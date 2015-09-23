@@ -96,6 +96,10 @@ define([
                     return value;
                 },
                 validationFunc: function (mug) {
+                    if (!mug.options.lookupTablesEnabled) {
+                        return "You do not have access to lookup tables in your application. " +
+                            "This application may not build.";
+                    }
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
                         return "A data source must be selected.";
@@ -182,12 +186,17 @@ define([
         init: function () {
             opts = this.opts().itemset;
             isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
+            Itemset.lookupTablesEnabled = this.opts().features.lookup_tables;
         },
         getSelectQuestions: function () {
-            return this.__callOld().concat([
-                "SelectDynamic",
-                "MSelectDynamic"
-            ]);
+            var questions = this.__callOld();
+            if (this.opts().features.lookup_tables) {
+                questions = questions.concat([
+                    "SelectDynamic",
+                    "MSelectDynamic"
+                ]);
+            }
+            return questions;
         },
         getMugTypes: function () {
             var types = this.__callOld();

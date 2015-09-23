@@ -39,6 +39,7 @@ require([
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
                 features: {
+                    lookup_tables: true,
                     advanced_itemsets: false,
                     rich_text: false
                 },
@@ -127,6 +128,27 @@ require([
             util.saveButtonEnabled(false);
             clickQuestion('question1/itemset');
             assert(!util.saveButtonEnabled(), "save button should not be enabled");
+        });
+
+        describe("without access to lookup tables", function() {
+            before(function (done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {onReady: done},
+                    features: {
+                        lookup_tables: false,
+                        advanced_itemsets: false,
+                        rich_text: false
+                    },
+                });
+            });
+
+            it("should display an error on an itemset", function() {
+                util.loadXML(TEST_XML_1);
+                var mug = util.getMug('question1/itemset');
+                assert.notStrictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+            });
         });
 
         describe("parsing and serializing", function () {
