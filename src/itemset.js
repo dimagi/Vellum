@@ -99,9 +99,9 @@ define([
                 validationFunc: function (mug) {
                     if (!mug.options.lookupTablesEnabled) {
                         return "You no longer have access to Lookup Tables in your application. " +
-                            "Lookup Tables are available on the Standard plan and higher. " +
+                            "Lookup Tables are available on the Standard plan and higher.\n" +
                             "Before you can make a new version of your application, " +
-                            "you must " + changeSubscriptionLink + " or delete this question.";
+                            "you must [change your subscription](" + changeSubscriptionLink + ") or delete this question.";
                     }
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
