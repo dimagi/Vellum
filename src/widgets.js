@@ -597,6 +597,8 @@ define([
             var val = widget.equivalentOption(value);
             if (val) {
                 input.val(val.value);
+            } else if (options.noCustom) {
+                input.prop('selectedIndex', -1);
             } else {
                 widget.addOption(value, "Custom");
                 input.val(value);
@@ -643,9 +645,18 @@ define([
         };
 
         widget.equivalentOption = function (val) {
-            val = val ? JSON.parse(val) : '';
+            function parseValue (val) {
+                if (_.isString(val)) {
+                    return val;
+                } else if (val) {
+                    return JSON.parse(val);
+                }
+
+                return '';
+            }
+            val = parseValue(val);
             return _.find(widget.getOptions(), function (option) {
-                return _.isEqual(option.value ? JSON.parse(option.value) : '', val);
+                return _.isEqual(parseValue(option.value), val);
             });
         };
 
