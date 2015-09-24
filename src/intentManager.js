@@ -43,7 +43,7 @@ define([
         if (onlyTemplatedIntents(options.vellum.opts().features)) {
             widget = widgets.dropdown(mug, options);
         } else {
-            widget = widgets.text(mug, options);
+            widget = widgets.dropdownWithInput(mug, options);
         }
 
         return widget;
