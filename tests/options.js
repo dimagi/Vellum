@@ -101,6 +101,9 @@ define(["underscore"], function (_) {
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",
             saveUrl: function (data) {},
+            externalLinks: {
+                changeSubscription: "#",
+            },
         },
         javaRosa: {
             langs: ['en', 'hin'],
@@ -157,6 +160,7 @@ define(["underscore"], function (_) {
             'saveToCase',
         ],
         features: {
+            'lookup_tables': true,
             'group_in_field_list': true,
             'rich_text': true,
             'advanced_itemsets': true,

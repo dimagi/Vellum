@@ -27,6 +27,7 @@ define([
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
         Itemset, isAdvancedItemsetEnabled, opts,
+        changeSubscriptionLink,
         END_FILTER = /\[[^\[\]]*\]$/;
 
     Itemset = util.extend(mugs.defaultOptions, {
@@ -96,6 +97,14 @@ define([
                     return value;
                 },
                 validationFunc: function (mug) {
+                    if (!mug.options.lookupTablesEnabled) {
+                        return _.template("You no longer have access to Lookup Tables in your application. " +
+                            "Lookup Tables are available on the Standard plan and higher.\n" +
+                            "Before you can make a new version of your application, " +
+                            "you must <%= link %> or delete this question")({
+                            link: changeSubscriptionLink ? "[change your subscription](" + changeSubscriptionLink + ")": "change your subscription"
+                        });
+                    }
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
                         return "A data source must be selected.";
@@ -182,12 +191,18 @@ define([
         init: function () {
             opts = this.opts().itemset;
             isAdvancedItemsetEnabled = this.opts().features.advanced_itemsets;
+            Itemset.lookupTablesEnabled = this.opts().features.lookup_tables;
+            changeSubscriptionLink = this.opts().core.externalLinks.changeSubscription;
         },
         getSelectQuestions: function () {
-            return this.__callOld().concat([
-                "SelectDynamic",
-                "MSelectDynamic"
-            ]);
+            var questions = this.__callOld();
+            if (this.opts().features.lookup_tables) {
+                questions = questions.concat([
+                    "SelectDynamic",
+                    "MSelectDynamic"
+                ]);
+            }
+            return questions;
         },
         getMugTypes: function () {
             var types = this.__callOld();
