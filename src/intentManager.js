@@ -4,15 +4,13 @@ define([
     'vellum/util',
     'underscore',
     'jquery',
-    'tpl!vellum/templates/intent_templates',
     'vellum/core'
 ], function (
     mugs,
     widgets,
     util,
     _,
-    $,
-    intent_templates
+    $
 ) {
     "use strict";
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
@@ -24,7 +22,7 @@ define([
             "unknownAttributes",
             "intentXmlns",
         ],
-        refreshCurrentMug;
+        intentTemplates;
 
     function makeODKXIntentTag (nodeID, appID) {
         return {
@@ -38,43 +36,15 @@ define([
     }
 
     function intentAppIdWidget(mug, options) {
-        var widget = widgets.text(mug, options),
-            input = widget.input,
-            opts = options.vellum.opts().intents,
-            tempMenu = $(intent_templates({templates: opts && opts.templates || []})),
-            templates = _.object(_.map(opts && opts.templates, function (temp) {
-                return [temp.id, temp];
-            })),
-            control = $('<div class="control-row row" />');
+        options.defaultOptions = intentTemplates;
 
-            if (!onlyTemplatedIntents(options.vellum.opts().features)) {
-                control = control.append($('<div class="span8" />').append(input))
-                                 .append($('<div class="span2" />'));
-            }
-            control = control.append($('<div class="span2" />').append(tempMenu));
+        var widget;
 
-        tempMenu.find('.dropdown-menu a').click(function (e) {
-            e.preventDefault();
-            var id = $(this).data("id");
-            input.val(id).change();
-            if (id && templates.hasOwnProperty(id)) {
-                var container = input.parents(".fd-props-content").first();
-                _.each({
-                    extra: "[name=property-androidIntentExtra]",
-                    response: "[name=property-androidIntentResponse]",
-                }, function (name, key) {
-                    var value = templates[id].hasOwnProperty(key) ? templates[id][key] : {},
-                        target = container.find(name),
-                        kvwidget = widgets.util.getWidget(target, options.vellum);
-                    kvwidget.setValue(value);
-                    kvwidget.handleChange();
-                });
-            }
-        });
-
-        widget.getControl = function () {
-            return control;
-        };
+        if (onlyTemplatedIntents(options.vellum.opts().features)) {
+            widget = widgets.dropdown(mug, options);
+        } else {
+            widget = widgets.text(mug, options);
+        }
 
         return widget;
     }
@@ -241,6 +211,7 @@ define([
                 lstring: 'Intent ID',
                 visibility: 'visible',
                 widget: intentAppIdWidget,
+                noCustom: true,
                 placeholder: 'Insert Android Application ID',
                 deserialize: function (data, key, mug) {
                     if (data.intent) {
@@ -323,7 +294,10 @@ define([
 
     $.vellum.plugin("intents", {}, {
         init: function() {
-            refreshCurrentMug = this.refreshCurrentMug.bind(this);
+            var opts = this.opts().intents;
+            intentTemplates = _.map(opts && opts.templates, function (temp) {
+                return {value: temp.id, text: temp.name};
+            });
         },
         loadXML: function (xml) {
             this.data.intents.unmappedIntentTags = parseIntentTags(
