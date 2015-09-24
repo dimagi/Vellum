@@ -367,18 +367,6 @@ define([
             }
             return ret;
         },
-        getAdvancedProperties: function() {
-            var ret = this.__callOld();
-
-            if (onlyTemplatedIntents(this.opts().features)) {
-                ret = ret.concat([
-                    "androidIntentExtra",
-                    "androidIntentResponse",
-                ]);
-            }
-
-            return ret;
-        },
     });
 
     return {
