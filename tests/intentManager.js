@@ -133,7 +133,10 @@ define([
             before(function(done) {
                 util.init({
                     intents: {templates: templates},
-                    features: {rich_text: false},
+                    features: {
+                        rich_text: false,
+                        custom_intents: false,
+                    },
                     core: {onReady: function () {
                         vellum = this;
                         mug = util.addQuestion("AndroidIntent", "intent");
@@ -143,20 +146,14 @@ define([
                 });
             });
 
-            it("should not select a template by default", function () {
-                assert.equal($("[name=property-androidIntentAppId]").val(), "");
+            it("should select the first template by default", function () {
+                assert.equal($("[name=property-androidIntentAppId]").val(), "com.richard.lu.areamapper");
             });
 
             _.each(templates, function (temp) {
                 it("should have " + temp.name + " template", function () {
-                    $("a[data-id='" + temp.id + "']").click();
-                    assert.equal($("[name=property-androidIntentAppId]").val(), temp.id);
-                    var extra = widgets.util.getWidget(
-                            $("[name=property-androidIntentExtra]"), vellum),
-                        response = widgets.util.getWidget(
-                            $("[name=property-androidIntentResponse]"), vellum);
-                    assert.deepEqual(extra.getValue(), temp.extra || {});
-                    assert.deepEqual(response.getValue(), temp.response || {});
+                    $("[name=property-androidIntentAppId]").val(temp.id).change();
+                    assert.strictEqual(mug.p.androidIntentAppId, temp.id);
                 });
             });
         });
