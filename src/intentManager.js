@@ -211,7 +211,7 @@ define([
         },
         spec: {
             androidIntentAppId: {
-                lstring: 'Intent ID',
+                lstring: 'External App',
                 visibility: 'visible',
                 widget: intentAppIdWidget,
                 noCustom: true,
