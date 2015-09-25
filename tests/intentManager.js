@@ -231,6 +231,16 @@ define([
                 assert.strictEqual("fake.intent", customOption);
             });
 
+            _.each(templates, function (temp) {
+                it("should change text box for " + temp.name + " template", function () {
+                    $("[name=property-androidIntentAppId]").val(temp.id).change();
+                    assert.strictEqual(mug.p.androidIntentAppId, temp.id);
+                    assert.strictEqual($("[name=property-androidIntentAppId-text]").val(),
+                                       temp.id);
+                    assert($("[name=property-androidIntentAppId-text]").attr('readonly'));
+                });
+            });
+
             describe("on load", function() {
                 before(function() {
                     util.loadXML(CUSTOM_INTENT_XML);
