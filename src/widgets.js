@@ -679,7 +679,8 @@ define([
     };
 
     var dropdownWithInput = function (mug, options) {
-        var widget = dropdown(mug, options);
+        var widget = dropdown(mug, options),
+            super_handleChange = widget.handleChange;
         widget.input = widget.text = $('<input />')
             .addClass('input-block-level')
             .attr({
@@ -691,27 +692,18 @@ define([
                 .append($("<div class='span4'>").append(widget.dropdown))
                 .append($("<div class='span8'>").append(widget.text));
 
-        function setInput() {
-            var selectedOption = widget.dropdown.find(':selected');
-            if (selectedOption.text() === 'Custom') {
-                widget.text.attr('readonly', false);
-            } else {
-                widget.text.attr('readonly', true);
-            }
-            widget.text.val(selectedOption.val());
-        }
-
         widget.setValue = function (value) {
             var val = widget.equivalentOption(value);
             widget.findOrAddCustom(value);
             if (val) {
                 widget.dropdown.val(val.value);
+                widget.text.attr('readonly', true);
+                widget.text.val(val.value);
             }  else {
                 widget.dropdown.val(value);
                 widget.text.attr('readonly', false);
                 widget.text.val(value);
             }
-            setInput();
         };
 
         widget.getValue = function () {
@@ -722,7 +714,19 @@ define([
             return control;
         };
 
-        widget.dropdown.change(setInput);
+        widget.handleChange = function() {
+            super_handleChange();
+            var selectedOption = widget.dropdown.find(':selected');
+            if (selectedOption.text() === 'Custom') {
+                widget.text.attr('readonly', false);
+                selectedOption.val(widget.text.val());
+            } else {
+                widget.text.attr('readonly', true);
+            }
+            widget.text.val(selectedOption.val());
+        };
+
+        widget.dropdown.change(widget.handleChange);
         widget.text.change(widget.handleChange);
 
         return widget;
