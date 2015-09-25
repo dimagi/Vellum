@@ -235,14 +235,27 @@ define([
                     }
                 },
                 validationFunc: function (mug) {
-                    var features = mug.form.vellum.opts().features;
-                    if (onlyTemplatedIntents(features) && _.chain(intentTemplates)
+                    var opts = mug.form.vellum.opts(),
+                        features = opts.features,
+                        link = opts.core.externalLinks.changeSubscription,
+                        text = link ? "[change your subscription](" + link + ")" : "change your subscription";
+                    if (noIntents(features)) {
+                        return "You no longer have access to built in or external integration in your application.\n\n" +
+                            "Built in integrations are available on the Pro plan and higher. " +
+                            "External integrations are available on the Advanced plan and higher. " +
+                            "Before you can make a new version of your application, " +
+                            "you must " + text + " or delete this question.";
+                    }
+                    else if (onlyTemplatedIntents(features) && _.chain(intentTemplates)
                          .map(function(template) { return template.value; })
                          .find(function(appId) { return appId === mug.p.androidIntentAppId; })
                          .isUndefined()
                          .value()
                        ) {
-                           return "Your subscription only has access to templated intents";
+                           return "Your subscription only has access to built-in integration.\n\n" +
+                               "External integrations are available on the Advanced plan and higher. " +
+                               "Before you can make a new version of your application, " +
+                               "you must " + text + " or delete this question.";
                     }
                     return 'pass';
                 },
