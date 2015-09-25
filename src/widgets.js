@@ -600,7 +600,7 @@ define([
             } else if (options.noCustom) {
                 input.prop('selectedIndex', -1);
             } else {
-                widget.addOption(value, "Custom");
+                widget.findOrAddCustom(value);
                 input.val(value);
             }
         };
@@ -660,6 +660,17 @@ define([
             });
         };
 
+        widget.findOrAddCustom = function (value) {
+            var customOption = $('[name=property-androidIntentAppId]')
+                .find('option')
+                .filter(function () { return $(this).text() === "Custom"; });
+            if (customOption.length === 0) {
+                widget.addOption(value, "Custom");
+            } else {
+                customOption.val(value);
+            }
+        };
+
         if (options.defaultOptions) {
             widget.addOptions(options.defaultOptions);
         }
@@ -692,11 +703,13 @@ define([
 
         widget.setValue = function (value) {
             var val = widget.equivalentOption(value);
+            widget.findOrAddCustom(value);
             if (val) {
                 widget.dropdown.val(val.value);
             }  else {
-                widget.addOption(value, "Custom");
                 widget.dropdown.val(value);
+                widget.text.attr('readonly', false);
+                widget.text.val(value);
             }
             setInput();
         };
