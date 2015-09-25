@@ -231,7 +231,19 @@ define([
                     } else {
                         mug.p[key] = data[key];
                     }
-                }
+                },
+                validationFunc: function (mug) {
+                    var features = mug.form.vellum.opts().features;
+                    if (onlyTemplatedIntents(features) && _.chain(intentTemplates)
+                         .map(function(template) { return template.value; })
+                         .find(function(appId) { return appId === mug.p.androidIntentAppId; })
+                         .isUndefined()
+                         .value()
+                       ) {
+                           return "Your subscription only has access to templated intents";
+                    }
+                    return 'pass';
+                },
             },
             androidIntentExtra: {
                 lstring: 'Extra',
