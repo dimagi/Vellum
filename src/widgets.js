@@ -646,14 +646,13 @@ define([
 
         widget.equivalentOption = function (val) {
             function parseValue (val) {
-                if (_.isString(val)) {
-                    return val;
-                } else if (val) {
+                try {
                     return JSON.parse(val);
+                } catch(err) {
+                    return  val;
                 }
-
-                return '';
             }
+
             val = parseValue(val);
             return _.find(widget.getOptions(), function (option) {
                 return _.isEqual(parseValue(option.value), val);
