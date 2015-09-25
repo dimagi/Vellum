@@ -243,5 +243,25 @@ define([
                 });
             });
         });
+
+        describe("no intents", function() {
+            before(function(done) {
+                util.init({
+                    intents: {templates: templates},
+                    features: {
+                        rich_text: false,
+                        custom_intents: false,
+                        templated_intents: false,
+                    },
+                    core: { onReady: done }
+                });
+            });
+
+            it("shows error on form load", function() {
+                util.loadXML(CUSTOM_INTENT_XML);
+                var mug = util.getMug('not_breath_count');
+                assert.notStrictEqual(mug.spec.androidIntentAppId.validationFunc(mug), 'pass');
+            });
+        });
     });
 });
