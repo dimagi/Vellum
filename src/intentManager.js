@@ -38,9 +38,10 @@ define([
     function intentAppIdWidget(mug, options) {
         options.defaultOptions = intentTemplates;
 
-        var widget;
+        var features = options.vellum.opts().features,
+            widget;
 
-        if (onlyTemplatedIntents(options.vellum.opts().features)) {
+        if (noIntents(features) || onlyTemplatedIntents(features)) {
             widget = widgets.dropdown(mug, options);
         } else {
             widget = widgets.dropdownWithInput(mug, options);
