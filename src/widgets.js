@@ -713,20 +713,19 @@ define([
             return control;
         };
 
-        widget.handleChange = function() {
-            super_handleChange();
+        widget.dropdown.change(function () {
             var selectedOption = widget.dropdown.find(':selected');
-            if (selectedOption.text() === 'Custom') {
-                widget.text.attr('readonly', false);
-                selectedOption.val(widget.text.val());
-            } else {
-                widget.text.attr('readonly', true);
-            }
+            widget.text.attr('readonly', true);
             widget.text.val(selectedOption.val());
-        };
+            super_handleChange();
+        });
 
-        widget.dropdown.change(widget.handleChange);
-        widget.text.change(widget.handleChange);
+        widget.text.change(function () {
+            var selectedOption = widget.dropdown.find(':selected');
+            widget.text.attr('readonly', false);
+            selectedOption.val(widget.text.val());
+            super_handleChange();
+        });
 
         return widget;
     };
