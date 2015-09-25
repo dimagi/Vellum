@@ -165,6 +165,7 @@ define(["underscore"], function (_) {
             'templated_intents': true,
             'custom_intents': true,
             'image_resize': true,
+            'markdown_in_groups': true,
         }
     };
 
