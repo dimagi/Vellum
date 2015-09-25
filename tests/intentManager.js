@@ -155,6 +155,10 @@ define([
                 assert.equal($("[name=property-androidIntentAppId]").val(), "com.richard.lu.areamapper");
             });
 
+            it("should not show validation error on question add", function() {
+                assert.strictEqual(mug.spec.androidIntentAppId.validationFunc(mug), 'pass');
+            });
+
             _.each(templates, function (temp) {
                 it("should have " + temp.name + " template", function () {
                     $("[name=property-androidIntentAppId]").val(temp.id).change();
@@ -214,13 +218,12 @@ define([
             });
 
             it("should always have one custom option", function() {
-                var customOption = $('[name=property-androidIntentAppId]')
-                    .find('option')
-                    .filter(function () { return $(this).text() === "Custom"; });
+                var customOption = $('[name=property-androidIntentAppId] option:contains("Custom")');
                 assert.lengthOf(customOption, 1, "incorrect number of custom options");
             });
 
             it("should update the custom option when text is changed", function() {
+                $('[name=property-androidIntentAppId]').prop('selectedIndex', 3).change();
                 $('[name=property-androidIntentAppId-text]').val("fake.intent").change();
                 var customOption = $('[name=property-androidIntentAppId]')
                     .find('option')

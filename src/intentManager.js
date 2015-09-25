@@ -148,6 +148,8 @@ define([
 
         if (mug.p.androidIntentAppId === "org.commcare.dalvik.action.PRINT") {
             mug.form.changeMugType(mug, 'PrintIntent');
+        } else if (!mug.p.androidIntentAppId) {
+            mug.p.androidIntentAppId = intentTemplates[0].value;
         }
 
         if (mug.__className === "PrintIntent") {
