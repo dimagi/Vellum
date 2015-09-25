@@ -7,7 +7,8 @@ define([
     'vellum/widgets',
     'text!static/intentManager/intent-with-unknown-attrs.xml',
     'text!static/intentManager/intent-with-no-mug.xml',
-    'text!static/intentManager/printing-intent.xml'
+    'text!static/intentManager/printing-intent.xml',
+    'text!static/intentManager/custom-intent.xml'
 ], function (
     util,
     chai,
@@ -17,17 +18,48 @@ define([
     widgets,
     INTENT_WITH_UNKNOWN_ATTRS_XML,
     INTENT_WITH_NO_MUG_XML,
-    PRINTING_INTENT_XML
+    PRINTING_INTENT_XML,
+    CUSTOM_INTENT_XML
 ) {
     var assert = chai.assert,
-        call = util.call;
+        call = util.call,
+        templates =  [
+            {
+                icon: "icon-map-marker",
+                name: "Area Mapper",
+                id: "com.richard.lu.areamapper",
+                extra: {ext: "value"},
+                response: {
+                    r1: "x",
+                    r2: "y",
+                    r3: "z",
+                    r4: "",
+                },
+            },
+            {
+                icon: "icon-barcode",
+                name: "Barcode Scanner",
+                id: "com.google.zxing.client.android.SCAN",
+                extra: {},
+                response: {},
+            },
+            {
+                icon: "icon-vellum-android-intent",
+                name: "Breath Counter",
+                id: "org.commcare.respiratory.BREATHCOUNT",
+            },
+        ];
 
     describe("The intent manager plugin", function() {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {rich_text: false},
+                features: {
+                    rich_text: false,
+                    custom_intents: true,
+                    templated_intents: true,
+                },
             });
         });
 
@@ -102,34 +134,7 @@ define([
         });
 
         describe("template selector", function() {
-            var vellum,
-                mug,
-                templates =  [
-                    {
-                        icon: "icon-map-marker",
-                        name: "Area Mapper",
-                        id: "com.richard.lu.areamapper",
-                        extra: {ext: "value"},
-                        response: {
-                            r1: "x",
-                            r2: "y",
-                            r3: "z",
-                            r4: "",
-                        },
-                    },
-                    {
-                        icon: "icon-barcode",
-                        name: "Barcode Scanner",
-                        id: "com.google.zxing.client.android.SCAN",
-                        extra: {},
-                        response: {},
-                    },
-                    {
-                        icon: "icon-vellum-android-intent",
-                        name: "Breath Counter",
-                        id: "org.commcare.respiratory.BREATHCOUNT",
-                    },
-                ];
+            var vellum, mug;
             before(function(done) {
                 util.init({
                     intents: {templates: templates},
@@ -184,6 +189,54 @@ define([
             _.each(tests, function(testcase) {
                 it(testcase[0] + " should be parsed as " + JSON.stringify(testcase[1]), function() {
                     assert.deepEqual(intentManager.test.parseFields(testcase[0]), testcase[1]);
+                });
+            });
+        });
+
+        describe("custom intents", function() {
+            var vellum, mug;
+            before(function(done) {
+                util.init({
+                    intents: {templates: templates},
+                    features: {
+                        rich_text: false,
+                        templated_intents: true,
+                        custom_intents: true,
+                    },
+                    core: {
+                        onReady: function () {
+                        vellum = this;
+                        mug = util.addQuestion("AndroidIntent", "intent");
+                        util.clickQuestion("intent");
+                        done();
+                    }}
+                });
+            });
+
+            it("should always have one custom option", function() {
+                var customOption = $('[name=property-androidIntentAppId]')
+                    .find('option')
+                    .filter(function () { return $(this).text() === "Custom"; });
+                assert.lengthOf(customOption, 1, "incorrect number of custom options");
+            });
+
+            it("should update the custom option when text is changed", function() {
+                $('[name=property-androidIntentAppId-text]').val("fake.intent").change();
+                var customOption = $('[name=property-androidIntentAppId]')
+                    .find('option')
+                    .filter(function () { return $(this).text() === "Custom"; }).val();
+                assert.strictEqual("fake.intent", customOption);
+            });
+
+            describe("on load", function() {
+                before(function() {
+                    util.loadXML(CUSTOM_INTENT_XML);
+                });
+
+                it("should display the correct intent", function() {
+                    util.clickQuestion("not_breath_count");
+                    assert.strictEqual($('[name=property-androidIntentAppId-text]').val(),
+                                       "android.intent.action.VIEW");
                 });
             });
         });

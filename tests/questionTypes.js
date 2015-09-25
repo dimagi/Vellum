@@ -244,7 +244,11 @@ require([
             // - automatic adding of choices when you add a select
             // - automatic generation of media paths for regular questions and choices
             util.init({
-                features: {rich_text: false },
+                features: {
+                    rich_text: false,
+                    templated_intents: true,
+                    custom_intents: true,
+                },
                 core: {
                     form: null,
                     onReady: function () {

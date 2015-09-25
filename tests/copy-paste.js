@@ -46,7 +46,10 @@ require([
     describe("The copy-paste plugin", function () {
         before(function (done) {
             util.init({
-                features: { rich_text: false },
+                features: {
+                    rich_text: false,
+                    custom_intents: true,
+                },
                 javaRosa: { langs: ['en', 'hin'] },
                 core: {
                     onReady: function () {
