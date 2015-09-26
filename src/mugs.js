@@ -1431,18 +1431,21 @@ define([
             form.createQuestion(mug, 'into', item, true);
             form.createQuestion(mug, 'into', item, true);
         },
+        spec: {
+            appearance: {
+                deleteOnCopy: false,
+            }
+        },
     });
 
     var MSelect = util.extend(BaseSelect, {
         typeName: 'Multiple Answer',
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
-        spec: {
-        },
         defaultOperator: "selected"
     });
 
-    var Select = util.extend(MSelect, {
+    var Select = util.extend(BaseSelect, {
         typeName: 'Single Answer',
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
