@@ -594,7 +594,8 @@ define([
 
     var itextLabelBlock = function (mug, options) {
         var block = baseItextBlock(mug, options);
-        if (_.contains(NO_MARKDOWN_MUGS, mug.__className) || mug.form.noMarkdown) {
+        if ((!options.vellum.opts().features.markdown_in_groups &&
+             _.contains(NO_MARKDOWN_MUGS, mug.__className)) || mug.form.noMarkdown) {
             block.itextWidget = itextLabelWidget;
         } else {
             block.itextWidget = itextMarkdownWidget;
