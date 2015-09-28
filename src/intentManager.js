@@ -1,3 +1,14 @@
+/*
+ * Android app callout module
+ *
+ * Can be either templated or custom.
+ *
+ * Templated means that there is only a dropdown, options are defined by
+ * the options passed in to the vellum instance
+ *
+ * Custom intents has the same dropdown, but also has an input used to define
+ * an app id
+ */
 define([
     'vellum/mugs',
     'vellum/widgets',
