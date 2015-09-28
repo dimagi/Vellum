@@ -17,8 +17,8 @@
     <!-- todo: don't require passing a unique ID to this template or an
     interface that exposes it (i.e., allow passing a non-unique id and then
     append it to a random one, or something -->
-    <div id="<%=fieldsetClass%>" class="accordion-body collapse<% if
-        (!isCollapsed) { %> in<% } %>" >
+    <div id="<%=fieldsetClass%>" class="accordion-body <% if
+        (isCollapsed) { %> collapse<% } else { %> in<% } %>" >
         <div class="accordion-inner fd-fieldset-content"></div>
     </div>
 </fieldset>

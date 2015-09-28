@@ -244,7 +244,11 @@ require([
             // - automatic adding of choices when you add a select
             // - automatic generation of media paths for regular questions and choices
             util.init({
-                features: {rich_text: false },
+                features: {
+                    rich_text: false,
+                    templated_intents: true,
+                    custom_intents: true,
+                },
                 core: {
                     form: null,
                     onReady: function () {
@@ -314,7 +318,8 @@ require([
                             .val("item1 custom hin").change();
 
                         clickQuestion("question22/question23/question7");
-                        $("[name='property-androidIntentAppId']").val("app_id").change();
+                        $("[name='property-androidIntentAppId']").val("").change();
+                        $("[name='property-androidIntentAppId-text']").val("app_id").change();
                         $("[name='property-androidIntentExtra'] .fd-kv-key").val('key1').change();
                         $("[name='property-androidIntentExtra'] .fd-kv-val").val('value1').change();
                         $("[name='property-androidIntentResponse'] .fd-kv-key").val('key2').change();

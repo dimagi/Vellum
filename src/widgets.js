@@ -587,7 +587,7 @@ define([
 
     var dropdown = function (mug, options) {
         var widget = normal(mug, options);
-        widget.input = $("<select />")
+        widget.dropdown = widget.input = $("<select />")
             .attr("name", widget.id)
             .addClass('input-block-level');
 
@@ -597,8 +597,10 @@ define([
             var val = widget.equivalentOption(value);
             if (val) {
                 input.val(val.value);
+            } else if (options.noCustom) {
+                input.prop('selectedIndex', -1);
             } else {
-                widget.addOption(value, "Custom");
+                widget.addCustomIfNeeded(value);
                 input.val(value);
             }
         };
@@ -619,7 +621,7 @@ define([
             var option = $('<option />')
                 .attr('value', value)
                 .text(text);
-            this.input.append(option);
+            this.dropdown.append(option);
         };
 
         widget.addOptions = function (options) {
@@ -630,11 +632,11 @@ define([
         };
 
         widget.clearOptions = function () {
-            this.input.empty();
+            this.dropdown.empty();
         };
 
         widget.getOptions = function () {
-            return _.map(widget.input.find('option'), function(option) {
+            return _.map(widget.dropdown.find('option'), function(option) {
                 return {
                     value: option.value,
                     text: option.text
@@ -643,15 +645,87 @@ define([
         };
 
         widget.equivalentOption = function (val) {
-            val = val ? JSON.parse(val) : '';
+            function parseValue (val) {
+                try {
+                    return JSON.parse(val);
+                } catch(err) {
+                    return  val;
+                }
+            }
+
+            val = parseValue(val);
             return _.find(widget.getOptions(), function (option) {
-                return _.isEqual(option.value ? JSON.parse(option.value) : '', val);
+                return _.isEqual(parseValue(option.value), val);
             });
+        };
+
+        widget.addCustomIfNeeded = function (value) {
+            var customOption = $('[name=property-androidIntentAppId]')
+                .find('option')
+                .filter(function () { return $(this).text() === "Custom"; });
+            if (customOption.length === 0) {
+                widget.addOption(value, "Custom");
+            } else {
+                customOption.val(value);
+            }
         };
 
         if (options.defaultOptions) {
             widget.addOptions(options.defaultOptions);
         }
+
+        return widget;
+    };
+
+    var dropdownWithInput = function (mug, options) {
+        var widget = dropdown(mug, options),
+            super_handleChange = widget.handleChange;
+        widget.input = widget.text = $('<input />')
+            .addClass('input-block-level')
+            .attr({
+                type: 'text',
+                name: widget.id + '-text',
+            });
+
+        var control = $('<div class="control-row row">')
+                .append($("<div class='span4'>").append(widget.dropdown))
+                .append($("<div class='span8'>").append(widget.text));
+
+        widget.setValue = function (value) {
+            var val = widget.equivalentOption(value);
+            widget.addCustomIfNeeded(value);
+            if (val) {
+                widget.dropdown.val(val.value);
+                widget.text.attr('readonly', true);
+                widget.text.val(val.value);
+            }  else {
+                widget.dropdown.val(value);
+                widget.text.attr('readonly', false);
+                widget.text.val(value);
+            }
+        };
+
+        widget.getValue = function () {
+            return widget.text.val();
+        };
+
+        widget.getControl = function () {
+            return control;
+        };
+
+        widget.dropdown.change(function () {
+            var selectedOption = widget.dropdown.find(':selected');
+            widget.text.attr('readonly', selectedOption.text() !== "Custom");
+            widget.text.val(selectedOption.val());
+            super_handleChange();
+        });
+
+        widget.text.change(function () {
+            var selectedOption = widget.dropdown.find(':selected');
+            widget.text.attr('readonly', false);
+            selectedOption.val(widget.text.val());
+            super_handleChange();
+        });
 
         return widget;
     };
@@ -789,6 +863,7 @@ define([
         droppableText: droppableText,
         checkbox: checkbox,
         dropdown: dropdown,
+        dropdownWithInput: dropdownWithInput,
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
