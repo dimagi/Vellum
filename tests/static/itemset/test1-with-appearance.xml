@@ -23,7 +23,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 ref="/data/question1">
+		<select1 ref="/data/question1" appearance="minimal">
 			<label ref="jr:itext('question1-label')" />
 			<alert ref="jr:itext('question1-constraintMsg')" />
 			<itemset nodeset="instance('casedb')/casedb/case[@case_type='mother']">

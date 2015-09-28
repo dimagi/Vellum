@@ -9,6 +9,7 @@ require([
     'vellum/form',
     'text!static/itemset/test1.xml',
     'text!static/itemset/test1-with-constraint.xml',
+    'text!static/itemset/test1-with-appearance.xml',
     'text!static/itemset/inner-filters.xml',
     'text!static/itemset/dropdown-fixture.xml',
     'text!static/itemset/data-itemset.xml'
@@ -23,6 +24,7 @@ require([
     form,
     TEST_XML_1,
     TEST_XML_1_WITH_CONSTRAINT,
+    TEST_XML_1_WITH_APPEARANCE,
     INNER_FILTERS_XML,
     DROPDOWN_FIXTURE_XML,
     DATA_ITEMSET_XML
@@ -168,6 +170,11 @@ require([
             it("preserves XML with a constraint", function() {
                 util.loadXML(TEST_XML_1_WITH_CONSTRAINT);
                 util.assertXmlEqual(call('createXML'), TEST_XML_1_WITH_CONSTRAINT);
+            });
+
+            it("preserves XML with an appearance", function() {
+                util.loadXML(TEST_XML_1_WITH_APPEARANCE);
+                util.assertXmlEqual(call('createXML'), TEST_XML_1_WITH_APPEARANCE);
             });
         });
 
