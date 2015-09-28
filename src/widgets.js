@@ -715,7 +715,7 @@ define([
 
         widget.dropdown.change(function () {
             var selectedOption = widget.dropdown.find(':selected');
-            widget.text.attr('readonly', true);
+            widget.text.attr('readonly', selectedOption.text() !== "Custom");
             widget.text.val(selectedOption.val());
             super_handleChange();
         });

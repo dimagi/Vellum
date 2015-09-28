@@ -198,7 +198,7 @@ define([
         });
 
         describe("custom intents", function() {
-            var vellum, mug;
+            var vellum, mug, customIndex;
             before(function(done) {
                 util.init({
                     intents: {templates: templates},
@@ -212,6 +212,7 @@ define([
                         vellum = this;
                         mug = util.addQuestion("AndroidIntent", "intent");
                         util.clickQuestion("intent");
+                        customIndex = templates.length;
                         done();
                     }}
                 });
@@ -222,8 +223,22 @@ define([
                 assert.lengthOf(customOption, 1, "incorrect number of custom options");
             });
 
+            it("should change text to not readonly when custom is selected", function() {
+                $('[name=property-androidIntentAppId]').prop('selectedIndex', 0).change();
+                assert($("[name=property-androidIntentAppId-text]").attr('readonly'));
+                $('[name=property-androidIntentAppId]').prop('selectedIndex', customIndex).change();
+                assert(!$("[name=property-androidIntentAppId-text]").attr('readonly'));
+            });
+
+            it("should change text to readonly when custom is not selected", function() {
+                $('[name=property-androidIntentAppId]').prop('selectedIndex', customIndex).change();
+                assert(!$("[name=property-androidIntentAppId-text]").attr('readonly'));
+                $('[name=property-androidIntentAppId]').prop('selectedIndex', 0).change();
+                assert($("[name=property-androidIntentAppId-text]").attr('readonly'));
+            });
+
             it("should update the custom option when text is changed", function() {
-                $('[name=property-androidIntentAppId]').prop('selectedIndex', 3).change();
+                $('[name=property-androidIntentAppId]').prop('selectedIndex', customIndex).change();
                 $('[name=property-androidIntentAppId-text]').val("fake.intent").change();
                 var customOption = $('[name=property-androidIntentAppId]')
                     .find('option')
