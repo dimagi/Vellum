@@ -25,7 +25,7 @@ define([
             var vellum = this,
                 tree = this.$f.find(".fd-tree"),
                 pane = this.$f.find(".fd-accessory-pane"),
-                head, headHeight;
+                head, headHeight, searchBar;
             fn.initDataBrowser = _.once(_initDataBrowser);
             pane.append($(external_sources_tree()));
             head = pane.find(".fd-head-external-sources");
@@ -37,6 +37,15 @@ define([
                         panelHeight = pane.height();
                     }
                 });
+            searchBar = pane.find('#fdExternalSearch');
+            searchBar.on('keyup keypress', function(e) {
+                var code = e.keyCode || e.which;
+                if (code === 13) {
+                    //disable submitting on enter
+                    e.preventDefault();
+                    return false;
+                }
+            });
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             datasources.getDataSources(function () {});
