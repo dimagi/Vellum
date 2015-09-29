@@ -139,7 +139,8 @@ require([
             assert.equal(getInstanceId(mug.form, sessionUri), null);
             assert.equal(getInstanceId(mug.form, casedbUri), null);
             assert.equal(calc.length, 1);
-            var node = util.findNode(dataTree, "first-child (child)");
+            var motherNode = util.findNode(dataTree, "mother"),
+                node = util.findNode(dataTree, "child", motherNode);
             dataTree.open_node(node);
             util.findNode(dataTree, "dob", node).data.handleDrop(calc);
             assert.equal(mug.p.calculateAttr,

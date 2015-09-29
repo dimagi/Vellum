@@ -1899,7 +1899,7 @@ define([
                                     mug.addMessage(name, {
                                         key: "missing-multimedia-warning",
                                         level: mug.WARNING,
-                                        message: "MultiMedia was not copied; " +
+                                        message: "Multimedia was not copied; " +
                                                  "it must be uploaded separately."
                                     });
                                 }
