@@ -123,7 +123,7 @@ define([
                     }
                     var name = source.name || source.id;
                     if (name) {
-                        tree.name = tree.name + " (" + name + ")";
+                        tree.name = name;
                     }
                     if (seen.hasOwnProperty(source.id)) {
                         // defer to prevent infinite loop
