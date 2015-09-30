@@ -828,7 +828,7 @@ define([
         }
         options.id = id;
 
-        if (mug.supportsRichText() && options.path === 'labelItext') {
+        if (mug.supportsRichText()) {
             widget = widgets.richTextarea(mug, options);
         } else {
             widget = widgets.multilineText(mug, options);
