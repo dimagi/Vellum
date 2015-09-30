@@ -104,26 +104,26 @@
 					<text id="question3-label">
 						<value>question3</value>
 					</text>
-					<text id="question3-item1-label">
-						<value>item1</value>
-						<value form="image">jr://file/commcare/image/data/question3-item1.png</value>
-						<value form="audio">jr://file/commcare/audio/data/question3-item1.mp3</value>
-						<value form="video">jr://file/commcare/video/data/question3-item1.3gp</value>
-						<value form="long">item1 long en</value>
-						<value form="short">item1 short en</value>
-						<value form="custom">item1 custom en</value>
+					<text id="question3-choice1-label">
+						<value>choice1</value>
+						<value form="image">jr://file/commcare/image/data/question3-choice1.png</value>
+						<value form="audio">jr://file/commcare/audio/data/question3-choice1.mp3</value>
+						<value form="video">jr://file/commcare/video/data/question3-choice1.3gp</value>
+						<value form="long">choice1 long en</value>
+						<value form="short">choice1 short en</value>
+						<value form="custom">choice1 custom en</value>
 					</text>
-					<text id="question3-item2-label">
-						<value>item2</value>
+					<text id="question3-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question6-label">
 						<value>question6</value>
 					</text>
-					<text id="question6-item1-label">
-						<value>item1</value>
+					<text id="question6-choice1-label">
+						<value>choice1</value>
 					</text>
-					<text id="question6-item2-label">
-						<value>item2</value>
+					<text id="question6-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question13-label">
 						<value>question13</value>
@@ -220,26 +220,26 @@
 					<text id="question3-label">
 						<value>question3</value>
 					</text>
-					<text id="question3-item1-label">
-						<value>item1</value>
-						<value form="image">jr://file/commcare/image/data/question3-item1.png</value>
-						<value form="audio">jr://file/commcare/audio/data/question3-item1.mp3</value>
-						<value form="video">jr://file/commcare/video/data/question3-item1.3gp</value>
-						<value form="long">item1 long hin</value>
-						<value form="short">item1 short hin</value>
-						<value form="custom">item1 custom hin</value>
+					<text id="question3-choice1-label">
+						<value>choice1</value>
+						<value form="image">jr://file/commcare/image/data/question3-choice1.png</value>
+						<value form="audio">jr://file/commcare/audio/data/question3-choice1.mp3</value>
+						<value form="video">jr://file/commcare/video/data/question3-choice1.3gp</value>
+						<value form="long">choice1 long hin</value>
+						<value form="short">choice1 short hin</value>
+						<value form="custom">choice1 custom hin</value>
 					</text>
-					<text id="question3-item2-label">
-						<value>item2</value>
+					<text id="question3-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question6-label">
 						<value>question6</value>
 					</text>
-					<text id="question6-item1-label">
-						<value>item1</value>
+					<text id="question6-choice1-label">
+						<value>choice1</value>
 					</text>
-					<text id="question6-item2-label">
-						<value>item2</value>
+					<text id="question6-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question13-label">
 						<value>question13</value>
@@ -325,24 +325,24 @@
 		<select1 ref="/data/question3">
 			<label ref="jr:itext('question3-label')" />
 			<item>
-				<label ref="jr:itext('question3-item1-label')" />
-				<value>item1</value>
+				<label ref="jr:itext('question3-choice1-label')" />
+				<value>choice1</value>
 			</item>
 			<item>
-				<label ref="jr:itext('question3-item2-label')" />
-				<value>item2</value>
+				<label ref="jr:itext('question3-choice2-label')" />
+				<value>choice2</value>
 			</item>
 		</select1>
 		<!-- arbitrary control attributes -->
 		<select ref="/data/question6" foo="baz">
 			<label ref="jr:itext('question6-label')" />
 			<item>
-				<label ref="jr:itext('question6-item1-label')" />
-				<value>item1</value>
+				<label ref="jr:itext('question6-choice1-label')" />
+				<value>choice1</value>
 			</item>
 			<item>
-				<label ref="jr:itext('question6-item2-label')" />
-				<value>item2</value>
+				<label ref="jr:itext('question6-choice2-label')" />
+				<value>choice2</value>
 			</item>
 		</select>
 		<input ref="/data/question13">

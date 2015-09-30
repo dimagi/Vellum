@@ -46,7 +46,7 @@ define([
             'default', 'short', 'long', 'audio', 'video', 'image'
         ],
         _nextItextItemKey = 1,
-        NO_MARKDOWN_MUGS = ['Item', 'Group', 'FieldList', 'Repeat'];
+        NO_MARKDOWN_MUGS = ['Choice', 'Group', 'FieldList', 'Repeat'];
 
     function ItextItem(options) {
         this.forms = options.forms || [];
@@ -1314,7 +1314,7 @@ define([
     }
 
     function getDefaultItextRoot(mug) {
-        if (mug.__className === "Item") {
+        if (mug.__className === "Choice") {
             var regex = new RegExp(util.invalidAttributeRegex.source, 'g');
             return getDefaultItextRoot(mug.parentMug) + "-" +
                 mug.getNodeID().replace(regex, '_');

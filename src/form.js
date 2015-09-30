@@ -716,7 +716,7 @@ define([
             this._logicManager.updatePaths(updates);
             this.fixBrokenReferences(mug);
             // TODO make Item not a special case
-            if (oldId && mug.__className !== "Item") {
+            if (oldId && mug.__className !== "Choice") {
                 // update first child of old parent with matching conflicted nodeID
                 var conflict = this.findFirstMatchingChild(oldParent, function (mug) {
                         return mug.p.conflictedNodeId === oldId;
@@ -841,8 +841,8 @@ define([
             if (!mug.options.isControlOnly) {
                 mug.p.nodeID = this.generate_question_id();
             }
-            if (mug.__className === "Item") {
-                var parent = refMug.__className === "Item" ? refMug.parentMug : refMug;
+            if (mug.__className === "Choice") {
+                var parent = refMug.__className === "Choice" ? refMug.parentMug : refMug;
                 mug.p.nodeID = this.generate_item_label(parent);
             }
             this.insertQuestion(mug, refMug, position, isInternal);
@@ -1011,7 +1011,7 @@ define([
                                   : this.tree.rootNode),
                 items = node.getChildrenMugs(),
                 ret;
-            if (!name) { name = "item"; }
+            if (!name) { name = "choice"; }
             if (arguments.length < 3) {
                 i = items.length + 1;
             }

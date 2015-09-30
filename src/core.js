@@ -299,9 +299,7 @@ define([
             {
                 group: ["Select", 'Multiple Choice'],
                 related: [
-                    "Item"
-                    // an Itemset is added automatically when you add a new dynamic
-                    // select
+                    "Choice"
                 ],
                 questions: this.getSelectQuestions()
             },
@@ -1025,7 +1023,7 @@ define([
     fn.mugToXPathReference = function (mug) {
         // for choices, return the quoted value.
         // for everything else return the path
-        if (mug.__className === "Item") {
+        if (mug.__className === "Choice") {
             return '"' + mug.p.nodeID + '"';
         } else {
             // for the currently selected mug, return a "."

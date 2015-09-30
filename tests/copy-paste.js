@@ -119,13 +119,13 @@ require([
                         "null",
                     ], [
                         "/choice/true",
-                        "Item",
+                        "Choice",
                         "Yes",
                         "Yes",
                         "null",
                     ], [
                         "/choice/false",
-                        "Item",
+                        "Choice",
                         "No",
                         "No",
                         "null",
@@ -151,13 +151,13 @@ require([
                         "null",
                     ], [
                         "/box/yes",
-                        "Item",
+                        "Choice",
                         "Yes",
                         "Yes",
                         "yes-label",
                     ], [
                         "/box/no",
-                        "Item",
+                        "Choice",
                         "No",
                         "No",
                         "no-label",
@@ -169,13 +169,13 @@ require([
                         "null",
                     ], [
                         "/fox/yes",
-                        "Item",
+                        "Choice",
                         "Yes",
                         "Yes",
                         "yes-label",
                     ], [
                         "/fox/no",
-                        "Item",
+                        "Choice",
                         "No",
                         "No",
                         "no-label",
@@ -307,7 +307,7 @@ require([
                     "null",
                 ], [
                     "/group/choice/true",
-                    "Item",
+                    "Choice",
                     "Yes",
                     "Yes",
                     "null",
@@ -315,7 +315,7 @@ require([
                     "null",
                 ], [
                     "/group/choice/false",
-                    "Item",
+                    "Choice",
                     "No",
                     "No",
                     "null",
@@ -463,7 +463,7 @@ require([
             util.loadXML("");
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
-                ["/select/item", "Item", "item1", "item1"],
+                ["/select/item", "Choice", "item1", "item1"],
             ], ["Cannot insert Choice into tree root"]);
             util.selectAll();
             eq(mod.copy(), "");
@@ -474,7 +474,7 @@ require([
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/select", "Select", "select", "select"],
-                ["/select/item1", "Item", "item1", "item1"],
+                ["/select/item1", "Choice", "item1", "item1"],
             ]);
             util.clickQuestion("select/item1");
             paste([
@@ -485,7 +485,7 @@ require([
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/select", "Select", "select", "select"],
-                ["/select/item1", "Item", "item1", "item1"],
+                ["/select/item1", "Choice", "item1", "item1"],
             ]);
         });
 
@@ -524,7 +524,7 @@ require([
             util.selectAll();
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
-                ["/select/item", "Item", "item1", "item1"],
+                ["/select/item", "Choice", "item1", "item1"],
             ], ["Cannot insert Choice into or after Text"]);
             util.selectAll();
             eq(mod.copy(), [
@@ -793,8 +793,8 @@ require([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/question1", "Text", "question1", "question1"],
                 ["/question2", "Select", "question2", "question2"],
-                ["/question2/item1", "Item", "item1", "item1"],
-                ["/question2/item2", "Item", "item2", "item2"],
+                ["/question2/item1", "Choice", "item1", "item1"],
+                ["/question2/item2", "Choice", "item2", "item2"],
                 ["/question3", "Int", "question3", "question3"],
                 ["/question4", "Date", "question4", "question4"],
                 ["/question5", "DataBindOnly", "null", "null"],
@@ -812,15 +812,15 @@ require([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/question1", "Text", "question1", "question1"],
                 ["/question2", "Select", "question2", "question2"],
-                ["/question2/item1", "Item", "item1", "item1"],
-                ["/question2/item2", "Item", "item2", "item2"],
+                ["/question2/item1", "Choice", "item1", "item1"],
+                ["/question2/item2", "Choice", "item2", "item2"],
                 ["/question3", "Int", "question3", "question3"],
                 ["/question4", "Date", "question4", "question4"],
                 ["/question5", "DataBindOnly", "null", "null"],
                 ["/copy-1-of-question1", "Text", "question1", "question1"],
                 ["/copy-1-of-question2", "Select", "question2", "question2"],
-                ["/copy-1-of-question2/item1", "Item", "item1", "item1"],
-                ["/copy-1-of-question2/item2", "Item", "item2", "item2"],
+                ["/copy-1-of-question2/item1", "Choice", "item1", "item1"],
+                ["/copy-1-of-question2/item2", "Choice", "item2", "item2"],
                 ["/copy-1-of-question3", "Int", "question3", "question3"],
                 ["/copy-1-of-question4", "Date", "question4", "question4"],
                 ["/copy-1-of-question5", "DataBindOnly", "null", "null"],

@@ -371,7 +371,7 @@ define([
             },
             // pre-make adaptors for these because they are used frequently
             adaptSelect = makeMugAdaptor('Select'),
-            adaptItem = makeControlOnlyMugAdaptor('Item'),
+            adaptItem = makeControlOnlyMugAdaptor('Choice'),
             _adaptTrigger = makeMugAdaptor('Trigger'),
             triggerAdaptor = function (appearance) {
                 return function (mug, form) {

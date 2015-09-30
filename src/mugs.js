@@ -1331,7 +1331,7 @@ define([
         }
     });
 
-    var Item = util.extend(defaultOptions, {
+    var Choice = util.extend(defaultOptions, {
         isControlOnly: true,
         typeName: 'Choice',
         tagName: 'item',
@@ -1414,7 +1414,7 @@ define([
     });
 
     var BaseSelect = util.extend(defaultOptions, {
-        validChildTypes: ["Item"],
+        validChildTypes: ["Choice"],
         controlNodeChildren: function ($node) {
             return $node.children().not('label, value, hint, help, alert');
         },
@@ -1427,9 +1427,9 @@ define([
             return '';
         },
         afterInsert: function (form, mug) {
-            var item = "Item";
-            form.createQuestion(mug, 'into', item, true);
-            form.createQuestion(mug, 'into', item, true);
+            var choice = "Choice";
+            form.createQuestion(mug, 'into', choice, true);
+            form.createQuestion(mug, 'into', choice, true);
         },
         spec: {
             appearance: {
@@ -1673,7 +1673,7 @@ define([
                 "Video": Video
             },
             auxiliary: {
-                "Item": Item
+                "Choice": Choice
             }
         },
         MugTypesManager: MugTypesManager,

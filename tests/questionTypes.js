@@ -302,20 +302,20 @@ require([
                         $("[name='itext-hin-label-custom']")
                             .val("question1 hin custom").change();
 
-                        clickQuestion("question3/item1");
+                        clickQuestion("question3/choice1");
                         addAllForms();
                         $("[name='itext-en-label-long']")
-                            .val("item1 long en").change();
+                            .val("choice1 long en").change();
                         $("[name='itext-hin-label-long']")
-                            .val("item1 long hin").change();
+                            .val("choice1 long hin").change();
                         $("[name='itext-en-label-short']")
-                            .val("item1 short en").change();
+                            .val("choice1 short en").change();
                         $("[name='itext-hin-label-short']")
-                            .val("item1 short hin").change();
+                            .val("choice1 short hin").change();
                         $("[name='itext-en-label-custom']")
-                            .val("item1 custom en").change();
+                            .val("choice1 custom en").change();
                         $("[name='itext-hin-label-custom']")
-                            .val("item1 custom hin").change();
+                            .val("choice1 custom hin").change();
 
                         clickQuestion("question22/question23/question7");
                         $("[name='property-androidIntentAppId']").val("").change();
@@ -391,8 +391,8 @@ require([
                 var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to),
                     mug = addQuestion(from, nodeId);
                 if (!choices && from.indexOf("Select") > -1) {
-                    util.deleteQuestion(nodeId + "/item1");
-                    util.deleteQuestion(nodeId + "/item2");
+                    util.deleteQuestion(nodeId + "/choice1");
+                    util.deleteQuestion(nodeId + "/choice2");
                 }
                 assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
                 assert.equal(mug.__className, from, "wrong mug type");
@@ -480,8 +480,8 @@ require([
             assert.equal($options.length, 1);
             assert.equal($options.length, $options.filter("[data-qtype*='Select']").length);
 
-            util.deleteQuestion("question1/item1");
-            util.deleteQuestion("question1/item2");
+            util.deleteQuestion("question1/choice1");
+            util.deleteQuestion("question1/choice2");
             util.clickQuestion("question1");
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
         });

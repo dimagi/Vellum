@@ -224,9 +224,9 @@ define([
                 item2 = select.form.getChildren(select)[1];
             assert(util.isTreeNodeValid(item1), item1.getErrors().join("\n"));
             assert(util.isTreeNodeValid(item2), item2.getErrors().join("\n"));
-            item2.p.nodeID = "item1";
-            assert(util.isTreeNodeValid(item1), "item1 should be valid");
-            assert(!util.isTreeNodeValid(item2), "item2 should be invalid");
+            item2.p.nodeID = "choice1";
+            assert(util.isTreeNodeValid(item1), "choice1 should be valid");
+            assert(!util.isTreeNodeValid(item2), "choice2 should be invalid");
         });
 
         it("should preserve order of the control tree", function() {
