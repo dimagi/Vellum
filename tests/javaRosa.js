@@ -531,8 +531,8 @@ require([
             util.loadXML("");
             util.addQuestion("Select", "ns");
             util.addQuestion("Select", "ew");
-            var north = util.getMug("ns/item1"),
-                south = util.getMug("ew/item1");
+            var north = util.getMug("ns/choice1"),
+                south = util.getMug("ew/choice1");
             north.p.nodeID = "north";
             south.p.nodeID = "south";
             north.form.moveMug(south, "after", north);
@@ -602,7 +602,7 @@ require([
         it("should not allow apostrophes in item labels", function() {
             util.loadXML("");
             util.addQuestion("Select", "select");
-            util.clickQuestion('select/item1');
+            util.clickQuestion('select/choice1');
             $("[name='property-nodeID']").val("blah ' blah").change();
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });
@@ -610,7 +610,7 @@ require([
         it("should not allow > in item labels", function() {
             util.loadXML("");
             util.addQuestion("Select", "select");
-            util.clickQuestion('select/item1');
+            util.clickQuestion('select/choice1');
             $("[name='property-nodeID']").val("blah > blah").change();
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
         });

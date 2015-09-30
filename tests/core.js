@@ -104,15 +104,15 @@ require([
         it("should increment item value on insert new select item as child of select", function () {
             util.loadXML(INCREMENT_ITEM_XML);
             util.clickQuestion("question1");
-            var item = util.addQuestion("Item");
-            assert.equal(item.p.nodeID, "item3");
+            var item = util.addQuestion("Choice");
+            assert.equal(item.p.nodeID, "choice3");
         });
 
         it("should increment item value on insert new select item after sibling item", function () {
             util.loadXML(INCREMENT_ITEM_XML);
-            util.clickQuestion("question1/item1");
-            var item = util.addQuestion("Item");
-            assert.equal(item.p.nodeID, "item3");
+            util.clickQuestion("question1/choice1");
+            var item = util.addQuestion("Choice");
+            assert.equal(item.p.nodeID, "choice3");
         });
 
         it("should add hidden value in repeat group", function () {
@@ -162,10 +162,10 @@ require([
         it("should not be able to add choice to collapsed select", function () {
             util.loadXML("");
             var group = util.addQuestion("Select", "select");
-            util.addQuestion("Item", "item3");
+            util.addQuestion("Choice", "choice3");
             util.collapseGroup(group);
             chai.expect(function() {
-                util.addQuestion.bind({prevId: "select"})("Item", "item4");
+                util.addQuestion.bind({prevId: "select"})("Choice", "choice4");
             }).to.throw(Error);
         });
 
@@ -177,8 +177,8 @@ require([
             util.expandGroup(group);
             util.assertJSTreeState(
                 "select",
-                "  item1",
-                "  item2",
+                "  choice1",
+                "  choice2",
                 "text1"
             );
         });
@@ -403,7 +403,7 @@ require([
             });
 
             test("Text", "Trigger", true);
-            test("Text", "Item");
+            test("Text", "Choice");
             test("Text", "Group");
             test("Text", "DataBindOnly");
             test("Text", "Select", true);
