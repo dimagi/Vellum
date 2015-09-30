@@ -835,6 +835,7 @@ define([
         }
 
         $input = widget.input;
+        $input.addClass('jstree-drop');
 
         if (options.path === 'labelItext') {
             if (!mug.supportsRichText()) {
@@ -880,11 +881,6 @@ define([
                 outputValue: true,
                 useRichText: mug.supportsRichText(),
             });
-        }
-
-        if (options.path === 'labelItext' ||
-            options.path === 'constraintMsgItext') {
-            $input.addClass('jstree-drop');
         }
 
         widget.displayName = options.displayName;
