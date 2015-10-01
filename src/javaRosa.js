@@ -1994,7 +1994,7 @@ define([
             databind.constraintMediaIText = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
                     visibility: function(mug) {
-                        return mug.__className !== "DataBindOnly" && mug.isVisible("constraintMsgItext");
+                        return mug.isVisible("constraintAttr");
                     },
                     presence: 'optional',
                     lstring: 'Add Validation Media',
