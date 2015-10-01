@@ -111,30 +111,6 @@ define([
                         mug.form.updateLogicReferences(
                             mug, "itemsetData", itemsetData.nodeset);
                     }
-                    if (!itemsetData.valueRef) {
-                        return "Choice Value must be specified.";
-                    }
-                    if (!itemsetData.labelRef) {
-                        return "Choice Label must be specified.";
-                    }
-
-                    var instance = itemsetData.instance,
-                        instanceSrc = instance ? instance.src : '',
-                        sources = getDataSources(),
-                        fixtures = datasources.getPossibleFixtures(sources),
-                        notCustom = _.some(fixtures, function (fixture) {
-                            return fixture.src === instanceSrc;
-                        }),
-                        choices = datasources.autocompleteChoices(sources, instanceSrc),
-                        filterRegex = /\[[^\[]+]/g,
-                        strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
-                        strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
-
-                    if (notCustom && !_.contains(choices, strippedValue)) {
-                        return itemsetData.valueRef + " was not found in the lookup table";
-                    } else if (notCustom && !_.contains(choices, strippedLabel)) {
-                        return itemsetData.labelRef + " was not found in the lookup table";
-                    }
 
                     return 'pass';
                 }
