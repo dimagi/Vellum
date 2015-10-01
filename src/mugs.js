@@ -1538,7 +1538,7 @@ define([
             repeat_count: {
                 lstring: 'Repeat Count',
                 visibility: 'visible_if_present',
-                presence: 'required',
+                presence: 'optional',
                 widget: widgets.droppableText
             },
             rawRepeatAttributes: {

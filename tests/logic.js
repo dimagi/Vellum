@@ -75,13 +75,9 @@ require([
             });
 
             function testReference(attr, value, bad) {
-                var mug = util.getMug(mugMap[attr] || "text"),
-                    required = attr === 'repeat_count';
-                if (!required) {
-                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                    assert.deepEqual(mug.messages.get(attr), []);
-                }
-                // no else clause as we don't show an error when the question is added
+                var mug = util.getMug(mugMap[attr] || "text");
+                assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                assert.deepEqual(mug.messages.get(attr), []);
 
                 mug.p[attr] = value;
                 if (bad) {
@@ -95,12 +91,8 @@ require([
                 }
 
                 mug.p[attr] = "";
-                if (!required) {
-                    assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                    assert.deepEqual(mug.messages.get(attr), []);
-                } else {
-                    assert(!util.isTreeNodeValid(mug), util.getMessages(mug));
-                }
+                assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                assert.deepEqual(mug.messages.get(attr), []);
             }
 
             _.each(properties, function (attr) {
