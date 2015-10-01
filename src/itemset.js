@@ -50,19 +50,18 @@ define([
         writeCustomXML: function (xmlWriter, mug) {
             var data = mug.p.itemsetData,
                 nodeset = data.nodeset,
-                filter = mug.p.filter;
+                filter = mug.p.filter,
+                valueRef = mug.p.valueRef,
+                labelRef = mug.p.labelRef;
             if (filter) {
                 nodeset += '[' + filter + ']';
             }
-            xmlWriter.writeAttributeString(
-                'nodeset', nodeset || '');
+            xmlWriter.writeAttributeString('nodeset', nodeset || '');
             xmlWriter.writeStartElement('label');
-            xmlWriter.writeAttributeString(
-                'ref', data.labelRef || '');
+            xmlWriter.writeAttributeString('ref', labelRef || '');
             xmlWriter.writeEndElement();
             xmlWriter.writeStartElement('value');
-            xmlWriter.writeAttributeString(
-                'ref', data.valueRef || '');
+            xmlWriter.writeAttributeString('ref', valueRef || '');
             xmlWriter.writeEndElement();
         },
         spec: {
