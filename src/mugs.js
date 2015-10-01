@@ -1539,7 +1539,18 @@ define([
                 lstring: 'Repeat Count',
                 visibility: 'visible_if_present',
                 presence: 'optional',
-                widget: widgets.droppableText
+                widget: widgets.droppableText,
+                validationFunc: function (mug) {
+                    var parentMug = mug.parentMug,
+                        value = $.trim(mug.p.repeat_count);
+
+                    if (!value &&
+                        parentMug && parentMug.__className === 'FieldList') {
+                        return "Repeat Count is required.";
+                    }
+
+                    return "pass";
+                },
             },
             rawRepeatAttributes: {
                 presence: 'optional',
