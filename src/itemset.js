@@ -120,53 +120,13 @@ define([
                 widget: refWidget,
                 visibility: 'visible',
                 presence: 'required',
-                validationFunc: function (mug) {
-                    var itemsetData = mug.p.itemsetData,
-                        value = mug.p.valueRef,
-                        instance = itemsetData.instance,
-                        instanceSrc = instance ? instance.src : '',
-                        sources = getDataSources(),
-                        fixtures = datasources.getPossibleFixtures(sources),
-                        notCustom = _.some(fixtures, function (fixture) {
-                            return fixture.src === instanceSrc;
-                        }),
-                        choices = datasources.autocompleteChoices(sources, instanceSrc),
-                        filterRegex = /\[[^\[]+]/g,
-                        strippedValue = value.replace(filterRegex, "");
-
-                    if (notCustom && !_.contains(choices, strippedValue)) {
-                        return value + " was not found in the lookup table";
-                    }
-
-                    return 'pass';
-                },
-            },
+                validationFunc: validateRefWidget('valueRef'),            },
             labelRef: {
                 lstring: 'Label Field',
                 widget: refWidget,
                 visibility: 'visible',
                 presence: 'required',
-                validationFunc: function (mug) {
-                    var itemsetData = mug.p.itemsetData,
-                        label = mug.p.labelRef,
-                        instance = itemsetData.instance,
-                        instanceSrc = instance ? instance.src : '',
-                        sources = getDataSources(),
-                        fixtures = datasources.getPossibleFixtures(sources),
-                        notCustom = _.some(fixtures, function (fixture) {
-                            return fixture.src === instanceSrc;
-                        }),
-                        choices = datasources.autocompleteChoices(sources, instanceSrc),
-                        filterRegex = /\[[^\[]+]/g,
-                        strippedLabel = label.replace(filterRegex, "");
-
-                    if (notCustom && !_.contains(choices, strippedLabel)) {
-                        return label + " was not found in the lookup table";
-                    }
-
-                    return 'pass';
-                },
-            },
+                validationFunc: validateRefWidget('labelRef'),            },
             filter: {
                 lstring: 'Filter',
                 presence: 'optional',
@@ -492,6 +452,29 @@ define([
         atwho.dropdownAutocomplete(widget.input, choices);
 
         return widget;
+    }
+
+    function validateRefWidget(attr) {
+        return function(mug) {
+            var itemsetData = mug.p.itemsetData,
+                mugAttr = mug.p[attr],
+                instance = itemsetData.instance,
+                instanceSrc = instance ? instance.src : '',
+                sources = getDataSources(),
+                fixtures = datasources.getPossibleFixtures(sources),
+                notCustom = _.some(fixtures, function (fixture) {
+                    return fixture.src === instanceSrc;
+                }),
+                choices = datasources.autocompleteChoices(sources, instanceSrc),
+                filterRegex = /\[[^\[]+]/g,
+                strippedMugAttr = mugAttr.replace(filterRegex, "");
+
+            if (notCustom && !_.contains(choices, strippedMugAttr)) {
+                return mugAttr + " was not found in the lookup table";
+            }
+
+            return 'pass';
+        };
     }
 
     function refSelect(name, label, isDisabled) {
