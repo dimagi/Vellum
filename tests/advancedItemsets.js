@@ -98,7 +98,7 @@ require([
             it("preserves inner filters if you never change the data source", function () {
                 util.loadXML(INNER_FILTERS_XML);
                 clickQuestion("question2/itemset");
-                $("[name='label_ref']").val("dummy").change();
+                $("[name=property-labelRef]").val("dummy").change();
 
                 util.assertXmlEqual(
                     INNER_FILTERS_XML.replace('case_name', 'dummy'),

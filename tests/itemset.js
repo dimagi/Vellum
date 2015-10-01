@@ -182,7 +182,7 @@ require([
             it("preserves inner filters if you never change the data source", function () {
                 util.loadXML(INNER_FILTERS_XML);
                 clickQuestion("question2/itemset");
-                $("[name='label_ref']").val("dummy").change();
+                $("[name=property-labelRef]").val("dummy").change();
 
                 util.assertXmlEqual(
                     INNER_FILTERS_XML.replace('case_name', 'dummy'),
@@ -221,8 +221,8 @@ require([
                     var mug = util.getMug('/data/question2/itemset');
                     assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
                     clickQuestion("question2/itemset");
-                    $('[name=value_ref]').val('blah').change();
-                    assert.notStrictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    $('[name=property-valueRef]').val('blah').change();
+                    assert.notStrictEqual(mug.spec.valueRef.validationFunc(mug), 'pass');
                 });
 
                 it("should not warn on values with a filter attached", function() {
@@ -230,9 +230,9 @@ require([
                     var mug = util.getMug('/data/question2/itemset');
                     assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
                     clickQuestion("question2/itemset");
-                    var value = $('[name=value_ref]');
+                    var value = $('[name=property-valueRef]');
                     value.val(value.val() + "[filter]").change();
-                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    assert.strictEqual(mug.spec.valueRef.validationFunc(mug), 'pass');
                 });
 
                 it("should not warn on labels with a filter attached", function() {
@@ -240,9 +240,9 @@ require([
                     var mug = util.getMug('/data/question2/itemset');
                     assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
                     clickQuestion("question2/itemset");
-                    var label = $('[name=label_ref]');
+                    var label = $('[name=property-labelRef]');
                     label.val(label.val() + "[filter]").change();
-                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    assert.strictEqual(mug.spec.labelRef.validationFunc(mug), 'pass');
                 });
 
                 it("should not warn on inner filters", function() {
@@ -250,8 +250,8 @@ require([
                     var mug = util.getMug('/data/question2/itemset');
                     assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
                     clickQuestion("question2/itemset");
-                    $('[name=label_ref]').val("inner-attribute[filter1]/extra-inner-attribute[filter2]").change();
-                    assert.strictEqual(mug.spec.itemsetData.validationFunc(mug), 'pass');
+                    $('[name=property-labelRef]').val("inner-attribute[filter1]/extra-inner-attribute[filter2]").change();
+                    assert.strictEqual(mug.spec.labelRef.validationFunc(mug), 'pass');
                 });
             });
         });
