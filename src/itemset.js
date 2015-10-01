@@ -321,8 +321,8 @@ define([
         function updateAutocomplete(data) {
             var value = super_getValue(),
                 choices = datasources.autocompleteChoices(data, value ? value.src : "");
-            labelRef.addAutocomplete(choices, super_handleChange);
-            valueRef.addAutocomplete(choices, super_handleChange);
+            atwho.dropdownAutocomplete(valueRef(), choices);
+            atwho.dropdownAutocomplete(labelRef(), choices);
             return choices;
         }
 
@@ -334,15 +334,19 @@ define([
                 // because updateAutocomplete() calls super_getValue()
                 var choices = updateAutocomplete(data);
                 if (choices && choices.length && isEmptyValue(current.value)) {
+                    if (!mug.p.labelRef) {
                     if (_.contains(choices, "name")) {
-                        labelRef.val("name");
+                            mug.p.labelRef = "name";
                     } else {
-                        labelRef.val(choices[0]);
+                            mug.p.labelRef = choices[0];
                     }
+                    }
+                    if (!mug.p.valueRef) {
                     if (_.contains(choices, "@id")) {
-                        valueRef.val("@id");
+                            mug.p.valueRef = "@id";
                     } else {
-                        valueRef.val(choices.length > 1 ? choices[1] : choices[0]);
+                            mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
+                        }
                     }
                     if (current.hasOwnProperty("value")) {
                         // HACK push async-loaded default value to the mug.
@@ -354,6 +358,9 @@ define([
                 }
             }
         }
+
+        function labelRef() { return $('#property-labelRef'); }
+        function valueRef() { return $('#property-valueRef'); }
 
         options = _.extend({}, options, {
             onOptionsLoaded: onOptionsLoaded,
