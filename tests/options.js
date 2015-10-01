@@ -82,7 +82,23 @@ define(["underscore"], function (_) {
                     no_option: true
                 }
             }
-        }
+        }, {
+            id: "some-other-fixture",
+            uri: "jr://fixture/item-list:some-other-fixture",
+            path: "/some-other-fixture_list/some-other-fixture",
+            name: 'some-other-fixture-name',
+            structure: {
+                "other-inner-attribute": {
+                    no_option: true
+                },
+                "@id-other": {
+                    no_option: true
+                },
+                "name-other": {
+                    no_option: true
+                }
+            }
+        },
     ];
 
     var OPTIONS = {
