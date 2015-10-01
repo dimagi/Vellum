@@ -92,6 +92,13 @@ define([
                         var instances = {};
                         instances[value.instance.id] = value.instance.src;
                         mug.form.updateKnownInstances(instances);
+                        //support old copy/paste
+                        if (value.valueRef) {
+                            mug.p.valueRef = value.valueRef;
+                        }
+                        if (value.labelRef) {
+                            mug.p.labelRef = value.labelRef;
+                        }
                     }
                     return value;
                 },
@@ -120,13 +127,25 @@ define([
                 widget: refWidget,
                 visibility: 'visible',
                 presence: 'required',
-                validationFunc: validateRefWidget('valueRef'),            },
+                validationFunc: validateRefWidget('valueRef'),
+                serialize: function (value, key, mug, data) {
+                    if (mug.p.valueRef) {
+                        data.itemsetData[0].valueRef = mug.p.valueRef;
+                    }
+                },
+            },
             labelRef: {
                 lstring: 'Label Field',
                 widget: refWidget,
                 visibility: 'visible',
                 presence: 'required',
-                validationFunc: validateRefWidget('labelRef'),            },
+                validationFunc: validateRefWidget('labelRef'),
+                serialize: function (value, key, mug, data) {
+                    if (mug.p.labelRef) {
+                        data.itemsetData[0].labelRef = mug.p.labelRef;
+                    }
+                },
+            },
             filter: {
                 lstring: 'Filter',
                 presence: 'optional',
@@ -205,6 +224,8 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        valueRef: itemsetDataSpec,
+                        labelRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
                     }
                 }),
@@ -218,6 +239,8 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        valueRef: itemsetDataSpec,
+                        labelRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
                     }
                 })
