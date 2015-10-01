@@ -244,6 +244,8 @@ define([
                                     nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
                     };
+                    mug.p.labelRef = $element.children('label').attr('ref');
+                    mug.p.valueRef = $element.children('value').attr('ref');
                     return mug;
                 };
                 adapt.ignoreDataNode = true;
