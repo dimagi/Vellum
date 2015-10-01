@@ -243,8 +243,6 @@ define([
                         instance: form.parseInstance(
                                     nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
-                        labelRef: $element.children('label').attr('ref'),
-                        valueRef: $element.children('value').attr('ref')
                     };
                     return mug;
                 };
@@ -335,16 +333,16 @@ define([
                 var choices = updateAutocomplete(data);
                 if (choices && choices.length && isEmptyValue(current.value)) {
                     if (!mug.p.labelRef) {
-                    if (_.contains(choices, "name")) {
+                        if (_.contains(choices, "name")) {
                             mug.p.labelRef = "name";
-                    } else {
+                        } else {
                             mug.p.labelRef = choices[0];
-                    }
+                        }
                     }
                     if (!mug.p.valueRef) {
-                    if (_.contains(choices, "@id")) {
+                        if (_.contains(choices, "@id")) {
                             mug.p.valueRef = "@id";
-                    } else {
+                        } else {
                             mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
                         }
                     }
@@ -392,22 +390,15 @@ define([
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
-            super_handleChange = widget.handleChange,
-            labelRef = refSelect("label_ref", "Label Field", false),
-            valueRef = refSelect("value_ref", "Value Field", false);
+            super_handleChange = widget.handleChange;
 
         widget.handleChange = function() {
             updateAutocomplete(dataSources);
             super_handleChange();
         };
 
-        labelRef.onChange(super_handleChange);
-        valueRef.onChange(super_handleChange);
-
         widget.getUIElement = function () {
-            return $('<div>').append(super_getUIElement())
-                .append(valueRef.element)
-                .append(labelRef.element);
+            return $('<div>').append(super_getUIElement());
         };
 
         widget.getValue = function () {
@@ -415,8 +406,6 @@ define([
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : {id: null, src: null}),
                 nodeset: val.query,
-                labelRef: labelRef.val(),
-                valueRef: valueRef.val()
             };
         };
 
@@ -435,8 +424,6 @@ define([
                 src: (val.instance ? val.instance.src : ""),
                 query: val.nodeset || ""
             });
-            labelRef.val(val.labelRef);
-            valueRef.val(val.valueRef);
         };
 
         canUpdateAutocomplete = true;
@@ -481,32 +468,6 @@ define([
             }
 
             return 'pass';
-        };
-    }
-
-    function refSelect(name, label, isDisabled) {
-        var input = $("<input type='text' class='input-block-level'>");
-        input.attr("name", name);
-        return {
-            addAutocomplete: function(sources, changeFunction) {
-                atwho.dropdownAutocomplete(input, sources);
-                input.on("blur change", function() {
-                    if (_.isFunction(changeFunction)) {
-                        changeFunction();
-                    }
-                });
-            },
-            element: widgets.util.getUIElement(input, label, isDisabled),
-            val: function (value) {
-                if (_.isUndefined(value)) {
-                    return input.val();
-                } else {
-                    input.val(value || "");
-                }
-            },
-            onChange: function (callback) {
-                input.bind("change keyup", callback);
-            }
         };
     }
 });
