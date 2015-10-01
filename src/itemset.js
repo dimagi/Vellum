@@ -140,6 +140,58 @@ define([
                     return 'pass';
                 }
             },
+            valueRef: {
+                lstring: 'Value Field',
+                widget: refWidget,
+                visibility: 'visible',
+                presence: 'required',
+                validationFunc: function (mug) {
+                    var itemsetData = mug.p.itemsetData,
+                        value = mug.p.valueRef,
+                        instance = itemsetData.instance,
+                        instanceSrc = instance ? instance.src : '',
+                        sources = getDataSources(),
+                        fixtures = datasources.getPossibleFixtures(sources),
+                        notCustom = _.some(fixtures, function (fixture) {
+                            return fixture.src === instanceSrc;
+                        }),
+                        choices = datasources.autocompleteChoices(sources, instanceSrc),
+                        filterRegex = /\[[^\[]+]/g,
+                        strippedValue = value.replace(filterRegex, "");
+
+                    if (notCustom && !_.contains(choices, strippedValue)) {
+                        return value + " was not found in the lookup table";
+                    }
+
+                    return 'pass';
+                },
+            },
+            labelRef: {
+                lstring: 'Label Field',
+                widget: refWidget,
+                visibility: 'visible',
+                presence: 'required',
+                validationFunc: function (mug) {
+                    var itemsetData = mug.p.itemsetData,
+                        label = mug.p.labelRef,
+                        instance = itemsetData.instance,
+                        instanceSrc = instance ? instance.src : '',
+                        sources = getDataSources(),
+                        fixtures = datasources.getPossibleFixtures(sources),
+                        notCustom = _.some(fixtures, function (fixture) {
+                            return fixture.src === instanceSrc;
+                        }),
+                        choices = datasources.autocompleteChoices(sources, instanceSrc),
+                        filterRegex = /\[[^\[]+]/g,
+                        strippedLabel = label.replace(filterRegex, "");
+
+                    if (notCustom && !_.contains(choices, strippedLabel)) {
+                        return label + " was not found in the lookup table";
+                    }
+
+                    return 'pass';
+                },
+            },
             filter: {
                 lstring: 'Filter',
                 presence: 'optional',
@@ -273,6 +325,12 @@ define([
                     updateDataSource(mug, event.val, event.previous);
                 }
             });
+        },
+        getMainProperties: function() {
+            return this.__callOld().concat([
+                'valueRef',
+                'labelRef',
+            ]);
         },
         getLogicProperties: function () {
             var ret = this.__callOld();
@@ -444,6 +502,19 @@ define([
             // call again to update auto-complete and set defaults
             onOptionsLoaded(dataSources);
         }
+
+        return widget;
+    }
+
+    function refWidget(mug, options) {
+        var widget = widgets.text(mug, options);
+
+        var value = mug.p.itemsetData,
+            instance = value ? value.instance : null,
+            src = instance ? instance.src : "",
+            choices = datasources.autocompleteChoices(getDataSources(), src);
+
+        atwho.dropdownAutocomplete(widget.input, choices);
 
         return widget;
     }
