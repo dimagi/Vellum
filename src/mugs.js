@@ -1538,8 +1538,27 @@ define([
             repeat_count: {
                 lstring: 'Repeat Count',
                 visibility: 'visible_if_present',
-                presence: 'required',
-                widget: widgets.droppableText
+                presence: 'optional',
+                widget: widgets.droppableText,
+                validationFunc: function (mug) {
+                    function insideFieldList(mug) {
+                        if (!mug) { return false; }
+
+                        var parentMug = mug.parentMug;
+
+                        if (parentMug && parentMug.__className === 'FieldList') {
+                            return true;
+                        }
+
+                        return insideFieldList(parentMug);
+                    }
+
+                    if (!$.trim(mug.p.repeat_count) && insideFieldList(mug)) {
+                        return "Repeat Count is required.";
+                    }
+
+                    return "pass";
+                },
             },
             rawRepeatAttributes: {
                 presence: 'optional',
