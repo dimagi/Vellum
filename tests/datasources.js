@@ -144,7 +144,6 @@ require([
             it("should select first option when empty and finished loading", function() {
                 util.loadXML("");
                 util.addQuestion("SelectDynamic", "select");
-                clickQuestion('select/itemset');
                 callback([{
                     id: "bar",
                     uri: "jr://fixture/foo",
@@ -161,12 +160,13 @@ require([
                         },
                     },
                 }]);
+                clickQuestion('select/itemset');
                 var data = $('[name=property-itemsetData]');
                 assert.equal(data.val(),
                     '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')root"}');
                 assert.equal(data.find("option:selected").text(), "outer");
-                assert.equal($('[name=value_ref]').val(), '@id');
-                assert.equal($('[name=label_ref]').val(), 'name');
+                assert.equal($('[name=property-valueRef]').val(), '@id');
+                assert.equal($('[name=property-labelRef]').val(), 'name');
             });
 
             it("should select correct option when not empty and finished loading", function() {

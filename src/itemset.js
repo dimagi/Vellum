@@ -50,19 +50,18 @@ define([
         writeCustomXML: function (xmlWriter, mug) {
             var data = mug.p.itemsetData,
                 nodeset = data.nodeset,
-                filter = mug.p.filter;
+                filter = mug.p.filter,
+                valueRef = mug.p.valueRef,
+                labelRef = mug.p.labelRef;
             if (filter) {
                 nodeset += '[' + filter + ']';
             }
-            xmlWriter.writeAttributeString(
-                'nodeset', nodeset || '');
+            xmlWriter.writeAttributeString('nodeset', nodeset || '');
             xmlWriter.writeStartElement('label');
-            xmlWriter.writeAttributeString(
-                'ref', data.labelRef || '');
+            xmlWriter.writeAttributeString('ref', labelRef || '');
             xmlWriter.writeEndElement();
             xmlWriter.writeStartElement('value');
-            xmlWriter.writeAttributeString(
-                'ref', data.valueRef || '');
+            xmlWriter.writeAttributeString('ref', valueRef || '');
             xmlWriter.writeEndElement();
         },
         spec: {
@@ -93,6 +92,13 @@ define([
                         var instances = {};
                         instances[value.instance.id] = value.instance.src;
                         mug.form.updateKnownInstances(instances);
+                        //support old copy/paste
+                        if (value.valueRef) {
+                            mug.p.valueRef = value.valueRef;
+                        }
+                        if (value.labelRef) {
+                            mug.p.labelRef = value.labelRef;
+                        }
                     }
                     return value;
                 },
@@ -112,33 +118,33 @@ define([
                         mug.form.updateLogicReferences(
                             mug, "itemsetData", itemsetData.nodeset);
                     }
-                    if (!itemsetData.valueRef) {
-                        return "Choice Value must be specified.";
-                    }
-                    if (!itemsetData.labelRef) {
-                        return "Choice Label must be specified.";
-                    }
-
-                    var instance = itemsetData.instance,
-                        instanceSrc = instance ? instance.src : '',
-                        sources = getDataSources(),
-                        fixtures = datasources.getPossibleFixtures(sources),
-                        notCustom = _.some(fixtures, function (fixture) {
-                            return fixture.src === instanceSrc;
-                        }),
-                        choices = datasources.autocompleteChoices(sources, instanceSrc),
-                        filterRegex = /\[[^\[]+]/g,
-                        strippedValue = itemsetData.valueRef.replace(filterRegex, ""),
-                        strippedLabel = itemsetData.labelRef.replace(filterRegex, "");
-
-                    if (notCustom && !_.contains(choices, strippedValue)) {
-                        return itemsetData.valueRef + " was not found in the lookup table";
-                    } else if (notCustom && !_.contains(choices, strippedLabel)) {
-                        return itemsetData.labelRef + " was not found in the lookup table";
-                    }
 
                     return 'pass';
                 }
+            },
+            valueRef: {
+                lstring: 'Value Field',
+                widget: refWidget,
+                visibility: 'visible',
+                presence: 'required',
+                validationFunc: validateRefWidget('valueRef'),
+                serialize: function (value, key, mug, data) {
+                    if (mug.p.valueRef) {
+                        data.itemsetData[0].valueRef = mug.p.valueRef;
+                    }
+                },
+            },
+            labelRef: {
+                lstring: 'Label Field',
+                widget: refWidget,
+                visibility: 'visible',
+                presence: 'required',
+                validationFunc: validateRefWidget('labelRef'),
+                serialize: function (value, key, mug, data) {
+                    if (mug.p.labelRef) {
+                        data.itemsetData[0].labelRef = mug.p.labelRef;
+                    }
+                },
             },
             filter: {
                 lstring: 'Filter',
@@ -218,6 +224,8 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        valueRef: itemsetDataSpec,
+                        labelRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
                     }
                 }),
@@ -231,6 +239,8 @@ define([
                     afterInsert: afterDynamicSelectInsert,
                     spec: {
                         itemsetData: itemsetDataSpec,
+                        valueRef: itemsetDataSpec,
+                        labelRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
                     }
                 })
@@ -256,9 +266,9 @@ define([
                         instance: form.parseInstance(
                                     nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
-                        labelRef: $element.children('label').attr('ref'),
-                        valueRef: $element.children('value').attr('ref')
                     };
+                    mug.p.labelRef = $element.children('label').attr('ref');
+                    mug.p.valueRef = $element.children('value').attr('ref');
                     return mug;
                 };
                 adapt.ignoreDataNode = true;
@@ -273,6 +283,12 @@ define([
                     updateDataSource(mug, event.val, event.previous);
                 }
             });
+        },
+        getMainProperties: function() {
+            return this.__callOld().concat([
+                'valueRef',
+                'labelRef',
+            ]);
         },
         getLogicProperties: function () {
             var ret = this.__callOld();
@@ -328,8 +344,8 @@ define([
         function updateAutocomplete(data) {
             var value = super_getValue(),
                 choices = datasources.autocompleteChoices(data, value ? value.src : "");
-            labelRef.addAutocomplete(choices, super_handleChange);
-            valueRef.addAutocomplete(choices, super_handleChange);
+            atwho.dropdownAutocomplete(valueRef(), choices);
+            atwho.dropdownAutocomplete(labelRef(), choices);
             return choices;
         }
 
@@ -341,15 +357,19 @@ define([
                 // because updateAutocomplete() calls super_getValue()
                 var choices = updateAutocomplete(data);
                 if (choices && choices.length && isEmptyValue(current.value)) {
-                    if (_.contains(choices, "name")) {
-                        labelRef.val("name");
-                    } else {
-                        labelRef.val(choices[0]);
+                    if (!mug.p.labelRef) {
+                        if (_.contains(choices, "name")) {
+                            mug.p.labelRef = "name";
+                        } else {
+                            mug.p.labelRef = choices[0];
+                        }
                     }
-                    if (_.contains(choices, "@id")) {
-                        valueRef.val("@id");
-                    } else {
-                        valueRef.val(choices.length > 1 ? choices[1] : choices[0]);
+                    if (!mug.p.valueRef) {
+                        if (_.contains(choices, "@id")) {
+                            mug.p.valueRef = "@id";
+                        } else {
+                            mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
+                        }
                     }
                     if (current.hasOwnProperty("value")) {
                         // HACK push async-loaded default value to the mug.
@@ -361,6 +381,9 @@ define([
                 }
             }
         }
+
+        function labelRef() { return $('#property-labelRef'); }
+        function valueRef() { return $('#property-valueRef'); }
 
         options = _.extend({}, options, {
             onOptionsLoaded: onOptionsLoaded,
@@ -392,22 +415,15 @@ define([
             super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
-            super_handleChange = widget.handleChange,
-            labelRef = refSelect("label_ref", "Label Field", false),
-            valueRef = refSelect("value_ref", "Value Field", false);
+            super_handleChange = widget.handleChange;
 
         widget.handleChange = function() {
             updateAutocomplete(dataSources);
             super_handleChange();
         };
 
-        labelRef.onChange(super_handleChange);
-        valueRef.onChange(super_handleChange);
-
         widget.getUIElement = function () {
-            return $('<div>').append(super_getUIElement())
-                .append(valueRef.element)
-                .append(labelRef.element);
+            return $('<div>').append(super_getUIElement());
         };
 
         widget.getValue = function () {
@@ -415,8 +431,6 @@ define([
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : {id: null, src: null}),
                 nodeset: val.query,
-                labelRef: labelRef.val(),
-                valueRef: valueRef.val()
             };
         };
 
@@ -435,8 +449,6 @@ define([
                 src: (val.instance ? val.instance.src : ""),
                 query: val.nodeset || ""
             });
-            labelRef.val(val.labelRef);
-            valueRef.val(val.valueRef);
         };
 
         canUpdateAutocomplete = true;
@@ -448,29 +460,39 @@ define([
         return widget;
     }
 
-    function refSelect(name, label, isDisabled) {
-        var input = $("<input type='text' class='input-block-level'>");
-        input.attr("name", name);
-        return {
-            addAutocomplete: function(sources, changeFunction) {
-                atwho.dropdownAutocomplete(input, sources);
-                input.on("blur change", function() {
-                    if (_.isFunction(changeFunction)) {
-                        changeFunction();
-                    }
-                });
-            },
-            element: widgets.util.getUIElement(input, label, isDisabled),
-            val: function (value) {
-                if (_.isUndefined(value)) {
-                    return input.val();
-                } else {
-                    input.val(value || "");
-                }
-            },
-            onChange: function (callback) {
-                input.bind("change keyup", callback);
+    function refWidget(mug, options) {
+        var widget = widgets.text(mug, options);
+
+        var value = mug.p.itemsetData,
+            instance = value ? value.instance : null,
+            src = instance ? instance.src : "",
+            choices = datasources.autocompleteChoices(getDataSources(), src);
+
+        atwho.dropdownAutocomplete(widget.input, choices);
+
+        return widget;
+    }
+
+    function validateRefWidget(attr) {
+        return function(mug) {
+            var itemsetData = mug.p.itemsetData,
+                mugAttr = mug.p[attr],
+                instance = itemsetData.instance,
+                instanceSrc = instance ? instance.src : '',
+                sources = getDataSources(),
+                fixtures = datasources.getPossibleFixtures(sources),
+                notCustom = _.some(fixtures, function (fixture) {
+                    return fixture.src === instanceSrc;
+                }),
+                choices = datasources.autocompleteChoices(sources, instanceSrc),
+                filterRegex = /\[[^\[]+]/g,
+                strippedMugAttr = mugAttr.replace(filterRegex, "");
+
+            if (notCustom && !_.contains(choices, strippedMugAttr)) {
+                return mugAttr + " was not found in the lookup table";
             }
+
+            return 'pass';
         };
     }
 });

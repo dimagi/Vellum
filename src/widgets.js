@@ -438,11 +438,7 @@ define([
             super_setValue = widget.setValue;
 
         widget.getValue = function() {
-            var val = super_getValue();
-            if ($.trim(val) === "") {
-                return "";
-            }
-            return val;
+            return $.trim(super_getValue());
         };
 
         widget.getUIElement = function () {
