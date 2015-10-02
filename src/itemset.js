@@ -412,7 +412,6 @@ define([
             optionsLoaded = false,
             canUpdateAutocomplete = false,
             widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
-            super_getUIElement = widget.getUIElement,
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             super_handleChange = widget.handleChange;
@@ -420,10 +419,6 @@ define([
         widget.handleChange = function() {
             updateAutocomplete(dataSources);
             super_handleChange();
-        };
-
-        widget.getUIElement = function () {
-            return $('<div>').append(super_getUIElement());
         };
 
         widget.getValue = function () {
