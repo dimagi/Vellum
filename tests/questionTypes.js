@@ -503,6 +503,15 @@ require([
                                   "question should not be valid");
         });
 
+        it("should require a repeat_count when inside of a group in a question list", function () {
+            util.loadXML("");
+            util.addQuestion("FieldList", "fieldlist");
+            util.addQuestion("Group", "group");
+            var repeat = util.addQuestion("Repeat", "repeat");
+            assert.notStrictEqual(repeat.spec.repeat_count.validationFunc(repeat), "pass",
+                                  "question should not be valid");
+        });
+
         it("should not require a repeat_count when inside of a group", function () {
             util.loadXML("");
             util.addQuestion("Group", "group");

@@ -1541,11 +1541,19 @@ define([
                 presence: 'optional',
                 widget: widgets.droppableText,
                 validationFunc: function (mug) {
-                    var parentMug = mug.parentMug,
-                        value = $.trim(mug.p.repeat_count);
+                    function insideFieldList(mug) {
+                        if (!mug) { return false; }
 
-                    if (!value &&
-                        parentMug && parentMug.__className === 'FieldList') {
+                        var parentMug = mug.parentMug;
+
+                        if (parentMug && parentMug.__className === 'FieldList') {
+                            return true;
+                        }
+
+                        return insideFieldList(parentMug);
+                    }
+
+                    if (!$.trim(mug.p.repeat_count) && insideFieldList(mug)) {
                         return "Repeat Count is required.";
                     }
 
