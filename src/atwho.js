@@ -29,11 +29,21 @@ define([
     var cachedMugData = timed(function(form) {
         return _.chain(form.getMugList())
                 .map(function(mug) {
+                    // probably better to use text-overflow: ellipsis
+                    var defaultLanguage = mug.form.vellum.data.javaRosa.Itext.getDefaultLanguage(),
+                        defaultLabel = mug.p.labelItext.getForm('default').getValue(defaultLanguage),
+                        displayLabel = defaultLabel;
+
+                    if (displayLabel.length > 25) {
+                        displayLabel = defaultLabel.slice(0, 25) + '&hellip;';
+                    }
+
                     return {
                         id: mug.ufid,
                         name: mug.absolutePath,
                         icon: mug.options.icon,
                         questionId: mug.p.nodeID,
+                        displayLabel: displayLabel,
                     };
                 })
                 .filter(function(choice) { return choice.name; })
@@ -125,7 +135,7 @@ define([
         $input.atwho({
             at: "/data/",
             data: cachedMugData(mug.form),
-            displayTpl: '<li><i class="${icon}" /> ${name}</li>',
+            displayTpl: '<li><i class="${icon}" /> ${name}<br /><span class="atwho-jrtext">${displayLabel}</span></li>',
             insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,
