@@ -68,7 +68,8 @@ requirejs.config({
         'caretjs': '../bower_components/Caret.js/dist/jquery.caret',
         'atjs': '../bower_components/At.js/dist/js/jquery.atwho',
         'ckeditor': '../lib/ckeditor/ckeditor',
-        'ckeditor-jquery': '../lib/ckeditor/adapters/jquery'
+        'ckeditor-jquery': '../lib/ckeditor/adapters/jquery',
+        'fusejs': '../bower_components/fuse.js/src/fuse'
     },
     shim: {
         'codemirror': {
@@ -163,6 +164,9 @@ requirejs.config({
         'ckeditor-jquery': {
             deps: ['jquery', 'ckeditor'],
             exports: '$.fn.ckeditor'
+        },
+        'fusejs': {
+            exports: 'fusejs'
         }
     },
     less: {

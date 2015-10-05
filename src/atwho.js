@@ -1,9 +1,11 @@
 define([
     'underscore',
-    'jquery'
+    'jquery',
+    'fusejs'
 ], function (
     _,
-    $
+    $,
+    fusejs
 ) {
     var that = {};
 
@@ -44,6 +46,7 @@ define([
                         icon: mug.options.icon,
                         questionId: mug.p.nodeID,
                         displayLabel: displayLabel,
+                        label: defaultLabel,
                     };
                 })
                 .filter(function(choice) { return choice.name; })
@@ -146,6 +149,17 @@ define([
                     regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
                     match = regexp.exec(subtext);
                     return match ? match[2] : null;
+                },
+                filter: function (query, data, searchKey) {
+                    if (!query) { return data; }
+                    var fuse = new fusejs(data, { keys: ['label', 'name'] });
+                    return fuse.search(query);
+                },
+                sorter: function (query, items, searchKey) {
+                    return _.map(items, function(item, idx) {
+                        item.atwho_order = idx;
+                        return item;
+                    });
                 },
                 beforeInsert: function(value, $li) {
                     if (window.analytics) {
