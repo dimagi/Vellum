@@ -135,9 +135,12 @@ define([
             };
         }
 
+        var mugData = cachedMugData(mug.form),
+            fuse = new fusejs(mugData, { keys: ['label', 'name'] });
+
         $input.atwho({
             at: "/data/",
-            data: cachedMugData(mug.form),
+            data: mugData,
             displayTpl: '<li><i class="${icon}" /> ${name}<br /><span class="atwho-jrtext">${displayLabel}</span></li>',
             insertTpl: options.insertTpl,
             limit: 10,
@@ -152,7 +155,6 @@ define([
                 },
                 filter: function (query, data, searchKey) {
                     if (!query) { return data; }
-                    var fuse = new fusejs(data, { keys: ['label', 'name'] });
                     return fuse.search(query);
                 },
                 sorter: function (query, items, searchKey) {
