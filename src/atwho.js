@@ -1,11 +1,13 @@
 define([
     'underscore',
     'jquery',
-    'fusejs'
+    'fusejs',
+    'tpl!vellum/templates/atwho_display'
 ], function (
     _,
     $,
-    fusejs
+    fusejs,
+    atwhoDisplay
 ) {
     var that = {};
 
@@ -33,7 +35,8 @@ define([
                 .map(function(mug) {
                     // probably better to use text-overflow: ellipsis
                     var defaultLanguage = mug.form.vellum.data.javaRosa.Itext.getDefaultLanguage(),
-                        defaultLabel = mug.p.labelItext.getForm('default').getValue(defaultLanguage),
+                        itext = mug.p.labelItext,
+                        defaultLabel = itext ? itext.getForm('default').getValue(defaultLanguage) : '',
                         displayLabel = defaultLabel;
 
                     if (displayLabel.length > 25) {
@@ -141,7 +144,7 @@ define([
         $input.atwho({
             at: "/data/",
             data: mugData,
-            displayTpl: '<li><i class="${icon}" /> ${name}<br /><span class="atwho-jrtext">${displayLabel}</span></li>',
+            displayTpl: atwhoDisplay,
             insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,
