@@ -34,9 +34,8 @@ define([
         return _.chain(form.getMugList())
                 .map(function(mug) {
                     // probably better to use text-overflow: ellipsis
-                    var defaultLanguage = mug.form.vellum.data.javaRosa.Itext.getDefaultLanguage(),
-                        itext = mug.p.labelItext,
-                        defaultLabel = itext ? itext.getForm('default').getValue(defaultLanguage) : '',
+                    var itext = mug.p.labelItext,
+                        defaultLabel = itext ? itext.get() : '',
                         displayLabel = defaultLabel;
 
                     if (displayLabel.length > 25) {
