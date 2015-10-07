@@ -32,6 +32,7 @@
         "requirejs-plugins": "~1.0.2",
         "At.js": "emord/At.js#override-insert",
         "Caret.js": "0.2.2",
+        "fuse.js": "1.2.2",
 
         "jstree": "3.1.1",
         "langcodes": "dimagi/langcodes",

@@ -1,9 +1,13 @@
 define([
     'underscore',
-    'jquery'
+    'jquery',
+    'fusejs',
+    'tpl!vellum/templates/atwho_display'
 ], function (
     _,
-    $
+    $,
+    fusejs,
+    atwhoDisplay
 ) {
     var that = {};
 
@@ -29,11 +33,22 @@ define([
     var cachedMugData = timed(function(form) {
         return _.chain(form.getMugList())
                 .map(function(mug) {
+                    // probably better to use text-overflow: ellipsis
+                    var itext = mug.p.labelItext,
+                        defaultLabel = itext ? itext.get() : '',
+                        displayLabel = defaultLabel;
+
+                    if (displayLabel.length > 25) {
+                        displayLabel = defaultLabel.slice(0, 25) + '&hellip;';
+                    }
+
                     return {
                         id: mug.ufid,
                         name: mug.absolutePath,
                         icon: mug.options.icon,
                         questionId: mug.p.nodeID,
+                        displayLabel: displayLabel,
+                        label: defaultLabel,
                     };
                 })
                 .filter(function(choice) { return choice.name; })
@@ -122,10 +137,13 @@ define([
             };
         }
 
+        var mugData = cachedMugData(mug.form),
+            fuse = new fusejs(mugData, { keys: ['label', 'name'] });
+
         $input.atwho({
             at: "/data/",
-            data: cachedMugData(mug.form),
-            displayTpl: '<li><i class="${icon}" /> ${name}</li>',
+            data: mugData,
+            displayTpl: atwhoDisplay,
             insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,
@@ -136,6 +154,16 @@ define([
                     regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
                     match = regexp.exec(subtext);
                     return match ? match[2] : null;
+                },
+                filter: function (query, data, searchKey) {
+                    if (!query) { return data; }
+                    return fuse.search(query);
+                },
+                sorter: function (query, items, searchKey) {
+                    return _.map(items, function(item, idx) {
+                        item.atwho_order = idx;
+                        return item;
+                    });
                 },
                 beforeInsert: function(value, $li) {
                     if (window.analytics) {
