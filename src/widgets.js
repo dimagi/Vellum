@@ -261,7 +261,7 @@ define([
                 $this.siblings('.cke_widget_drag_handler_container').children().popout({
                     title: '',
                     content: value,
-                    template: '<div contenteditable="false" class="popover">' +
+                    template: '<div contenteditable="false" class="popover popover-vellum">' +
                         '<div class="arrow"></div>' +
                         '<div class="popover-inner">' +
                         '<div class="popover-content"><p></p></div></div></div>',

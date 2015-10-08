@@ -53,7 +53,9 @@ define([
                 },
                 init: function() {
                     // TODO: PR to ckeditor to make changing drag ui supported
-                    var width = $(this.element.$).width();
+                    // Leave 15px on the left side so that users can actually
+                    // interact with the close button
+                    var width = $(this.element.$).width() - 15;
                     this.dragHandlerContainer.setStyles({
                         'width': width + 'px',
                         'background': '',
