@@ -55,19 +55,16 @@ define([
                     // TODO: PR to ckeditor to make changing drag ui supported
                     // Leave 15px on the left side so that users can actually
                     // interact with the close button
-                    var width = $(this.element.$).width() - 15;
+                    var width = $(this.element.$).innerWidth() - 15;
+                    var height = $(this.element.$).outerHeight() + 4;
                     this.dragHandlerContainer.setStyles({
-                        'width': width + 'px',
-                        'background': '',
+                        width: width + 'px',
+                        height: height + 'px',
+                        left: '0px'
                     });
-                    this.dragHandlerContainer.getChildren().getItem(0).setStyles({
-                        'width': width + 'px',
-                        'margin-top': '15px',
-                        'height': '25px',
-                    });
-                },
+                }
             });
-        },
+        }
     });
 
     /*
@@ -164,7 +161,7 @@ define([
         var xpathInfo = _parseXPath(xpath, form),
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
-            dispValue = getBubbleDisplayValue(xpath),
+            dispValue = $('<span class="data-node-id" />').text(getBubbleDisplayValue(xpath)),
             icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
             bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses)
                 .attr({

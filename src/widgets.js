@@ -257,16 +257,19 @@ define([
                 var $this = $(this),
                     datavalue = $this.attr('data-value'),
                     match =  datavalue.match('output value="(.*)"'),
-                    value = match ? match[1] : $this.attr('data-value');
-                $this.siblings('.cke_widget_drag_handler_container').children().popout({
-                    title: '',
-                    content: value,
-                    template: '<div contenteditable="false" class="popover popover-vellum">' +
-                        '<div class="arrow"></div>' +
+                    value = match ? match[1] : $this.attr('data-value'),
+                    display_id = $this.find('.data-node-id').text(),
+                    label_text = 'This is a placeholder for the actual label text.',
+                    special_path = '#case_type/fake/path/thats/pretty/long/and/intentionally/wraps/' + display_id;
+                $this.siblings('.cke_widget_drag_handler_container').children().stickyover({
+                    title: display_id + '<small>' + special_path + '</small>',
+                    html: true,
+                    content: '<p>' + label_text + '</p>',
+                    template: '<div contenteditable="false" class="popover fd-popover">' +
                         '<div class="popover-inner">' +
-                        '<div class="popover-content"><p></p></div></div></div>',
-                    placement: 'bottom',
-                    trigger: 'hover',
+                        '<h3 class="popover-title"></h3>' +
+                        '<div class="popover-content"><p></p></div>' +
+                        '</div></div>'
                 });
             });
         }
