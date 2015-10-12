@@ -257,14 +257,19 @@ define([
                 var $this = $(this),
                     datavalue = $this.attr('data-value'),
                     match =  datavalue.match('output value="(.*)"'),
-                    value = match ? match[1] : $this.attr('data-value'),
-                    display_id = $this.find('.data-node-id').text(),
-                    label_text = 'This is a placeholder for the actual label text.',
-                    special_path = '#case_type/fake/path/thats/pretty/long/and/intentionally/wraps/' + display_id;
+                    xpath = match ? match[1] : datavalue,
+                    displayId = $this.clone().children().remove().end().text(),
+                    labelMug, labelText;
+                if (/^\/data\//.test(xpath)) {
+                    labelMug = mug.form.getMugByPath(xpath);
+                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
+                } else {
+                    labelText = "";
+                }
                 $this.siblings('.cke_widget_drag_handler_container').children().stickyover({
-                    title: display_id + '<small>' + special_path + '</small>',
+                    title: displayId + '<small>' + xpath + '</small>',
                     html: true,
-                    content: '<p>' + label_text + '</p>',
+                    content: '<p>' + labelText + '</p>',
                     template: '<div contenteditable="false" class="popover fd-popover">' +
                         '<div class="popover-inner">' +
                         '<h3 class="popover-title"></h3>' +

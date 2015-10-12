@@ -161,7 +161,7 @@ define([
         var xpathInfo = _parseXPath(xpath, form),
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
-            dispValue = $('<span class="data-node-id" />').text(getBubbleDisplayValue(xpath)),
+            dispValue = getBubbleDisplayValue(xpath),
             icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
             bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses)
                 .attr({
