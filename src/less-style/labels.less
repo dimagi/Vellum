@@ -1,49 +1,55 @@
 //label datanode
 .label-datanode {
   text-shadow: none;
-  line-height: 25px;
-  padding: 0 6px;
+  line-height: 16px;
+  padding: 0 2px;
+  margin: 0px 2px;
+  margin-bottom: 2px;
   font-size: 12px;
+  border: 1px solid;
+  vertical-align: middle;
   &:hover {
     cursor: pointer;
     color: #ffffff;
-    .close {
-      opacity: 0.6;
-    }
   }
-
   .close {
     color: @cc-light-cool-accent-low;
     opacity: 0.4;
     font-weight: 500;
-    line-height: 20px;
-    padding-left: 5px;
-    padding-top: 2px;
+    line-height: 13px;
+    font-size: 18px;
+    padding: 0 5px;
+    padding-bottom: 3px;
+    margin-right: -3px;
     &:hover {
       opacity: 0.9;
     }
   }
   .fcc {
     padding: 0 3px;
+    font-size: 0.8em;
   }
 }
 
 .label-datanode-internal {
   color: @cc-light-cool-accent-low;
-  background-color: @cc-light-cool-accent-hi;
+  border-color: darken(desaturate(@cc-light-cool-accent-hi, 20%), 20%);
+  background-color: desaturate(@cc-light-cool-accent-hi, 20%);
   .close {
     color: @cc-light-cool-accent-low;
   }
   &:hover {
-    background-color: @cc-light-cool-accent-mid;
+    background-color: desaturate(@cc-light-cool-accent-mid, 30%);
+    border-color: darken(desaturate(@cc-light-cool-accent-mid, 30%), 5%);
     .close {
-      color: @cc-light-cool-accent-hi;
+      color: desaturate(@cc-light-cool-accent-hi, 20%);
     }
   }
 }
 
 .label-datanode-external {
   color: @cc-neutral-low;
+  border-color:darken(@cc-bg, 20%);
   background-color: darken(@cc-bg, 5%);
   .close {
     color: @cc-neutral-low;
@@ -87,4 +93,25 @@
 .datanode-tree-bubble-external.on {
   background-color: @cc-neutral-mid;
   color: #ffffff;
+}
+
+.cke_widget_wrapper:hover > .label-datanode {
+  outline: none !important;
+  .box-shadow(0px 0px 8px @cc-brand-mid);
+}
+
+.cke_widget_focused .label-datanode {
+  outline: none !important;
+  .box-shadow(0px 0px 8px @cc-brand-low);
+  border-color: lighten(@cc-brand-low, 30%);
+}
+
+.cke_widget_drag_handler_container {
+  top: -2px !important;
+  background: transparent !important;
+}
+
+.cke_widget_drag_handler {
+  width: 100% !important;
+  height: 100% !important;
 }

@@ -53,19 +53,18 @@ define([
                 },
                 init: function() {
                     // TODO: PR to ckeditor to make changing drag ui supported
-                    var width = $(this.element.$).width();
+                    // Leave 15px on the left side so that users can actually
+                    // interact with the close button
+                    var width = $(this.element.$).innerWidth() - 15;
+                    var height = $(this.element.$).outerHeight() + 4;
                     this.dragHandlerContainer.setStyles({
-                        'width': width + 'px',
-                        'background': '',
+                        width: width + 'px',
+                        height: height + 'px',
+                        left: '0px'
                     });
-                    this.dragHandlerContainer.getChildren().getItem(0).setStyles({
-                        'width': width + 'px',
-                        'margin-top': '15px',
-                        'height': '25px',
-                    });
-                },
+                }
             });
-        },
+        }
     });
 
     /*

@@ -216,11 +216,17 @@ define([
             headHeight = pane.find(".fd-head-external-sources").outerHeight(true);
         if (pane.height() > headHeight) {
             pane.css("height", headHeight + "px");
+            pane.find('.fd-head-external-sources .fd-head-max-indicator i')
+                .removeClass('icon-circle-arrow-down')
+                .addClass('icon-circle-arrow-up');
             $(window).resize();
         } else {
             var tree = vellum.$f.find(".fd-tree"),
                 height = panelHeight || tree.height() * 0.45;
             pane.css("height", height + "px");
+            pane.find('.fd-head-external-sources .fd-head-max-indicator i')
+                .removeClass('icon-circle-arrow-up')
+                .addClass('icon-circle-arrow-down');
             $(window).resize();
             fn.initDataBrowser(vellum);
         }

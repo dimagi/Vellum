@@ -257,16 +257,24 @@ define([
                 var $this = $(this),
                     datavalue = $this.attr('data-value'),
                     match =  datavalue.match('output value="(.*)"'),
-                    value = match ? match[1] : $this.attr('data-value');
-                $this.siblings('.cke_widget_drag_handler_container').children().popout({
-                    title: '',
-                    content: value,
-                    template: '<div contenteditable="false" class="popover">' +
-                        '<div class="arrow"></div>' +
+                    xpath = match ? match[1] : datavalue,
+                    displayId = $this.clone().children().remove().end().text(),
+                    labelMug, labelText;
+                if (/^\/data\//.test(xpath)) {
+                    labelMug = mug.form.getMugByPath(xpath);
+                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
+                } else {
+                    return;
+                }
+                $this.siblings('.cke_widget_drag_handler_container').children().stickyover({
+                    title: displayId + '<small>' + xpath + '</small>',
+                    html: true,
+                    content: '<p>' + labelText + '</p>',
+                    template: '<div contenteditable="false" class="popover fd-popover">' +
                         '<div class="popover-inner">' +
-                        '<div class="popover-content"><p></p></div></div></div>',
-                    placement: 'bottom',
-                    trigger: 'hover',
+                        '<h3 class="popover-title"></h3>' +
+                        '<div class="popover-content"><p></p></div>' +
+                        '</div></div>'
                 });
             });
         }
