@@ -235,11 +235,13 @@ define([
             if (container === null) {
                 return;
             }
-            var values = _.object(_.map(mug.form.getSetValues(), function (value) {
+            var isNested = mug.parentMug && mug.parentMug.isInRepeat(),
+                values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.event + " " + value.ref, value];
                 }));
             _.each(setvalueData, function (data) {
-                var value = values[data.event + " " + container + data.path + "/@" + data.key];
+                var event = isNested ? "jr-insert" : data.event,
+                    value = values[event + " " + container + data.path + "/@" + data.key];
                 if (value) {
                     mug.p.setvalues[data.key] = value;
                     if (data.key === "ids") {
@@ -362,10 +364,12 @@ define([
             mug.p.repeat_count = path + "/@count";
 
             // add/update <setvalue> elements
-            var setvalues = mug.p.setvalues,
+            var isNested = mug.parentMug && mug.parentMug.isInRepeat(),
+                setvalues = mug.p.setvalues,
                 setvaluesById = _.groupBy(mug.form.getSetValues(), "_id");
             _.each(setvalueData, function (data) {
-                var value = setvalues[data.key],
+                var event = isNested ? "jr-insert": data.event,
+                    value = setvalues[data.key],
                     setvalue = null;
                 if (value) {
                     setvalue = setvaluesById[value._id] || {};
@@ -376,7 +380,9 @@ define([
                 value.value = data.query.replace("{}", data.key === "ids" ? query : path);
                 if (!value.event) {
                     setvalues[data.key] = mug.form.addSetValue(
-                        data.event, value.ref, value.value);
+                        event, value.ref, value.value);
+                } else {
+                    value.event = event;
                 }
             });
         } else {
