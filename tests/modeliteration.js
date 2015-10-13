@@ -321,5 +321,21 @@ require([
                 idsQuery: "instance('products')/products/product/@id"
             });
         });
+
+        it("should use jr-insert event for nested model iteration setvalues", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            var nested = util.addQuestion.bind({prevId: "product/item"})("Repeat", "nested");
+            nested.p.dataSource = {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            };
+            var xml = call('createXML'),
+                $xml = $(xml),
+                ref = "setvalue[ref='/data/product/";
+            assert.equal($xml.find(ref + "@ids']").attr("event"), "xforms-ready",
+                   "wrong setvalue event for outer repeat: " + xml);
+            assert.equal($xml.find(ref + "item/nested/@ids']").attr("event"), "jr-insert",
+                   "wrong setvalue event for nested repeat: " + xml);
+        });
     });
 });
