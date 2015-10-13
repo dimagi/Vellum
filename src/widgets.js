@@ -264,7 +264,7 @@ define([
                     labelMug = mug.form.getMugByPath(xpath);
                     labelText = labelMug ? labelMug.p.labelItext.get() : "";
                 } else {
-                    labelText = "";
+                    return;
                 }
                 $this.siblings('.cke_widget_drag_handler_container').children().stickyover({
                     title: displayId + '<small>' + xpath + '</small>',
