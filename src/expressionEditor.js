@@ -79,18 +79,20 @@ define([
         };
 
         var setExpression = function(input, val) {
-            if (options.mug.supportsRichText()) {
-                input.ckeditor().editor.setData(
-                    richText.toRichText(val, options.mug.form, true)
-                );
-            } else {
-                input.val(val);
-            }
-        };
+                if (options.mug.supportsRichText()) {
+                    editor = input.ckeditor().editor;
+                    editor.setData(
+                        richText.toRichText(val, options.mug.form, true)
+                    );
+                } else {
+                    input.val(val);
+                }
+            },
+            editor;
 
         var getExpression = function(input) {
             if (options.mug.supportsRichText()) {
-                return richText.fromRichText(input.ckeditor().editor.getData());
+                return richText.fromRichText(editor.getData());
             } else {
                 return input.val();
             }

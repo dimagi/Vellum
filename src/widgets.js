@@ -248,7 +248,7 @@ define([
     };
 
     var richText = function(mug, options) {
-        var widget = normal(mug, options), editor;
+        var widget = normal(mug, options);
 
         // Each bubble in rich text has a popover on hover that will display
         // the path
@@ -300,9 +300,9 @@ define([
             widget.input.addClass('fd-textarea');
         }
 
-        widget.input.ckeditor().promise.then(function() {
-            editor = widget.input.ckeditor().editor;
-
+        var ckobj = widget.input.ckeditor(),
+            editor = ckobj.editor;
+        ckobj.promise.then(function() {
             mug.on('teardown-mug-properties', function() {
                 if (editor) {
                     editor.destroy();
@@ -342,14 +342,14 @@ define([
         };
 
         widget.setValue = function (val) {
-            widget.input.ckeditor().promise.then(function() {
+            ckobj.promise.then(function() {
                 editor.setData(richTextUtils.toRichText(val, mug.form, true));
             });
         };
 
         widget.getValue = function () {
             var val = "";
-            widget.input.ckeditor().promise.then(function() {
+            ckobj.promise.then(function() {
                 val = richTextUtils.fromRichText(editor.getData());
             });
             return val.replace('&nbsp;', ' ').trim();
