@@ -744,7 +744,11 @@ define([
             if ((!mug && _this.data.core.form.useRichText !== false &&
                  this.opts().features.rich_text) ||
                  (mug && mug.supportsRichText())) {
-                target.ckeditor().editor.insertHtml(richText.toRichText(path, _this.data.core.form, true) + " ");
+                target.ckeditor().editor.insertHtml(richText.toRichText(
+                    path,
+                    _this.data.core.form,
+                    {withClose: true, isExpression: true}
+                ) + " ");
             } else {
                 target.val(target.val() + path).change();
             }

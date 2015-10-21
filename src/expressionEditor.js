@@ -81,9 +81,11 @@ define([
         var setExpression = function(input, val) {
                 if (options.mug.supportsRichText()) {
                     editor = input.ckeditor().editor;
-                    editor.setData(
-                        richText.toRichText(val, options.mug.form, true)
-                    );
+                    editor.setData(richText.toRichText(
+                        val,
+                        options.mug.form,
+                        {withClose: true, isExpression: true}
+                    ));
                 } else {
                     input.val(val);
                 }

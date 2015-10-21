@@ -93,15 +93,16 @@ define([
         describe("simple conversions", function() {
             // path, display value, icon
             var simpleConversions = [
-                ['/data/text', 'text', icon('fcc-fd-text'), true],
-                ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
-                ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", 'edd', externalIcon(), false]
-            ];
+                    ['/data/text', 'text', icon('fcc-fd-text'), true],
+                    ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
+                    ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", 'edd', externalIcon(), false]
+                ],
+                opts = {isExpression: true};
 
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richText.toRichText(val[0], formShim)).html(),
+                        wrapWithDiv(richText.toRichText(val[0], formShim, opts)).html(),
                         wrapWithDiv(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
@@ -149,27 +150,28 @@ define([
 
         describe("equation conversions", function() {
             var equations = [
-                [
-                    "/data/text = /data/othertext",
-                    wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " = " +
-                    wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
+                    [
+                        "/data/text = /data/othertext",
+                        wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " = " +
+                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
+                    ],
+                    [
+                        "/data/text <= /data/othertext",
+                        wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " &lt;= " +
+                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
+                    ],
+                    [
+                        "instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065 = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065",
+                        wrapWithDiv(makeBubble("instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065", 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
+                        wrapWithDiv(makeBubble("instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065", 'f_1065', icon('fcc-fd-external-case'))).html()
+                    ],
                 ],
-                [
-                    "/data/text <= /data/othertext",
-                    wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " &lt;= " +
-                    wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
-                ],
-                [
-                    "instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065 = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065",
-                    wrapWithDiv(makeBubble("instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065", 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
-                    wrapWithDiv(makeBubble("instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065", 'f_1065', icon('fcc-fd-external-case'))).html()
-                ],
-            ];
+                opts = {isExpression: true};
 
             _.each(equations, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(val[0], formShim),
+                        richText.toRichText(val[0], formShim, opts),
                         val[1]
                     );
                 });
@@ -191,14 +193,15 @@ define([
 
         describe("doesn't convert", function() {
             var nonConversions = [
-                "instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd[@other = 'blah']",
-                "/data/group[@prop = 'something']",
-                "instance('casedb')/cases/case[@case_id = /data/blah]",
-            ];
+                    "instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd[@other = 'blah']",
+                    "/data/group[@prop = 'something']",
+                    "instance('casedb')/cases/case[@case_id = /data/blah]",
+                ],
+                opts = {isExpression: true};
 
             _.each(nonConversions, function(val) {
                 it("from text to html: " + val, function() {
-                    assert.strictEqual(val, richText.toRichText(val, formShim));
+                    assert.strictEqual(val, richText.toRichText(val, formShim, opts));
                 });
             });
         });

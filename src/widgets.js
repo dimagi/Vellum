@@ -341,9 +341,10 @@ define([
             return widget.input;
         };
 
+        var opts = {withClose: true, isExpression: options.singleLine};
         widget.setValue = function (val) {
             ckobj.promise.then(function() {
-                editor.setData(richTextUtils.toRichText(val, mug.form, true));
+                editor.setData(richTextUtils.toRichText(val, mug.form, opts));
             });
         };
 

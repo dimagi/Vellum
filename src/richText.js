@@ -203,7 +203,6 @@ define([
             }
         }
 
-
         // only support absolute path right now
         if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
             return value.replace('<', '&lt;').replace('>', '&gt;');
@@ -230,11 +229,11 @@ define([
      *
      * @param withClose - Create bubbles with close buttons if true.
      */
-    function bubbleExpression(text, exprText, form, withClose) {
+    function bubbleExpression(text, form, withClose) {
         var el = $('<div>').html(text);
         var EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
             ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
-            expr = new logic.LogicExpression(exprText),
+            expr = new logic.LogicExpression(text),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(expr.getTopLevelPaths())
                 .filter(function(path) {
@@ -288,16 +287,19 @@ define([
      *
      * This does not add any <p> or <br> tags, only newlines as used in xml
      *
+     * @param options - An object containing options for the conversion:
+     *      - withClose - Create bubbles with close buttons if true.
+     *      - isExpression - Convert all top-level path elements to bubbles
+     *          if true; otherwise convert <output ... /> elements to bubbles.
      * @returns - html string to be displayed in editor
      */
-    function toRichText(val, form, withClose) {
-        if (!val) {return "";}
-        var text;
+    function toRichText(text, form, options) {
+        if (!text) {return "";}
+        options = options || {};
         // HACK this is vulnerable to HTML injection. will need to change
-        val = val.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
-        text = bubbleOutputs(val, form, withClose);
-        text = bubbleExpression(text, val, form, withClose);
-        return text;
+        text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
+        var bubble = options.isExpression ? bubbleExpression : bubbleOutputs;
+        return bubble(text, form, options.withClose);
     }
 
     /**
@@ -313,12 +315,11 @@ define([
      *     <span /> (info)
      *   </p>
      *
-     * @param val - HTML string that may or may not have bubble
-     *
+     * @param html - HTML string that may or may not have bubble
      * @returns - string with bubbles deconstructed into plain text
      */
-    function fromRichText(val) {
-        return unwrapBubbles(fromHtml(val));
+    function fromRichText(html) {
+        return unwrapBubbles(fromHtml(html));
     }
 
     return {
