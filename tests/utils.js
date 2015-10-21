@@ -5,8 +5,9 @@ define([
     'jsdiff',
     'underscore',
     'jquery',
-    'vellum/tsv',
     'vellum/copy-paste',
+    'vellum/tsv',
+    'vellum/widgets',
     'jquery.jstree',
     'jquery.vellum'
 ], function (
@@ -16,8 +17,9 @@ define([
     jsdiff,
     _,
     $,
+    copypaste,
     tsv,
-    copypaste
+    widgets
 ) {
     var assert = chai.assert,
         savedForm = null,
@@ -138,6 +140,12 @@ define([
 
     function getInput(property) {
         return call("getCurrentMugInput", property);
+    }
+
+    function getWidget(name) {
+        var vellum = $("#vellum").vellum("get"),
+            target = $("[name=" + name + "]");
+        return widgets.util.getWidget(target, vellum);
     }
 
     function assertInputCount(nameOrInputs, num, name) {
@@ -354,6 +362,7 @@ define([
         },
         getMug: getMug,
         getInput: getInput,
+        getWidget: getWidget,
         assertEqual: assertEqual,
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,
