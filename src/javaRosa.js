@@ -1477,6 +1477,10 @@ define([
                     }
                 }
             });
+
+            if (form) {
+                form.vellum.refreshCurrentMug();
+            }
         },
         // parse Itext Block and populate itext model
         loadXML: function (xmlString) {
