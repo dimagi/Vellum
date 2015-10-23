@@ -34,8 +34,7 @@ define([
         return _.chain(form.getMugList())
                 .map(function(mug) {
                     // probably better to use text-overflow: ellipsis
-                    var itext = mug.p.labelItext,
-                        defaultLabel = mug.form.vellum.getMugDisplayName(mug),
+                    var defaultLabel = mug.form.vellum.getMugDisplayName(mug),
                         displayLabel = defaultLabel;
 
                     if (displayLabel.length > 25) {
