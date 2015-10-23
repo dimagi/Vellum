@@ -88,14 +88,19 @@ define([
     }
 
     function wrapWithDiv(el) { return $('<div>').append(el); }
+    function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
 
     describe("Rich text utilities", function() {
         describe("simple conversions", function() {
             // path, display value, icon
             var simpleConversions = [
                     ['/data/text', 'text', icon('fcc-fd-text'), true],
-                    ["instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]", 'case', externalIcon(), false],
-                    ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", 'edd', externalIcon(), false]
+                    ["instance('casedb')/cases/case" +
+                     "[@case_id = instance('commcaresession')/session/data/case_id]",
+                     'case', externalIcon(), false],
+                    ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case" +
+                     "[@case_id = instance('commcaresession')/session/data/case_id]" +
+                     "/index/parent]/edd", 'edd', externalIcon(), false]
                 ],
                 opts = {isExpression: true};
 
@@ -103,14 +108,14 @@ define([
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
                         wrapWithDiv(richText.toRichText(val[0], formShim, opts)).html(),
-                        wrapWithDiv(makeBubble(val[0], val[1], val[2], val[3])).html()
+                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
                         wrapWithDiv(richText.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
-                        wrapWithDiv(makeOutputValue(val[0], val[1], val[2], val[3])).html()
+                        wrapWithDivP(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
             });
@@ -118,24 +123,24 @@ define([
 
         describe("date conversions", function() {
             var dates = [
-                {
-                    xmlValue: "format-date(date(/data/date), '%d/%n/%y')",
-                    valueInBubble: '/data/date',
-                    bubbleDispValue: 'date',
-                    icon: icon('icon-calendar'),
-                    internalRef: true,
-                    extraAttrs: {
-                        'data-date-format': '%d/%n/%y',
-                    }
-                },
-            ];
+                    {
+                        xmlValue: "format-date(date(/data/date), '%d/%n/%y')",
+                        valueInBubble: '/data/date',
+                        bubbleDispValue: 'date',
+                        icon: icon('icon-calendar'),
+                        internalRef: true,
+                        extraAttrs: {
+                            'data-date-format': '%d/%n/%y',
+                        }
+                    },
+                ];
 
             _.each(dates, function(val) {
                 it("from text to html with output value: " + val.xmlValue, function() {
                     var real = richText.toRichText(outputValueTemplateFn(val.xmlValue), formShim),
                         test = makeOutputValue(val.valueInBubble, val.bubbleDispValue,
                                               val.icon, val.internalRef).attr(val.extraAttrs);
-                    assert(wrapWithDiv(real)[0].isEqualNode(wrapWithDiv(test)[0]),
+                    assert(wrapWithDiv(real)[0].isEqualNode(wrapWithDivP(test)[0]),
                           '\n' + real + '\n' + wrapWithDiv(test).html());
                 });
             });
@@ -143,27 +148,31 @@ define([
             it("bubble a drag+drop reference", function() {
                 var fmt = "%d/%n/%y",
                     tag = javaRosa.getOutputRef("/data/text", fmt),
-                    bubble = richText.toRichText(tag, formShim, false);
-                assert.strictEqual($(bubble).data('date-format'), fmt);
+                    bubble = richText.toRichText(tag, formShim);
+                assert.strictEqual($(bubble).find('span').data('date-format'), fmt);
             });
         });
 
         describe("equation conversions", function() {
-            var equations = [
+            var f_1065 = "instance('casedb')/cases/case[" +
+                            "@case_id = instance('commcaresession')/session/data/case_id" +
+                         "]/f_1065",
+                ico = icon('fcc-fd-text'),
+                equations = [
                     [
                         "/data/text = /data/othertext",
-                        wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " = " +
-                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
+                        wrapWithDiv(makeBubble('/data/text', 'text', ico, true)).html() + " = " +
+                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', ico, true)).html()
                     ],
                     [
                         "/data/text <= /data/othertext",
-                        wrapWithDiv(makeBubble('/data/text', 'text', icon('fcc-fd-text'), true)).html() + " &lt;= " +
-                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', icon('fcc-fd-text'), true)).html()
+                        wrapWithDiv(makeBubble('/data/text', 'text', ico, true)).html() + " &lt;= " +
+                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', ico, true)).html()
                     ],
                     [
-                        "instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065 = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065",
-                        wrapWithDiv(makeBubble("instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065", 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
-                        wrapWithDiv(makeBubble("instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/f_1065", 'f_1065', icon('fcc-fd-external-case'))).html()
+                        f_1065 + " = " + f_1065,
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html()
                     ],
                 ],
                 opts = {isExpression: true};
@@ -172,7 +181,7 @@ define([
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
                         richText.toRichText(val[0], formShim, opts),
-                        val[1]
+                        "<p>" + val[1] + "</p>"
                     );
                 });
             });
@@ -180,20 +189,43 @@ define([
 
         describe("text conversions", function() {
             var text = [
-                ["blah\nblah\n", "<p>blah<br />blah</p>"],
+                ["blah\nblah\n", "<p>blah</p><p>blah</p>"],
+                [
+                    "list\n* item\n* item\n",
+                    "<p>list</p><p>* item</p><p>* item</p>"
+                ],
+                [
+                    "list\n\n* item\n* item\n",
+                    "<p>list</p><p></p><p>* item</p><p>* item</p>"
+                ],
+                [
+                    "list\n\n\n* item\n* item\n",
+                    "<p>list</p><p></p><p></p><p>* item</p><p>* item</p>"
+                ],
             ];
 
             _.each(text, function(val){
                 it("from html to text: " + val[1], function() {
+                    assert.strictEqual(richText.fromRichText(val[1]), val[0]);
+                });
+            });
+
+            _.each(text, function(val){
+                it("(text -> html -> text): " + JSON.stringify(val[0]), function() {
                     assert.strictEqual(
-                        val[0], richText.fromRichText(val[1]));
+                        richText.fromRichText(richText.toRichText(val[0])),
+                        val[0]
+                    );
                 });
             });
         });
 
         describe("doesn't convert", function() {
             var nonConversions = [
-                    "instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd[@other = 'blah']",
+                    "instance('casedb')/cases/case[" +
+                        "@case_id = instance('casedb')/cases/case[" +
+                            "@case_id = instance('commcaresession')/session/data/case_id" +
+                        "]/index/parent]/edd[@other = 'blah']",
                     "/data/group[@prop = 'something']",
                     "instance('casedb')/cases/case[@case_id = /data/blah]",
                 ],
@@ -201,7 +233,30 @@ define([
 
             _.each(nonConversions, function(val) {
                 it("from text to html: " + val, function() {
-                    assert.strictEqual(val, richText.toRichText(val, formShim, opts));
+                    assert.strictEqual(
+                        richText.toRichText(val, formShim, opts),
+                        "<p>" + val + "</p>"
+                    );
+                });
+            });
+        });
+
+        describe("convert value with output and escaped HTML", function () {
+            var items = [
+                    ['<h1><output value="/data/text" /></h1>',
+                     '&lt;h1&gt;{text}&lt;/h1&gt;'],
+                    ['<output value="/data/text" /> <tag /> <output value="/data/othertext" />',
+                     '{text} &lt;tag /&gt; {othertext}'],
+                ],
+                ico = icon('fcc-fd-text');
+
+            _.each(items, function (item) {
+                it("to text: " + item[0], function () {
+                    var result = richText.bubbleOutputs(item[0], formShim, false, true),
+                        expect = item[1].replace(/{(.*?)}/g, function (m, name) {
+                            return makeOutputValue("/data/" + name, name, ico, true)[0].outerHTML;
+                        });
+                    assert.equal(result, expect);
                 });
             });
         });

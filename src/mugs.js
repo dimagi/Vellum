@@ -356,7 +356,8 @@ define([
                 .replace("$2", property)
                 .replace("$3", String(vis)));
         },
-        getDisplayName: function (lang) {
+        getDisplayName: function (lang, escape) {
+            if (escape === undefined) { escape = true; }
             var itextItem = this.p.labelItext,
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
@@ -387,7 +388,7 @@ define([
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
-                return $('<div>').text(disp).html();
+                return escape ? $('<div>').text(disp).html() : disp;
             }
 
             return nodeID;

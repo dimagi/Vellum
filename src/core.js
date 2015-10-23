@@ -451,10 +451,13 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage ||
-            this.data.javaRosa.Itext.getDefaultLanguage());
+        var lang = this.data.core.currentItextDisplayLanguage ||
+                   this.data.javaRosa.Itext.getDefaultLanguage(),
+            val = mug.getDisplayName(lang, false);
         if (mug.supportsRichText()) {
-            val = richText.toRichText(val, this.data.core.form);
+            val = richText.bubbleOutputs(val, this.data.core.form, false, true);
+        } else {
+            val = $('<div />').text(val).html();
         }
         return val;
     };

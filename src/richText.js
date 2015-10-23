@@ -26,12 +26,16 @@ define([
     'underscore',
     'jquery',
     'vellum/logic',
+    'vellum/util',
+    'vellum/xml',
     'xpathmodels',
     'ckeditor'
 ], function(
     _,
     $,
     logic,
+    util,
+    xml,
     xpathmodels,
     CKEDITOR
 ){
@@ -215,13 +219,32 @@ define([
      * Replace <output> tags with bubble markup
      *
      * @param withClose - Create bubbles with close buttons if true.
+     * @param escape - If true, escape HTML except for bubble markup.
      */
-    function bubbleOutputs(text, form, withClose) {
-        var el = $('<div>').html(text);
-        el.find('output').replaceWith(function() {
-            return replacePathWithBubble(form, this.outerHTML, withClose);
-        });
-        return el.html();
+    function bubbleOutputs(text, form, withClose, escape) {
+        var el = $('<div>').html(text),
+            places = {},
+            replacer, result;
+        if (escape) {
+            replacer = function () {
+                var id = util.get_guid();
+                places[id] = replacePathWithBubble(form, this.outerHTML, withClose);
+                return "{" + id + "}";
+            };
+        } else {
+            replacer = function() {
+                return replacePathWithBubble(form, this.outerHTML, withClose);
+            };
+        }
+        el.find('output').replaceWith(replacer);
+        result = el.html();
+        if (escape) {
+            result = $('<div />').text(xml.normalize(result)).html();
+            result = result.replace(/{(.+?)}/g, function (match, id) {
+                return places[id][0].outerHTML;
+            });
+        }
+        return result;
     }
 
     /**
@@ -270,12 +293,24 @@ define([
     }
 
     /**
+     * Convert plain text to HTML to be edited in CKEditor
+     *
+     * Replace line breaks with <p> tags and &nbsp; with spaces.
+     */
+    function toHtml(text) {
+        text = text.replace(/\n$/, "")
+                   .replace(/\n/g, "</p><p>");
+        return "<p>" + text + "</p>";
+    }
+
+    /**
      * Convert CKEditor HTML to plain text
      *
      * Replace <p> tags with newlines.
      */
     function fromHtml(html) {
-        return html.replace(/<p>/ig,"")
+        return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
+                   .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
                    // maybe not necessary? ckeditor uses p tags for newlines
                    .replace(/<br ?\/?>/ig,"\n");
@@ -284,8 +319,6 @@ define([
     /**
      * Takes a value from xml and replaces xpaths with bubbles to display in the
      * editor
-     *
-     * This does not add any <p> or <br> tags, only newlines as used in xml
      *
      * @param options - An object containing options for the conversion:
      *      - withClose - Create bubbles with close buttons if true.
@@ -299,7 +332,7 @@ define([
         // HACK this is vulnerable to HTML injection. will need to change
         text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
         var bubble = options.isExpression ? bubbleExpression : bubbleOutputs;
-        return bubble(text, form, options.withClose);
+        return toHtml(bubble(text, form, options.withClose));
     }
 
     /**
@@ -323,6 +356,7 @@ define([
     }
 
     return {
+        bubbleOutputs: bubbleOutputs,
         fromRichText: fromRichText,
         toRichText: toRichText,
     };

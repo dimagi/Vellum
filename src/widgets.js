@@ -348,10 +348,13 @@ define([
             });
         };
 
-        widget.getValue = function () {
+        widget.getValue = function (callback) {
             var val = "";
             ckobj.promise.then(function() {
                 val = richTextUtils.fromRichText(editor.getData());
+                if (callback) {
+                    callback(val);
+                }
             });
             return val.replace('&nbsp;', ' ').trim();
         };
