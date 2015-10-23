@@ -213,6 +213,76 @@ define([
     }
 
     /**
+     * Replace <output> tags with bubble markup
+     *
+     * @param withClose - Create bubbles with close buttons if true.
+     */
+    function bubbleOutputs(text, form, withClose) {
+        var el = $('<div>').html(text);
+        el.find('output').replaceWith(function() {
+            return replacePathWithBubble(form, this.outerHTML, withClose);
+        });
+        return el.html();
+    }
+
+    /**
+     * Wrap top-level expression nodes with bubble markup
+     *
+     * @param withClose - Create bubbles with close buttons if true.
+     */
+    function bubbleExpression(text, exprText, form, withClose) {
+        var el = $('<div>').html(text);
+        var EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
+            ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
+            expr = new logic.LogicExpression(exprText),
+            // Uses top level paths, because filters should not be made to bubbles
+            paths = _.chain(expr.getTopLevelPaths())
+                .filter(function(path) {
+                    var context = path.initial_context,
+                        numFilters = _.reduce(path.steps, function(memo, step) {
+                           return memo + step.predicates.length;
+                        }, 0),
+                        hasSession = /commcaresession/.test(path.toXPath());
+
+                    if (context === EXPR && (numFilters > 1 || !hasSession) ||
+                        context === ROOT && numFilters > 0) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .map(function(path) { return path.toXPath(); })
+                .uniq().value();
+
+        _.each(paths, function(path) {
+            var newPath = replacePathWithBubble(form, path, withClose);
+            el.html(el.html().replace(
+                new RegExp(RegExp.escape(path).replace(/ /g, '\\s*'), 'mg'),
+                $('<div>').append(newPath).html()
+            ));
+        });
+        return el.html();
+    }
+
+    function unwrapBubbles(text) {
+        var el = $('<div>').html(text);
+        el.find('.label-datanode').children().unwrap();
+        return el.text();
+    }
+
+    /**
+     * Convert CKEditor HTML to plain text
+     *
+     * Replace <p> tags with newlines.
+     */
+    function fromHtml(html) {
+        return html.replace(/<p>/ig,"")
+                   .replace(/<\/p>/ig, "\n")
+                   // maybe not necessary? ckeditor uses p tags for newlines
+                   .replace(/<br ?\/?>/ig,"\n");
+    }
+
+    /**
      * Takes a value from xml and replaces xpaths with bubbles to display in the
      * editor
      *
@@ -222,46 +292,19 @@ define([
      */
     function toRichText(val, form, withClose) {
         if (!val) {return "";}
+        var text;
+        // HACK this is vulnerable to HTML injection. will need to change
         val = val.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
-        var el = $('<div>').html(val);
-        el.find('output').replaceWith(function() {
-            return replacePathWithBubble(form, this.outerHTML, withClose);
-        });
-        var EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
-            ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
-            l = new logic.LogicExpression(val),
-            // Uses top level paths, because filters should not be made to bubbles
-            paths = _.chain(l.getTopLevelPaths())
-                     .filter(function(path) {
-                         var context = path.initial_context,
-                             numFilters = _.reduce(path.steps, function(memo, step) {
-                                return memo + step.predicates.length;
-                             }, 0),
-                             hasSession = /commcaresession/.test(path.toXPath());
-
-                         if (context === EXPR && (numFilters > 1 || !hasSession) ||
-                             context === ROOT && numFilters > 0) {
-                             return false;
-                         }
-
-                         return true;
-                     })
-                     .map(function(path) { return path.toXPath(); })
-                     .uniq().value();
-
-        _.each(paths, function(path) {
-            var newPath = replacePathWithBubble(form, path, withClose);
-            el.html(el.html().replace(new RegExp(RegExp.escape(path).replace(/ /g, '\\s*'), 'mg'),
-                                      $('<div>').append(newPath).html()));
-        });
-        return el.html();
+        text = bubbleOutputs(val, form, withClose);
+        text = bubbleExpression(text, val, form, withClose);
+        return text;
     }
 
     /**
      * Deconstructs html strings that have bubbles in them
      * This should preserve whitespace as it appears in the editor
      *
-     * Dependent on CKEditor, which uses p, br and &nbsp; to format content
+     * Dependent on CKEditor, which uses p and &nbsp; to format content
      *
      * Expects the html to only be at most two levels deep (considering a
      * bubble span as one level):
@@ -275,15 +318,7 @@ define([
      * @returns - string with bubbles deconstructed into plain text
      */
     function fromRichText(val) {
-        var el = $('<div>');
-        val = val.replace(/<p>/ig,"")
-                 .replace(/<\/p>/ig, "\n")
-                 .replace(/(<br ?\/?>)/ig,"\n");
-
-        el = el.html(val);
-        el.find('.label-datanode').children().unwrap();
-
-        return el.text();
+        return unwrapBubbles(fromHtml(val));
     }
 
     return {
