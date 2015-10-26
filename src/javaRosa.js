@@ -1478,8 +1478,10 @@ define([
                 }
             });
 
-            if (form) {
-                form.vellum.refreshCurrentMug();
+            if (form && form.vellum.getCurrentlySelectedMug()) {
+                form.vellum.getCurrentlySelectedMug().fire({
+                    type: 'change-display-language',
+                });
             }
         },
         // parse Itext Block and populate itext model
