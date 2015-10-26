@@ -58,6 +58,8 @@ require.config({
     bundles: %(bundles)s
 });
 
+CKEDITOR_BASEPATH = "_build/lib/ckeditor/"
+
 // stubs (stubModules build option puts them in exclude.js, which is removed)
 define('css/css', {});
 define('less/less', {});
