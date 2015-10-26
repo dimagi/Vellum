@@ -189,6 +189,7 @@ define([
         }, null, "teardown-mug-properties");
 
         mug.on("change-display-language", function() {
+            $input.atwho('destroy');
             $input.atwho(_atWhoOptions());
         });
     };
