@@ -5,9 +5,7 @@ define([
     'jquery',
     'vellum/atwho',
     'vellum/util',
-    'vellum/richText',
-    'ckeditor',
-    'ckeditor-jquery'
+    'vellum/richText'
 ], function (
     widget_control_keyvalue,
     widget_control_message,
@@ -15,14 +13,8 @@ define([
     $,
     atwho,
     util,
-    richTextUtils,
-    CKEDITOR
+    richTextUtils
 ) {
-    CKEDITOR.config.allowedContent = true;
-    CKEDITOR.config.customConfig = '';
-    CKEDITOR.config.title = false;
-    CKEDITOR.config.extraPlugins = 'bubbles';
-
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
@@ -293,40 +285,33 @@ define([
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
-            .addClass('input-block-level jstree-drop');
-        if (options.singleLine) {
-            widget.input.addClass('fd-input');
-        } else {
-            widget.input.addClass('fd-textarea');
-        }
+            .addClass('input-block-level jstree-drop')
+            .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
-        var ckobj = widget.input.ckeditor(),
-            editor = ckobj.editor;
-        ckobj.promise.then(function() {
-            mug.on('teardown-mug-properties', function() {
-                if (editor) {
-                    editor.destroy();
-                }
-            }, null, "teardown-mug-properties");
+        var opts = {withClose: true, isExpression: options.widget === xPath},
+            editor = richTextUtils.editor(widget.input, mug.form, opts);
 
-            editor.on('change', function() {
-                widget.handleChange();
-                widget.input.find('.label-datanode').each(function(k, v) {
-                    var value = $(v);
-                    // ckeditor likes to move title attribute to data-original-title
-                    value.attr('title', value.attr('data-original-title'));
-                });
+        mug.on('teardown-mug-properties', function() {
+            editor.destroy();
+        }, null, "teardown-mug-properties");
+
+        editor.on('change', function() {
+            widget.handleChange();
+            widget.input.find('.label-datanode').each(function(k, v) {
+                var value = $(v);
+                // ckeditor likes to move title attribute to data-original-title
+                value.attr('title', value.attr('data-original-title'));
             });
+        });
 
-            editor.on('afterInsertHtml', function (e) {
-                addCloseButton(widget, widget.input);
-                addPopovers(widget.input);
-            });
+        editor.on('afterInsertHtml', function (e) {
+            addCloseButton(widget, widget.input);
+            addPopovers(widget.input);
+        });
 
-            editor.on('dataReady', function (e) {
-                addCloseButton(widget, widget.input);
-                addPopovers(widget.input);
-            });
+        editor.on('dataReady', function (e) {
+            addCloseButton(widget, widget.input);
+            addPopovers(widget.input);
         });
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
@@ -341,23 +326,8 @@ define([
             return widget.input;
         };
 
-        var opts = {withClose: true, isExpression: options.singleLine};
-        widget.setValue = function (val) {
-            ckobj.promise.then(function() {
-                editor.setData(richTextUtils.toRichText(val, mug.form, opts));
-            });
-        };
-
-        widget.getValue = function (callback) {
-            var val = "";
-            ckobj.promise.then(function() {
-                val = richTextUtils.fromRichText(editor.getData());
-                if (callback) {
-                    callback(val);
-                }
-            });
-            return val.replace('&nbsp;', ' ').trim();
-        };
+        widget.setValue = editor.setValue;
+        widget.getValue = editor.getValue;
 
         return widget;
     };
@@ -865,7 +835,6 @@ define([
         normal: normal,
         text: text,
         multilineText: multilineText,
-        richInput: richInput,
         richTextarea: richTextarea,
         identifier: identifier,
         droppableText: droppableText,

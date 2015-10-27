@@ -189,17 +189,17 @@ define([
 
         describe("text conversions", function() {
             var text = [
-                ["blah\nblah\n", "<p>blah</p><p>blah</p>"],
+                ["blah\nblah", "<p>blah</p><p>blah</p>"],
                 [
-                    "list\n* item\n* item\n",
+                    "list\n* item\n* item",
                     "<p>list</p><p>* item</p><p>* item</p>"
                 ],
                 [
-                    "list\n\n* item\n* item\n",
+                    "list\n\n* item\n* item",
                     "<p>list</p><p></p><p>* item</p><p>* item</p>"
                 ],
                 [
-                    "list\n\n\n* item\n* item\n",
+                    "list\n\n\n* item\n* item",
                     "<p>list</p><p></p><p></p><p>* item</p><p>* item</p>"
                 ],
             ];
@@ -258,6 +258,32 @@ define([
                         });
                     assert.equal(result, expect);
                 });
+            });
+        });
+    });
+
+    describe("The rich text editor", function () {
+        var el = $("<div id='cktestparent'><div id='cktest' contenteditable>test</div></div>");
+        before(function () {
+            $("body").append(el);
+        });
+        after(function () {
+            assert.equal($("#cktestparent").length, 1);
+            el.remove();
+            assert.equal($("#cktestparent").length, 0);
+        });
+
+        it("should be accessible via various jquery paths", function (done) {
+            var cktest = $("#cktest"),
+                v0 = richText.editor(cktest, formShim),
+                v1 = richText.editor(cktest);
+            assert.equal(v0, v1);
+            v0.setValue("test", function () {
+                assert.equal(v1.getValue(), "test");
+                var el = $("#cktestparent").children().first();
+                assert.equal(richText.editor(el), v0);
+                v0.destroy();
+                done();
             });
         });
     });

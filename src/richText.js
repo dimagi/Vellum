@@ -29,7 +29,8 @@ define([
     'vellum/util',
     'vellum/xml',
     'xpathmodels',
-    'ckeditor'
+    'ckeditor',
+    'ckeditor-jquery'
 ], function(
     _,
     $,
@@ -70,6 +71,81 @@ define([
             });
         }
     });
+
+    CKEDITOR.config.allowedContent = true;
+    CKEDITOR.config.customConfig = '';
+    CKEDITOR.config.title = false;
+    CKEDITOR.config.extraPlugins = 'bubbles';
+
+    /**
+     * Get or create a rich text editor for the given element
+     *
+     * Only the first argument is needed to get the editor once an
+     * editor has been created for a given jQuery object. Calling
+     * this function with a single argument is a good way to get an
+     * editor that you expect to already exist; an error will be thrown
+     * if the editor does not exist.
+     *
+     * @param input - editor jQuery HTML element.
+     * @param form - form object; used for creating bubbles.
+     * @param options - rich text bubble options.
+     */
+    var editor = function(input, form, options) {
+        var wrapper = input.data("ckwrapper");
+        if (wrapper) {
+            return wrapper;
+        }
+        if (arguments.length === 1) {
+            throw new Error("editor not initialized: " +
+                            $("<div>").append(input).html());
+        }
+        if (input.length !== 1) {
+            throw new Error("input should reference exactly one element, " +
+                            "got " + input.length);
+        }
+        options = options || {};
+        var editor = input.ckeditor().editor;
+        wrapper = {
+            getValue: function (callback) {
+                if (callback) {
+                    input.promise.then(function() {
+                        callback(fromRichText(editor.getData()));
+                    });
+                } else {
+                    return fromRichText(editor.getData());
+                }
+            },
+            setValue: function () {
+                var args = Array.prototype.slice.call(arguments);
+                args[0] = toRichText(args[0], form, options);
+                editor.setData.apply(editor, args);
+            },
+            insertExpression: function (value) {
+                var opts = {withClose: options.withClose, isExpression: true};
+                editor.insertHtml(toRichText(value, form, opts) + ' ');
+            },
+            insertOutput: function (value) {
+                var opts = {withClose: options.withClose, isExpression: false};
+                editor.insertHtml(toRichText(value, form, opts), 'text');
+            },
+            on: function () {
+                var args = Array.prototype.slice.call(arguments);
+                editor.on.apply(editor, args);
+            },
+            destroy: function () {
+                if (input !== null) {
+                    input.removeData("ckwrapper");
+                    input.promise.then(function () {
+                        editor.destroy();
+                        editor = null;
+                    });
+                    input = null;
+                }
+            },
+        };
+        input.data("ckwrapper", wrapper);
+        return wrapper;
+    };
 
     /*
      * formats specifies the serialization for different formats that can be
@@ -313,7 +389,9 @@ define([
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
                    // maybe not necessary? ckeditor uses p tags for newlines
-                   .replace(/<br ?\/?>/ig,"\n");
+                   .replace(/<br ?\/?>/ig,"\n")
+                   // always convert &nbsp; to space and trim whitespace
+                   .replace(/&nbsp;/ig, ' ').trim();
     }
 
     /**
@@ -357,6 +435,7 @@ define([
 
     return {
         bubbleOutputs: bubbleOutputs,
+        editor: editor,
         fromRichText: fromRichText,
         toRichText: toRichText,
     };

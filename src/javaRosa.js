@@ -1303,8 +1303,7 @@ define([
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
         if ((!mug && vellum.opts().features.rich_text) || (mug && mug.supportsRichText())) {
-            var opts = {withClose: true};
-            target.ckeditor().editor.insertHtml(richText.toRichText(output, form, opts), 'text');
+            richText.editor(target).insertOutput(output);
         } else {
             util.insertTextAtCursor(target, output, true);
         }

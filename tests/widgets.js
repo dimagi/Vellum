@@ -105,15 +105,15 @@ require([
                 ["id", "type", "labelItext:en-default"],
                 ["/text", "Text", "list\n\n* item\n* item\n"],
             ]);
-            var richItext = util.getWidget('itext-en-label');
             util.clickQuestion('text');
             // NOTE async assert because ckEditor setData is async.
             // Without this we get an empty string from getValue().
             // This probably means there are bugs elsewhere because
             // we depend on widget.getValue() returning the correct
             // result immediately after widget.setValue(x) is called.
+            var richItext = util.getWidget('itext-en-label');
             richItext.getValue(function (val) {
-                util.assertEqual(val, "list\n\n* item\n* item\n");
+                util.assertEqual(val, "list\n\n* item\n* item");
                 done();
             });
         });

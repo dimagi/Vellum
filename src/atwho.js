@@ -2,11 +2,13 @@ define([
     'underscore',
     'jquery',
     'fusejs',
+    'vellum/richText',
     'tpl!vellum/templates/atwho_display'
 ], function (
     _,
     $,
     fusejs,
+    richText,
     atwhoDisplay
 ) {
     var that = {};
@@ -130,7 +132,7 @@ define([
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();
-                $input.ckeditor().editor.insertHtml(content);
+                richText.editor($input).insertExpression(content);
                 if (!this.$inputor.is(':focus')) {
                     this.$inputor.focus();
                 }
