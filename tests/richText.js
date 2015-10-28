@@ -252,7 +252,7 @@ define([
 
             _.each(items, function (item) {
                 it("to text: " + item[0], function () {
-                    var result = richText.bubbleOutputs(item[0], formShim, false, true),
+                    var result = richText.bubbleOutputs(item[0], formShim, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
                             return makeOutputValue("/data/" + name, name, ico, true)[0].outerHTML;
                         });

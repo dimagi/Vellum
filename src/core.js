@@ -455,7 +455,7 @@ define([
                    this.data.javaRosa.Itext.getDefaultLanguage(),
             val = mug.getDisplayName(lang, false);
         if (mug.supportsRichText()) {
-            val = richText.bubbleOutputs(val, this.data.core.form, false, true);
+            val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
             val = $('<div />').text(val).html();
         }

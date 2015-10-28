@@ -271,24 +271,13 @@ define([
             });
         }
 
-        function addCloseButton(widget, input) {
-            input.find('.label-datanode').each(function () {
-                var _this = this;
-                $(this).find('.close').click(function() {
-                    _this.remove();
-                    widget.handleChange();
-                    return false;
-                });
-            });
-        }
-
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
             .addClass('input-block-level jstree-drop')
             .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
-        var opts = {withClose: true, isExpression: options.widget === xPath},
+        var opts = {isExpression: options.widget === xPath},
             editor = richTextUtils.editor(widget.input, mug.form, opts);
 
         mug.on('teardown-mug-properties', function() {
@@ -305,12 +294,10 @@ define([
         });
 
         editor.on('afterInsertHtml', function (e) {
-            addCloseButton(widget, widget.input);
             addPopovers(widget.input);
         });
 
         editor.on('dataReady', function (e) {
-            addCloseButton(widget, widget.input);
             addPopovers(widget.input);
         });
 
@@ -318,7 +305,6 @@ define([
             // gets rid of atwho wrapper
             // tod: find out why this is needed and move elsewhere
             $(this).find('.atwho-inserted').children().unwrap();
-            addCloseButton(widget, widget.input);
             addPopovers(widget.input);
         });
 

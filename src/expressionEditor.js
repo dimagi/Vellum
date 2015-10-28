@@ -69,7 +69,7 @@ define([
 
     function showXPathEditor($div, options) {
         var editorContent = $div,
-            richTextOptions = {withClose: true, isExpression: true},
+            richTextOptions = {isExpression: true},
             form = options.mug.form;
         options = _.defaults(options, {
             leftPlaceholder: "Hint: drag a question here.",

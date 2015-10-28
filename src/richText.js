@@ -47,7 +47,7 @@ define([
                 template:
                     '<span class="label label-datanode label-datanode-internal">' +
                       '<i class="icon-question-sign">&nbsp;</i>' +
-                      'test widget' +
+                      'example widget, not used' +
                     '</span>',
                 upcast: function ( element ) {
                     return element.name === 'span' && element.hasClass('label-datanode');
@@ -66,6 +66,24 @@ define([
                         width: width + 'px',
                         height: height + 'px',
                         left: '0px'
+                    });
+
+                    // Add close button
+                    var that = this,
+                        buttons = this.element.getElementsByTag("button"),
+                        button;
+                    if (buttons.count()) {
+                        // sometimes the it's in the dom (from previous init??)
+                        button = buttons.getItem(0);
+                    } else {
+                        button = CKEDITOR.dom.element.createFromHtml(
+                                    "<button class='close'>&times;</button>");
+                        this.element.append(button);
+                    }
+                    button.on("click", function () {
+                        that.editor.widgets.del(that);
+                        that.editor.fire('saveSnapshot');
+                        return false;
                     });
                 }
             });
@@ -128,11 +146,11 @@ define([
                 });
             },
             insertExpression: function (value) {
-                var opts = {withClose: options.withClose, isExpression: true};
+                var opts = {isExpression: true};
                 editor.insertHtml(toRichText(value, form, opts) + ' ');
             },
             insertOutput: function (value) {
-                var opts = {withClose: options.withClose, isExpression: false};
+                var opts = {isExpression: false};
                 editor.insertHtml(toRichText(value, form, opts), 'text');
             },
             on: function () {
@@ -218,14 +236,12 @@ define([
     /**
      * Make a xpath bubble
      *
-     * @param withClose - boolean include the close button
-     *
      * @param templateFn - function(xpath) returns what the bubble should be
      *                     transcribed to in XML
      *
      * @returns jquery object of the bubble
      */
-    function makeBubble(form, xpath, withClose, extraAttrs) {
+    function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
             if (/instance\('casedb'\)/.test(xpath)) {
                 return {
@@ -249,17 +265,13 @@ define([
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
             dispValue = getBubbleDisplayValue(xpath),
-            icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
-            bubble = $('<span>').addClass('label label-datanode ' + bubbleClasses)
-                .attr({
-                    'data-value': xpath,
-                }).attr(extraAttrs).append(icon).append(dispValue);
-
-        if (withClose) {
-            bubble.append($("<button>").addClass('close').html("&times;"));
-        }
-
-        return bubble;
+            icon = $('<i>').addClass(iconClasses).html('&nbsp;');
+        return $('<span>')
+            .addClass('label label-datanode ' + bubbleClasses)
+            .attr({'data-value': xpath})
+            .attr(extraAttrs)
+            .append(icon)
+            .append(dispValue);
     }
 
     /**
@@ -267,7 +279,7 @@ define([
      *
      * @returns - jquery object of xpath bubble
      */
-    function replacePathWithBubble(form, value, withClose) {
+    function replacePathWithBubble(form, value) {
         var xpath = value,
             outputValueRegex = /<output\s+value="([^"]+)"/,
             dateFormatRegex = /<output\s+value="format-date\(date\(([^)]+)\),\s*'([^']+)'\)"/,
@@ -295,28 +307,27 @@ define([
             return value.replace('<', '&lt;').replace('>', '&gt;');
         }
 
-        return makeBubble(form, xpath, withClose, extraAttrs);
+        return makeBubble(form, xpath, extraAttrs);
     }
 
     /**
      * Replace <output> tags with bubble markup
      *
-     * @param withClose - Create bubbles with close buttons if true.
      * @param escape - If true, escape HTML except for bubble markup.
      */
-    function bubbleOutputs(text, form, withClose, escape) {
+    function bubbleOutputs(text, form, escape) {
         var el = $('<div>').html(text),
             places = {},
             replacer, result;
         if (escape) {
             replacer = function () {
                 var id = util.get_guid();
-                places[id] = replacePathWithBubble(form, this.outerHTML, withClose);
+                places[id] = replacePathWithBubble(form, this.outerHTML);
                 return "{" + id + "}";
             };
         } else {
             replacer = function() {
-                return replacePathWithBubble(form, this.outerHTML, withClose);
+                return replacePathWithBubble(form, this.outerHTML);
             };
         }
         el.find('output').replaceWith(replacer);
@@ -332,10 +343,8 @@ define([
 
     /**
      * Wrap top-level expression nodes with bubble markup
-     *
-     * @param withClose - Create bubbles with close buttons if true.
      */
-    function bubbleExpression(text, form, withClose) {
+    function bubbleExpression(text, form) {
         var el = $('<div>').html(text);
         var EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
             ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
@@ -360,7 +369,7 @@ define([
                 .uniq().value();
 
         _.each(paths, function(path) {
-            var newPath = replacePathWithBubble(form, path, withClose);
+            var newPath = replacePathWithBubble(form, path);
             el.html(el.html().replace(
                 new RegExp(RegExp.escape(path).replace(/ /g, '\\s*'), 'mg'),
                 $('<div>').append(newPath).html()
@@ -406,7 +415,6 @@ define([
      * editor
      *
      * @param options - An object containing options for the conversion:
-     *      - withClose - Create bubbles with close buttons if true.
      *      - isExpression - Convert all top-level path elements to bubbles
      *          if true; otherwise convert <output ... /> elements to bubbles.
      * @returns - html string to be displayed in editor
@@ -417,7 +425,7 @@ define([
         // HACK this is vulnerable to HTML injection. will need to change
         text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
         var bubble = options.isExpression ? bubbleExpression : bubbleOutputs;
-        return toHtml(bubble(text, form, options.withClose));
+        return toHtml(bubble(text, form));
     }
 
     /**
