@@ -117,5 +117,18 @@ require([
                 done();
             });
         });
+
+        it("should return just-set value on get value", function () {
+            util.loadXML("");
+            util.paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/text", "Text", ""],
+            ]);
+            util.clickQuestion('text');
+            var widget = util.getWidget('itext-en-label'),
+                text = '<output value="/data/text" />';
+            widget.setValue(text);
+            assert.equal(widget.getValue(), text);
+        });
     });
 });

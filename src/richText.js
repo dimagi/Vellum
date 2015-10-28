@@ -103,22 +103,29 @@ define([
             throw new Error("input should reference exactly one element, " +
                             "got " + input.length);
         }
+        var NOTSET = {},
+            newval = NOTSET,  // HACK work around async get/set
+            editor = input.ckeditor().editor;
         options = options || {};
-        var editor = input.ckeditor().editor;
         wrapper = {
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
                         callback(fromRichText(editor.getData()));
                     });
+                } else if (newval !== NOTSET) {
+                    return newval;
                 } else {
                     return fromRichText(editor.getData());
                 }
             },
-            setValue: function () {
-                var args = Array.prototype.slice.call(arguments);
-                args[0] = toRichText(args[0], form, options);
-                editor.setData.apply(editor, args);
+            setValue: function (value, callback) {
+                newval = value;
+                value = toRichText(value, form, options);
+                editor.setData(value, function () {
+                    newval = NOTSET;
+                    if (callback) { callback(); }
+                });
             },
             insertExpression: function (value) {
                 var opts = {withClose: options.withClose, isExpression: true};

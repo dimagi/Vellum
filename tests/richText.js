@@ -263,7 +263,7 @@ define([
     });
 
     describe("The rich text editor", function () {
-        var el = $("<div id='cktestparent'><div id='cktest' contenteditable>test</div></div>");
+        var el = $("<div id='cktestparent' />");
         before(function () {
             $("body").append(el);
         });
@@ -274,17 +274,25 @@ define([
         });
 
         it("should be accessible via various jquery paths", function (done) {
-            var cktest = $("#cktest"),
+            var cktest = $("<div contenteditable />").appendTo(el),
                 v0 = richText.editor(cktest, formShim),
                 v1 = richText.editor(cktest);
             assert.equal(v0, v1);
             v0.setValue("test", function () {
                 assert.equal(v1.getValue(), "test");
-                var el = $("#cktestparent").children().first();
-                assert.equal(richText.editor(el), v0);
+                var div = $("#cktestparent").children().first();
+                assert.equal(richText.editor(div), v0);
                 v0.destroy();
                 done();
             });
+        });
+
+        it("should return just-set value on get value", function () {
+            var cktest = $("<div contenteditable />").appendTo(el),
+                editor = richText.editor(cktest, formShim),
+                text = '<output value="/data/text" />';
+            editor.setValue(text);
+            assert.equal(editor.getValue(), text);
         });
     });
 });
