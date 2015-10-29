@@ -23,6 +23,7 @@
  * Any other HTML has undefined behavior
  */
 define([
+    'require',
     'underscore',
     'jquery',
     'vellum/logic',
@@ -32,6 +33,7 @@ define([
     'ckeditor',
     'ckeditor-jquery'
 ], function(
+    require,
     _,
     $,
     logic,
@@ -40,79 +42,82 @@ define([
     xpathmodels,
     CKEDITOR
 ){
+    var bubbleWidgetDefinition = {
+        template:
+            '<span class="label label-datanode label-datanode-internal">' +
+              '<i class="icon-question-sign">&nbsp;</i>' +
+              'example widget, not used' +
+            '</span>',
+        upcast: function ( element ) {
+            return element.name === 'span' && element.hasClass('label-datanode');
+        },
+        downcast: function(element) {
+            element.setHtml(applyFormats($(element.getOuterHtml()).data()));
+            element.replaceWithChildren();
+        },
+        init: function() {
+            // TODO: PR to ckeditor to make changing drag ui supported
+            // Leave 15px on the left side so that users can actually
+            // interact with the close button
+            var width = $(this.element.$).innerWidth() - 15;
+            var height = $(this.element.$).outerHeight() + 4;
+            this.dragHandlerContainer.setStyles({
+                width: width + 'px',
+                height: height + 'px',
+                left: '0px'
+            });
+
+            // Add close button
+            var that = this,
+                buttons = this.element.getElementsByTag("button"),
+                button;
+            if (buttons.count()) {
+                // sometimes the it's in the dom
+                // apparently init can be called more than once for a widget!?
+                button = buttons.getItem(0);
+            } else {
+                button = CKEDITOR.dom.element.createFromHtml(
+                            "<button class='close'>&times;</button>");
+                this.element.append(button);
+            }
+            button.on("click", function () {
+                that.editor.widgets.del(that);
+                that.editor.fire('saveSnapshot');
+                return false;
+            });
+
+            // Setup popover
+            var $this = $(this.element.$),
+                datavalue = $this.attr('data-value'),
+                // WARNING does the wrong thing for value like "/data/q + 3"
+                match =  datavalue.match('output value="(.*)"'),
+                xpath = match ? match[1] : datavalue,
+                getWidget = require('vellum/widgets').util.getWidget,
+                // TODO find out why widget is sometimes null (tests only?)
+                widget = getWidget($this);
+            if (/^\/data\//.test(xpath) && widget) {
+                var isText = function () { return this.nodeType === 3; },
+                    displayId = $this.contents().filter(isText)[0].nodeValue,
+                    labelMug = widget.mug.form.getMugByPath(xpath),
+                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
+                $(this.dragHandlerContainer.$).children("img").stickyover({
+                    title: displayId + '<small>' + xpath + '</small>',
+                    html: true,
+                    content: '<p>' + labelText + '</p>',
+                    template: '<div contenteditable="false" class="popover fd-popover">' +
+                        '<div class="popover-inner">' +
+                        '<h3 class="popover-title"></h3>' +
+                        '<div class="popover-content"><p></p></div>' +
+                        '</div></div>'
+                });
+            }
+        }
+    };
+
     CKEDITOR.plugins.add('bubbles', {
         requires: 'widget',
         init: function (editor) {
-            editor.widgets.add('bubbles', {
-                template:
-                    '<span class="label label-datanode label-datanode-internal">' +
-                      '<i class="icon-question-sign">&nbsp;</i>' +
-                      'example widget, not used' +
-                    '</span>',
-                upcast: function ( element ) {
-                    return element.name === 'span' && element.hasClass('label-datanode');
-                },
-                downcast: function(element) {
-                    element.setHtml(applyFormats($(element.getOuterHtml()).data()));
-                    element.replaceWithChildren();
-                },
-                init: function() {
-                    // TODO: PR to ckeditor to make changing drag ui supported
-                    // Leave 15px on the left side so that users can actually
-                    // interact with the close button
-                    var width = $(this.element.$).innerWidth() - 15;
-                    var height = $(this.element.$).outerHeight() + 4;
-                    this.dragHandlerContainer.setStyles({
-                        width: width + 'px',
-                        height: height + 'px',
-                        left: '0px'
-                    });
-
-                    // Add close button
-                    var that = this,
-                        buttons = this.element.getElementsByTag("button"),
-                        button;
-                    if (buttons.count()) {
-                        // sometimes the it's in the dom (from previous init??)
-                        button = buttons.getItem(0);
-                    } else {
-                        button = CKEDITOR.dom.element.createFromHtml(
-                                    "<button class='close'>&times;</button>");
-                        this.element.append(button);
-                    }
-                    button.on("click", function () {
-                        that.editor.widgets.del(that);
-                        that.editor.fire('saveSnapshot');
-                        return false;
-                    });
-
-                    // Setup popover
-                    var $this = $(this.element.$),
-                        datavalue = $this.attr('data-value'),
-                        // WARNING does the wrong thing for value like "/data/q + 3"
-                        match =  datavalue.match('output value="(.*)"'),
-                        xpath = match ? match[1] : datavalue,
-                        getWidget = require('vellum/widgets').util.getWidget,
-                        // TODO find out why widget is sometimes null (tests only?)
-                        widget = getWidget($this);
-                    if (/^\/data\//.test(xpath) && widget) {
-                        var isText = function () { return this.nodeType === 3; },
-                            displayId = $this.contents().filter(isText)[0].nodeValue,
-                            labelMug = widget.mug.form.getMugByPath(xpath),
-                            labelText = labelMug ? labelMug.p.labelItext.get() : "";
-                        $(this.dragHandlerContainer.$).children("img").stickyover({
-                            title: displayId + '<small>' + xpath + '</small>',
-                            html: true,
-                            content: '<p>' + labelText + '</p>',
-                            template: '<div contenteditable="false" class="popover fd-popover">' +
-                                '<div class="popover-inner">' +
-                                '<h3 class="popover-title"></h3>' +
-                                '<div class="popover-content"><p></p></div>' +
-                                '</div></div>'
-                        });
-                    }
-                }
-            });
+            editor.widgets.add('bubbles', bubbleWidgetDefinition);
         }
     });
 
