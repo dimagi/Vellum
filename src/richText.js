@@ -85,6 +85,32 @@ define([
                         that.editor.fire('saveSnapshot');
                         return false;
                     });
+
+                    // Setup popover
+                    var $this = $(this.element.$),
+                        datavalue = $this.attr('data-value'),
+                        // WARNING does the wrong thing for value like "/data/q + 3"
+                        match =  datavalue.match('output value="(.*)"'),
+                        xpath = match ? match[1] : datavalue,
+                        getWidget = require('vellum/widgets').util.getWidget,
+                        // TODO find out why widget is sometimes null (tests only?)
+                        widget = getWidget($this);
+                    if (/^\/data\//.test(xpath) && widget) {
+                        var isText = function () { return this.nodeType === 3; },
+                            displayId = $this.contents().filter(isText)[0].nodeValue,
+                            labelMug = widget.mug.form.getMugByPath(xpath),
+                            labelText = labelMug ? labelMug.p.labelItext.get() : "";
+                        $(this.dragHandlerContainer.$).children("img").stickyover({
+                            title: displayId + '<small>' + xpath + '</small>',
+                            html: true,
+                            content: '<p>' + labelText + '</p>',
+                            template: '<div contenteditable="false" class="popover fd-popover">' +
+                                '<div class="popover-inner">' +
+                                '<h3 class="popover-title"></h3>' +
+                                '<div class="popover-content"><p></p></div>' +
+                                '</div></div>'
+                        });
+                    }
                 }
             });
         }

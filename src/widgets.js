@@ -242,35 +242,6 @@ define([
     var richText = function(mug, options) {
         var widget = normal(mug, options);
 
-        // Each bubble in rich text has a popover on hover that will display
-        // the path
-        function addPopovers(input) {
-            input.find('.label-datanode').each(function () {
-                var $this = $(this),
-                    datavalue = $this.attr('data-value'),
-                    match =  datavalue.match('output value="(.*)"'),
-                    xpath = match ? match[1] : datavalue,
-                    displayId = $this.clone().children().remove().end().text(),
-                    labelMug, labelText;
-                if (/^\/data\//.test(xpath)) {
-                    labelMug = mug.form.getMugByPath(xpath);
-                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
-                } else {
-                    return;
-                }
-                $this.siblings('.cke_widget_drag_handler_container').children().stickyover({
-                    title: displayId + '<small>' + xpath + '</small>',
-                    html: true,
-                    content: '<p>' + labelText + '</p>',
-                    template: '<div contenteditable="false" class="popover fd-popover">' +
-                        '<div class="popover-inner">' +
-                        '<h3 class="popover-title"></h3>' +
-                        '<div class="popover-content"><p></p></div>' +
-                        '</div></div>'
-                });
-            });
-        }
-
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
@@ -293,19 +264,10 @@ define([
             });
         });
 
-        editor.on('afterInsertHtml', function (e) {
-            addPopovers(widget.input);
-        });
-
-        editor.on('dataReady', function (e) {
-            addPopovers(widget.input);
-        });
-
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
             // gets rid of atwho wrapper
             // tod: find out why this is needed and move elsewhere
             $(this).find('.atwho-inserted').children().unwrap();
-            addPopovers(widget.input);
         });
 
         widget.getControl = function () {
@@ -803,7 +765,7 @@ define([
             widget;
         while (obj && obj.length) {
             widget = obj.data("vellum_widget");
-            if (widget && vellum === obj.vellum("get")) {
+            if (widget && (!vellum || vellum === obj.vellum("get"))) {
                 return widget;
             }
             obj = obj.parent();
