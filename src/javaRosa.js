@@ -1052,6 +1052,18 @@ define([
         return widget;
     };
 
+    function looksLikeMarkdown(val) {
+        /* Regex checks (in order):
+         * ordered lists
+         * unordered lists
+         * strikethrough
+         * headings
+         * italics/bold/bold italics
+         * links
+         */
+        return /^\d+\. |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val);
+    }
+
     var itextMarkdownWidget = function (mug, language, form, options) {
         options = options || {};
         var parent = options.parent;
@@ -1061,18 +1073,6 @@ define([
             super_handleChange = widget.handleChange,
             wantsMarkdown = true,
             markdownOff, markdownOn, markdownOutput;
-
-        function looksLikeMarkdown(val) {
-            /* Regex checks (in order):
-             * ordered lists
-             * unordered lists
-             * strikethrough
-             * headings
-             * italics/bold/bold italics
-             * links
-             */
-            return /^\d+\. |^\*|~~.+~~|# |\*{1,3}\S+\*{1,3}|\[.+\]\(\S+\)/m.test(val);
-        }
 
         widget.toggleMarkdown = function() {
             parent.toggleClass("has-markdown");
@@ -2242,5 +2242,6 @@ define([
         parseXLSItext: parseXLSItext,
         generateItextXLS: generateItextXLS,
         getOutputRef: getOutputRef,
+        looksLikeMarkdown: looksLikeMarkdown,
     };
 });

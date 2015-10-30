@@ -823,6 +823,25 @@ require([
         });
     });
 
+    describe("The javaRosa markdown detector", function() {
+        _.each([
+            "**Word!**",
+            "**a bold phrase**",
+        ], function (text) {
+            it("should recognize " + JSON.stringify(text), function() {
+                assert(jr.looksLikeMarkdown(text), "fail");
+            });
+        });
+
+        _.each([
+            "**not\nbold**",
+        ], function (text) {
+            it("should NOT recognize " + JSON.stringify(text), function() {
+                assert(!jr.looksLikeMarkdown(text), "fail");
+            });
+        });
+    });
+
     describe("The javaRosa plugin language selector", function() {
         before(function(done) {
             util.init({
