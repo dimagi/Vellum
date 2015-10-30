@@ -249,6 +249,7 @@ define([
                      '&lt;h1&gt;{text}&lt;/h1&gt;'],
                     ['<output value="/data/text" /> <tag /> <output value="/data/othertext" />',
                      '{text} &lt;tag /&gt; {othertext}'],
+                    ["{blah}", "{blah}"],
                 ],
                 ico = icon('fcc-fd-text');
 
@@ -256,7 +257,11 @@ define([
                 it("to text: " + item[0], function () {
                     var result = richText.bubbleOutputs(item[0], formShim, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
-                            return makeOutputValue("/data/" + name, name, ico, true)[0].outerHTML;
+                            if (formShim.getMugByPath("/data/" + name)) {
+                                var output = makeOutputValue("/data/" + name, name, ico, true);
+                                return output[0].outerHTML;
+                            }
+                            return m;
                         });
                     assert.equal(result, expect);
                 });

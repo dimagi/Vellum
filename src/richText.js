@@ -374,7 +374,7 @@ define([
         if (escape) {
             result = $('<div />').text(xml.normalize(result)).html();
             result = result.replace(/{(.+?)}/g, function (match, id) {
-                return places[id][0].outerHTML;
+                return places.hasOwnProperty(id) ? places[id][0].outerHTML : match;
             });
         }
         return result;
