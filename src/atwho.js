@@ -57,20 +57,6 @@ define([
                 .value();
     }, 500);
 
-    function bubble(outputValue) {
-        var retBub = $('<span>')
-            .addClass('label label-datanode label-datanode-internal')
-            .attr({
-                'data-value': "${name}",
-                'data-output-value': outputValue,
-            })
-            .append($('<i>').addClass('${icon}').append('&nbsp;'))
-            .append('${questionId}')
-            .append($('<button>').addClass('close').append('&times;'));
-
-        return $('<div>').append(retBub).html();
-    }
-
     /**
      * Turn a given input into an autocomplete, which will be populated
      * with a given set of choices and will also accept free text.
@@ -114,7 +100,7 @@ define([
      *                  category: sent to analytics
      *                  insertTpl: string to add to input when question is selected
      *                  property: sent to analytics
-     *                  useRichText: use a bubble template
+     *                  useRichText: use rich text editor insert method
      *                  outputValue: use output value in the template
      */
     that.questionAutocomplete = function ($input, mug, options) {
@@ -128,7 +114,7 @@ define([
         });
 
         if (options.useRichText) {
-            options.insertTpl = bubble(options.outputValue);
+            options.insertTpl = '${name}';
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();

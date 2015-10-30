@@ -157,6 +157,7 @@ define([
             editor = input.ckeditor().editor;
         options = options || {};
         wrapper = {
+            editor: editor,
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
@@ -177,12 +178,19 @@ define([
                 });
             },
             insertExpression: function (value) {
-                var opts = {isExpression: true};
-                editor.insertHtml(toRichText(value, form, opts) + ' ');
+                if (options.isExpression) {
+                    editor.insertHtml(bubbleExpression(value, form) + ' ');
+                } else {
+                    var attrs = {'data-output-value': true},
+                        output = makeBubble(form, value, attrs);
+                    editor.insertHtml($('<p>').append(output).html() + ' ');
+                }
             },
             insertOutput: function (value) {
-                var opts = {isExpression: false};
-                editor.insertHtml(toRichText(value, form, opts), 'text');
+                if (options.isExpression) {
+                    throw new Error("cannot insert output into expression editor");
+                }
+                editor.insertHtml(bubbleOutputs(value, form) + ' ');
             },
             on: function () {
                 var args = Array.prototype.slice.call(arguments);

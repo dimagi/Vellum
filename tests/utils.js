@@ -352,8 +352,42 @@ define([
         return find(node || tree.get_node("#"));
     }
 
+    /**
+     * Report full stack trace on async callback error
+     *
+     * Wrap async callback functions with this function to report the
+     * full stack trace if they fail. It is recommended to only use this
+     * temporarily while debugging a test that is throwing a hard-to-
+     * trace error. It destroys pretty assertion diff output. Also,
+     * assertion errors thrown from within an async callback do include
+     * full stack trace information.
+     *
+     * Fixes the problem described in
+     * https://github.com/mochajs/mocha/issues/815
+     *
+     * Usage:
+     *
+     *  it("will always fail", function (done) {
+     *      someAsyncFunction(asyncatch(function (arg) {
+     *          doSomethingThatThrowsAnError();
+     *          done();
+     *      }));
+     *  });
+     */
+    function asyncatch(fn) {
+        return function () {
+            try {
+                var args = Array.prototype.slice.call(arguments);
+                return fn.apply(this, args);
+            } catch (err) {
+                throw err && err.stack ? new Error(err.stack) : err;
+            }
+        };
+    }
+
     return {
         options: options,
+        asyncatch: asyncatch,
         init: init,
         call: call,
         loadXML: loadXML,

@@ -28,14 +28,16 @@ define([
     'underscore',
     'tests/utils',
     'vellum/richText',
-    'vellum/javaRosa'
+    'vellum/javaRosa',
+    'ckeditor',
 ], function(
     chai,
     $,
     _,
     util,
     richText,
-    javaRosa
+    javaRosa,
+    CKEDITOR
 ) {
     var assert = chai.assert,
         formShim = {
@@ -263,36 +265,143 @@ define([
     });
 
     describe("The rich text editor", function () {
-        var el = $("<div id='cktestparent' />");
-        before(function () {
+        var el = $("<div id='cktestparent'><div contenteditable /></div>"),
+            options = {isExpression: false},
+            input, editor;
+        before(function (done) {
             $("body").append(el);
+            input = el.children().first();
+            editor = richText.editor(input, formShim, options);
+            // wait for editor to be ready; necessary to change selection
+            input.promise.then(function () { done(); });
+        });
+        beforeEach(function (done) {
+            editor.setValue("", function () { done(); });
         });
         after(function () {
+            editor.destroy();
             assert.equal($("#cktestparent").length, 1);
             el.remove();
             assert.equal($("#cktestparent").length, 0);
         });
 
         it("should be accessible via various jquery paths", function (done) {
-            var cktest = $("<div contenteditable />").appendTo(el),
-                v0 = richText.editor(cktest, formShim),
-                v1 = richText.editor(cktest);
+            var v0 = editor,
+                v1 = richText.editor(input);
             assert.equal(v0, v1);
             v0.setValue("test", function () {
                 assert.equal(v1.getValue(), "test");
                 var div = $("#cktestparent").children().first();
                 assert.equal(richText.editor(div), v0);
-                v0.destroy();
                 done();
             });
         });
 
         it("should return just-set value on get value", function () {
-            var cktest = $("<div contenteditable />").appendTo(el),
-                editor = richText.editor(cktest, formShim),
-                text = '<output value="/data/text" />';
+            var text = '<output value="/data/text" />';
+            assert.notEqual(editor.getValue(), text);
             editor.setValue(text);
             assert.equal(editor.getValue(), text);
         });
+
+        it("should insert expression into expression editor", function (done) {
+            editor.setValue('one two', function () {
+                assert.equal(editor.getValue(), 'one two');
+                select(editor, 3);
+                // temporarily change to expression editor
+                options.isExpression = true;
+                try {
+                    editor.insertExpression('/data/text');
+                    assert.equal(editor.getValue(), "one/data/text two");
+                } finally {
+                    options.isExpression = false;
+                }
+                done();
+            });
+        });
+
+        it("should create output on insert expression into label editor", function (done) {
+            var output = '<output value="/data/text" />';
+            editor.setValue('one two', function () {
+                assert.equal(editor.getValue(), 'one two');
+                select(editor, 3);
+                editor.insertExpression("/data/text");
+                assert.equal(editor.getValue(), "one" + output + " two");
+                done();
+            });
+        });
+
+        it("should insert output into label editor", function (done) {
+            var output = '<output value="/data/text" />';
+            editor.setValue('one two', function () {
+                assert.equal(editor.getValue(), 'one two');
+                select(editor, 3);
+                editor.insertOutput(output);
+                assert.equal(editor.getValue(), "one" + output + " two");
+                done();
+            });
+        });
+
+        // TODO tests to make sure select() works in various scenarios
+        // for example, with multiple lines
+
+        // -- helpers ---------------------------------------------------------
+
+        function select(editor, start) {
+            function iterNodes(element) {
+                var i = 0,
+                    children = element.getChildren(),
+                    count = children.count(),
+                    inner = null;
+                function next() {
+                    var child;
+                    if (inner) {
+                        child = inner();
+                        if (child !== null) {
+                            return child;
+                        }
+                        inner = null;
+                    }
+                    if (i >= count) {
+                        return null;
+                    }
+                    child = children.getItem(i);
+                    i++;
+                    if (child.type === CKEDITOR.NODE_ELEMENT) {
+                        var name = child.getName().toLowerCase();
+                        if (name === "p") {
+                            inner = iterNodes(child);
+                            return next();
+                        }
+                        throw new Error("not implemented: " + name);
+                    } else if (child.type === CKEDITOR.NODE_TEXT) {
+                        return {node: child, length: child.getText().length};
+                    }
+                    throw new Error("unhandled element type: " + child.type);
+                }
+                return next;
+            }
+            function getNodeOffset(index, nextNode) {
+                var offset = index,
+                    node = nextNode();
+                while (node) {
+                    if (node.length >= offset) {
+                        return {node: node.node, offset: offset};
+                    }
+                    offset -= node.length;
+                    node = nextNode();
+                }
+                throw new Error("index is larger than content: " + index);
+            }
+            editor = editor.editor;
+            editor.focus();
+            var sel = editor.getSelection(),
+                nextNode = iterNodes(sel.root),
+                node = getNodeOffset(start, nextNode),
+                range = sel.getRanges()[0];
+            range.setStart(node.node, node.offset);
+            range.collapse(true);
+            sel.selectRanges([range]);
+        }
     });
 });
