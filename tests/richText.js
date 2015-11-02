@@ -192,6 +192,11 @@ define([
         describe("text conversions", function() {
             var text = [
                 ["blah\nblah", "<p>blah</p><p>blah</p>"],
+                ["blah\nblah\n", "<p>blah</p><p>blah</p><p>&nbsp;</p>"],
+                [
+                    "blah\n\nblah\n\n",
+                    "<p>blah</p><p>&nbsp;</p><p>blah</p><p>&nbsp;</p><p>&nbsp;</p>"
+                ],
                 [
                     "list\n* item\n* item",
                     "<p>list</p><p>* item</p><p>* item</p>"

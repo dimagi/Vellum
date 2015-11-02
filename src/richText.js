@@ -429,8 +429,7 @@ define([
      * Replace line breaks with <p> tags and &nbsp; with spaces.
      */
     function toHtml(text) {
-        text = text.replace(/\n$/, "")
-                   .replace(/\n/g, "</p><p>");
+        text = text.replace(/\n/g, "</p><p>");
         return "<p>" + text + "</p>";
     }
 
@@ -443,10 +442,10 @@ define([
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
+                   // fixup final </p>, which is is not a newline
+                   .replace(/\n$/, "")
                    // maybe not necessary? ckeditor uses p tags for newlines
-                   .replace(/<br ?\/?>/ig,"\n")
-                   // always convert &nbsp; to space and trim whitespace
-                   .replace(/&nbsp;/ig, ' ').trim();
+                   .replace(/<br ?\/?>/ig,"\n");
     }
 
     /**

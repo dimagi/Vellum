@@ -113,7 +113,7 @@ require([
             // result immediately after widget.setValue(x) is called.
             var richItext = util.getWidget('itext-en-label');
             richItext.getValue(function (val) {
-                util.assertEqual(val, "list\n\n* item\n* item");
+                util.assertEqual(val, "list\n\n* item\n* item\n");
                 done();
             });
         });
