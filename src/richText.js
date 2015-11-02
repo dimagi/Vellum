@@ -460,8 +460,6 @@ define([
     function toRichText(text, form, options) {
         if (!text) {return "";}
         options = options || {};
-        // HACK this is vulnerable to HTML injection. will need to change
-        text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
         var bubble = options.isExpression ? bubbleExpression : bubbleOutputs;
         return toHtml(bubble(text, form));
     }
