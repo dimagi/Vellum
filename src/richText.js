@@ -177,20 +177,20 @@ define([
                     if (callback) { callback(); }
                 });
             },
-            insertExpression: function (value) {
+            insertExpression: function (xpath) {
                 if (options.isExpression) {
-                    editor.insertHtml(bubbleExpression(value, form) + ' ');
+                    editor.insertHtml(bubbleExpression(xpath, form) + ' ');
                 } else {
                     var attrs = {'data-output-value': true},
-                        output = makeBubble(form, value, attrs);
+                        output = makeBubble(form, xpath, attrs);
                     editor.insertHtml($('<p>').append(output).html() + ' ');
                 }
             },
-            insertOutput: function (value) {
+            insertOutput: function (xpath) {
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
-                editor.insertHtml(bubbleOutputs(value, form) + ' ');
+                editor.insertHtml(bubbleOutputs(xpath, form) + ' ');
             },
             on: function () {
                 var args = Array.prototype.slice.call(arguments);
@@ -443,9 +443,7 @@ define([
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
                    // fixup final </p>, which is is not a newline
-                   .replace(/\n$/, "")
-                   // maybe not necessary? ckeditor uses p tags for newlines
-                   .replace(/<br ?\/?>/ig,"\n");
+                   .replace(/\n$/, "");
     }
 
     /**

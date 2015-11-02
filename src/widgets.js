@@ -257,11 +257,6 @@ define([
 
         editor.on('change', function() {
             widget.handleChange();
-            widget.input.find('.label-datanode').each(function(k, v) {
-                var value = $(v);
-                // ckeditor likes to move title attribute to data-original-title
-                value.attr('title', value.attr('data-original-title'));
-            });
         });
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
