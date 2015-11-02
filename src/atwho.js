@@ -50,7 +50,9 @@ define([
                         label: defaultLabel,
                     };
                 })
-                .filter(function(choice) { return choice.name; })
+                .filter(function(choice) {
+                    return choice.name && !_.isUndefined(choice.displayLabel);
+                })
                 .value();
     }, 500);
 
