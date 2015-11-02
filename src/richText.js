@@ -22,6 +22,14 @@
  *
  * Any other HTML has undefined behavior
  */
+
+(function () {
+    // set CKEditor base path before loading ckeditor
+    var require = window.requirejs,
+        path = require.toUrl("vellum/../lib/ckeditor/").replace(/\?.*/, "");
+    window.CKEDITOR_BASEPATH = path;
+})();
+
 define([
     'require',
     'underscore',
