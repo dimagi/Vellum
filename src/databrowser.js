@@ -40,8 +40,10 @@ define([
                 });
             paneRatio = pane.height() / $('.fd-content-left').height();
             $(window).scroll(function() {
-                pane.height($('.fd-content-left').height() * paneRatio);
-                panelHeight = pane.height();
+                if (pane.height() > headHeight) {
+                    pane.height($('.fd-content-left').height() * paneRatio);
+                    panelHeight = pane.height();
+                }
             });
             searchBar = pane.find('#fdExternalSearch');
             searchBar.on('keyup keypress', function(e) {
