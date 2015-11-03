@@ -352,6 +352,17 @@ require([
             assert($(".fd-default-panel").is(":visible"));
         });
 
+        it("should use single quotes on drag/drop choice", function() {
+            util.loadXML("");
+            util.addQuestion("Select", "select");
+            var mug = util.addQuestion("DataBindOnly", "mug"),
+                calc = $("[name=property-calculateAttr]"),
+                tree = $(".fd-question-tree").jstree(true);
+            assert.equal(calc.length, 1);
+            util.findNode(tree, "choice1").data.handleDrop(calc);
+            assert.equal(mug.p.calculateAttr, "'choice1'");
+        });
+
         describe("should", function () {
             var form, dup;
             before(function () {

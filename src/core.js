@@ -1027,7 +1027,7 @@ define([
         // for choices, return the quoted value.
         // for everything else return the path
         if (mug.__className === "Choice") {
-            return '"' + mug.p.nodeID + '"';
+            return "'" + mug.p.nodeID + "'";
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
