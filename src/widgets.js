@@ -5,9 +5,7 @@ define([
     'jquery',
     'vellum/atwho',
     'vellum/util',
-    'vellum/richText',
-    'ckeditor',
-    'ckeditor-jquery'
+    'vellum/richText'
 ], function (
     widget_control_keyvalue,
     widget_control_message,
@@ -15,14 +13,8 @@ define([
     $,
     atwho,
     util,
-    richTextUtils,
-    CKEDITOR
+    richTextUtils
 ) {
-    CKEDITOR.config.allowedContent = true;
-    CKEDITOR.config.customConfig = '';
-    CKEDITOR.config.title = false;
-    CKEDITOR.config.extraPlugins = 'bubbles';
-
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
@@ -248,112 +240,32 @@ define([
     };
 
     var richText = function(mug, options) {
-        var widget = normal(mug, options), editor;
-
-        // Each bubble in rich text has a popover on hover that will display
-        // the path
-        function addPopovers(input) {
-            input.find('.label-datanode').each(function () {
-                var $this = $(this),
-                    datavalue = $this.attr('data-value'),
-                    match =  datavalue.match('output value="(.*)"'),
-                    xpath = match ? match[1] : datavalue,
-                    displayId = $this.clone().children().remove().end().text(),
-                    labelMug, labelText;
-                if (/^\/data\//.test(xpath)) {
-                    labelMug = mug.form.getMugByPath(xpath);
-                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
-                } else {
-                    return;
-                }
-                $this.siblings('.cke_widget_drag_handler_container').children().stickyover({
-                    title: displayId + '<small>' + xpath + '</small>',
-                    html: true,
-                    content: '<p>' + labelText + '</p>',
-                    template: '<div contenteditable="false" class="popover fd-popover">' +
-                        '<div class="popover-inner">' +
-                        '<h3 class="popover-title"></h3>' +
-                        '<div class="popover-content"><p></p></div>' +
-                        '</div></div>'
-                });
-            });
-        }
-
-        function addCloseButton(widget, input) {
-            input.find('.label-datanode').each(function () {
-                var _this = this;
-                $(this).find('.close').click(function() {
-                    _this.remove();
-                    widget.handleChange();
-                    return false;
-                });
-            });
-        }
+        var widget = normal(mug, options);
 
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
-            .addClass('input-block-level jstree-drop');
-        if (options.singleLine) {
-            widget.input.addClass('fd-input');
-        } else {
-            widget.input.addClass('fd-textarea');
-        }
+            .addClass('input-block-level jstree-drop')
+            .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
-        widget.input.ckeditor().promise.then(function() {
-            editor = widget.input.ckeditor().editor;
+        var opts = {isExpression: options.widget === xPath},
+            editor = richTextUtils.editor(widget.input, mug.form, opts);
 
-            mug.on('teardown-mug-properties', function() {
-                if (editor) {
-                    editor.destroy();
-                }
-            }, null, "teardown-mug-properties");
-
-            editor.on('change', function() {
-                widget.handleChange();
-                widget.input.find('.label-datanode').each(function(k, v) {
-                    var value = $(v);
-                    // ckeditor likes to move title attribute to data-original-title
-                    value.attr('title', value.attr('data-original-title'));
-                });
-            });
-
-            editor.on('afterInsertHtml', function (e) {
-                addCloseButton(widget, widget.input);
-                addPopovers(widget.input);
-            });
-
-            editor.on('dataReady', function (e) {
-                addCloseButton(widget, widget.input);
-                addPopovers(widget.input);
-            });
-        });
+        mug.on('teardown-mug-properties', editor.destroy, null, "teardown-mug-properties");
+        editor.on('change', widget.handleChange);
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
             // gets rid of atwho wrapper
             // tod: find out why this is needed and move elsewhere
             $(this).find('.atwho-inserted').children().unwrap();
-            addCloseButton(widget, widget.input);
-            addPopovers(widget.input);
         });
 
         widget.getControl = function () {
             return widget.input;
         };
 
-        widget.setValue = function (val) {
-            widget.input.ckeditor().promise.then(function() {
-                editor.setData(richTextUtils.toRichText(val, mug.form, true));
-            });
-        };
-
-        widget.getValue = function () {
-            var val = "";
-            widget.input.ckeditor().promise.then(function() {
-                val = richTextUtils.fromRichText(editor.getData());
-            });
-            return val.replace('&nbsp;', ' ').trim();
-        };
+        widget.setValue = editor.setValue;
+        widget.getValue = editor.getValue;
 
         return widget;
     };
@@ -843,7 +755,7 @@ define([
             widget;
         while (obj && obj.length) {
             widget = obj.data("vellum_widget");
-            if (widget && vellum === obj.vellum("get")) {
+            if (widget && (!vellum || vellum === obj.vellum("get"))) {
                 return widget;
             }
             obj = obj.parent();
@@ -861,7 +773,6 @@ define([
         normal: normal,
         text: text,
         multilineText: multilineText,
-        richInput: richInput,
         richTextarea: richTextarea,
         identifier: identifier,
         droppableText: droppableText,

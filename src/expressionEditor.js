@@ -68,7 +68,9 @@ define([
     addOp(FunctionHandler, "selected", "has selected value");
 
     function showXPathEditor($div, options) {
-        var editorContent = $div;
+        var editorContent = $div,
+            richTextOptions = {isExpression: true},
+            form = options.mug.form;
         options = _.defaults(options, {
             leftPlaceholder: "Hint: drag a question here.",
             rightPlaceholder: "Hint: drag a question here.",
@@ -80,9 +82,7 @@ define([
 
         var setExpression = function(input, val) {
             if (options.mug.supportsRichText()) {
-                input.ckeditor().editor.setData(
-                    richText.toRichText(val, options.mug.form, true)
-                );
+                richText.editor(input, form, richTextOptions).setValue(val);
             } else {
                 input.val(val);
             }
@@ -90,7 +90,7 @@ define([
 
         var getExpression = function(input) {
             if (options.mug.supportsRichText()) {
-                return richText.fromRichText(input.ckeditor().editor.getData());
+                return richText.editor(input, form, richTextOptions).getValue();
             } else {
                 return input.val();
             }
@@ -205,7 +205,9 @@ define([
                 }));
 
                 if (options.mug.supportsRichText()) {
-                    $expUI.find('.fd-input').ckeditor();
+                    $expUI.find('.fd-input').each(function () {
+                        richText.editor($(this), form, richTextOptions);
+                    });
                 }
 
                 var getLeftQuestionInput = function () {

@@ -451,10 +451,13 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage ||
-            this.data.javaRosa.Itext.getDefaultLanguage());
+        var lang = this.data.core.currentItextDisplayLanguage ||
+                   this.data.javaRosa.Itext.getDefaultLanguage(),
+            val = mug.getDisplayName(lang, false);
         if (mug.supportsRichText()) {
-            val = richText.toRichText(val, this.data.core.form);
+            val = richText.bubbleOutputs(val, this.data.core.form, true);
+        } else {
+            val = $('<div />').text(val).html();
         }
         return val;
     };
@@ -744,7 +747,7 @@ define([
             if ((!mug && _this.data.core.form.useRichText !== false &&
                  this.opts().features.rich_text) ||
                  (mug && mug.supportsRichText())) {
-                target.ckeditor().editor.insertHtml(richText.toRichText(path, _this.data.core.form, true) + " ");
+                richText.editor(target).insertExpression(path);
             } else {
                 target.val(target.val() + path).change();
             }
