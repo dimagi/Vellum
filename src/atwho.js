@@ -39,7 +39,7 @@ define([
                     var defaultLabel = mug.form.vellum.getMugDisplayName(mug),
                         displayLabel = defaultLabel;
 
-                    if (displayLabel.length > 25) {
+                    if (displayLabel && displayLabel.length > 25) {
                         displayLabel = defaultLabel.slice(0, 25) + '&hellip;';
                     }
 
@@ -52,7 +52,9 @@ define([
                         label: defaultLabel,
                     };
                 })
-                .filter(function(choice) { return choice.name; })
+                .filter(function(choice) {
+                    return choice.name && !_.isUndefined(choice.displayLabel);
+                })
                 .value();
     }, 500);
 

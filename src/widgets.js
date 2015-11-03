@@ -216,7 +216,6 @@ define([
             .attr("rows", "2")
             .addClass('input-block-level')
             .on('change input', function (e) { widget.handleChange(); })
-            .focus(function() { this.select(); })
             .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
