@@ -130,5 +130,25 @@ require([
             widget.setValue(text);
             assert.equal(widget.getValue(), text);
         });
+
+        it("should create reference to hidden value in display condition", function (done) {
+            util.loadXML("");
+            util.paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/hidden", "DataBindOnly", "null"],
+                ["/text", "Text", "test"],
+            ]);
+            util.clickQuestion('text');
+            var text = util.getMug("text"),
+                disp = util.getWidget("property-relevantAttr"),
+                tree = $(".fd-question-tree").jstree(true);
+            assert.equal(disp.input.length, 1);
+            disp.input.promise.then(function () { // wait for editor to be ready
+                util.findNode(tree, "hidden").data.handleDrop(disp.input);
+                disp.handleChange();
+                assert.equal(text.p.relevantAttr, '/data/hidden');
+                done();
+            });
+        });
     });
 });

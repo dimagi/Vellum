@@ -107,7 +107,8 @@ define([
                 var isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
-                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
+                    labelText = labelMug && labelMug.p.labelItext ?
+                                labelMug.p.labelItext.get() : "";
                 $(this.dragHandlerContainer.$).children("img").stickyover({
                     title: displayId + '<small>' + xpath + '</small>',
                     html: true,
