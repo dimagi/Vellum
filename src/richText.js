@@ -434,10 +434,11 @@ define([
     /**
      * Convert plain text to HTML to be edited in CKEditor
      *
-     * Replace line breaks with <p> tags and &nbsp; with spaces.
+     * Replace line breaks with <p> tags and preserve contiguous spaces.
      */
     function toHtml(text) {
-        text = text.replace(/\n/g, "</p><p>");
+        text = text.replace(/\n/g, "</p><p>")
+                   .replace(/  /g, " &nbsp;");
         return "<p>" + text + "</p>";
     }
 
@@ -450,6 +451,7 @@ define([
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
+                   .replace(/(&nbsp;|\xa0)/ig, " ")
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }

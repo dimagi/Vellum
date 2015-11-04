@@ -209,10 +209,13 @@ define([
                     "list\n\n\n* item\n* item",
                     "<p>list</p><p></p><p></p><p>* item</p><p>* item</p>"
                 ],
+                [" ", " "],
+                ["   ", " \xa0 "],
+                ["   ", " &nbsp; "],
             ];
 
             _.each(text, function(val){
-                it("from html to text: " + val[1], function() {
+                it("from html to text: " + JSON.stringify(val[1]), function() {
                     assert.strictEqual(richText.fromRichText(val[1]), val[0]);
                 });
             });
