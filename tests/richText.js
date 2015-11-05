@@ -317,7 +317,7 @@ define([
         it("should insert expression into expression editor", function (done) {
             editor.setValue('one two', function () {
                 assert.equal(editor.getValue(), 'one two');
-                select(editor, 3);
+                editor.select(3);
                 // temporarily change to expression editor
                 options.isExpression = true;
                 try {
@@ -334,7 +334,7 @@ define([
             var output = '<output value="/data/text" />';
             editor.setValue('one two', function () {
                 assert.equal(editor.getValue(), 'one two');
-                select(editor, 3);
+                editor.select(3);
                 editor.insertExpression("/data/text");
                 assert.equal(editor.getValue(), "one" + output + " two");
                 done();
@@ -345,73 +345,14 @@ define([
             var output = '<output value="/data/text" />';
             editor.setValue('one two', function () {
                 assert.equal(editor.getValue(), 'one two');
-                select(editor, 3);
+                editor.select(3);
                 editor.insertOutput(output);
                 assert.equal(editor.getValue(), "one" + output + " two");
                 done();
             });
         });
 
-        // TODO tests to make sure select() works in various scenarios
+        // TODO tests for editor.select()
         // for example, with multiple lines
-
-        // -- helpers ---------------------------------------------------------
-
-        function select(editor, start) {
-            function iterNodes(element) {
-                var i = 0,
-                    children = element.getChildren(),
-                    count = children.count(),
-                    inner = null;
-                function next() {
-                    var child;
-                    if (inner) {
-                        child = inner();
-                        if (child !== null) {
-                            return child;
-                        }
-                        inner = null;
-                    }
-                    if (i >= count) {
-                        return null;
-                    }
-                    child = children.getItem(i);
-                    i++;
-                    if (child.type === CKEDITOR.NODE_ELEMENT) {
-                        var name = child.getName().toLowerCase();
-                        if (name === "p") {
-                            inner = iterNodes(child);
-                            return next();
-                        }
-                        throw new Error("not implemented: " + name);
-                    } else if (child.type === CKEDITOR.NODE_TEXT) {
-                        return {node: child, length: child.getText().length};
-                    }
-                    throw new Error("unhandled element type: " + child.type);
-                }
-                return next;
-            }
-            function getNodeOffset(index, nextNode) {
-                var offset = index,
-                    node = nextNode();
-                while (node) {
-                    if (node.length >= offset) {
-                        return {node: node.node, offset: offset};
-                    }
-                    offset -= node.length;
-                    node = nextNode();
-                }
-                throw new Error("index is larger than content: " + index);
-            }
-            editor = editor.editor;
-            editor.focus();
-            var sel = editor.getSelection(),
-                nextNode = iterNodes(sel.root),
-                node = getNodeOffset(start, nextNode),
-                range = sel.getRanges()[0];
-            range.setStart(node.node, node.offset);
-            range.collapse(true);
-            sel.selectRanges([range]);
-        }
     });
 });
