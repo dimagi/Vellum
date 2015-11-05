@@ -99,22 +99,28 @@ require([
             });
         });
 
-        it("should preserve newlines", function(done) {
-            util.loadXML("");
-            util.paste([
-                ["id", "type", "labelItext:en-default"],
-                ["/text", "Text", "list\n\n* item\n* item\n"],
-            ]);
-            util.clickQuestion('text');
-            // NOTE async assert because ckEditor setData is async.
-            // Without this we get an empty string from getValue().
-            // This probably means there are bugs elsewhere because
-            // we depend on widget.getValue() returning the correct
-            // result immediately after widget.setValue(x) is called.
-            var richItext = util.getWidget('itext-en-label');
-            richItext.getValue(function (val) {
-                util.assertEqual(val, "list\n\n* item\n* item\n");
-                done();
+        describe("should preserve", function() {
+            var data = [
+                    ["id", "type", "labelItext:en-default"],
+                    ["/newlines", "Text", "list\n\n* item\n* item\n"],
+                    ["/spaces", "Text", "a  b   c    d"],
+                ];
+            before(function () {
+                util.loadXML("");
+                util.paste(data);
+            });
+
+            _.each(data.slice(1), function (row) {
+                var name = row[0].slice(1);
+                it(name, function (done) {
+                    util.clickQuestion(name);
+                    var widget = util.getWidget('itext-en-label');
+                    widget.getValue(function (val) {
+                        // async assert because ckEditor setData is async
+                        util.assertEqual(val, row[2]);
+                        done();
+                    });
+                });
             });
         });
 
