@@ -236,8 +236,6 @@ define([
 
     /**
      * Set selection in CKEditor
-     *
-     * Warning: selecting beyond the first line of content is untested.
      */
     function ckSelect(editor, index) {
         function iterNodes(parent) {
@@ -265,7 +263,7 @@ define([
                         inner = iterNodes(child);
                         return next();
                     }
-                    if (name === "span") {
+                    if (name === "span" || name === "br") {
                         return {node: parent, length: 1};
                     }
                     throw new Error("not implemented: " + name);
