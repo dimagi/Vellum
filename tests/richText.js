@@ -317,27 +317,11 @@ define([
             assert.equal(editor.getValue(), text);
         });
 
-        it("should insert expression into expression editor", function (done) {
-            editor.setValue('one two', function () {
-                assert.equal(editor.getValue(), 'one two');
-                select(editor, 3);
-                // temporarily change to expression editor
-                options.isExpression = true;
-                try {
-                    editor.insertExpression('/data/text');
-                    assert.equal(editor.getValue(), "one/data/text two");
-                } finally {
-                    options.isExpression = false;
-                }
-                done();
-            });
-        });
-
         it("should create output on insert expression into label editor", function (done) {
             var output = '<output value="/data/text" />';
             editor.setValue('one two', function () {
                 assert.equal(editor.getValue(), 'one two');
-                select(editor, 3);
+                editor.select(3);
                 editor.insertExpression("/data/text");
                 assert.equal(editor.getValue(), "one" + output + " two");
                 done();
@@ -348,73 +332,50 @@ define([
             var output = '<output value="/data/text" />';
             editor.setValue('one two', function () {
                 assert.equal(editor.getValue(), 'one two');
-                select(editor, 3);
+                editor.select(3);
                 editor.insertOutput(output);
                 assert.equal(editor.getValue(), "one" + output + " two");
                 done();
             });
         });
 
-        // TODO tests to make sure select() works in various scenarios
-        // for example, with multiple lines
-
-        // -- helpers ---------------------------------------------------------
-
-        function select(editor, start) {
-            function iterNodes(element) {
-                var i = 0,
-                    children = element.getChildren(),
-                    count = children.count(),
-                    inner = null;
-                function next() {
-                    var child;
-                    if (inner) {
-                        child = inner();
-                        if (child !== null) {
-                            return child;
-                        }
-                        inner = null;
-                    }
-                    if (i >= count) {
-                        return null;
-                    }
-                    child = children.getItem(i);
-                    i++;
-                    if (child.type === CKEDITOR.NODE_ELEMENT) {
-                        var name = child.getName().toLowerCase();
-                        if (name === "p") {
-                            inner = iterNodes(child);
-                            return next();
-                        }
-                        throw new Error("not implemented: " + name);
-                    } else if (child.type === CKEDITOR.NODE_TEXT) {
-                        return {node: child, length: child.getText().length};
-                    }
-                    throw new Error("unhandled element type: " + child.type);
-                }
-                return next;
-            }
-            function getNodeOffset(index, nextNode) {
-                var offset = index,
-                    node = nextNode();
-                while (node) {
-                    if (node.length >= offset) {
-                        return {node: node.node, offset: offset};
-                    }
-                    offset -= node.length;
-                    node = nextNode();
-                }
-                throw new Error("index is larger than content: " + index);
-            }
-            editor = editor.editor;
-            editor.focus();
-            var sel = editor.getSelection(),
-                nextNode = iterNodes(sel.root),
-                node = getNodeOffset(start, nextNode),
-                range = sel.getRanges()[0];
-            range.setStart(node.node, node.offset);
-            range.collapse(true);
-            sel.selectRanges([range]);
+        function applyArgs(func) {
+            return function (args) {
+                return func.apply(this, args);
+            };
         }
+
+        _.each([
+            ["one two", 3, "one/data/text two"],
+            ["one two", 4, "one /data/text two"],
+            ["one\n\ntwo", 3, "one/data/text\n\ntwo"],
+            ["one\n\ntwo", 4, "one\n/data/text\ntwo"],
+            /* TODO make these tests pass
+            ["one\n\ntwo", 5, "one\n\n/data/text two"],
+            ["11\n\n22\n\n33", 5, "11\n\n2/data/text 2\n\n33"],
+            ["11\n\n22\n\n33", 6, "11\n\n22/data/text\n\n33"],
+            ["11\n\n22\n\n33", 7, "11\n\n22\n/data/text\n33"],
+            ["11\n\n22\n\n33", 8, "11\n\n22\n\n/data/text 33"],
+            ["11\n\n22\n\n33", 9, "11\n\n22\n\n3/data/text 3"],
+            ["11\n\n22\n\n33", 10, "11\n\n22\n\n33/data/text"],
+            */
+        ], applyArgs(function (expr, i, result) {
+            var repr = JSON.stringify(result);
+            it("should insert expression into expression at " + i + ": " + repr, function (done) {
+                editor.setValue(expr, function () {
+                    assert.equal(editor.getValue(), expr);
+                    editor.select(i);
+                    // temporarily change to expression editor
+                    options.isExpression = true;
+                    try {
+                        editor.insertExpression('/data/text');
+                        assert.equal(editor.getValue(), result);
+                    } finally {
+                        options.isExpression = false;
+                    }
+                    done();
+                });
+            });
+        }));
     });
 });

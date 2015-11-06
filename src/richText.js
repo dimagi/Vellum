@@ -107,7 +107,8 @@ define([
                 var isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
-                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
+                    labelText = labelMug && labelMug.p.labelItext ?
+                                labelMug.p.labelItext.get() : "";
                 $(this.dragHandlerContainer.$).children("img").stickyover({
                     title: displayId + '<small>' + xpath + '</small>',
                     html: true,
@@ -165,7 +166,6 @@ define([
             editor = input.ckeditor().editor;
         options = options || {};
         wrapper = {
-            editor: editor,
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
@@ -174,7 +174,19 @@ define([
                 } else if (newval !== NOTSET) {
                     return newval;
                 } else {
-                    return fromRichText(editor.getData());
+                    var data;
+                    try {
+                        data = editor.getData();
+                    } catch (err) {
+                        if (err.name !== "IndexSizeError") {
+                            throw err;
+                        }
+                        // HACK work around Chrome/CKEditor bug
+                        // https://dev.ckeditor.com/ticket/13903
+                        wrapper.select(0);
+                        data = editor.getData();
+                    }
+                    return fromRichText(data);
                 }
             },
             setValue: function (value, callback) {
@@ -200,6 +212,9 @@ define([
                 }
                 editor.insertHtml(bubbleOutputs(xpath, form) + ' ');
             },
+            select: function (index) {
+                ckSelect.call(null, editor, index);
+            },
             on: function () {
                 var args = Array.prototype.slice.call(arguments);
                 editor.on.apply(editor, args);
@@ -218,6 +233,68 @@ define([
         input.data("ckwrapper", wrapper);
         return wrapper;
     };
+
+    /**
+     * Set selection in CKEditor
+     */
+    function ckSelect(editor, index) {
+        function iterNodes(parent) {
+            var i = 0,
+                children = parent.getChildren(),
+                count = children.count(),
+                inner = null;
+            function next() {
+                var child;
+                if (inner) {
+                    child = inner();
+                    if (child !== null) {
+                        return child;
+                    }
+                    inner = null;
+                }
+                if (i >= count) {
+                    return null;
+                }
+                child = children.getItem(i);
+                i++;
+                if (child.type === CKEDITOR.NODE_ELEMENT) {
+                    var name = child.getName().toLowerCase();
+                    if (name === "p") {
+                        inner = iterNodes(child);
+                        return next();
+                    }
+                    if (name === "span" || name === "br") {
+                        return {node: parent, length: 1};
+                    }
+                    throw new Error("not implemented: " + name);
+                } else if (child.type === CKEDITOR.NODE_TEXT) {
+                    return {node: child, length: child.getText().length};
+                }
+                throw new Error("unhandled element type: " + child.type);
+            }
+            return next;
+        }
+        function getNodeOffset(index, nextNode) {
+            var offset = index,
+                node = nextNode();
+            while (node) {
+                if (node.length >= offset) {
+                    return {node: node.node, offset: offset};
+                }
+                offset -= node.length;
+                node = nextNode();
+            }
+            throw new Error("index is larger than content: " + index);
+        }
+        editor.focus();
+        var sel = editor.getSelection(),
+            nextNode = iterNodes(sel.root),
+            node = getNodeOffset(index, nextNode),
+            range = sel.getRanges()[0];
+        range.setStart(node.node, node.offset);
+        range.collapse(true);
+        sel.selectRanges([range]);
+    }
 
     /*
      * formats specifies the serialization for different formats that can be
