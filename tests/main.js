@@ -1,5 +1,4 @@
-/* global console, mocha, mochaPhantomJS */
-mocha.setup('bdd');
+/* global console, mocha */
 mocha.reporter('html');
 
 // PhantomJS doesn't support bind yet
@@ -125,33 +124,28 @@ require(['jquery', 'jquery.vellum'], function ($) {
                 $(".sidebar .nav #resultsTab a").click();
                 return false;
             }
-            if (window.mochaPhantomJS) {
-                mochaPhantomJS.run();
-            } else {
-                $(".sidebar #mocha-stats").remove();
-                mocha.run();
-                // move progress indicator into sidebar
-                $("#mocha-stats").css({
-                    "margin-top": "3em",
-                    position: "relative",
-                    left: 0,
-                    top: 0
-                }).appendTo(".sidebar");
-                $("#mocha-stats li").css({display: "block"});
-                $("#mocha-stats li.progress").css({height: "40px"});
-                $("#mocha-stats li.passes a").click(showTestResults);
-                $("#mocha-stats li.failures a").click(showTestResults);
-            }
+            $(".sidebar #mocha-stats").remove();
+            mocha.run();
+            // move progress indicator into sidebar
+            $("#mocha-stats").css({
+                "margin-top": "3em",
+                position: "relative",
+                left: 0,
+                top: 0
+            }).appendTo(".sidebar");
+            $("#mocha-stats li").css({display: "block"});
+            $("#mocha-stats li.progress").css({height: "40px"});
+            $("#mocha-stats li.passes a").click(showTestResults);
+            $("#mocha-stats li.failures a").click(showTestResults);
         }
         $('#run-tests').click(runTests);
 
-        // ensure the normal first test instance is fully loaded before
-        // destroying it for tests
-        setTimeout(function () {
-            if (window.mochaPhantomJS) {
-                runTests();
-            }
-        }, 1000);
+        // mocha.env is an object when invoked by mocha-phantomjs
+        if (mocha.env) {
+            // ensure the normal first test instance is fully loaded before
+            // destroying it for tests
+            setTimeout(runTests, 0);
+        }
 
         function load(form) {
             $('#vellum').empty().vellum($.extend(true, {}, options.options, {
