@@ -68,21 +68,5 @@ define([
             assert.strictEqual(setvalue.attr('ref'), '/data/text');
             assert.strictEqual(setvalue.attr('value'), 'blah');
         });
-
-        it("should warn when referencing another node", function() {
-            util.loadXML("");
-            util.addQuestion("Text", 'text1');
-            var text2 = util.addQuestion("Text", 'text2');
-            text2.p.defaultValue = '/data/text1';
-            assert.notStrictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
-        });
-
-        it("should not warn when referencing a case", function() {
-            util.loadXML("");
-            util.addQuestion("Text", 'text1');
-            var text2 = util.addQuestion("Text", 'text2');
-            text2.p.defaultValue = "instance('casedb')/case/attribute";
-            assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
-        });
     });
 });
