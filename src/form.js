@@ -154,6 +154,7 @@ define([
                     refs[mug.ufid] = {};
                 }
                 refs[mug.ufid][property || "."] = null;
+                that.internal = false;
             }
         };
 
@@ -308,6 +309,11 @@ define([
                         meta = null;
                     }
                     this.knownInstances[attrs.id] = attrs.src;
+                } else if (meta.attributes.id !== attrs.id) {
+                    // support renaming when there is no reference
+                    if (meta.internal) {
+                        meta.attributes.id = attrs.id;
+                    }
                 }
             } else if (attrs.id) {
                 // attrs has no src, find by id
@@ -465,7 +471,7 @@ define([
                 });
             if (meta) {
                 if (meta.dropReference(mug, property)) {
-                    this.instanceMetadata = _.without(this.instanceMetadata, meta);
+                    meta.internal = true;
                     return true;
                 }
             }
@@ -475,8 +481,10 @@ define([
          * Drop all instance references from the given mug/property
          */
         dropAllInstanceReferences: function (mug, property) {
-            this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
-                return !meta.dropReference(mug, property);
+            _.each(this.instanceMetadata, function (meta) {
+                if (meta.dropReference(mug, property)) {
+                    meta.internal = true;
+                }
             });
         },
         // todo: update references on rename
