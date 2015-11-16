@@ -97,9 +97,10 @@ define([
     }
 
     var _writeInstanceAttributes = function (writer, instanceMetadata) {
-        for (var attrId in instanceMetadata.attributes) {
-            if (instanceMetadata.attributes.hasOwnProperty(attrId)) {
-                writer.writeAttributeString(attrId, instanceMetadata.attributes[attrId]);
+        var attrs = instanceMetadata.attributes;
+        for (var attrId in attrs) {
+            if (attrs.hasOwnProperty(attrId) && attrs[attrId]) {
+                writer.writeAttributeString(attrId, attrs[attrId]);
             }
         }
     };

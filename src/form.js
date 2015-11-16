@@ -211,7 +211,7 @@ define([
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
-        this.knownInstances = {}; // {<instance id>: <instance src>}
+        this.knownInstances = {}; // {<instance id>: <instance src or children>}
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
@@ -320,7 +320,11 @@ define([
                         meta.attributes.src = this.knownInstances[attrs.id];
                     }
                 } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
-                    attrs.src = this.knownInstances[attrs.id];
+                    if (_.isObject(this.knownInstances[attrs.id]))
+                        attrs.children = this.knownInstances[attrs.id];
+                    else {
+                        attrs.src = this.knownInstances[attrs.id];
+                    }
                 }
             } else {
                 throw new Error("unsupported: non-primary instance without id or src");
@@ -329,8 +333,8 @@ define([
                 meta = InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }, null, mug || null, property);
-                if (!attrs.src) {
+                }, attrs.children, mug || null, property);
+                if (!attrs.src && !attrs.children) {
                     meta.internal = true;
                 }
                 this.instanceMetadata.push(meta);
@@ -442,8 +446,13 @@ define([
                 });
             } else {
                 _.each(this.instanceMetadata, function (meta) {
-                    if (meta.attributes.id && meta.attributes.src) {
+                    if (!meta.attributes.id) {
+                        return;
+                    }
+                    if (meta.attributes.src) {
                         instances[meta.attributes.id] = meta.attributes.src;
+                    } else if (meta.children) {
+                        instances[meta.attributes.id] = meta.children;
                     }
                 });
             }
