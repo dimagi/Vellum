@@ -827,12 +827,7 @@ define([
             id = id + options.idSuffix;
         }
         options.id = id;
-
-        if (mug.supportsRichText()) {
-            widget = widgets.richTextarea(mug, options);
-        } else {
-            widget = widgets.multilineText(mug, options);
-        }
+        widget = widgets.richTextarea(mug, options);
 
         $input = widget.input;
         $input.addClass('jstree-drop');
