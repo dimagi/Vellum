@@ -323,9 +323,7 @@ define([
                         meta.attributes.src = this.knownInstances[attrs.id].src;
                     }
                 } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
-                    _.each(this.knownInstances[attrs.id], function(v, k) {
-                        attrs[k] = v;
-                    });
+                    _.defaults(attrs, this.knownInstances[attrs.id]);
                 }
             } else {
                 throw new Error("unsupported: non-primary instance without id or src");
@@ -440,12 +438,14 @@ define([
                     .value();
                 _.each(map, function (instance, id) {
                     if (instance && !instances.hasOwnProperty(id)) {
-                        if (instance.src) {
-                            instances[id] = instance;
-                        } else if (instance.children) {
+                        if (instance.children) {
                             instances[id] = { children: $(instance.children)};
-                        } else {
+                        } else if (_.isString(instance)){
+                            // assume a string is the src
                             instances[id] = { src: instance };
+                        } else {
+                            // assume we are fed a correct instance dict
+                            instances[id] = instance;
                         }
                         var meta = metas[id];
                         if (meta && meta.internal) {
