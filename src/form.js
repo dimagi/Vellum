@@ -211,7 +211,8 @@ define([
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
-        this.knownInstances = {}; // {<instance id>: <instance src or children>}
+        // {<instance id>: { src or children: <instance src or children>}
+        this.knownInstances = {};
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
@@ -307,7 +308,7 @@ define([
                         attrs.id = getUniqueId(attrs.id, ids);
                         meta = null;
                     }
-                    this.knownInstances[attrs.id] = attrs.src;
+                    this.knownInstances[attrs.id] = { src: attrs.src };
                 }
             } else if (attrs.id) {
                 // attrs has no src, find by id
@@ -317,13 +318,13 @@ define([
                 if (meta) {
                     if (meta.internal && this.knownInstances.hasOwnProperty(attrs.id)) {
                         meta.internal = false;
-                        meta.attributes.src = this.knownInstances[attrs.id];
+                        meta.attributes.src = this.knownInstances[attrs.id].src;
                     }
                 } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
-                    if (_.isObject(this.knownInstances[attrs.id]))
-                        attrs.children = this.knownInstances[attrs.id];
-                    else {
-                        attrs.src = this.knownInstances[attrs.id];
+                    if (_.isString(this.knownInstances[attrs.id].src)) {
+                        attrs.src = this.knownInstances[attrs.id].src;
+                    } else {
+                        attrs.children = this.knownInstances[attrs.id].children;
                     }
                 }
             } else {
@@ -436,7 +437,11 @@ define([
                     .value();
                 _.each(map, function (src, id) {
                     if (src && !instances.hasOwnProperty(id)) {
-                        instances[id] = src;
+                        if (src.src) {
+                            instances[id] = src;
+                        } else {
+                            instances[id] = { src: src };
+                        }
                         var meta = metas[id];
                         if (meta && meta.internal) {
                             meta.internal = false;
@@ -450,9 +455,9 @@ define([
                         return;
                     }
                     if (meta.attributes.src) {
-                        instances[meta.attributes.id] = meta.attributes.src;
+                        instances[meta.attributes.id] = { src: meta.attributes.src };
                     } else if (meta.children) {
-                        instances[meta.attributes.id] = meta.children;
+                        instances[meta.attributes.id] = { children: meta.children };
                     }
                 });
             }

@@ -712,7 +712,7 @@ require([
         it("should copy dynamic select with itemset data and instance", function () {
             var data = [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "instances", "itemsetData"],
-                ["/select", "SelectDynamic", "select", "select", '{"foo":"jr://foo"}',
+                ["/select", "SelectDynamic", "select", "select", '{"foo":{"src":"jr://foo"}}',
                  '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
@@ -727,7 +727,7 @@ require([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "filter", "instances", "itemsetData"],
                 ["/select", "SelectDynamic", "select", "select",
                  '["type = instance(\'fum\')/fum/@type"]',
-                 '{"foo":"jr://foo","fum":"jr://fum"}',
+                 '{"foo":{"src":"jr://foo"},"fum":{"src":"jr://fum"}}',
                  '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
@@ -846,7 +846,7 @@ require([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
                 ['/repeat/item', 'Repeat', 'repeat', 'repeat',
                     '{"idsQuery":"instance(\'products\')/products/product/@id"}',
-                    '{"products":"jr://commtrack:products"}'],
+                    '{"products":{"src":"jr://commtrack:products"}}'],
             ];
             util.loadXML("");
             paste(data);
@@ -869,7 +869,7 @@ require([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
                 ['/repeat/item', 'Repeat', 'repeat', 'repeat',
                     '{"idsQuery":"instance(\'products\')/products/product/@id"}',
-                    '{"products":"jr://commtrack:products"}'],
+                    '{"products":{"src":"jr://commtrack:products"}}'],
             ]);
             assert(util.isTreeNodeValid("repeat/item"), util.getMessages("repeat/item"));
         });
