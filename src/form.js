@@ -1,6 +1,7 @@
 define([
     'require',
     'underscore',
+    'jquery',
     'xpath',
     'vellum/tree',
     'vellum/logic',
@@ -9,6 +10,7 @@ define([
 ], function (
     require,
     _,
+    $,
     xpath,
     Tree,
     logic,
@@ -321,11 +323,9 @@ define([
                         meta.attributes.src = this.knownInstances[attrs.id].src;
                     }
                 } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
-                    if (_.isString(this.knownInstances[attrs.id].src)) {
-                        attrs.src = this.knownInstances[attrs.id].src;
-                    } else {
-                        attrs.children = this.knownInstances[attrs.id].children;
-                    }
+                    _.each(this.knownInstances[attrs.id], function(v, k) {
+                        attrs[k] = v;
+                    });
                 }
             } else {
                 throw new Error("unsupported: non-primary instance without id or src");
@@ -386,7 +386,10 @@ define([
             expr.analyze();
             _.each(expr.instanceRefs, function (ignore, id) {
                 if (knownInstances.hasOwnProperty(id) && knownInstances[id]) {
-                    instances[id] = knownInstances[id];
+                    instances[id] = util.extend(knownInstances[id]);
+                    if (instances[id].children) {
+                        instances[id].children = $('<div>').append(instances[id].children).html();
+                    }
                 }
             });
             return instances;
@@ -435,17 +438,19 @@ define([
                     .map(function (m) { return [m.attributes.id, m]; })
                     .object()
                     .value();
-                _.each(map, function (src, id) {
-                    if (src && !instances.hasOwnProperty(id)) {
-                        if (src.src) {
-                            instances[id] = src;
+                _.each(map, function (instance, id) {
+                    if (instance && !instances.hasOwnProperty(id)) {
+                        if (instance.src) {
+                            instances[id] = instance;
+                        } else if (instance.children) {
+                            instances[id] = { children: $(instance.children)};
                         } else {
-                            instances[id] = { src: src };
+                            instances[id] = { src: instance };
                         }
                         var meta = metas[id];
                         if (meta && meta.internal) {
                             meta.internal = false;
-                            meta.attributes.src = src;
+                            meta.attributes.src = instances[id].src;
                         }
                     }
                 });
