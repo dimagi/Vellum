@@ -1,6 +1,7 @@
 define([
     'require',
     'underscore',
+    'jquery',
     'xpath',
     'vellum/tree',
     'vellum/logic',
@@ -9,6 +10,7 @@ define([
 ], function (
     require,
     _,
+    $,
     xpath,
     Tree,
     logic,
@@ -211,7 +213,8 @@ define([
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
-        this.knownInstances = {}; // {<instance id>: <instance src>}
+        // {<instance id>: { src or children: <instance src or children>}
+        this.knownInstances = {};
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
@@ -307,7 +310,7 @@ define([
                         attrs.id = getUniqueId(attrs.id, ids);
                         meta = null;
                     }
-                    this.knownInstances[attrs.id] = attrs.src;
+                    this.knownInstances[attrs.id] = { src: attrs.src };
                 }
             } else if (attrs.id) {
                 // attrs has no src, find by id
@@ -317,10 +320,10 @@ define([
                 if (meta) {
                     if (meta.internal && this.knownInstances.hasOwnProperty(attrs.id)) {
                         meta.internal = false;
-                        meta.attributes.src = this.knownInstances[attrs.id];
+                        meta.attributes.src = this.knownInstances[attrs.id].src;
                     }
                 } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
-                    attrs.src = this.knownInstances[attrs.id];
+                    _.defaults(attrs, this.knownInstances[attrs.id]);
                 }
             } else {
                 throw new Error("unsupported: non-primary instance without id or src");
@@ -329,8 +332,8 @@ define([
                 meta = InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }, null, mug || null, property);
-                if (!attrs.src) {
+                }, attrs.children, mug || null, property);
+                if (!attrs.src && !attrs.children) {
                     meta.internal = true;
                 }
                 this.instanceMetadata.push(meta);
@@ -381,7 +384,10 @@ define([
             expr.analyze();
             _.each(expr.instanceRefs, function (ignore, id) {
                 if (knownInstances.hasOwnProperty(id) && knownInstances[id]) {
-                    instances[id] = knownInstances[id];
+                    instances[id] = util.extend(knownInstances[id]);
+                    if (instances[id].children) {
+                        instances[id].children = $('<div>').append(instances[id].children).html();
+                    }
                 }
             });
             return instances;
@@ -430,20 +436,33 @@ define([
                     .map(function (m) { return [m.attributes.id, m]; })
                     .object()
                     .value();
-                _.each(map, function (src, id) {
-                    if (src && !instances.hasOwnProperty(id)) {
-                        instances[id] = src;
+                _.each(map, function (instance, id) {
+                    if (instance && !instances.hasOwnProperty(id)) {
+                        if (instance.children) {
+                            instances[id] = { children: $(instance.children)};
+                        } else if (_.isString(instance)){
+                            // assume a string is the src
+                            instances[id] = { src: instance };
+                        } else {
+                            // assume we are fed a correct instance dict
+                            instances[id] = instance;
+                        }
                         var meta = metas[id];
                         if (meta && meta.internal) {
                             meta.internal = false;
-                            meta.attributes.src = src;
+                            meta.attributes.src = instances[id].src;
                         }
                     }
                 });
             } else {
                 _.each(this.instanceMetadata, function (meta) {
-                    if (meta.attributes.id && meta.attributes.src) {
-                        instances[meta.attributes.id] = meta.attributes.src;
+                    if (!meta.attributes.id) {
+                        return;
+                    }
+                    if (meta.attributes.src) {
+                        instances[meta.attributes.id] = { src: meta.attributes.src };
+                    } else if (meta.children) {
+                        instances[meta.attributes.id] = { children: meta.children };
                     }
                 });
             }

@@ -8,6 +8,7 @@ require([
     'text!static/copy-paste/text-question.xml',
     'text!static/copy-paste/two-choices.xml',
     'text!static/copy-paste/two-questions.xml',
+    'text!static/form/manual-instance-reference.xml',
     'vellum/copy-paste',
     'vellum/tsv'
 ], function (
@@ -20,6 +21,7 @@ require([
     TEXT_QUESTION_XML,
     TWO_CHOICES_XML,
     TWO_QUESTIONS_XML,
+    MANUAL_INSTANCE_REFERENCE_XML,
     mod,
     tsv
 ) {
@@ -712,7 +714,7 @@ require([
         it("should copy dynamic select with itemset data and instance", function () {
             var data = [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "instances", "itemsetData"],
-                ["/select", "SelectDynamic", "select", "select", '{"foo":"jr://foo"}',
+                ["/select", "SelectDynamic", "select", "select", '{"foo":{"src":"jr://foo"}}',
                  '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
@@ -727,7 +729,7 @@ require([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "filter", "instances", "itemsetData"],
                 ["/select", "SelectDynamic", "select", "select",
                  '["type = instance(\'fum\')/fum/@type"]',
-                 '{"foo":"jr://foo","fum":"jr://fum"}',
+                 '{"foo":{"src":"jr://foo"},"fum":{"src":"jr://fum"}}',
                  '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
@@ -846,7 +848,7 @@ require([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
                 ['/repeat/item', 'Repeat', 'repeat', 'repeat',
                     '{"idsQuery":"instance(\'products\')/products/product/@id"}',
-                    '{"products":"jr://commtrack:products"}'],
+                    '{"products":{"src":"jr://commtrack:products"}}'],
             ];
             util.loadXML("");
             paste(data);
@@ -869,7 +871,7 @@ require([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
                 ['/repeat/item', 'Repeat', 'repeat', 'repeat',
                     '{"idsQuery":"instance(\'products\')/products/product/@id"}',
-                    '{"products":"jr://commtrack:products"}'],
+                    '{"products":{"src":"jr://commtrack:products"}}'],
             ]);
             assert(util.isTreeNodeValid("repeat/item"), util.getMessages("repeat/item"));
         });
@@ -982,6 +984,43 @@ require([
             var input = $("[name=property-nodeID]");
             input.val("other").change();
             assert.equal(input.val(), "other");
+        });
+
+        describe("with instances without src", function() {
+            before(function (done) {
+                util.init({
+                    features: { rich_text: false },
+                    javaRosa: { langs: ['en'] },
+                    core: {
+                        onReady: function () {
+                            assert(this.isPluginEnabled("copyPaste"),
+                                   "copyPaste plugin should be enabled");
+                            done();
+                        }
+                    }
+                });
+            });
+
+            var data = [
+                ['id', 'type', 'labelItext:en-default', 'appearance', 'calculateAttr', 'instances'],
+                ['/score', 'Int', 'What was your score', 'null', 'null', 'null'],
+                ['/output', 'DataBindOnly', 'null', 'null',
+                    "instance('scores')/score[@high > /data/score][@low < /data/score]",
+                    '{"scores":{"children":"<score low=\\"0.0\\" high=\\"500.0\\">You\'re really bad</score><score low=\\"500.0\\" high=\\"99999999.0\\">You\'re really good</score>"}}'],
+                ['/result', 'Trigger', '<output value="/data/output"/>', 'minimal', 'null', 'null'],
+            ];
+
+            it("should properly paste", function() {
+                util.loadXML("");
+                paste(data);
+                util.assertXmlEqual(call("createXML"), MANUAL_INSTANCE_REFERENCE_XML, {normalize_xmlns: true});
+            });
+
+            it("should properly copy", function() {
+                util.loadXML(MANUAL_INSTANCE_REFERENCE_XML);
+                util.selectAll();
+                eq(mod.copy(), data);
+            });
         });
 
         describe("with multimedia", function () {

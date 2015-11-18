@@ -13,7 +13,8 @@ define([
     'text!static/form/select-questions.xml',
     'text!static/form/mismatch-tree-order.xml',
     'text!static/form/hidden-value-tree-order.xml',
-    'text!static/form/instance-reference.xml'
+    'text!static/form/instance-reference.xml',
+    'text!static/form/manual-instance-reference.xml'
 ], function (
     util,
     chai,
@@ -29,7 +30,8 @@ define([
     SELECT_QUESTIONS,
     MISMATCH_TREE_ORDER_XML,
     HIDDEN_VALUE_TREE_ORDER,
-    INSTANCE_REFERENCE_XML
+    INSTANCE_REFERENCE_XML,
+    MANUAL_INSTANCE_REFERENCE_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -329,6 +331,13 @@ define([
             assertInstanceSrc("groups", form,
                 "jr://fixture/user-groups",
                 "groups instance not found");
+        });
+
+        it("should not delete manual instances when it's reference is updated", function() {
+            util.loadXML(MANUAL_INSTANCE_REFERENCE_XML);
+            util.clickQuestion('output');
+            $('[name=property-calculateAttr]').change();
+            util.assertXmlEqual(call('createXML'), MANUAL_INSTANCE_REFERENCE_XML);
         });
 
         describe("instance tracker", function () {
