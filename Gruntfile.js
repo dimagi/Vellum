@@ -16,6 +16,14 @@ module.exports = function(grunt)  {
             }
         }
     },
+    watch: {
+        files: [
+            '<%= jshint.src.src %>',
+            '<%= jshint.tests.src %>',
+            'Gruntfile.js',
+        ],
+        tasks: ['jshint'],
+    },
     // test: {
     //   options: {
     //     banner: '#<{(|! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> |)}>#\n'
@@ -28,6 +36,7 @@ module.exports = function(grunt)  {
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('default', ['jshint']);
 };
