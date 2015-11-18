@@ -95,13 +95,6 @@ $ ./test
 $ ./test --help # for advanced usage
 ```
 
-Make dependency graph image:
-```
-$ make madge
-```
-
-![](deps.png)
-
 ### Testing on Heroku
 
 NOTE: this is outdated, and may not work anymore

@@ -13,9 +13,6 @@ test: tar _test
 deps:
 	npm install
 
-madge:
-	PATH=$$(npm bin):$$PATH madge --format amd src -R src/main.js -i deps.png -x "^(css.*|jquery|underscore|main|util)$$"
-
 _rjs:
 	rm -rf _build
 	PATH=$$(npm bin):$$PATH r.js -o build.js
