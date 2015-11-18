@@ -21,7 +21,6 @@
         "tests"
     ],
     "dependencies": {
-        "almond": "~0.2.9", 
         "underscore": "~1.4.4",
         "jquery": "~1.11.1",
         "requirejs": "~2.1.11",
