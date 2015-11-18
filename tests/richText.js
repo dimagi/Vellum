@@ -278,104 +278,136 @@ define([
     });
 
     describe("The rich text editor", function () {
-        var el = $("<div id='cktestparent'><div contenteditable /></div>"),
-            options = {isExpression: false},
-            input, editor;
-        before(function (done) {
-            $("body").append(el);
-            input = el.children().first();
-            editor = richText.editor(input, formShim, options);
-            // wait for editor to be ready; necessary to change selection
-            input.promise.then(function () { done(); });
-        });
-        beforeEach(function (done) {
-            editor.setValue("", function () { done(); });
-        });
-        after(function () {
-            editor.destroy();
-            assert.equal($("#cktestparent").length, 1);
-            el.remove();
-            assert.equal($("#cktestparent").length, 0);
-        });
-
-        it("should be accessible via various jquery paths", function (done) {
-            var v0 = editor,
-                v1 = richText.editor(input);
-            assert.equal(v0, v1);
-            v0.setValue("test", function () {
-                assert.equal(v1.getValue(), "test");
-                var div = $("#cktestparent").children().first();
-                assert.equal(richText.editor(div), v0);
-                done();
+        describe("", function() {
+            var el = $("<div id='cktestparent'><div contenteditable /></div>"),
+                options = {isExpression: false},
+                input, editor;
+            before(function (done) {
+                $("body").append(el);
+                input = el.children().first();
+                editor = richText.editor(input, formShim, options);
+                // wait for editor to be ready; necessary to change selection
+                input.promise.then(function () { done(); });
             });
-        });
-
-        it("should return just-set value on get value", function () {
-            var text = '<output value="/data/text" />';
-            assert.notEqual(editor.getValue(), text);
-            editor.setValue(text);
-            assert.equal(editor.getValue(), text);
-        });
-
-        it("should create output on insert expression into label editor", function (done) {
-            var output = '<output value="/data/text" />';
-            editor.setValue('one two', function () {
-                assert.equal(editor.getValue(), 'one two');
-                editor.select(3);
-                editor.insertExpression("/data/text");
-                assert.equal(editor.getValue(), "one" + output + " two");
-                done();
+            beforeEach(function (done) {
+                editor.setValue("", function () { done(); });
             });
-        });
-
-        it("should insert output into label editor", function (done) {
-            var output = '<output value="/data/text" />';
-            editor.setValue('one two', function () {
-                assert.equal(editor.getValue(), 'one two');
-                editor.select(3);
-                editor.insertOutput(output);
-                assert.equal(editor.getValue(), "one" + output + " two");
-                done();
+            after(function () {
+                editor.destroy();
+                assert.equal($("#cktestparent").length, 1);
+                el.remove();
+                assert.equal($("#cktestparent").length, 0);
             });
-        });
 
-        function applyArgs(func) {
-            return function (args) {
-                return func.apply(this, args);
-            };
-        }
-
-        _.each([
-            ["one two", 3, "one/data/text two"],
-            ["one two", 4, "one /data/text two"],
-            ["one\n\ntwo", 3, "one/data/text\n\ntwo"],
-            ["one\n\ntwo", 4, "one\n/data/text\ntwo"],
-            /* TODO make these tests pass
-            ["one\n\ntwo", 5, "one\n\n/data/text two"],
-            ["11\n\n22\n\n33", 5, "11\n\n2/data/text 2\n\n33"],
-            ["11\n\n22\n\n33", 6, "11\n\n22/data/text\n\n33"],
-            ["11\n\n22\n\n33", 7, "11\n\n22\n/data/text\n33"],
-            ["11\n\n22\n\n33", 8, "11\n\n22\n\n/data/text 33"],
-            ["11\n\n22\n\n33", 9, "11\n\n22\n\n3/data/text 3"],
-            ["11\n\n22\n\n33", 10, "11\n\n22\n\n33/data/text"],
-            */
-        ], applyArgs(function (expr, i, result) {
-            var repr = JSON.stringify(result);
-            it("should insert expression into expression at " + i + ": " + repr, function (done) {
-                editor.setValue(expr, function () {
-                    assert.equal(editor.getValue(), expr);
-                    editor.select(i);
-                    // temporarily change to expression editor
-                    options.isExpression = true;
-                    try {
-                        editor.insertExpression('/data/text');
-                        assert.equal(editor.getValue(), result);
-                    } finally {
-                        options.isExpression = false;
-                    }
+            it("should be accessible via various jquery paths", function (done) {
+                var v0 = editor,
+                    v1 = richText.editor(input);
+                assert.equal(v0, v1);
+                v0.setValue("test", function () {
+                    assert.equal(v1.getValue(), "test");
+                    var div = $("#cktestparent").children().first();
+                    assert.equal(richText.editor(div), v0);
                     done();
                 });
             });
-        }));
+
+            it("should return just-set value on get value", function () {
+                var text = '<output value="/data/text" />';
+                assert.notEqual(editor.getValue(), text);
+                editor.setValue(text);
+                assert.equal(editor.getValue(), text);
+            });
+
+            it("should create output on insert expression into label editor", function (done) {
+                var output = '<output value="/data/text" />';
+                editor.setValue('one two', function () {
+                    assert.equal(editor.getValue(), 'one two');
+                    editor.select(3);
+                    editor.insertExpression("/data/text");
+                    assert.equal(editor.getValue(), "one" + output + " two");
+                    done();
+                });
+            });
+
+            it("should insert output into label editor", function (done) {
+                var output = '<output value="/data/text" />';
+                editor.setValue('one two', function () {
+                    assert.equal(editor.getValue(), 'one two');
+                    editor.select(3);
+                    editor.insertOutput(output);
+                    assert.equal(editor.getValue(), "one" + output + " two");
+                    done();
+                });
+            });
+
+            function applyArgs(func) {
+                return function (args) {
+                    return func.apply(this, args);
+                };
+            }
+
+            _.each([
+                ["one two", 3, "one/data/text two"],
+                ["one two", 4, "one /data/text two"],
+                ["one\n\ntwo", 3, "one/data/text\n\ntwo"],
+                ["one\n\ntwo", 4, "one\n/data/text\ntwo"],
+                /* TODO make these tests pass
+                ["one\n\ntwo", 5, "one\n\n/data/text two"],
+                ["11\n\n22\n\n33", 5, "11\n\n2/data/text 2\n\n33"],
+                ["11\n\n22\n\n33", 6, "11\n\n22/data/text\n\n33"],
+                ["11\n\n22\n\n33", 7, "11\n\n22\n/data/text\n33"],
+                ["11\n\n22\n\n33", 8, "11\n\n22\n\n/data/text 33"],
+                ["11\n\n22\n\n33", 9, "11\n\n22\n\n3/data/text 3"],
+                ["11\n\n22\n\n33", 10, "11\n\n22\n\n33/data/text"],
+                */
+            ], applyArgs(function (expr, i, result) {
+                var repr = JSON.stringify(result);
+                it("should insert expression into expression at " + i + ": " + repr, function (done) {
+                    editor.setValue(expr, function () {
+                        assert.equal(editor.getValue(), expr);
+                        editor.select(i);
+                        // temporarily change to expression editor
+                        options.isExpression = true;
+                        try {
+                            editor.insertExpression('/data/text');
+                            assert.equal(editor.getValue(), result);
+                        } finally {
+                            options.isExpression = false;
+                        }
+                        done();
+                    });
+                });
+            }));
+        });
+
+        describe("in vellum", function() {
+            var widget;
+
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    form: "",
+                    core: {
+                        onReady: function() {
+                            util.addQuestion("Text", 'text');
+                            widget = util.getWidget('itext-en-label');
+                            widget.input.promise.then(function () { done(); });
+                        }
+                    },
+                    features: {rich_text: true},
+                });
+            });
+
+            it("should show the markdown preview", function(done) {
+                var super_handleChange = widget.handleChange;
+                function handleChange() {
+                    super_handleChange();
+                    assert($('.has-markdown').length);
+                    done();
+                }
+                widget.setValue('# blah', handleChange);
+            });
+        });
     });
+
 });
