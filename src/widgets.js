@@ -251,7 +251,7 @@ define([
             editor = richTextUtils.editor(widget.input, mug.form, opts);
 
         mug.on('teardown-mug-properties', editor.destroy, null, "teardown-mug-properties");
-        editor.on('change', widget.handleChange);
+        editor.on('change', function () { widget.handleChange(); });
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
             // gets rid of atwho wrapper

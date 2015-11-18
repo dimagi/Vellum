@@ -827,12 +827,7 @@ define([
             id = id + options.idSuffix;
         }
         options.id = id;
-
-        if (mug.supportsRichText()) {
-            widget = widgets.richTextarea(mug, options);
-        } else {
-            widget = widgets.multilineText(mug, options);
-        }
+        widget = widgets.richTextarea(mug, options);
 
         $input = widget.input;
         $input.addClass('jstree-drop');
@@ -1084,7 +1079,7 @@ define([
         widget.handleChange = function() {
             super_handleChange();
             var val = widget.getValue(),
-                item = this.getItextItem();
+                item = widget.getItextItem();
             if (looksLikeMarkdown(val)) {
                 if (wantsMarkdown) {
                     parent.removeClass("markdown-ignorant");
@@ -1097,8 +1092,8 @@ define([
             markdownOutput.html(util.markdown(val)).removeClass('hide');
         };
 
-        widget.setValue = function (val) {
-            super_setValue(val);
+        widget.setValue = function (val, callback) {
+            super_setValue(val, callback);
             if (!val) {
                 markdownOutput.addClass('hide');
             }
