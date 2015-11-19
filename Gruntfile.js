@@ -22,21 +22,31 @@ module.exports = function(grunt)  {
             '<%= jshint.tests.src %>',
             'Gruntfile.js',
         ],
-        tasks: ['jshint'],
+        tasks: ['test', 'jshint'],
     },
-    // test: {
-    //   options: {
-    //     banner: '#<{(|! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> |)}>#\n'
-    //   },
-    //   build: {
-    //     src: 'src/<%= pkg.name %>.js',
-    //     dest: 'build/<%= pkg.name %>.min.js'
-    //   }
-    // }
+    mocha_phantomjs: {
+        all: {
+            options: {
+                urls: ['http://localhost:8000/index.html']
+            }
+        }
+    },
+    connect: {
+        server: {
+            options: {
+                port: 8000,
+                base: '.',
+            }
+        }
+    },
+
   });
 
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-mocha-phantomjs');
 
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('default', ['test', 'jshint']);
+  grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
 };
