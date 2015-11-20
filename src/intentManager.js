@@ -317,7 +317,6 @@ define([
                 widget: widgets.media,
             },
             androidIntentAppId: { visibility: 'hidden' },
-            androidIntentResponse: { visibility: 'hidden' },
         }
     });
 
