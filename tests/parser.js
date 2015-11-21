@@ -105,6 +105,12 @@ require([
         it("should load question without bind element", function () {
             util.loadXML(MISSING_BIND_XML);
         });
+
+        it("should set undefined for data value", function () {
+            util.loadXML(MISSING_BIND_XML);
+            util.clickQuestion("text");
+            assert(!$('[name=property-dataValue]').length);
+        });
     });
 
     var TEST_XML_1 = '' + 
