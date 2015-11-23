@@ -23,18 +23,26 @@ module.exports = function(grunt)  {
             'Gruntfile.js',
         ],
         tasks: ['test', 'jshint'],
+        options: {
+            interrupt: true,
+        }
     },
     mocha_phantomjs: {
         all: {
             options: {
-                urls: ['http://localhost:8000/index.html']
+                urls: ['http://localhost:8000/index.html'],
+                reporter: 'nyan', // the only one that gives # of tests completed
+                config: {
+                    'bail': true,
+                    'grep': grunt.option('grep') || "",
+                }
             }
         }
     },
     connect: {
         server: {
             options: {
-                port: 8000,
+                port: grunt.option('port') || 8000,
                 base: '.',
             }
         }
