@@ -17,7 +17,6 @@
  *   <span data-value="xpath" data-output-value=boolean>
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
- *     <i class="close">&times;</i>
  *   </span>
  *
  * Any other HTML has undefined behavior
@@ -64,30 +63,9 @@ define([
             element.replaceWithChildren();
         },
         init: function() {
-            // Add close button
-            var that = this,
-                buttons = this.element.getElementsByTag("button"),
-                button;
-            if (buttons.count()) {
-                // sometimes the it's in the dom
-                // apparently init can be called more than once for a widget!?
-                button = buttons.getItem(0);
-            } else {
-                button = CKEDITOR.dom.element.createFromHtml(
-                            "<button class='close'>&times;</button>");
-                this.element.append(button);
-            }
-            button.on("click", function () {
-                that.editor.widgets.del(that);
-                that.editor.fire('saveSnapshot');
-                return false;
-            });
-
             // TODO: PR to ckeditor to make changing drag ui supported
-            // Leave 15px on the left side so that users can actually
-            // interact with the close button
-            var width = $(this.element.$).innerWidth() - 15;
-            var height = $(this.element.$).outerHeight() + 4;
+            var width = $(this.element.$).innerWidth();
+            var height = $(this.element.$).outerHeight();
             this.dragHandlerContainer.setStyles({
                 width: width + 'px',
                 height: height + 'px',
