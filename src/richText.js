@@ -64,17 +64,6 @@ define([
             element.replaceWithChildren();
         },
         init: function() {
-            // TODO: PR to ckeditor to make changing drag ui supported
-            // Leave 15px on the left side so that users can actually
-            // interact with the close button
-            var width = $(this.element.$).innerWidth() - 15;
-            var height = $(this.element.$).outerHeight() + 4;
-            this.dragHandlerContainer.setStyles({
-                width: width + 'px',
-                height: height + 'px',
-                left: '0px'
-            });
-
             // Add close button
             var that = this,
                 buttons = this.element.getElementsByTag("button"),
@@ -92,6 +81,17 @@ define([
                 that.editor.widgets.del(that);
                 that.editor.fire('saveSnapshot');
                 return false;
+            });
+
+            // TODO: PR to ckeditor to make changing drag ui supported
+            // Leave 15px on the left side so that users can actually
+            // interact with the close button
+            var width = $(this.element.$).innerWidth() - 15;
+            var height = $(this.element.$).outerHeight() + 4;
+            this.dragHandlerContainer.setStyles({
+                width: width + 'px',
+                height: height + 'px',
+                left: '0px'
             });
 
             // Setup popover
