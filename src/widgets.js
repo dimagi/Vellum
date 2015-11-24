@@ -414,6 +414,7 @@ define([
             path = options.widgetValuePath || options.path,
             id = options.id || 'property-' + path;
         widget.definition = mug.p.getDefinition(options.path);
+        options.noRichText = true;
 
         widget.mugValue = options.mugValue || function (mug, value) {
             if (arguments.length === 1) {
