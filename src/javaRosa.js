@@ -822,12 +822,14 @@ define([
             Itext = vellum.data.javaRosa.Itext,
             // todo: id->class
             id = "itext-" + language + "-" + options.itextType,
+            widgetClass = options.baseWidgetClass || widgets.richTextarea,
             widget, $input;
+
         if (options.idSuffix) {
             id = id + options.idSuffix;
         }
         options.id = id;
-        widget = widgets.richTextarea(mug, options);
+        widget = widgetClass(mug, options);
 
         $input = widget.input;
         $input.addClass('jstree-drop');
@@ -1156,6 +1158,7 @@ define([
 
     var itextMediaWidget = function (url_type) {
         return function (mug, language, form, options) {
+            options.baseWidgetClass = widgets.text;
             var widget = itextFormWidget(mug, language, form, options);
 
             widget.getDefaultValue = function () {
