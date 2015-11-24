@@ -407,6 +407,14 @@ define([
                 }
                 widget.setValue('# blah', handleChange);
             });
+
+            it("should allow editing of validation message", function () {
+                var mug = util.getMug('text'),
+                    msg = $('[name=itext-en-constraintMsg]');
+                mug.p.constraintAttr = '.';
+                msg.focus();
+                assert(msg[0].isContentEditable);
+            });
         });
     });
 

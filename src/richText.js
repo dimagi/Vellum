@@ -208,6 +208,9 @@ define([
                 }
             },
         };
+
+        // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
+        editor.on('focus', function () { editor.setReadOnly(false); });
         input.data("ckwrapper", wrapper);
         return wrapper;
     };
