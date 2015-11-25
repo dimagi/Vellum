@@ -75,12 +75,11 @@ define([
     _,
     util
 ) {
-    var vellum, dataSourcesEndpoint, dataCache, dataCallbacks;
+    var dataSourcesEndpoint, dataCache, dataCallbacks;
 
     // called during core init
     function init(instance) {
-        vellum = instance;
-        dataSourcesEndpoint = vellum.opts().core.dataSourcesEndpoint;
+        dataSourcesEndpoint = instance.opts().core.dataSourcesEndpoint;
         reset();
     }
 
