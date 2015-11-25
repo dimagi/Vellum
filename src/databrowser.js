@@ -17,6 +17,7 @@ define([
     external_sources_tree
 ) {
     var fn = {},
+        DATABROWSER_HEIGHT = 0.33,
         panelHeight;
 
     // plugin adds an item to the Tools menu when enabled
@@ -31,7 +32,7 @@ define([
             head = pane.find(".fd-head-external-sources");
             headHeight = head.outerHeight(true) || 0;
             pane.data("min-size", headHeight)
-                .height(tree.height() * 0.45)
+                .height(tree.height() * DATABROWSER_HEIGHT)
                 .resize(function () {
                     if (pane.height() > headHeight + 100) {
                         panelHeight = pane.height();
@@ -224,7 +225,7 @@ define([
             $(window).resize();
         } else {
             var tree = vellum.$f.find(".fd-tree"),
-                height = panelHeight || tree.height() * 0.45;
+                height = panelHeight || tree.height() * DATABROWSER_HEIGHT;
             pane.css("height", height + "px");
             pane.find('.fd-head-external-sources .fd-head-max-indicator i')
                 .removeClass('icon-circle-arrow-up')
