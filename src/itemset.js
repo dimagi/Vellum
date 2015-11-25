@@ -5,6 +5,7 @@ define([
     'tpl!vellum/templates/custom_data_source',
     'vellum/widgets',
     'vellum/datasources',
+    'vellum/datasourcewidgets',
     'vellum/form',
     'vellum/mugs',
     'vellum/parser',
@@ -18,6 +19,7 @@ define([
     custom_data_source,
     widgets,
     datasources,
+    datasourceWidgets,
     form,
     mugs,
     parser,
@@ -158,7 +160,7 @@ define([
                 autocompleteChoices: function(mug) {
                     var sources = getDataSources(),
                         src = mug.p.itemsetData.instance.src;
-                    return datasources.autocompleteChoices(sources, src);
+                    return datasourceWidgets.autocompleteChoices(sources, src);
                 },
                 help: "This is an XPath expression that will filter the set " +
                       "of choices from the lookup table",
@@ -343,7 +345,7 @@ define([
 
         function updateAutocomplete(data) {
             var value = super_getValue(),
-                choices = datasources.autocompleteChoices(data, value ? value.src : "");
+                choices = datasourceWidgets.autocompleteChoices(data, value ? value.src : "");
             atwho.dropdownAutocomplete(valueRef(), choices);
             atwho.dropdownAutocomplete(labelRef(), choices);
             return choices;
@@ -411,7 +413,7 @@ define([
             dataSources = [],
             optionsLoaded = false,
             canUpdateAutocomplete = false,
-            widget = datasources.fixtureWidget(mug, options, "Lookup Table"),
+            widget = datasourceWidgets.fixtureWidget(mug, options, "Lookup Table"),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             super_handleChange = widget.handleChange;
@@ -461,7 +463,7 @@ define([
         var value = mug.p.itemsetData,
             instance = value ? value.instance : null,
             src = instance ? instance.src : "",
-            choices = datasources.autocompleteChoices(getDataSources(), src);
+            choices = datasourceWidgets.autocompleteChoices(getDataSources(), src);
 
         atwho.dropdownAutocomplete(widget.input, choices);
 
@@ -475,11 +477,11 @@ define([
                 instance = itemsetData.instance,
                 instanceSrc = instance ? instance.src : '',
                 sources = getDataSources(),
-                fixtures = datasources.getPossibleFixtures(sources),
+                fixtures = datasourceWidgets.getPossibleFixtures(sources),
                 notCustom = _.some(fixtures, function (fixture) {
                     return fixture.src === instanceSrc;
                 }),
-                choices = datasources.autocompleteChoices(sources, instanceSrc),
+                choices = datasourceWidgets.autocompleteChoices(sources, instanceSrc),
                 filterRegex = /\[[^\[]+]/g,
                 strippedMugAttr = mugAttr.replace(filterRegex, "");
 
