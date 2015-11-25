@@ -2,7 +2,7 @@ define([
     'vellum/form',
     'jquery',
     'underscore',
-    'vellum/datasources',
+    'vellum/datasourcewidgets',
     'vellum/mugs',
     'vellum/parser',
     'vellum/tree',
@@ -12,7 +12,7 @@ define([
     form_,
     $,
     _,
-    datasources,
+    datasourceWidgets,
     mugs,
     parser,
     Tree,
@@ -286,7 +286,7 @@ define([
     }
 
     function idsQueryDataSourceWidget(mug, options) {
-        var widget = datasources.advancedDataSourceWidget(
+        var widget = datasourceWidgets.advancedDataSourceWidget(
                                     mug, options, "Model Iteration ID Query"),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
