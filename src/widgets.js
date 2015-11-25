@@ -247,7 +247,7 @@ define([
             .addClass('input-block-level jstree-drop')
             .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
-        var opts = {isExpression: options.widget === xPath},
+        var opts = {isExpression: options.widget === xPath || options.widget === droppableText},
             editor = richTextUtils.editor(widget.input, mug.form, opts);
 
         mug.on('teardown-mug-properties', editor.destroy, null, "teardown-mug-properties");
@@ -321,7 +321,7 @@ define([
     };
 
     var droppableText = function (mug, options) {
-        var widget = text(mug, options);
+        var widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
             .attr('placeholder', 'Hint: drag a question here.')
             .change(function () {
@@ -414,6 +414,7 @@ define([
             path = options.widgetValuePath || options.path,
             id = options.id || 'property-' + path;
         widget.definition = mug.p.getDefinition(options.path);
+        options.noRichText = true;
 
         widget.mugValue = options.mugValue || function (mug, value) {
             if (arguments.length === 1) {
