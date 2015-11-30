@@ -86,10 +86,14 @@ define([
                     labelMug = widget.mug.form.getMugByPath(xpath),
                     labelText = labelMug && labelMug.p.labelItext ?
                                 labelMug.p.labelItext.get() : "";
+                labelText = $('<div>').append(labelText);
+                labelText.find('output').replaceWith(function () {
+                    return extractXPathInfoFromOutputValue($(this).attr('value')).reference;
+                });
                 $(this.dragHandlerContainer.$).children("img").stickyover({
                     title: displayId + '<small>' + xpath + '</small>',
                     html: true,
-                    content: '<p>' + labelText + '</p>',
+                    content: '<p>' + labelText.text() + '</p>',
                     template: '<div contenteditable="false" class="popover fd-popover">' +
                         '<div class="popover-inner">' +
                         '<h3 class="popover-title"></h3>' +
