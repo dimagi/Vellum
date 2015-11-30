@@ -76,8 +76,7 @@ define([
             var $this = $(this.element.$),
                 datavalue = $this.attr('data-value'),
                 // WARNING does the wrong thing for value like "/data/q + 3"
-                match =  datavalue.match('output value="(.*)"'),
-                xpath = match ? match[1] : datavalue,
+                xpath = extractXPathInfoFromOutputValue(datavalue).reference,
                 getWidget = require('vellum/widgets').util.getWidget,
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
@@ -385,27 +384,9 @@ define([
      * @returns - jquery object of xpath bubble
      */
     function replacePathWithBubble(form, value) {
-        var xpath = value,
-            outputValueRegex = /<output\s+value="([^"]+)"/,
-            dateFormatRegex = /<output\s+value="format-date\(date\(([^)]+)\),\s*'([^']+)'\)"/,
-            match = dateFormatRegex.exec(value),
-            extraAttrs = {
-                'data-output-value': false,
-            };
-
-        if (match) {
-            extraAttrs = {
-                'data-output-value': true,
-                'data-date-format': match[2],
-            };
-            xpath = match[1];
-        } else {
-            match = outputValueRegex.exec(value);
-            if (match) {
-                extraAttrs = { 'data-output-value': true };
-                xpath = match[1];
-            }
-        }
+        var info = extractXPathInfoFromOutputValue(value),
+            xpath = info.reference,
+            extraAttrs = _.omit(info, 'reference');
 
         // only support absolute path right now
         if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
@@ -548,6 +529,31 @@ define([
      */
     function fromRichText(html) {
         return unwrapBubbles(fromHtml(html));
+    }
+
+    function extractXPathInfoFromOutputValue(value) {
+        var outputValueRegex = /<output\s+value="([^"]+)"/,
+            dateFormatRegex = /format-date\(date\(([^)]+)\),\s*'([^']+)'\)/,
+            dateMatch = dateFormatRegex.exec(value),
+            outputValueMatch = outputValueRegex.exec(value);
+
+        if (dateMatch) {
+            return {
+                'data-output-value': !!outputValueMatch,
+                'data-date-format': dateMatch[2],
+                reference: dateMatch[1],
+            };
+        } else if (outputValueMatch){
+            return {
+                'data-output-value': true,
+                reference: outputValueMatch[1],
+            };
+        }
+
+        return {
+            'data-output-value': false,
+            reference: value,
+        };
     }
 
     return {
