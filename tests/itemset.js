@@ -256,4 +256,26 @@ require([
             });
         });
     });
+
+    describe("The Dynamic Itemset plugin with no fixtures", function () {
+        var DATA_SOURCES = [{id: "ignored", uri: "jr://not-a-fixture"}];
+        before(function (done) {
+            util.init({
+                plugins: plugins,
+                javaRosa: {langs: ['en']},
+                core: {
+                    dataSourcesEndpoint: function (callback) { callback(DATA_SOURCES); },
+                    onReady: done,
+                },
+                features: {lookup_tables: true},
+            });
+        });
+        beforeEach(datasources.reset);
+
+        it("should be able to configure Lookup Table Data", function() {
+            util.addQuestion("SelectDynamic", "select");
+            util.clickQuestion("select/itemset");  // should not throw exception
+            assert.equal($("[name=property-itemsetData]").length, 1);
+        });
+    });
 });
