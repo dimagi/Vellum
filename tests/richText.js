@@ -30,6 +30,7 @@ define([
     'vellum/richText',
     'vellum/javaRosa',
     'ckeditor',
+    'text!static/richText/burpee.xml',
 ], function(
     chai,
     $,
@@ -37,7 +38,8 @@ define([
     util,
     richText,
     javaRosa,
-    CKEDITOR
+    CKEDITOR,
+    BURPEE_XML
 ) {
     var assert = chai.assert,
         formShim = {
@@ -383,39 +385,65 @@ define([
         describe("in vellum", function() {
             var widget;
 
-            before(function (done) {
-                util.init({
-                    javaRosa: {langs: ['en']},
-                    form: "",
-                    core: {
-                        onReady: function() {
-                            util.addQuestion("Text", 'text');
-                            widget = util.getWidget('itext-en-label');
-                            widget.input.promise.then(function () { done(); });
-                        }
-                    },
-                    features: {rich_text: true},
+            describe("", function () {
+                before(function (done) {
+                    util.init({
+                        javaRosa: {langs: ['en']},
+                        form: "",
+                        core: {
+                            onReady: function() {
+                                util.addQuestion("Text", 'text');
+                                widget = util.getWidget('itext-en-label');
+                                widget.input.promise.then(function () { done(); });
+                            }
+                        },
+                        features: {rich_text: true},
+                    });
+                });
+
+                it("should show the markdown preview", function(done) {
+                    var super_handleChange = widget.handleChange;
+                    function handleChange() {
+                        super_handleChange();
+                        assert($('.has-markdown').length);
+                        done();
+                    }
+                    widget.setValue('# blah', handleChange);
+                });
+
+                it("should allow editing of validation message", function () {
+                    var mug = util.getMug('text'),
+                        msg = $('[name=itext-en-constraintMsg]');
+                    mug.p.constraintAttr = '.';
+                    msg.focus();
+                    assert(msg[0].isContentEditable);
                 });
             });
 
-            it("should show the markdown preview", function(done) {
-                var super_handleChange = widget.handleChange;
-                function handleChange() {
-                    super_handleChange();
-                    assert($('.has-markdown').length);
-                    done();
-                }
-                widget.setValue('# blah', handleChange);
-            });
+            describe("popovers", function () {
+                before(function (done) {
+                    util.init({
+                        javaRosa: {langs: ['en']},
+                        form: "",
+                        core: { onReady: done },
+                        features: {rich_text: true},
+                    });
+                });
 
-            it("should allow editing of validation message", function () {
-                var mug = util.getMug('text'),
-                    msg = $('[name=itext-en-constraintMsg]');
-                mug.p.constraintAttr = '.';
-                msg.focus();
-                assert(msg[0].isContentEditable);
+                it("should show xpath on popover", function (done) {
+                    util.loadXML(BURPEE_XML);
+                    util.clickQuestion("total_num_burpees");
+                    widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        assert(bubble, "No bubbles detected");
+                        bubble.mouseenter();
+                        assert.strictEqual($('.popover-content').text(),
+                                           "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                        done();
+                    });
+                });
             });
         });
     });
-
 });
