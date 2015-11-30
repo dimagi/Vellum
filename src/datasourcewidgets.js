@@ -145,7 +145,8 @@ define([
         }
 
         function local_getValue() {
-            return JSON.parse(super_getValue());
+            var value = super_getValue();
+            return value ? JSON.parse(value) : EMPTY_VALUE;
         }
 
         function local_setValue(val) {
