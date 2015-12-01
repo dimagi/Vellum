@@ -55,7 +55,7 @@ require([
                     "filter",
                     "defaultValue"
                 ],
-                canSelfRef = ["constraintAttr"],
+                canSelfRef = ["constraintAttr", "calculateAttr"],
                 noSelfProps = _.difference(properties, canSelfRef),
                 mugMap = {
                     repeat_count: "repeat",
