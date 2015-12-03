@@ -166,7 +166,8 @@ define([
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
-            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
+            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!',
+            csrftoken: _this.opts().csrftoken
         });
         var setFullscreenIcon = function () {
             var $i = $('i', _this.data.core.$fullscreenButton);
