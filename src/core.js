@@ -1680,11 +1680,17 @@ define([
                 isCopyable: !multiselect && mug.options.isCopyable
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mugs = _this.getCurrentlySelectedMug(true);
+            var mugs = _this.getCurrentlySelectedMug(true),
+                errorMessage;
+            if (mugs.length > 1) {
+                errorMessage = "You are about to delete multiple questions. This cannot be undone";
+            } else if (mugs.length && form.getChildren(mugs[0]).length) {
+                errorMessage = "You are about to delete a question with child nodes. This cannot be undone";
+            }
             if (mugs.length > 1 || (mugs.length && form.getChildren(mugs[0]).length)) {
                 _this.alert(
                     "Delete Questions?",
-                    "This cannot be undone.",
+                    errorMessage,
                     [{
                         title: "Cancel",
                     }, {
