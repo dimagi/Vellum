@@ -1687,7 +1687,7 @@ define([
             } else if (mugs.length && form.getChildren(mugs[0]).length) {
                 errorMessage = "You are about to delete a question with child nodes. This cannot be undone";
             }
-            if (mugs.length > 1 || (mugs.length && form.getChildren(mugs[0]).length)) {
+            if (errorMessage) {
                 _this.alert(
                     "Delete Questions?",
                     errorMessage,
