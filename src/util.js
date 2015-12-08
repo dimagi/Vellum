@@ -289,6 +289,14 @@ define([
 
     that.markdown = markdown;
 
+    that.truncate = function (label, length) {
+        length = length || 25;
+        if (label && label.length > length) {
+            return label.slice(0, length) + '&hellip;';
+        }
+        return label;
+    };
+
     return that;
 });
 

@@ -114,6 +114,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/setvalue',
         'tests/richText',
         'tests/comments',
+        'tests/atwho',
     ], function (
         options
     ) {

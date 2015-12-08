@@ -3,12 +3,14 @@ define([
     'jquery',
     'fusejs',
     'vellum/richText',
+    'vellum/util',
     'tpl!vellum/templates/atwho_display'
 ], function (
     _,
     $,
     fusejs,
     richText,
+    util,
     atwhoDisplay
 ) {
     var that = {};
@@ -35,20 +37,14 @@ define([
     var cachedMugData = timed(function(form) {
         return _.chain(form.getMugList())
                 .map(function(mug) {
-                    // probably better to use text-overflow: ellipsis
-                    var defaultLabel = mug.form.vellum.getMugDisplayName(mug),
-                        displayLabel = defaultLabel;
-
-                    if (displayLabel && displayLabel.length > 25) {
-                        displayLabel = defaultLabel.slice(0, 25) + '&hellip;';
-                    }
+                    var defaultLabel = form.vellum.getMugDisplayName(mug);
 
                     return {
                         id: mug.ufid,
                         name: mug.absolutePath,
                         icon: mug.options.icon,
                         questionId: mug.p.nodeID,
-                        displayLabel: displayLabel,
+                        displayLabel: util.truncate(defaultLabel),
                         label: defaultLabel,
                     };
                 })
@@ -56,7 +52,7 @@ define([
                     return choice.name && !_.isUndefined(choice.displayLabel);
                 })
                 .value();
-    }, 500);
+    }, 0);
 
     /**
      * Turn a given input into an autocomplete, which will be populated
@@ -183,6 +179,8 @@ define([
             $input.atwho(_atWhoOptions());
         });
     };
+
+    that.cachedMugData = cachedMugData;
 
     return that;
 });
