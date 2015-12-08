@@ -394,7 +394,7 @@ define([
 
         // only support absolute path right now
         if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
-            return value.replace('<', '&lt;').replace('>', '&gt;');
+            return $('<span>').text(value);
         }
 
         return makeBubble(form, xpath, extraAttrs);
