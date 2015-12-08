@@ -85,7 +85,7 @@ require([
     describe("atwho", function() {
         var atwhoData;
         before(function() {
-            atwhoData = atwho.cachedMugData(form);
+            atwhoData = atwho.cachedMugData(0)(form);
         });
 
         it("should truncate the display label", function() {
@@ -121,7 +121,7 @@ require([
                 input.val('/data/');
                 input.keyup();
                 atwhoview = getDisplayedAtwhoViews();
-                assert(atwhoview.length, 1);
+                assert.strictEqual(atwhoview.length, 1);
             });
             after(function() {
                 input.atwho('destroy');
