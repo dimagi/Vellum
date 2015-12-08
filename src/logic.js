@@ -17,7 +17,7 @@ define([
         "repeat_count",
         "filter",
         "defaultValue"
-    ], NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
+    ], NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr', 'calculateAttr');
 
     function LogicExpression (exprText) {
         this._text = exprText || "";
