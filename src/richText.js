@@ -394,7 +394,7 @@ define([
 
         // only support absolute path right now
         if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
-            return $('<span>').text(value).contents();
+            return $('<span>').text(xml.normalize(value)).contents();
         }
 
         return makeBubble(form, xpath, extraAttrs);
@@ -411,15 +411,13 @@ define([
             replacer, result;
         if (escape) {
             replacer = function () {
-                var id = util.get_guid(),
-                    text = xml.humanize($("<div>").append($(this).clone()));
-                places[id] = replacePathWithBubble(form, text);
+                var id = util.get_guid();
+                places[id] = replacePathWithBubble(form, this.outerHTML);
                 return "{" + id + "}";
             };
         } else {
             replacer = function() {
-                var text = xml.humanize($("<div>").append($(this).clone()));
-                return replacePathWithBubble(form, text);
+                return replacePathWithBubble(form, this.outerHTML);
             };
         }
         el.find('output').replaceWith(replacer);
