@@ -7,7 +7,9 @@ require([
     'vellum/parser',
     'text!static/parser/other_item.xml',
     'text!static/parser/label-without-itext.xml',
-    'text!static/parser/missing-bind.xml'
+    'text!static/parser/missing-bind.xml',
+    'text!static/parser/test-xml-1.xml',
+    'text!static/parser/test-xml-2.xml',
 ], function (
     chai,
     $,
@@ -16,7 +18,9 @@ require([
     parser,
     OTHER_ITEM_XML,
     LABEL_WITHOUT_ITEXT_XML,
-    MISSING_BIND_XML
+    MISSING_BIND_XML,
+    TEST_XML_1,
+    TEST_XML_2
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -112,59 +116,4 @@ require([
             assert(!$('[name=property-dataValue]').length);
         });
     });
-
-    var TEST_XML_1 = '' + 
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Vellum testing</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/FFD00941-A932-471A-AEC8-87F6EFEF767F"\
-                          uiVersion="1" version="1" name="Vellum testing">\
-                        <state />\
-                    </data>\
-                </instance>\
-                <instance id="states" src="jr://fixture/item-list:state"></instance>\
-                <bind nodeset="/data/state" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="state-label">\
-                            <value>State</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <select1 ref="/data/state">\
-                <label ref="jr:itext(\'state-label\')" />\
-                <itemset nodeset="instance(\'states\')/state_list/state">\
-                  <label ref="name"></label>\
-                  <value ref="id"></value>\
-                </itemset>\
-            </select1>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_2 = util.xmlines('' +
-    '<?xml version="1.0" encoding="UTF-8"?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
-                        <question1 />\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1" calculate="concat(&quot;Line 1&quot;,&quot;&#10;Line 2&quot;)" />\
-                <itext>\
-                    <translation lang="en" default=""/>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body></h:body>\
-    </h:html>');
 });
