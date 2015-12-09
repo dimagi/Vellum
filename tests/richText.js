@@ -260,7 +260,7 @@ define([
                     ['<output value="/data/text" /> <tag /> <output value="/data/othertext" />',
                      '{text} &lt;tag /&gt; {othertext}'],
                     ["{blah}", "{blah}"],
-                    ['<output value="unknown(/data/text)" />', '<span>&lt;output value="unknown(/data/text)"&gt;&lt;/output&gt;</span>'],
+                    ['<output value="unknown(/data/text)" />', '&lt;output value="unknown(/data/text)" /&gt;'],
                 ],
                 ico = icon('fcc-fd-text');
 

@@ -394,7 +394,7 @@ define([
 
         // only support absolute path right now
         if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
-            return $('<span>').text(value);
+            return $('<span>').text(value).contents();
         }
 
         return makeBubble(form, xpath, extraAttrs);
@@ -411,13 +411,15 @@ define([
             replacer, result;
         if (escape) {
             replacer = function () {
-                var id = util.get_guid();
-                places[id] = replacePathWithBubble(form, this.outerHTML);
+                var id = util.get_guid(),
+                    text = xml.humanize($("<div>").append($(this).clone()));
+                places[id] = replacePathWithBubble(form, text);
                 return "{" + id + "}";
             };
         } else {
             replacer = function() {
-                return replacePathWithBubble(form, this.outerHTML);
+                var text = xml.humanize($("<div>").append($(this).clone()));
+                return replacePathWithBubble(form, text);
             };
         }
         el.find('output').replaceWith(replacer);
@@ -425,7 +427,8 @@ define([
         if (escape) {
             result = $('<div />').text(xml.normalize(result)).html();
             result = result.replace(/{(.+?)}/g, function (match, id) {
-                return places.hasOwnProperty(id) ? places[id][0].outerHTML : match;
+                return places.hasOwnProperty(id) ?
+                        $("<div>").append(places[id]).html() : match;
             });
         }
         return result;
