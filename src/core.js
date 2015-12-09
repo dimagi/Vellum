@@ -1683,9 +1683,9 @@ define([
             var mugs = _this.getCurrentlySelectedMug(true),
                 errorMessage;
             if (mugs.length > 1) {
-                errorMessage = "You are about to delete multiple questions. This cannot be undone";
+                errorMessage = "Deleting multiple questions cannot be undone.";
             } else if (mugs.length && form.getChildren(mugs[0]).length) {
-                errorMessage = "You are about to delete a question with child nodes. This cannot be undone";
+                errorMessage = "Deleting a question with children cannot be undone.";
             }
             if (errorMessage) {
                 _this.alert(
