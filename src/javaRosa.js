@@ -1418,7 +1418,8 @@ define([
             if (fullLangs.length < 2) {
                 return;
             }
-            $menu.append($(language_selector({languages: fullLangs})).html());
+            $menu.find('#language-selector').remove();
+            $menu.append(language_selector({languages: fullLangs}));
             $items = $menu.find(".fd-display-item");
             $items.click(function (e) {
                 $input.val($(this).data("code")).change();
