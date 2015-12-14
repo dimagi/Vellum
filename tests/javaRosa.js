@@ -886,5 +886,13 @@ require([
             $display.val('_ids').change();
             assert.equal($(treeSelector).text(), "question1");
         });
+
+        it("should only display once after multiple load xml", function() {
+            assert.strictEqual($('#fd-questions-dropdown-menu li:contains("Display")').length, 1);
+            util.loadXML("");
+            assert.strictEqual($('#fd-questions-dropdown-menu li:contains("Display")').length, 1);
+            util.loadXML("");
+            assert.strictEqual($('#fd-questions-dropdown-menu li:contains("Display")').length, 1);
+        });
     });
 });
