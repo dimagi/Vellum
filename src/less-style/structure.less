@@ -4,7 +4,7 @@
   top: 0;
   width: 100%;
   background-color: white;
-  z-index: 1;
+  z-index: @zindexUIContainer;  // cover HQ footer when in full-screen mode
 }
 
 .fd-toolbar {
@@ -60,29 +60,39 @@
 
 .fd-head {
   color: @white;
+  background-color: @cc-brand-low;
   font-size: 17px;
-  font-weight: bold;
+  font-weight: normal !important;
   height: @treeBrowserHeadHeight;
   padding: 0;
-  text-align: center;
-  z-index: 3;
+  text-align: left;
   line-height: @treeBrowserHeadHeight;
   width: 100%;
+  position: relative;
 
   > .pull-right {
     padding-right: 10px;
   }
+
   .fd-head-max-indicator i {
     color: @cc-neutral-hi;
   }
-}
 
-.fd-head:hover .fd-head-max-indicator i {
-  color: @white;
+  &:hover .fd-head-max-indicator i {
+    color: @white;
+  }
+
+  > h2 {
+    font-size: @baseFontSize * 0.8  ;
+    padding: 1px @contentPaddingVellum 0;
+    margin: 0;
+    font-weight: normal;
+    line-height: 23px;
+    text-transform: uppercase;
+  }
 }
 
 .fd-form-saving {
-  @zIndex: 1100;
   position: fixed;
   top: 0;
   bottom: 0;
@@ -90,7 +100,7 @@
   right: 0;
   opacity: 0.8;
   background-color: @black;
-  z-index: @zIndex;
+  z-index: @zindexBlockInteraction;
 
   > div {
     @imageSize: 32px;
@@ -98,7 +108,6 @@
     @size: @imageSize + @padding * 2;
 
     opacity: 1;
-    z-index: @zIndex + 1;
     position: fixed;
     top: calc(~"50% - " @size / 2);
     left: calc(~"50% - " @size / 2);
@@ -166,24 +175,6 @@
 
 .fd-question-type .tooltip {
   display: absolute !important;
-}
-
-.fd-head {
-  background-color: @cc-brand-low;
-  font-weight: normal !important;
-  text-align: left;
-  width: 100%;
-  position: relative;
-  z-index: 1;
-
-  > h2 {
-    font-size: @baseFontSize * 0.8  ;
-    padding: 1px @contentPaddingVellum 0;
-    margin: 0;
-    font-weight: normal;
-    line-height: 23px;
-    text-transform: uppercase;
-  }
 }
 
 .fd-questions-menu-container {
