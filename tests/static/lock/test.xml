@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:orx="http://openrosa.org/jr/xforms"
+	xmlns="http://www.w3.org/2002/xforms"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns:jr="http://openrosa.org/javarosa"
+	xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" 
+					xmlns="http://openrosa.org/formdesigner/4BE1309B-ABCF-4184-8175-9E381F3E0DD7"
+					uiVersion="1" version="1" name="Untitled Form">
+					<node_locked />
+					<value_locked />
+					<none_locked />
+					<normal />
+					<group />
+				</data>
+			</instance>
+			<bind nodeset="/data/node_locked" type="xsd:string" vellum:lock="node" />
+			<bind nodeset="/data/value_locked" type="xsd:string" vellum:lock="value"/>
+			<bind nodeset="/data/none_locked" type="xsd:string" vellum:lock="none" />
+			<bind nodeset="/data/normal" type="xsd:string" />
+			<bind nodeset="/data/group" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="node_locked-label">
+						<value>node_locked</value>
+					</text>
+					<text id="value_locked-label">
+						<value>value_locked</value>
+					</text>
+					<text id="none_locked-label">
+						<value>none_locked</value>
+					</text>
+					<text id="normal-label">
+						<value>normal</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/node_locked">
+			<label ref="jr:itext('node_locked-label')" />
+		</input>
+		<input ref="/data/value_locked">
+			<label ref="jr:itext('value_locked-label')" />
+		</input>
+		<input ref="/data/none_locked">
+			<label ref="jr:itext('none_locked-label')" />
+		</input>
+		<input ref="/data/normal">
+			<label ref="jr:itext('normal-label')" />
+		</input>
+		<group ref="/data/group"></group>
+	</h:body>
+</h:html>
