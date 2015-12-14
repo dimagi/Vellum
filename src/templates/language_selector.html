@@ -1,11 +1,9 @@
-<div id="language-selector">
-    <li class="divider"></li>
-    <li class="nav-header">Display</li>
-    <% _.each(languages, function(language) { %>
-    <li><a tabindex="-1" href="#" class="fd-display-item" data-code="<%-language.code%>"><i class="icon icon-ok"></i><%-language.name%><%
-        if (language.name !== language.code && language.code !== '_ids') {
-            %> (<%-language.code%>)<%
-        }
-        %></a></li><%
-    }); %>
-</div>
+<li class="divider language-selector"></li>
+<li class="nav-header language-selector">Display</li>
+<% _.each(languages, function(language) { %>
+<li><a tabindex="-1" href="#" class="fd-display-item language-selector" data-code="<%-language.code%>"><i class="icon icon-ok"></i><%-language.name%><%
+    if (language.name !== language.code && language.code !== '_ids') {
+        %> (<%-language.code%>)<%
+    }
+    %></a></li><%
+}); %>

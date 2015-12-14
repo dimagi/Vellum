@@ -1418,7 +1418,7 @@ define([
             if (fullLangs.length < 2) {
                 return;
             }
-            $menu.find('#language-selector').remove();
+            $menu.find('.language-selector').remove();
             $menu.append(language_selector({languages: fullLangs}));
             $items = $menu.find(".fd-display-item");
             $items.click(function (e) {
