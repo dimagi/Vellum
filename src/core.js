@@ -69,7 +69,7 @@ define([
     }, 0);
 
     var isMac = /Mac/.test(navigator.platform);
-    var undoStack = null;
+    var undoStack = [];
 
     var DEBUG_MODE = false;
 
@@ -839,7 +839,6 @@ define([
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
         }).bind("select_node.jstree deselect_node.jstree", function (e, data) {
-            undoStack = null;
             var selected = _this.jstree('get_selected');
             if (!selected.length) {
                 _this.hideQuestionProperties();
@@ -1183,9 +1182,6 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
-            // hacks
-            e.mug._node_control = undefined;
-            undoStack = [e.mug, e.previousSibling, e.position];
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1203,6 +1199,14 @@ define([
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
+        }).on('add-to-undo', function (e) {
+            // hacks
+            e.mug._node_control = undefined;
+            if (e.keepUndoStack) {
+                undoStack = [[e.mug, e.previousSibling, e.position]].concat(undoStack);
+            } else {
+                undoStack = [[e.mug, e.previousSibling, e.position]];
+            }
         });
     };
 
@@ -1683,7 +1687,7 @@ define([
                     return _this.isMugRemoveable(mug, mug.absolutePath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
-                isUndoable: undoStack,
+                isUndoable: undoStack.length,
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true),
@@ -1717,19 +1721,21 @@ define([
         });
         $baseToolbar.find('.fd-undo').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
-                var mug = undoStack[0],
-                    sibling = undoStack[1],
-                    position = undoStack[2];
-                if (window.analytics) {
-                    window.analytics.workflow("undo delete question in form builder");
-                }
-                mug.form.insertQuestion(mug, sibling, position);
-                var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-                if ($firstInput.length) {
-                    $firstInput.focus().select();
-                }
-                undoStack = null;
+                _.each(undoStack, function(undo) {
+                    var mug = undo[0],
+                        sibling = undo[1],
+                        position = undo[2];
+                    if (window.analytics) {
+                        window.analytics.workflow("undo delete question in form builder");
+                    }
+                    mug.form.insertQuestion(mug, sibling, position);
+                    var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
+                    if ($firstInput.length) {
+                        $firstInput.focus().select();
+                    }
+                });
                 _this.refreshCurrentMug();
+                undoStack = [];
             });
         });
         if (!multiselect) {

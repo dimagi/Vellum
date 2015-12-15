@@ -956,13 +956,14 @@ define([
             }
             var _this = this,
                 seen = {},
-                ufids = {};
+                ufids = {},
+                keepUndoStack = mugs.length !== 1;
             _.each(mugs, function (mug) {
-                _this._removeMugFromForm(mug, ufids, false);
+                _this._removeMugFromForm(mug, ufids, false, keepUndoStack);
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _removeMugFromForm: function(mug, ufids, isInternal) {
+        _removeMugFromForm: function(mug, ufids, isInternal, keepUndoStack) {
             if (ufids.hasOwnProperty(mug.ufid)) {
                 return; // already removed
             }
@@ -973,7 +974,7 @@ define([
                 previousSibling = mug.previousSibling;
                 var children = node.getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
-                    this._removeMugFromForm(children[i], ufids, true);
+                    this._removeMugFromForm(children[i], ufids, true, keepUndoStack);
                 }
                 delete this.mugMap[mug.absolutePath];
                 this.tree.removeMug(mug);
@@ -988,8 +989,13 @@ define([
                 type: 'question-remove',
                 mug: mug,
                 isInternal: isInternal,
+            });
+            this.fire({
+                type: 'add-to-undo',
+                mug: mug,
                 previousSibling: previousSibling,
                 position: previousSibling === mug.parentMug ? 'into' : 'after',
+                keepUndoStack: keepUndoStack,
             });
         },
         isUniqueQuestionId: function (qId, mug) {
