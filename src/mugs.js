@@ -3,7 +3,6 @@ define([
     'underscore',
     'xpathmodels',
     'vellum/tree',
-    'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
     'vellum/util',
     'vellum/logic'
@@ -12,7 +11,6 @@ define([
     _,
     xpathmodels,
     Tree,
-    jr,
     widgets,
     util,
     logic
