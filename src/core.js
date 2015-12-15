@@ -1690,33 +1690,8 @@ define([
                 isUndoable: undoStack.length,
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mugs = _this.getCurrentlySelectedMug(true),
-                errorMessage;
-            if (mugs.length > 1) {
-                errorMessage = "Deleting multiple questions cannot be undone.";
-            } else if (mugs.length && form.getChildren(mugs[0]).length) {
-                errorMessage = "Deleting a question with children cannot be undone.";
-            }
-            if (errorMessage) {
-                _this.alert(
-                    "Delete Questions?",
-                    errorMessage,
-                    [{
-                        title: "Cancel",
-                    }, {
-                        title: "Delete",
-                        cssClasses: "btn-primary",
-                        defaultButton: true,
-                        action: function () {
-                            form.removeMugsFromForm(mugs);
-                            _this.selectSomethingOrHideProperties(true);
-                            _this.data.core.$modal.modal('hide');
-                        }
-                    }]
-                );
-            } else {
-                form.removeMugsFromForm(mugs);
-            }
+            var mugs = _this.getCurrentlySelectedMug(true);
+            form.removeMugsFromForm(mugs);
             _this.refreshCurrentMug();
         });
         $baseToolbar.find('.fd-undo').click(function () {
