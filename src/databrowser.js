@@ -32,7 +32,7 @@ define([
             head = pane.find(".fd-head-external-sources");
             headHeight = head.outerHeight(true) || 0;
             pane.data("min-size", headHeight)
-                .height(tree.height() * DATABROWSER_HEIGHT)
+                .height(Math.min(tree.height() * DATABROWSER_HEIGHT, headHeight * 12))
                 .resize(function () {
                     if (pane.height() > headHeight + 100) {
                         panelHeight = pane.height();
