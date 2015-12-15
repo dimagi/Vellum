@@ -69,6 +69,7 @@ define([
     }, 0);
 
     var isMac = /Mac/.test(navigator.platform);
+    var undoStack = null;
 
     var DEBUG_MODE = false;
 
@@ -1181,6 +1182,9 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
+            // hacks
+            e.mug._node_control = undefined;
+            undoStack = [e.mug, e.mug.parentMug];
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1677,7 +1681,8 @@ define([
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, mug.absolutePath);
                 }),
-                isCopyable: !multiselect && mug.options.isCopyable
+                isCopyable: !multiselect && mug.options.isCopyable,
+                isUndoable: undoStack,
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true),
@@ -1707,6 +1712,20 @@ define([
             } else {
                 form.removeMugsFromForm(mugs);
             }
+        });
+        $baseToolbar.find('.fd-button-undo').click(function () {
+            _this.ensureCurrentMugIsSaved(function () {
+                var mug = undoStack[0],
+                    parent = undoStack[1];
+                if (window.analytics) {
+                    window.analytics.workflow("undo delete question in form builder");
+                }
+                mug.form.insertQuestion(mug, parent, 'into');
+                var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
+                if ($firstInput.length) {
+                    $firstInput.focus().select();
+                }
+            });
         });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
