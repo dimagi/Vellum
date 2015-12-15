@@ -1,11 +1,6 @@
 <div class="fd-question-toolbar-container clearfix">
     <% if (isCopyable) { %><div class="btn-toolbar pull-left"></div><% } %>
     <div class="btn-toolbar pull-right">
-    <% if (isUndoable) { %>
-        <button type="button" class="btn btn-primary fd-button-undo"  tabindex="-1">
-            <i class="icon-undo"></i> Undo
-        </button>
-    <% } %>
     <% if (isDeleteable) { %>
         <button type="button" class="btn btn-danger fd-button-remove"  tabindex="-1">
             <i class="fa fa-trash-o"></i> Delete
@@ -13,6 +8,12 @@
     </div>
     <% } %>
 </div>
+<% if (isUndoable) { %>
+  <div class="alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">&times;</button>
+    You have deleted a question. <a href="#" class="fd-undo">Undo</a>
+  </div>
+<% } %>
 <% if (comment) { %>
 <div class="alert alert-info">
   <button type="button" class="close" data-dismiss="alert">&times;</button>

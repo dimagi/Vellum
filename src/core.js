@@ -1715,7 +1715,7 @@ define([
             }
             _this.refreshCurrentMug();
         });
-        $baseToolbar.find('.fd-button-undo').click(function () {
+        $baseToolbar.find('.fd-undo').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
                 var mug = undoStack[0],
                     parent = undoStack[1];
