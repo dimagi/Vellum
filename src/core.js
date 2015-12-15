@@ -1712,6 +1712,7 @@ define([
             } else {
                 form.removeMugsFromForm(mugs);
             }
+            _this.refreshCurrentMug();
         });
         $baseToolbar.find('.fd-button-undo').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
@@ -1725,6 +1726,8 @@ define([
                 if ($firstInput.length) {
                     $firstInput.focus().select();
                 }
+                undoStack = null;
+                _this.refreshCurrentMug();
             });
         });
         if (!multiselect) {
