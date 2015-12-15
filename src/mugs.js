@@ -475,6 +475,17 @@ define([
         }
     });
 
+    Object.defineProperty(Mug.prototype, "previousSibling", {
+        get: function () {
+            var tree = this.form.tree,
+                node = this.form.tree.getNodeFromMug(this),
+                parentMug = this.parentMug,
+                parentNode = parentMug ? tree.getNodeFromMug(parentMug) : tree.getRootNode(),
+                mugPosition = parentNode.children.indexOf(node);
+            return (mugPosition === 0) ? parentMug : parentNode.children[mugPosition - 1].getValue();
+        }
+    });
+
     function copyAndProcessSpec(baseSpec, mugSpec, mugOptions) {
         var control = baseSpec.control,
             databind = baseSpec.databind;
