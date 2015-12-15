@@ -839,6 +839,7 @@ define([
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
         }).bind("select_node.jstree deselect_node.jstree", function (e, data) {
+            undoStack = null;
             var selected = _this.jstree('get_selected');
             if (!selected.length) {
                 _this.hideQuestionProperties();
