@@ -1185,7 +1185,7 @@ define([
             }
             // hacks
             e.mug._node_control = undefined;
-            undoStack = [e.mug, e.mug.parentMug];
+            undoStack = [e.mug, e.previousSibling, e.position];
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1718,11 +1718,12 @@ define([
         $baseToolbar.find('.fd-undo').click(function () {
             _this.ensureCurrentMugIsSaved(function () {
                 var mug = undoStack[0],
-                    parent = undoStack[1];
+                    sibling = undoStack[1],
+                    position = undoStack[2];
                 if (window.analytics) {
                     window.analytics.workflow("undo delete question in form builder");
                 }
-                mug.form.insertQuestion(mug, parent, 'into');
+                mug.form.insertQuestion(mug, sibling, position);
                 var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
                 if ($firstInput.length) {
                     $firstInput.focus().select();

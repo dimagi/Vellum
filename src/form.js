@@ -967,8 +967,10 @@ define([
                 return; // already removed
             }
             ufids[mug.ufid] = null;
-            var node = this.tree.getNodeFromMug(mug);
+            var node = this.tree.getNodeFromMug(mug),
+                previousSibling;
             if (node) {
+                previousSibling = mug.previousSibling;
                 var children = node.getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
@@ -985,7 +987,9 @@ define([
             this.fire({
                 type: 'question-remove',
                 mug: mug,
-                isInternal: isInternal
+                isInternal: isInternal,
+                previousSibling: previousSibling,
+                position: previousSibling === mug.parentMug ? 'into' : 'after',
             });
         },
         isUniqueQuestionId: function (qId, mug) {
