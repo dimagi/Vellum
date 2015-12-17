@@ -604,8 +604,8 @@ define([
             });
 
         var control = $('<div class="control-row row">')
-                .append($("<div class='span4'>").append(widget.dropdown))
-                .append($("<div class='span8'>").append(widget.text));
+                .append($("<div class='col-sm-4'>").append(widget.dropdown))
+                .append($("<div class='col-sm-8'>").append(widget.text));
 
         widget.setValue = function (value) {
             var val = widget.equivalentOption(value);
