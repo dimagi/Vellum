@@ -1,29 +1,28 @@
 define([
-    'xpath',
-    'xpathmodels',
+    'vellum/xpath',
     'jquery',
     'underscore'
 ], function (
     xpath,
-    xpathmodels,
     $,
     _
 ) {
     var XPATH_REFERENCES = [
-        "relevantAttr",
-        "calculateAttr",
-        "constraintAttr",
-        "dataParent",
-        "repeat_count",
-        "filter",
-        "defaultValue"
-    ], NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
+            "relevantAttr",
+            "calculateAttr",
+            "constraintAttr",
+            "dataParent",
+            "repeat_count",
+            "filter",
+            "defaultValue"
+        ],
+        NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
 
     function LogicExpression (exprText) {
         this._text = exprText || "";
         if ($.trim(exprText)) {
             try {
-                this.parsed = xpath.parse(exprText);
+                this.parsed = xpath.xpath.parse(exprText);
             } catch (err) {
                 this.parsed = null;
                 this.error = err;
@@ -37,9 +36,9 @@ define([
             var paths = [],
                 absolutePaths = [],
                 topLevelPaths = [],
-                ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
-                RELATIVE = xpathmodels.XPathInitialContextEnum.RELATIVE,
-                EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
+                ROOT = xpath.xpathmodels.XPathInitialContextEnum.ROOT,
+                RELATIVE = xpath.xpathmodels.XPathInitialContextEnum.RELATIVE,
+                EXPR = xpath.xpathmodels.XPathInitialContextEnum.EXPR,
                 predicates;
             this.paths = paths;
             this.absolutePaths = absolutePaths;
@@ -53,7 +52,7 @@ define([
                     k = queue.shift();
                     node = k.xpath;
                     insideFilter = k.insideFilter;
-                    if (node instanceof xpathmodels.XPathPathExpr) {
+                    if (node instanceof xpath.xpathmodels.XPathPathExpr) {
                         paths.push(node);
                         if (!insideFilter) {
                             topLevelPaths.push(node);
@@ -82,7 +81,7 @@ define([
                                 });
                             }
                         }
-                    } else if (node instanceof xpathmodels.XPathFuncExpr) {
+                    } else if (node instanceof xpath.xpathmodels.XPathFuncExpr) {
                         this._addInstanceRef(node);
                     }
                     children = node.getChildren();
@@ -106,7 +105,7 @@ define([
         },
         _addInstanceRef: function (expr) {
             if (expr.id === "instance" && expr.args.length === 1 &&
-                    expr.args[0] instanceof xpathmodels.XPathStringLiteral) {
+                    expr.args[0] instanceof xpath.xpathmodels.XPathStringLiteral) {
                 var id = expr.args[0].value;
                 this.instanceRefs[id] = null;
                 return true;
@@ -141,7 +140,7 @@ define([
             for (var i = 0; i < paths.length; i++) {
                 path = paths[i];
                 if (path.toXPath() === from) {
-                    replacePathInfo(xpath.parse(to), path);
+                    replacePathInfo(xpath.xpath.parse(to), path);
                 }
             }
         },

@@ -5,8 +5,7 @@
 define([
     'underscore',
     'jquery',
-    'xpath',
-    'xpathmodels',
+    'vellum/xpath',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
     'tpl!vellum/templates/control_group',
@@ -23,7 +22,6 @@ define([
     _,
     $,
     xpath,
-    xpathmodels,
     edit_source,
     language_selector,
     control_group,
@@ -1585,8 +1583,8 @@ define([
 
             function getITextID(value) {
                 try {
-                    var parsed = xpath.parse(value);
-                    if (parsed instanceof xpathmodels.XPathFuncExpr &&
+                    var parsed = xpath.xpath.parse(value);
+                    if (parsed instanceof xpath.xpathmodels.XPathFuncExpr &&
                         parsed.id === "jr:itext")
                     {
                         return parsed.args[0].value;

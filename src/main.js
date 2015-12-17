@@ -140,7 +140,7 @@ requirejs.config({
         },
         'xpathmodels': {
             deps: ['scheme-number'],
-            exports: 'xpathmodels'
+            exports: 'makeXPathModels'
         },
         'scheme-number': {
             deps: ['biginteger'],
