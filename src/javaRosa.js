@@ -1151,7 +1151,7 @@ define([
     };
 
     var ICONS = {
-        image: 'fa fa-picture',
+        image: 'fa fa-photo',
         audio: 'fa fa-volume-up',
         video: 'fa fa-video-camera',
     };

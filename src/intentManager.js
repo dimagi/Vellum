@@ -305,7 +305,7 @@ define([
 
     var PrintIntent = util.extend(AndroidIntent, {
         typeName: 'Print',
-        icon: 'fa-print',
+        icon: 'fa fa-print',
         init: function (mug, form) {
             AndroidIntent.init(mug, form);
             mug.p.androidIntentAppId = "org.commcare.dalvik.action.PRINT";
