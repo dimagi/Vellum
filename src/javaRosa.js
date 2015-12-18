@@ -768,7 +768,7 @@ define([
                 widgets.util.setWidget($ui, itextWidget);
                 $groupContainer.append($ui);
             });
-            $blockUI.find('.new-itext-control-group').after($groupContainer);
+            $blockUI.find('.new-itext-form-group').after($groupContainer);
             $groupContainer.before(block.getDeleteFormButton(form));
         };
 
@@ -780,7 +780,7 @@ define([
             var $addFormControls = $(control_group({
                 label: block.displayName,
             }));
-            $addFormControls.addClass('new-itext-control-group')
+            $addFormControls.addClass('new-itext-form-group')
                 .find('.controls').not('.messages')
                 .append(block.getAddFormButtons());
             $blockUI.prepend($addFormControls);

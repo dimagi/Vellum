@@ -142,7 +142,7 @@ define([
 
         widget.getMessagesContainer = function () {
             return widget.getControl()
-                    .closest(".widget.control-group")
+                    .closest(".widget.form-group")
                     .find(".messages:last");
         };
 
@@ -700,7 +700,7 @@ define([
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
-        var uiElem = $("<div />").addClass("widget control-group"),
+        var uiElem = $("<div />").addClass("widget form-group"),
             $controls = $('<div class="controls" />'),
             $messages = $('<div class="controls messages" />'),
             $label = $('<div />').append($("<label />").text(labelText));

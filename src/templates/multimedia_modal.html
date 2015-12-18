@@ -4,7 +4,7 @@
         <h3>Upload <%= mediaType %></h3>
     </div>
     <div class="modal-body form form-horizontal">
-        <div class="control-group">
+        <div class="form-group">
             <label class="control-label">
                 Select new <%= mediaType %>
             </label>
@@ -15,7 +15,7 @@
                 <div class="hqm-queue"></div>
             </div>
         </div>
-        <div class="control-group hqm-existing hide">
+        <div class="form-group hqm-existing hide">
             <label class="control-label">
                 Current <%= mediaType %>
             </label>
@@ -25,7 +25,7 @@
         <div class="hqm-upload-form">
             <fieldset class="hqm-sharing hide">
                 <legend>Multimedia Sharing Options</legend>
-                <div class="control-group">
+                <div class="form-group">
                     <label class="control-label" for="fd-mm-<%= mediaType %>-license">License</label>
                     <div class="controls">
                         <select name="license" id="fd-mm-<%= mediaType %>-license">
@@ -38,7 +38,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="form-group">
                     <label class="control-label" for="fd-mm-<%= mediaType %>-author">Author</label>
                     <div class="controls">
                         <input type="text"
@@ -47,7 +47,7 @@
                                placeholder="Enter the name of the author." />
                     </div>
                 </div>
-                <div class="control-group">
+                <div class="form-group">
                     <label class="control-label" for="fd-mm-<%= mediaType %>-attribution">Attribution Notes</label>
                     <div class="controls">
                         <textarea name="attribution-notes"
