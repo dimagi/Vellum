@@ -7,8 +7,10 @@
     </a>
     <ul class="dropdown-menu">
         <% if (questions.length === 0) { %>
+            <!-- TODO: replace .nav-header with list group or panel group -->
             <li class="nav-header">Cannot Change Question Type</li>
         <% } else { %>
+            <!-- TODO: replace .nav-header with list group or panel group -->
             <li class="nav-header">Change Question Type To</li>
             <% _.each(questions, function(question) { %>
             <li>
