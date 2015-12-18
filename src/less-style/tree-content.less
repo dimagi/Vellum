@@ -1,123 +1,86 @@
 @import "lib/main";
 
 .fd-tree {
-  .fd-scrollable {
-    overflow-x: auto;
-  }
+    .fd-scrollable {
+        overflow-x: auto;
+    }
 }
 
 .fd-question-tree.jstree {
-  margin: 5px 0;
-  background: @white;
+    margin: 5px 0;
+    background: @white;
 }
 
 .fd-tree-valid-alert-icon {
-  // todo, investigate usage
-  display: inline-block;
-  width: 1.25em;
-  text-align: center;
-  color: lighten(@red, 15);
-}
-
-.fd-lang-display-selector {
-  padding: @gridGutterWidth/2;
-  background-color: @navbarBackground;
-  text-align: center;
+    color: lighten(@red, 15);
 }
 
 .fd-display-item i.fa-check {
-  display: none;
+    display: none;
 }
 
 .fd-display-item.selected i.fa-check {
-  display: inline-block;
-}
-
-.fd-search-box {
-  position: relative;
-  padding: @gridGutterWidth/2 @gridGutterWidth;
-  background-color: @navbarBackground;
-  > input {
-    border-radius: 1em;
-    text-indent: 1.5em;
-    width: 100%;
-    height: 2em;
-    box-sizing : border-box;
-  }
-  > .fa-search {
-    position: absolute;
-    top: @gridGutterWidth/2+6px;
-    left: @gridGutterWidth+7px;
-    color: #777;
-  }
-}
-
-.fd-search-icon {
-  font-size: 1.2em;
-}
-
-.fd-question-tree-actions {
-  text-align: center;
-  > div { padding-top: @gridGutterWidth/2; }
+    display: inline-block;
+    margin-left: -14px;
+    margin-right: 2px;
 }
 
 .fd-messages {
-  position: fixed;
-  bottom: 40px;
-  left: 0;
-  width: 100%;
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
 }
 
 .jstree-default .jstree-anchor {
-  color: darken(@blueDark, 10);
-  &.jstree-hovered,
-  &.jstree-clicked {
-    border: none;
-    background: desaturate(lighten(@blue, 58), 40);
-  }
-  &.jstree-clicked {
-    .box-shadow(0px 0px 4px fade(@blue, 60%));
-  }
-  > .jstree-icon {
-    background: none;
-    font-size: .85em;
-    color: @blueLight;
-  }
+    color: darken(@blueDark, 10);
+    &.jstree-hovered,
+    &.jstree-clicked {
+        border: none;
+        background: desaturate(lighten(@blue, 58), 40);
+    }
+    &.jstree-clicked {
+        .box-shadow(0px 0px 4px fade(@blue, 60%));
+    }
+    > .jstree-icon {
+        background: none;
+        font-size: .85em;
+        color: @blueLight;
+    }
 }
 
 .fd-external-resource-search {
-  background-color: @cc-bg;
-  margin-bottom: 5px;
-  > form {
-    position: relative;
-    padding: 0px @contentPaddingVellum;
-    margin: 0;
-    i {
-      line-height: 36px;
+    background-color: @cc-bg;
+    margin-bottom: 5px;
+    > form {
+        position: relative;
+        padding: 0px @contentPaddingVellum;
+        i {
+            line-height: 42px;
+        }
     }
-  }
 }
 
 .fd-search-control {
-  position: absolute;
-  top: 5px;
-  margin-left: 18px;
-  width: 100%;
+    position: absolute;
+    top: 5px;
+    margin-left: 18px;
+    width: 100%;
 }
 
 .fd-head-external-sources {
-  background-color: @cc-neutral-low;
-  cursor: pointer;
+    background-color: @cc-neutral-low;
+    cursor: pointer;
 }
 
 .fd-external-sources-tree .jstree-anchor {
-  color: @cc-neutral-low;
-  &.jstree-clicked {
-    background-color: @cc-bg;
-    .box-shadow(0px 0px 4px fade(@cc-neutral-mid, 80%));
-  }
+    color: @cc-neutral-low;
+    &.jstree-clicked {
+        background-color: @cc-bg;
+        .box-shadow(0px 0px 4px fade(@cc-neutral-mid, 80%));
+    }
 
-  > .jstree-icon {
-    color: @cc-neutral-mid;
-  }
+    > .jstree-icon {
+        color: @cc-neutral-mid;
+    }
 }
