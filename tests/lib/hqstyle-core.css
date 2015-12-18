@@ -6763,13 +6763,11 @@ GradientType=1);
  * -------------------------- */
 @font-face {
   font-family: 'FontAwesome';
-  src: url('/static/style/lib/fontawesome-4.1.0/fonts/fontawesome-webfont.eot?v=4.5.0&32400f4e0893');
-  src: url('/static/style/lib/fontawesome-4.1.0/fonts/fontawesome-webfont.eot?&32400f4e0893#iefix&v=4.5.0')
+  src: url('fontawesome-webfont.eot');
 format('embedded-opentype'),
-url('/static/style/lib/fontawesome-4.1.0/fonts/fontawesome-webfont.woff2?v=4.5.0&db812d8a70a4') format('woff2'),
-url('/static/style/lib/fontawesome-4.1.0/fonts/fontawesome-webfont.woff?v=4.5.0&a35720c2fed2') format('woff'),
-url('/static/style/lib/fontawesome-4.1.0/fonts/fontawesome-webfont.ttf?v=4.5.0&a3de2170e4e9') format('truetype'),
-url('/static/style/lib/fontawesome-4.1.0/fonts/fontawesome-webfont.svg?v=4.5.0&f775f9cca88e#fontawesomeregular')
+url('fontawesome-webfont.woff') format('woff'),
+url('fontawesome-webfont.ttf') format('truetype'),
+url('fontawesome-webfont.svg')
 format('svg');
   font-weight: normal;
   font-style: normal;
@@ -8852,11 +8850,11 @@ format('svg');
  * -------------------------- */
 @font-face {
   font-family: 'CommCareHQFontRegular';
-  src: url('/static/style/font/commcarehqfont-regular.eot?v=1.0&b93c7c8a624e');
-  src: url('/static/style/font/commcarehqfont-regular.eot?&b93c7c8a624e#iefix&v=1.0') format('embedded-opentype'),
-url('/static/style/font/commcarehqfont-regular.woff?v=1.0&5c2aee3bfa7c') format('woff'),
-url('/static/style/font/commcarehqfont-regular.ttf?v=1.0&8bc88ef15bdc') format('truetype'),
-url('/static/style/font/commcarehqfont-regular.svg?v=1.0&93daa7eba890#CommCareHQFontRegular') format('svg');
+  src: url('commcarehqfont-regular.eot');
+  src: url('commcarehqfont-regular.eot') format('embedded-opentype'),
+url('commcarehqfont-regular.woff') format('woff'),
+url('commcarehqfont-regular.ttf') format('truetype'),
+url('commcarehqfont-regular.svg') format('svg');
   font-weight: normal;
   font-style: normal;
 }
