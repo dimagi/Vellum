@@ -1151,9 +1151,9 @@ define([
     };
 
     var ICONS = {
-        image: 'icon-picture',
-        audio: 'icon-volume-up',
-        video: 'icon-facetime-video'
+        image: 'fa fa-picture',
+        audio: 'fa fa-volume-up',
+        video: 'fa fa-video-camera',
     };
 
     var itextMediaWidget = function (url_type) {

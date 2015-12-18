@@ -79,17 +79,17 @@ define([
         "error": {
             cssClass: "alert-danger",
             title: "Error",
-            icon: "icon-exclamation-sign"
+            icon: "fa fa-exclamation-circle",
         },
         "parse-warning": {
             cssClass: "",
             title: "Warning",
-            icon: "fa fa-warning"
+            icon: "fa fa-warning",
         },
         "form-warning": {
             cssClass: "",
             title: "Form Warning",
-            icon: "fa fa-info-circle"
+            icon: "fa fa-info-circle",
         }
     };
 
@@ -170,11 +170,11 @@ define([
             csrftoken: _this.opts().csrftoken
         });
         var setFullscreenIcon = function () {
-            var $i = $('i', _this.data.core.$fullscreenButton);
+            var $i = $('i', _this.data.core.$fullscreenButton).addClass("fa");
             if (_this.data.windowManager.fullscreen) {
-                $i.addClass('icon-resize-small').removeClass('icon-resize-full');
+                $i.addClass('fa-compress').removeClass('fa-expand');
             } else {
-                $i.removeClass('icon-resize-small').addClass('icon-resize-full');
+                $i.removeClass('fa-compress').addClass('fa-expand');
             }
         };
         setTimeout(setFullscreenIcon, 0);
@@ -1602,8 +1602,9 @@ define([
             var errors = mug.getErrors();
             if (errors.length) {
                 var msg = errors.join("\n").replace(/"/g, "'");
-                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
-                    'icon-exclamation-triangle" title="' + msg + '"></div>';
+                // TODO: test icon still works
+                node.data.errors = '<i class="fd-tree-valid-alert-icon ' +
+                    'fa fa-warning" title="' + msg + '"></i>';
             } else {
                 node.data.errors = null;
             }
