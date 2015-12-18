@@ -1203,7 +1203,11 @@ define([
             // hacks
             e.mug._node_control = undefined;
             if (e.keepUndoStack) {
-                undoStack = [[e.mug, e.previousSibling, e.position]].concat(undoStack);
+                if (e.hasChildren) {
+                    undoStack = [[e.mug, e.previousSibling, e.position]].concat(undoStack);
+                } else {
+                    undoStack = undoStack.concat([[e.mug, e.previousSibling, e.position]]);
+                }
             } else {
                 undoStack = [[e.mug, e.previousSibling, e.position]];
             }

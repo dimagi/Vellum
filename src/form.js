@@ -963,18 +963,21 @@ define([
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _removeMugFromForm: function(mug, ufids, isInternal, keepUndoStack) {
+        _removeMugFromForm: function(mug, ufids, isInternal, keepUndoStack, previousEqualParent) {
             if (ufids.hasOwnProperty(mug.ufid)) {
                 return; // already removed
             }
             ufids[mug.ufid] = null;
             var node = this.tree.getNodeFromMug(mug),
-                previousSibling;
+                parentMug = mug.parentMug,
+                previousSibling, hasChildren;
             if (node) {
-                previousSibling = mug.previousSibling;
+                previousSibling = previousEqualParent ? parentMug : mug.previousSibling;
                 var children = node.getChildrenMugs();
-                for (var i = 0; i < children.length; i++) {
-                    this._removeMugFromForm(children[i], ufids, true, keepUndoStack);
+                for (var i = children.length - 1; i >= 0; i--) {
+                    keepUndoStack = true;
+                    hasChildren = true;
+                    this._removeMugFromForm(children[i], ufids, true, keepUndoStack, true);
                 }
                 delete this.mugMap[mug.absolutePath];
                 this.tree.removeMug(mug);
@@ -994,8 +997,9 @@ define([
                 type: 'add-to-undo',
                 mug: mug,
                 previousSibling: previousSibling,
-                position: previousSibling === mug.parentMug ? 'into' : 'after',
+                position: previousSibling === parentMug ? 'first' : 'after',
                 keepUndoStack: keepUndoStack,
+                hasChildren: hasChildren,
             });
         },
         isUniqueQuestionId: function (qId, mug) {
