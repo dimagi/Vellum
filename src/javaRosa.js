@@ -714,7 +714,7 @@ define([
                     }
                 });
                 $modal.modal('show');
-                $modal.one('shown', function () {
+                $modal.one('shown.bs.modal', function () {
                     $newItemInput.focus();
                 });
             });
@@ -2233,7 +2233,7 @@ define([
             $textarea.val(generateItextXLS(form, Itext));
 
             $modal.modal('show');
-            $modal.one('shown', function () { $textarea.focus(); });
+            $modal.one('shown.bs.modal', function () { $textarea.focus(); });
         }
     });
 

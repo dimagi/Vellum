@@ -551,7 +551,7 @@ define([
         codeMirror.setSize('100%', '100%');
 
         $modal.modal('show');
-        $modal.one('shown', function () {
+        $modal.one('shown.bs.modal', function () {
             codeMirror.refresh();
             codeMirror.focus();
         });
@@ -572,7 +572,7 @@ define([
         var $text = $exportForm.find('textarea');
         $text.val(this.data.core.form.getExportTSV());
         $modal.modal('show');
-        $modal.one('shown', function () { $text.focus(); });
+        $modal.one('shown.bs.modal', function () { $text.focus(); });
     };
 
     fn.showOverwriteWarning = function(send, formText, serverForm) {
@@ -685,7 +685,7 @@ define([
         });
 
         $modal.modal('show');
-        $modal.one('shown', function () {
+        $modal.one('shown.bs.modal', function () {
             $modalBody.find("input:first").focus().select();
         });
     };
@@ -715,7 +715,7 @@ define([
                 closeButtonTitle: closeButtonTitle,
                 headerIcon: headerIcon,
             }));
-        $modal.one("shown", function () {
+        $modal.one("shown.bs.modal", function () {
             $modal.find(".btn-default:last").focus();
         });
 
