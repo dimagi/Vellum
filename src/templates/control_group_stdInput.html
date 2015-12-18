@@ -1,8 +1,8 @@
 <div class="form-group">
-    <label class="control-label">
+    <label class="control-label col-sm-4">
         <%=label%>
-        <div class="controls">
-            <input type="<%=type%>" />
-        </div>
     </label>
+    <div class="col-sm-8">
+        <input type="<%=type%>"<% if (type === 'text') { %> class="form-control"<% } %> />
+    </div>
 </div>
