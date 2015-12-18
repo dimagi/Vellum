@@ -84,12 +84,12 @@ define([
         "parse-warning": {
             cssClass: "",
             title: "Warning",
-            icon: "icon-warning-sign"
+            icon: "fa fa-warning"
         },
         "form-warning": {
             cssClass: "",
             title: "Form Warning",
-            icon: "icon-info-sign"
+            icon: "fa fa-info-circle"
         }
     };
 
@@ -488,7 +488,7 @@ define([
                         _this.closeModal();
                     }
                 }
-            ], false, "icon-warning-sign");
+            ], false, "fa fa-warning");
             var content = "There are validation errors in the form.  Do you want to continue anyway?";
             content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
             $modal.find(".modal-body").html(content);
@@ -529,6 +529,7 @@ define([
             .css('height', modalHeight + 'px')
             .css('width', $(window).width() - 40 + 'px');
 
+        // TODO: test
         $modal.addClass('fd-source-modal')
             .removeClass('form-horizontal')
             .find('.modal-body')
@@ -603,6 +604,7 @@ define([
                         .css('height', modalHeight + 'px')
                         .css('width', $(window).width() - 40 + 'px');
 
+                    // TODO: test
                     $modal.addClass('fd-source-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
@@ -612,7 +614,7 @@ define([
                     $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
             }
-        ], "Cancel", "icon-warning-sign");
+        ], "Cancel", "fa fa-warning");
 
         var diff = util.xmlDiff(formText, serverForm);
 
@@ -777,7 +779,7 @@ define([
                 valid_children: this.data.core.mugTypes.Group.validChildTypes
             },
             "default": {
-                icon: 'icon-question-sign',
+                icon: 'fa fa-question-circle',
                 max_children: 0,
                 valid_children: []
             }
@@ -1111,7 +1113,7 @@ define([
 
                 _this.hideQuestionProperties();
 
-                var $modal = _this.generateNewModal("Error", [], "OK", "icon-warning-sign");
+                var $modal = _this.generateNewModal("Error", [], "OK", "fa fa-warning");
                 $modal.find(".modal-body").text(msg);
                 $modal.modal('show');
 
@@ -1573,7 +1575,7 @@ define([
             buttons.push({title: "OK", defaultButton: true});
         }
 
-        var $modal = this.generateNewModal(title, buttons, false, "icon-warning-sign");
+        var $modal = this.generateNewModal(title, buttons, false, "fa fa-warning");
 
         // store a reference to $modal on this so modal button actions can
         // reference it in order to hide it at the right point in time.  This is
@@ -1837,7 +1839,7 @@ define([
                         _this.send(formText, forceFullSave ? 'full' : null);
                     },
                 },
-            ], false, "icon-warning-sign");
+            ], false, "fa fa-warning");
             $modal.find(".modal-body").html(theScaryWarning);
             $modal.modal('show');
             return;

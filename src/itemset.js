@@ -36,13 +36,13 @@ define([
         isControlOnly: true,
         typeName: 'Lookup Table Data',
         tagName: 'itemset',
-        icon: 'icon-th',
+        icon: 'fa fa-th',
         isTypeChangeable: false,
         // have to delete the parent select
         isRemoveable: false,
         isCopyable: false,
         getIcon: function (mug) {
-            return 'icon-th';
+            return 'fa fa-th';
         },
         init: function (mug, form, baseSpec) {
             mug.p.itemsetData = {};

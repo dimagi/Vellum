@@ -128,7 +128,7 @@ define(["underscore"], function (_) {
         intents: {
             templates: [
                 {
-                    icon: "icon-map-marker",
+                    icon: "fa fa-map-marker",
                     name: "Area Mapper",
                     id: "com.richard.lu.areamapper",
                     extra: {ext: "value"},
@@ -140,7 +140,7 @@ define(["underscore"], function (_) {
                     },
                 },
                 {
-                    icon: "icon-barcode",
+                    icon: "fa fa-barcode",
                     name: "Barcode Scanner",
                     id: "com.google.zxing.client.android.SCAN",
                     extra: {},

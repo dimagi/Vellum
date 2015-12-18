@@ -52,7 +52,7 @@ define([
     var bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
-              '<i class="icon-question-sign">&nbsp;</i>' +
+              '<i class="fa fa-question-circle">&nbsp;</i>' +
               'example widget, not used' +
             '</span>',
         upcast: function ( element ) {

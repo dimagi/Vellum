@@ -1264,7 +1264,7 @@ define([
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         dataType: 'geopoint',
-        icon: 'icon-map-marker',
+        icon: 'fa fa-map-marker',
         isODKOnly: true,
         init: function (mug, form) {
         }
@@ -1273,7 +1273,7 @@ define([
     var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
         dataType: 'barcode',
-        icon: 'icon-barcode',
+        icon: 'fa fa-barcode',
         isODKOnly: true,
         init: function (mug, form) {
         }
@@ -1282,7 +1282,7 @@ define([
     var Date = util.extend(defaultOptions, {
         typeName: 'Date',
         dataType: 'xsd:date',
-        icon: 'icon-calendar',
+        icon: 'fa fa-calendar',
         init: function (mug, form) {
         }
     });

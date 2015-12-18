@@ -182,7 +182,7 @@ define([
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
-            icon: 'icon-save',
+            icon: 'fa fa-save',
             init: function (mug, form) {
                 mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
             },

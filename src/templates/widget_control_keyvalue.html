@@ -5,8 +5,12 @@
             <div class="col-sm-3"><input class="fd-kv-key input-block-level" type="text" value="<%=k%>" placeholder="key" /></div>
             <div class="col-sm-1" style="text-align:center;">&rarr;</div>
             <div class="col-sm-7"><input class="fd-kv-val input-block-level jstree-drop" type="text" value="<%=v%>" placeholder="value" /></div>
-            <div class="col-sm-1"><a href="#" class="btn fd-kv-remove-pair btn-small btn-danger<% if (k =='') { %> hide<% } %>"><i class="icon-remove"></i></a></div>
+            <div class="col-sm-1">
+                <a href="#" class="btn fd-kv-remove-pair btn-small btn-danger<% if (k =='') { %> hide<% } %>">
+                    <i class="fa fa-remove"></i>
+                </a>
+            </div>
         </div>
     <% }); }); %>
-    <a href="#" class="btn btn-default fd-kv-add-pair hide"><i class="icon-plus"></i> Add Key&rarr;Value Pair</a>
+    <a href="#" class="btn btn-default fd-kv-add-pair hide"><i class="fa fa-plus"></i> Add Key&rarr;Value Pair</a>
 </div>
