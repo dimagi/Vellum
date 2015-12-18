@@ -686,7 +686,7 @@ define([
             .addClass("fd-edit-button pull-right")
             .text("Edit")
             .stopLink()
-            .addClass('btn')
+            .addClass('btn btn-default')
             .attr('type', 'button')
             .prop('disabled', isDisabled)
             .click(editFn);

@@ -1,6 +1,6 @@
 <div class="btn-group fd-question-type-group <%= groupClass %> <% if (textOnly) { %>fd-question-type-group-advanced<% } %>">
     <% if (!textOnly) { %>
-    <a class="btn btn-large fd-question-type fd-question-type-default"
+    <a class="btn btn-default btn-large fd-question-type fd-question-type-default"
        data-qtype="<%= defaultQuestion.slug %>"
        href="#">
         <span data-qlabel="<%= defaultQuestion.title %>">
@@ -9,7 +9,7 @@
     </a>
     <% } %>
     <% if (showDropdown) { %>
-    <a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#"><% if (textOnly) { %>
+    <a class="btn btn-default btn-large dropdown-toggle" data-toggle="dropdown" href="#"><% if (textOnly) { %>
         <i class="<%= defaultQuestion.icon %>"></i> <%= defaultQuestion.title %>
         <% } %><span class="caret"></span></a>
     <ul class="dropdown-menu">
@@ -25,7 +25,7 @@
     </ul>
     <% } %>
     <% _.each(relatedQuestions, function (related) { %>
-    <a class="btn btn-large fd-question-type fd-question-type-related disabled"
+    <a class="btn btn-default btn-large fd-question-type fd-question-type-related disabled"
        data-qtype="<%= related.slug %>"
        href="#">
         <span data-qlabel="<%= related.title %>">

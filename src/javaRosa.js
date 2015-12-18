@@ -637,7 +637,7 @@ define([
                 var $btn = $('<div />');
                 $btn.text(' ' + form)
                     .addClass(block.getAddFormButtonClass(form))
-                    .addClass('btn itext-option').click(function () {
+                    .addClass('btn btn-default itext-option').click(function () {
                         block.addItext(form);
                     });
 
@@ -661,7 +661,7 @@ define([
         block.getAddCustomItextButton = function () {
             var $customButton = $("<button />")
                     .text("custom...")
-                    .addClass('btn')
+                    .addClass('btn btn-default')
                     .attr('type', 'button'),
                 newItextBtnClass = 'fd-new-itext-button';
 

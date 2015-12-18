@@ -178,7 +178,7 @@ define([
             }
         };
         setTimeout(setFullscreenIcon, 0);
-        this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
+        this.data.core.$fullscreenButton = $('<button class="btn btn-default"><i/></button>').click(function (e) {
             e.preventDefault();
             if (window.analytics) {
                 window.analytics.usage('Form Builder', 'Full Screen Mode',
