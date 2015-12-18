@@ -24,6 +24,7 @@ define([
     'vellum/datasources',
     'vellum/util',
     'vellum/debugutil',
+    'vellum/undomanager',
     'vellum/base',
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
@@ -54,7 +55,8 @@ define([
     parser,
     datasources,
     util,
-    debug
+    debug,
+    undomanager
 ) {
     
     // Load these modules in the background after all runtime dependencies have
@@ -69,7 +71,6 @@ define([
     }, 0);
 
     var isMac = /Mac/.test(navigator.platform);
-    var undoStack = [];
 
     var DEBUG_MODE = false;
 
@@ -1204,12 +1205,12 @@ define([
             e.mug._node_control = undefined;
             if (e.keepUndoStack) {
                 if (e.hasChildren) {
-                    undoStack = [[e.mug, e.previousSibling, e.position]].concat(undoStack);
+                    undomanager.prependMug(e.mug, e.previousSibling, e.position);
                 } else {
-                    undoStack = undoStack.concat([[e.mug, e.previousSibling, e.position]]);
+                    undomanager.appendMug(e.mug, e.previousSibling, e.position);
                 }
             } else {
-                undoStack = [[e.mug, e.previousSibling, e.position]];
+                undomanager.resetUndo(e.mug, e.previousSibling, e.position);
             }
         });
     };
@@ -1691,31 +1692,14 @@ define([
                     return _this.isMugRemoveable(mug, mug.absolutePath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
-                isUndoable: undoStack.length,
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true);
             form.removeMugsFromForm(mugs);
             _this.refreshCurrentMug();
         });
-        $baseToolbar.find('.fd-undo').click(function () {
-            _this.ensureCurrentMugIsSaved(function () {
-                _.each(undoStack, function(undo) {
-                    var mug = undo[0],
-                        sibling = undo[1],
-                        position = undo[2];
-                    if (window.analytics) {
-                        window.analytics.workflow("undo delete question in form builder");
-                    }
-                    mug.form.insertQuestion(mug, sibling, position);
-                    var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-                    if ($firstInput.length) {
-                        $firstInput.focus().select();
-                    }
-                });
-                _this.refreshCurrentMug();
-                undoStack = [];
-            });
+        $('.fd-undo').click(function () {
+            _this.ensureCurrentMugIsSaved(undomanager.undo);
         });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
