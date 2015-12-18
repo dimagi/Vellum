@@ -1591,7 +1591,7 @@ define([
         }
         $modal
             .modal('show')
-            .on('hide', function () {
+            .on('hide.bs.modal', function () {
                 _this.data.core.isAlertVisible = false;
             });
     };
