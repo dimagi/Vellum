@@ -174,7 +174,7 @@ define([
     var text = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "text").addClass('input-block-level');
+        input.attr("type", "text").addClass('form-control');
 
         if (options.placeholder) {
             input.attr('placeholder', options.placeholder);
@@ -214,7 +214,7 @@ define([
             .attr("name", widget.id)
             .attr("id", widget.id)
             .attr("rows", "2")
-            .addClass('input-block-level')
+            .addClass('form-control')
             .on('change input', function (e) { widget.handleChange(); })
             .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
@@ -244,7 +244,7 @@ define([
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
-            .addClass('input-block-level jstree-drop')
+            .addClass('form-control jstree-drop')
             .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
         var opts = {isExpression: options.widget === xPath || options.widget === droppableText},
@@ -505,7 +505,7 @@ define([
         var widget = normal(mug, options);
         widget.dropdown = widget.input = $("<select />")
             .attr("name", widget.id)
-            .addClass('input-block-level');
+            .addClass('form-control');
 
         var input = widget.input;
 
@@ -597,7 +597,7 @@ define([
         var widget = dropdown(mug, options),
             super_handleChange = widget.handleChange;
         widget.input = widget.text = $('<input />')
-            .addClass('input-block-level')
+            .addClass('form-control')
             .attr({
                 type: 'text',
                 name: widget.id + '-text',
