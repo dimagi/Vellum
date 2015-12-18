@@ -7,10 +7,10 @@
             </div>
             <div class="modal-body form form-horizontal">
                 <div class="form-group">
-                    <label class="control-label">
+                    <label class="col-sm-4 control-label">
                         Select new <%= mediaType %>
                     </label>
-                    <div class="controls">
+                    <div class="col-sm-8">
                         <div class="hqm-select-files-container">
                             <button class="hqm-select btn btn-primary" type="button">Select File</button>
                         </div>
@@ -18,18 +18,18 @@
                     </div>
                 </div>
                 <div class="form-group hqm-existing hide">
-                    <label class="control-label">
+                    <label class="col-sm-4 control-label">
                         Current <%= mediaType %>
                     </label>
-                    <div class="controls">
+                    <div class="col-sm-8">
                     </div>
                 </div>
                 <div class="hqm-upload-form">
                     <fieldset class="hqm-sharing hide">
                         <legend>Multimedia Sharing Options</legend>
                         <div class="form-group">
-                            <label class="control-label" for="fd-mm-<%= mediaType %>-license">License</label>
-                            <div class="controls">
+                            <label class="control-label col-sm-4" for="fd-mm-<%= mediaType %>-license">License</label>
+                            <div class="col-sm-8">
                                 <select name="license" id="fd-mm-<%= mediaType %>-license">
                                     <option value="cc-nc">Creative Commons Attribution, Non-Commercial</option>
                                     <option value="cc-nd">Creative Commons Attribution, No Derivatives</option>
@@ -41,8 +41,8 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="fd-mm-<%= mediaType %>-author">Author</label>
-                            <div class="controls">
+                            <label class="col-sm-4 control-label" for="fd-mm-<%= mediaType %>-author">Author</label>
+                            <div class="col-sm-8">
                                 <input type="text"
                                        name="author"
                                        id="fd-mm-<%= mediaType %>-author"
@@ -50,10 +50,10 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="fd-mm-<%= mediaType %>-attribution">
+                            <label class="col-sm-4 control-label" for="fd-mm-<%= mediaType %>-attribution">
                                 Attribution Notes
                             </label>
-                            <div class="controls">
+                            <div class="col-sm-8">
                                 <textarea name="attribution-notes"
                                        id="fd-mm-<%= mediaType %>-attribution"
                                        rows="2"></textarea>
