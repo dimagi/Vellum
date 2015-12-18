@@ -1,20 +1,29 @@
 define([
     'jquery',
     'underscore',
+    'tpl!vellum/templates/undo_alert',
 ], function(
     $,
-    _
+    _,
+    UNDO_ALERT
 ) {
     var undoStack = [],
         alertShown = false;
 
+    function createAlert() {
+        alertShown = true;
+        $('.fd-scrollable-tree').prepend(UNDO_ALERT).bind('closed', function() {
+            alertShown = false;
+        }).bind('close', function() {
+            alertShown = false;
+        });
+    }
+
     function toggleAlert() {
         if (undoStack.length && !alertShown) {
-            $('.fd-undo-delete').show();
-            alertShown = true;
+            createAlert();
         } else if (undoStack.length === 0 && alertShown) {
-            $('.fd-undo-delete').hide();
-            alertShown = false;
+            $('.fd-undo-delete').alert('close');
         }
     }
 
