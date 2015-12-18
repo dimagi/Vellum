@@ -468,6 +468,13 @@ define([
         }
     });
 
+    Object.defineProperty(Mug.prototype, "hashtagPath", {
+        get: function () {
+            var path = this.absolutePathNoRoot;
+            return path ? '#form' + path : null;
+        }
+    });
+
     Object.defineProperty(Mug.prototype, "parentMug", {
         get: function () {
             var node = this.form.tree.getNodeFromMug(this);
