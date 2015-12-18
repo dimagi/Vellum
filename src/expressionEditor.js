@@ -229,7 +229,7 @@ define([
                     if (le && validate(le)[0] && re && validate(re)[0]) {
                         $expUI.find('.validation-results.alert-success').removeClass('hide');
                     } else {
-                        $expUI.find('.validation-results.alert-error').removeClass('hide');
+                        $expUI.find('.validation-results.alert-danger').removeClass('hide');
                     }
                 };
 

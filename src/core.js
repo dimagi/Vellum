@@ -77,7 +77,7 @@ define([
 
     var MESSAGE_TYPES = {
         "error": {
-            cssClass: "alert-error",
+            cssClass: "alert-danger",
             title: "Error",
             icon: "icon-exclamation-sign"
         },
