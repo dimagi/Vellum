@@ -72,8 +72,8 @@ define([
             richTextOptions = {isExpression: true},
             form = options.mug.form;
         options = _.defaults(options, {
-            leftPlaceholder: "Hint: drag a question here.",
-            rightPlaceholder: "Hint: drag a question here.",
+            leftPlaceholder: "Drag question here",
+            rightPlaceholder: "Drag question here",
         });
 
         var getExpressionInput = function () {

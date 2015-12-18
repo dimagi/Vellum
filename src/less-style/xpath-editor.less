@@ -7,21 +7,22 @@
 
     .xpath-expression-group {
         .validation-result-container {
-            margin-right: 5px;
-
             .validation-results {
-                padding: 5px 10px;
+                display: inline-block;
+                padding: 5px 25px;
                 margin-bottom: 0;
             }
-        }
-
-        .xpath-expression-row {
-            margin-right: 80px;
         }
     }
 
     .fd-xpath-editor-container fieldset {
         position: relative;
+        legend {
+            .clearfix();
+            button {
+                margin-bottom: 5px;
+            }
+        }
     }
 }
 
@@ -34,19 +35,4 @@
     .form-group:last-child {
         margin-bottom: 0;
     }
-}
-
-// TODO: remove this? replace with col-sm-X?
-.fieldset-condensed {
-    .control-label {
-        width: 90px;
-    }
-    .controls {
-        margin-left: 100px;
-    }
-}
-
-// TODO: remove this? replace with col-sm-X?
-.form-horizontal .form-actions-condensed {
-    padding-left: 100px;
 }

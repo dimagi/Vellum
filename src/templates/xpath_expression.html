@@ -1,28 +1,32 @@
 <div class="form-group xpath-expression-group">
-    <button type="button" class="btn btn-danger xpath-delete-expression pull-right"><i class="fa fa-remove"></i></button>
-    <div class="validation-result-container pull-right">
-        <p class="validation-results alert alert-success hide">
-            <i class="fa fa-check"></i>
-        </p>
-        <p class="validation-results alert alert-danger hide">
-            <i class="fa fa-warning"></i>
-        </p>
-    </div>
-    <div class="control-row xpath-expression-row">
-        <div class="col-sm-4">
+    <div class="xpath-expression-row">
+        <div class="col-sm-3">
             <<%=tag%> <%=tagArgs%> class="fd-input form-control left-question xpath-edit-node jstree-drop"
                    type="text" placeholder="<%= leftPlaceholder %>" />
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <select class="form-control op-select">
                 <% _.each(operationOpts, function (opt) { %>
                 <option value="<%=opt[1]%>"><%=opt[0]%></option>
                 <% }); %>
             </select>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <<%=tag%> <%=tagArgs%> class="fd-input form-control right-question xpath-edit-node jstree-drop"
                    type="text" placeholder="<%= rightPlaceholder %>" />
+        </div>
+        <div class="col-sm-3">
+            <button type="button" class="btn btn-danger xpath-delete-expression pull-right">
+                <i class="fa fa-remove"></i>
+            </button>
+            <div class="validation-result-container">
+                <p class="validation-results alert alert-success hide">
+                    <i class="fa fa-check"></i>
+                </p>
+                <p class="validation-results alert alert-danger hide">
+                    <i class="fa fa-warning"></i>
+                </p>
+            </div>
         </div>
     </div>
 </div>
