@@ -1,5 +1,5 @@
-<fieldset class="accordion-group fd-question-fieldset">
-    <legend class="accordion-heading">
+<fieldset class="panel panel-default fd-question-fieldset">
+    <legend class="panel-heading">
         <% if (help) { %>
         <div class="fd-help pull-right">
             <a href="#" class="help"
@@ -9,7 +9,7 @@
             </a>
         </div>
         <% } %>
-        <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetClass%>" data-toggle="collapse">
+        <a class="<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetClass%>" data-toggle="collapse">
             <i class="icon-double-angle-down"></i>
             <%=fieldsetTitle%>
         </a>
@@ -17,8 +17,8 @@
     <!-- todo: don't require passing a unique ID to this template or an
     interface that exposes it (i.e., allow passing a non-unique id and then
     append it to a random one, or something -->
-    <div id="<%=fieldsetClass%>" class="accordion-body <% if
+    <div id="<%=fieldsetClass%>" class="panel-collapse <% if
         (isCollapsed) { %> collapse<% } else { %> in<% } %>" >
-        <div class="accordion-inner fd-fieldset-content"></div>
+        <div class="panel-body fd-fieldset-content"></div>
     </div>
 </fieldset>
