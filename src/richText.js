@@ -90,7 +90,13 @@ define([
                 labelText.find('output').replaceWith(function () {
                     return extractXPathInfoFromOutputValue($(this).attr('value')).reference;
                 });
-                $(this.dragHandlerContainer.$).children("img").stickyover({
+                // Remove ckeditor-supplied title attributes, which will otherwise override popover title
+                $(this.dragHandlerContainer.$).children("img").removeAttr("title");
+                // TODO: check with emord this can use popover...and if so, remove stickyover altogether
+                $(this.dragHandlerContainer.$).children("img").popover({
+                    trigger: 'hover',
+                    container: 'body',
+                    placement: 'bottom',
                     title: displayId + '<small>' + xpath + '</small>',
                     html: true,
                     content: '<p>' + labelText.text() + '</p>',
