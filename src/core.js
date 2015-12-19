@@ -476,6 +476,7 @@ define([
             var $modal = _this.generateNewModal("Error", [
                 {
                     title: 'Continue',
+                    cssClasses: "btn-default",
                     action: function() {
                         _this.closeModal();
                         _this.showSourceInModal(done);
@@ -520,21 +521,17 @@ define([
             description: "This is the raw XML. You can edit or paste into this box to make changes " +
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
+
         modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
         modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
         modalHeight = $(window).height() - 40;
         modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
 
-        $modal
-            .css('height', modalHeight + 'px')
-            .css('width', $(window).width() - 40 + 'px');
-
-        // TODO: test
         $modal.addClass('fd-source-modal')
             .removeClass('form-horizontal')
             .find('.modal-body')
-            .html($updateForm)
-            .css('height', modalBodyHeight + 'px');
+            .css('height', modalBodyHeight + 'px')
+            .html($updateForm);
 
         $textarea = $updateForm.find('textarea');
 
@@ -576,7 +573,8 @@ define([
     };
 
     fn.showOverwriteWarning = function(send, formText, serverForm) {
-        var $modal, $overwriteForm, _this = this;
+        var $modal, $overwriteForm, _this = this,
+            modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
 
         $modal = _this.generateNewModal("Lost work warning", [
             {
@@ -595,21 +593,17 @@ define([
                 action: function () {
                     $('#form-differences').show();
 
-                    var modalHeaderHeight = $modal.find('.modal-header').outerHeight(false),
-                        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false),
-                        modalHeight = $(window).height() - 40,
-                        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-
-                    $modal
-                        .css('height', modalHeight + 'px')
-                        .css('width', $(window).width() - 40 + 'px');
-
+                    // TODO: DRY up this, it's duplicated in showSourceInModal
                     // TODO: test
+                    modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
+                    modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
+                    modalHeight = $(window).height() - 40;
+                    modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
                     $modal.addClass('fd-source-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
-                        .html($overwriteForm)
-                        .css('height', modalBodyHeight + 'px');
+                        .css('height', modalBodyHeight + 'px')
+                        .html($overwriteForm);
 
                     $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
@@ -1835,6 +1829,7 @@ define([
                 },
                 {
                     title: 'Save anyway',
+                    cssClasses: "btn-default",
                     action: function() {
                         _this.closeModal();
                         _this.send(formText, forceFullSave ? 'full' : null);

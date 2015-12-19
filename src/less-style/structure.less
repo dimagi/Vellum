@@ -206,7 +206,25 @@
 }
 
 .fd-source-modal {
-    left: 20px;
+    .modal-dialog {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: 0;
+        width: auto;
+
+        .modal-content {
+            position: absolute;
+            @padding: 20px;
+            top: @padding;
+            bottom: @padding;
+            left: @padding;
+            right: @padding;
+        }
+    }
+    /*left: 20px;
     margin-left: 0;
     height: 93%;
 
@@ -223,7 +241,7 @@
                 height: 100%;
             }
         }
-    }
+    }*/
 }
 
 .fd-messages {
