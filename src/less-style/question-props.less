@@ -59,14 +59,29 @@
     }
 
     .fd-help {
-        height: 25px;
+        position: relative;
+        top: -8px;
+        height: 15px;
         width: 25px;
-        display: block;
+        display: inline-block;
         font-size: @baseFontSize * 1.5;
 
         a:hover {
             text-decoration: none;
             color: @green;
+        }
+    }
+}
+
+.widget {
+    .control-label label {
+        vertical-align: top;
+    }
+
+    .messages {
+        padding-top: 1px; // HACK make .alert margin work
+        .alert {
+            margin: 10px 0;
         }
     }
 }
