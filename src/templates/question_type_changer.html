@@ -1,5 +1,4 @@
 <div class="btn-group question-type-changer">
-    <!-- TODO: is the btn-default here necessary? -->
     <a class="btn btn-default dropdown-toggle current-question"
         data-toggle="dropdown" href="#">
         <i class="<%=currentQuestionIcon%>"></i> 
@@ -7,11 +6,9 @@
     </a>
     <ul class="dropdown-menu">
         <% if (questions.length === 0) { %>
-            <!-- TODO: replace .nav-header with list group or panel group -->
-            <li class="nav-header">Cannot Change Question Type</li>
+            <li class="dropdown-header">Cannot Change Question Type</li>
         <% } else { %>
-            <!-- TODO: replace .nav-header with list group or panel group -->
-            <li class="nav-header">Change Question Type To</li>
+            <li class="dropdown-header">Change Question Type To</li>
             <% _.each(questions, function(question) { %>
             <li>
                 <a href="#" class="change-question" data-qtype="<%=question.slug%>">

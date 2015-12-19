@@ -1,6 +1,5 @@
 <li class="divider language-selector"></li>
-<!-- TODO: replace .nav-header with list group or panel group -->
-<li class="nav-header language-selector">Display</li>
+<li class="dropdown-header language-selector">Display</li>
 <% _.each(languages, function(language) { %>
 <li><a tabindex="-1" href="#" class="fd-display-item language-selector" data-code="<%-language.code%>"><i class="fa fa-check"></i><%-language.name%><%
     if (language.name !== language.code && language.code !== '_ids') {
