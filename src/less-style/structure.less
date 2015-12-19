@@ -1,5 +1,14 @@
 @import "lib/main";
 
+.fd-question-properties,
+.fd-xpath-editor {
+    display: none;
+}
+
+.fd-default-panel {
+    padding-left: @contentPaddingVellum;
+}
+
 .fd-ui-container {
     top: 0;
     width: 100%;
@@ -224,24 +233,6 @@
             right: @padding;
         }
     }
-    /*left: 20px;
-    margin-left: 0;
-    height: 93%;
-
-    &.fade.in { top: 20px;}
-
-    .modal-body {
-        max-height: none;
-    }
-    .fd-source-container {
-        height: 100%;
-        >.control-row {
-            height: 95%;
-            textarea {
-                height: 100%;
-            }
-        }
-    }*/
 }
 
 .fd-messages {
