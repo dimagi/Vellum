@@ -485,6 +485,7 @@ define([
 
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
+            // TODO: template
             var $uiElem = _getUIElement(),
                 $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container').addClass("col-sm-1"),
                 $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
@@ -633,6 +634,7 @@ define([
         };
 
         block.getAddFormButtons = function () {
+            // TODO: template?
             var $buttonGroup = $("<div />").addClass("btn-group itext-options");
             _.each(block.forms, function (form) {
                 var $btn = $('<div />');
@@ -660,6 +662,7 @@ define([
         };
 
         block.getAddCustomItextButton = function () {
+            // TODO: template?
             var $customButton = $("<button />")
                     .text("custom...")
                     .addClass('btn btn-default')
@@ -682,23 +685,19 @@ define([
                     label: "Content Type"
                 }));
 
-                $newItemInput = $("<input />").attr("type", "text");
+                $newItemInput = $("<input />").attr("type", "text").addClass("form-control");
                 $newItemInput.keyup(function () {
                     var currentValue = $(this).val(),
                         $addButton = mug.form.vellum.$f.find('.' + newItextBtnClass);
+                    $addButton.toggleClass("disabled");
+                    $addButton.toggleClass("btn-primary");
                     if (!currentValue || 
                         RESERVED_ITEXT_CONTENT_TYPES.indexOf(currentValue) !== -1 || 
                         block.activeForms.indexOf(currentValue) !== -1) 
                     {
-                        $addButton
-                            .addClass('disabled')
-                            .removeClass('btn-primary')
-                            .attr('disabled', 'disabled');
+                        $addButton.attr('disabled', 'disabled');
                     } else {
-                        $addButton
-                            .removeClass('disabled')
-                            .addClass('btn-primary')
-                            .removeAttr('disabled');
+                        $addButton.addClass('btn-primary')
                     }
                 });
 
@@ -769,6 +768,7 @@ define([
                 $groupContainer.append($ui);
             });
             $blockUI.find('.new-itext-form-group').after($groupContainer);
+            $groupContainer.find(".col-sm-9").removeClass("col-sm-9").addClass("col-sm-8");
             $groupContainer.before(block.getDeleteFormButton(form));
         };
 
@@ -787,7 +787,8 @@ define([
 
             var $formGroup = $blockUI.find('.itext-lang-group');
             $formGroup.each(function () {
-               $(this).before(block.getDeleteFormButton($(this).data('formtype')));
+                $(this).find(".col-sm-9").removeClass("col-sm-9").addClass("col-sm-8");
+                $(this).before(block.getDeleteFormButton($(this).data('formtype')));
             });
 
             return $blockUI;

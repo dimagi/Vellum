@@ -683,7 +683,7 @@ define([
         }
 
         var button = $('<button />')
-            .addClass("fd-edit-button col-sm-1")
+            .addClass("fd-edit-button")
             .text("Edit")
             .stopLink()
             .addClass('btn btn-default')

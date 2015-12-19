@@ -16,13 +16,12 @@
 }
 
 .itext-block-container {
-    margin-bottom: @gridGutterWidth;
-    &:last-child {
-        margin-bottom: 0;
+    &:not(:last-child) {
+        margin-bottom: @gridGutterWidth;
     }
 
-    > .btn-danger {
-        margin-top: @gridGutterWidth/2;
+    .btn-danger {
+        margin: 10px;
     }
 }
 
