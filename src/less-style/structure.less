@@ -98,9 +98,19 @@
                     #fd-questions-dropdown-menu a {
                         min-width: 170px;
 
+                        // Checkmarks to show selected language
+                        i.fa-check {
+                            display: none;
+                        }
+
+                        &.selected i.fa-check {
+                            display: inline-block;
+                            margin-left: -14px;
+                            margin-right: 2px;
+                        }
+
                         > .hotkey {
                             float: right;
-                            display: inline-block;
                         }
                     }
                 }
@@ -126,6 +136,11 @@
 
         // Vellum-level messages displayed across bottom of screen
         .fd-messages {
+            position: fixed;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+
             .alert {
                 .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
                 margin: @gridGutterWidth;

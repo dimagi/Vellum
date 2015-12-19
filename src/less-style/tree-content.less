@@ -1,88 +1,93 @@
+// Styling for trees (question tree and external data tree)
 @import "lib/main";
 
-.fd-tree {
-    .fd-scrollable {
-        overflow-x: auto;
+// Vellum wrappers
+.formdesigner .fd-ui-container {
+
+    // Styles shared by both trees
+    .jstree {
+
+        // Items in tree (type icon + name)
+        .jstree-anchor {
+            color: darken(@blueDark, 10);
+
+            &.jstree-hovered,
+            &.jstree-clicked {
+                border: none;
+                background: desaturate(lighten(@blue, 58), 40);
+            }
+
+            &.jstree-clicked {
+                .box-shadow(0px 0px 4px fade(@blue, 60%));
+            }
+
+            > .jstree-icon {
+                background: none;
+                font-size: .85em;
+                color: @blueLight;
+            }
+
+            .fd-tree-valid-alert-icon {
+                color: lighten(@red, 15);
+                margin-right: 3px;
+                margin-left: -3px;
+            }
+        } 
     }
-}
 
-.fd-question-tree.jstree {
-    margin: 5px 0;
-    background: @white;
-}
+    // Panel for question tree, including header
+    .fd-tree {
+        .fd-scrollable {
+            overflow-x: auto;
 
-.fd-tree-valid-alert-icon {
-    color: lighten(@red, 15);
-    margin-right: 3px;
-    margin-left: -3px;
-}
-
-.fd-display-item i.fa-check {
-    display: none;
-}
-
-.fd-display-item.selected i.fa-check {
-    display: inline-block;
-    margin-left: -14px;
-    margin-right: 2px;
-}
-
-.fd-messages {
-    position: fixed;
-    bottom: 40px;
-    left: 0;
-    width: 100%;
-}
-
-.jstree-default .jstree-anchor {
-    color: darken(@blueDark, 10);
-    &.jstree-hovered,
-    &.jstree-clicked {
-        border: none;
-        background: desaturate(lighten(@blue, 58), 40);
-    }
-    &.jstree-clicked {
-        .box-shadow(0px 0px 4px fade(@blue, 60%));
-    }
-    > .jstree-icon {
-        background: none;
-        font-size: .85em;
-        color: @blueLight;
-    }
-}
-
-.fd-external-resource-search {
-    background-color: @cc-bg;
-    margin-bottom: 5px;
-    > form {
-        position: relative;
-        padding: 0px @contentPaddingVellum;
-        i {
-            line-height: 42px;
+            // Separate tree from header
+            .jstree {
+                margin: 5px 0;
+            }
         }
     }
-}
 
-.fd-search-control {
-    position: absolute;
-    top: 5px;
-    margin-left: 18px;
-    width: 100%;
-}
+    // Panel for external data sources tree, including header
+    .fd-external-sources-container {
 
-.fd-head-external-sources {
-    background-color: @cc-neutral-low;
-    cursor: pointer;
-}
+        // Header for panel
+        .fd-head.fd-head-external-sources {
+            background-color: @cc-neutral-low;
+            cursor: pointer;
+        }
 
-.fd-external-sources-tree .jstree-anchor {
-    color: @cc-neutral-low;
-    &.jstree-clicked {
-        background-color: @cc-bg;
-        .box-shadow(0px 0px 4px fade(@cc-neutral-mid, 80%));
-    }
+        // Area for search
+        .fd-external-resource-search {
+            background-color: @cc-bg;
+            margin-bottom: 5px;
+            > form {
+                position: relative;
+                padding: 0px @contentPaddingVellum;
+                i {
+                    line-height: 42px;
+                }
+            }
 
-    > .jstree-icon {
-        color: @cc-neutral-mid;
+            // Icon and search box
+            .fd-search-control {
+                position: absolute;
+                top: 5px;
+                margin-left: 18px;
+                width: 100%;
+            }
+        }
+
+        // Data tree itemsuse a different color scheme
+        .fd-external-sources-tree .jstree-anchor {
+            color: @cc-neutral-low;
+            &.jstree-clicked {
+                background-color: @cc-bg;
+                .box-shadow(0px 0px 4px fade(@cc-neutral-mid, 80%));
+            }
+
+            > .jstree-icon {
+                color: @cc-neutral-mid;
+            }
+        }
     }
 }
