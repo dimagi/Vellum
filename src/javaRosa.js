@@ -1118,7 +1118,8 @@ define([
 
             elem.detach('.markdown-output');
             markdownRow.append(markdownSpacer);
-            markdownRow.append(markdownOutput);
+            markdownContainer.append(markdownOutput);
+            markdownRow.append(markdownContainer);
             elem.append(markdownRow);
             elem.find('.control-label').append(markdown_help({title:options.lstring }));
 

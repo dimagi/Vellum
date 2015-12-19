@@ -710,7 +710,7 @@ define([
         var uiElem = $("<div />").addClass("widget"),
             $controlsRow = $("<div />").addClass("form-group"),
             $controls = $('<div class="col-sm-9 controls" />'),
-            $label = $('<div />').append($("<label />").text(labelText))
+            $label = $('<div />').append($("<label />").text(labelText)),
             $messagesRow = $("<div />").addClass("form-group").addClass("hide"),
             $messagesSpacer = $('<div class="col-sm-3" />'),
             $messages = $('<div class="col-sm-9 messages" />');
