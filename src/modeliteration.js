@@ -2,7 +2,7 @@ define([
     'vellum/form',
     'jquery',
     'underscore',
-    'vellum/datasourcewidgets',
+    'vellum/data_source_widgets',
     'vellum/mugs',
     'vellum/parser',
     'vellum/tree',
