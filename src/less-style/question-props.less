@@ -1,11 +1,15 @@
 @import "lib/main";
 
 .formdesigner {
-    .itext-lang-group-config {
-        background: @navbarBackground;
-        padding: @gridGutterWidth/2 @gridGutterWidth/2 @gridGutterWidth/2 0;
-        .border-radius(10px);
+    .well {
+        padding: 10px;
 
+        .col-sm-1 {
+            padding: 0;
+        }
+    }
+
+    .itext-lang-group-config {
         &:last-of-type {
             margin-bottom: 0;
         }
@@ -229,4 +233,14 @@
     resize: both;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+.fd-kv {
+    margin-bottom: 0;
+    .fd-kv-arrow {
+        text-align: center;
+        i {
+            margin-top: 8px;
+        }
+    }
 }

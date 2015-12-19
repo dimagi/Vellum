@@ -189,7 +189,7 @@ define([
             spec: {
                 xmlnsAttr: { presence: "optional" },
                 "date_modified": {
-                    lstring: "Date modified",
+                    lstring: "Date Modified",
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,

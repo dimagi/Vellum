@@ -625,6 +625,7 @@ define([
         block.getFormGroupContainer = function (form) {
             var $formGroup = _getFormGroupContainer(form);
             $formGroup.addClass("itext-lang-group-config")
+                .addClass("well")
                 .data('formtype', form);
             return $formGroup;
         };
