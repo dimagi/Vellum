@@ -323,7 +323,7 @@ define([
     var droppableText = function (mug, options) {
         var widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
-            .attr('placeholder', 'Hint: drag a question here.')
+            .attr('placeholder', 'Drag a question here')
             .change(function () {
                 widget.handleChange();
             });
@@ -683,7 +683,7 @@ define([
         }
 
         var button = $('<button />')
-            .addClass("fd-edit-button pull-right")
+            .addClass("fd-edit-button col-sm-1")
             .text("Edit")
             .stopLink()
             .addClass('btn btn-default')
@@ -692,19 +692,22 @@ define([
             .click(editFn);
 
         $uiElem.css('position', 'relative');
-        $uiElem.find('.controls').not('.messages')
-            .addClass('fd-edit-controls')
-            .css('margin-right', '60px')
+        $uiElem.find('.controls')
+            .removeClass("col-sm-9").addClass("col-sm-8")
             .after(button);
         return $uiElem;
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
-        var uiElem = $("<div />").addClass("widget form-group"),
-            $controls = $('<div class="controls" />'),
-            $messages = $('<div class="controls messages" />'),
-            $label = $('<div />').append($("<label />").text(labelText));
-        $label.addClass('control-label');
+        // TODO: use template
+        var uiElem = $("<div />").addClass("widget"),
+            $controlsRow = $("<div />").addClass("form-group"),
+            $controls = $('<div class="col-sm-9 controls" />'),
+            $label = $('<div />').append($("<label />").text(labelText))
+            $messagesRow = $("<div />").addClass("form-group"),
+            $messagesSpacer = $('<div class="col-sm-3" />'),
+            $messages = $('<div class="col-sm-9 messages" />');
+        $label.addClass('control-label col-sm-3');
         if (help) {
             var link = "";
             if (help.url) {
@@ -722,12 +725,16 @@ define([
             $help.append($link);
             $label.append($help);
         }
-        uiElem.append($label);
 
+        // TODO: test message display
         $input.prop('disabled', !!isDisabled);
         $controls.append($input);
-        uiElem.append($controls);
-        uiElem.append($messages);
+        $controlsRow.append($label);
+        $controlsRow.append($controls);
+        uiElem.append($controlsRow);
+        $messagesRow.append($messagesSpacer);
+        $messagesRow.append($messages);
+        uiElem.append($messagesRow);
         return uiElem;
     };
 

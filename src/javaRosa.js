@@ -486,15 +486,16 @@ define([
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
             var $uiElem = _getUIElement(),
-                $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container'),
+                $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container').addClass("col-sm-1"),
                 $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
 
             $autoBoxLabel.prepend($autoBox);
             $autoBoxContainer.append($autoBoxLabel);
             $uiElem.css('position', 'relative');
 
-            $uiElem.find('.controls').not(".messages")
-                .addClass('fd-itextID-controls')
+            $uiElem.find('.controls')
+                .removeClass("col-sm-9")
+                .addClass("col-sm-8")
                 .after($autoBoxContainer);
 
             return $uiElem;
@@ -701,8 +702,7 @@ define([
                     }
                 });
 
-                $newItemForm.find('.controls').not('.messages')
-                    .append($newItemInput);
+                $newItemForm.find('.controls').append($newItemInput);
                 $modal
                     .find('.modal-body')
                     .append($newItemForm);
@@ -781,7 +781,7 @@ define([
                 label: block.displayName,
             }));
             $addFormControls.addClass('new-itext-form-group')
-                .find('.controls').not('.messages')
+                .find('.controls')
                 .append(block.getAddFormButtons());
             $blockUI.prepend($addFormControls);
 
@@ -1104,10 +1104,15 @@ define([
 
         widget.getUIElement = function() {
             var elem = super_getUIElement(),
-                val = widget.getValue();
+                val = widget.getValue(),
+                markdownSpacer = $("<div />").addClass("col-sm-3"),
+                markdownContainer = $("<div />").addClass("col-sm-9"),
+                markdownRow = $("<div />").addClass("form-group");
 
             elem.detach('.markdown-output');
-            elem.append(markdownOutput);
+            markdownRow.append(markdownSpacer);
+            markdownRow.append(markdownOutput);
+            elem.append(markdownRow);
             elem.find('.control-label').append(markdown_help({title:options.lstring }));
 
             markdownOff = elem.find('.turn-markdown-off').click(function() {
