@@ -32,9 +32,13 @@ define([
     $.fn.fdHelp = function () {
         // creates a help popover, requires twitter bootstrap
         this.append($('<i />').addClass('fa fa-question-circle'))
-            .popout({
+            .popover({
                 trigger: 'focus',
-                html: true
+                html: true,
+                container: 'body',
+            }).click(function(e) {
+                // If this help icon is inside a bigger click target, don't trigger the ancestor
+                e.stopPropagation();
             });
         return this;
     };
