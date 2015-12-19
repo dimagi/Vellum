@@ -1,0 +1,41 @@
+// Styling related to displaying markdown in question properties
+@import "lib/main";
+
+.itext-block-container {
+
+    &.has-markdown {
+        .turn-markdown-off,
+        .markdown-output:not(:empty),
+        .fd-help {
+            display: block;
+        }
+        .turn-markdown-on {
+            display: none;
+        }
+    }
+
+    &:not(.has-markdown) {
+        .turn-markdown-off,
+        .markdown-output {
+            display: none;
+        }
+        .turn-markdown-on,
+        .fd-help {
+            display: block;
+        }
+    }
+
+    &.markdown-ignorant {
+        .turn-markdown-off,
+        .turn-markdown-on, 
+        .markdown-output,
+        .fd-help {
+            display: none;
+        }
+    }
+}
+
+.markdown-output {
+    margin-top: 10px;
+    margin-bottom: 0px;
+}

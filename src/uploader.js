@@ -119,6 +119,7 @@ define([
     };
 
     var addUploaderToWidget = function (widget, objectMap, uploadControls) {
+        // TODO: template?
         widget.mediaRef = multimediaReference(
             widget.form, objectMap, uploadControls);
 

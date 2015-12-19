@@ -33,6 +33,16 @@
                 .fd-xpath-editor {
                     display: none;
                 }
+
+                // Tweak bootstrap's well styles
+                .well {
+                    padding: 10px;
+
+                    // Vellum's wells use col-sm-1 columns to squeeze in small items that usually have enough padding
+                    .col-sm-1 {
+                        padding: 0;
+                    }
+                }
             }
 
             // Intro content for any panel ("New Form, please add questions above...")
