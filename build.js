@@ -116,7 +116,6 @@
             include: [
                 'underscore',
                 'jquery.jstree',
-                'jquery.bootstrap-popout',
                 'jquery.bootstrap-stickyover',
                 'save-button',
                 'ckeditor',

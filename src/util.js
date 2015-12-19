@@ -4,7 +4,6 @@ define([
     'jsdiff',
     'vellum/markdown',
     'jquery',
-    'jquery.bootstrap-popout',
     'jquery.bootstrap-stickyover',
     'vellum/jquery-extensions'
 ], function (
