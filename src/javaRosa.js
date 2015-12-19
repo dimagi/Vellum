@@ -690,15 +690,19 @@ define([
                 $newItemInput.keyup(function () {
                     var currentValue = $(this).val(),
                         $addButton = mug.form.vellum.$f.find('.' + newItextBtnClass);
-                    $addButton.toggleClass("disabled");
-                    $addButton.toggleClass("btn-primary");
                     if (!currentValue || 
                         RESERVED_ITEXT_CONTENT_TYPES.indexOf(currentValue) !== -1 || 
                         block.activeForms.indexOf(currentValue) !== -1) 
                     {
-                        $addButton.attr('disabled', 'disabled');
+                        $addButton
+                            .addClass('disabled')
+                            .removeClass('btn-primary')
+                            .attr('disabled', 'disabled');
                     } else {
-                        $addButton.addClass('btn-primary')
+                        $addButton
+                            .removeClass('disabled')
+                            .addClass('btn-primary')
+                            .removeAttr('disabled');
                     }
                 });
 
