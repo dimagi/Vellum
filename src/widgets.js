@@ -142,7 +142,7 @@ define([
 
         widget.getMessagesContainer = function () {
             return widget.getControl()
-                    .closest(".widget.form-group")
+                    .closest(".widget")
                     .find(".messages:last");
         };
 
@@ -150,10 +150,17 @@ define([
             return getMessages(mug, path);
         };
 
+        // TODO: test
         widget.refreshMessages = function () {
-            widget.getMessagesContainer()
-                .empty()
-                .append(widget.getMessages(mug, path));
+            var messages = widget.getMessages(mug, path);
+            var $container = widget.getMessagesContainer();
+            $container.empty();
+            if (messages.length) {
+                $container.append(messages);
+                $container.closest(".form-group").removeClass("hide");
+            } else {
+                $container.closest(".form-group").addClass("hide");
+            }
         };
 
         mug.on("messages-changed",
@@ -704,7 +711,7 @@ define([
             $controlsRow = $("<div />").addClass("form-group"),
             $controls = $('<div class="col-sm-9 controls" />'),
             $label = $('<div />').append($("<label />").text(labelText))
-            $messagesRow = $("<div />").addClass("form-group"),
+            $messagesRow = $("<div />").addClass("form-group").addClass("hide"),
             $messagesSpacer = $('<div class="col-sm-3" />'),
             $messages = $('<div class="col-sm-9 messages" />');
         $label.addClass('control-label col-sm-3');

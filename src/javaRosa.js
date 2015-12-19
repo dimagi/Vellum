@@ -1078,7 +1078,7 @@ define([
             widget.mug.form.fire('change');
         };
 
-        markdownOutput = $('<div>').addClass("controls well markdown-output");
+        markdownOutput = $('<div>').addClass("controls well markdown-output col-sm-9");
 
         widget.handleChange = function() {
             super_handleChange();
@@ -1093,23 +1093,24 @@ define([
                 parent.removeClass("has-markdown");
             }
             item.hasMarkdown = markdownOff.is(":visible");
-            markdownOutput.html(util.markdown(val)).removeClass('hide');
+            markdownOutput.html(util.markdown(val)).closest('.form-group').removeClass('hide');
         };
 
         widget.setValue = function (val, callback) {
             super_setValue(val, callback);
             if (!val) {
-                markdownOutput.addClass('hide');
+                markdownOutput.closest('.form-group').addClass('hide');
             }
             markdownOutput.html(util.markdown(val));
         };
 
+        // TODO: test markdown
         widget.getUIElement = function() {
             var elem = super_getUIElement(),
                 val = widget.getValue(),
                 markdownSpacer = $("<div />").addClass("col-sm-3"),
                 markdownContainer = $("<div />").addClass("col-sm-9"),
-                markdownRow = $("<div />").addClass("form-group");
+                markdownRow = $("<div />").addClass("form-group").addClass("hide");
 
             elem.detach('.markdown-output');
             markdownRow.append(markdownSpacer);

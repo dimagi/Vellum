@@ -43,31 +43,26 @@
     min-width: 0px; /* for chrome */
     display: table-column; /* for firefox */
 
-    .panel-heading {
-        margin-bottom: 0;
-    }
-
-    // TODO: rename and put this on accordion links
-    .accordion-toggle {
+    .collapse-toggle {
+        cursor: pointer;
+        min-height: 30px;
         .transition(background .4s ease-in-out);
         &:hover {
             background-color: lighten(@grayLighter, 3);
             text-decoration: none;
         }
-    }
-
-    .panel-body {
-        padding-bottom: @gridGutterWidth;
-        padding-right: 0px;
+        .fd-help {
+           position: absolute;
+           right: 0;
+           top: 0;
+        }
     }
 
     .fd-help {
-        right: 15px;
-        top: 7px;
         height: 25px;
+        width: 25px;
         display: block;
-        font-size: @baseFontSize*1.5;
-        padding: 3px 0;
+        font-size: @baseFontSize * 1.5;
 
         a:hover {
             text-decoration: none;
@@ -244,3 +239,4 @@
         }
     }
 }
+
