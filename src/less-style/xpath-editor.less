@@ -1,38 +1,43 @@
+// Styles for XPath editor
 @import "lib/main";
 
+// Entired panel, including header
 .fd-xpath-editor {
+
+    // Scrollable content
     .fd-xpath-editor-content {
         padding: @gridGutterWidth;
-    }
 
-    .xpath-expression-group {
-        .validation-result-container {
-            .validation-results {
-                display: inline-block;
-                padding: 5px 25px;
-                margin-bottom: 0;
+        // Main content, above save & cancel (simple & advanced editor are each a fieldset)
+        fieldset {
+            position: relative;
+
+            // "Edit Expression [(Advanced)]"
+            legend {
+                // Clear button that toggle simple/advanced mode
+                .clearfix();
+
+                // Push legend's bottom border below the button that toggles simple/advanced mode
+                button {
+                    margin-bottom: 5px;
+                }
+            }
+
+            // In simple mode, the list of conditionals
+            .fd-xpath-editor-expressions {
+                .xpath-expression-group {
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+
+                    // Check or x to indicate if this expression looks good
+                    .validation-results {
+                        display: inline-block;
+                        padding: 5px 25px;
+                        margin-bottom: 0;
+                    }
+                }
             }
         }
-    }
-
-    .fd-xpath-editor-container fieldset {
-        position: relative;
-        legend {
-            .clearfix();
-            button {
-                margin-bottom: 5px;
-            }
-        }
-    }
-}
-
-.fd-xpath-editor-expressions {
-    background-color: @navbarBackground;
-    padding: @gridGutterWidth/2;
-    .border-radius(5px);
-    margin-bottom: @gridGutterWidth/2;
-
-    .form-group:last-child {
-        margin-bottom: 0;
     }
 }
