@@ -595,7 +595,6 @@ define([
                 action: function () {
                     $('#form-differences').show();
 
-                    // TODO: test this modal
                     $modal.addClass('fd-source-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
@@ -620,7 +619,7 @@ define([
         $('#form-differences').hide();
         $modal.modal('show');
     };
-        
+
     fn.showFormPropertiesModal = function () {
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
@@ -1593,7 +1592,6 @@ define([
             var errors = mug.getErrors();
             if (errors.length) {
                 var msg = errors.join("\n").replace(/"/g, "'");
-                // TODO: test icon still works
                 node.data.errors = '<i class="fd-tree-valid-alert-icon ' +
                     'fa fa-warning" title="' + msg + '"></i>';
             } else {

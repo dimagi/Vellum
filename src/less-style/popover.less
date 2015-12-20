@@ -1,6 +1,6 @@
-// TODO: make sure this still works
-// TODO: rename to rich-text-popover? help popovers don't use this class
-.fd-popover {
+// Styling for popovers for data node bubbles
+
+.rich-text-popover {
     min-height: 150px !important;
     .border-radius(3px);
     word-wrap: break-word;
@@ -9,11 +9,14 @@
     min-width: 236px;
     max-width: 276px;
 
-    h3 {
-        font-weight: 600;
+    .popover-title {
+        h3 {
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0;
+        }
 
-        small {
-            display: block;
+        .text-muted {
             margin-top: 5px;
             line-height: 1.3em;
         }
@@ -32,4 +35,3 @@
         display: none;
     }
 }
-
