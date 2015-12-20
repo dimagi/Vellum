@@ -499,10 +499,18 @@ define([
         }
     };
 
+    fn._resizeFullScreenModal = function($modal) {
+        var modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
+        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
+        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
+        modalHeight = $(window).height() - 40;
+        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+        $modal.find(".modal-body").css('height', modalBodyHeight + 'px')
+    }
+
     fn.showSourceInModal = function (done) {
         var _this = this,
-            $modal, $updateForm, $textarea, codeMirror, modalHeaderHeight,
-            modalFooterHeight, modalHeight, modalBodyHeight;
+            $modal, $updateForm, $textarea, codeMirror;
 
         $modal = this.generateNewModal("Edit Form's Source XML", [
             {
@@ -522,16 +530,11 @@ define([
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
 
-        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
-        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
-        modalHeight = $(window).height() - 40;
-        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-
         $modal.addClass('fd-source-modal')
             .removeClass('form-horizontal')
             .find('.modal-body')
-            .css('height', modalBodyHeight + 'px')
             .html($updateForm);
+        this._resizeFullScreenModal($modal);
 
         $textarea = $updateForm.find('textarea');
 
@@ -573,8 +576,7 @@ define([
     };
 
     fn.showOverwriteWarning = function(send, formText, serverForm) {
-        var $modal, $overwriteForm, _this = this,
-            modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
+        var $modal, $overwriteForm, _this = this;
 
         $modal = _this.generateNewModal("Lost work warning", [
             {
@@ -593,17 +595,12 @@ define([
                 action: function () {
                     $('#form-differences').show();
 
-                    // TODO: DRY up this, it's duplicated in showSourceInModal
-                    // TODO: test
-                    modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
-                    modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
-                    modalHeight = $(window).height() - 40;
-                    modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+                    // TODO: test this modal
                     $modal.addClass('fd-source-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
-                        .css('height', modalBodyHeight + 'px')
                         .html($overwriteForm);
+                    _this._resizeFullScreenModal($modal);
 
                     $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
