@@ -632,7 +632,6 @@ define([
         };
 
         block.getAddFormButtons = function () {
-            // TODO: template?
             var $buttonGroup = $("<div />").addClass("btn-group itext-options");
             _.each(block.forms, function (form) {
                 var $btn = $('<div />');
@@ -660,7 +659,6 @@ define([
         };
 
         block.getAddCustomItextButton = function () {
-            // TODO: template?
             var $customButton = $("<button />")
                     .text("custom...")
                     .addClass('btn btn-default')
