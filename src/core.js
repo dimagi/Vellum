@@ -505,8 +505,8 @@ define([
         modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
         modalHeight = $(window).height() - 40;
         modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-        $modal.find(".modal-body").css('height', modalBodyHeight + 'px')
-    }
+        $modal.find(".modal-body").css('height', modalBodyHeight + 'px');
+    };
 
     fn.showSourceInModal = function (done) {
         var _this = this,
