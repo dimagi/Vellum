@@ -7,11 +7,12 @@ define([
     'jquery',
     'xpath',
     'xpathmodels',
+    'tpl!vellum/templates/auto_box',
+    'text!vellum/templates/button_remove.html',
+    'tpl!vellum/templates/control_group',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
-    'tpl!vellum/templates/control_group',
     'tpl!vellum/templates/markdown_help',
-    'text!vellum/templates/button_remove.html',
     'vellum/widgets',
     'vellum/richText',
     'vellum/util',
@@ -24,11 +25,12 @@ define([
     $,
     xpath,
     xpathmodels,
+    auto_box,
+    button_remove,
+    control_group,
     edit_source,
     language_selector,
-    control_group,
     markdown_help,
-    button_remove,
     widgets,
     richText,
     util,
@@ -485,15 +487,10 @@ define([
 
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
-            // TODO: template
-            var $uiElem = _getUIElement(),
-                $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container').addClass("col-sm-1"),
-                $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
+            var $uiElem = _getUIElement().css('position', 'relative'),
+                $autoBoxContainer = $(auto_box());
 
-            $autoBoxLabel.prepend($autoBox);
-            $autoBoxContainer.append($autoBoxLabel);
-            $uiElem.css('position', 'relative');
-
+            $autoBoxContainer.find("label").prepend($autoBox);
             $uiElem.find('.controls')
                 .removeClass("col-sm-9")
                 .addClass("col-sm-8")
