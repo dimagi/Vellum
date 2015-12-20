@@ -2,26 +2,28 @@
 @import "lib/main";
 
 .itext-block-container {
+    // These are functional styles that control when to display help icons for markdown
+    // The !important markers, while terrible, are to overcome more specific but genuinely stylistic styles
 
     &.has-markdown {
         .turn-markdown-off,
         .markdown-output:not(:empty),
         .fd-help {
-            display: block;
+            display: inline-block !important;
         }
         .turn-markdown-on {
-            display: none;
+            display: none !important;
         }
     }
 
     &:not(.has-markdown) {
         .turn-markdown-off,
         .markdown-output {
-            display: none;
+            display: none !important;
         }
         .turn-markdown-on,
         .fd-help {
-            display: block;
+            display: inline-block !important;
         }
     }
 
@@ -30,7 +32,7 @@
         .turn-markdown-on, 
         .markdown-output,
         .fd-help {
-            display: none;
+            display: none !important;
         }
     }
 }
