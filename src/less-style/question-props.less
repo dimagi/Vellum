@@ -64,21 +64,13 @@
                 }
             }
 
-            // Blocks of itext, like when adding multimedia or advanced > other content
-            .itext-block-container {
-
-                .btn-danger {
-                    margin: 10px;
-                }
+            // Accordion content
+            .fd-fieldset-content {
 
                 // Label for single input
                 .control-label {
 
-                    // Pull text label up so it aligns with help icon
-                    label {
-                        vertical-align: top;
-                    }
-
+                    // Align help icon with top of input, and display inline with label
                     .fd-help {
                         position: relative;
                         top: -8px;
@@ -86,11 +78,23 @@
                         display: inline-block;
                     }
 
+                    // Pull text label up so it aligns with help icon
+                    label {
+                        vertical-align: top;
+                    }
+
                     .messages {
                         padding-top: 1px; // HACK make .alert margin work
                         .alert {
                             margin: 10px 0;
                         }
+                    }
+                }
+
+                // Blocks of itext, like when adding multimedia or advanced > other content
+                .itext-block-container {
+                    .btn-danger {
+                        margin: 10px;
                     }
                 }
             }
