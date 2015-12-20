@@ -133,7 +133,8 @@ require([
                 var btn = $(".btn.current-question");
                 assert(btn.length === 1);
                 btn.click();
-                assert.equal(!!btn.next().find("li:not(.dropdown-header)").length, bool);
+                var menu = btn.closest('.question-type-changer');
+                assert.equal(!!menu.find('li:not(.dropdown-header)').length, bool);
             }
             it("shows the type changer for type-changeable questions", function () {
                 testTypeChangeable(true);
