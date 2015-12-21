@@ -10,6 +10,14 @@ define([
     var assert = chai.assert;
 
     describe("The undo manager", function () {
+        before(function(done) {
+            util.init({
+                javaRosa: {langs: ['en']},
+                core: { onReady: done },
+                features: {rich_text: false},
+            });
+        });
+
         it("should show an alert when deleting questions", function () {
             util.loadXML("");
             util.addQuestion('Text', 'text');
