@@ -74,7 +74,7 @@ define([
                 })];
             },
             controlChildFilter: function (children, mug) {
-                var nodeset = mug.form.getAbsolutePath(mug),
+                var nodeset = mug.absolutePath,
                     r_count = mug.p.repeat_count;
                 children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
@@ -100,7 +100,7 @@ define([
                 };
             },
             getBindList: function (mug) {
-                var path = mug.form.getAbsolutePath(mug),
+                var path = mug.absolutePath,
                     binds = oldRepeat.getBindList(mug);
                 if (mug.p.dataSource.idsQuery) {
                     binds.splice(0, 0, {
@@ -223,7 +223,7 @@ define([
             if (mug.__className !== "Repeat") {
                 return;
             }
-            var path = mug.form.getAbsolutePath(mug),
+            var path = mug.absolutePath,
                 container = null;
             if (mug.p.dataSource.idsQuery) {
                 container = path.replace(/\/item$/, "");
@@ -335,7 +335,7 @@ define([
         }
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
             var nodeID = mug.p.nodeID,
-                currentPath = mug.form.getAbsolutePath(mug),
+                currentPath = mug.absolutePath,
                 oldParent = mug.parentMug,
                 oldPath;
             if (value && value.idsQuery) {
@@ -352,7 +352,7 @@ define([
     }
 
     function prepareForWrite(mug) {
-        var path = mug.form.getAbsolutePath(mug);
+        var path = mug.absolutePath;
         if (!mug.p.dataSourceChanged && mug.p.originalPath === path) {
             return;
         }

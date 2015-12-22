@@ -469,7 +469,7 @@ define([
     function serializeNodeId(value, key, mug, data) {
         var parent = mug.parentMug,
             path = parent ?
-                mug.form.getAbsolutePath(parent, true) + "/" : "/";
+                mug.absolutePathNoRoot + "/" : "/";
         data.id = path + mug.p.nodeID;
     }
 });

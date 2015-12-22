@@ -462,6 +462,12 @@ define([
         }
     });
 
+    Object.defineProperty(Mug.prototype, "absolutePathNoRoot", {
+        get: function () {
+            return this.form.getAbsolutePath(this, true);
+        }
+    });
+
     Object.defineProperty(Mug.prototype, "parentMug", {
         get: function () {
             var node = this.form.tree.getNodeFromMug(this);
@@ -764,7 +770,7 @@ define([
                     }
                 },
                 serialize: function (value, key, mug, data) {
-                    data.id = mug.form.getAbsolutePath(mug, true);
+                    data.id = mug.absolutePathNoRoot;
                 },
                 deserialize: function (data, key, mug) {
                     if (data.id && data.id !== mug.p.nodeID) {
@@ -1078,7 +1084,7 @@ define([
                 constraintMsg = mug.p.constraintMsgAttr;
             }
             var attrs = {
-                nodeset: mug.form.getAbsolutePath(mug),
+                nodeset: mug.absolutePath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
@@ -1372,7 +1378,7 @@ define([
                     return "pass";
                 },
                 serialize: function (value, key, mug, data) {
-                    var path = mug.form.getAbsolutePath(mug.parentMug, true);
+                    var path = mug.parentMug.absolutePathNoRoot;
                     data.id = path + "/" + value;
                 },
                 deserialize: function (data) {
@@ -1492,7 +1498,7 @@ define([
             return {"jr:template": ""};
         },
         controlChildFilter: function (children, mug) {
-            var absPath = mug.form.getAbsolutePath(mug),
+            var absPath = mug.absolutePath,
                 r_count = mug.p.repeat_count,
                 attrs = _.object(_.filter(_.map(mug.p.rawRepeatAttributes, function (val, key) {
                     return key.toLowerCase() !== "jr:noaddremove" ? [key, val] : null;
