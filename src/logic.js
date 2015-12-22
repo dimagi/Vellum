@@ -22,7 +22,7 @@ define([
         this._text = exprText || "";
         if ($.trim(exprText)) {
             try {
-                this.parsed = xpath.xpath.parse(exprText);
+                this.parsed = xpath.parse(exprText);
             } catch (err) {
                 this.parsed = null;
                 this.error = err;
@@ -36,9 +36,9 @@ define([
             var paths = [],
                 absolutePaths = [],
                 topLevelPaths = [],
-                ROOT = xpath.xpathmodels.XPathInitialContextEnum.ROOT,
-                RELATIVE = xpath.xpathmodels.XPathInitialContextEnum.RELATIVE,
-                EXPR = xpath.xpathmodels.XPathInitialContextEnum.EXPR,
+                ROOT = xpath.models.XPathInitialContextEnum.ROOT,
+                RELATIVE = xpath.models.XPathInitialContextEnum.RELATIVE,
+                EXPR = xpath.models.XPathInitialContextEnum.EXPR,
                 predicates;
             this.paths = paths;
             this.absolutePaths = absolutePaths;
@@ -52,7 +52,7 @@ define([
                     k = queue.shift();
                     node = k.xpath;
                     insideFilter = k.insideFilter;
-                    if (node instanceof xpath.xpathmodels.XPathPathExpr) {
+                    if (node instanceof xpath.models.XPathPathExpr) {
                         paths.push(node);
                         if (!insideFilter) {
                             topLevelPaths.push(node);
@@ -81,7 +81,7 @@ define([
                                 });
                             }
                         }
-                    } else if (node instanceof xpath.xpathmodels.XPathFuncExpr) {
+                    } else if (node instanceof xpath.models.XPathFuncExpr) {
                         this._addInstanceRef(node);
                     }
                     children = node.getChildren();
@@ -105,7 +105,7 @@ define([
         },
         _addInstanceRef: function (expr) {
             if (expr.id === "instance" && expr.args.length === 1 &&
-                    expr.args[0] instanceof xpath.xpathmodels.XPathStringLiteral) {
+                    expr.args[0] instanceof xpath.models.XPathStringLiteral) {
                 var id = expr.args[0].value;
                 this.instanceRefs[id] = null;
                 return true;
@@ -140,7 +140,7 @@ define([
             for (var i = 0; i < paths.length; i++) {
                 path = paths[i];
                 if (path.toXPath() === from) {
-                    replacePathInfo(xpath.xpath.parse(to), path);
+                    replacePathInfo(xpath.parse(to), path);
                 }
             }
         },

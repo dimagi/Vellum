@@ -25,13 +25,13 @@ define([
     // Handlers for the simple expression editor
     var simpleExpressions = {};
     var operationOpts = [];
-    var expTypes = xpath.xpathmodels.XPathExpressionTypeEnum;
+    var expTypes = xpath.models.XPathExpressionTypeEnum;
     var BinOpHandler = {
         toString: function(op, left, right) {
             // make sure we wrap the vals in parens in case they were necessary
             // todo, construct manually, and validate individual parts.
             return "(" + left + ") " + 
-                xpath.xpathmodels.expressionTypeEnumToXPathLiteral(op) + 
+                xpath.models.expressionTypeEnumToXPathLiteral(op) + 
                 " (" + right + ")";
         },
         typeLeftRight: function(expOp) {
@@ -52,7 +52,7 @@ define([
         }
     };
     function addOp(expr, value, label) {
-        value = xpath.xpathmodels.expressionTypeEnumToXPathLiteral(value);
+        value = xpath.models.expressionTypeEnumToXPathLiteral(value);
         simpleExpressions[value] = expr;
         operationOpts.push([label, value]);
     }
@@ -156,7 +156,7 @@ define([
         var validate = function (expr) {
             if (expr) {
                 try {
-                    var parsed = xpath.xpath.parse(expr);
+                    var parsed = xpath.parse(expr);
                     return [true, parsed];
                 } catch (err) {
                     return [false, err];
@@ -177,13 +177,13 @@ define([
 
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
-                return (subElement instanceof xpath.xpathmodels.XPathBoolExpr);
+                return (subElement instanceof xpath.models.XPathBoolExpr);
             };
 
             var isExpressionOp = function (subElement) {
                 // something that can be put into an expression
-                return (subElement instanceof xpath.xpathmodels.XPathCmpExpr ||
-                        subElement instanceof xpath.xpathmodels.XPathEqExpr ||
+                return (subElement instanceof xpath.models.XPathCmpExpr ||
+                        subElement instanceof xpath.models.XPathEqExpr ||
                         simpleExpressions.hasOwnProperty(subElement.id));
             };
 
@@ -256,7 +256,7 @@ define([
                         if (!expOp) return false;
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
-                    $expUI.find('.op-select').val(xpath.xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
+                    $expUI.find('.op-select').val(xpath.models.expressionTypeEnumToXPathLiteral(expOp.type));
                     // the population of the left can affect the right,
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
