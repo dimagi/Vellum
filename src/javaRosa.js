@@ -1058,7 +1058,7 @@ define([
          * italics/bold/bold italics
          * links
          */
-        return /^\d+\. |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val);
+        return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val);
     }
 
     var itextMarkdownWidget = function (mug, language, form, options) {
