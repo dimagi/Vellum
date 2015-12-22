@@ -97,6 +97,13 @@ require([
                 $('[name=itext-en-label]').val("no markdown").change();
                 util.assertXmlEqual(call('createXML'), NO_MARKDOWN_XML, {normalize_xmlns: true});
             });
+
+            it("should support ordered list with parens", function() {
+                util.loadXML("");
+                util.addQuestion("Text", 'markdown_question');
+                $('[name=itext-en-label]').val("1) first\n 2) second").change();
+                assert(markdownVisible());
+            });
         });
 
         describe("when a user explicitly wants no markdown", function() {
