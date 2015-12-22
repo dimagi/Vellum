@@ -594,14 +594,14 @@ define([
      */
     function processPath (path, rootNodeName) {
         var newPath;
-        var parsed = xpath.xpath.parse(path);
-        if (!(parsed instanceof xpath.xpathmodels.XPathPathExpr)) {
+        var parsed = xpath.parse(path);
+        if (!(parsed instanceof xpath.models.XPathPathExpr)) {
             return null;
         }
 
-        if (parsed.initial_context === xpath.xpathmodels.XPathInitialContextEnum.RELATIVE) {
-            parsed.steps.splice(0, 0, xpath.xpathmodels.XPathStep({axis: "child", test: rootNodeName}));
-            parsed.initial_context = xpath.xpathmodels.XPathInitialContextEnum.ROOT;
+        if (parsed.initial_context === xpath.models.XPathInitialContextEnum.RELATIVE) {
+            parsed.steps.splice(0, 0, xpath.models.XPathStep({axis: "child", test: rootNodeName}));
+            parsed.initial_context = xpath.models.XPathInitialContextEnum.ROOT;
         } else {
             return path;
         }

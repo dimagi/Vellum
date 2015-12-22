@@ -1583,8 +1583,8 @@ define([
 
             function getITextID(value) {
                 try {
-                    var parsed = xpath.xpath.parse(value);
-                    if (parsed instanceof xpath.xpathmodels.XPathFuncExpr &&
+                    var parsed = xpath.parse(value);
+                    if (parsed instanceof xpath.models.XPathFuncExpr &&
                         parsed.id === "jr:itext")
                     {
                         return parsed.args[0].value;

@@ -5,13 +5,8 @@ define([
     xpath,
     makeXPathModels
 ) {
-    /* global xpathmodels */
-    /*jshint -W020 */
-    xpathmodels = makeXPathModels();
-    /*jshint +W020 */
-    
-    return {
-        xpath: xpath,
-        xpathmodels: xpathmodels
-    };
+    var models = makeXPathModels();
+    window.xpathmodels = models;  // the xpath module uses this global
+    xpath.models = models;
+    return xpath;
 });
