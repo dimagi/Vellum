@@ -644,11 +644,11 @@ define([
                     return;
                 }
                 oldId = mug.p.nodeID;
-                oldPath = this.tree.getAbsolutePath(mug);
+                oldPath = mug.absolutePath;
                 oldParent = conflictParent = mug.parentMug;
             } else {
                 oldId = mug.p.nodeID;
-                oldPath = this.tree.getAbsolutePath(mug);
+                oldPath = mug.absolutePath;
                 oldParent = mug.parentMug;
                 this.insertMug(refMug, mug, position);
                 var spec = mug.spec.dataParent;
@@ -673,7 +673,7 @@ define([
                 }
             }
 
-            var newPath = this.tree.getAbsolutePath(mug);
+            var newPath = mug.absolutePath;
             this.vellum.handleMugRename(
                 this, mug, newId, oldId, newPath, oldPath, oldParent);
 
@@ -714,14 +714,13 @@ define([
                 return postPath.replace(postRegExp, oldPath + "/");
             }
             this._logicManager.updatePath(mug.ufid, oldPath, newPath);
-            var tree = this.tree;
             if (!newPath) {
                 // Items don't have an absolute path. I wonder if it would
                 // matter if they had one?
                 return;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
-                postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
+                postMovePaths = _(mugs).map(function(mug) { return mug.absolutePath; }),
                 postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
                 updates = {},
                 preMovePath;
@@ -764,8 +763,7 @@ define([
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];
-                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, 
-                    this.getAbsolutePath(duplicate));
+                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, duplicate.absolutePath);
             }
             return duplicate;
         },
@@ -808,8 +806,8 @@ define([
 
             pathReplacements.push({
                 mugId: mug.ufid,
-                from: this.getAbsolutePath(mug),
-                to: this.getAbsolutePath(duplicate)
+                from: mug.absolutePath,
+                to: duplicate.absolutePath,
             });
 
             return [duplicate, pathReplacements];
@@ -903,7 +901,7 @@ define([
             var map = this.mugMap;
             delete map[oldPath];
             if (_.isUndefined(newPath)) {
-                newPath = this.getAbsolutePath(mug);
+                newPath = mug.absolutePath;
             }
             if (newPath) {
                 map[newPath] = mug;
@@ -912,7 +910,7 @@ define([
         _fixMugState: function (mug) {
             // parser needs this because it inserts directly into the tree
             this.mugMap[mug.ufid] = mug;
-            var path = this.tree.getAbsolutePath(mug);
+            var path = mug.absolutePath;
             if (path) {
                 this.mugMap[path] = mug;
             }
@@ -976,7 +974,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[this.tree.getAbsolutePath(mug)];
+                delete this.mugMap[mug.absolutePath];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {

@@ -249,8 +249,7 @@ define([
                 opts.writeCustomXML(xmlWriter, mug);
             }
             if (opts.writeControlRefAttr) {
-                var absPath = form.getAbsolutePath(mug);
-                xmlWriter.writeAttributeString(opts.writeControlRefAttr, absPath);
+                xmlWriter.writeAttributeString(opts.writeControlRefAttr, mug.absolutePath);
             }
             var appearanceAttr = mug.getAppearanceAttribute();
             if (appearanceAttr) {

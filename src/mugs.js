@@ -1078,7 +1078,7 @@ define([
                 constraintMsg = mug.p.constraintMsgAttr;
             }
             var attrs = {
-                nodeset: mug.form.getAbsolutePath(mug),
+                nodeset: mug.absolutePath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
@@ -1492,7 +1492,7 @@ define([
             return {"jr:template": ""};
         },
         controlChildFilter: function (children, mug) {
-            var absPath = mug.form.getAbsolutePath(mug),
+            var absPath = mug.absolutePath,
                 r_count = mug.p.repeat_count,
                 attrs = _.object(_.filter(_.map(mug.p.rawRepeatAttributes, function (val, key) {
                     return key.toLowerCase() !== "jr:noaddremove" ? [key, val] : null;
