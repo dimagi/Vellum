@@ -103,7 +103,6 @@ require([
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("1) first\n 2) second").change();
                 assert(markdownVisible());
-                $('.markdown-trigger').first().click();
             });
         });
 
