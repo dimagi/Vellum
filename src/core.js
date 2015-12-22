@@ -4,7 +4,7 @@ define([
     'require',
     'save-button',
     'underscore',
-    'xpathmodels',
+    'vellum/xpath',
     'jquery',
     'tpl!vellum/templates/main',
     'tpl!vellum/templates/question_type_group',
@@ -36,7 +36,7 @@ define([
     require,
     SaveButton,
     _,
-    xpathmodels,
+    xpath,
     $,
     main_template,
     question_type_group,
@@ -73,7 +73,7 @@ define([
     var isMac = /Mac/.test(navigator.platform);
 
     var DEBUG_MODE = false;
-    xpathmodels.DEBUG_MODE = DEBUG_MODE;
+    xpath.xpathmodels.DEBUG_MODE = DEBUG_MODE;
 
     var MESSAGE_TYPES = {
         "error": {

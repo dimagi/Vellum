@@ -36,7 +36,7 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
-    'xpathmodels',
+    'vellum/xpath',
     'ckeditor',
     'ckeditor-jquery'
 ], function(
@@ -46,7 +46,7 @@ define([
     logic,
     util,
     xml,
-    xpathmodels,
+    xpath,
     CKEDITOR
 ){
     var bubbleWidgetDefinition = {
@@ -437,8 +437,8 @@ define([
      */
     function bubbleExpression(text, form) {
         var el = $('<div>').html(text);
-        var EXPR = xpathmodels.XPathInitialContextEnum.EXPR,
-            ROOT = xpathmodels.XPathInitialContextEnum.ROOT,
+        var EXPR = xpath.xpathmodels.XPathInitialContextEnum.EXPR,
+            ROOT = xpath.xpathmodels.XPathInitialContextEnum.ROOT,
             expr = new logic.LogicExpression(text),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(expr.getTopLevelPaths())
