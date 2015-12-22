@@ -1317,10 +1317,10 @@ define([
             return getDefaultItextRoot(mug.parentMug) + "-" +
                 mug.getNodeID().replace(regex, '_');
         } else {
-            var path = mug.form.getAbsolutePath(mug, true);
+            var path = mug.absolutePathNoRoot;
             if (!path) {
                 if (mug.parentMug) {
-                    path = mug.form.getAbsolutePath(mug.parentMug, true) +
+                    path = mug.parentMug.absolutePathNoRoot +
                             "/" + mug.getNodeID();
                 } else {
                     // fall back to nodeID if mug path still not found
