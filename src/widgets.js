@@ -330,7 +330,7 @@ define([
     var droppableText = function (mug, options) {
         var widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
-            .attr('placeholder', 'Drag a question here')
+            .attr('placeholder', 'Drag question here')
             .change(function () {
                 widget.handleChange();
             });
