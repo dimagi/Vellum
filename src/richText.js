@@ -97,7 +97,8 @@ define([
                     trigger: 'hover',
                     container: 'body',
                     placement: 'bottom',
-                    title: '<h3>' + displayId + '</h3><div class="text-muted">' + xpath + '</div>',
+                    title: '<h3>' + util.escape(displayId) + '</h3>' +
+                           '<div class="text-muted">' + util.escape(xpath) + '</div>',
                     html: true,
                     content: '<p>' + labelText.text() + '</p>',
                     template: '<div contenteditable="false" class="popover rich-text-popover">' +

@@ -458,7 +458,7 @@ define([
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
-            val = $('<div />').text(val).html();
+            val = util.escape(val);
         }
         return val;
     };
@@ -612,7 +612,7 @@ define([
             description: "Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
                          "to overwrite their work?",
-            xmldiff: $('<div>').text(diff).html()
+            xmldiff: util.escape(diff),
         }));
         $modal.find('.modal-body').html($overwriteForm);
 

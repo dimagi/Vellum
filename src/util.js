@@ -156,6 +156,13 @@ define([
         return noun + (n !== 1 ? 's' : '');
     };
 
+    /**
+     * Escape string for use as HTML. May alter whitespace within string.
+     */
+    that.escape = function (string) {
+        return $("<div>").text(string).html();
+    };
+
     /* jshint bitwise: false */
     that.get_guid = function() {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
