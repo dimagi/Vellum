@@ -1103,7 +1103,6 @@ define([
             markdownOutput.html(util.markdown(val));
         };
 
-        // TODO: test markdown
         widget.getUIElement = function() {
             var elem = super_getUIElement(),
                 val = widget.getValue(),
