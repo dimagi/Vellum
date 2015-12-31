@@ -531,8 +531,8 @@ define([
         }));
 
         $modal.addClass('fd-source-modal')
-            .removeClass('form-horizontal')
             .find('.modal-body')
+            .removeClass('form-horizontal').removeClass('form')
             .html($updateForm);
         this._resizeFullScreenModal($modal);
 
@@ -548,10 +548,13 @@ define([
         codeMirror = require('codemirror').fromTextArea($textarea.get(0));
         codeMirror.setOption('viewportMargin', Infinity);
         codeMirror.setOption('lineNumbers', true);
-        codeMirror.setSize('100%', '100%');
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
+            var $body = $modal.find(".modal-body"),
+                bodyHeight = $body.height(),
+                pHeight = $body.find("p").outerHeight(true);
+            codeMirror.setSize('100%', bodyHeight - pHeight);
             codeMirror.refresh();
             codeMirror.focus();
         });
