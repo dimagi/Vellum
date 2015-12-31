@@ -214,7 +214,7 @@ define([
         typeName: 'Android App Callout',
         dataType: 'intent',
         tagName: 'input',
-        icon: 'icon-vellum-android-intent',
+        icon: 'fcc fcc-fd-android-intent',
         isODKOnly: true,
         isTypeChangeable: false,
         init: function (mug, form) {
