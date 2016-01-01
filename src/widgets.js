@@ -1,4 +1,5 @@
 define([
+    'tpl!vellum/templates/ui_element',
     'tpl!vellum/templates/widget_control_keyvalue',
     'tpl!vellum/templates/widget_control_message',
     'underscore',
@@ -7,6 +8,7 @@ define([
     'vellum/util',
     'vellum/richText'
 ], function (
+    ui_element,
     widget_control_keyvalue,
     widget_control_message,
     _,
@@ -150,16 +152,15 @@ define([
             return getMessages(mug, path);
         };
 
-        // TODO: test
         widget.refreshMessages = function () {
             var messages = widget.getMessages(mug, path);
             var $container = widget.getMessagesContainer();
             $container.empty();
             if (messages.length) {
                 $container.append(messages);
-                $container.closest(".form-group").removeClass("hide");
+                $container.removeClass("hide");
             } else {
-                $container.closest(".form-group").addClass("hide");
+                $container.addClass("hide");
             }
         };
 
@@ -706,43 +707,18 @@ define([
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
-        // TODO: use template
-        var uiElem = $("<div />").addClass("widget"),
-            $controlsRow = $("<div />").addClass("form-group"),
-            $controls = $('<div class="col-sm-9 controls" />'),
-            $label = $('<div />').append($("<label />").text(labelText)),
-            $messagesRow = $("<div />").addClass("form-group").addClass("hide"),
-            $messagesSpacer = $('<div class="col-sm-3" />'),
-            $messages = $('<div class="col-sm-9 messages" />');
-        $label.addClass('control-label col-sm-3');
-        if (help) {
-            var link = "";
-            if (help.url) {
-                link = "<p><a href='" + help.url + "' target='_blank'>See more</a></p>";
-            }
-            var $link = $("<a />").attr({
-                "href": "#",
-                "data-title": labelText,
-                "data-content": help.text + link
-            });
-            if (!help.url) {
-                $link.click(function (e) { e.preventDefault(); });
-            }
-            var $help = $("<div/>").addClass("fd-help");
-            $help.append($link);
-            $label.append($help);
+        var $uiElem = $(ui_element({
+            labelText: labelText,
+            help: help,
+        }));
+        $input.prop('disabled', !!isDisabled);
+        $uiElem.find(".controls").prepend($input);
+
+        if (help && !help.url) {
+            $uiElem.find(".fd-help a").click(function (e) { e.preventDefault(); });
         }
 
-        // TODO: test message display
-        $input.prop('disabled', !!isDisabled);
-        $controls.append($input);
-        $controlsRow.append($label);
-        $controlsRow.append($controls);
-        uiElem.append($controlsRow);
-        $messagesRow.append($messagesSpacer);
-        $messagesRow.append($messages);
-        uiElem.append($messagesRow);
-        return uiElem;
+        return $uiElem;
     };
 
     function getMessages(mug, path) {
