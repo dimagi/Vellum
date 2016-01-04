@@ -8,7 +8,7 @@
 					<blue />
 				</other>
 			</instance>
-			<bind nodeset="/other/blue" type="xsd:string" />
+			<bind vellum:nodeset="#form/blue" nodeset="/other/blue" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="blue-label">

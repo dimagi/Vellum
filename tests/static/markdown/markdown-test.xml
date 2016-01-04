@@ -11,10 +11,10 @@
 					<escaped_markdown />
 				</data>
 			</instance>
-			<bind nodeset="/data/markdown_question" type="xsd:string" />
-			<bind nodeset="/data/no_markdown" type="xsd:string" />
-			<bind nodeset="/data/markdown_but_not" type="xsd:string" />
-			<bind nodeset="/data/escaped_markdown" type="xsd:string" />
+			<bind vellum:nodeset="#form/markdown_question" nodeset="/data/markdown_question" type="xsd:string" />
+			<bind vellum:nodeset="#form/no_markdown" nodeset="/data/no_markdown" type="xsd:string" />
+			<bind vellum:nodeset="#form/markdown_but_not" nodeset="/data/markdown_but_not" type="xsd:string" />
+			<bind vellum:nodeset="#form/escaped_markdown" nodeset="/data/escaped_markdown" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="markdown_question-label">
@@ -52,16 +52,16 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/markdown_question">
+		<input vellum:ref="#form/markdown_question" ref="/data/markdown_question">
 			<label ref="jr:itext('markdown_question-label')" />
 		</input>
-		<input ref="/data/no_markdown">
+		<input vellum:ref="#form/no_markdown" ref="/data/no_markdown">
 			<label ref="jr:itext('no_markdown-label')" />
 		</input>
-		<input ref="/data/markdown_but_not">
+		<input vellum:ref="#form/markdown_but_not" ref="/data/markdown_but_not">
 			<label ref="jr:itext('markdown_but_not-label')" />
 		</input>
-		<input ref="/data/escaped_markdown">
+		<input vellum:ref="#form/escaped_markdown" ref="/data/escaped_markdown">
 			<label ref="jr:itext('escaped_markdown-label')" />
 		</input>
 	</h:body>

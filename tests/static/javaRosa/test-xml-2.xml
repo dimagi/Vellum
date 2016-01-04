@@ -14,7 +14,7 @@
 					<question1/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:string"
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string"
 				jr:constraintMsg="jr:itext('question1-constraintMsg')" />
 			<itext>
 				<translation lang="en" default="">
@@ -73,7 +73,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/question1">
+		<input vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')"/>
 			<hint ref="jr:itext('question1-hint')"/>
 			<help ref="jr:itext('question1-help')"/>

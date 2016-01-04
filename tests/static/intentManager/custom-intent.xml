@@ -8,7 +8,7 @@
 					<not_breath_count />
 				</data>
 			</instance>
-			<bind nodeset="/data/not_breath_count" type="intent" />
+			<bind vellum:nodeset="#form/not_breath_count" nodeset="/data/not_breath_count" type="intent" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="not_breath_count-label">
@@ -23,7 +23,7 @@
 		</odkx:intent>
 	</h:head>
 	<h:body>
-		<input ref="/data/not_breath_count" appearance="intent:not_breath_count">
+		<input vellum:ref="#form/not_breath_count" ref="/data/not_breath_count" appearance="intent:not_breath_count">
 			<label ref="jr:itext('not_breath_count-label')" />
 		</input>
 	</h:body>

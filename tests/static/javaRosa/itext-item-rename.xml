@@ -9,8 +9,8 @@
 					<ew />
 				</data>
 			</instance>
-			<bind nodeset="/data/ns" />
-			<bind nodeset="/data/ew" />
+			<bind vellum:nodeset="#form/ns" nodeset="/data/ns" />
+			<bind vellum:nodeset="#form/ew" nodeset="/data/ew" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="ns-label">
@@ -56,7 +56,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 ref="/data/ns">
+		<select1 vellum:ref="#form/ns" ref="/data/ns">
 			<label ref="jr:itext('ns-label')" />
 			<item>
 				<label ref="jr:itext('ns-north-label')" />
@@ -71,7 +71,7 @@
 				<value>choice2</value>
 			</item>
 		</select1>
-		<select1 ref="/data/ew">
+		<select1 vellum:ref="#form/ew" ref="/data/ew">
 			<label ref="jr:itext('ew-label')" />
 			<item>
 				<label ref="jr:itext('ew-choice2-label')" />

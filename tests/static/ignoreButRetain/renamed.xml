@@ -13,11 +13,11 @@
 					<question4 vellum:ignore="retain"/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:string"/>
-			<bind nodeset="/data/question9a"/>
-			<bind nodeset="/data/question9a/question10" type="xsd:int" vellum:ignore="retain"/>
-			<bind nodeset="/data/question9a/question11" type="xsd:int"/>
-			<bind nodeset="/data/question4" vellum:ignore="retain"/>
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string"/>
+			<bind vellum:nodeset="#form/question9a" nodeset="/data/question9a"/>
+			<bind type="xsd:int" vellum:ignore="retain" vellum:nodeset="#form/question9a/question10" nodeset="/data/question9a/question10"/>
+			<bind vellum:nodeset="#form/question9a/question11" nodeset="/data/question9a/question11" type="xsd:int"/>
+			<bind vellum:ignore="retain" vellum:nodeset="#form/question4" nodeset="/data/question4"/>
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -28,11 +28,9 @@
 					</text>
 					<text id="question10-label" vellum:ignore="retain">
 						<value>question10</value>
-					</text>
-					<text id="question11-label">
+					</text><text id="question11-label">
 						<value>question11</value>
-					</text>
-					<text id="question4-label" vellum:ignore="retain">
+					</text><text id="question4-label" vellum:ignore="retain">
 						<value>question4</value>
 					</text>
 				</translation>
@@ -40,20 +38,20 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/question1">
+		<input vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')"/>
 		</input>
-		<group ref="/data/question9a">
+		<group vellum:ref="#form/question9a" ref="/data/question9a">
 			<!-- todo: renaming of itext IDs without requiring UI layer -->
 			<label ref="jr:itext('question9a-label')"/>
-			<input ref="/data/question9a/question10" vellum:ignore="retain">
+			<input vellum:ignore="retain" vellum:ref="#form/question9a/question10" ref="/data/question9a/question10">
 				<label ref="jr:itext('question10-label')"/>
 			</input>
-			<input ref="/data/question9a/question11">
+			<input vellum:ref="#form/question9a/question11" ref="/data/question9a/question11">
 				<label ref="jr:itext('question11-label')"/>
 			</input>
 		</group>
-		<select1 ref="/data/question4" vellum:ignore="retain">
+		<select1 vellum:ignore="retain" vellum:ref="#form/question4" ref="/data/question4">
 			<label ref="jr:itext('question4-label')"/>
 			<item>
 				<label ref="jr:itext('question4-item5-label')"/>

@@ -11,9 +11,9 @@
 					</parent>
 				</data>
 			</instance>
-			<bind nodeset="/data/parent" />
-			<bind nodeset="/data/parent/normal-child" type="xsd:string" />
-			<bind nodeset="/data/parent/different-child" type="xsd:string" />
+			<bind vellum:nodeset="#form/parent" nodeset="/data/parent" />
+			<bind vellum:nodeset="#form/parent/normal-child" nodeset="/data/parent/normal-child" type="xsd:string" />
+			<bind vellum:nodeset="#form/parent/different-child" nodeset="/data/parent/different-child" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="different-child-label">
@@ -30,12 +30,12 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/parent/different-child">
+		<input vellum:ref="#form/parent/different-child" ref="/data/parent/different-child">
 			<label ref="jr:itext('different-child-label')" />
 		</input>
-		<group ref="/data/parent">
+		<group vellum:ref="#form/parent" ref="/data/parent">
 			<label ref="jr:itext('parent-label')" />
-			<input ref="/data/parent/normal-child">
+			<input vellum:ref="#form/parent/normal-child" ref="/data/parent/normal-child">
 				<label ref="jr:itext('normal-child-label')" />
 			</input>
 		</group>

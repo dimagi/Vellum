@@ -9,7 +9,7 @@
 				</data>
 			</instance>
 			<instance id="groups" src="jr://fixture/user-groups"/>
-			<bind nodeset="/data/contact_chiefdom" required="true()" />
+			<bind vellum:nodeset="#form/contact_chiefdom" nodeset="/data/contact_chiefdom" required="true()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question7-label">
@@ -20,7 +20,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 ref="/data/contact_chiefdom">
+		<select1 vellum:ref="#form/contact_chiefdom" ref="/data/contact_chiefdom">
 			<label ref="jr:itext('question7-label')" />
 			<itemset nodeset="instance('groups')/groups/group[count(group_data/data[@key = 'group_type'][. = 'chiefdom']) &gt; 0]">
 				<label ref="name" />

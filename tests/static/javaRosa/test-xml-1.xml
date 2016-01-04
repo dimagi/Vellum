@@ -17,7 +17,7 @@
 					<question1 />
 				</data>
 			</instance>
-			<bind nodeset="/data/question1"
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1"
 				type="xsd:string"
 				constraint="1"
 				jr:constraintMsg="jr:itext('question1-constraintMsg')" />
@@ -36,7 +36,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/question1">
+		<input vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')" />
 		</input>
 	</h:body>

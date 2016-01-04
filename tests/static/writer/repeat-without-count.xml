@@ -8,7 +8,7 @@
 					<group jr:template="" />
 				</data>
 			</instance>
-			<bind nodeset="/data/group" />
+			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="group-label">
@@ -26,7 +26,7 @@
 	<h:body>
 		<group>
 			<label ref="jr:itext('group-label')" />
-			<repeat nodeset="/data/group" />
+			<repeat vellum:nodeset="#form/group" nodeset="/data/group" />
 		</group>
 	</h:body>
 </h:html>
