@@ -20,6 +20,7 @@ module.exports = function(grunt)  {
         files: [
             '<%= jshint.src.src %>',
             '<%= jshint.tests.src %>',
+            'tests/static/**/*.xml',
             'Gruntfile.js',
         ],
         tasks: ['test', 'jshint'],
