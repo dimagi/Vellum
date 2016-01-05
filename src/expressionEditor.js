@@ -156,7 +156,7 @@ define([
         var validate = function (expr) {
             if (expr) {
                 try {
-                    var parsed = xpath.parse(expr);
+                    var parsed = xpath.parser.parse(expr);
                     return [true, parsed];
                 } catch (err) {
                     return [false, err];

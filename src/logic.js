@@ -22,7 +22,7 @@ define([
         this._text = exprText || "";
         if ($.trim(exprText)) {
             try {
-                this.parsed = xpath.parse(exprText);
+                this.parsed = xpath.parser.parse(exprText);
             } catch (err) {
                 this.parsed = null;
                 this.error = err;
@@ -140,7 +140,7 @@ define([
             for (var i = 0; i < paths.length; i++) {
                 path = paths[i];
                 if (path.toXPath() === from) {
-                    replacePathInfo(xpath.parse(to), path);
+                    replacePathInfo(xpath.parser.parse(to), path);
                 }
             }
         },
