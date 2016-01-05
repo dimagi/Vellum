@@ -47,6 +47,7 @@ define([
                             return {
                                 id: mug.ufid,
                                 name: mug.absolutePath,
+                                absolutePath: mug.absolutePath,
                                 icon: mug.options.icon,
                                 questionId: mug.p.nodeID,
                                 displayLabel: util.truncate(defaultLabel),
@@ -133,49 +134,55 @@ define([
             };
         }
 
-        var _atWhoOptions = function() {
-            var mugData = cachedMugData(mug.form),
-                fuse = new fusejs(mugData, { keys: ['label', 'name'] });
-    
-            return {
-                at: "/data/",
-                data: mugData,
-                displayTpl: atwhoDisplay,
-                insertTpl: options.insertTpl,
-                limit: 10,
-                maxLen: 30,
-                tabSelectsMatch: false,
-                callbacks: {
-                    matcher: function(flag, subtext) {
-                        var match, regexp;
-                        regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
-                        match = regexp.exec(subtext);
-                        return match ? match[2] : null;
-                    },
-                    filter: function (query, data, searchKey) {
-                        if (!query) { return data; }
-                        return fuse.search(query);
-                    },
-                    sorter: function (query, items, searchKey) {
-                        return _.map(items, function(item, idx) {
-                            item.atwho_order = idx;
-                            return item;
-                        });
-                    },
-                    beforeInsert: function(value, $li) {
-                        if (window.analytics) {
-                            window.analytics.usage(options.category,
-                                                   "Autocomplete",
-                                                   options.property);
-                        }
-                        return value;
-                    }
-                },
-                functionOverrides: options.functionOverrides,
-            };
-        };
+        function addAtWhoToInput() {
+            var _atWhoOptions = function(atKey) {
+                var mugData = cachedMugData()(mug.form),
+                    fuse = new fusejs(mugData, { keys: ['label', 'name', 'absolutePath'] });
 
-        $input.atwho(_atWhoOptions());
+                return {
+                    at: atKey,
+                    displayTpl: atwhoDisplay,
+                    insertTpl: options.insertTpl,
+                    limit: 10,
+                    maxLen: 30,
+                    tabSelectsMatch: false,
+                    callbacks: {
+                        matcher: function(flag, subtext) {
+                            var match, regexp;
+                            regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
+                            match = regexp.exec(subtext);
+                            return match ? match[2] : null;
+                        },
+                        filter: function (query, data, searchKey) {
+                            if (!query) { return fuse.list; }
+                            return fuse.search(query);
+                        },
+                        sorter: function (query, items, searchKey) {
+                            return _.map(items, function(item, idx) {
+                                item.atwho_order = idx;
+                                return item;
+                            });
+                        },
+                        beforeInsert: function(value, $li) {
+                            if (window.analytics) {
+                                window.analytics.usage(options.category,
+                                                       "Autocomplete",
+                                                       options.property);
+                            }
+                            return value;
+                        }
+                    },
+                    functionOverrides: options.functionOverrides,
+                };
+            };
+
+            $input.atwho(_atWhoOptions('/data/'));
+            if (options.useRichText) {
+                $input.atwho(_atWhoOptions('#form'));
+            }
+        }
+
+        addAtWhoToInput();
 
         $input.on("inserted.atwho", function(event, $li, otherEvent) {
             $(this).find('.atwho-inserted').children().unwrap();
@@ -187,7 +194,7 @@ define([
 
         mug.on("change-display-language", function() {
             $input.atwho('destroy');
-            $input.atwho(_atWhoOptions());
+            addAtWhoToInput();
         });
     };
 
