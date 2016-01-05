@@ -1,19 +1,15 @@
 define([
     'jquery',
     'underscore',
-    'xpathmodels',
     'vellum/tree',
     'vellum/widgets',
     'vellum/util',
-    'vellum/logic'
 ], function (
     $,
     _,
-    xpathmodels,
     Tree,
     widgets,
-    util,
-    logic
+    util
 ) {
     /**
      * A question, containing data, bind, and control elements.

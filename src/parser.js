@@ -1,13 +1,11 @@
 define([
     'vellum/form',
-    'vellum/util',
     'vellum/xml',
     'jquery',
     'underscore',
     'vellum/xpath'
 ], function (
     form_,
-    util,
     xml,
     $,
     _,
