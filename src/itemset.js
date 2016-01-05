@@ -1,11 +1,9 @@
 define([
     'underscore',
     'jquery',
-    'tpl!vellum/templates/external_data_source', 
     'vellum/widgets',
     'vellum/datasources',
     'vellum/data_source_widgets',
-    'vellum/form',
     'vellum/mugs',
     'vellum/parser',
     'vellum/util',
@@ -14,11 +12,9 @@ define([
 ], function (
     _,
     $,
-    external_data_source,
     widgets,
     datasources,
     datasourceWidgets,
-    form,
     mugs,
     parser,
     util,

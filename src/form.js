@@ -5,7 +5,6 @@ define([
     'vellum/xpath',
     'vellum/tree',
     'vellum/logic',
-    'vellum/widgets',
     'vellum/util'
 ], function (
     require,
@@ -14,7 +13,6 @@ define([
     xpath,
     Tree,
     logic,
-    widgets,
     util
 ) {
     // Load these dependencies in the background after all other run-time

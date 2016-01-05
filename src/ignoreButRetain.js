@@ -20,16 +20,12 @@
 define([
     'underscore',
     'jquery',
-    'vellum/mugs',
     'vellum/parser',
-    'vellum/util',
     'vellum/core'
 ], function (
     _,
     $,
-    mugs,
-    parser,
-    util
+    parser
 ) {
     var xmls = new XMLSerializer(),
         MUG = "mug",
