@@ -54,12 +54,14 @@ define([
                 _.each(['nodeset', 'calculate', 'constraint', 'relevant'], function (attr) {
                     doc.find('bind').removeAttr('vellum:' + attr);
                 });
+                doc.find('setvalue').removeAttr('vellum:ref');
                 _.each(['input', 'repeat'], function (attr) {
                     doc.find(attr).removeAttr('vellum:nodeset');
                 });
+                doc.find('output').removeAttr('vellum:value');
                 var body = doc.find('body');
                 body.find('input').removeAttr('vellum:nodeset');
-                _.each(['input', 'trigger', 'select1', 'group', 'unknown', 'upload', 'select'], function (attr) {
+                _.each(['input', 'trigger', 'select1', 'group', 'unknown', 'upload', 'select', 'secret'], function (attr) {
                     body.find(attr).removeAttr('vellum:ref');
                 });
             });
