@@ -36,12 +36,14 @@ define([
             var paths = [],
                 absolutePaths = [],
                 topLevelPaths = [],
+                hashtags = [],
                 ROOT = xpath.models.XPathInitialContextEnum.ROOT,
                 RELATIVE = xpath.models.XPathInitialContextEnum.RELATIVE,
                 EXPR = xpath.models.XPathInitialContextEnum.EXPR,
                 predicates;
             this.paths = paths;
             this.absolutePaths = absolutePaths;
+            this.hashtags = hashtags;
             this.instanceRefs = {};
             this.referencesSelf = false;
             this.topLevelPaths = topLevelPaths;
@@ -83,8 +85,10 @@ define([
                         }
                     } else if (node instanceof xpath.models.XPathFuncExpr) {
                         this._addInstanceRef(node);
+                    } else if (node instanceof xpath.models.HashtagExpr) {
+                        hashtags.push(node);
                     }
-                    children = node.getChildren();
+                    children = node.getChildren ? node.getChildren() : [];
                     for (i = 0; i < children.length; i++) {
                         queue.push({
                             xpath: children[i],
@@ -124,9 +128,16 @@ define([
             }
             return this.topLevelPaths;
         },
+        getHashtags: function () {
+            if (!this.hashtags) {
+                this.analyze();
+            }
+            return this.hashtags;
+        },
         updatePath: function (from, to) {
             var paths = this.getPaths(),
-                path;
+                hashtags = this.getHashtags(),
+                path, i;
 
             var replacePathInfo = function (source, destination) {
                 // copies information from source to destination in place,
@@ -137,16 +148,22 @@ define([
                 destination.filter = source.filter;
             };
             
-            for (var i = 0; i < paths.length; i++) {
+            for (i = 0; i < paths.length; i++) {
                 path = paths[i];
-                if (path.toXPath() === from) {
+                if (path.toHashtag() === from) {
+                    replacePathInfo(xpath.parser.parse(to), path);
+                }
+            }
+            for (i = 0; i < hashtags.length; i++) {
+                path = hashtags[i];
+                if (path.toHashtag() === from) {
                     replacePathInfo(xpath.parser.parse(to), path);
                 }
             }
         },
         getText: function () {
             if (this._text && this.parsed) {
-                return this.parsed.toXPath();
+                return this.parsed.toHashtag();
             } else {
                 return this._text;
             }
@@ -195,11 +212,12 @@ define([
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
-            this.all = this.all.concat(expr.absolutePaths.map(function (path) {
-                var pathString = path.pathWithoutPredicates(),
-                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
+            this.all = this.all.concat(expr.absolutePaths.concat(expr.hashtags).map(function (path) {
+                var isHashtag = path.toHashtag().startsWith('#'),
+                    pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
+                    pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
-                    xpath = path.toXPath();
+                    xpath = path.toHashtag();
 
                 // last part is hack to allow root node in data parents
                 if (!refMug &&
@@ -358,5 +376,14 @@ define([
         LogicExpression: LogicExpression,
         XPATH_REFERENCES: XPATH_REFERENCES,
         NO_SELF_REFERENCES: NO_SELF_REFERENCES,
+        setHashtagToXPathDict: function (translationDict) {
+            xpath.setHashtagToXPathDict(translationDict);
+        },
+        addHashtag: function(hashtag, xpath_) {
+            xpath.addHashtag(hashtag, xpath_);
+        },
+        removeHashtag: function(hashtag) {
+            xpath.removeHashtag(hashtag);
+        },
     };
 });
