@@ -37,7 +37,8 @@ define([
         return xml.serializeToString(value[0]) // pure magic
             .replace(wrapper, "$3")         // remove outer tag
             .replace(emptytag, "<$1 />")    // <tag></tag> to <tag />
-            .replace(/&nbsp;|\xa0/g, " ");  // &nbsp; is not a valid XML entity
+            .replace(/&nbsp;|\xa0/g, " ")   // &nbsp; is not a valid XML entity
+            .replace('xmlns:vellum="http://commcarehq.org/xforms/vellum"', "");
     }
 
     /**
