@@ -3,13 +3,15 @@ define([
     'vellum/xml',
     'jquery',
     'underscore',
-    'vellum/xpath'
+    'vellum/xpath',
+    'vellum/logic'
 ], function (
     form_,
     xml,
     $,
     _,
-    xpath
+    xpath,
+    logic
 ) {
     var DEFAULT_FORM_ID = 'data';
 
@@ -215,15 +217,15 @@ define([
         setValues.each(function () {
             var $el = $(this);
             form.vellum.parseSetValue(
-                form, $el, processPath($el.attr('ref'), rootNodeName));
+                form, $el, processPath(parseVellumAttrs($el, 'ref', true), rootNodeName));
         });
     }
 
     function parseSetValue(form, el, path) {
         var mug = form.getMugByPath(path),
             event = el.attr('event'),
-            ref = el.attr('ref'),
-            value = el.attr('value');
+            ref = parseVellumAttrs(el, 'ref', true),
+            value = parseVellumAttrs(el, 'value', true);
 
         // HACK: hardcoding these as that's what setValue will support for now
         if (!mug || (event !== 'xforms-ready' && event !== 'jr-insert')) {
@@ -504,14 +506,14 @@ define([
         if(!el){
             return null;
         }
-        var path = noPop ? el.attr('ref') : el.popAttr('ref'),
+        var path = parseVellumAttrs(el, 'ref', noPop),
             nodeId, pathToTry;
         if(!path){
-            path = noPop ? el.attr('nodeset') : el.popAttr('nodeset');
+            path = parseVellumAttrs(el, 'nodeset', noPop);
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = noPop ? el.attr('bind') : el.popAttr('bind');
+            nodeId = parseVellumAttrs(el, 'bind', noPop);
             if (nodeId) {
                 pathToTry = processPath(nodeId);
                 if (!form.getMugByPath(pathToTry)) {
@@ -522,7 +524,7 @@ define([
             }
         }
         path = path || nodeId || null;
-        if (path && path[0] !== "/") {
+        if (path && path[0] !== "/" && path[0] !== "#") {
             // make path absolute
             if (parentMug) {
                 var parentPath = parentMug.absolutePath;
@@ -604,17 +606,17 @@ define([
     function processPath (path, rootNodeName) {
         var newPath;
         var parsed = xpath.parser.parse(path);
-        if (!(parsed instanceof xpath.models.XPathPathExpr)) {
+        if (!(parsed instanceof xpath.models.XPathPathExpr ||
+              parsed instanceof xpath.models.HashtagExpr)) {
             return null;
         }
 
         if (parsed.initial_context === xpath.models.XPathInitialContextEnum.RELATIVE) {
             parsed.steps.splice(0, 0, xpath.models.XPathStep({axis: "child", test: rootNodeName}));
             parsed.initial_context = xpath.models.XPathInitialContextEnum.ROOT;
-        } else {
-            return path;
         }
-        newPath = parsed.toXPath();
+
+        newPath = parsed.toHashtag();
         return newPath;
     }
 
@@ -623,7 +625,7 @@ define([
 
         bindList.each(function () {
             var el = $(this),
-                path = el.popAttr('nodeset') || el.popAttr('ref');
+                path = parseVellumAttrs(el, 'nodeset') || parseVellumAttrs(el, 'ref');
 
             form.vellum.parseBindElement(
                 form, el, processPath(path, rootNodeName));
@@ -641,9 +643,9 @@ define([
         }
 
         var attrs = {
-            relevantAttr: el.popAttr('relevant'),
-            calculateAttr: el.popAttr('calculate'),
-            constraintAttr: el.popAttr('constraint'),
+            relevantAttr: parseVellumAttrs(el, 'relevant'),
+            calculateAttr: parseVellumAttrs(el, 'calculate'),
+            constraintAttr: parseVellumAttrs(el, 'constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
         };
@@ -656,6 +658,13 @@ define([
         }
       
         mug.p.setAttrs(attrs);
+    }
+
+    function parseVellumAttrs(el, key, noPop) {
+        var method = (noPop ? el.attr : el.popAttr).bind(el),
+            vellumAttr = method('vellum:' + key),
+            xmlAttr = method(key);
+        return vellumAttr ? vellumAttr : xmlAttr;
     }
 
     var _getInstances = function (xml) {

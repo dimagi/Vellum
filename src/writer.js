@@ -2,12 +2,14 @@ define([
     'jquery',
     'underscore',
     'XMLWriter',
-    'vellum/util'
+    'vellum/util',
+    'vellum/logic',
 ], function (
     $,
     _,
     XMLWriter,
-    util
+    util,
+    logic
 ) {
     var createXForm = function (form) {
         var xmlWriter = new XMLWriter('UTF-8', '1.0');
@@ -179,7 +181,7 @@ define([
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
                         if (value) {
-                            xmlWriter.writeAttributeString(key, value);
+                            writeHashtags(xmlWriter, key, value);
                         }
                     });
                     xmlWriter.writeEndElement();
@@ -193,8 +195,8 @@ define([
         function writeSetValue(setValue) {
             xmlWriter.writeStartElement('setvalue');
             xmlWriter.writeAttributeString('event', setValue.event);
-            xmlWriter.writeAttributeString('ref', setValue.ref);
-            xmlWriter.writeAttributeString('value', setValue.value);
+            writeHashtags(xmlWriter, 'ref', setValue.ref);
+            writeHashtags(xmlWriter, 'value', setValue.value);
             xmlWriter.writeEndElement();
         }
 
@@ -249,7 +251,10 @@ define([
                 opts.writeCustomXML(xmlWriter, mug);
             }
             if (opts.writeControlRefAttr) {
-                xmlWriter.writeAttributeString(opts.writeControlRefAttr, mug.absolutePath);
+                var hashtag = mug.hashtagPath;
+                if (hashtag) {
+                    writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag);
+                }
             }
             var appearanceAttr = mug.getAppearanceAttribute();
             if (appearanceAttr) {
@@ -321,6 +326,23 @@ define([
             var alertRef = "jr:itext('" + alertItext.id + "')";
             xmlWriter.writeAttributeString('ref', alertRef);
             xmlWriter.writeEndElement();
+        }
+    }
+
+    function writeHashtags(xmlWriter, key, hashtagOrXPath) {
+        var expr = new logic.LogicExpression(hashtagOrXPath),
+            xpath = expr.parsed.toXPath(),
+            hashtag = expr.parsed.toHashtag();
+
+        if (hashtag !== xpath) {
+            xmlWriter.writeAttributeString('vellum:' + key, hashtag);
+            if (xpath.replace(/ /g, '') === hashtagOrXPath.replace(/ /g, '')) {
+                xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            } else {
+                xmlWriter.writeAttributeString(key, xpath);
+            }
+        } else {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
         }
     }
 
