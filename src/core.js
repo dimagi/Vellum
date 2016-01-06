@@ -958,7 +958,7 @@ define([
         }
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
-        var locked = !this.isMugPathMoveable(sourceMug.absolutePath);
+        var locked = !this.isMugPathMoveable(sourceMug.hashtagPath);
         if (locked) {
             if (position === 'into' || position === 'last' || position === 'first') {
                 return sourceMug.parentMug === targetMug;
@@ -1676,7 +1676,7 @@ define([
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
-                    return _this.isMugRemoveable(mug, mug.absolutePath);
+                    return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable
             }));
@@ -1741,7 +1741,7 @@ define([
             }
             return ret;
         };
-        var changeable = this.isMugTypeChangeable(mug, mug.absolutePath);
+        var changeable = this.isMugTypeChangeable(mug, mug.hashtagPath);
 
         var $questionTypeChanger = $(question_type_changer({
             currentQuestionIcon: mug.getIcon(),

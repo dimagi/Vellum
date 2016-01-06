@@ -35,7 +35,7 @@ define([
                 return !mug.spec[widget.path].enabled(mug);
             }
 
-            return mug.form.vellum.isPropertyLocked(mug.absolutePath,
+            return mug.form.vellum.isPropertyLocked(mug.hashtagPath,
                                                     widget.path);
         };
 
