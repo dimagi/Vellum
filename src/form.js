@@ -894,13 +894,23 @@ define([
             }
         },
         _updateMugPath: function (mug, oldPath, newPath) {
-            var map = this.mugMap;
+            var map = this.mugMap, oldHashtag, newHashtag;
             delete map[oldPath];
-            if (_.isUndefined(newPath)) {
+            if (oldPath) {
+                oldHashtag = oldPath.replace('/' + this.tree.rootNode.rootNodeId, '#form');
+                delete map[oldHashtag];
+                logic.removeHashtag(oldHashtag);
+            }
+            if (_.isUndefined(newHashtag)) {
                 newPath = mug.absolutePath;
+                newHashtag = mug.hashtagPath;
+            } else {
+                newHashtag = newPath.replace('/' + this.tree.rootNode.rootNodeId, '#form');
             }
             if (newPath) {
                 map[newPath] = mug;
+                map[newHashtag] = mug;
+                logic.addHashtag(newHashtag, newPath);
             }
         },
         _fixMugState: function (mug) {
@@ -909,6 +919,7 @@ define([
             var path = mug.absolutePath;
             if (path) {
                 this.mugMap[path] = mug;
+                logic.addHashtag(mug.hashtagPath, path);
             }
         },
         fixBrokenReferences: function (mug) {
@@ -942,7 +953,10 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[path];
+            var root = '/' + this.tree.rootNode.rootNodeId,
+                hashtag = path.replace(root, '#form').replace(/ /g, ''),
+                absPath = path.replace('#form', root).replace(/ /g, '');
+            return this.mugMap[hashtag] || this.mugMap[absPath];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -971,6 +985,7 @@ define([
                     this._removeMugFromForm(children[i], ufids, true);
                 }
                 delete this.mugMap[mug.absolutePath];
+                delete this.mugMap[mug.hashtagPath];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {

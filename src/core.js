@@ -1126,6 +1126,7 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
+        xpath.setHashtagToXPathDict({});
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
