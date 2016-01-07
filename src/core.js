@@ -1033,7 +1033,7 @@ define([
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
-                "." : mug.absolutePath;
+                "." : (mug.supportsRichText() ? mug.hashtagPath : mug.absolutePath);
         }
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using

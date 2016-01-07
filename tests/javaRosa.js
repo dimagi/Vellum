@@ -432,7 +432,7 @@ require([
             var audio = util.addQuestion("Audio", "audio"),
                 text = util.addQuestion("Text", "text"),
                 target = $("[name='itext-en-label']");
-            call("handleDropFinish", target, audio.ufid, audio);
+            call("handleDropFinish", target, audio.absolutePath, audio);
             chai.expect(util.getMessages(text))
                 .to.include("Audio Capture nodes cannot be used in an output value");
         });
