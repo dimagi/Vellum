@@ -95,7 +95,7 @@ require([
                 calc = $("[name=property-calculateAttr]"),
                 sessionUri = CASE_DATA[0].uri,
                 casedbUri = CASE_DATA[1].uri,
-                where = "@case_id=instance('commcaresession')/session/data/case_id";
+                where = "@case_id = instance('commcaresession')/session/data/case_id";
             assert.equal(getInstanceId(mug.form, sessionUri), null);
             assert.equal(getInstanceId(mug.form, casedbUri), null);
             assert.equal(calc.length, 1);
@@ -112,8 +112,8 @@ require([
                 calc = $("[name=property-calculateAttr]"),
                 sessionUri = CASE_DATA[0].uri,
                 casedbUri = CASE_DATA[1].uri,
-                whereSession = "@case_id=instance('commcaresession')/session/data/case_id",
-                whereParent = "@case_id=instance('casedb')/cases/case[" +
+                whereSession = "@case_id = instance('commcaresession')/session/data/case_id",
+                whereParent = "@case_id = instance('casedb')/cases/case[" +
                               whereSession + "]/index/parent";
             assert.equal(getInstanceId(mug.form, sessionUri), null);
             assert.equal(getInstanceId(mug.form, casedbUri), null);
@@ -131,10 +131,10 @@ require([
                 calc = $("[name=property-calculateAttr]"),
                 sessionUri = CASE_DATA[0].uri,
                 casedbUri = CASE_DATA[1].uri,
-                whereSession = "@case_id=instance('commcaresession')/session/data/case_id",
-                whereParent = "@case_id=instance('casedb')/cases/case[" +
+                whereSession = "@case_id = instance('commcaresession')/session/data/case_id",
+                whereParent = "@case_id = instance('casedb')/cases/case[" +
                               whereSession + "]/index/parent",
-                whereChild = "@case_id=instance('casedb')/cases/case[" +
+                whereChild = "@case_id = instance('casedb')/cases/case[" +
                              whereParent + "]/index/first-child";
             assert.equal(getInstanceId(mug.form, sessionUri), null);
             assert.equal(getInstanceId(mug.form, casedbUri), null);

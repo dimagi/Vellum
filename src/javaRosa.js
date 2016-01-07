@@ -896,15 +896,17 @@ define([
         };
 
         widget.getItextValue = function (lang) {
-            var itextItem = widget.getItextItem();
+            var itextItem = widget.getItextItem(), value;
             if (!lang) {
                 lang = widget.language;
             }
-            return itextItem && itextItem.get(widget.form, lang);
+            value = itextItem && itextItem.get(widget.form, lang);
+            return mug.supportsRichText() ? outputToHashtag(value) : outputToXPath(value);
         };
 
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
+            value = outputToHashtag(value);
             if (itextItem) {
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
@@ -1041,7 +1043,7 @@ define([
         };
 
         widget.save = function () {
-            widget.setItextValue(widget.getValue());
+            widget.setItextValue(outputToHashtag(widget.getValue()));
         };
 
         return widget;
@@ -2234,6 +2236,34 @@ define([
             $modal.one('shown', function () { $textarea.focus(); });
         }
     });
+
+    function outputToHashtag(text) {
+        if (text) {
+            text = $("<div />").append(text);
+            text.find('output').replaceWith(function() {
+                var $this = $(this),
+                    value = xpath.parser.parse($this.attr('value'));
+                $this.attr('value', value.toHashtag());
+                return $this[0].outerHTML;
+            });
+            text = xml.normalize(text.html());
+        }
+        return text;
+    }
+
+    function outputToXPath(text) {
+        if (text) {
+            text = $("<div />").append(text);
+            text.find('output').replaceWith(function() {
+                var $this = $(this),
+                    value = xpath.parser.parse($this.attr('value'));
+                $this.attr('value', value.toXPath());
+                return $this[0].outerHTML;
+            });
+            text = xml.normalize(text.html());
+        }
+        return text;
+    }
 
     return {
         parseXLSItext: parseXLSItext,

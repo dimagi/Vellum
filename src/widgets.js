@@ -5,7 +5,8 @@ define([
     'jquery',
     'vellum/atwho',
     'vellum/util',
-    'vellum/richText'
+    'vellum/richText',
+    'vellum/xpath',
 ], function (
     widget_control_keyvalue,
     widget_control_message,
@@ -13,7 +14,8 @@ define([
     $,
     atwho,
     util,
-    richTextUtils
+    richTextUtils,
+    xpath
 ) {
     var base = function(mug, options) {
         // set properties shared by all widgets
@@ -188,7 +190,11 @@ define([
 
             var position = util.getCaretPosition(input[0]);
             var oldvalue = input.val();
-            input.val(value);
+            if (value && widget.hasLogicReferences) {
+                input.val(xpath.parser.parse(value).toXPath());
+            } else {
+                input.val(value);
+            }
 
             // If this input has focus and value hasn't changed much,
             // keep the cursor in the same position
@@ -198,7 +204,13 @@ define([
         };
 
         widget.getValue = function() {
-            return input.val().replace(/&#10;/g, '\n');
+            var ret = input.val().replace(/&#10;/g, '\n');
+
+            if (ret && widget.hasLogicReferences) {
+                return xpath.parser.parse(ret).toHashtag();
+            } else {
+                return ret;
+            }
         };
 
         input.bind("change input", function () {
@@ -328,9 +340,10 @@ define([
                 widget.handleChange();
             });
 
+        widget.hasLogicReferences = true;
+
         return widget;
     };
-    droppableText.hasLogicReferences = true;
 
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
@@ -404,9 +417,10 @@ define([
             useRichText: mug.supportsRichText()
         });
 
+        widget.hasLogicReferences = true;
+
         return widget;
     };
-    xPath.hasLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
         // todo: make this inherit from normal
