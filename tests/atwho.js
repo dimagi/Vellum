@@ -22,6 +22,7 @@ require([
             {
                 ufid: 0,
                 absolutePath: '/data/one',
+                hashtagPath: '#form/one',
                 options: {
                     icon: 'fcc fcc-text',
                 },
@@ -33,6 +34,7 @@ require([
             {
                 ufid: 1,
                 absolutePath: '/data/long',
+                hashtagPath: '#form/long',
                 options: {
                     icon: 'fcc fcc-text',
                 },
@@ -44,6 +46,7 @@ require([
             {
                 ufid: 2,
                 absolutePath: undefined,
+                hashtagPath: undefined,
                 options: {
                     icon: 'fcc fcc-choice',
                 },
@@ -55,6 +58,7 @@ require([
             {
                 ufid: 3,
                 absolutePath: '/data/modeliteration/item',
+                hashtagPath: '#form/modeliteration/item',
                 options: {
                     icon: 'fcc fcc-choice',
                 },
@@ -77,7 +81,7 @@ require([
         mug.on = function () {};
         // for tests in editor
         mug.icon = mug.options.icon;
-        mug.name = mug.absolutePath;
+        mug.name = mug.hashtagPath;
         mug.displayLabel = real_util.truncate(form.vellum.getMugDisplayName(mug));
         real_util.eventuality(mug);
     });

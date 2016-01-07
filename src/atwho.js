@@ -42,7 +42,7 @@ define([
 
                         return {
                             id: mug.ufid,
-                            name: mug.absolutePath,
+                            name: mug.hashtagPath,
                             absolutePath: mug.absolutePath,
                             icon: mug.options.icon,
                             questionId: mug.p.nodeID,
