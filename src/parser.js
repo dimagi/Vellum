@@ -273,7 +273,9 @@ define([
             // HACK fix abstraction broken by direct tree insert
             form.mugMap[mug.ufid] = mug;
         } else if (node.parent.value !== parentMug) {
-            mug.p.dataParent = node.parent.getAbsolutePath();
+            var dataParentNode = node.parent,
+                dataParentMug = node.parent.value;
+            mug.p.dataParent = dataParentNode.isRootNode ? '#form' : dataParentMug.hashtagPath;
             node = form.tree.insertMug(mug, 'into', parentMug);
         }
         if (appearance) {
@@ -527,7 +529,7 @@ define([
         if (path && path[0] !== "/" && path[0] !== "#") {
             // make path absolute
             if (parentMug) {
-                var parentPath = parentMug.absolutePath;
+                var parentPath = parentMug.hashtagPath;
                 if (parentPath) {
                     path = parentPath + "/" + path;
                 }

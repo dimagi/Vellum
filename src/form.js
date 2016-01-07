@@ -894,11 +894,9 @@ define([
             }
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
-            var map = this.mugMap, oldPath, newPath;
+            var map = this.mugMap, newPath;
             delete map[oldHashtag];
-            if (oldPath) {
-                oldPath = oldHashtag.replace('#form', '/' + this.tree.rootNode.rootNodeId);
-                delete map[oldPath];
+            if (oldHashtag) {
                 logic.removeHashtag(oldHashtag);
             }
             if (_.isUndefined(newHashtag)) {
@@ -907,8 +905,7 @@ define([
             } else {
                 newPath = newHashtag.replace('#form', '/' + this.tree.rootNode.rootNodeId);
             }
-            if (newPath) {
-                map[newPath] = mug;
+            if (newHashtag) {
                 map[newHashtag] = mug;
                 logic.addHashtag(newHashtag, newPath);
             }
@@ -918,7 +915,7 @@ define([
             this.mugMap[mug.ufid] = mug;
             var path = mug.absolutePath;
             if (path) {
-                this.mugMap[path] = mug;
+                this.mugMap[mug.hashtagPath] = mug;
                 logic.addHashtag(mug.hashtagPath, path);
             }
         },
@@ -954,9 +951,8 @@ define([
                 return null;
             }
             var root = '/' + this.tree.rootNode.rootNodeId,
-                hashtag = path.replace(root, '#form').replace(/ /g, ''),
-                absPath = path.replace('#form', root).replace(/ /g, '');
-            return this.mugMap[hashtag] || this.mugMap[absPath];
+                hashtag = path.replace(root, '#form').replace(/ /g, '');
+            return this.mugMap[hashtag];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -984,7 +980,6 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[mug.absolutePath];
                 delete this.mugMap[mug.hashtagPath];
                 this.tree.removeMug(mug);
             }
