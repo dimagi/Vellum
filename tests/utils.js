@@ -40,33 +40,11 @@ define([
         opts = _.defaults(opts || {}, {
             normalize_xmlns: false,
             not: false,
-            removeVellumAttrs: true,
         });
         if (opts.normalize_xmlns) {
             var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
             actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
                                     '$1' + xmlns + '"');
-        }
-        if (opts.removeVellumAttrs) {
-            var actualDoc = $($.parseXML(actual)),
-                expectedDoc = $($.parseXML(expected));
-            _.each([actualDoc, expectedDoc], function (doc) {
-                _.each(['nodeset', 'calculate', 'constraint', 'relevant'], function (attr) {
-                    doc.find('bind').removeAttr('vellum:' + attr);
-                });
-                doc.find('setvalue').removeAttr('vellum:ref');
-                _.each(['input', 'repeat'], function (attr) {
-                    doc.find(attr).removeAttr('vellum:nodeset');
-                });
-                doc.find('output').removeAttr('vellum:value');
-                var body = doc.find('body');
-                body.find('input').removeAttr('vellum:nodeset');
-                _.each(['input', 'trigger', 'select1', 'group', 'unknown', 'upload', 'select', 'secret'], function (attr) {
-                    body.find(attr).removeAttr('vellum:ref');
-                });
-            });
-            actual = (new XMLSerializer()).serializeToString(actualDoc[0]);
-            expected = (new XMLSerializer()).serializeToString(expectedDoc[0]);
         }
         var result = xmlEqual(actual, expected);
         if (opts.not) {
