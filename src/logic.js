@@ -150,7 +150,7 @@ define([
             
             for (i = 0; i < paths.length; i++) {
                 path = paths[i];
-                if (path.toXPath() === from) {
+                if (path.toHashtag() === from) {
                     replacePathInfo(xpath.parser.parse(to), path);
                 }
             }
@@ -163,7 +163,7 @@ define([
         },
         getText: function () {
             if (this._text && this.parsed) {
-                return this.parsed.toXPath();
+                return this.parsed.toHashtag();
             } else {
                 return this._text;
             }
@@ -217,7 +217,7 @@ define([
                     pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
-                    xpath = path.toXPath();
+                    xpath = path.toHashtag();
 
                 // last part is hack to allow root node in data parents
                 if (!refMug &&
