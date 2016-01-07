@@ -1,6 +1,7 @@
 define([
     'jquery',
     'underscore',
+    'vellum/logic',
     'vellum/datasourcewidgets',
     'vellum/mugs',
     'vellum/parser',
@@ -10,6 +11,7 @@ define([
 ], function (
     $,
     _,
+    logic,
     datasourceWidgets,
     mugs,
     parser,
@@ -72,7 +74,7 @@ define([
                 })];
             },
             controlChildFilter: function (children, mug) {
-                var nodeset = mug.absolutePath,
+                var nodeset = mug.hashtagPath,
                     r_count = mug.p.repeat_count;
                 children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
@@ -80,7 +82,16 @@ define([
                         xmlWriter.writeAttributeString("jr:count", String(r_count));
                         xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
-                    xmlWriter.writeAttributeString("nodeset", nodeset);
+                    var key = 'nodeset',
+                        expr = new logic.LogicExpression(nodeset);
+                    var xpath = expr.parsed.toXPath(),
+                        hashtags = expr.getHashtags();
+                    if (hashtags.length && nodeset !== xpath) {
+                        xmlWriter.writeAttributeString('vellum:' + key, nodeset);
+                        xmlWriter.writeAttributeString(key, xpath);
+                    } else {
+                        xmlWriter.writeAttributeString(key, nodeset);
+                    }
                 };
                 return children;
             },

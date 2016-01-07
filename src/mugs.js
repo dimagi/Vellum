@@ -4,12 +4,14 @@ define([
     'vellum/tree',
     'vellum/widgets',
     'vellum/util',
+    'vellum/logic'
 ], function (
     $,
     _,
     Tree,
     widgets,
-    util
+    util,
+    logic
 ) {
     /**
      * A question, containing data, bind, and control elements.
@@ -1501,7 +1503,7 @@ define([
             return {"jr:template": ""};
         },
         controlChildFilter: function (children, mug) {
-            var absPath = mug.absolutePath,
+            var hashtag = mug.hashtagPath,
                 r_count = mug.p.repeat_count,
                 attrs = _.object(_.filter(_.map(mug.p.rawRepeatAttributes, function (val, key) {
                     return key.toLowerCase() !== "jr:noaddremove" ? [key, val] : null;
@@ -1524,7 +1526,16 @@ define([
                             xmlWriter.writeAttributeString("jr:count", String(r_count));
                             xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                         }
-                        xmlWriter.writeAttributeString("nodeset", absPath);
+                        var key = 'nodeset',
+                            expr = new logic.LogicExpression(hashtag),
+                            xpath = expr.parsed.toXPath(),
+                            hashtags = expr.getHashtags();
+                        if (hashtags.length && hashtag !== xpath) {
+                            xmlWriter.writeAttributeString('vellum:' + key, hashtag);
+                            xmlWriter.writeAttributeString(key, xpath);
+                        } else {
+                            xmlWriter.writeAttributeString(key, hashtag);
+                        }
                     },
                 }
             })];
