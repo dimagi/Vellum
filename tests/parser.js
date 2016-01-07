@@ -10,6 +10,9 @@ require([
     'text!static/parser/missing-bind.xml',
     'text!static/parser/test-xml-1.xml',
     'text!static/parser/test-xml-2.xml',
+    'text!static/parser/override.xml',
+    'text!static/parser/overridden.xml',
+    'text!static/parser/first-time-hashtag.xml',
 ], function (
     chai,
     $,
@@ -20,7 +23,10 @@ require([
     LABEL_WITHOUT_ITEXT_XML,
     MISSING_BIND_XML,
     TEST_XML_1,
-    TEST_XML_2
+    TEST_XML_2,
+    OVERRIDE_XML,
+    OVERRIDDEN_XML,
+    FIRST_TIME_HASHTAG_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -114,6 +120,43 @@ require([
             util.loadXML(MISSING_BIND_XML);
             util.clickQuestion("text");
             assert(!$('[name=property-dataValue]').length);
+        });
+
+        describe("override", function() {
+            before(function(done) {
+                util.init({
+                    features: {rich_text: false},
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        onReady: done
+                    }
+                });
+            });
+
+            var properties = {
+                'relevantAttr': 'question2',
+                'constraintAttr': 'question2',
+                'calculateAttr': 'question3',
+            };
+
+            _.each(properties, function(question, prop) {
+                it("should override " + prop + " in question " + question, function() {
+                    util.loadXML(OVERRIDE_XML);
+                    var mug = util.getMug(question);
+                    assert.strictEqual(mug.p[prop], "#form/question1");
+                });
+            });
+
+            it("should override correctly", function() {
+                util.loadXML(OVERRIDE_XML);
+                util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
+            });
+
+            it("should generate hashtags correctly on first load", function() {
+                util.loadXML(FIRST_TIME_HASHTAG_XML);
+                util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
+            });
         });
     });
 });
