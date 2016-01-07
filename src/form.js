@@ -640,11 +640,11 @@ define([
                     return;
                 }
                 oldId = mug.p.nodeID;
-                oldPath = mug.absolutePath;
+                oldPath = mug.hashtagPath;
                 oldParent = conflictParent = mug.parentMug;
             } else {
                 oldId = mug.p.nodeID;
-                oldPath = mug.absolutePath;
+                oldPath = mug.hashtagPath;
                 oldParent = mug.parentMug;
                 this.insertMug(refMug, mug, position);
                 var spec = mug.spec.dataParent;
@@ -669,7 +669,7 @@ define([
                 }
             }
 
-            var newPath = mug.absolutePath;
+            var newPath = mug.hashtagPath;
             this.vellum.handleMugRename(
                 this, mug, newId, oldId, newPath, oldPath, oldParent);
 
@@ -716,7 +716,7 @@ define([
                 return;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
-                postMovePaths = _(mugs).map(function(mug) { return mug.absolutePath; }),
+                postMovePaths = _(mugs).map(function(mug) { return mug.hashtagPath; }),
                 postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
                 updates = {},
                 preMovePath;
@@ -802,8 +802,8 @@ define([
 
             pathReplacements.push({
                 mugId: mug.ufid,
-                from: mug.absolutePath,
-                to: duplicate.absolutePath,
+                from: mug.hashtagPath,
+                to: duplicate.hashtagPath,
             });
 
             return [duplicate, pathReplacements];
@@ -893,19 +893,19 @@ define([
                 mug.options.afterInsert(this, mug);
             }
         },
-        _updateMugPath: function (mug, oldPath, newPath) {
-            var map = this.mugMap, oldHashtag, newHashtag;
-            delete map[oldPath];
+        _updateMugPath: function (mug, oldHashtag, newHashtag) {
+            var map = this.mugMap, oldPath, newPath;
+            delete map[oldHashtag];
             if (oldPath) {
-                oldHashtag = oldPath.replace('/' + this.tree.rootNode.rootNodeId, '#form');
-                delete map[oldHashtag];
+                oldPath = oldHashtag.replace('#form', '/' + this.tree.rootNode.rootNodeId);
+                delete map[oldPath];
                 logic.removeHashtag(oldHashtag);
             }
             if (_.isUndefined(newHashtag)) {
                 newPath = mug.absolutePath;
                 newHashtag = mug.hashtagPath;
             } else {
-                newHashtag = newPath.replace('/' + this.tree.rootNode.rootNodeId, '#form');
+                newPath = newHashtag.replace('#form', '/' + this.tree.rootNode.rootNodeId);
             }
             if (newPath) {
                 map[newPath] = mug;

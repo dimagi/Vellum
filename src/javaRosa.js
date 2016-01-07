@@ -230,17 +230,21 @@ define([
         updateOutputRefExpressions: function () {
             var allRefs = {},
                 langRefs,
-                outputRe,
-                match;
+                outputs;
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*(?:\/|><\/output)>)/gim;
+                    outputs = $('<div>').append(this.data[lang]).find('output');
                     langRefs = [];
-                    match = outputRe.exec(this.data[lang]);
-                    while (match !== null) {
-                        langRefs.push(match[1]);
-                        match = outputRe.exec(this.data[lang]);
-                    }
+                    _.each(outputs, function (output) {
+                        output = $(output);
+                        var value = output.attr('vellum:value') || output.attr('value'),
+                            ref = output.attr('vellum:ref') || output.attr('ref');
+                        if (value) {
+                            langRefs.push(value);
+                        } else if (ref) {
+                            langRefs.push(ref);
+                        }
+                    });
                     allRefs[lang] = langRefs;
                 }
             }
