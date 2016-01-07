@@ -1579,6 +1579,27 @@ define([
             this.__callOld();
 
             delete this.data.javaRosa.itextMap;
+            var form = this.data.core.form;
+            forEachItextItem(form, function (item, mug) {
+                _(item.forms).each(function (itForm) {
+                    _.each(langs, function (lang) {
+                        var value = $('<div>').append(itForm.getValue(lang));
+                        if (!value) { return; }
+                        value.find('output').replaceWith(function() {
+                            var tempOutput = $('<output>'),
+                                output = $(this),
+                                value = output.attr('vellum:value') || output.attr('value'),
+                                ref = output.attr('vellum:ref') || output.attr('ref');
+                            if (value) {
+                                return tempOutput.attr('value', xpath.parser.parse(value).toHashtag())[0].outerHTML;
+                            } else if (ref) {
+                                return tempOutput.attr('ref', xpath.parser.parse(ref).toHashtag())[0].outerHTML;
+                            }
+                        });
+                        itForm.setValue(lang, value.html().replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+                    });
+                });
+            });
             Itext.on('change', function () { _this.onFormChange(); });
         },
         populateControlMug: function(mug, controlElement) {
@@ -1729,6 +1750,19 @@ define([
             // will be properly set as such.
             // 4. duplicate itext ids will be automatically updated to create
             // non-duplicates
+            
+            function hashtags(outputRef) {
+                var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
+                    key = !!$(outputRef).attr('value') ? 'value' : 'ref',
+                    parsed = xpath.parser.parse(value),
+                    hashtag = parsed.toHashtag(),
+                    xpath_ = parsed.toXPath();
+                if (xpath_ === hashtag) {
+                    return '<output ' + key + '="' + parsed.toXPath() + '"/>';
+                } else {
+                    return '<output ' + key + '="' + parsed.toXPath() + '" vellum:' + key + '="' + parsed.toHashtag() + '"/>';
+                }
+            }
 
             var Itext = this.data.javaRosa.Itext,
                 items = this.data.javaRosa.itextItemsFromBeforeSerialize,
@@ -1755,7 +1789,11 @@ define([
                             if(form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
-                            xmlWriter.writeXML(xml.normalize(val));
+                            val = $('<div>').append(xml.normalize(val));
+                            val.find('output').replaceWith(function() {
+                                return hashtags(this);
+                            });
+                            xmlWriter.writeXML(val.html());
                             xmlWriter.writeEndElement();
                         }
                         if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
