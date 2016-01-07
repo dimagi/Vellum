@@ -80,7 +80,7 @@ define([
                 getWidget = require('vellum/widgets').util.getWidget,
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
-            if (/^\/data\//.test(xpath) && widget) {
+            if (/^#form\//.test(xpath) && widget) {
                 var isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
@@ -336,8 +336,18 @@ define([
      *   instance: instance('blah')/blah_list/blah
      */
     function getBubbleDisplayValue(path) {
-        var steps = new logic.LogicExpression(path).getTopLevelPaths()[0].steps,
+        var parsed = new logic.LogicExpression(path),
+            topLevelPaths = parsed.getTopLevelPaths(),
+            hashtags = parsed.getHashtags(),
+            steps, dispValue;
+
+        if (topLevelPaths.length) {
+            steps = parsed.getTopLevelPaths()[0].steps;
             dispValue = steps[steps.length-1].name;
+        } else {
+            steps = hashtags[0].toHashtag().split('/');
+            dispValue = steps[steps.length-1];
+        }
         return dispValue;
     }
 
@@ -457,7 +467,9 @@ define([
                     return true;
                 })
                 .map(function(path) { return path.toXPath(); })
-                .uniq().value();
+                .uniq().value().concat(_.map(expr.getHashtags(), function(hashtag) {
+                    return hashtag.toHashtag();
+                }));
 
         _.each(paths, function(path) {
             var newPath = replacePathWithBubble(form, path);
