@@ -315,7 +315,7 @@ require([
             util.loadXML(OUTPUTREF_WITH_INEQUALITY_XML);
             var mug = util.getMug("product");
             assert.equal(mug.p.labelItext.get(),
-                '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')"/>');
+                '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')"></output>');
             util.assertXmlEqual(
                 call('createXML'),
                 OUTPUTREF_WITH_INEQUALITY_XML,
