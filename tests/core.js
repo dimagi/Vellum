@@ -88,7 +88,7 @@ require([
             group.p.nodeID = "g8";
             assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
             assert.equal(q2.p.relevantAttr,
-                "/data/g8/question1 = 'valley girl' and /data/g8/question2 = 'dude'");
+                "#form/g8/question1 = 'valley girl' and #form/g8/question2 = 'dude'");
         });
 
         it("should show warning icons on invalid questions", function () {

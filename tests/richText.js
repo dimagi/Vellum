@@ -440,7 +440,7 @@ define([
                         assert(bubble, "No bubbles detected");
                         bubble.mouseenter();
                         assert.strictEqual($('.popover-content').text(),
-                                           "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                                           "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                         done();
                     });
                 });

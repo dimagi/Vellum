@@ -450,14 +450,14 @@ require([
                 ["id", "type", "calculateAttr", "conflictedNodeId"],
                 ["/radius", "DataBindOnly", "42", "null"],
                 ["/copy-1-of-pi", "DataBindOnly", "3.1415", "pi"],
-                ["/circumference", "DataBindOnly", "2 * /data/copy-1-of-pi * /data/radius", "null"],
+                ["/circumference", "DataBindOnly", "2 * #form/copy-1-of-pi * #form/radius", "null"],
             ]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "calculateAttr"],
                 ["/radius", "DataBindOnly", "42"],
                 ["/pi", "DataBindOnly", "3.1415"],
-                ["/circumference", "DataBindOnly", "2 * /data/pi * /data/radius"],
+                ["/circumference", "DataBindOnly", "2 * #form/pi * #form/radius"],
             ]);
         });
 
@@ -1005,9 +1005,9 @@ require([
                 ['id', 'type', 'labelItext:en-default', 'appearance', 'calculateAttr', 'instances'],
                 ['/score', 'Int', 'What was your score', 'null', 'null', 'null'],
                 ['/output', 'DataBindOnly', 'null', 'null',
-                    "instance('scores')/score[@high > /data/score][@low < /data/score]",
+                    "instance('scores')/score[@high > #form/score][@low < #form/score]",
                     '{"scores":{"children":"<score low=\\"0.0\\" high=\\"500.0\\">You\'re really bad</score><score low=\\"500.0\\" high=\\"99999999.0\\">You\'re really good</score>"}}'],
-                ['/result', 'Trigger', '<output value="/data/output"/>', 'minimal', 'null', 'null'],
+                ['/result', 'Trigger', '<output value="#form/output"></output>', 'minimal', 'null', 'null'],
             ];
 
             it("should properly paste", function() {

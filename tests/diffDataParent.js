@@ -72,10 +72,10 @@ require([
                 group2 = util.addQuestion.bind({prevId: text1.p.nodeID})("Group", 'group2'),
                 form = call("getData").core.form;
 
-            text1.p.dataParent = '/data/group1';
-            assert.equal(text1.p.dataParent, "/data/group1");
+            text1.p.dataParent = '#form/group1';
+            assert.equal(text1.p.dataParent, "#form/group1");
             form.moveMug(group1, 'into', group2);
-            assert.equal(text1.p.dataParent, "/data/group2/group1");
+            assert.equal(text1.p.dataParent, "#form/group2/group1");
         });
 
         it("should clear the data parent when moving to a repeat group", function() {
@@ -144,7 +144,7 @@ require([
             util.addQuestion("Group", 'group');
             util.addQuestion("Text", 'text2');
 
-            text1.p.dataParent = '/data/group';
+            text1.p.dataParent = '#form/group';
             util.addQuestion.bind({prevId: text1.absolutePath})("Text", 'text3');
             // questions with alternate dataParent always come last in the data tree
             util.assertTreeState(form.dataTree(),
