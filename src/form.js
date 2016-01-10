@@ -4,6 +4,7 @@ define([
     'jquery',
     'vellum/tree',
     'vellum/logic',
+    'vellum/xpath',
     'vellum/util'
 ], function (
     require,
@@ -11,6 +12,7 @@ define([
     $,
     Tree,
     logic,
+    xpath,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -22,6 +24,14 @@ define([
         writer = w;
         exporter = e;
     });
+
+    function normalizeHashtag(xpath_) {
+        try {
+            return xpath.parser.parse(xpath_).toHashtag();
+        } catch (err) {
+            return xpath_;
+        }
+    }
 
     var FormError = function (options) {
         var that = {};
@@ -243,7 +253,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[dataParent];
+                var dataParentMug = _this.mugMap[normalizeHashtag(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -895,7 +905,7 @@ define([
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
             var map = this.mugMap, newPath;
-            delete map[oldHashtag];
+            delete map[normalizeHashtag(oldHashtag)];
             if (oldHashtag) {
                 logic.removeHashtag(oldHashtag);
             }
@@ -903,11 +913,17 @@ define([
                 newPath = mug.absolutePath;
                 newHashtag = mug.hashtagPath;
             } else {
-                newPath = newHashtag.replace('#form', '/' + this.tree.rootNode.rootNodeId);
+                newPath = newHashtag.replace(/^#form/, '/' + this.tree.rootNode.rootNodeId);
+                if (newPath === newHashtag) {
+                    // this happens if _updateMugPath is commtrack (#supply one day)
+                    newPath = null;
+                }
             }
             if (newHashtag) {
-                map[newHashtag] = mug;
-                logic.addHashtag(newHashtag, newPath);
+                if (newPath) {
+                    logic.addHashtag(newHashtag, newPath);
+                }
+                map[normalizeHashtag(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
@@ -915,8 +931,8 @@ define([
             this.mugMap[mug.ufid] = mug;
             var path = mug.absolutePath;
             if (path) {
-                this.mugMap[mug.hashtagPath] = mug;
                 logic.addHashtag(mug.hashtagPath, path);
+                this.mugMap[normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -951,8 +967,8 @@ define([
                 return null;
             }
             var root = '/' + this.tree.rootNode.rootNodeId,
-                hashtag = path.replace(root, '#form').replace(/ /g, '');
-            return this.mugMap[hashtag];
+                hashtag = path.replace(root, '#form');
+            return this.mugMap[normalizeHashtag(hashtag)] || this.mugMap[normalizeHashtag(path)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -980,7 +996,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[mug.hashtagPath];
+                delete this.mugMap[normalizeHashtag(mug.hashtagPath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
