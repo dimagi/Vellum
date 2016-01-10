@@ -3,6 +3,7 @@ define([
     'underscore',
     'jsdiff',
     'vellum/markdown',
+    'vellum/xpath',
     'jquery',
     'jquery.bootstrap-popout',
     'jquery.bootstrap-stickyover',
@@ -12,6 +13,7 @@ define([
     _,
     jsdiff,
     markdown,
+    xpath,
     $
 ) {
     RegExp.escape = function(s) {
@@ -295,6 +297,23 @@ define([
             return label.slice(0, length) + '&hellip;';
         }
         return label;
+    };
+
+    that.writeHashtags = function (xmlWriter, key, hashtagOrXPath) {
+        var expr = xpath.parser.parse(hashtagOrXPath),
+            xpath_ = expr.toXPath(),
+            hashtag = expr.toHashtag();
+
+        if (hashtag !== xpath_) {
+            xmlWriter.writeAttributeString('vellum:' + key, hashtag);
+            if (xpath_.replace(/ /g, '') === hashtagOrXPath.replace(/ /g, '')) {
+                xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            } else {
+                xmlWriter.writeAttributeString(key, xpath_);
+            }
+        } else {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+        }
     };
 
     return that;

@@ -1534,16 +1534,7 @@ define([
                             xmlWriter.writeAttributeString("jr:count", String(r_count));
                             xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                         }
-                        var key = 'nodeset',
-                            expr = new logic.LogicExpression(hashtag),
-                            xpath = expr.parsed.toXPath(),
-                            hashtags = expr.getHashtags();
-                        if (hashtags.length && hashtag !== xpath) {
-                            xmlWriter.writeAttributeString('vellum:' + key, hashtag);
-                            xmlWriter.writeAttributeString(key, xpath);
-                        } else {
-                            xmlWriter.writeAttributeString(key, hashtag);
-                        }
+                        util.writeHashtags(xmlWriter, 'nodeset', hashtag);
                     },
                 }
             })];

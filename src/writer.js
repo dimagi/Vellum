@@ -181,7 +181,7 @@ define([
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
                         if (value) {
-                            writeHashtags(xmlWriter, key, value);
+                            util.writeHashtags(xmlWriter, key, value);
                         }
                     });
                     xmlWriter.writeEndElement();
@@ -195,8 +195,8 @@ define([
         function writeSetValue(setValue) {
             xmlWriter.writeStartElement('setvalue');
             xmlWriter.writeAttributeString('event', setValue.event);
-            writeHashtags(xmlWriter, 'ref', setValue.ref);
-            writeHashtags(xmlWriter, 'value', setValue.value);
+            util.writeHashtags(xmlWriter, 'ref', setValue.ref);
+            util.writeHashtags(xmlWriter, 'value', setValue.value);
             xmlWriter.writeEndElement();
         }
 
@@ -253,7 +253,7 @@ define([
             if (opts.writeControlRefAttr) {
                 var hashtag = mug.hashtagPath;
                 if (hashtag) {
-                    writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag);
+                    util.writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag);
                 }
             }
             var appearanceAttr = mug.getAppearanceAttribute();
@@ -326,23 +326,6 @@ define([
             var alertRef = "jr:itext('" + alertItext.id + "')";
             xmlWriter.writeAttributeString('ref', alertRef);
             xmlWriter.writeEndElement();
-        }
-    }
-
-    function writeHashtags(xmlWriter, key, hashtagOrXPath) {
-        var expr = new logic.LogicExpression(hashtagOrXPath),
-            xpath = expr.parsed.toXPath(),
-            hashtag = expr.parsed.toHashtag();
-
-        if (hashtag !== xpath) {
-            xmlWriter.writeAttributeString('vellum:' + key, hashtag);
-            if (xpath.replace(/ /g, '') === hashtagOrXPath.replace(/ /g, '')) {
-                xmlWriter.writeAttributeString(key, hashtagOrXPath);
-            } else {
-                xmlWriter.writeAttributeString(key, xpath);
-            }
-        } else {
-            xmlWriter.writeAttributeString(key, hashtagOrXPath);
         }
     }
 

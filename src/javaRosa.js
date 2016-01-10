@@ -1758,9 +1758,9 @@ define([
                     hashtag = parsed.toHashtag(),
                     xpath_ = parsed.toXPath();
                 if (xpath_ === hashtag) {
-                    return '<output ' + key + '="' + parsed.toXPath() + '"/>';
+                    return '<output ' + key + '="' + xpath_ + '"/>';
                 } else {
-                    return '<output ' + key + '="' + parsed.toXPath() + '" vellum:' + key + '="' + parsed.toHashtag() + '"/>';
+                    return '<output ' + key + '="' + xpath_ + '" vellum:' + key + '="' + hashtag + '"/>';
                 }
             }
 
