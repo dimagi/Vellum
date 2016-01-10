@@ -4,14 +4,16 @@ define([
     'vellum/tree',
     'vellum/widgets',
     'vellum/util',
-    'vellum/logic'
+    'vellum/logic',
+    'vellum/xpath',
 ], function (
     $,
     _,
     Tree,
     widgets,
     util,
-    logic
+    logic,
+    xpath
 ) {
     /**
      * A question, containing data, bind, and control elements.
@@ -468,8 +470,14 @@ define([
 
     Object.defineProperty(Mug.prototype, "hashtagPath", {
         get: function () {
-            var path = this.absolutePathNoRoot;
-            return path ? '#form' + path : null;
+            var path = '#form' + this.absolutePathNoRoot,
+                hashtagable = true;
+            try {
+                path = xpath.parser.parse(path).toHashtag();
+            } catch (err) {
+                hashtagable = false;
+            }
+            return path ? ( hashtagable ? path : this.absolutePath) : null;
         }
     });
 
