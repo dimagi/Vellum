@@ -92,7 +92,6 @@ define([
                 });
                 // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                 $(this.dragHandlerContainer.$).children("img").removeAttr("title");
-                // TODO: check with emord this can use popover...and if so, remove stickyover altogether
                 $(this.dragHandlerContainer.$).children("img").popover({
                     trigger: 'hover',
                     container: 'body',
