@@ -977,7 +977,7 @@ define([
                 },
                 presence: 'optional',
                 setter: function (mug, attr, value) {
-                    var oldPath = mug.absolutePath;
+                    var oldPath = mug.hashtagPath;
                     mug.p.set(attr, value);
                     mug.form._updateMugPath(mug, oldPath);
                 },
@@ -994,7 +994,7 @@ define([
                            form.getBasePath().slice(0, -1) !== dataParent) {
                             return "Must be valid path";
                         } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
-                            return dataParentMug.absolutePath + " is not a valid data parent";
+                            return dataParentMug.hashtagPath + " is not a valid data parent";
                         } else if (!mug.spec.dataParent.visibility(mug)) {
                             return "Children of repeat groups cannot have a different data parent";
                         }
@@ -1097,7 +1097,7 @@ define([
                 constraintMsg = mug.p.constraintMsgAttr;
             }
             var attrs = {
-                nodeset: mug.absolutePath,
+                nodeset: mug.hashtagPath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
@@ -1120,7 +1120,7 @@ define([
                 ret = [{
                     value: mug.p.defaultValue,
                     event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
-                    ref: mug.absolutePath
+                    ref: mug.hashtagPath
                 }];
             }
 
