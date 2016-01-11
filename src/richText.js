@@ -416,18 +416,23 @@ define([
      * @param escape - If true, escape HTML except for bubble markup.
      */
     function bubbleOutputs(text, form, escape) {
+        function transformToOldOuptut(output) {
+            var $output = $(output),
+                attribute = $output.attr('vellum:value') || $output.attr('value');
+            return $("<output>").attr('value', attribute)[0].outerHTML;
+        }
         var el = $('<div>').html(text),
             places = {},
             replacer, result;
         if (escape) {
             replacer = function () {
                 var id = util.get_guid();
-                places[id] = replacePathWithBubble(form, this.outerHTML);
+                places[id] = replacePathWithBubble(form, transformToOldOuptut(this.outerHTML));
                 return "{" + id + "}";
             };
         } else {
             replacer = function() {
-                return replacePathWithBubble(form, this.outerHTML);
+                return replacePathWithBubble(form, transformToOldOuptut(this.outerHTML));
             };
         }
         el.find('output').replaceWith(replacer);
