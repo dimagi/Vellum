@@ -5,8 +5,7 @@
 define([
     'underscore',
     'jquery',
-    'xpath',
-    'xpathmodels',
+    'vellum/xpath',
     'tpl!vellum/templates/auto_box',
     'text!vellum/templates/button_remove.html',
     'tpl!vellum/templates/control_group',
@@ -24,7 +23,6 @@ define([
     _,
     $,
     xpath,
-    xpathmodels,
     auto_box,
     button_remove,
     control_group,
@@ -1059,7 +1057,7 @@ define([
          * italics/bold/bold italics
          * links
          */
-        return /^\d+\. |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val);
+        return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val);
     }
 
     var itextMarkdownWidget = function (mug, language, form, options) {
@@ -1324,10 +1322,10 @@ define([
             return getDefaultItextRoot(mug.parentMug) + "-" +
                 mug.getNodeID().replace(regex, '_');
         } else {
-            var path = mug.form.getAbsolutePath(mug, true);
+            var path = mug.absolutePathNoRoot;
             if (!path) {
                 if (mug.parentMug) {
-                    path = mug.form.getAbsolutePath(mug.parentMug, true) +
+                    path = mug.parentMug.absolutePathNoRoot +
                             "/" + mug.getNodeID();
                 } else {
                     // fall back to nodeID if mug path still not found
@@ -1593,7 +1591,7 @@ define([
             function getITextID(value) {
                 try {
                     var parsed = xpath.parse(value);
-                    if (parsed instanceof xpathmodels.XPathFuncExpr &&
+                    if (parsed instanceof xpath.models.XPathFuncExpr &&
                         parsed.id === "jr:itext")
                     {
                         return parsed.args[0].value;

@@ -4,16 +4,14 @@ define([
     'vellum/xml',
     'jquery',
     'underscore',
-    'xpath',
-    'xpathmodels'
+    'vellum/xpath'
 ], function (
     form_,
     util,
     xml,
     $,
     _,
-    xpath,
-    xpathmodels
+    xpath
 ) {
     var DEFAULT_FORM_ID = 'data';
 
@@ -597,13 +595,13 @@ define([
     function processPath (path, rootNodeName) {
         var newPath;
         var parsed = xpath.parse(path);
-        if (!(parsed instanceof xpathmodels.XPathPathExpr)) {
+        if (!(parsed instanceof xpath.models.XPathPathExpr)) {
             return null;
         }
 
-        if (parsed.initial_context === xpathmodels.XPathInitialContextEnum.RELATIVE) {
-            parsed.steps.splice(0, 0, xpathmodels.XPathStep({axis: "child", test: rootNodeName}));
-            parsed.initial_context = xpathmodels.XPathInitialContextEnum.ROOT;
+        if (parsed.initial_context === xpath.models.XPathInitialContextEnum.RELATIVE) {
+            parsed.steps.splice(0, 0, xpath.models.XPathStep({axis: "child", test: rootNodeName}));
+            parsed.initial_context = xpath.models.XPathInitialContextEnum.ROOT;
         } else {
             return path;
         }

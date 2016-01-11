@@ -4,7 +4,7 @@ define([
     'require',
     'save-button',
     'underscore',
-    'xpathmodels',
+    'vellum/xpath',
     'jquery',
     'tpl!vellum/templates/main',
     'tpl!vellum/templates/question_type_group',
@@ -36,7 +36,7 @@ define([
     require,
     SaveButton,
     _,
-    xpathmodels,
+    xpath,
     $,
     main_template,
     question_type_group,
@@ -73,7 +73,7 @@ define([
     var isMac = /Mac/.test(navigator.platform);
 
     var DEBUG_MODE = false;
-    xpathmodels.DEBUG_MODE = DEBUG_MODE;
+    xpath.models.DEBUG_MODE = DEBUG_MODE;
 
     var MESSAGE_TYPES = {
         "error": {
@@ -1028,7 +1028,7 @@ define([
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
-                "." : this.data.core.form.getAbsolutePath(mug);
+                "." : mug.absolutePath;
         }
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using
@@ -1670,7 +1670,7 @@ define([
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
-                    return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
+                    return _this.isMugRemoveable(mug, mug.absolutePath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable
             }));
@@ -1735,8 +1735,7 @@ define([
             }
             return ret;
         };
-        var form = this.data.core.form,
-            changeable = this.isMugTypeChangeable(mug, form.getAbsolutePath(mug));
+        var changeable = this.isMugTypeChangeable(mug, mug.absolutePath);
 
         var $questionTypeChanger = $(question_type_changer({
             currentQuestionIcon: mug.getIcon(),
