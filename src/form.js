@@ -217,7 +217,7 @@ define([
         this.formName = 'New Form';
         this.mugMap = {};
         this.tree = new Tree('data', 'control');
-        logic.addHashtag('#form', '/data');
+        xpath.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
@@ -534,7 +534,7 @@ define([
         },
         setFormID: function (id) {
             this.tree.setRootID(id);
-            logic.addHashtag('#form', '/' + id);
+            xpath.addHashtag('#form', '/' + id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -911,7 +911,7 @@ define([
             var map = this.mugMap, newPath;
             delete map[normalizeHashtag(oldHashtag)];
             if (oldHashtag) {
-                logic.removeHashtag(oldHashtag);
+                xpath.removeHashtag(oldHashtag);
             }
             if (_.isUndefined(newHashtag)) {
                 newPath = mug.absolutePath;
@@ -925,7 +925,7 @@ define([
             }
             if (newHashtag) {
                 if (newPath) {
-                    logic.addHashtag(newHashtag, newPath);
+                    xpath.addHashtag(newHashtag, newPath);
                 }
                 map[normalizeHashtag(newHashtag)] = mug;
             }
@@ -935,7 +935,7 @@ define([
             this.mugMap[mug.ufid] = mug;
             var path = mug.absolutePath;
             if (path) {
-                logic.addHashtag(mug.hashtagPath, path);
+                xpath.addHashtag(mug.hashtagPath, path);
                 this.mugMap[normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },

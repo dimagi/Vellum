@@ -5,6 +5,7 @@ require([
     'underscore',
     'tests/utils',
     'vellum/logic',
+    'vellum/xpath',
     'text!tests/static/logic/test-xml-1.xml',
 ], function (
     chai,
@@ -12,6 +13,7 @@ require([
     _,
     util,
     logic,
+    xpath,
     TEST_XML_1
 ) {
     var assert = chai.assert,
@@ -237,7 +239,7 @@ require([
             };
 
             before(function() {
-                logic.setHashtagToXPathDict(translationDict);
+                xpath.setHashtagToXPathDict(translationDict);
             });
 
             function compareHashtags(expr, expected) {

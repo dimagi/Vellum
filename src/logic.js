@@ -376,14 +376,5 @@ define([
         LogicExpression: LogicExpression,
         XPATH_REFERENCES: XPATH_REFERENCES,
         NO_SELF_REFERENCES: NO_SELF_REFERENCES,
-        setHashtagToXPathDict: function (translationDict) {
-            xpath.setHashtagToXPathDict(translationDict);
-        },
-        addHashtag: function(hashtag, xpath_) {
-            xpath.addHashtag(hashtag, xpath_);
-        },
-        removeHashtag: function(hashtag) {
-            xpath.removeHashtag(hashtag);
-        },
     };
 });
