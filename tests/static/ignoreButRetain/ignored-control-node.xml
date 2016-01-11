@@ -19,7 +19,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/question" ref="/data/question" vellum:ignore="retain">
+		<input ref="/data/question" vellum:ignore="retain">
 			<label ref="jr:itext('question-label')"/>
 		</input>
 	</h:body>

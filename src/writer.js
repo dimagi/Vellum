@@ -181,7 +181,7 @@ define([
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
                         if (value) {
-                            util.writeHashtags(xmlWriter, key, value);
+                            util.writeHashtags(xmlWriter, key, value, mug);
                         }
                     });
                     xmlWriter.writeEndElement();
@@ -192,11 +192,11 @@ define([
     };
 
     var createSetValues = function (dataTree, form, xmlWriter) {
-        function writeSetValue(setValue) {
+        function writeSetValue(setValue, mug) {
             xmlWriter.writeStartElement('setvalue');
             xmlWriter.writeAttributeString('event', setValue.event);
-            util.writeHashtags(xmlWriter, 'ref', setValue.ref);
-            util.writeHashtags(xmlWriter, 'value', setValue.value);
+            util.writeHashtags(xmlWriter, 'ref', setValue.ref, mug);
+            util.writeHashtags(xmlWriter, 'value', setValue.value, mug);
             xmlWriter.writeEndElement();
         }
 
@@ -204,7 +204,9 @@ define([
 
         dataTree.walk(function (mug, nodeID, processChildren) {
             if(mug && mug.options.getSetValues) {
-                _.each(mug.options.getSetValues(mug), writeSetValue);
+                _.each(mug.options.getSetValues(mug), function (setValue) {
+                    writeSetValue(setValue, mug);
+                });
             }
             processChildren();
         });
@@ -253,7 +255,7 @@ define([
             if (opts.writeControlRefAttr) {
                 var hashtag = mug.hashtagPath;
                 if (hashtag) {
-                    util.writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag);
+                    util.writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag, mug);
                 }
             }
             var appearanceAttr = mug.getAppearanceAttribute();

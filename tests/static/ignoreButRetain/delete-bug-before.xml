@@ -13,7 +13,7 @@
 			</instance>
 			<bind vellum:nodeset="#form/before" nodeset="/data/before" type="xsd:string"/>
 			<bind vellum:nodeset="#form/delete-me" nodeset="/data/delete-me" type="xsd:string"/>
-			<bind vellum:nodeset="#form/ignored" nodeset="/data/ignored" type="xsd:string" vellum:ignore="retain"/>
+			<bind nodeset="/data/ignored" type="xsd:string" vellum:ignore="retain"/>
 			<bind vellum:nodeset="#form/after" nodeset="/data/after" type="xsd:string"/>
 			<setvalue event="when-youre-strange" ref="/data/ignored[inner]" value="super()/flip"/>
 			<itext>
@@ -41,7 +41,7 @@
 		<input vellum:ref="#form/delete-me" ref="/data/delete-me">
 			<label ref="jr:itext('delete-me-label')"/>
 		</input>
-		<input vellum:ref="#form/ignored" ref="/data/ignored" vellum:ignore="retain">
+		<input ref="/data/ignored" vellum:ignore="retain">
 			<label ref="jr:itext('ignored-label')"/>
 		</input>
 		<input vellum:ref="#form/after" ref="/data/after">

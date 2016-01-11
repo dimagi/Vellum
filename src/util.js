@@ -299,7 +299,11 @@ define([
         return label;
     };
 
-    that.writeHashtags = function (xmlWriter, key, hashtagOrXPath) {
+    that.writeHashtags = function (xmlWriter, key, hashtagOrXPath, mug) {
+        if (mug && mug.options && mug.options.ignoreHashtags) {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            return;
+        }
         var expr = xpath.parser.parse(hashtagOrXPath),
             xpath_ = expr.toXPath(),
             hashtag = expr.toHashtag();

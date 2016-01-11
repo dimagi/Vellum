@@ -10,7 +10,7 @@
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/foobar" nodeset="/data/foobar" type="xsd:string"/>
-			<bind vellum:nodeset="#form/question9" nodeset="/data/question9" vellum:calculate="1 + #form/foobar" calculate="1 + /data/foobar" vellum:ignore="retain"/>
+			<bind nodeset="/data/question9" calculate="1 + /data/foobar" vellum:ignore="retain"/>
 			<itext>
 				<translation lang="en" default=""/>
 			</itext>

@@ -9,7 +9,7 @@
 					<question2/>
 				</data>
 			</instance>
-			<bind vellum:nodeset="#form/question" nodeset="/data/question" type="xsd:string"/>
+			<bind nodeset="/data/question" type="xsd:string"/>
 			<bind nodeset="/data/question/extra/path" type="xsd:string"/>
 			<bind nodeset="/data/question[extra = path]" type="xsd:string"/>
 			<bind nodeset="/data/question[with][extra = path]" type="xsd:string"/>

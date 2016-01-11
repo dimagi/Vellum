@@ -21,11 +21,13 @@ define([
     'underscore',
     'jquery',
     'vellum/parser',
+    'vellum/xpath',
     'vellum/core'
 ], function (
     _,
     $,
-    parser
+    parser,
+    xpath
 ) {
     var xmls = new XMLSerializer(),
         MUG = "mug",
@@ -159,6 +161,7 @@ define([
         },
         parseBindElement: function (form, el, path) {
             if (this.data.ignore.active) {
+                path = xpath.parser.parse(path).toXPath();
                 var mug = form.getMugByPath(path);
                 if (!mug) {
                     mug = findParent(path, form);
@@ -168,7 +171,7 @@ define([
                 {
                     var basePath, relativeTo;
                     if (mug && mug.__className === "Ignored") {
-                        basePath = mug.hashtagPath;
+                        basePath = mug.absolutePath;
                         relativeTo = MUG;
                     } else {
                         var parent = null;
@@ -179,7 +182,7 @@ define([
                         form.tree.insertMug(mug, 'into', parent);
                         // HACK fix abstraction broken by direct tree insert
                         form._fixMugState(mug);
-                        basePath = parent ? parent.hashtagPath : '#form';
+                        basePath = parent ? parent.absolutePath : form.getBasePath(true);
                         relativeTo = PARENT;
                         this.data.ignore.ignoredMugs.push(mug);
                     }
@@ -196,6 +199,7 @@ define([
         },
         parseSetValue: function (form, el, path) {
             if (this.data.ignore.active) {
+                path = xpath.parser.parse(path).toXPath();
                 var mug = form.getMugByPath(path);
                 if (!mug) {
                     mug = findParent(path, form);
@@ -285,25 +289,23 @@ define([
             this.__callOld();
             var _this = this;
             if (this.data.ignore.active && oldPath) {
-                _.each([['#form', '/data'], ['/data', '#form']], function(paths) {
-                    oldPath = oldPath.replace(paths[0], paths[1]);
-                    newPath = newPath.replace(paths[0], paths[1]);
-                    var oldEscaped = RegExp.escape(oldPath),
-                        pathRegex = new RegExp(oldEscaped + '(\\W|$)', 'g'),
-                        newPattern = newPath + "$1";
-                    _.each(_this.data.ignore.ignoredNodes, function (node) {
-                        node.nodeXML = node.nodeXML.replace(pathRegex, newPattern);
-                    });
-                    _.each(_this.data.ignore.ignoredMugs, function (mug) {
-                        if (mug.p.controlNode) {
-                            mug.p.controlNode =
-                                mug.p.controlNode.replace(pathRegex, newPattern);
-                        }
-                        _.each(mug.p.binds, function (bind) {
-                            bind.attrs = _.object(_.map(bind.attrs, function (value, key) {
-                                return [key, value.replace(pathRegex, newPattern)];
-                            }));
-                        });
+                oldPath = oldPath.replace(/^#form/, form.getBasePath(true));
+                newPath = newPath.replace(/^#form/, form.getBasePath(true));
+                var oldEscaped = RegExp.escape(oldPath),
+                    pathRegex = new RegExp(oldEscaped + '(\\W|$)', 'g'),
+                    newPattern = newPath + "$1";
+                _.each(_this.data.ignore.ignoredNodes, function (node) {
+                    node.nodeXML = node.nodeXML.replace(pathRegex, newPattern);
+                });
+                _.each(_this.data.ignore.ignoredMugs, function (mug) {
+                    if (mug.p.controlNode) {
+                        mug.p.controlNode =
+                            mug.p.controlNode.replace(pathRegex, newPattern);
+                    }
+                    _.each(mug.p.binds, function (bind) {
+                        bind.attrs = _.object(_.map(bind.attrs, function (value, key) {
+                            return [key, value.replace(pathRegex, newPattern)];
+                        }));
                     });
                 });
             }
@@ -316,6 +318,7 @@ define([
             isTypeChangeable: false,
             isRemoveable: false,
             isCopyable: false,
+            ignoreHashtags: true,
             init: function (mug) {
                 mug.p.binds = [];
                 mug.p.setValues = [];
