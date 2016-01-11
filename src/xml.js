@@ -38,6 +38,7 @@ define([
             .replace(wrapper, "$3")         // remove outer tag
             .replace(emptytag, "<$1 />")    // <tag></tag> to <tag />
             .replace(/&nbsp;|\xa0/g, " ")   // &nbsp; is not a valid XML entity
+            // when normalizing output values alone it will include the namespace
             .replace('xmlns:vellum="http://commcarehq.org/xforms/vellum"', "");
     }
 
