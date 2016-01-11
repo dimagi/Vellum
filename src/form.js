@@ -26,8 +26,10 @@ define([
     });
 
     function normalizeHashtag(xpath_) {
+        // try catch is needed as workaround for having an itemset without
+        // the itemset plugin enabled
         try {
-            return xpath.parser.parse(xpath_).toHashtag();
+            return xpath_ ? xpath.parser.parse(xpath_).toHashtag() : xpath_;
         } catch (err) {
             return xpath_;
         }
@@ -215,6 +217,7 @@ define([
         this.formName = 'New Form';
         this.mugMap = {};
         this.tree = new Tree('data', 'control');
+        logic.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
@@ -531,6 +534,7 @@ define([
         },
         setFormID: function (id) {
             this.tree.setRootID(id);
+            logic.addHashtag('#form', '/' + id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -966,9 +970,7 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            var root = '/' + this.tree.rootNode.rootNodeId,
-                hashtag = path.replace(root, '#form');
-            return this.mugMap[normalizeHashtag(hashtag)] || this.mugMap[normalizeHashtag(path)];
+            return this.mugMap[normalizeHashtag(path)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
