@@ -64,7 +64,7 @@ define([
      * @param $input - jQuery object, the input to turn into an autocomplete
      * @param choices - An array of strings with which to populate the autocomplete
      */
-    that.dropdownAutocomplete = function ($input, choices) {
+    that._dropdownAutocomplete = function ($input, choices) {
         $input.atwho({
             at: "",
             data: choices,
@@ -104,6 +104,10 @@ define([
      *                  outputValue: use output value in the template
      */
     that.questionAutocomplete = function ($input, mug, options) {
+        mug.form.vellum.addAutocomplete($input, mug, options) ;
+    };
+
+    that._questionAutocomplete = function ($input, mug, options) {
         options = _.defaults(options || {}, {
             category: 'Question Reference',
             insertTpl: '${name}',
@@ -184,6 +188,18 @@ define([
     };
 
     that.cachedMugData = cachedMugData;
+
+    $.vellum.plugin("atwho", {},
+        {
+            addAutocomplete: function ($input, mug, options) {
+                if (options && options.choices) {
+                   that._dropdownAutocomplete($input, options.choices);
+                } else {
+                    that._questionAutocomplete($input, mug, options);
+                }
+            }
+        }
+    );
 
     return that;
 });

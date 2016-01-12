@@ -70,6 +70,7 @@ require([
                     return mug.displayName;
                 }
             },
+            formUuid: 'test',
             getMugList: function () { return mugs; },
         };
     _.each(mugs, function(mug) {
@@ -117,7 +118,7 @@ require([
                 $('.atwho-container').remove();
                 $("body").append(el);
                 input = el.children().first();
-                atwho.questionAutocomplete(input, mug);
+                atwho._questionAutocomplete(input, mug);
                 input.val('/data/');
                 input.keyup();
                 atwhoview = getDisplayedAtwhoViews();
