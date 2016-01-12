@@ -77,7 +77,7 @@ define([
                 getWidget = require('vellum/widgets').util.getWidget,
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
-            if (/^#form\//.test(xpath) && widget) {
+            if (/^#(form|case)\//.test(xpath) && widget) {
                 var isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
@@ -365,7 +365,7 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (/instance\('casedb'\)/.test(xpath)) {
+            if (/^#case/.test(xpath)) {
                 return {
                     classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                 };
@@ -407,7 +407,7 @@ define([
             extraAttrs = _.omit(info, 'reference');
 
         // only support absolute path right now
-        if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
+        if (!form.getMugByPath(xpath) && !/^#case/.test(xpath)) {
             return $('<span>').text(xml.normalize(value)).contents();
         }
 
@@ -482,7 +482,7 @@ define([
                     return hashtag.toHashtag();
                 }));
 
-        _.each(paths, function(path) {
+        _.each(_.uniq(paths), function(path) {
             var newPath = replacePathWithBubble(form, path);
             el.html(el.html().replace(
                 new RegExp(RegExp.escape(path).replace(/ /g, '\\s*'), 'mg'),

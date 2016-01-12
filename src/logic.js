@@ -215,7 +215,7 @@ define([
                 var isHashtag = path.toHashtag().startsWith('#'),
                     pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
-                    refMug = form.getMugByPath(pathString),
+                    refMug = form.getMugByPath(pathString) || pathString.startsWith('#case'),
                     xpath = path.toHashtag();
 
                 // last part is hack to allow root node in data parents
@@ -236,6 +236,12 @@ define([
             }));
             _.each(expr.instanceRefs, function (ignore, id) {
                 form.referenceInstance(id, mug, property);
+            });
+            _.each(expr.hashtags, function (hashtag) {
+                if (/^#case/.test(hashtag.toHashtag())) {
+                    form.referenceInstance('casedb', mug, property);
+                    form.referenceInstance('commcaresession', mug, property);
+                }
             });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {

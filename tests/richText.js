@@ -103,12 +103,8 @@ define([
             // path, display value, icon
             var simpleConversions = [
                     ['/data/text', 'text', icon('fcc-fd-text'), true],
-                    ["instance('casedb')/cases/case" +
-                     "[@case_id = instance('commcaresession')/session/data/case_id]",
-                     'case', externalIcon(), false],
-                    ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case" +
-                     "[@case_id = instance('commcaresession')/session/data/case_id]" +
-                     "/index/parent]/edd", 'edd', externalIcon(), false]
+                    ["#case/child/case", 'case', externalIcon(), false],
+                    ["#case/mother/edd", 'edd', externalIcon(), false]
                 ],
                 opts = {isExpression: true};
 
@@ -162,9 +158,7 @@ define([
         });
 
         describe("equation conversions", function() {
-            var f_1065 = "instance('casedb')/cases/case[" +
-                            "@case_id = instance('commcaresession')/session/data/case_id" +
-                         "]/f_1065",
+            var f_1065 = "#case/child/f_1065",
                 ico = icon('fcc-fd-text'),
                 equations = [
                     [
