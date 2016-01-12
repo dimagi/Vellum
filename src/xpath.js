@@ -7,32 +7,32 @@ define([
 ) {
     var hashtagToXPath = {},
         xpathmodels = makeXPathModels({
-        isValidNamespace: function (namespace) {
-            return namespace === 'form';
-        },
-        hashtagToXPath: function (hashtagExpr) {
-            if (hashtagToXPath[hashtagExpr]) {
-                return hashtagToXPath[hashtagExpr];
-            }
-            return hashtagExpr;
-        },
-        toHashtag: function (xpath_) {
-            function toHashtag(xpathExpr) {
-                for (var key in hashtagToXPath) {
-                    if (hashtagToXPath.hasOwnProperty(key)) {
-                        if (hashtagToXPath[key] === xpathExpr)
-                            return key;
-                    }
+            isValidNamespace: function (namespace) {
+                return namespace === 'form';
+            },
+            hashtagToXPath: function (hashtagExpr) {
+                if (hashtagToXPath[hashtagExpr]) {
+                    return hashtagToXPath[hashtagExpr];
                 }
-                return null;
-            }
+                return hashtagExpr;
+            },
+            toHashtag: function (xpath_) {
+                function toHashtag(xpathExpr) {
+                    for (var key in hashtagToXPath) {
+                        if (hashtagToXPath.hasOwnProperty(key)) {
+                            if (hashtagToXPath[key] === xpathExpr)
+                                return key;
+                        }
+                    }
+                    return null;
+                }
 
-            if (xpath_ instanceof xpathmodels.HashtagExpr) {
-                return xpath_.toHashtag();
+                if (xpath_ instanceof xpathmodels.HashtagExpr) {
+                    return xpath_.toHashtag();
+                }
+                return toHashtag(xpath_.toXPath());
             }
-            return toHashtag(xpath_.toXPath());
-        }
-    });
+        });
 
     window.xpathmodels = xpathmodels;
 
