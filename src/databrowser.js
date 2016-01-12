@@ -5,6 +5,7 @@ define([
     'jquery',
     'underscore',
     'vellum/datasources',
+    'vellum/xpath',
     'vellum/widgets',
     'vellum/window',
     'tpl!vellum/templates/external_sources_tree',
@@ -12,6 +13,7 @@ define([
     $,
     _,
     datasources,
+    xpath,
     widgets,
     window_,
     external_sources_tree
@@ -55,6 +57,7 @@ define([
                     return false;
                 }
             });
+            vellum.data.core.databrowser = { dataHashtags: {} };
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             datasources.getDataSources(function () {});
@@ -62,7 +65,14 @@ define([
             pane.parent().find(".fd-external-sources-divider")
                 .clickExceptAfterDrag(toggle);
             head.click(toggle);
-        }
+        },
+        loadXML: function() {
+            this.__callOld();
+            var _this = this;
+            _.each(this.data.core.databrowser.dataHashtags, function (path, hash) {
+                addHashtag(hash, path, _this);
+            });
+        },
     });
 
     function _initDataBrowser(vellum) {
@@ -103,10 +113,15 @@ define([
     }
 
     function dataTreeJson(data, vellum) {
-        function node(parentPath, info) {
+        function node(source, parentPath, info) {
             return function (item, id) {
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
+                if (source && source.id !== "commcaresession") {
+                    var hashtagPath = '#case/' + source.id + '/' + id;
+                    addHashtag(hashtagPath, path, vellum);
+                    path = hashtagPath;
+                }
                 return {
                     text: tree.name,
                     icon: tree.nodes === true || tree.nodes.length ?
@@ -157,7 +172,7 @@ define([
         }
         function getNodes(source, path, info) {
             var nodes = _.chain(source && source.structure)
-                .map(node(path, info))
+                .map(node(source, path, info))
                 .sortBy("text")
                 .value();
             if (source && source.related) {
@@ -166,7 +181,7 @@ define([
                         // magic: reference key: @case_id
                         var item = {reference: {subset: subset, key: "@case_id"}};
                         // magic: append "/index" to path
-                        return node(path + "/index", info)(item, relation);
+                        return node(source, path + "/index", info)(item, relation);
                     })
                     .sortBy("text")
                     .value()
@@ -197,7 +212,7 @@ define([
                 info = _.omit(source, "structure"),
                 path = "instance('" + source.id + "')" + source.path;
             // do not show Session node for now
-            nodes = node(null, info)(source, path).children;
+            nodes = node(source, null, info)(source, path).children;
         }
 
         // move the parent data sources up one level to be equal to their child
@@ -232,6 +247,18 @@ define([
                 .addClass('fa-arrow-circle-o-down');
             $(window).resize();
             fn.initDataBrowser(vellum);
+        }
+    }
+
+    function addHashtag(hashtag, fullPath, vellum) {
+        var form = vellum.data.core.form,
+            dataHashtags = vellum.data.core.databrowser.dataHashtags;
+        if (form && form.addHashtag) {
+            // don't overwrite since if we get the same hashtag it will be due
+            // to recursive references
+            form.addHashtag(hashtag, fullPath, true);
+        } else {
+            dataHashtags[hashtag] = fullPath;
         }
     }
 
