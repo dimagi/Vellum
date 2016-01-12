@@ -417,6 +417,8 @@ define([
      */
     function bubbleOutputs(text, form, escape) {
         function transformToOldOuptut(output) {
+            // this is to support vellum:value in extractXPathInfoFromOutputValue
+            // as it uses regex for now
             var $output = $(output),
                 attribute = $output.attr('vellum:value') || $output.attr('value');
             return $("<output>").attr('value', attribute)[0].outerHTML;
