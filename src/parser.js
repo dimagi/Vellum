@@ -617,7 +617,6 @@ define([
             parsed.steps.splice(0, 0, xpath.models.XPathStep({axis: "child", test: rootNodeName}));
             parsed.initial_context = xpath.models.XPathInitialContextEnum.ROOT;
         }
-
         newPath = parsed.toHashtag();
         return newPath;
     }

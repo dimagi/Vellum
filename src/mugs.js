@@ -470,6 +470,7 @@ define([
 
     Object.defineProperty(Mug.prototype, "hashtagPath", {
         get: function () {
+            // commtrack isn't hashtaggable (ex. /data/trans[type=trans1])
             var path = '#form' + this.absolutePathNoRoot,
                 hashtagable = true;
             try {
@@ -477,7 +478,7 @@ define([
             } catch (err) {
                 hashtagable = false;
             }
-            return path ? ( hashtagable ? path : this.absolutePath) : null;
+            return (hashtagable ? path : this.absolutePath);
         }
     });
 
