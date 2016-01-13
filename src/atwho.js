@@ -35,27 +35,28 @@ define([
         };
     };
 
-    var cachedMugData = function(cacheTime) {
-        return timed(function(form) {
-            return _.chain(form.getMugList())
-                    .map(function(mug) {
-                        var defaultLabel = form.vellum.getMugDisplayName(mug);
+    var _cachedMugData = function(cacheTime) {
+            return timed(function(form) {
+                return _.chain(form.getMugList())
+                        .map(function(mug) {
+                            var defaultLabel = form.vellum.getMugDisplayName(mug);
 
-                        return {
-                            id: mug.ufid,
-                            name: mug.absolutePath,
-                            icon: mug.options.icon,
-                            questionId: mug.p.nodeID,
-                            displayLabel: util.truncate(defaultLabel),
-                            label: defaultLabel,
-                        };
-                    })
-                    .filter(function(choice) {
-                        return choice.name && !_.isUndefined(choice.displayLabel);
-                    })
-                    .value();
-        }, cacheTime || 500);
-    };
+                            return {
+                                id: mug.ufid,
+                                name: mug.absolutePath,
+                                icon: mug.options.icon,
+                                questionId: mug.p.nodeID,
+                                displayLabel: util.truncate(defaultLabel),
+                                label: defaultLabel,
+                            };
+                        })
+                        .filter(function(choice) {
+                            return choice.name && !_.isUndefined(choice.displayLabel);
+                        })
+                        .value();
+            }, cacheTime || 500);
+        },
+        cachedMugData = _cachedMugData();
 
     /**
      * Turn a given input into an autocomplete, which will be populated
@@ -130,7 +131,7 @@ define([
         }
 
         var _atWhoOptions = function() {
-            var mugData = cachedMugData()(mug.form),
+            var mugData = cachedMugData(mug.form),
                 fuse = new fusejs(mugData, { keys: ['label', 'name'] });
     
             return {
@@ -187,7 +188,7 @@ define([
         });
     };
 
-    that.cachedMugData = cachedMugData;
+    that.cachedMugData = _cachedMugData;
 
     $.vellum.plugin("atwho", {},
         {
