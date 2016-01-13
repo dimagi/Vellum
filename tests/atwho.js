@@ -69,7 +69,9 @@ require([
                 getMugDisplayName: function (mug) {
                     return mug.displayName;
                 },
-                data: {},
+                data: {
+                    atwho: {}
+                },
             },
             formUuid: 'test',
             getMugList: function () { return mugs; },

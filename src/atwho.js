@@ -23,17 +23,17 @@ define([
             var now = +new Date(),
                 timedOut = (now - time) >= timeout,
                 form = arguments[0],
-                cache = form.vellum.data.atwho;
-            // atwho isn't actually defined anywhere, but data is an object from core
+                atwhoData = form.vellum.data.atwho,
+                cache = atwhoData.cache;
 
             if(timedOut || _.isUndefined(cache)) {
-                cache = f.apply(f, arguments);
+                cache = atwhoData.cache = f.apply(f, arguments);
                 if (timedOut) {
                     time = now;
                 }
             }
 
-            return cache;
+            return atwhoData.cache;
         };
     };
 
