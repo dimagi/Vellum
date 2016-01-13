@@ -335,15 +335,12 @@ define([
         }
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
             var nodeID = mug.p.nodeID,
-                currentPath = mug.absolutePath,
                 hashPath = mug.hashtagPath,
                 oldParent = mug.parentMug,
-                oldPath, oldHash;
+                oldHash;
             if (value && value.idsQuery) {
-                oldPath = currentPath.replace(/\/item$/, "");
                 oldHash = hashPath.replace(/\/item$/, "");
             } else {
-                oldPath = currentPath + "/item";
                 oldHash = hashPath + "/item";
                 if (/\/@count$/.test(mug.p.repeat_count)) {
                     mug.p.repeat_count = "";
