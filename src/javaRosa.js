@@ -1753,7 +1753,7 @@ define([
             
             function hashtags(outputRef) {
                 var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
-                    key = !!$(outputRef).attr('value') ? 'value' : 'ref',
+                    key = $(outputRef).attr('value') ? 'value' : 'ref',
                     parsed = xpath.parser.parse(value),
                     hashtag = parsed.toHashtag(),
                     xpath_ = parsed.toXPath();
