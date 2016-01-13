@@ -36,6 +36,6 @@
     "main": "src/main.js",
     "scripts": {
         "install": "bower install",
-        "test": "mocha-phantomjs --timeout 2500 'index.html?built' && jshint src/*.js && jshint -c tests/.jshintrc tests/*.js"
+        "test": "mocha-phantomjs 'index.html?built' && jshint src/*.js && jshint -c tests/.jshintrc tests/*.js"
     }
 }
