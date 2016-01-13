@@ -17,21 +17,23 @@ define([
 
     // stripped down version of http://codepen.io/ImagineProgramming/storydump/javascript-memoization-timeout
     var timed = function timed(f, timeout) {
-        var cache = {}, time = 0;
+        var time = 0;
 
         return function TimedMemoizedFunction() {
             var now = +new Date(),
                 timedOut = (now - time) >= timeout,
-                form = arguments[0];
+                form = arguments[0],
+                cache = form.vellum.data.atwho;
+            // atwho isn't actually defined anywhere, but data is an object from core
 
-            if(timedOut || _.isUndefined(cache[form.formUuid])) {
-                cache[form.formUuid] = f.apply(f, arguments);
+            if(timedOut || _.isUndefined(cache)) {
+                cache = f.apply(f, arguments);
                 if (timedOut) {
                     time = now;
                 }
             }
 
-            return cache[form.formUuid];
+            return cache;
         };
     };
 

@@ -68,7 +68,8 @@ require([
             vellum: {
                 getMugDisplayName: function (mug) {
                     return mug.displayName;
-                }
+                },
+                data: {},
             },
             formUuid: 'test',
             getMugList: function () { return mugs; },
