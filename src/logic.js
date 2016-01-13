@@ -88,7 +88,7 @@ define([
                     } else if (node instanceof xpath.models.HashtagExpr) {
                         hashtags.push(node);
                     }
-                    children = node.getChildren ? node.getChildren() : [];
+                    children = node.getChildren();
                     for (i = 0; i < children.length; i++) {
                         queue.push({
                             xpath: children[i],
