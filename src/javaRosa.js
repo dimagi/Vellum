@@ -1610,8 +1610,8 @@ define([
 
             function getITextID(value) {
                 try {
-                    var parsed = xpath.parser.parse(value);
-                    if (parsed instanceof xpath.models.XPathFuncExpr &&
+                    var parsed = mug.form.xpath.parse(value);
+                    if (parsed instanceof mug.form.xpath.models.XPathFuncExpr &&
                         parsed.id === "jr:itext")
                     {
                         return parsed.args[0].value;

@@ -1,9 +1,7 @@
 define([
-    'vellum/xpath',
     'jquery',
     'underscore'
 ], function (
-    xpath,
     $,
     _
 ) {
@@ -18,11 +16,12 @@ define([
         ],
         NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
 
-    function LogicExpression (exprText) {
+    function LogicExpression (exprText, xpathParser) {
         this._text = exprText || "";
+        this._xpathParser = xpathParser;
         if ($.trim(exprText)) {
             try {
-                this.parsed = xpath.parser.parse(exprText);
+                this.parsed = this._xpathParser.parse(exprText);
             } catch (err) {
                 this.parsed = null;
                 this.error = err;
@@ -37,9 +36,9 @@ define([
                 absolutePaths = [],
                 topLevelPaths = [],
                 hashtags = [],
-                ROOT = xpath.models.XPathInitialContextEnum.ROOT,
-                RELATIVE = xpath.models.XPathInitialContextEnum.RELATIVE,
-                EXPR = xpath.models.XPathInitialContextEnum.EXPR,
+                ROOT = this._xpathParser.models.XPathInitialContextEnum.ROOT,
+                RELATIVE = this._xpathParser.models.XPathInitialContextEnum.RELATIVE,
+                EXPR = this._xpathParser.models.XPathInitialContextEnum.EXPR,
                 predicates;
             this.paths = paths;
             this.absolutePaths = absolutePaths;
@@ -54,7 +53,7 @@ define([
                     k = queue.shift();
                     node = k.xpath;
                     insideFilter = k.insideFilter;
-                    if (node instanceof xpath.models.XPathPathExpr) {
+                    if (node instanceof this._xpathParser.models.XPathPathExpr) {
                         paths.push(node);
                         if (!insideFilter) {
                             topLevelPaths.push(node);
@@ -83,7 +82,7 @@ define([
                                 });
                             }
                         }
-                    } else if (node instanceof xpath.models.XPathFuncExpr) {
+                    } else if (node instanceof this._xpathParser.models.XPathFuncExpr) {
                         this._addInstanceRef(node);
                     } else if (node instanceof xpath.models.HashtagExpr) {
                         hashtags.push(node);
@@ -109,7 +108,7 @@ define([
         },
         _addInstanceRef: function (expr) {
             if (expr.id === "instance" && expr.args.length === 1 &&
-                    expr.args[0] instanceof xpath.models.XPathStringLiteral) {
+                    expr.args[0] instanceof this._xpathParser.models.XPathStringLiteral) {
                 var id = expr.args[0].value;
                 this.instanceRefs[id] = null;
                 return true;
@@ -151,13 +150,13 @@ define([
             for (i = 0; i < paths.length; i++) {
                 path = paths[i];
                 if (path.toHashtag() === from) {
-                    replacePathInfo(xpath.parser.parse(to), path);
+                    replacePathInfo(this._xpathParser.parse(to), path);
                 }
             }
             for (i = 0; i < hashtags.length; i++) {
                 path = hashtags[i];
                 if (path.toHashtag() === from) {
-                    replacePathInfo(xpath.parser.parse(to), path);
+                    replacePathInfo(this._xpathParser.parse(to), path);
                 }
             }
         },
@@ -189,8 +188,8 @@ define([
         addReferences: function (mug, property, value) {
             // get absolute paths from mug property's value
             var _this = this,
-                form = mug.form,
-                expr = new LogicExpression(value || mug.p[property]),
+                form = _this.form,
+                expr = new LogicExpression(value || mug.p[property], form.xpath),
                 unknowns = [],
                 messages = [],
                 warning = "",
@@ -304,14 +303,15 @@ define([
          *        beginning with this path (no trailing /)
          */
         updatePaths: function (data, subtree) {
-            var seen = {};
+            var seen = {},
+                form = this.form;
             function updatePath(mug, property, paths) {
                 var pkey = mug.ufid + " " + property + " " + paths[0];
                 if (seen.hasOwnProperty(pkey)) {
                     return;
                 }
                 seen[pkey] = null;
-                var expr = new LogicExpression(mug.p[property]),
+                var expr = new LogicExpression(mug.p[property], form.xpath),
                     orig = expr.getText();
                 expr.updatePath(paths[0], paths[1]);
                 if (orig !== expr.getText()) {

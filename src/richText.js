@@ -36,7 +36,6 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
-    'vellum/xpath',
     'ckeditor',
     'ckeditor-jquery'
 ], function(
@@ -46,7 +45,6 @@ define([
     logic,
     util,
     xml,
-    xpath,
     CKEDITOR
 ){
     var bubbleWidgetDefinition = {
@@ -335,8 +333,8 @@ define([
      *   form: /data/group/text
      *   instance: instance('blah')/blah_list/blah
      */
-    function getBubbleDisplayValue(path) {
-        var parsed = new logic.LogicExpression(path),
+    function getBubbleDisplayValue(path, xpathParser) {
+        var parsed = new logic.LogicExpression(path, xpathParser),
             topLevelPaths = parsed.getTopLevelPaths(),
             hashtags = parsed.getHashtags(),
             steps, dispValue;
@@ -382,7 +380,7 @@ define([
         var xpathInfo = _parseXPath(xpath, form),
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
-            dispValue = getBubbleDisplayValue(xpath),
+            dispValue = getBubbleDisplayValue(xpath, form.xpath),
             icon = $('<i>').addClass(iconClasses).html('&nbsp;');
         return $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
@@ -454,9 +452,9 @@ define([
      */
     function bubbleExpression(text, form) {
         var el = $('<div>').html(text);
-        var EXPR = xpath.models.XPathInitialContextEnum.EXPR,
-            ROOT = xpath.models.XPathInitialContextEnum.ROOT,
-            expr = new logic.LogicExpression(text),
+        var EXPR = form.xpath.models.XPathInitialContextEnum.EXPR,
+            ROOT = form.xpath.models.XPathInitialContextEnum.ROOT,
+            expr = new logic.LogicExpression(text, form.xpath),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(expr.getTopLevelPaths())
                 .filter(function(path) {

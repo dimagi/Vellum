@@ -195,6 +195,7 @@ define([
         this.setValues = [];
         this._setValueId = 1;
 
+        debugger;
         this._logicManager = new logic.LogicManager(this, {
                 allowedDataNodeReferences: opts.allowedDataNodeReferences
             });
@@ -217,7 +218,8 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        
+        this.xpath = xpath.createParser();
+
         //make the object event aware
         util.eventuality(this);
     }
@@ -377,7 +379,7 @@ define([
          * @reutrns - {<id>: <src>, ...}
          */
         parseInstanceRefs: function (query, mug, property) {
-            var expr = new logic.LogicExpression(query),
+            var expr = new logic.LogicExpression(query, this.xpath),
                 knownInstances = this.knownInstances,
                 instances = {};
             expr.analyze();

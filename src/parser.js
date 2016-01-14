@@ -208,7 +208,7 @@ define([
         setValues.each(function () {
             var $el = $(this);
             form.vellum.parseSetValue(
-                form, $el, processPath(parseVellumAttrs($el, 'ref', true), rootNodeName));
+                form, $el, processPath(parseVellumAttrs($el, 'ref', true), rootNodeName, form));
         });
     }
 
@@ -500,6 +500,7 @@ define([
             return null;
         }
         var path = parseVellumAttrs(el, 'ref', noPop),
+            rootNodeName = form.tree.getRootNode().getID(),
             nodeId, pathToTry;
         if(!path){
             path = parseVellumAttrs(el, 'nodeset', noPop);
@@ -508,7 +509,7 @@ define([
             // attempt to support sloppy hand-written forms
             nodeId = parseVellumAttrs(el, 'bind', noPop);
             if (nodeId) {
-                pathToTry = processPath(nodeId);
+                pathToTry = processPath(nodeId, rootNodeName, form);
                 if (!form.getMugByPath(pathToTry)) {
                     form.parseWarnings.push("Ambiguous bind: " + nodeId);
                 } else {
@@ -596,17 +597,17 @@ define([
      * @param rootNodeName - the name of the model root (used to create the absolute path)
      * @return absolute nodeset path.
      */
-    function processPath (path, rootNodeName) {
+    function processPath (path, rootNodeName, form) {
         var newPath;
-        var parsed = xpath.parser.parse(path);
-        if (!(parsed instanceof xpath.models.XPathPathExpr ||
-              parsed instanceof xpath.models.HashtagExpr)) {
+        var parsed = form.xpath.parse(path);
+        if (!(parsed instanceof form.xpath.models.XPathPathExpr ||
+              parsed instanceof form.xpath.models.HashtagExpr)) {
             return null;
         }
 
-        if (parsed.initial_context === xpath.models.XPathInitialContextEnum.RELATIVE) {
-            parsed.steps.splice(0, 0, xpath.models.XPathStep({axis: "child", test: rootNodeName}));
-            parsed.initial_context = xpath.models.XPathInitialContextEnum.ROOT;
+        if (parsed.initial_context === form.xpath.models.XPathInitialContextEnum.RELATIVE) {
+            parsed.steps.splice(0, 0, form.xpath.models.XPathStep({axis: "child", test: rootNodeName}));
+            parsed.initial_context = form.xpath.models.XPathInitialContextEnum.ROOT;
         }
         newPath = parsed.toHashtag();
         return newPath;
@@ -620,7 +621,7 @@ define([
                 path = parseVellumAttrs(el, 'nodeset') || parseVellumAttrs(el, 'ref');
 
             form.vellum.parseBindElement(
-                form, el, processPath(path, rootNodeName));
+                form, el, processPath(path, rootNodeName, form));
         });
     }
 

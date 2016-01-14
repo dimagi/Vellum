@@ -1,12 +1,10 @@
 define([
     'xpath',
-    'xpathmodels'
 ], function (
-    xpath,
-    makeXPathModels
+    xpath
 ) {
     var hashtagToXPath = {},
-        xpathmodels = makeXPathModels({
+        xpathmodels = xpath.makeXPathModels({
             isValidNamespace: function (namespace) {
                 return namespace === 'form';
             },
@@ -34,11 +32,7 @@ define([
             }
         });
 
-    xpath.setXPathModels(xpathmodels);
-
     return {
-        parser: xpath,
-        models: xpathmodels,
         setHashtagToXPathDict: function (translationDict) {
             hashtagToXPath = translationDict;
         },
@@ -64,6 +58,12 @@ define([
             } catch (err) {
                 return xpath_;
             }
+        },
+        createParser: function () {
+            var ret = new xpath.Parser();
+            ret.yy.xpathmodels = xpath.yy.xpathmodels;
+            ret.models = ret.yy.xpathmodels;
+            return ret;
         },
     };
 });

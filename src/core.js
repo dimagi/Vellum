@@ -73,7 +73,6 @@ define([
     var isMac = /Mac/.test(navigator.platform);
 
     var DEBUG_MODE = false;
-    xpath.models.DEBUG_MODE = DEBUG_MODE;
 
     var MESSAGE_TYPES = {
         "error": {
