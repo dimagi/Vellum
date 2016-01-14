@@ -333,8 +333,8 @@ define([
      *   form: /data/group/text
      *   instance: instance('blah')/blah_list/blah
      */
-    function getBubbleDisplayValue(path, form) {
-        var steps = new logic.LogicExpression(path, form).getTopLevelPaths()[0].steps,
+    function getBubbleDisplayValue(path, xpathParser) {
+        var steps = new logic.LogicExpression(path, xpathParser).getTopLevelPaths()[0].steps,
             dispValue = steps[steps.length-1].name;
         return dispValue;
     }
@@ -370,7 +370,7 @@ define([
         var xpathInfo = _parseXPath(xpath, form),
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
-            dispValue = getBubbleDisplayValue(xpath, form),
+            dispValue = getBubbleDisplayValue(xpath, form.xpath),
             icon = $('<i>').addClass(iconClasses).html('&nbsp;');
         return $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
@@ -437,7 +437,7 @@ define([
         var el = $('<div>').html(text);
         var EXPR = form.xpath.models.XPathInitialContextEnum.EXPR,
             ROOT = form.xpath.models.XPathInitialContextEnum.ROOT,
-            expr = new logic.LogicExpression(text, form),
+            expr = new logic.LogicExpression(text, form.xpath),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(expr.getTopLevelPaths())
                 .filter(function(path) {

@@ -186,7 +186,7 @@ require([
         ];
 
         _.each(expressions, function(expr) {
-            var logicExpr = new logic.LogicExpression(expr[0], {xpath: xpath.createParser()});
+            var logicExpr = new logic.LogicExpression(expr[0], xpath.createParser());
 
             it("should return all paths: " + expr[0], function() {
                 var paths = _.map(logicExpr.getPaths(), getPath);

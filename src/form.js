@@ -379,7 +379,7 @@ define([
          * @reutrns - {<id>: <src>, ...}
          */
         parseInstanceRefs: function (query, mug, property) {
-            var expr = new logic.LogicExpression(query, this),
+            var expr = new logic.LogicExpression(query, this.xpath),
                 knownInstances = this.knownInstances,
                 instances = {};
             expr.analyze();

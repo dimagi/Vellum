@@ -16,12 +16,12 @@ define([
         ],
         NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
 
-    function LogicExpression (exprText, form) {
+    function LogicExpression (exprText, xpathParser) {
         this._text = exprText || "";
-        this._form = form;
+        this._xpathParser = xpathParser;
         if ($.trim(exprText)) {
             try {
-                this.parsed = this._form.xpath.parse(exprText);
+                this.parsed = this._xpathParser.parse(exprText);
             } catch (err) {
                 this.parsed = null;
                 this.error = err;
@@ -35,9 +35,9 @@ define([
             var paths = [],
                 absolutePaths = [],
                 topLevelPaths = [],
-                ROOT = this._form.xpath.models.XPathInitialContextEnum.ROOT,
-                RELATIVE = this._form.xpath.models.XPathInitialContextEnum.RELATIVE,
-                EXPR = this._form.xpath.models.XPathInitialContextEnum.EXPR,
+                ROOT = this._xpathParser.models.XPathInitialContextEnum.ROOT,
+                RELATIVE = this._xpathParser.models.XPathInitialContextEnum.RELATIVE,
+                EXPR = this._xpathParser.models.XPathInitialContextEnum.EXPR,
                 predicates;
             this.paths = paths;
             this.absolutePaths = absolutePaths;
@@ -51,7 +51,7 @@ define([
                     k = queue.shift();
                     node = k.xpath;
                     insideFilter = k.insideFilter;
-                    if (node instanceof this._form.xpath.models.XPathPathExpr) {
+                    if (node instanceof this._xpathParser.models.XPathPathExpr) {
                         paths.push(node);
                         if (!insideFilter) {
                             topLevelPaths.push(node);
@@ -80,7 +80,7 @@ define([
                                 });
                             }
                         }
-                    } else if (node instanceof this._form.xpath.models.XPathFuncExpr) {
+                    } else if (node instanceof this._xpathParser.models.XPathFuncExpr) {
                         this._addInstanceRef(node);
                     }
                     children = node.getChildren();
@@ -104,7 +104,7 @@ define([
         },
         _addInstanceRef: function (expr) {
             if (expr.id === "instance" && expr.args.length === 1 &&
-                    expr.args[0] instanceof this._form.xpath.models.XPathStringLiteral) {
+                    expr.args[0] instanceof this._xpathParser.models.XPathStringLiteral) {
                 var id = expr.args[0].value;
                 this.instanceRefs[id] = null;
                 return true;
@@ -139,7 +139,7 @@ define([
             for (var i = 0; i < paths.length; i++) {
                 path = paths[i];
                 if (path.toXPath() === from) {
-                    replacePathInfo(this._form.xpath.parse(to), path);
+                    replacePathInfo(this._xpathParser.parse(to), path);
                 }
             }
         },
@@ -172,7 +172,7 @@ define([
             // get absolute paths from mug property's value
             var _this = this,
                 form = _this.form,
-                expr = new LogicExpression(value || mug.p[property], form),
+                expr = new LogicExpression(value || mug.p[property], form.xpath),
                 unknowns = [],
                 messages = [],
                 warning = "",
@@ -293,7 +293,7 @@ define([
                     return;
                 }
                 seen[pkey] = null;
-                var expr = new LogicExpression(mug.p[property], form),
+                var expr = new LogicExpression(mug.p[property], form.xpath),
                     orig = expr.getText();
                 expr.updatePath(paths[0], paths[1]);
                 if (orig !== expr.getText()) {
