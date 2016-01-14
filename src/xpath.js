@@ -1,9 +1,7 @@
 define([
     'xpath',
-    'xpathmodels'
 ], function (
-    xpath,
-    makeXPathModels
+    xpath
 ) {
     return {
         parser: xpath,
