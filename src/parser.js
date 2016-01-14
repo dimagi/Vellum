@@ -155,6 +155,7 @@ define([
 
         if (!form.formUuid) {
             form.parseWarnings.push('Form does not have a unique xform XMLNS (in data block). Will be added automatically');
+            form.formUuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
         }
         if (!form.formJRM) {
             form.parseWarnings.push('Form JRM namespace attribute was not found in data block. One will be added automatically');

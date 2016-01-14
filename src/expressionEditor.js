@@ -108,7 +108,7 @@ define([
                 if (_.isFunction(choices)) {
                     choices = choices();
                 }
-                atwho.dropdownAutocomplete(input, choices);
+                atwho.questionAutocomplete(input, options.mug, {choices: choices});
             }
             else {
                 atwho.questionAutocomplete(input, options.mug, {
