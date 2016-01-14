@@ -1,7 +1,6 @@
 define([
     'jquery',
     'underscore',
-    'vellum/xpath',
     'vellum/tree',
     'vellum/widgets',
     'vellum/util',
@@ -9,7 +8,6 @@ define([
 ], function (
     $,
     _,
-    xpath,
     Tree,
     widgets,
     util,

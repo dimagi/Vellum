@@ -497,6 +497,7 @@ define([
             return null;
         }
         var path = noPop ? el.attr('ref') : el.popAttr('ref'),
+            rootNodeName = form.tree.getRootNode().getID(),
             nodeId, pathToTry;
         if(!path){
             path = noPop ? el.attr('nodeset') : el.popAttr('nodeset');
@@ -505,7 +506,7 @@ define([
             // attempt to support sloppy hand-written forms
             nodeId = noPop ? el.attr('bind') : el.popAttr('bind');
             if (nodeId) {
-                pathToTry = processPath(nodeId, form);
+                pathToTry = processPath(nodeId, rootNodeName, form);
                 if (!form.getMugByPath(pathToTry)) {
                     form.parseWarnings.push("Ambiguous bind: " + nodeId);
                 } else {
