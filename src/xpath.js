@@ -48,5 +48,14 @@ define([
         removeHashtag: function(hashtag) {
             delete hashtagToXPath[hashtag];
         },
+        normalizeHashtag: function (xpath_) {
+            // try catch is needed as workaround for having an itemset without
+            // the itemset plugin enabled
+            try {
+                return xpath_ ? xpath.parse(xpath_).toHashtag() : xpath_;
+            } catch (err) {
+                return xpath_;
+            }
+        },
     };
 });

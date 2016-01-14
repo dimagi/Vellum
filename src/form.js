@@ -25,16 +25,6 @@ define([
         exporter = e;
     });
 
-    function normalizeHashtag(xpath_) {
-        // try catch is needed as workaround for having an itemset without
-        // the itemset plugin enabled
-        try {
-            return xpath_ ? xpath.parser.parse(xpath_).toHashtag() : xpath_;
-        } catch (err) {
-            return xpath_;
-        }
-    }
-
     var FormError = function (options) {
         var that = {};
         that.message = options.message;
@@ -256,7 +246,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[normalizeHashtag(dataParent)];
+                var dataParentMug = _this.mugMap[xpath.normalizeHashtag(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -909,7 +899,7 @@ define([
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
             var map = this.mugMap, newPath;
-            delete map[normalizeHashtag(oldHashtag)];
+            delete map[xpath.normalizeHashtag(oldHashtag)];
             if (oldHashtag) {
                 xpath.removeHashtag(oldHashtag);
             }
@@ -927,7 +917,7 @@ define([
                 if (newPath) {
                     xpath.addHashtag(newHashtag, newPath);
                 }
-                map[normalizeHashtag(newHashtag)] = mug;
+                map[xpath.normalizeHashtag(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
@@ -936,7 +926,7 @@ define([
             var path = mug.absolutePath;
             if (path) {
                 xpath.addHashtag(mug.hashtagPath, path);
-                this.mugMap[normalizeHashtag(mug.hashtagPath)] = mug;
+                this.mugMap[xpath.normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -970,7 +960,7 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[normalizeHashtag(path)];
+            return this.mugMap[xpath.normalizeHashtag(path)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -998,7 +988,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[normalizeHashtag(mug.hashtagPath)];
+                delete this.mugMap[xpath.normalizeHashtag(mug.hashtagPath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
