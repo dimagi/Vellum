@@ -34,7 +34,7 @@ define([
             }
         });
 
-    window.xpathmodels = xpathmodels;
+    xpath.setXPathModels(xpathmodels);
 
     return {
         parser: xpath,
