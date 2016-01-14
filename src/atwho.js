@@ -17,45 +17,49 @@ define([
 
     // stripped down version of http://codepen.io/ImagineProgramming/storydump/javascript-memoization-timeout
     var timed = function timed(f, timeout) {
-        var cache, time = 0;
+        var time = 0;
 
         return function TimedMemoizedFunction() {
             var now = +new Date(),
-                timedOut = (now - time) >= timeout;
+                timedOut = (now - time) >= timeout,
+                form = arguments[0],
+                atwhoData = form.vellum.data.atwho,
+                cache = atwhoData.cache;
 
             if(timedOut || _.isUndefined(cache)) {
-                cache = f.apply(f, arguments);
+                cache = atwhoData.cache = f.apply(f, arguments);
                 if (timedOut) {
                     time = now;
                 }
             }
 
-            return cache;
+            return atwhoData.cache;
         };
     };
 
-    var cachedMugData = function(cacheTime) {
-        return timed(function(form) {
-            return _.chain(form.getMugList())
-                    .map(function(mug) {
-                        var defaultLabel = form.vellum.getMugDisplayName(mug);
+    var _cachedMugData = function(cacheTime) {
+            return timed(function(form) {
+                return _.chain(form.getMugList())
+                        .map(function(mug) {
+                            var defaultLabel = form.vellum.getMugDisplayName(mug);
 
-                        return {
-                            id: mug.ufid,
-                            name: mug.hashtagPath,
-                            absolutePath: mug.absolutePath,
-                            icon: mug.options.icon,
-                            questionId: mug.p.nodeID,
-                            displayLabel: util.truncate(defaultLabel),
-                            label: defaultLabel,
-                        };
-                    })
-                    .filter(function(choice) {
-                        return choice.name && !_.isUndefined(choice.displayLabel);
-                    })
-                    .value();
-        }, cacheTime || 500);
-    };
+                            return {
+                                id: mug.ufid,
+                                name: mug.hashtagPath,
+                                absolutePath: mug.absolutePath,
+                                icon: mug.options.icon,
+                                questionId: mug.p.nodeID,
+                                displayLabel: util.truncate(defaultLabel),
+                                label: defaultLabel,
+                            };
+                        })
+                        .filter(function(choice) {
+                            return choice.name && !_.isUndefined(choice.displayLabel);
+                        })
+                        .value();
+            }, cacheTime || 500);
+        },
+        cachedMugData = _cachedMugData();
 
     /**
      * Turn a given input into an autocomplete, which will be populated
@@ -64,7 +68,7 @@ define([
      * @param $input - jQuery object, the input to turn into an autocomplete
      * @param choices - An array of strings with which to populate the autocomplete
      */
-    that.dropdownAutocomplete = function ($input, choices) {
+    that._dropdownAutocomplete = function ($input, choices) {
         $input.atwho({
             at: "",
             data: choices,
@@ -104,6 +108,10 @@ define([
      *                  outputValue: use output value in the template
      */
     that.questionAutocomplete = function ($input, mug, options) {
+        mug.form.vellum.addAutocomplete($input, mug, options) ;
+    };
+
+    that._questionAutocomplete = function ($input, mug, options) {
         options = _.defaults(options || {}, {
             category: 'Question Reference',
             insertTpl: '${name}',
@@ -127,7 +135,7 @@ define([
 
         function addAtWhoToInput() {
             var _atWhoOptions = function(atKey) {
-                var mugData = cachedMugData()(mug.form),
+                var mugData = cachedMugData(mug.form),
                     fuse = new fusejs(mugData, { keys: ['label', 'name', 'absolutePath'] });
         
                 return {
@@ -190,7 +198,19 @@ define([
         });
     };
 
-    that.cachedMugData = cachedMugData;
+    that.cachedMugData = _cachedMugData;
+
+    $.vellum.plugin("atwho", {},
+        {
+            addAutocomplete: function ($input, mug, options) {
+                if (options && options.choices) {
+                   that._dropdownAutocomplete($input, options.choices);
+                } else {
+                    that._questionAutocomplete($input, mug, options);
+                }
+            }
+        }
+    );
 
     return that;
 });

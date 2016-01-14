@@ -172,6 +172,7 @@ define([
         if (opts.plugins) {
             vellum_options.plugins = opts.plugins;
         }
+        vellum_options.plugins = _.without(vellum_options.plugins, "atwho");
         vellum_options.core = vellum_options.core || {};
         var originalSaveUrl = vellum_options.core.saveUrl || function () {};
         vellum_options.core.saveUrl = function (data) {

@@ -70,9 +70,6 @@ define([
         }
 
         uuid = form.formUuid; //gets set at parse time/by UI
-        if(!uuid) {
-            uuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
-        }
 
         xmlWriter.writeAttributeString("xmlns:jrm",jrm);
         xmlWriter.writeAttributeString("xmlns", uuid);

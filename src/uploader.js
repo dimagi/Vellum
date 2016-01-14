@@ -369,6 +369,7 @@ define([
                 }
                 delete control.value;
             });
+            this.__callOld();
         }
     });
 });

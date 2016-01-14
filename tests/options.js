@@ -174,6 +174,7 @@ define(["underscore"], function (_) {
             'modeliteration',
             'commtrack',
             'saveToCase',
+            'atwho',
         ],
         features: {
             'lookup_tables': true,

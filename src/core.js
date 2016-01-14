@@ -2121,6 +2121,8 @@ define([
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
 
+    fn.addAutocomplete = function (input, form, options) {};
+
     fn.initWidget = function (widget) {};
 
     fn.destroy = function () {};
