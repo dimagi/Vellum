@@ -25,19 +25,7 @@ define([
         var attributes = _.chain($(element)[0].attributes)
                 .map(function (value) {
                     return [value.nodeName, value.nodeValue];
-                }) .object().value(),
-            attrKeys = _.keys(attributes);
-
-        _.each(attrKeys, function (key) {
-            if (key.startsWith('vellum:') &&
-                key !== 'vellum:ignore' &&
-                key !== 'vellum:lock'
-              ) {
-                delete attributes[key.slice(7)];
-                attributes[key.slice(7)] = attributes[key];
-                delete attributes[key];
-            }
-        });
+                }) .object().value();
 
         return attributes;
     }
