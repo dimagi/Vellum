@@ -595,7 +595,7 @@ define([
      */
     function processPath (path, rootNodeName) {
         var newPath;
-        var parsed = xpath.parse(path);
+        var parsed = xpath.parser.parse(path);
         if (!(parsed instanceof xpath.models.XPathPathExpr)) {
             return null;
         }
