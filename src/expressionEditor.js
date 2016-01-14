@@ -156,7 +156,7 @@ define([
         var validate = function (expr) {
             if (expr) {
                 try {
-                    var parsed = xpath.parser.parse(expr);
+                    var parsed = form.xpath.parse(expr);
                     return [true, parsed];
                 } catch (err) {
                     return [false, err];
@@ -177,13 +177,13 @@ define([
 
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
-                return (subElement instanceof xpath.models.XPathBoolExpr);
+                return (subElement instanceof form.xpath.models.XPathBoolExpr);
             };
 
             var isExpressionOp = function (subElement) {
                 // something that can be put into an expression
-                return (subElement instanceof xpath.models.XPathCmpExpr ||
-                        subElement instanceof xpath.models.XPathEqExpr ||
+                return (subElement instanceof form.xpath.models.XPathCmpExpr ||
+                        subElement instanceof form.xpath.models.XPathEqExpr ||
                         simpleExpressions.hasOwnProperty(subElement.id));
             };
 
@@ -256,7 +256,7 @@ define([
                         if (!expOp) return false;
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
-                    $expUI.find('.op-select').val(xpath.models.expressionTypeEnumToXPathLiteral(expOp.type));
+                    $expUI.find('.op-select').val(form.xpath.models.expressionTypeEnumToXPathLiteral(expOp.type));
                     // the population of the left can affect the right,
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);

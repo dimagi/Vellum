@@ -437,8 +437,8 @@ define([
      */
     function bubbleExpression(text, form) {
         var el = $('<div>').html(text);
-        var EXPR = xpath.models.XPathInitialContextEnum.EXPR,
-            ROOT = xpath.models.XPathInitialContextEnum.ROOT,
+        var EXPR = form.xpath.models.XPathInitialContextEnum.EXPR,
+            ROOT = form.xpath.models.XPathInitialContextEnum.ROOT,
             expr = new logic.LogicExpression(text),
             // Uses top level paths, because filters should not be made to bubbles
             paths = _.chain(expr.getTopLevelPaths())

@@ -2,7 +2,7 @@ define([
     'require',
     'underscore',
     'jquery',
-    'xpath',
+    'vellum/xpath',
     'vellum/tree',
     'vellum/logic',
     'vellum/widgets',
@@ -218,7 +218,8 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        
+        this.xpath = xpath.createParser();
+
         //make the object event aware
         util.eventuality(this);
     }

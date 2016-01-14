@@ -207,7 +207,7 @@ define([
         setValues.each(function () {
             var $el = $(this);
             form.vellum.parseSetValue(
-                form, $el, processPath($el.attr('ref'), rootNodeName));
+                form, $el, processPath($el.attr('ref'), rootNodeName, form));
         });
     }
 
@@ -505,7 +505,7 @@ define([
             // attempt to support sloppy hand-written forms
             nodeId = noPop ? el.attr('bind') : el.popAttr('bind');
             if (nodeId) {
-                pathToTry = processPath(nodeId);
+                pathToTry = processPath(nodeId, form);
                 if (!form.getMugByPath(pathToTry)) {
                     form.parseWarnings.push("Ambiguous bind: " + nodeId);
                 } else {
@@ -593,16 +593,16 @@ define([
      * @param rootNodeName - the name of the model root (used to create the absolute path)
      * @return absolute nodeset path.
      */
-    function processPath (path, rootNodeName) {
+    function processPath (path, rootNodeName, form) {
         var newPath;
-        var parsed = xpath.parser.parse(path);
-        if (!(parsed instanceof xpath.models.XPathPathExpr)) {
+        var parsed = form.xpath.parse(path);
+        if (!(parsed instanceof form.xpath.models.XPathPathExpr)) {
             return null;
         }
 
-        if (parsed.initial_context === xpath.models.XPathInitialContextEnum.RELATIVE) {
-            parsed.steps.splice(0, 0, xpath.models.XPathStep({axis: "child", test: rootNodeName}));
-            parsed.initial_context = xpath.models.XPathInitialContextEnum.ROOT;
+        if (parsed.initial_context === form.xpath.models.XPathInitialContextEnum.RELATIVE) {
+            parsed.steps.splice(0, 0, form.xpath.models.XPathStep({axis: "child", test: rootNodeName}));
+            parsed.initial_context = form.xpath.models.XPathInitialContextEnum.ROOT;
         } else {
             return path;
         }
@@ -618,7 +618,7 @@ define([
                 path = el.popAttr('nodeset') || el.popAttr('ref');
 
             form.vellum.parseBindElement(
-                form, el, processPath(path, rootNodeName));
+                form, el, processPath(path, rootNodeName, form));
         });
     }
 
