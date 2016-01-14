@@ -4,7 +4,6 @@ define([
     'vellum/debugutil',
     'vellum/util',
     'vellum/atwho',
-    'vellum/xpath',
     'vellum/richText',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
@@ -16,55 +15,11 @@ define([
     debug,
     util,
     atwho,
-    xpath,
     richText,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
 ) {
-    // Handlers for the simple expression editor
-    var simpleExpressions = {};
-    var operationOpts = [];
-    var expTypes = xpath.models.XPathExpressionTypeEnum;
-    var BinOpHandler = {
-        toString: function(op, left, right) {
-            // make sure we wrap the vals in parens in case they were necessary
-            // todo, construct manually, and validate individual parts.
-            return "(" + left + ") " + 
-                xpath.models.expressionTypeEnumToXPathLiteral(op) + 
-                " (" + right + ")";
-        },
-        typeLeftRight: function(expOp) {
-            return expOp;
-        }
-    };
-    var FunctionHandler = {
-        toString: function(op, left, right) {
-            return op + "(" + left + ", " + right + ")";
-        },
-        typeLeftRight: function(expOp) {
-            if (expOp.args.length !== 2) return false;
-            return {
-                type: expOp.id,
-                left: expOp.args[0],
-                right: expOp.args[1]
-            };
-        }
-    };
-    function addOp(expr, value, label) {
-        value = xpath.models.expressionTypeEnumToXPathLiteral(value);
-        simpleExpressions[value] = expr;
-        operationOpts.push([label, value]);
-    }
-
-    addOp(BinOpHandler, expTypes.EQ, "is equal to");
-    addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
-    addOp(BinOpHandler, expTypes.LT, "is less than");
-    addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
-    addOp(BinOpHandler, expTypes.GT, "is greater than");
-    addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
-    addOp(FunctionHandler, "selected", "has selected value");
-
     function showXPathEditor($div, options) {
         var editorContent = $div,
             richTextOptions = {isExpression: true},
@@ -73,6 +28,49 @@ define([
             leftPlaceholder: "Hint: drag a question here.",
             rightPlaceholder: "Hint: drag a question here.",
         });
+
+        // Handlers for the simple expression editor
+        var simpleExpressions = {};
+        var operationOpts = [];
+        var expTypes = form.xpath.models.XPathExpressionTypeEnum;
+        var BinOpHandler = {
+            toString: function(op, left, right) {
+                // make sure we wrap the vals in parens in case they were necessary
+                // todo, construct manually, and validate individual parts.
+                return "(" + left + ") " + 
+                    form.xpath.models.expressionTypeEnumToXPathLiteral(op) + 
+                    " (" + right + ")";
+            },
+            typeLeftRight: function(expOp) {
+                return expOp;
+            }
+        };
+        var FunctionHandler = {
+            toString: function(op, left, right) {
+                return op + "(" + left + ", " + right + ")";
+            },
+            typeLeftRight: function(expOp) {
+                if (expOp.args.length !== 2) return false;
+                return {
+                    type: expOp.id,
+                    left: expOp.args[0],
+                    right: expOp.args[1]
+                };
+            }
+        };
+        function addOp(expr, value, label) {
+            value = form.xpath.models.expressionTypeEnumToXPathLiteral(value);
+            simpleExpressions[value] = expr;
+            operationOpts.push([label, value]);
+        }
+
+        addOp(BinOpHandler, expTypes.EQ, "is equal to");
+        addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
+        addOp(BinOpHandler, expTypes.LT, "is less than");
+        addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
+        addOp(BinOpHandler, expTypes.GT, "is greater than");
+        addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
+        addOp(FunctionHandler, "selected", "has selected value");
 
         var getExpressionInput = function () {
             return $div.find(".fd-xpath-editor-text");
