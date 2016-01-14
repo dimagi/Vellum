@@ -57,5 +57,13 @@ define([
                 return xpath_;
             }
         },
+        normalizeXPath: function (xpath_) {
+            // if it's not an xpath just return the original string
+            try {
+                return xpath_ ? xpath.parse(xpath_).toXPath() : xpath_;
+            } catch (err) {
+                return xpath_;
+            }
+        },
     };
 });
