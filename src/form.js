@@ -703,7 +703,7 @@ define([
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];
-                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, duplicate.absolutePath);
+                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, duplicate.hashtagPath);
             }
             return duplicate;
         },

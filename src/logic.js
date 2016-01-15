@@ -231,7 +231,7 @@ define([
                     ref: refMug ? refMug.ufid : "", // referenced Mug
                     property: property,
                     path: xpath, // path to refMug
-                    sourcePath: mug.absolutePath
+                    sourcePath: mug.hashtagPath
                 };      
             }));
             _.each(expr.instanceRefs, function (ignore, id) {
