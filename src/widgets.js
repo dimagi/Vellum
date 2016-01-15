@@ -191,7 +191,7 @@ define([
             var position = util.getCaretPosition(input[0]);
             var oldvalue = input.val();
             if (value && widget.hasLogicReferences) {
-                input.val(xpath.normalizeXPath(value));
+                input.val(mug.form.normalizeXPath(value));
             } else {
                 input.val(value);
             }

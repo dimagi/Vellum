@@ -161,7 +161,7 @@ define([
         },
         parseBindElement: function (form, el, path) {
             if (this.data.ignore.active) {
-                path = xpath.normalizeXPath(path, form.xpath);
+                path = form.normalizeXPath(path);
                 var mug = form.getMugByPath(path);
                 if (!mug) {
                     mug = findParent(path, form);
@@ -199,7 +199,7 @@ define([
         },
         parseSetValue: function (form, el, path) {
             if (this.data.ignore.active) {
-                path = xpath.normalizeXPath(path, form.xpath);
+                path = form.normalizeXPath(path);
                 var mug = form.getMugByPath(path);
                 if (!mug) {
                     mug = findParent(path, form);
