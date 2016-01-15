@@ -315,7 +315,7 @@ require([
             util.loadXML(OUTPUTREF_WITH_INEQUALITY_XML);
             var mug = util.getMug("product");
             assert.equal(mug.p.labelItext.get(),
-                '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')"></output>');
+                '<output value="if(1 < 2 or 2 > 3 or 3 <= 3 or 4 >= 5, \'product\', \'other\')" />');
             util.assertXmlEqual(
                 call('createXML'),
                 OUTPUTREF_WITH_INEQUALITY_XML,
@@ -373,7 +373,7 @@ require([
             vellum_util.setCaretPosition(target[0], 4);
             call("handleDropFinish", target, mug1.absolutePath, mug1);
             var val = mug2.p.labelItext.get('default', 'en');
-            assert.equal(val, 'test<output value="#form/question1" /> string');
+            assert.equal(val, 'test<output value="#form/question1"></output> string');
             assert.equal(target.val(), 'test<output value="/data/question1" /> string');
         });
 

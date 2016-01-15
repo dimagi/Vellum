@@ -1578,6 +1578,9 @@ define([
 
             delete this.data.javaRosa.itextMap;
             var form = this.data.core.form;
+            function _toHashtag(value) {
+                return form.xpath.parse(value).toHashtag();
+            }
             forEachItextItem(form, function (item, mug) {
                 _(item.forms).each(function (itForm) {
                     _.each(langs, function (lang) {
@@ -1589,12 +1592,12 @@ define([
                                 value = output.attr('vellum:value') || output.attr('value'),
                                 ref = output.attr('vellum:ref') || output.attr('ref');
                             if (value) {
-                                return tempOutput.attr('value', form.xpath.parse(value).toHashtag())[0].outerHTML;
+                                return tempOutput.attr('value', _toHashtag(value))[0].outerHTML;
                             } else if (ref) {
-                                return tempOutput.attr('ref', form.xpath.parse(ref).toHashtag())[0].outerHTML;
+                                return tempOutput.attr('ref', _toHashtag(ref))[0].outerHTML;
                             }
                         });
-                        itForm.setValue(lang, value.html().replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+                        itForm.setValue(lang, xml.humanize(value.html()));
                     });
                 });
             });
@@ -1754,11 +1757,12 @@ define([
                     key = $(outputRef).attr('value') ? 'value' : 'ref',
                     parsed = xpathParser.parse(value),
                     hashtag = parsed.toHashtag(),
-                    xpath_ = parsed.toXPath();
+                    xpath_ = parsed.toXPath(),
+                    ret = $("<output>");
                 if (xpath_ === hashtag) {
-                    return '<output ' + key + '="' + xpath_ + '"/>';
+                    return ret.attr(key, xpath_)[0].outerHTML;
                 } else {
-                    return '<output ' + key + '="' + xpath_ + '" vellum:' + key + '="' + hashtag + '"/>';
+                    return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
                 }
             }
 
@@ -1791,7 +1795,7 @@ define([
                             val.find('output').replaceWith(function() {
                                 return hashtags(this);
                             });
-                            xmlWriter.writeXML(val.html());
+                            xmlWriter.writeXML(xml.normalize(val.html()));
                             xmlWriter.writeEndElement();
                         }
                         if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
@@ -2286,7 +2290,7 @@ define([
                 $this.attr('value', value.toHashtag());
                 return $this[0].outerHTML;
             });
-            text = xml.normalize(text.html());
+            text = xml.humanize(text.html());
         }
         return text;
     }
@@ -2300,7 +2304,7 @@ define([
                 $this.attr('value', value.toXPath());
                 return $this[0].outerHTML;
             });
-            text = xml.normalize(text.html());
+            text = xml.humanize(text.html());
         }
         return text;
     }
