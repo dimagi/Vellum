@@ -126,10 +126,10 @@ define([
             },
             getBindList: function (mug) {
                 return [{
-                    nodeset: mug.absolutePath,
+                    nodeset: mug.hashtagPath,
                     relevant: mug.p.relevantAttr,
                 }, {
-                    nodeset: mug.absolutePath + "/entry/@quantity",
+                    nodeset: mug.hashtagPath + "/entry/@quantity",
                     calculate: mug.p.quantity,
                 }];
             },
@@ -179,7 +179,7 @@ define([
                 },
             },
             getSetValues: function (mug) {
-                var path = mug.absolutePath,
+                var path = mug.hashtagPath,
                     event = mug.isInRepeat() ? "jr-insert" : "xforms-ready",
                     ret = [];
 
