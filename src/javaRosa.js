@@ -189,7 +189,7 @@ define([
             return this.data[lang];
         },
         setValue: function (lang, value) {
-            this.data[lang] = value;
+            this.data[lang] = xml.humanize(value);
             this.outputExpressions = null;
         },
         getValueOrDefault: function (lang) {
@@ -1045,7 +1045,7 @@ define([
         };
 
         widget.save = function () {
-            widget.setItextValue(outputToHashtag(widget.getValue(), widget.mug.form.xpath));
+            widget.setItextValue(widget.getValue());
         };
 
         return widget;
@@ -1521,11 +1521,11 @@ define([
                             // the same
                             item.hasMarkdown = true;
                             item.getOrCreateForm("default")
-                                .setValue(lang, xml.humanize(valEl));
+                                .setValue(lang, valEl);
                             return;
                         }
                         item.getOrCreateForm(curForm)
-                            .setValue(lang, xml.humanize(valEl));
+                            .setValue(lang, valEl);
                     }
                     textEl.children().each(eachValue);
                 }
@@ -1597,7 +1597,7 @@ define([
                                 return tempOutput.attr('ref', _toHashtag(ref))[0].outerHTML;
                             }
                         });
-                        itForm.setValue(lang, xml.humanize(value.html()));
+                        itForm.setValue(lang, value.html());
                     });
                 });
             });
@@ -1791,7 +1791,7 @@ define([
                             if(form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
-                            val = $('<div>').append(xml.normalize(val));
+                            val = $('<div>').append(val);
                             val.find('output').replaceWith(function() {
                                 return hashtags(this);
                             });
@@ -2281,32 +2281,23 @@ define([
         }
     });
 
-    function outputToHashtag(text, xpathParser) {
-        if (text) {
-            text = $("<div />").append(text);
-            text.find('output').replaceWith(function() {
-                var $this = $(this),
-                    value = xpathParser.parse($this.attr('value'));
-                $this.attr('value', value.toHashtag());
-                return $this[0].outerHTML;
-            });
-            text = xml.humanize(text.html());
-        }
-        return text;
-    }
+    var outputToHashtag = _outputToXPathOrHashtag('toHashtag');
+    var outputToXPath = _outputToXPathOrHashtag('toXPath');
 
-    function outputToXPath(text, xpathParser) {
-        if (text) {
-            text = $("<div />").append(text);
-            text.find('output').replaceWith(function() {
-                var $this = $(this),
-                    value = xpathParser.parse($this.attr('value'));
-                $this.attr('value', value.toXPath());
-                return $this[0].outerHTML;
-            });
-            text = xml.humanize(text.html());
-        }
-        return text;
+    function _outputToXPathOrHashtag(functionName) {
+        return function (text, xpathParser) {
+            if (text) {
+                text = $("<div />").append(text);
+                text.find('output').replaceWith(function() {
+                    var $this = $(this),
+                        value = xpathParser.parse($this.attr('value'));
+                    $this.attr('value', value[functionName]());
+                    return $this[0].outerHTML;
+                });
+                text = xml.humanize(text.html());
+            }
+            return text;
+        };
     }
 
     return {
