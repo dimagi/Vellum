@@ -41,7 +41,7 @@ define([
         
         createSetValues(dataTree, form, xmlWriter);
 
-        form.vellum.contributeToModelXML(xmlWriter);
+        form.vellum.contributeToModelXML(xmlWriter, form.xpath);
         
         xmlWriter.writeEndElement(); //CLOSE MODEL
 
@@ -197,7 +197,7 @@ define([
             xmlWriter.writeEndElement();
         }
 
-        _.each(form.getSetValues(), writeSetValue);
+        _.each(form.getSetValues(), function (sv) { writeSetValue(sv); });
 
         dataTree.walk(function (mug, nodeID, processChildren) {
             if(mug && mug.options.getSetValues) {

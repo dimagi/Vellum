@@ -474,7 +474,7 @@ define([
             var path = '#form' + this.absolutePathNoRoot,
                 hashtagable = true;
             try {
-                path = xpath.parser.parse(path).toHashtag();
+                path = this.form.xpath.parse(path).toHashtag();
             } catch (err) {
                 hashtagable = false;
             }
@@ -1520,6 +1520,7 @@ define([
             return [new Tree.Node(children, {
                 getNodeID: function () {},
                 getAppearanceAttribute: function () {},
+                form: mug.form,
                 p: {
                     rawControlAttributes: attrs
                 },
@@ -1535,7 +1536,7 @@ define([
                             xmlWriter.writeAttributeString("jr:count", String(r_count));
                             xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                         }
-                        util.writeHashtags(xmlWriter, 'nodeset', hashtag);
+                        util.writeHashtags(xmlWriter, 'nodeset', hashtag, mug);
                     },
                 }
             })];

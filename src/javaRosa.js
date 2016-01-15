@@ -5,7 +5,6 @@
 define([
     'underscore',
     'jquery',
-    'vellum/xpath',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
     'tpl!vellum/templates/control_group',
@@ -21,7 +20,6 @@ define([
 ], function (
     _,
     $,
-    xpath,
     edit_source,
     language_selector,
     control_group,
@@ -905,12 +903,12 @@ define([
                 lang = widget.language;
             }
             value = itextItem && itextItem.get(widget.form, lang);
-            return mug.supportsRichText() ? outputToHashtag(value) : outputToXPath(value);
+            return mug.supportsRichText() ? outputToHashtag(value, widget.mug.form.xpath) : outputToXPath(value, widget.mug.form.xpath);
         };
 
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
-            value = outputToHashtag(value);
+            value = outputToHashtag(value, widget.mug.form.xpath);
             if (itextItem) {
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
@@ -1047,7 +1045,7 @@ define([
         };
 
         widget.save = function () {
-            widget.setItextValue(outputToHashtag(widget.getValue()));
+            widget.setItextValue(outputToHashtag(widget.getValue(), widget.mug.form.xpath));
         };
 
         return widget;
@@ -1591,9 +1589,9 @@ define([
                                 value = output.attr('vellum:value') || output.attr('value'),
                                 ref = output.attr('vellum:ref') || output.attr('ref');
                             if (value) {
-                                return tempOutput.attr('value', xpath.parser.parse(value).toHashtag())[0].outerHTML;
+                                return tempOutput.attr('value', form.xpath.parse(value).toHashtag())[0].outerHTML;
                             } else if (ref) {
-                                return tempOutput.attr('ref', xpath.parser.parse(ref).toHashtag())[0].outerHTML;
+                                return tempOutput.attr('ref', form.xpath.parse(ref).toHashtag())[0].outerHTML;
                             }
                         });
                         itForm.setValue(lang, value.html().replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
@@ -1736,7 +1734,7 @@ define([
                 }
             });
         },
-        contributeToModelXML: function (xmlWriter) {
+        contributeToModelXML: function (xmlWriter, xpathParser) {
             // here are the rules that govern itext
             // 0. iText items which aren't referenced by any questions are 
             // cleared from the form.
@@ -1754,7 +1752,7 @@ define([
             function hashtags(outputRef) {
                 var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
                     key = $(outputRef).attr('value') ? 'value' : 'ref',
-                    parsed = xpath.parser.parse(value),
+                    parsed = xpathParser.parse(value),
                     hashtag = parsed.toHashtag(),
                     xpath_ = parsed.toXPath();
                 if (xpath_ === hashtag) {
@@ -2279,12 +2277,12 @@ define([
         }
     });
 
-    function outputToHashtag(text) {
+    function outputToHashtag(text, xpathParser) {
         if (text) {
             text = $("<div />").append(text);
             text.find('output').replaceWith(function() {
                 var $this = $(this),
-                    value = xpath.parser.parse($this.attr('value'));
+                    value = xpathParser.parse($this.attr('value'));
                 $this.attr('value', value.toHashtag());
                 return $this[0].outerHTML;
             });
@@ -2293,12 +2291,12 @@ define([
         return text;
     }
 
-    function outputToXPath(text) {
+    function outputToXPath(text, xpathParser) {
         if (text) {
             text = $("<div />").append(text);
             text.find('output').replaceWith(function() {
                 var $this = $(this),
-                    value = xpath.parser.parse($this.attr('value'));
+                    value = xpathParser.parse($this.attr('value'));
                 $this.attr('value', value.toXPath());
                 return $this[0].outerHTML;
             });

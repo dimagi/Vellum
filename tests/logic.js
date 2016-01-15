@@ -186,7 +186,7 @@ require([
         ];
 
         _.each(expressions, function(expr) {
-            var logicExpr = new logic.LogicExpression(expr[0], xpath.createParser());
+            var logicExpr = new logic.LogicExpression(expr[0], xpath.createParser(xpath.makeXPathModels()));
 
             it("should return all paths: " + expr[0], function() {
                 var paths = _.map(logicExpr.getPaths(), getPath);
@@ -236,11 +236,8 @@ require([
             translationDict = {
                 "#form/text1": "/data/text1",
                 "#form/text2": "/data/text2",
-            };
-
-            before(function() {
-                xpath.setHashtagToXPathDict(translationDict);
-            });
+            },
+            xpathParser = xpath.createParser(xpath.makeXPathModels(translationDict));
 
             function compareHashtags(expr, expected) {
                 var tags = _.map(expr.getHashtags(), getHashtags);
@@ -248,7 +245,7 @@ require([
             }
 
             _.each(hashtags, function(hashtag) {
-                var logicExpr = new logic.LogicExpression(hashtag.path);
+                var logicExpr = new logic.LogicExpression(hashtag.path, xpathParser);
 
                 it("should return all hashtags: " + hashtag.path, function() {
                     compareHashtags(logicExpr, hashtag);
@@ -260,7 +257,7 @@ require([
             });
 
             _.each(incorrectHashtags, function (hashtag) {
-                var logicExpr = new logic.LogicExpression(hashtag.path);
+                var logicExpr = new logic.LogicExpression(hashtag.path, xpathParser);
 
                 it("should return all hashtags: " + hashtag.path, function() {
                     compareHashtags(logicExpr, hashtag);

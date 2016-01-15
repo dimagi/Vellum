@@ -9,7 +9,7 @@
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/text" nodeset="/data/text" type="xsd:string" />
-			<setvalue event="special-snowflake" vellum:ref="#form/text" ref="/data/text" value="blah" />
+			<setvalue event="special-snowflake" ref="/data/text" value="blah" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="text-label">

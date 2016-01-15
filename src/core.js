@@ -4,7 +4,6 @@ define([
     'require',
     'save-button',
     'underscore',
-    'vellum/xpath',
     'jquery',
     'tpl!vellum/templates/main',
     'tpl!vellum/templates/question_type_group',
@@ -36,7 +35,6 @@ define([
     require,
     SaveButton,
     _,
-    xpath,
     $,
     main_template,
     question_type_group,
@@ -1125,7 +1123,6 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
-        xpath.setHashtagToXPathDict({});
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
@@ -2116,7 +2113,7 @@ define([
      */
     fn.updateControlNodeAdaptorMap = function (map) {};
 
-    fn.contributeToModelXML = function (xmlWriter) {};
+    fn.contributeToModelXML = function (xmlWriter, xpathParser) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
 

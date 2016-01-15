@@ -195,7 +195,6 @@ define([
         this.setValues = [];
         this._setValueId = 1;
 
-        debugger;
         this._logicManager = new logic.LogicManager(this, {
                 allowedDataNodeReferences: opts.allowedDataNodeReferences
             });
@@ -207,8 +206,9 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
+        this.hashtagDictionary = {};
         this.tree = new Tree('data', 'control');
-        xpath.addHashtag('#form', '/data');
+        this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
@@ -218,13 +218,19 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = xpath.createParser();
+        this.xpath = xpath.createParser(xpath.makeXPathModels(this.hashtagDictionary));
 
         //make the object event aware
         util.eventuality(this);
     }
 
     Form.prototype = {
+        addHashtag: function(hashtag, xpath) {
+            this.hashtagDictionary[hashtag] = xpath;
+        },
+        removeHashtag: function(hashtag) {
+            delete this.hashtagDictionary[hashtag];
+        },
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
@@ -248,7 +254,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[xpath.normalizeHashtag(dataParent)];
+                var dataParentMug = _this.mugMap[xpath.normalizeHashtag(dataParent, this.xpath)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -526,7 +532,7 @@ define([
         },
         setFormID: function (id) {
             this.tree.setRootID(id);
-            xpath.addHashtag('#form', '/' + id);
+            this.addHashtag('#form', '/' + id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -901,9 +907,9 @@ define([
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
             var map = this.mugMap, newPath;
-            delete map[xpath.normalizeHashtag(oldHashtag)];
+            delete map[xpath.normalizeHashtag(oldHashtag, this.xpath)];
             if (oldHashtag) {
-                xpath.removeHashtag(oldHashtag);
+                this.removeHashtag(oldHashtag);
             }
             if (_.isUndefined(newHashtag)) {
                 newPath = mug.absolutePath;
@@ -917,9 +923,9 @@ define([
             }
             if (newHashtag) {
                 if (newPath) {
-                    xpath.addHashtag(newHashtag, newPath);
+                    this.addHashtag(newHashtag, newPath);
                 }
-                map[xpath.normalizeHashtag(newHashtag)] = mug;
+                map[xpath.normalizeHashtag(newHashtag, this.xpath)] = mug;
             }
         },
         _fixMugState: function (mug) {
@@ -927,8 +933,8 @@ define([
             this.mugMap[mug.ufid] = mug;
             var path = mug.absolutePath;
             if (path) {
-                xpath.addHashtag(mug.hashtagPath, path);
-                this.mugMap[xpath.normalizeHashtag(mug.hashtagPath)] = mug;
+                this.addHashtag(mug.hashtagPath, path);
+                this.mugMap[xpath.normalizeHashtag(mug.hashtagPath, this.xpath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -962,7 +968,7 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[xpath.normalizeHashtag(path)];
+            return this.mugMap[xpath.normalizeHashtag(path, this.xpath)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -990,7 +996,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[xpath.normalizeHashtag(mug.hashtagPath)];
+                delete this.mugMap[xpath.normalizeHashtag(mug.hashtagPath, this.xpath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {

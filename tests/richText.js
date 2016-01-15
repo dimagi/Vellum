@@ -44,6 +44,7 @@ define([
     BURPEE_XML
 ) {
     var assert = chai.assert,
+        hashtagToXPath = {},
         formShim = {
             getMugByPath: function(path) {
                 return {
@@ -61,7 +62,7 @@ define([
                     },
                 }[path];
             },
-            xpath: xpath.createParser(),
+            xpath: xpath.createParser(xpath.makeXPathModels(hashtagToXPath)),
         };
 
     function icon(iconClass) { 

@@ -82,7 +82,7 @@ define([
                         xmlWriter.writeAttributeString("jr:count", String(r_count));
                         xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
-                    util.writeHashtags(xmlWriter, 'nodeset', nodeset);
+                    util.writeHashtags(xmlWriter, 'nodeset', nodeset, mug);
                 };
                 return children;
             },

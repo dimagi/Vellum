@@ -207,7 +207,7 @@ define([
             var ret = input.val().replace(/&#10;/g, '\n');
 
             if (ret && widget.hasLogicReferences) {
-                return xpath.parser.parse(ret).toHashtag();
+                return mug.form.xpath.parse(ret).toHashtag();
             } else {
                 return ret;
             }

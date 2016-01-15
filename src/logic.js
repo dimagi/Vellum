@@ -84,7 +84,7 @@ define([
                         }
                     } else if (node instanceof this._xpathParser.models.XPathFuncExpr) {
                         this._addInstanceRef(node);
-                    } else if (node instanceof xpath.models.HashtagExpr) {
+                    } else if (node instanceof this._xpathParser.models.HashtagExpr) {
                         hashtags.push(node);
                     }
                     children = node.getChildren();
