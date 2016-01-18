@@ -1,12 +1,14 @@
 define([
     'xpath',
-    'xpathmodels'
 ], function (
-    xpath,
-    makeXPathModels
+    xpath
 ) {
-    var models = makeXPathModels();
-    window.xpathmodels = models;  // the xpath module uses this global
-    xpath.models = models;
-    return xpath;
+    return {
+        createParser: function () {
+            var ret = new xpath.Parser();
+            ret.yy.xpathmodels = xpath.yy.xpathmodels;
+            ret.models = ret.yy.xpathmodels;
+            return ret;
+        },
+    };
 });
