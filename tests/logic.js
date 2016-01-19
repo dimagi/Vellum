@@ -5,6 +5,7 @@ require([
     'underscore',
     'tests/utils',
     'vellum/logic',
+    'vellum/xpath',
     'text!tests/static/logic/test-xml-1.xml',
 ], function (
     chai,
@@ -12,6 +13,7 @@ require([
     _,
     util,
     logic,
+    xpath,
     TEST_XML_1
 ) {
     var assert = chai.assert,
@@ -184,7 +186,7 @@ require([
         ];
 
         _.each(expressions, function(expr) {
-            var logicExpr = new logic.LogicExpression(expr[0]);
+            var logicExpr = new logic.LogicExpression(expr[0], xpath.createParser());
 
             it("should return all paths: " + expr[0], function() {
                 var paths = _.map(logicExpr.getPaths(), getPath);

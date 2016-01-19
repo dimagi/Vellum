@@ -73,7 +73,6 @@ define([
     var isMac = /Mac/.test(navigator.platform);
 
     var DEBUG_MODE = false;
-    xpath.models.DEBUG_MODE = DEBUG_MODE;
 
     var MESSAGE_TYPES = {
         "error": {
@@ -2115,6 +2114,8 @@ define([
     fn.contributeToModelXML = function (xmlWriter) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
+
+    fn.addAutocomplete = function (input, form, options) {};
 
     fn.initWidget = function (widget) {};
 

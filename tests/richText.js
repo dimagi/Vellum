@@ -29,6 +29,7 @@ define([
     'tests/utils',
     'vellum/richText',
     'vellum/javaRosa',
+    'vellum/xpath',
     'ckeditor',
     'text!static/richText/burpee.xml',
 ], function(
@@ -38,6 +39,7 @@ define([
     util,
     richText,
     javaRosa,
+    xpath,
     CKEDITOR,
     BURPEE_XML
 ) {
@@ -58,7 +60,8 @@ define([
                         options: { icon: 'fcc icon-folder-open' },
                     },
                 }[path];
-            }
+            },
+            xpath: xpath.createParser(),
         };
 
     function icon(iconClass) { 

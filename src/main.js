@@ -47,7 +47,6 @@ requirejs.config({
 
         // todo: should convert xpath submodule to AMD
         'xpath': '../bower_components/xpath/xpath',
-        'xpathmodels': '../bower_components/xpath/models',
         'scheme-number': '../bower_components/xpath/lib/schemeNumber',
         'biginteger': '../bower_components/xpath/lib/biginteger',
 
@@ -125,12 +124,8 @@ requirejs.config({
         },
 
         'xpath': {
-            deps: ['xpathmodels'],
-            exports: 'xpath'
-        },
-        'xpathmodels': {
             deps: ['scheme-number'],
-            exports: 'makeXPathModels'
+            exports: 'xpath'
         },
         'scheme-number': {
             deps: ['biginteger'],
