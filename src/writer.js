@@ -3,13 +3,11 @@ define([
     'underscore',
     'XMLWriter',
     'vellum/util',
-    'vellum/logic',
 ], function (
     $,
     _,
     XMLWriter,
-    util,
-    logic
+    util
 ) {
     var createXForm = function (form) {
         var xmlWriter = new XMLWriter('UTF-8', '1.0');

@@ -4,16 +4,12 @@ define([
     'vellum/tree',
     'vellum/widgets',
     'vellum/util',
-    'vellum/logic',
-    'vellum/xpath',
 ], function (
     $,
     _,
     Tree,
     widgets,
-    util,
-    logic,
-    xpath
+    util
 ) {
     /**
      * A question, containing data, bind, and control elements.

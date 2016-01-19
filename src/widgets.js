@@ -6,7 +6,6 @@ define([
     'vellum/atwho',
     'vellum/util',
     'vellum/richText',
-    'vellum/xpath',
 ], function (
     widget_control_keyvalue,
     widget_control_message,
@@ -14,8 +13,7 @@ define([
     $,
     atwho,
     util,
-    richTextUtils,
-    xpath
+    richTextUtils
 ) {
     var base = function(mug, options) {
         // set properties shared by all widgets

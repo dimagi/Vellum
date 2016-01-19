@@ -21,13 +21,11 @@ define([
     'underscore',
     'jquery',
     'vellum/parser',
-    'vellum/xpath',
     'vellum/core'
 ], function (
     _,
     $,
-    parser,
-    xpath
+    parser
 ) {
     var xmls = new XMLSerializer(),
         MUG = "mug",

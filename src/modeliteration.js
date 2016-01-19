@@ -1,7 +1,6 @@
 define([
     'jquery',
     'underscore',
-    'vellum/logic',
     'vellum/datasourcewidgets',
     'vellum/mugs',
     'vellum/parser',
@@ -11,7 +10,6 @@ define([
 ], function (
     $,
     _,
-    logic,
     datasourceWidgets,
     mugs,
     parser,
