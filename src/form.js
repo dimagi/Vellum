@@ -847,7 +847,7 @@ define([
                 newPath = mug.absolutePath;
                 newHashtag = mug.hashtagPath;
             } else {
-                newPath = newHashtag.replace(/^#form/, '/' + this.tree.rootNode.rootNodeId);
+                newPath = newHashtag.replace(/^#form/, this.getBasePath(true));
                 if (newPath === newHashtag) {
                     // this happens if _updateMugPath is commtrack (#supply one day)
                     newPath = null;
