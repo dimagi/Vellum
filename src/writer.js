@@ -177,9 +177,7 @@ define([
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
-                        if (value) {
-                            util.writeHashtags(xmlWriter, key, value, mug);
-                        }
+                        util.writeHashtags(xmlWriter, key, value, mug);
                     });
                     xmlWriter.writeEndElement();
                 });
@@ -251,9 +249,7 @@ define([
             }
             if (opts.writeControlRefAttr) {
                 var hashtag = mug.hashtagPath;
-                if (hashtag) {
-                    util.writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag, mug);
-                }
+                util.writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag, mug);
             }
             var appearanceAttr = mug.getAppearanceAttribute();
             if (appearanceAttr) {
