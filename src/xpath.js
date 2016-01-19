@@ -10,7 +10,7 @@ define([
                     return namespace === 'form';
                 },
                 hashtagToXPath: function (hashtagExpr) {
-                    if (hashtagToXPath[hashtagExpr]) {
+                    if (hashtagToXPath.hasOwnProperty(hashtagExpr)) {
                         return hashtagToXPath[hashtagExpr];
                     }
                     return hashtagExpr;
