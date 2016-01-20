@@ -3,7 +3,7 @@ define([
     'jquery',
     'vellum/widgets',
     'vellum/datasources',
-    'vellum/data_source_widgets',
+    'vellum/dataSourceWidgets',
     'vellum/mugs',
     'vellum/parser',
     'vellum/util',
