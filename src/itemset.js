@@ -4,7 +4,7 @@ define([
     'tpl!vellum/templates/external_data_source', 
     'vellum/widgets',
     'vellum/datasources',
-    'vellum/data_source_widgets',
+    'vellum/dataSourceWidgets',
     'vellum/form',
     'vellum/mugs',
     'vellum/parser',
