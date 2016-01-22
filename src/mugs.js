@@ -1433,7 +1433,7 @@ define([
     });
 
     var MSelect = util.extend(BaseSelect, {
-        typeName: 'Multiple Answer',
+        typeName: 'Checkbox',
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
         defaultOperator: "selected"
