@@ -477,8 +477,9 @@ define([
                     title: 'Continue',
                     cssClasses: "btn-default",
                     action: function() {
-                        _this.closeModal();
-                        _this.showSourceInModal(done);
+                        _this.closeModal(function() {
+                            _this.showSourceInModal(done);
+                        });
                     }
                 },
                 {
@@ -682,8 +683,15 @@ define([
         });
     };
 
-    fn.closeModal = function () {
-        this.$f.find('.fd-modal-generic-container .modal').modal('hide');
+    fn.closeModal = function (done) {
+        var _this = this,
+            $modal = _this.$f.find('.fd-modal-generic-container .modal');
+        if (done) {
+            $modal.one('hidden.bs.modal', function() {
+                done.apply(_this);
+            });
+        }
+        $modal.modal('hide');
     };
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle, headerIcon) {
