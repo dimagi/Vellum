@@ -5,7 +5,6 @@
 define([
     'underscore',
     'jquery',
-    'vellum/xpath',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
     'tpl!vellum/templates/control_group',
@@ -21,7 +20,6 @@ define([
 ], function (
     _,
     $,
-    xpath,
     edit_source,
     language_selector,
     control_group,
