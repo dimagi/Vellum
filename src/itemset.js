@@ -217,7 +217,7 @@ define([
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
                     typeName: 'Checkbox Lookup Table',
                     typeChangeError: function (mug, typeName) {
-                        return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic single answer";
+                        return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic multiple choice";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -230,7 +230,7 @@ define([
                     }
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
-                    typeName: 'Single Answer Lookup Table',
+                    typeName: 'Multiple Choice Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         return typeName === "MSelectDynamic" ? "" : "Can only change to a dynamic checkbox";
                     },

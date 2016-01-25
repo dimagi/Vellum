@@ -1440,7 +1440,7 @@ define([
     });
 
     var Select = util.extend(BaseSelect, {
-        typeName: 'Single Answer',
+        typeName: 'Multiple Choice',
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
         defaultOperator: null
