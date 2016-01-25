@@ -442,33 +442,33 @@ require([
             });
 
             it("should remove appearance attribute from label", function () {
-                    var from = "Trigger",
-                        to = "Text",
-                        mug = setup(from, to);
-                    call("changeMugType", mug, to);
-                    mug = util.getMug(mug.p.nodeID);
-                    assert.equal(mug.__className, to);
-                    assert.equal(mug.p.appearance, undefined);
+                var from = "Trigger",
+                    to = "Text",
+                    mug = setup(from, to);
+                call("changeMugType", mug, to);
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                assert.equal(mug.p.appearance, undefined);
 
-                    call("loadXML", call("createXML"));
-                    mug = util.getMug(mug.p.nodeID);
-                    assert.equal(mug.__className, to);
-                    tearDown(from, to);
+                call("loadXML", call("createXML"));
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                tearDown(from, to);
             });
 
             it("should add appearance attribute to label", function () {
-                    var from = "Text",
-                        to = "Trigger",
-                        mug = setup(from, to);
-                    call("changeMugType", mug, to);
-                    mug = util.getMug(mug.p.nodeID);
-                    assert.equal(mug.__className, to);
-                    assert.equal(mug.p.appearance, 'minimal');
+                var from = "Text",
+                    to = "Trigger",
+                    mug = setup(from, to);
+                call("changeMugType", mug, to);
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                assert.equal(mug.p.appearance, 'minimal');
 
-                    call("loadXML", call("createXML"));
-                    mug = util.getMug(mug.p.nodeID);
-                    assert.equal(mug.__className, to);
-                    tearDown(from, to);
+                call("loadXML", call("createXML"));
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                tearDown(from, to);
             });
         });
 
