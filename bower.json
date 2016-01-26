@@ -37,7 +37,7 @@
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
-        "xpath": "dimagi/js-xpath#0.0.1",
+        "xpath": "dimagi/js-xpath#v0.0.2",
         "jsdiff": "~1",
         "markdown-it": "~4.2.0"
     },
