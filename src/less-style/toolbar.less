@@ -31,6 +31,13 @@
                     > span { #gradient > .vertical(lighten(@btnBackgroundHighlight, 5), @btnBackground); }
                     i { .opacity(30); }
                 }
+
+                // Round all corners for related buttons, which otherwise look funny
+                // since they're preceded by a dropdown that has rounded corners
+                &.fd-question-type-related {
+                    border-bottom-left-radius: 6px;
+                    border-top-left-radius: 6px;
+                }
             }
 
             // Advanced questions dropdown
