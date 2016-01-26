@@ -1015,6 +1015,9 @@ define([
         typeChangeError: function (mug, typeName) {
             return '';
         },
+        changeTypeTransform: function (mug) {
+            return;
+        },
         // controls whether delete button shows up - you can still delete a
         // mug's ancestor even if it's not removeable
         isRemoveable: true,
@@ -1398,6 +1401,9 @@ define([
         init: function (mug, form) {
             mug.p.appearance = "minimal";
         },
+        changeTypeTransform: function (mug) {
+            delete mug.p.appearance;
+        },
         spec: {
             dataValue: { presence: 'optional' },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
@@ -1635,6 +1641,7 @@ define([
             if (message) {
                 throw new Error(message);
             }
+            this.allTypes[mug.__className].changeTypeTransform(mug);
 
             mug.setOptionsAndProperties(this.allTypes[typeName]);
 
