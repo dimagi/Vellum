@@ -4,7 +4,8 @@ define([
     'fusejs',
     'vellum/richText',
     'vellum/util',
-    'tpl!vellum/templates/atwho_display'
+    'tpl!vellum/templates/atwho_display',
+    'vellum/core',
 ], function (
     _,
     $,

@@ -4,14 +4,12 @@ define([
     'vellum/xml',
     'jquery',
     'underscore',
-    'vellum/xpath'
 ], function (
     form_,
     util,
     xml,
     $,
-    _,
-    xpath
+    _
 ) {
     var DEFAULT_FORM_ID = 'data';
 

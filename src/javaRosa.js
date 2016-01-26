@@ -5,7 +5,6 @@
 define([
     'underscore',
     'jquery',
-    'vellum/xpath',
     'tpl!vellum/templates/auto_box',
     'text!vellum/templates/button_remove.html',
     'tpl!vellum/templates/control_group',
@@ -22,7 +21,6 @@ define([
 ], function (
     _,
     $,
-    xpath,
     auto_box,
     button_remove,
     control_group,

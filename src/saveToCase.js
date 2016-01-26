@@ -1,9 +1,7 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
     'vellum/mugs',
-    'vellum/parser',
     'vellum/tree',
     'vellum/util',
     'vellum/atwho',
@@ -14,11 +12,9 @@ define([
     'tpl!vellum/templates/widget_save_to_case',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
     mugs,
-    parser,
     Tree,
     util,
     atwho,
