@@ -227,7 +227,7 @@ define([
                             }
                             return '';
                         }
-                        return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic single answer";
+                        return typeName === "SelectDynamic" ? "" : "Can only change to a Single Answer Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -250,7 +250,7 @@ define([
                             }
                             return '';
                         }
-                        return typeName === "MSelectDynamic" ? "" : "Can only change to a dynamic single answer";
+                        return typeName === "MSelectDynamic" ? "" : "Can only change to a Multiple Answer Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -314,10 +314,7 @@ define([
             return ret;
         },
         changeMugType: function (mug, type) {
-            var changeToItemset = false;
-            if (mug.__className.match(/^M?Select/) && type.match(/^M?SelectDynamic$/)) {
-                changeToItemset = true;
-            }
+            var changeToItemset = mug.__className.match(/^M?Select/) && type.match(/^M?SelectDynamic$/);
             this.__callOld();
             if (changeToItemset) {
                 afterDynamicSelectInsert(mug.form, mug);
