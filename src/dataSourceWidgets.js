@@ -210,6 +210,7 @@ define([
                         }
                     );
                 query.find(".fd-edit-button").text("...");
+                query.find('.controls').css('margin-right', '48px');
                 return $("<div></div>").append(query);
             };
         }
