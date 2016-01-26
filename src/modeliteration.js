@@ -1,15 +1,13 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
-    'vellum/datasourcewidgets',
+    'vellum/dataSourceWidgets',
     'vellum/mugs',
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
     datasourceWidgets,

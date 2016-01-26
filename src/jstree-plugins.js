@@ -1,10 +1,8 @@
 define([
     'jquery',
-    'underscore',
     'jquery.jstree'
 ], function (
-    $,
-    _
+    $
 ) {
     /**
      * Conditional events plugin

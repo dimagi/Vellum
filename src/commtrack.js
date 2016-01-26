@@ -1,19 +1,15 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
     'vellum/mugs',
-    'vellum/parser',
     'vellum/tree',
     'vellum/util',
     'vellum/widgets',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
     mugs,
-    parser,
     Tree,
     util,
     widgets
