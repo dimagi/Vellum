@@ -118,6 +118,7 @@ define([
     CKEDITOR.config.customConfig = '';
     CKEDITOR.config.title = false;
     CKEDITOR.config.extraPlugins = 'bubbles';
+    CKEDITOR.config.disableNativeSpellChecker = false;
 
     /**
      * Get or create a rich text editor for the given element
