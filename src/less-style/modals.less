@@ -54,6 +54,10 @@
             bottom: @padding;
             left: @padding;
             right: @padding;
+
+            .modal-body {
+                overflow-y: auto;   // fixed position means scrolling happens within modal
+            }
         }
     }
 }

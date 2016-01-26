@@ -581,7 +581,7 @@ define([
     fn.showOverwriteWarning = function(send, formText, serverForm) {
         var $modal, $overwriteForm, _this = this;
 
-        $modal = _this.generateNewModal("Lost work warning", [
+        $modal = _this.generateNewModal("Lost Work Warning", [
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
