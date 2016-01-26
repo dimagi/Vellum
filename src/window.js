@@ -53,6 +53,7 @@ define([
             if (this.data.windowManager.fullscreen) {
                 $fdc.parent().css({height: null, width: null});
                 $fdc.css({height: null, width: null});
+                $fdc.addClass("full-screen");
                 $fdc.parent().css({
                     top: 0,
                     bottom: 0,

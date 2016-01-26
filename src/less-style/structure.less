@@ -9,7 +9,10 @@
         top: 0;
         width: 100%;
         background-color: white;
-        z-index: @zindexUIContainer;    // really only necessary when full-screen
+
+        &.full-screen {
+            z-index: @zindexUIContainer;
+        }
 
         // Major content block (column or divider)
         .fd-content {
