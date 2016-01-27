@@ -213,7 +213,15 @@ define([
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
                     typeName: 'Multiple Answer Lookup Table',
                     typeChangeError: function (mug, typeName) {
-                        return typeName === "SelectDynamic" ? "" : "Can only change to a dynamic single answer";
+                        if (typeName.match(/^M?Select$/)) {
+                            if (mug.form.getChildren(mug).length > 0) {
+                                return "Cannot change to Multiple/Single Choice " +
+                                      "question if it has Choices. " +
+                                      "Please remove all Choices and try again.";
+                            }
+                            return '';
+                        }
+                        return typeName === "SelectDynamic" ? "" : "Can only change to a Single Answer Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -228,7 +236,15 @@ define([
                 "SelectDynamic": util.extend(mugTypes.Select, {
                     typeName: 'Single Answer Lookup Table',
                     typeChangeError: function (mug, typeName) {
-                        return typeName === "MSelectDynamic" ? "" : "Can only change to a dynamic multiple answer";
+                        if (typeName.match(/^M?Select$/)) {
+                            if (mug.form.getChildren(mug).length > 0) {
+                                return "Cannot change to Multiple/Single Choice " +
+                                      "question if it has Choices. " +
+                                      "Please remove all Choices and try again.";
+                            }
+                            return '';
+                        }
+                        return typeName === "MSelectDynamic" ? "" : "Can only change to a Multiple Answer Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -290,7 +306,14 @@ define([
             var ret = this.__callOld();
             ret.push('filter');
             return ret;
-        }
+        },
+        changeMugType: function (mug, type) {
+            var changeToItemset = mug.__className.match(/^M?Select/) && type.match(/^M?SelectDynamic$/);
+            this.__callOld();
+            if (changeToItemset) {
+                afterDynamicSelectInsert(mug.form, mug);
+            }
+        },
     });
 
     function updateDataSource(mug, value, previous) {
