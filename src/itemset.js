@@ -221,7 +221,7 @@ define([
                             }
                             return '';
                         }
-                        return typeName === "SelectDynamic" ? "" : "Can only change to a Single Answer Lookup Table";
+                        return typeName === "SelectDynamic" ? "" : "Can only change to a Multiple Choice Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -244,7 +244,7 @@ define([
                             }
                             return '';
                         }
-                        return typeName === "MSelectDynamic" ? "" : "Can only change to a Multiple Answer Lookup Table";
+                        return typeName === "MSelectDynamic" ? "" : "Can only change to a Checkbox Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
