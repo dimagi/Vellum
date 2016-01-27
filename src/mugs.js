@@ -883,7 +883,7 @@ define([
             requiredAttr: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Is this Question Required?",
+                lstring: "Required",
                 widget: widgets.checkbox
             },
             nodeset: {
