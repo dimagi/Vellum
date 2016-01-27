@@ -358,6 +358,10 @@ require([
                     ["PhoneNumber", "Text"],
                     ["Select", "Text"],
                     ["MSelect", "Text"],
+                    ["Select", "SelectDynamic"],
+                    ["Select", "MSelectDynamic"],
+                    ["MSelect", "SelectDynamic"],
+                    ["MSelect", "MSelectDynamic"],
                     ["Select", "MSelect"],
                     ["MSelect", "Select"],
                     ["Select + Choices", "MSelect"],
@@ -368,7 +372,11 @@ require([
                     //["Text", "Repeat"],
                     //["Text", "FieldList"],
                     ["MSelect + Choices", "Text"],
-                    ["Select + Choices", "Text"]
+                    ["Select + Choices", "Text"],
+                    ["Select + Choices", "SelectDynamic"],
+                    ["Select + Choices", "MSelectDynamic"],
+                    ["MSelect + Choices", "SelectDynamic"],
+                    ["MSelect + Choices", "MSelectDynamic"],
                     //["Group", "Text"],
                     //["Repeat", "Text"],
                     //["FieldList", "Text"]
