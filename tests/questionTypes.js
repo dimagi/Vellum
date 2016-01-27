@@ -358,6 +358,10 @@ require([
                     ["PhoneNumber", "Text"],
                     ["Select", "Text"],
                     ["MSelect", "Text"],
+                    ["Select", "SelectDynamic"],
+                    ["Select", "MSelectDynamic"],
+                    ["MSelect", "SelectDynamic"],
+                    ["MSelect", "MSelectDynamic"],
                     ["Select", "MSelect"],
                     ["MSelect", "Select"],
                     ["Select + Choices", "MSelect"],
@@ -368,7 +372,11 @@ require([
                     //["Text", "Repeat"],
                     //["Text", "FieldList"],
                     ["MSelect + Choices", "Text"],
-                    ["Select + Choices", "Text"]
+                    ["Select + Choices", "Text"],
+                    ["Select + Choices", "SelectDynamic"],
+                    ["Select + Choices", "MSelectDynamic"],
+                    ["MSelect + Choices", "SelectDynamic"],
+                    ["MSelect + Choices", "MSelectDynamic"],
                     //["Group", "Text"],
                     //["Repeat", "Text"],
                     //["FieldList", "Text"]
@@ -399,6 +407,13 @@ require([
                 return mug;
             }
 
+            function tearDown(from, to) {
+                var choices = from.indexOf(" + Choices") > -1;
+                from = (choices ? from.replace(" + Choices", "") : from);
+                var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to);
+                util.deleteQuestion(nodeId);
+            }
+
             _.each(changes, function (change) {
                 var from = change[0],
                     to = change[1];
@@ -411,6 +426,7 @@ require([
                     call("loadXML", call("createXML"));
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
+                    tearDown(from, to);
                 });
             });
 
@@ -429,7 +445,38 @@ require([
                     assert(ok, "Error not raised when changing " + from + " to " + to);
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, from.replace(" + Choices", ""));
+                    tearDown(from, to);
                 });
+            });
+
+            it("should remove appearance attribute from label", function () {
+                var from = "Trigger",
+                    to = "Text",
+                    mug = setup(from, to);
+                call("changeMugType", mug, to);
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                assert.equal(mug.p.appearance, undefined);
+
+                call("loadXML", call("createXML"));
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                tearDown(from, to);
+            });
+
+            it("should add appearance attribute to label", function () {
+                var from = "Text",
+                    to = "Trigger",
+                    mug = setup(from, to);
+                call("changeMugType", mug, to);
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                assert.equal(mug.p.appearance, 'minimal');
+
+                call("loadXML", call("createXML"));
+                mug = util.getMug(mug.p.nodeID);
+                assert.equal(mug.__className, to);
+                tearDown(from, to);
             });
         });
 

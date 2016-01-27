@@ -897,7 +897,7 @@ define([
             requiredAttr: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Is this Question Required?",
+                lstring: "Required",
                 widget: widgets.checkbox
             },
             nodeset: {
@@ -1026,6 +1026,9 @@ define([
          */
         typeChangeError: function (mug, typeName) {
             return '';
+        },
+        changeTypeTransform: function (mug) {
+            return;
         },
         // controls whether delete button shows up - you can still delete a
         // mug's ancestor even if it's not removeable
@@ -1410,6 +1413,9 @@ define([
         init: function (mug, form) {
             mug.p.appearance = "minimal";
         },
+        changeTypeTransform: function (mug) {
+            delete mug.p.appearance;
+        },
         spec: {
             dataValue: { presence: 'optional' },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
@@ -1648,6 +1654,7 @@ define([
             if (message) {
                 throw new Error(message);
             }
+            this.allTypes[mug.__className].changeTypeTransform(mug);
 
             mug.setOptionsAndProperties(this.allTypes[typeName]);
 
