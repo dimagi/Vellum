@@ -374,7 +374,24 @@ define([
         },
         reset: function () {
             this.all = [];
-        }
+        },
+        caseReferences: function () {
+            return _.chain(this.all)
+                .filter(function(ref) {
+                    return ref.path.startsWith('#case');
+                })
+                .map(function(ref) {
+                    var info = ref.path.split('/'),
+                        type = info[1],
+                        prop = info[2];
+                    return {
+                        caseType: type,
+                        caseProperty: prop,
+                        question: ref.sourcePath.replace('#form', '/data'),
+                    };
+                })
+                .value();
+        },
     };
 
     return {
