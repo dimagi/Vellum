@@ -140,6 +140,9 @@ define([
     }
 
     Form.prototype = {
+        validHashtags: function() {
+            return _.keys(this.hashtagDictionary);
+        },
         addHashtag: function(hashtag, xpath, dontOverwrite) {
             if (!dontOverwrite || !this.hashtagDictionary.hasOwnProperty(hashtag)) {
                 this.hashtagDictionary[hashtag] = xpath;
