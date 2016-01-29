@@ -215,15 +215,18 @@ define([
                 var isHashtag = path.toHashtag().startsWith('#'),
                     pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
-                    refMug = form.getMugByPath(pathString) || pathString.startsWith('#case'),
-                    xpath = path.toHashtag();
+                    refMug = form.getMugByPath(pathString),
+                    xpath = path.toHashtag(),
+                    knownHashtag = pathString.startsWith('#case') && _.contains(form.validHashtags(), xpath);
 
                 // last part is hack to allow root node in data parents
-                if (!refMug &&
+                if ((!refMug && !knownHashtag) &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
+                    unknowns.push(xpath);
+                } else if (!refMug && pathString.startsWith('#case') && !knownHashtag) {
                     unknowns.push(xpath);
                 }
                 return {
