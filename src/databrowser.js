@@ -253,15 +253,16 @@ define([
     function addHashtag(hashtag, fullPath, vellum) {
         var form = vellum.data.core.form,
             dataHashtags = vellum.data.core.databrowser.dataHashtags;
+
+        // if we get the same hashtag it will be due to recursive references
+        if (!dataHashtags.hasOwnProperty(hashtag)) {
+            dataHashtags[hashtag] = fullPath;
+        }
         if (form && form.addHashtag) {
-            // don't overwrite since if we get the same hashtag it will be due
-            // to recursive references
             form.addHashtag(hashtag, fullPath, true);
             _.each(form.getMugList(), function(mug) {
                 form.fixBrokenReferences(mug);
             });
-        } else {
-            dataHashtags[hashtag] = fullPath;
         }
     }
 
