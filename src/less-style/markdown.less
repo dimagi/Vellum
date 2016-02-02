@@ -6,6 +6,9 @@
     // The !important markers, while terrible, are to overcome more specific but genuinely stylistic styles
 
     &.has-markdown {
+        .markdown-group {
+            display: block !important;
+        }
         .turn-markdown-off,
         .markdown-output:not(:empty),
         .fd-help {
@@ -17,6 +20,7 @@
     }
 
     &:not(.has-markdown) {
+        .markdown-group,
         .turn-markdown-off,
         .markdown-output {
             display: none !important;

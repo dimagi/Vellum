@@ -1104,7 +1104,7 @@ define([
                 val = widget.getValue(),
                 markdownSpacer = $("<div />").addClass("col-sm-3"),
                 markdownContainer = $("<div />").addClass("col-sm-9"),
-                markdownRow = $("<div />").addClass("form-group").addClass("hide");
+                markdownRow = $("<div />").addClass("form-group").addClass("markdown-group");
 
             elem.detach('.markdown-output');
             markdownRow.append(markdownSpacer);
