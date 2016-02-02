@@ -146,7 +146,7 @@ define([
                 if (source) {
                     info = _.extend(_.omit(source, "structure"), {_parent: info});
                     path = "instance('" + source.id + "')" + source.path +
-                           "[" + ref.key + "=" + path + "]";
+                           "[" + ref.key + " = " + path + "]";
                     if (source.subsets && ref.subset) {
                         // magic: match key: "@case_type"
                         source = _.findWhere(
