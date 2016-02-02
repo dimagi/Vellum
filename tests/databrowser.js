@@ -2,6 +2,7 @@
 define([
     'tests/options',
     'tests/utils',
+    'vellum/util',
     'chai',
     'jquery',
     'underscore',
@@ -12,6 +13,7 @@ define([
 ], function (
     options,
     util,
+    vellum_util,
     chai,
     $,
     _,
@@ -68,24 +70,6 @@ define([
 
     describe("The data browser", function () {
         var dataTree;
-        before(function (done) {
-            util.init({
-                features: {rich_text: false},
-                plugins: plugins,
-                javaRosa: {langs: ['en']},
-                core: {
-                    dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
-                    onReady: function () {
-                        var _this = this;
-                        datasources.getDataSources(function () {
-                            databrowser.initDataBrowser(_this);
-                            dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
-                            done();
-                        });
-                    }
-                }
-            });
-        });
 
         function getInstanceId(form, src) {
             var meta = _.find(form.instanceMetadata, function (meta) {
@@ -93,61 +77,122 @@ define([
             });
             return meta ? meta.attributes.id : null;
         }
+        context("when loaded before the form", function () {
+            before(function (done) {
+                util.init({
+                    features: {rich_text: false},
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
+                        onReady: function () {
+                            var _this = this;
+                            datasources.getDataSources(function () {
+                                databrowser.initDataBrowser(_this);
+                                dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
+                                done();
+                            });
+                        }
+                    }
+                });
+            });
 
-        it("should add ref on drag/drop", function() {
-            util.loadXML("");
-            var mug = util.addQuestion("DataBindOnly", "mug"),
-                calc = $("[name=property-calculateAttr]"),
-                sessionUri = CASE_DATA[0].uri,
-                casedbUri = CASE_DATA[1].uri;
-            assert.equal(getInstanceId(mug.form, sessionUri), null);
-            assert.equal(getInstanceId(mug.form, casedbUri), null);
-            assert.equal(calc.length, 1);
-            util.findNode(dataTree, "dob").data.handleDrop(calc);
-            assert.equal(mug.p.calculateAttr, "#case/child/dob");
-            assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-            assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-            util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
-                                {normalize_xmlns: true});
+            it("should add ref on drag/drop", function() {
+                util.loadXML("");
+                var mug = util.addQuestion("DataBindOnly", "mug"),
+                    calc = $("[name=property-calculateAttr]"),
+                    sessionUri = CASE_DATA[0].uri,
+                    casedbUri = CASE_DATA[1].uri;
+                assert.equal(getInstanceId(mug.form, sessionUri), null);
+                assert.equal(getInstanceId(mug.form, casedbUri), null);
+                assert.equal(calc.length, 1);
+                util.findNode(dataTree, "dob").data.handleDrop(calc);
+                assert.equal(mug.p.calculateAttr, "#case/child/dob");
+                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
+                                    {normalize_xmlns: true});
+            });
+
+            it("should add parent ref on drag/drop", function() {
+                util.loadXML("");
+                var mug = util.addQuestion("DataBindOnly", "mug"),
+                    calc = $("[name=property-calculateAttr]"),
+                    sessionUri = CASE_DATA[0].uri,
+                    casedbUri = CASE_DATA[1].uri;
+                assert.equal(getInstanceId(mug.form, sessionUri), null);
+                assert.equal(getInstanceId(mug.form, casedbUri), null);
+                assert.equal(calc.length, 1);
+                util.findNode(dataTree, "edd").data.handleDrop(calc);
+                assert.equal(mug.p.calculateAttr, "#case/mother/edd");
+                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
+                                    {normalize_xmlns: true});
+            });
+
+            it("should add recursive ref on drag/drop", function() {
+                util.loadXML("");
+                var mug = util.addQuestion("DataBindOnly", "mug"),
+                    calc = $("[name=property-calculateAttr]"),
+                    sessionUri = CASE_DATA[0].uri,
+                    casedbUri = CASE_DATA[1].uri;
+                assert.equal(getInstanceId(mug.form, sessionUri), null);
+                assert.equal(getInstanceId(mug.form, casedbUri), null);
+                assert.equal(calc.length, 1);
+                var motherNode = util.findNode(dataTree, "mother"),
+                    node = util.findNode(dataTree, "child", motherNode);
+                dataTree.open_node(node);
+                util.findNode(dataTree, "dob", node).data.handleDrop(calc);
+                assert.equal(mug.p.calculateAttr, '#case/child/dob');
+                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
+                                    {normalize_xmlns: true});
+            });
+
+            // TODO should remove instances when expression ref is removed
         });
 
-        it("should add parent ref on drag/drop", function() {
-            util.loadXML("");
-            var mug = util.addQuestion("DataBindOnly", "mug"),
-                calc = $("[name=property-calculateAttr]"),
-                sessionUri = CASE_DATA[0].uri,
-                casedbUri = CASE_DATA[1].uri;
-            assert.equal(getInstanceId(mug.form, sessionUri), null);
-            assert.equal(getInstanceId(mug.form, casedbUri), null);
-            assert.equal(calc.length, 1);
-            util.findNode(dataTree, "edd").data.handleDrop(calc);
-            assert.equal(mug.p.calculateAttr, "#case/mother/edd");
-            assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-            assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-            util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
-                                {normalize_xmlns: true});
-        });
+        context("when loaded after the form", function () {
+            var _this, widget, blue, event = {};
+            vellum_util.eventuality(event);
+            function loadDataTree(done) {
+                datasources.getDataSources(function () {
+                    databrowser.initDataBrowser(_this);
+                    done();
+                });
+            }
+            before(function (done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (callback) {
+                            event.on("nodeError", function() {
+                                callback(CASE_DATA);
+                            });
+                        },
+                        form: "",
+                        onReady: function () {
+                            _this = this;
+                            blue = util.addQuestion("DataBindOnly", "blue");
+                            widget = util.getWidget('property-calculateAttr');
+                            widget.input.promise.then(done);
+                        }
+                    }
+                });
+            });
 
-        it("should add recursive ref on drag/drop", function() {
-            util.loadXML("");
-            var mug = util.addQuestion("DataBindOnly", "mug"),
-                calc = $("[name=property-calculateAttr]"),
-                sessionUri = CASE_DATA[0].uri,
-                casedbUri = CASE_DATA[1].uri;
-            assert.equal(getInstanceId(mug.form, sessionUri), null);
-            assert.equal(getInstanceId(mug.form, casedbUri), null);
-            assert.equal(calc.length, 1);
-            var motherNode = util.findNode(dataTree, "mother"),
-                node = util.findNode(dataTree, "child", motherNode);
-            dataTree.open_node(node);
-            util.findNode(dataTree, "dob", node).data.handleDrop(calc);
-            assert.equal(mug.p.calculateAttr, '#case/child/dob');
-            assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-            assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-            util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
-                                {normalize_xmlns: true});
+            it("should error for unknown properties", function(done) {
+                widget.setValue("#case/child/dob");
+                assert(!util.isTreeNodeValid(blue), "expected validation error");
+                event.fire("nodeError");
+                loadDataTree(function() {
+                    assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
+                    done();
+                });
+            });
         });
-
-        // TODO should remove instances when expression ref is removed
     });
 });
