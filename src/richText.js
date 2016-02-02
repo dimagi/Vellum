@@ -78,7 +78,8 @@ define([
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
             if (/^#(form|case)\//.test(xpath) && widget) {
-                var isText = function () { return this.nodeType === 3; },
+                var isCase = /^#case\//.test(xpath),
+                    isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
                     labelText = labelMug && labelMug.p.labelItext ?
@@ -100,7 +101,7 @@ define([
                     template: '<div contenteditable="false" class="popover rich-text-popover">' +
                         '<div class="popover-inner">' +
                         '<div class="popover-title"></div>' +
-                        '<div class="popover-content"><p></p></div>' +
+                        (isCase ? '' : '<div class="popover-content"><p></p></div>') +
                         '</div></div>'
                 });
             }
