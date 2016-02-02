@@ -404,7 +404,7 @@ define([
      */
     function replacePathWithBubble(form, value) {
         var info = extractXPathInfoFromOutputValue(value),
-            xpath = info.reference,
+            xpath = form.normalizeHashtag(info.reference),
             extraAttrs = _.omit(info, 'reference');
 
         // only support absolute path right now

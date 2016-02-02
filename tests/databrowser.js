@@ -9,6 +9,7 @@ define([
     'vellum/databrowser',
     'vellum/datasources',
     'text!static/databrowser/child-ref.xml',
+    'text!static/databrowser/child-ref-no-hashtag.xml',
     'text!static/databrowser/mother-ref.xml',
 ], function (
     options,
@@ -20,6 +21,7 @@ define([
     databrowser,
     datasources,
     CHILD_REF_XML,
+    CHILD_REF_NO_HASHTAG_XML,
     MOTHER_REF_XML
 ) {
     var assert = chai.assert,
@@ -149,6 +151,11 @@ define([
                 assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                 util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
                                     {normalize_xmlns: true});
+            });
+
+            it("should hashtagify refs when written", function() {
+                util.loadXML(CHILD_REF_NO_HASHTAG_XML);
+                util.assertXmlEqual(call("createXML"), CHILD_REF_XML);
             });
 
             // TODO should remove instances when expression ref is removed

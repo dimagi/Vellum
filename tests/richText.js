@@ -46,6 +46,9 @@ define([
     var assert = chai.assert,
         hashtagToXPath = {},
         formShim = {
+            normalizeHashtag: function (path) {
+                return path;
+            },
             getMugByPath: function(path) {
                 return {
                     "/data/text": {
