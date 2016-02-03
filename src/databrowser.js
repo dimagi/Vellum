@@ -226,6 +226,14 @@ define([
             });
         });
 
+        // done here for performance reasons. would be nice to be done after
+        // every new hashtag, but only for the mugs that reference that hashtag
+        var form = vellum.data.core.form;
+        if (form) {
+            _.each(form.getMugList(), function(mug) {
+                form.fixBrokenReferences(mug);
+            });
+        }
         return nodes.concat(siblings);
     }
 
@@ -260,9 +268,6 @@ define([
         }
         if (form && form.addHashtag) {
             form.addHashtag(hashtag, fullPath, true);
-            _.each(form.getMugList(), function(mug) {
-                form.fixBrokenReferences(mug);
-            });
         }
     }
 
