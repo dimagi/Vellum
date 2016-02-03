@@ -913,8 +913,17 @@ define([
                 xpathType: 'generic',
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                help: "Referencing a node in this form may cause errors and/or " +
-                    "unexpected behavior",
+                validationFunc: function (mug) {
+                    var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
+                    paths = _.filter(paths, function (path) {
+                        return path.initial_context !== xpathmodels.XPathInitialContextEnum.EXPR;
+                    });
+                    if (paths.length) {
+                        return "You are referencing a node in this form. " +
+                               "This can cause errors in the form";
+                    }
+                    return 'pass';
+                }
             },
             comment: {
                 lstring: 'Comment',
