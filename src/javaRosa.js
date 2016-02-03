@@ -1834,6 +1834,9 @@ define([
                     if (hasText && !value.autoId) {
                         data[name] = value.id;
                     }
+                    if (value.hasMarkdown) {
+                        data[name + ':hasMarkdown'] = value.hasMarkdown;
+                    }
                 };
                 options.deserialize = function (data, name, mug, errors) {
                     var item = mug.p[name],
@@ -1906,6 +1909,9 @@ define([
                     });
                     if (found && !data[name]) {
                         item.id = getDefaultItextId(mug, name.replace(/Itext$/, ""));
+                    }
+                    if (data[name + ":hasMarkdown"]) {
+                        item.hasMarkdown = true;
                     }
                     var WARNING_KEY = "javaRosa-discarded-languages-warning",
                         langRE = new RegExp("^" + RegExp.escape(name) + ":(\\w+)-"),
