@@ -2004,7 +2004,8 @@ define([
             "requiredAttr",
             "relevantAttr",
             "constraintAttr",
-            "repeat_count"
+            "repeat_count",
+            'defaultValue',
         ];
     };
 
@@ -2012,7 +2013,6 @@ define([
         return [
             "dataSource",
             "dataValue",
-            'defaultValue',
             "xmlnsAttr",
             "label",
             "hintLabel",
