@@ -225,6 +225,9 @@
   margin-left: 0;
   height: 93%;
 
+  // Prevent scrollbars underneath the modal from bleeding through on OSX
+  transform: translate3d(0, 0, 0);
+
   &.fade.in { top: 20px;}
 
   .modal-body {
