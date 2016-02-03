@@ -160,12 +160,19 @@ define([
                 return xpath_;
             }
         },
-        normalizeXPath: function (xpath_, xpathParser) {
+        normalizeXPath: function (xpath_) {
             // if it's not an xpath just return the original string
             try {
                 return xpath_ ? this.xpath.parse(xpath_).toXPath() : xpath_;
             } catch (err) {
                 return xpath_;
+            }
+        },
+        hashtagsInXPath: function (xpath_) {
+            try {
+                return new logic.LogicExpression(xpath_, this.xpath).getHashtags();
+            } catch (err) {
+                return [];
             }
         },
         dataTree: function() {

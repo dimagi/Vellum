@@ -914,13 +914,13 @@ define([
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
-                    var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
-                    paths = _.filter(paths, function (path) {
-                        return path.initial_context !== xpathmodels.XPathInitialContextEnum.EXPR;
-                    });
-                    if (paths.length) {
-                        return "You are referencing a node in this form. " +
-                               "This can cause errors in the form";
+                    if (!mug.form.vellum.opts().features.allow_data_reference_in_setvalue) {
+                        var paths = mug.form.hashtagsInXPath(mug.p.defaultValue);
+                        paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
+                        if (paths.length) {
+                            return "You are referencing a node in this form. " +
+                                   "This can cause errors in the form";
+                        }
                     }
                     return 'pass';
                 }
