@@ -169,6 +169,9 @@
             overflow-x: hidden;
             overflow-y: auto;
             height: @containerHeight;
+
+            // Prevent scrollbars underneath the modal from bleeding through on OSX
+            transform: translate3d(0, 0, 0);
         }
     }
 }
