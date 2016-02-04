@@ -1,0 +1,49 @@
+// Styles for Vellum's rich text-enabled inputs
+// Mostly copied from Bootstrap, so that these inputs blend in with the rest
+@import "lib/main";
+
+.fd-input {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -webkit-transition: border linear .2s, box-shadow linear .2s;
+    -moz-transition: border linear .2s, box-shadow linear .2s;
+    -o-transition: border linear .2s, box-shadow linear .2s;
+    transition: border linear .2s, box-shadow linear .2s;
+    height: 28px;
+    padding: 4px 6px 4px 6px;
+    font-size: 13px;
+    background: #ffffff;
+    vertical-align: middle;
+    color: rgb(85, 85, 85);
+    white-space: nowrap;
+    overflow: hidden;
+    &:focus {
+        border-color: rgba(82, 168, 236, 0.8);
+        outline: 0;
+        outline: thin dotted \9;
+        /* IE6-9 */
+
+        -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+        -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+    }
+    p {
+        margin: 0; /* CKEditor line spacing */
+    }
+}
+
+.fd-textarea {
+    .fd-input;
+    -moz-appearance: textfield-multiline;
+    min-height: 4em;
+    height: 4.5em;
+    overflow: auto;
+    resize: both;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

@@ -30,13 +30,13 @@ define([
         isControlOnly: true,
         typeName: 'Lookup Table Data',
         tagName: 'itemset',
-        icon: 'icon-th',
+        icon: 'fa fa-th',
         isTypeChangeable: false,
         // have to delete the parent select
         isRemoveable: false,
         isCopyable: false,
         getIcon: function (mug) {
-            return 'icon-th';
+            return 'fa fa-th';
         },
         init: function (mug, form, baseSpec) {
             mug.p.itemsetData = {};
@@ -211,7 +211,7 @@ define([
             types.auxiliary.Itemset = Itemset;
             types.normal = $.extend(types.normal, {
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
-                    typeName: 'Multiple Answer Lookup Table',
+                    typeName: 'Checkbox Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         if (typeName.match(/^M?Select$/)) {
                             if (mug.form.getChildren(mug).length > 0) {
@@ -221,7 +221,7 @@ define([
                             }
                             return '';
                         }
-                        return typeName === "SelectDynamic" ? "" : "Can only change to a Single Answer Lookup Table";
+                        return typeName === "SelectDynamic" ? "" : "Can only change to a Multiple Choice Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -234,7 +234,7 @@ define([
                     }
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
-                    typeName: 'Single Answer Lookup Table',
+                    typeName: 'Multiple Choice Lookup Table',
                     typeChangeError: function (mug, typeName) {
                         if (typeName.match(/^M?Select$/)) {
                             if (mug.form.getChildren(mug).length > 0) {
@@ -244,7 +244,7 @@ define([
                             }
                             return '';
                         }
-                        return typeName === "MSelectDynamic" ? "" : "Can only change to a Multiple Answer Lookup Table";
+                        return typeName === "MSelectDynamic" ? "" : "Can only change to a Checkbox Lookup Table";
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,

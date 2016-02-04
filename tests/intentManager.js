@@ -25,7 +25,7 @@ define([
         call = util.call,
         templates =  [
             {
-                icon: "icon-map-marker",
+                icon: "fa fa-map-marker",
                 name: "Area Mapper",
                 id: "com.richard.lu.areamapper",
                 extra: {ext: "value"},
@@ -37,7 +37,7 @@ define([
                 },
             },
             {
-                icon: "icon-barcode",
+                icon: "fa fa-barcode",
                 name: "Barcode Scanner",
                 id: "com.google.zxing.client.android.SCAN",
                 extra: {},

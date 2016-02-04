@@ -214,7 +214,7 @@ define([
         typeName: 'Android App Callout',
         dataType: 'intent',
         tagName: 'input',
-        icon: 'icon-vellum-android-intent',
+        icon: 'fcc fcc-fd-android-intent',
         isODKOnly: true,
         isTypeChangeable: false,
         init: function (mug, form) {
@@ -305,7 +305,7 @@ define([
 
     var PrintIntent = util.extend(AndroidIntent, {
         typeName: 'Print',
-        icon: 'icon-print',
+        icon: 'fa fa-print',
         init: function (mug, form) {
             AndroidIntent.init(mug, form);
             mug.p.androidIntentAppId = "org.commcare.dalvik.action.PRINT";

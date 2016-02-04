@@ -133,9 +133,8 @@ require([
                 var btn = $(".btn.current-question");
                 assert(btn.length === 1);
                 btn.click();
-                assert.equal(
-                    btn.next().find('li:contains("Cannot Change Question Type")').length,
-                    +!bool);
+                var menu = btn.closest('.question-type-changer');
+                assert.equal(!!menu.find('li:not(.dropdown-header)').length, bool);
             }
             it("shows the type changer for type-changeable questions", function () {
                 testTypeChangeable(true);
@@ -163,7 +162,7 @@ require([
 
             function testEditButton(bool) {
                 clickQuestion(bool ? "value_locked" : "normal");
-                var $but = getInput('relevantAttr').parents('.control-group').find('button:contains(Edit)');
+                var $but = getInput('relevantAttr').parents('.form-group').find('button:contains(Edit)');
                 assert.equal(1, $but.length);
                 assert.equal(bool, $but.prop('disabled'));
             }

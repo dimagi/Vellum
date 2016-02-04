@@ -1,28 +1,28 @@
 <div class="fd-xpath-editor-container form form-horizontal">
 
     <fieldset class="xpath-advanced hide">
-        <legend>
-            <i class="icon-cog"></i> Edit Expression (Advanced)
-            <button type="button" class="btn fd-xpath-show-simple-button pull-right xpath-mode-toggle">
+        <legend> 
+            <i class="fa fa-cog"></i> Edit Expression (Advanced)
+            <button type="button" class="btn btn-default fd-xpath-show-simple-button pull-right xpath-mode-toggle">
                 Show Simple Mode
             </button>
         </legend>
         <div class="alert alert-info xpath-advanced-notice hide">
-            <i class="icon-info-sign"></i>
+            <i class="fa fa-info-circle"></i>
             You are currently in Advanced Mode because your logic is too complicated for the Expression Editor.
         </div>
-        <div class="control-group">
-            <label class="control-label">
-                XPath Expression:
+        <div class="form-group">
+            <label class="control-label col-sm-2">
+                XPath Expression
             </label>
-            <div class="controls">
+            <div class="col-sm-10">
                 <<%= tag %> <%= tagArgs %>
-                          class="fd-textarea input-block-level fd-xpath-editor-text jstree-drop"></<%= tag %>>
-                <p class="help-block">Hint: You can drag a question into the box.</p>
+                          class="fd-textarea form-control fd-xpath-editor-text jstree-drop"></<%= tag %>>
+                <p class="help-block">You can drag a question into the box.</p>
                 <p class="help-block">
                     <a target="_blank"
                        href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
-                        <i class="icon-info-sign"></i> Guide to Common Logic and Calculations
+                        <i class="fa fa-info-circle"></i> Guide to Common Logic and Calculations
                     </a>
                 </p>
             </div>
@@ -32,33 +32,33 @@
     <fieldset class="xpath-simple hide fieldset-condensed">
         <legend>
             Edit Expression
-            <button type="button" class="btn pull-right xpath-mode-toggle fd-xpath-show-advanced-button">
-                <i class="icon-cog"></i> Show Advanced Mode
+            <button type="button" class="btn btn-default pull-right xpath-mode-toggle fd-xpath-show-advanced-button">
+                <i class="fa fa-cog"></i> Show Advanced Mode
             </button>
         </legend>
-        <div class="control-group">
-            <label class="control-label">Result is:</label>
-            <div class="controls">
-                <select class="input-block-level top-level-join-select">
+        <div class="form-group">
+            <label class="control-label col-sm-2">Result is</label>
+            <div class="col-sm-10">
+                <select class="form-control top-level-join-select">
                     <% _.each(topLevelJoinOpts, function (opt) { %>
                     <option value="<%=opt[1]%>"><%=opt[0]%></option>
                     <% }); %>
                 </select>
             </div>
         </div>
-        <div class="control-group">
-            <label class="control-label">Expression:</label>
-            <div class="controls">
-                <div class="fd-xpath-editor-expressions"></div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Expression</label>
+            <div class="col-sm-10">
+                <div class="fd-xpath-editor-expressions well"></div>
                 <p class="help-block pull-right">
                     <a target="_blank"
                        href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
-                        <i class="icon-info-sign"></i> Guide to Common Logic and Calculations
+                        <i class="fa fa-info-circle"></i> Guide to Common Logic and Calculations
                     </a>
                 </p>
                 <p>
-                    <button type="button" class="btn fd-add-exp">
-                        <i class="icon-plus"></i> Add Expression
+                    <button type="button" class="btn btn-default fd-add-exp">
+                        <i class="fa fa-plus"></i> Add Expression
                     </button>
                 </p>
             </div>
@@ -68,7 +68,10 @@
     <div class="fd-xpath-validation-summary hide"></div>
 
     <div class="form-actions form-actions-condensed fd-xpath-actions">
-        <button type="button" class="btn btn-primary fd-xpath-save-button">Save</button>
-        <button type="button" class="btn fd-xpath-cancel-button">Cancel</button>
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+            <button type="button" class="btn btn-primary fd-xpath-save-button">Save</button>
+            <button type="button" class="btn btn-default fd-xpath-cancel-button">Cancel</button>
+        </div>
     </div>
 </div>

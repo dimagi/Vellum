@@ -584,7 +584,7 @@ require([
             assert.equal($(ITEXT_ITEM_NON_AUTO_ID_XML).find("text#south-label").length, 0,
                          "wrong <text#south> node count\n" + ITEXT_ITEM_NON_AUTO_ID_XML);
             util.clickQuestion("south");
-            var controls = $("[name='property-labelItext']").closest(".control-group"),
+            var controls = $("[name='property-labelItext']").closest(".form-group"),
                 autobox = controls.find("input[type=checkbox]");
             autobox.prop("checked", true).change();
             $("[name='itext-en-label']").val("south").change();

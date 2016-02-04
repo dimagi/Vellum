@@ -482,7 +482,7 @@ require([
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/text", "Text", "text", "text"],
-            ], ["Cannot insert Text into Single Answer"]);
+            ], ["Cannot insert Text into Multiple Choice"]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],

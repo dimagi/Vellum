@@ -1,0 +1,47 @@
+// Styling related to displaying markdown in question properties
+@import "lib/main";
+
+.itext-block-container {
+    // These are functional styles that control when to display help icons for markdown
+    // The !important markers, while terrible, are to overcome more specific but genuinely stylistic styles
+
+    &.has-markdown {
+        .markdown-group {
+            display: block !important;
+        }
+        .turn-markdown-off,
+        .markdown-output:not(:empty),
+        .fd-help {
+            display: inline-block !important;
+        }
+        .turn-markdown-on {
+            display: none !important;
+        }
+    }
+
+    &:not(.has-markdown) {
+        .markdown-group,
+        .turn-markdown-off,
+        .markdown-output {
+            display: none !important;
+        }
+        .turn-markdown-on,
+        .fd-help {
+            display: inline-block !important;
+        }
+    }
+
+    &.markdown-ignorant {
+        .turn-markdown-off,
+        .turn-markdown-on, 
+        .markdown-output,
+        .fd-help {
+            display: none !important;
+        }
+    }
+}
+
+.markdown-output {
+    width: 100%;
+    margin: 0;
+}
