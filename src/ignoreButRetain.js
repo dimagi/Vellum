@@ -307,7 +307,7 @@ define([
 
     var IgnoredQuestion = {
             typeName: "Ignored XML",
-            icon: 'icon-question-sign',
+            icon: 'fa fa-question-circle',
             isTypeChangeable: false,
             isRemoveable: false,
             isCopyable: false,

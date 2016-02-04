@@ -1,272 +1,125 @@
+// Styles for question properties content displayed in right column
 @import "lib/main";
 
-.formdesigner {
-  .itext-lang-group-config {
-    margin-right: 45px;
-    margin-bottom: @gridGutterWidth;
-    background: @navbarBackground;
-    padding: @gridGutterWidth/2 @gridGutterWidth/2 @gridGutterWidth/2 0;
-    .border-radius(10px);
+// Vellum wrapper
+.formdesigner .fd-ui-container {
 
-    &:last-of-type {
-      margin-bottom: 0;
+    // Question type changer and delete button
+    .fd-props-toolbar {
+        margin-bottom: 5px;
+        border-bottom: 1px solid @navbarBackground;
+        padding: @contentPaddingVellum;
     }
-    .control-group:last-child {
-      margin-bottom: 0;
-    }
-  }
-}
 
-.itext-block-container {
-  margin-bottom: @gridGutterWidth;
-  &:last-child {
-    margin-bottom: 0;
-  }
+    // Main content (scrolling area, accordion of Basic, Logic, etc.)
+    .fd-props-content {
+        padding: 0 @contentPaddingVellum;
 
-  > .btn-danger {
-    margin-top: @gridGutterWidth/2;
-  }
-}
-
-.fd-props-content {
-  padding: 0 @contentPaddingVellum;
-}
-
-.question-section {
-  margin-bottom: 1em;
-}
-
-.fd-question-fieldset {
-  border: none;
-  position: relative;
-  min-width: 0px; /* for chrome */
-  display: table-column; /* for firefox */
-
-  .accordion-heading {
-    margin-bottom: 0;
-  }
-
-  .accordion-toggle {
-    .transition(background .4s ease-in-out);
-    &:hover {
-      background-color: lighten(@grayLighter, 3);
-      text-decoration: none;
-    }
-  }
-
-  .accordion-inner {
-    padding-bottom: @gridGutterWidth;
-    padding-right: 0px;
-  }
-
-  .fd-help {
-    right: 15px;
-    top: 7px;
-    height: 25px;
-    display: block;
-    font-size: @baseFontSize*1.5;
-    padding: 3px 0;
-
-    a:hover {
-      text-decoration: none;
-      color: @green;
-    }
-  }
-}
-
-.well-vellum {
-  margin: 0 0 @gridGutterWidth;
-  background-color: desaturate(lighten(@blueLight, 50), 40);
-}
-
-.fd-mm-preview-container {
-  text-align: center;
-  width: 115px;
-  float: left;
-  img {
-    padding: .5em;
-    background-color: @white;
-    border: 1px solid @grayLighter;
-    margin-bottom: @gridGutterWidth/2;
-  }
-}
-.fd-mm-preview-container,
-.fd-mm-upload-container {
-  .btn { text-transform: capitalize; }
-}
-
-.fd-mm-upload-container {
-  margin-left: 125px;
-  > .control-row {
-    margin: 0px 0px 10px 0;
-    &:first-child { height: 25px; }
-  }
-}
-
-.fd-mm-path-input {
-  margin-right: 92px;
-}
-
-.fd-mm-no-ref {
-  color: @grayLight;
-  background-color: @white;
-  border: 1px solid @grayLighter;
-  padding: @gridGutterWidth/2;
-
-  i {
-    display: block;
-    font-size: @baseFontSize*4;
-  }
-}
-
-.itext-lang-group .control-label {
-  text-transform: capitalize;
-}
-
-.controls  {
-  .control-row.row {
-    margin-left: 0;
-  }
-  .control-row > .control-label {
-    width: 60px;
-  }
-}
-
-.fd-edit-controls {
-  position: absolute;
-  left: 0;
-  right: 0;
-}
-
-.fd-edit-button {
-  position: absolute;
-  right: 0;
-}
-
-.fd-itextID-controls {
-  margin-right: 75px;
-  position: absolute;
-  left: 0;
-  right: 0;
-}
-
-.fd-itextID-checkbox-container {
-  width: 55px;
-  padding: 0 5px;
-  background-color: lighten(@green, 50);
-  .border-radius(5px);
-  position: absolute;
-  right: 0;
-
-  label {
-    display: block;
-    margin: 4px auto 5px;
-  }
-}
-
-.itext-block-container {
-    &.has-markdown {
-        .turn-markdown-off,
-        .markdown-output:not(:empty),
+        // Help icons
         .fd-help {
-            display: block;
+            width: 25px;
+            font-size: @baseFontSize * 1.5;
+
+            a:hover {
+                text-decoration: none;
+                color: @green;
+            }
         }
-        .turn-markdown-on {
-            display: none;
+
+        // Copy-paste help (displayed in right-hand panel when multiple questions are selected in tree)
+        .fd-copy-paste-help {
+            .row {
+                padding: 0 2em;
+                margin-bottom: 2em;
+            }
+
+            .copy-paste-box textarea {
+                width: 100%;
+                height: 100px;
+            }
+        }
+
+        // Single accordion section (Basic, Logic, etc.)
+        .fd-question-fieldset {
+            position: relative;
+            min-width: 0px; /* for chrome */
+            display: table-column; /* for firefox */
+
+            // Accordion header
+            .collapse-toggle {
+                cursor: pointer;
+                min-height: 30px;
+                .transition(background .4s ease-in-out);
+
+                &:hover {
+                    background-color: lighten(@grayLighter, 3);
+                    text-decoration: none;
+                }
+
+                // Make icon point right instead of down
+                &.collapsed .fa-angle-double-down::before {
+                    content: "\f101" !important;
+                }
+
+                // Position section-level help at right of header
+                .fd-help {
+                   position: absolute;
+                   right: 0;
+                   top: 0;
+                }
+            }
+
+            // Accordion content
+            .fd-fieldset-content {
+
+                // Label for single input
+                .control-label {
+
+                    // Align help icon with top of input, and display inline with label
+                    .fd-help {
+                        position: relative;
+                        top: -8px;
+                        height: 15px;   // artifically small height to account for negative top
+                        display: inline-block;
+                    }
+
+                    // Pull text label up so it aligns with help icon
+                    label {
+                        vertical-align: top;
+                    }
+                }
+
+                .messages .alert {
+                    margin: 10px 0 0 0;
+                }
+
+                // Blocks of itext, like when adding multimedia or advanced > other content
+                .itext-block-container {
+                    .btn-danger {
+                        margin: 10px;
+                    }
+                }
+            }
+
+            // "auto?" checkbox for custom itext IDs
+            .fd-itextID-checkbox-container {
+                width: 55px;
+                padding: 0 5px;
+                background-color: lighten(@green, 50);
+                .border-radius(5px);
+            }
+
+            // Key-value section, as used in android intent questions
+            .fd-kv {
+                margin-bottom: 0;
+
+                .fd-kv-arrow {
+                    text-align: center;
+                    i {
+                        margin-top: 8px;
+                    }
+                }
+            }
         }
     }
-    &:not(.has-markdown) {
-        .turn-markdown-off,
-        .markdown-output {
-            display: none;
-        }
-        .turn-markdown-on,
-        .fd-help {
-            display: block;
-        }
-    }
-    &.markdown-ignorant {
-        .turn-markdown-off,
-        .turn-markdown-on, 
-        .markdown-output,
-        .fd-help {
-            display: none;
-        }
-    }
-}
-
-.markdown-output {
-    margin-top: 10px;
-    margin-bottom: 0px;
-}
-
-.fd-copy-paste-help {
-  .row {
-    padding: 0 2em;
-    margin-bottom: 2em;
-  }
-  .copy-paste-box textarea {
-    width: 100%;
-    height: 100px;
-  }
-}
-
-.atwho-container .atwho-view {
-  overflow: hidden;
-}
-
-.atwho-jrtext {
-  padding-left: 1em;
-  color: gray;
-}
-
-.cur > .atwho-jrtext {
-  padding-left: 1em;
-  color: white;
-}
-
-.fd-input {
-  -moz-appearance: textfield;
-  -webkit-appearance: textfield;
-  border: 1px solid #cccccc;
-  border-radius: 4px;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-  -webkit-transition: border linear .2s, box-shadow linear .2s;
-  -moz-transition: border linear .2s, box-shadow linear .2s;
-  -o-transition: border linear .2s, box-shadow linear .2s;
-  transition: border linear .2s, box-shadow linear .2s;
-  height: 28px;
-  padding: 4px 6px 4px 6px;
-  font-size: 13px;
-  background: #ffffff;
-  vertical-align: middle;
-  color: rgb(85, 85, 85);
-  white-space: nowrap;
-  overflow: hidden;
-  &:focus {
-    border-color: rgba(82, 168, 236, 0.8);
-    outline: 0;
-    outline: thin dotted \9;
-    /* IE6-9 */
-
-    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
-    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
-    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
-  }
-  p {
-    margin: 0; /* CKEditor line spacing */
-  }
-}
-
-.fd-textarea {
-  .fd-input;
-  -moz-appearance: textfield-multiline;
-  min-height: 4em;
-  height: 4.5em;
-  overflow: auto;
-  resize: both;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
+} 

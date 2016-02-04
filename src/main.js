@@ -42,8 +42,6 @@ requirejs.config({
         'jquery': '../bower_components/jquery/dist/jquery',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
         'jquery.bootstrap': '../lib/bootstrap',
-        'jquery.bootstrap-popout': '../lib/bootstrap-popout',
-        'jquery.bootstrap-stickyover': '../lib/bootstrap-stickyover',
         'underscore': '../bower_components/underscore/underscore',
         'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
@@ -91,14 +89,6 @@ requirejs.config({
         'jquery.bootstrap': {
             deps: ['jquery'],
             exports: '$.fn.popover'
-        },
-        'jquery.bootstrap-popout': {
-            deps: ['jquery.bootstrap'],
-            exports: '$.fn.popout'
-        },
-        'jquery.bootstrap-stickyover': {
-            deps: ['jquery.bootstrap'],
-            exports: '$.fn.stickyover'
         },
         'underscore': {
             exports: '_'
@@ -170,12 +160,6 @@ if (window.jQuery) {
     define('jquery', [], function() {
         return window.jQuery;
     });
-    if (window.jQuery.fn.popout) {
-        define('jquery.bootstrap-popout', [], function () {});
-    }
-    if (window.jQuery.fn.stickyover) {
-        define('jquery.bootstrap-stickyover', [], function () {});
-    }
 }
 
 define([

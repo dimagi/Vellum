@@ -5,11 +5,12 @@
 define([
     'underscore',
     'jquery',
+    'tpl!vellum/templates/auto_box',
+    'text!vellum/templates/button_remove.html',
+    'tpl!vellum/templates/control_group',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
-    'tpl!vellum/templates/control_group',
     'tpl!vellum/templates/markdown_help',
-    'text!vellum/templates/button_remove.html',
     'vellum/widgets',
     'vellum/richText',
     'vellum/util',
@@ -20,11 +21,12 @@ define([
 ], function (
     _,
     $,
+    auto_box,
+    button_remove,
+    control_group,
     edit_source,
     language_selector,
-    control_group,
     markdown_help,
-    button_remove,
     widgets,
     richText,
     util,
@@ -481,16 +483,13 @@ define([
 
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
-            var $uiElem = _getUIElement(),
-                $autoBoxContainer = $('<div />').addClass('fd-itextID-checkbox-container'),
-                $autoBoxLabel = $("<label />").text("auto?").addClass('checkbox');
+            var $uiElem = _getUIElement().css('position', 'relative'),
+                $autoBoxContainer = $(auto_box());
 
-            $autoBoxLabel.prepend($autoBox);
-            $autoBoxContainer.append($autoBoxLabel);
-            $uiElem.css('position', 'relative');
-
-            $uiElem.find('.controls').not(".messages")
-                .addClass('fd-itextID-controls')
+            $autoBoxContainer.find("label").prepend($autoBox);
+            $uiElem.find('.controls')
+                .removeClass("col-sm-9")
+                .addClass("col-sm-8")
                 .after($autoBoxContainer);
 
             return $uiElem;
@@ -619,6 +618,7 @@ define([
         block.getFormGroupContainer = function (form) {
             var $formGroup = _getFormGroupContainer(form);
             $formGroup.addClass("itext-lang-group-config")
+                .addClass("well")
                 .data('formtype', form);
             return $formGroup;
         };
@@ -633,7 +633,7 @@ define([
                 var $btn = $('<div />');
                 $btn.text(' ' + form)
                     .addClass(block.getAddFormButtonClass(form))
-                    .addClass('btn itext-option').click(function () {
+                    .addClass('btn btn-default itext-option').click(function () {
                         block.addItext(form);
                     });
 
@@ -657,7 +657,7 @@ define([
         block.getAddCustomItextButton = function () {
             var $customButton = $("<button />")
                     .text("custom...")
-                    .addClass('btn')
+                    .addClass('btn btn-default')
                     .attr('type', 'button'),
                 newItextBtnClass = 'fd-new-itext-button';
 
@@ -677,7 +677,7 @@ define([
                     label: "Content Type"
                 }));
 
-                $newItemInput = $("<input />").attr("type", "text");
+                $newItemInput = $("<input />").attr("type", "text").addClass("form-control");
                 $newItemInput.keyup(function () {
                     var currentValue = $(this).val(),
                         $addButton = mug.form.vellum.$f.find('.' + newItextBtnClass);
@@ -697,8 +697,7 @@ define([
                     }
                 });
 
-                $newItemForm.find('.controls').not('.messages')
-                    .append($newItemInput);
+                $newItemForm.find('.controls').append($newItemInput);
                 $modal
                     .find('.modal-body')
                     .append($newItemForm);
@@ -710,7 +709,7 @@ define([
                     }
                 });
                 $modal.modal('show');
-                $modal.one('shown', function () {
+                $modal.one('shown.bs.modal', function () {
                     $newItemInput.focus();
                 });
             });
@@ -764,7 +763,8 @@ define([
                 widgets.util.setWidget($ui, itextWidget);
                 $groupContainer.append($ui);
             });
-            $blockUI.find('.new-itext-control-group').after($groupContainer);
+            $blockUI.find('.new-itext-form-group').after($groupContainer);
+            $groupContainer.find(".col-sm-9").removeClass("col-sm-9").addClass("col-sm-8");
             $groupContainer.before(block.getDeleteFormButton(form));
         };
 
@@ -776,14 +776,15 @@ define([
             var $addFormControls = $(control_group({
                 label: block.displayName,
             }));
-            $addFormControls.addClass('new-itext-control-group')
-                .find('.controls').not('.messages')
+            $addFormControls.addClass('new-itext-form-group')
+                .find('.controls')
                 .append(block.getAddFormButtons());
             $blockUI.prepend($addFormControls);
 
             var $formGroup = $blockUI.find('.itext-lang-group');
             $formGroup.each(function () {
-               $(this).before(block.getDeleteFormButton($(this).data('formtype')));
+                $(this).find(".col-sm-9").removeClass("col-sm-9").addClass("col-sm-8");
+                $(this).before(block.getDeleteFormButton($(this).data('formtype')));
             });
 
             return $blockUI;
@@ -1072,7 +1073,7 @@ define([
             widget.mug.form.fire('change');
         };
 
-        markdownOutput = $('<div>').addClass("controls well markdown-output");
+        markdownOutput = $('<div>').addClass("controls well markdown-output col-sm-9");
 
         widget.handleChange = function() {
             super_handleChange();
@@ -1087,23 +1088,29 @@ define([
                 parent.removeClass("has-markdown");
             }
             item.hasMarkdown = markdownOff.is(":visible");
-            markdownOutput.html(util.markdown(val)).removeClass('hide');
+            markdownOutput.html(util.markdown(val)).closest('.form-group').removeClass('hide');
         };
 
         widget.setValue = function (val, callback) {
             super_setValue(val, callback);
             if (!val) {
-                markdownOutput.addClass('hide');
+                markdownOutput.closest('.form-group').addClass('hide');
             }
             markdownOutput.html(util.markdown(val));
         };
 
         widget.getUIElement = function() {
             var elem = super_getUIElement(),
-                val = widget.getValue();
+                val = widget.getValue(),
+                markdownSpacer = $("<div />").addClass("col-sm-3"),
+                markdownContainer = $("<div />").addClass("col-sm-9"),
+                markdownRow = $("<div />").addClass("form-group").addClass("markdown-group");
 
             elem.detach('.markdown-output');
-            elem.append(markdownOutput);
+            markdownRow.append(markdownSpacer);
+            markdownContainer.append(markdownOutput);
+            markdownRow.append(markdownContainer);
+            elem.append(markdownRow);
             elem.find('.control-label').append(markdown_help({title:options.lstring }));
 
             markdownOff = elem.find('.turn-markdown-off').click(function() {
@@ -1147,9 +1154,9 @@ define([
     };
 
     var ICONS = {
-        image: 'icon-picture',
-        audio: 'icon-volume-up',
-        video: 'icon-facetime-video'
+        image: 'fa fa-photo',
+        audio: 'fa fa-volume-up',
+        video: 'fa fa-video-camera',
     };
 
     var itextMediaWidget = function (url_type) {
@@ -2229,7 +2236,7 @@ define([
             $textarea.val(generateItextXLS(form, Itext));
 
             $modal.modal('show');
-            $modal.one('shown', function () { $textarea.focus(); });
+            $modal.one('shown.bs.modal', function () { $textarea.focus(); });
         }
     });
 

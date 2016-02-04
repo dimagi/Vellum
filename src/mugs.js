@@ -1170,7 +1170,7 @@ define([
 
     var PhoneNumber = util.extend(Text, {
         typeName: 'Phone Number or Numeric ID',
-        icon: 'icon-signal',
+        icon: 'fa fa-signal',
         init: function (mug, form) {
             Text.init(mug, form);
             mug.p.appearance = "numeric";
@@ -1181,7 +1181,7 @@ define([
         typeName: 'Password',
         dataType: 'xsd:string',
         tagName: 'secret',
-        icon: 'icon-key',
+        icon: 'fa fa-key',
         canOutputValue: false,
         init: function (mug, form) {
         }
@@ -1210,7 +1210,7 @@ define([
 
     var Image = util.extend(Audio, {
         typeName: 'Image Capture',
-        icon: 'icon-camera',
+        icon: 'fa fa-camera',
         mediaType: "image/*", /* */
         spec: {
             imageSize: {
@@ -1248,7 +1248,7 @@ define([
 
     var Video = util.extend(Audio, {
         typeName: 'Video Capture',
-        icon: 'icon-facetime-video',
+        icon: 'fa fa-video-camera',
         mediaType: "video/*", /* */
     });
 
@@ -1269,7 +1269,7 @@ define([
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         dataType: 'geopoint',
-        icon: 'icon-map-marker',
+        icon: 'fa fa-map-marker',
         isODKOnly: true,
         init: function (mug, form) {
         }
@@ -1278,7 +1278,7 @@ define([
     var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
         dataType: 'barcode',
-        icon: 'icon-barcode',
+        icon: 'fa fa-barcode',
         isODKOnly: true,
         init: function (mug, form) {
         }
@@ -1287,7 +1287,7 @@ define([
     var Date = util.extend(defaultOptions, {
         typeName: 'Date',
         dataType: 'xsd:date',
-        icon: 'icon-calendar',
+        icon: 'fa fa-calendar',
         init: function (mug, form) {
         }
     });
@@ -1303,7 +1303,7 @@ define([
     var Time = util.extend(defaultOptions, {
         typeName: 'Time',
         dataType: 'xsd:time',
-        icon: 'icon-time',
+        icon: 'fa fa-clock-o',
         init: function (mug, form) {
         }
     });
@@ -1395,7 +1395,7 @@ define([
     var Trigger = util.extend(defaultOptions, {
         typeName: 'Label',
         tagName: 'trigger',
-        icon: 'icon-tag',
+        icon: 'fa fa-tag',
         init: function (mug, form) {
             mug.p.appearance = "minimal";
         },
@@ -1437,14 +1437,14 @@ define([
     });
 
     var MSelect = util.extend(BaseSelect, {
-        typeName: 'Multiple Answer',
+        typeName: 'Checkbox',
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
         defaultOperator: "selected"
     });
 
     var Select = util.extend(BaseSelect, {
-        typeName: 'Single Answer',
+        typeName: 'Multiple Choice',
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
         defaultOperator: null
@@ -1453,7 +1453,7 @@ define([
     var Group = util.extend(defaultOptions, {
         typeName: 'Group',
         tagName: 'group',
-        icon: 'icon-folder-open',
+        icon: 'fa fa-folder-open',
         isSpecialGroup: true,
         isNestableGroup: true,
         isTypeChangeable: false,
@@ -1482,7 +1482,7 @@ define([
     // nest other group types and it has a very different end-user functionality
     var FieldList = util.extend(Group, {
         typeName: 'Question List',
-        icon: 'icon-reorder',
+        icon: 'fa fa-reorder',
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
@@ -1491,7 +1491,7 @@ define([
 
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
-        icon: 'icon-retweet',
+        icon: 'fa fa-retweet',
         possibleDataParent: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();

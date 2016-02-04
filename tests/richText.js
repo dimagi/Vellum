@@ -54,7 +54,7 @@ define([
                         options: { icon: 'fcc fcc-fd-text' },
                     },
                     "/data/date": {
-                        options: { icon: 'fcc icon-calendar' },
+                        options: { icon: 'fcc fa fa-calendar' },
                     },
                     "/data/group": {
                         options: { icon: 'fcc icon-folder-open' },
@@ -134,7 +134,7 @@ define([
                         xmlValue: "format-date(date(/data/date), '%d/%n/%y')",
                         valueInBubble: '/data/date',
                         bubbleDispValue: 'date',
-                        icon: icon('icon-calendar'),
+                        icon: icon('fa fa-calendar'),
                         internalRef: true,
                         extraAttrs: {
                             'data-date-format': '%d/%n/%y',

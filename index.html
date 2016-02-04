@@ -18,36 +18,37 @@
     <script>mocha.setup('bdd');</script>
 
     <style>
-      .sidebar button,
-      .sidebar div {
+      .container-fluid {
+        // Prevent scrollbars
+        overflow: hidden;
+      }
+
+      .sidebar > * {
         width: 100%;
         margin-top: 1em;
-      }
-      .nav-list {
-        padding-left: 0;
       }
     </style>
   </head>
 
   <body>
     <div class="container-fluid">
-      <div class="row-fluid">
-        <div class="span2 sidebar">
-          <ul class="nav nav-list">
-            <li class="active"><a data-toggle='tab' href='#test'><h4>Vellum</h4></a></li>
-            <li id="resultsTab"><a data-toggle='tab' href='#results'><h4>Test Results</h4></a></li>
+      <div class="row">
+        <div class="col-sm-2 sidebar">
+          <ul class="nav nav-pills nav-stacked">
+              <li class="active"><a data-toggle='tab' href='#test'>Vellum</a></li>
+              <li><a data-toggle='tab' id='resultsTab' href='#results'>Test Results</a></li>
           </ul>
-          <button class="btn" id="run-tests">
-            <h4>Run tests</h4>
+          <button class="btn btn-default btn-sm" id="run-tests">
+            Run tests
           </button>
-          <button class="btn" id="load-saved">
-            <h4>Reload saved form</h4>
+          <button class="btn btn-default btn-sm" id="load-saved">
+            Reload saved form
           </button>
           <div>
             <input type="file" id="file" />
           </div>
         </div>
-        <div class="span10">
+        <div class="col-sm-10">
           <div class="tab-content">
             <div class="tab-pane active" id="test">
               <div id='vellum'></div>

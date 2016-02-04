@@ -125,7 +125,7 @@ define([
                 messages = text.messages.get("nodeID");
             assert.equal(messages.length, 1, messages.join("\n"));
             // UI dependent, possibly fragile
-            var div = $("[name=property-nodeID]").closest(".control-group"),
+            var div = $("[name=property-nodeID]").closest(".widget"),
                 msg = div.find(".messages").children();
             assert.equal(msg.length, messages.length, msg.text());
             assert.equal(msg[0].text, messages[0].message);

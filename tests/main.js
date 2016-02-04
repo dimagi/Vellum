@@ -122,7 +122,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
 
         function runTests() {
             function showTestResults() {
-                $(".sidebar .nav #resultsTab a").click();
+                $("#resultsTab").click();
                 return false;
             }
             $(".sidebar #mocha-stats").remove();

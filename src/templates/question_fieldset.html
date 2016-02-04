@@ -1,5 +1,10 @@
-<fieldset class="accordion-group fd-question-fieldset">
-    <legend class="accordion-heading">
+<fieldset class="fd-question-fieldset">
+    <legend class="collapse-toggle"
+            data-toggle="collapse"
+            data-target="#<%=fieldsetClass%>"
+            aria-expanded="<% if (isCollapsed) { %> true<% } else { %>false<% } %>"
+            aria-controls="<%=fieldsetClass%>"
+    >
         <% if (help) { %>
         <div class="fd-help pull-right">
             <a href="#" class="help"
@@ -9,16 +14,13 @@
             </a>
         </div>
         <% } %>
-        <a class="accordion-toggle<% if (isCollapsed) { %> collapsed<% } %>" href="#<%=fieldsetClass%>" data-toggle="collapse">
-            <i class="icon-double-angle-down"></i>
-            <%=fieldsetTitle%>
-        </a>
+        <i class="fa fa-angle-double-<% if (isCollapsed) { %>right<% } else { %>down<% } %>"></i>
+        <%=fieldsetTitle%>
     </legend>
     <!-- todo: don't require passing a unique ID to this template or an
     interface that exposes it (i.e., allow passing a non-unique id and then
     append it to a random one, or something -->
-    <div id="<%=fieldsetClass%>" class="accordion-body <% if
-        (isCollapsed) { %> collapse<% } else { %> in<% } %>" >
-        <div class="accordion-inner fd-fieldset-content"></div>
+    <div id="<%=fieldsetClass%>" class="<% if (isCollapsed) { %> collapse<% } else { %> in<% } %>">
+        <div class="fd-fieldset-content"></div>
     </div>
 </fieldset>

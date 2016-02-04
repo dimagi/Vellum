@@ -23,8 +23,8 @@ define([
             richTextOptions = {isExpression: true},
             form = options.mug.form;
         options = _.defaults(options, {
-            leftPlaceholder: "Hint: drag a question here.",
-            rightPlaceholder: "Hint: drag a question here.",
+            leftPlaceholder: "Drag question here",
+            rightPlaceholder: "Drag question here",
         });
 
         // Handlers for the simple expression editor
@@ -223,7 +223,7 @@ define([
                     if (le && validate(le)[0] && re && validate(re)[0]) {
                         $expUI.find('.validation-results.alert-success').removeClass('hide');
                     } else {
-                        $expUI.find('.validation-results.alert-error').removeClass('hide');
+                        $expUI.find('.validation-results.alert-danger').removeClass('hide');
                     }
                 };
 

@@ -53,7 +53,7 @@ require([
             assert.equal(input.val(), escaped);
 
             // click Edit button
-            input.closest(".control-group").find(".fd-edit-button").click();
+            input.closest(".form-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
                 var text = $(".xpath-advanced").find("textarea").val();
@@ -75,7 +75,7 @@ require([
 
             // click Edit button
             var input = $("[name=property-calculateAttr]");
-            input.closest(".control-group").find(".fd-edit-button").click();
+            input.closest(".form-group").find(".fd-edit-button").click();
 
             events.on("showXPathEditor", function () {
                 var textarea = $(".xpath-advanced").find("textarea");

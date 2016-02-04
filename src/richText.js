@@ -50,7 +50,7 @@ define([
     var bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
-              '<i class="icon-question-sign">&nbsp;</i>' +
+              '<i class="fa fa-question-circle">&nbsp;</i>' +
               'example widget, not used' +
             '</span>',
         upcast: function ( element ) {
@@ -88,13 +88,19 @@ define([
                 labelText.find('output').replaceWith(function () {
                     return extractXPathInfoFromOutputValue($(this).attr('value')).reference;
                 });
-                $(this.dragHandlerContainer.$).children("img").stickyover({
-                    title: displayId + '<small>' + xpath + '</small>',
+                // Remove ckeditor-supplied title attributes, which will otherwise override popover title
+                $(this.dragHandlerContainer.$).children("img").removeAttr("title");
+                $(this.dragHandlerContainer.$).children("img").popover({
+                    trigger: 'hover',
+                    container: 'body',
+                    placement: 'bottom',
+                    title: '<h3>' + util.escape(displayId) + '</h3>' +
+                           '<div class="text-muted">' + util.escape(xpath) + '</div>',
                     html: true,
                     content: '<p>' + labelText.text() + '</p>',
-                    template: '<div contenteditable="false" class="popover fd-popover">' +
+                    template: '<div contenteditable="false" class="popover rich-text-popover">' +
                         '<div class="popover-inner">' +
-                        '<h3 class="popover-title"></h3>' +
+                        '<div class="popover-title"></div>' +
                         '<div class="popover-content"><p></p></div>' +
                         '</div></div>'
                 });

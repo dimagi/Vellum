@@ -1,0 +1,64 @@
+// Custom styling for modals
+@import "lib/main";
+
+// Film and spinner that cover screen during save (not a bootstrap modal like the others)
+.fd-form-saving {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0.8;
+    background-color: @black;
+    z-index: @zindexBlockInteraction;
+
+    > div {
+        @imageSize: 32px;
+        @padding: 8px;
+        @size: @imageSize + @padding * 2;
+
+        opacity: 1;
+        position: fixed;
+        top: calc(~"50% - " @size / 2);
+        left: calc(~"50% - " @size / 2);
+        .box-sizing(border-box);
+        width: @size;
+        height: @size;
+        .border-radius(4px);
+        background-color: @white;
+        padding: @padding;
+
+        > div {
+            width: @imageSize;
+            height: @imageSize;
+            background-image: url('../images/ajax-loader.gif');
+        }
+    }
+}
+
+// Full-screen modal for displaying form XML
+.fd-source-modal {
+    .modal-dialog {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: 0;
+        width: auto;    // override bootstrap's static width
+
+        .modal-content {
+            position: absolute;
+            @padding: 20px;
+            top: @padding;
+            bottom: @padding;
+            left: @padding;
+            right: @padding;
+
+            .modal-body {
+                overflow-y: auto;   // fixed position means scrolling happens within modal
+            }
+        }
+    }
+}
+

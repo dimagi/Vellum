@@ -1,4 +1,5 @@
 define([
+    'tpl!vellum/templates/ui_element',
     'tpl!vellum/templates/widget_control_keyvalue',
     'tpl!vellum/templates/widget_control_message',
     'underscore',
@@ -7,6 +8,7 @@ define([
     'vellum/util',
     'vellum/richText'
 ], function (
+    ui_element,
     widget_control_keyvalue,
     widget_control_message,
     _,
@@ -142,7 +144,7 @@ define([
 
         widget.getMessagesContainer = function () {
             return widget.getControl()
-                    .closest(".widget.control-group")
+                    .closest(".widget")
                     .find(".messages:last");
         };
 
@@ -151,9 +153,15 @@ define([
         };
 
         widget.refreshMessages = function () {
-            widget.getMessagesContainer()
-                .empty()
-                .append(widget.getMessages(mug, path));
+            var messages = widget.getMessages(mug, path);
+            var $container = widget.getMessagesContainer();
+            $container.empty();
+            if (messages.length) {
+                $container.append(messages);
+                $container.removeClass("hide");
+            } else {
+                $container.addClass("hide");
+            }
         };
 
         mug.on("messages-changed",
@@ -174,7 +182,7 @@ define([
     var text = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "text").addClass('input-block-level');
+        input.attr("type", "text").addClass('form-control');
 
         if (options.placeholder) {
             input.attr('placeholder', options.placeholder);
@@ -214,7 +222,7 @@ define([
             .attr("name", widget.id)
             .attr("id", widget.id)
             .attr("rows", "2")
-            .addClass('input-block-level')
+            .addClass('form-control')
             .on('change input', function (e) { widget.handleChange(); })
             .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
@@ -244,7 +252,7 @@ define([
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
-            .addClass('input-block-level jstree-drop')
+            .addClass('form-control jstree-drop')
             .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
         var opts = {isExpression: options.widget === xPath || options.widget === droppableText},
@@ -323,7 +331,7 @@ define([
     var droppableText = function (mug, options) {
         var widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
-            .attr('placeholder', 'Hint: drag a question here.')
+            .attr('placeholder', 'Drag question here')
             .change(function () {
                 widget.handleChange();
             });
@@ -505,7 +513,7 @@ define([
         var widget = normal(mug, options);
         widget.dropdown = widget.input = $("<select />")
             .attr("name", widget.id)
-            .addClass('input-block-level');
+            .addClass('form-control');
 
         var input = widget.input;
 
@@ -597,15 +605,15 @@ define([
         var widget = dropdown(mug, options),
             super_handleChange = widget.handleChange;
         widget.input = widget.text = $('<input />')
-            .addClass('input-block-level')
+            .addClass('form-control')
             .attr({
                 type: 'text',
                 name: widget.id + '-text',
             });
 
         var control = $('<div class="control-row row">')
-                .append($("<div class='span4'>").append(widget.dropdown))
-                .append($("<div class='span8'>").append(widget.text));
+                .append($("<div class='col-sm-4'>").append(widget.dropdown))
+                .append($("<div class='col-sm-8'>").append(widget.text));
 
         widget.setValue = function (value) {
             var val = widget.equivalentOption(value);
@@ -683,52 +691,34 @@ define([
         }
 
         var button = $('<button />')
-            .addClass("fd-edit-button pull-right")
+            .addClass("fd-edit-button")
             .text("Edit")
             .stopLink()
-            .addClass('btn')
+            .addClass('btn btn-default')
             .attr('type', 'button')
             .prop('disabled', isDisabled)
             .click(editFn);
 
         $uiElem.css('position', 'relative');
-        $uiElem.find('.controls').not('.messages')
-            .addClass('fd-edit-controls')
-            .css('margin-right', '60px')
+        $uiElem.find('.controls')
+            .removeClass("col-sm-9").addClass("col-sm-8")
             .after(button);
         return $uiElem;
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
-        var uiElem = $("<div />").addClass("widget control-group"),
-            $controls = $('<div class="controls" />'),
-            $messages = $('<div class="controls messages" />'),
-            $label = $('<div />').append($("<label />").text(labelText));
-        $label.addClass('control-label');
-        if (help) {
-            var link = "";
-            if (help.url) {
-                link = "<p><a href='" + help.url + "' target='_blank'>See more</a></p>";
-            }
-            var $link = $("<a />").attr({
-                "href": "#",
-                "data-title": labelText,
-                "data-content": help.text + link
-            });
-            if (!help.url) {
-                $link.click(function (e) { e.preventDefault(); });
-            }
-            var $help = $("<div/>").addClass("fd-help");
-            $help.append($link);
-            $label.append($help);
-        }
-        uiElem.append($label);
-
+        var $uiElem = $(ui_element({
+            labelText: labelText,
+            help: help,
+        }));
         $input.prop('disabled', !!isDisabled);
-        $controls.append($input);
-        uiElem.append($controls);
-        uiElem.append($messages);
-        return uiElem;
+        $uiElem.find(".controls").prepend($input);
+
+        if (help && !help.url) {
+            $uiElem.find(".fd-help a").click(function (e) { e.preventDefault(); });
+        }
+
+        return $uiElem;
     };
 
     function getMessages(mug, path) {

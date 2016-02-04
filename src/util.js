@@ -4,8 +4,6 @@ define([
     'jsdiff',
     'vellum/markdown',
     'jquery',
-    'jquery.bootstrap-popout',
-    'jquery.bootstrap-stickyover',
     'vellum/jquery-extensions'
 ], function (
     langCodes,
@@ -155,6 +153,13 @@ define([
 
     that.pluralize = function (noun, n) {
         return noun + (n !== 1 ? 's' : '');
+    };
+
+    /**
+     * Escape string for use as HTML. May alter whitespace within string.
+     */
+    that.escape = function (string) {
+        return $("<div>").text(string).html();
     };
 
     /* jshint bitwise: false */

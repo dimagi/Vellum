@@ -1,23 +1,37 @@
-.fd-popover {
-  min-height: 150px !important;
-  .border-radius(3px);
-  word-wrap: break-word;
+// Styling for popovers for data node bubbles
 
-  h3 {
-    font-weight: 600;
-    small {
-      display: block;
-      margin-top: 5px;
-      line-height: 1.3em;
+.rich-text-popover {
+    min-height: 150px !important;
+    .border-radius(3px);
+    word-wrap: break-word;
+
+    // Static width, haven't found a better way to do this
+    min-width: 236px;
+    max-width: 276px;
+
+    .popover-title {
+        h3 {
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .text-muted {
+            margin-top: 5px;
+            line-height: 1.3em;
+        }
     }
-  }
-  // Offset the popover to account for the popover arrow
-  &.top, &.right, &.bottom, &.left {
-    margin: 0;
-  }
-  .arrow,
-  .arrow:after {
-    display: none;
-  }
-}
 
+    // Offset the popover to account for the popover arrow
+    &.top, &.right, &.bottom, &.left {
+        margin: 0;
+    }
+    &.bottom { margin-top: 5px }
+    &.top { margin-bottom: -10px }
+    &.right { margin-left: 5px }
+
+    .arrow,
+    .arrow:after {
+        display: none;
+    }
+}
