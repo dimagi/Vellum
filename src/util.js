@@ -318,9 +318,15 @@ define([
             return;
         }
 
-        var expr = mug.form.xpath.parse(hashtagOrXPath),
-            xpath_ = expr.toXPath(),
+        var xpath_, hashtag;
+        try {
+            var expr = mug.form.xpath.parse(hashtagOrXPath);
+            xpath_ = expr.toXPath();
             hashtag = expr.toHashtag();
+        } catch (err) {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            return; 
+        }
 
         if (hashtag !== xpath_) {
             xmlWriter.writeAttributeString('vellum:' + key, hashtag);
