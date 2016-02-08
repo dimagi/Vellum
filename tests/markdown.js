@@ -26,13 +26,8 @@ require([
     EXPLICIT_NO_MARKDOWN_XML
 ) {
     var assert = chai.assert,
-        call = util.call;
-
-    function markdownVisible() {
-        return $('.itext-block-label-group-default')
-            .find('.markdown-output')
-            .is(':visible');
-    }
+        call = util.call,
+        markdownVisible = util.markdownVisible;
 
     function toggleMarkdown() {
         $('.markdown-trigger').first().click();
