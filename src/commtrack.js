@@ -133,6 +133,7 @@ define([
                     calculate: mug.p.quantity,
                 }];
             },
+            isHashtaggable: false,
             spec: {
                 date: {
                     visibility: 'hidden',

@@ -467,14 +467,10 @@ define([
     Object.defineProperty(Mug.prototype, "hashtagPath", {
         get: function () {
             // commtrack isn't hashtaggable (ex. /data/trans[type=trans1])
-            var path = '#form' + this.absolutePathNoRoot,
-                hashtagable = true;
-            try {
-                path = this.form.xpath.parse(path).toHashtag();
-            } catch (err) {
-                hashtagable = false;
+            if (this.options.isHashtaggable && this.absolutePathNoRoot) {
+                return '#form' + this.absolutePathNoRoot;
             }
-            return (hashtagable ? path : this.absolutePath);
+            return this.absolutePath;
         }
     });
 
@@ -1144,6 +1140,7 @@ define([
         getIcon: function (mug) {
             return mug.options.icon;
         },
+        isHashtaggable: true,
         init: function (mug, form) {},
         spec: {}
     };

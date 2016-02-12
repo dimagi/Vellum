@@ -317,6 +317,7 @@ define([
             isRemoveable: false,
             isCopyable: false,
             ignoreHashtags: true,
+            isHashtaggable: false,
             init: function (mug) {
                 mug.p.binds = [];
                 mug.p.setValues = [];
