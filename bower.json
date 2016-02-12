@@ -39,7 +39,7 @@
         "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath#v0.0.2",
         "jsdiff": "~1",
-        "markdown-it": "~4.2.0"
+        "markdown-it": "~6.0.0"
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
