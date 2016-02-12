@@ -389,6 +389,12 @@ define([
         };
     }
 
+    function markdownVisible() {
+        return $('.itext-block-label-group-default')
+            .find('.markdown-output')
+            .is(':visible');
+    }
+
     return {
         options: options,
         asyncatch: asyncatch,
@@ -450,6 +456,7 @@ define([
             }
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.children(".fd-tree-valid-alert-icon").length === 0;
-        }
+        },
+        markdownVisible: markdownVisible,
     };
 });

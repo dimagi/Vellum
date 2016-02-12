@@ -361,7 +361,7 @@ define([
                 [{id: "old", src: "new://3"}, "old-1", "src"],
                 [{id: "old", src: "old://"}, "old", "src"],
                 [{id: "any", src: "old://"}, "old", "src"],
-                [{id: "known", src: null}, "known", "known://"],
+                [{id: "known", src: undefined}, "known", "known://"],
                 [{id: "blank", src: "blank://"}, "blank", "src"],
                 [{id: null, src: "new://5"}, "data-1", "src"],
                 //[{id: null, src: null}, "data-1", "src"],     Error!

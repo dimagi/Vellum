@@ -21,7 +21,7 @@
         "tests"
     ],
     "dependencies": {
-        "underscore": "~1.4.4",
+        "underscore": "~1.6.0",
         "jquery": "~1.11.1",
         "requirejs": "~2.1.11",
         "requirejs-text": "~2.0.12",

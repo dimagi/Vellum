@@ -986,6 +986,19 @@ require([
             assert.equal(input.val(), "other");
         });
 
+        it("should paste markdown correctly", function() {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hasMarkdown"],
+                ["/text", "Text", "*text*", true],
+                ["/text2", "Text", "text2", false],
+            ]);
+            util.clickQuestion('text');
+            assert(util.markdownVisible());
+            util.clickQuestion('text2');
+            assert(!util.markdownVisible());
+        });
+
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({
