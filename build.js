@@ -69,7 +69,8 @@
             name: 'global-deps',
             include: [
                 'jquery',
-                'jquery.bootstrap'
+                'jquery.bootstrap',
+                'underscore'
             ],
             exclude: [
                 'exclude'
@@ -114,7 +115,6 @@
             create: true,
             name: 'local-deps',
             include: [
-                'underscore',
                 'jquery.jstree',
                 'save-button',
                 'ckeditor',
