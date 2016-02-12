@@ -29,7 +29,7 @@ console.log("loading Vellum from " + baseUrl);
 define("jquery", [testBase + 'bower_components/jquery/dist/jquery'], function () { return window.jQuery; });
 define("jquery.bootstrap", ["jquery", testBase + 'lib/bootstrap'], function () {});
 
-require.config({
+requirejs.config({
     baseUrl: baseUrl,
     paths: {
         "jquery.vellum": "main",
@@ -40,11 +40,11 @@ require.config({
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
-require(['jquery', 'jquery.vellum'], function ($) {
+requirejs(['jquery', 'jquery.vellum'], function ($) {
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
-    require.config({
+    requirejs.config({
         // handle potential slow free heroku dynos
         waitSeconds: 60,
         paths: {
@@ -61,7 +61,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
     });
 
     if (useBuilt) {
-        require.config({
+        requirejs.config({
             paths: {
                 'text': '../bower_components/requirejs-text',
                 // for some reason this is necessary in firefox only for built
@@ -76,7 +76,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
     }
 
-    require([
+    requirejs([
         'tests/options',
 
         // tests for profiling load times
