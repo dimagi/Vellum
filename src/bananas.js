@@ -16,6 +16,7 @@ define([
     }
 
     function toBanana(input, xpathParser) {
+        if (!input) { return input; }
         xpathParser = xpathParser || defaultParser;
 
         var parsedBanana = transform(input);
@@ -70,6 +71,7 @@ define([
     }
 
     function transform(input, transformFn) {
+        if (!input) { return input; }
         input = getSymbols(input);
         transformFn = transformFn || function (input) { return input; };
         var state = OUTSIDE_BANANA,
