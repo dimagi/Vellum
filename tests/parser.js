@@ -1,5 +1,5 @@
 /*jshint multistr: true */
-require([
+define([
     'chai',
     'jquery',
     'underscore',

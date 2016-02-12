@@ -24,8 +24,7 @@
 
 (function () {
     // set CKEditor base path before loading ckeditor
-    var require = window.requirejs,
-        path = require.toUrl("vellum/../lib/ckeditor/").replace(/\?.*/, "");
+    var path = window.requirejs.toUrl("vellum/../lib/ckeditor/").replace(/\?.*/, "");
     window.CKEDITOR_BASEPATH = path;
 })();
 
