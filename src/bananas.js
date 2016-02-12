@@ -8,25 +8,30 @@ define([
         DELIMITER = "🍌",
         defaultParser = xpath.createParser(xpath.makeXPathModels({}));
 
-    function parse(input, transformFn, xpathParser) {
-        input = getSymbols(input);
+    function toXPath(input, xpathParser) {
+        xpathParser = xpathParser || defaultParser;
+        return transform(input, function(input) {
+            return xpathParser.parse(input).toXPath();
+        });
+    }
+
+    function toBanana(input, xpathParser) {
         xpathParser = xpathParser || defaultParser;
 
-        // I hope no one used multiple 🍌 in their forms before..
-        var parsedBanana = parseBananas(input, transformFn);
+        var parsedBanana = transform(input);
 
         try {
             // we should really only accept bananas, but if they supply a nice
             // looking xpath. let's turn them into pretty bananas
-            var parsed = xpathParser.parse(parsedBanana.nontransformedText);
+            var parsed = xpathParser.parse(parsedBanana);
             // success! now let's turn that input into bananas
             parsed = xpathParser.parse(parsed.toHashtag());
             return transformHashtags(parsed, xpathParser.models, function(input) {
-                return transformFn(input);
+                return DELIMITER + input + DELIMITER;
             });
         } catch (err) {
-            // a bad xpath. let's just return the transformed bananas
-            return parsedBanana.text;
+            // a bad xpath. let's just return the given input
+            return input;
         }
     }
 
@@ -45,8 +50,9 @@ define([
                     }
                 }
             } else if (node instanceof models.HashtagExpr) {
+                var blah = transformFn(node.toHashtag());
                 node.toHashtag = function() {
-                    return transformFn(node.toHashtag());
+                    return blah;
                 };
             }
             children = node.getChildren();
@@ -63,12 +69,12 @@ define([
         return parsedHashtags.toHashtag();
     }
 
-    function parseBananas(input, transformFn) {
+    function transform(input, transformFn) {
+        input = getSymbols(input);
         transformFn = transformFn || function (input) { return input; };
         var state = OUTSIDE_BANANA,
             strLen = input.length,
             text = "",
-            nontransformedText = "",
             currentReference = "";
 
         for (var i = 0; i < strLen; i++) {
@@ -78,13 +84,11 @@ define([
             if (state === OUTSIDE_BANANA) {
                 if (current === DELIMITER && next === DELIMITER) {
                     text += DELIMITER;
-                    nontransformedText += DELIMITER;
                     i++;
                 } else if (current === DELIMITER) {
                     state = INSIDE_BANANA;
                 } else {
                     text += current;
-                    nontransformedText += current;
                 }
             } else if (state === INSIDE_BANANA) {
                 if (current === DELIMITER && next === DELIMITER) {
@@ -93,7 +97,6 @@ define([
                 } else if (current === DELIMITER) {
                     state = OUTSIDE_BANANA;
                     text += transformFn(currentReference);
-                    nontransformedText += currentReference;
                     currentReference = "";
                 } else if (next !== undefined){
                     currentReference += current;
@@ -101,16 +104,12 @@ define([
                     // end of string, shouldn't happen, but will not
                     // overestimate users or Vellum devs
                     text += DELIMITER + currentReference;
-                    nontransformedText += DELIMITER + currentReference;
                     currentReference = "";
                 }
             }
         }
 
-        return {
-            text: text,
-            nontransformedText: nontransformedText,
-        };
+        return text;
     }
 
     function getSymbols(string) {
@@ -133,5 +132,9 @@ define([
         return output;
     }
 
-    return parse;
+    return {
+        toBanana: toBanana,
+        toXPath: toXPath,
+        transform: transform,
+    };
 });
