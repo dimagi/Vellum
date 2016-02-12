@@ -1,4 +1,4 @@
-require([
+define([
     'tests/utils',
     'chai',
     'jquery',

@@ -1,5 +1,5 @@
 /*jshint multistr: true */
-require([
+define([
     'tests/options',
     'tests/utils',
     'chai',
