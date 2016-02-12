@@ -4,7 +4,8 @@
             <label><%= labelText %></label>
             <% if (help) { %>
                 <div class="fd-help">
-                    <a href="#" data-title="<%- labelText %>"
+                    <a href="#" tabindex="-1"
+                        data-title="<%- labelText %>"
                         data-content="<%- help.text %><% if (help.url) { %><p><a href='<%- help.url %>' target='_blank'>See more</a></p><% } %>"></a>
                 </div>
             <% } %>
