@@ -135,7 +135,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = bananas.Parser(xpath.createParser(xpath.makeXPathModels(this.hashtagDictionary)));
+        this.xpath = bananas.Parser(this.hashtagDictionary);
 
         //make the object event aware
         util.eventuality(this);

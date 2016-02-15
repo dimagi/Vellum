@@ -134,7 +134,8 @@ define([
         return output;
     }
 
-    function Parser(xpathParser) {
+    function Parser(hashtagDictionary) {
+        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary));
         return {
             parse: function (input) {
                 var parsed = xpathParser.parse(toXPath(input, xpathParser));
