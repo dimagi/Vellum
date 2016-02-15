@@ -51,10 +51,12 @@ define([
                     }
                 }
             } else if (node instanceof models.HashtagExpr) {
-                var blah = transformFn(node.toHashtag());
-                node.toHashtag = function() {
-                    return blah;
-                };
+                (function() {
+                    var oldToHashtag = node.toHashtag();
+                    node.toHashtag = function() {
+                        return transformFn(oldToHashtag());
+                    };
+                })();
             }
             children = node.getChildren();
             for (i = 0; i < children.length; i++) {
