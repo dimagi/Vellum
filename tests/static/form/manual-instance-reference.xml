@@ -14,26 +14,26 @@
 				<score low="0.0" high="500.0">You're really bad</score>
 				<score low="500.0" high="99999999.0">You're really good</score>
 			</instance>
-			<bind vellum:nodeset="#form/score" nodeset="/data/score" type="xsd:int" />
-			<bind vellum:nodeset="#form/output" nodeset="/data/output" vellum:calculate="instance('scores')/score[@high &gt; #form/score][@low &lt; #form/score]" calculate="instance('scores')/score[@high &gt; /data/score][@low &lt; /data/score]" />
-			<bind vellum:nodeset="#form/result" nodeset="/data/result" />
+			<bind vellum:nodeset="🍌#form/score🍌" nodeset="/data/score" type="xsd:int" />
+			<bind vellum:nodeset="🍌#form/output🍌" nodeset="/data/output" vellum:calculate="instance('scores')/score[@high &gt; 🍌#form/score🍌][@low &lt; 🍌#form/score🍌]" calculate="instance('scores')/score[@high &gt; /data/score][@low &lt; /data/score]" />
+			<bind vellum:nodeset="🍌#form/result🍌" nodeset="/data/result" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="score-label">
 						<value>What was your score</value>
 					</text>
 					<text id="result-label">
-						<value><output vellum:value="#form/output" value="/data/output" /></value>
+						<value><output vellum:value="🍌#form/output🍌" value="/data/output" /></value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/score" ref="/data/score">
+		<input vellum:ref="🍌#form/score🍌" ref="/data/score">
 			<label ref="jr:itext('score-label')" />
 		</input>
-		<trigger vellum:ref="#form/result" ref="/data/result" appearance="minimal">
+		<trigger vellum:ref="🍌#form/result🍌" ref="/data/result" appearance="minimal">
 			<label ref="jr:itext('result-label')" />
 		</trigger>
 	</h:body>

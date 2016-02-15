@@ -148,8 +148,8 @@ define([
         });
 
         it("should not remove instance when ignore/retain is active", function () {
-            var normal = '<bind vellum:nodeset="#form/product/item" nodeset="/data/product/item" />',
-                ignore = '<bind vellum:nodeset="#form/product/item" nodeset="/data/product/item" wierd="true()" vellum:ignore="retain" />',
+            var normal = '<bind vellum:nodeset="🍌#form/product/item🍌" nodeset="/data/product/item" />',
+                ignore = '<bind vellum:nodeset="🍌#form/product/item🍌" nodeset="/data/product/item" wierd="true()" vellum:ignore="retain" />',
                 xml = FIXTURE_REPEAT_XML.replace(normal, normal + ignore);
             assert(xml.indexOf(ignore) > 0, ignore + " not found in XML:\n\n" + xml);
             util.loadXML(xml);

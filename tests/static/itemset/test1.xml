@@ -9,7 +9,7 @@
 				</data>
 			</instance>
 			<instance id="casedb" src="jr://instance/casedb" />
-			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" constraint="1 = 1" jr:constraintMsg="jr:itext('question1-constraintMsg')"/>
+			<bind vellum:nodeset="🍌#form/question1🍌" nodeset="/data/question1" constraint="1 = 1" jr:constraintMsg="jr:itext('question1-constraintMsg')"/>
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -23,7 +23,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 vellum:ref="#form/question1" ref="/data/question1">
+		<select1 vellum:ref="🍌#form/question1🍌" ref="/data/question1">
 			<label ref="jr:itext('question1-label')" />
 			<alert ref="jr:itext('question1-constraintMsg')" />
 			<itemset nodeset="instance('casedb')/casedb/case[@case_type='mother']">
