@@ -21,7 +21,7 @@
 			<setvalue event="xforms-ready" ref="/data/group/@ids" value="join(' ', instance('casedb')/mother/child/@case_id)" />
 			<setvalue event="xforms-ready" ref="/data/group/@count" value="count-selected(/data/group/@ids)" />
 			<setvalue event="jr-insert" ref="/data/group/item/@index" value="int(/data/group/@current_index)" />
-			<setvalue event="jr-insert" ref="/data/group/item/@id" value="selected-at(/data/group/@ids,../@index)" />
+			<setvalue event="jr-insert" ref="/data/group/item/@id" value="selected-at(/data/group/@ids, ../@index)" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="group/item-label">

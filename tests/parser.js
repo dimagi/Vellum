@@ -86,7 +86,7 @@ define([
         it("should not drop newlines in calculate conditions", function () {
             util.loadXML(TEST_XML_2);
             var mug = call("getMugByPath", "/data/question1");
-            assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
+            assert.equal(mug.p.calculateAttr, 'concat("Line 1", "\nLine 2")');
         });
 
         var ignoreWarnings = /Form (JRM namespace|does not have a (Name|(UI)?Version))/;
