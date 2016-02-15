@@ -87,7 +87,7 @@ define([
                 q2 = call("getMugByPath", "/data/question2");
             group.p.nodeID = "g8";
             assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
-            assert.equal(q2.p.relevantAttr,
+            assert.strictEqual(q2.p.relevantAttr,
                 "#form/g8/question1 = 'valley girl' and #form/g8/question2 = 'dude'");
         });
 
