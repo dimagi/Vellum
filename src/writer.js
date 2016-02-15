@@ -193,7 +193,7 @@ define([
             xmlWriter.writeEndElement();
         }
 
-        _.each(form.getSetValues(), function (sv) { writeSetValue(sv); });
+        _.each(form.getSetValues(), function (sv) { writeSetValue(sv, {form: form}); });
 
         dataTree.walk(function (mug, nodeID, processChildren) {
             if(mug && mug.options.getSetValues) {

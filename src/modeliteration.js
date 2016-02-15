@@ -39,7 +39,7 @@ define([
                 key: "id",
                 event: "jr-insert",
                 path: "/item",
-                query: "selected-at({}/@ids,../@index)"
+                query: "selected-at({}/@ids, ../@index)"
             }
         ],
         joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
