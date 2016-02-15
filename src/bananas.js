@@ -134,9 +134,23 @@ define([
         return output;
     }
 
+    function Parser(xpathParser) {
+        return {
+            parse: function (input) {
+                var parsed = xpathParser.parse(toXPath(input, xpathParser));
+                parsed.toBanana = function() {
+                    return toBanana(input, xpathParser);
+                };
+                return parsed;
+            },
+            models: xpathParser.models,
+        };
+    }
+
     return {
         toBanana: toBanana,
         toXPath: toXPath,
         transform: transform,
+        Parser: Parser,
     };
 });
