@@ -13,14 +13,14 @@
 					<question4 vellum:ignore="retain"/>
 				</data>
 			</instance>
-			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string"/>
-			<bind vellum:nodeset="#form/question9" nodeset="/data/question9"/>
+			<bind vellum:nodeset="🍌#form/question1🍌" nodeset="/data/question1" type="xsd:string"/>
+			<bind vellum:nodeset="🍌#form/question9🍌" nodeset="/data/question9"/>
 			<bind nodeset="/data/question9/question10" type="xsd:int" vellum:ignore="retain"/>
-			<bind vellum:nodeset="#form/question9/question11" nodeset="/data/question9/question11" type="xsd:int"/>
+			<bind vellum:nodeset="🍌#form/question9/question11🍌" nodeset="/data/question9/question11" type="xsd:int"/>
 			<bind nodeset="/data/question4" vellum:ignore="retain"/>
-			<setvalue event="xforms-revalidate" vellum:ref="#form/question1" ref="/data/question1" value="0"/>
-			<setvalue event="xforms-ready" vellum:ref="#form/question1" ref="/data/question1" value="1" vellum:ignore="retain"/>
-			<setvalue event="xforms-ready" vellum:ref="#form/question2" ref="/data/question2" value="2" vellum:ignore="retain"/>
+			<setvalue event="xforms-revalidate" vellum:ref="🍌#form/question1🍌" ref="/data/question1" value="0"/>
+			<setvalue event="xforms-ready" ref="/data/question1" value="1" vellum:ignore="retain"/>
+			<setvalue event="xforms-ready" ref="/data/question2" value="2" vellum:ignore="retain"/>
 			<setvalue event="xforms-ready" ref="/data/question3" value="3"/>
 			<itext>
 				<translation lang="en" default="">
@@ -39,16 +39,16 @@
 	</h:head>
 	<!-- body nodes, including nesting -->
 	<h:body>
-		<input vellum:ref="#form/question1" ref="/data/question1">
+		<input vellum:ref="🍌#form/question1🍌" ref="/data/question1">
 			<label ref="jr:itext('question1-label')"/>
 		</input>
-		<group vellum:ref="#form/question9" ref="/data/question9">
+		<group vellum:ref="🍌#form/question9🍌" ref="/data/question9">
 			<label ref="jr:itext('question9-label')"/>
 			<!-- ignored node after an inner label -->
 			<input ref="/data/question9/question10" vellum:ignore="retain">
 				<label ref="jr:itext('question10-label')"/>
 			</input>
-			<input vellum:ref="#form/question9/question11" ref="/data/question9/question11">
+			<input vellum:ref="🍌#form/question9/question11🍌" ref="/data/question9/question11">
 				<label ref="jr:itext('question11-label')"/>
 			</input>
 		</group>

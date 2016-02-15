@@ -1763,13 +1763,13 @@ define([
                 var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
                     key = $(outputRef).attr('value') ? 'value' : 'ref',
                     parsed = xpathParser.parse(value),
-                    hashtag = parsed.toHashtag(),
+                    banana = parsed.toBanana(),
                     xpath_ = parsed.toXPath(),
                     ret = $("<output>");
-                if (xpath_ === hashtag) {
+                if (xpath_ === banana) {
                     return ret.attr(key, xpath_)[0].outerHTML;
                 } else {
-                    return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
+                    return ret.attr(key, xpath_).attr('vellum:' + key, banana)[0].outerHTML;
                 }
             }
 

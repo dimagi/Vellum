@@ -17,9 +17,9 @@
 					</save_to_case>
 				</data>
 			</instance>
-			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
+			<bind vellum:nodeset="🍌#form/name🍌" nodeset="/data/name" type="xsd:string" />
 			<bind nodeset="/data/save_to_case/case/create/case_type" calculate="caseType" />
-			<bind nodeset="/data/save_to_case/case/create/case_name" vellum:calculate="#form/name" calculate="/data/name" />
+			<bind nodeset="/data/save_to_case/case/create/case_name" vellum:calculate="🍌#form/name🍌" calculate="/data/name" />
 			<bind nodeset="/data/save_to_case/case/create/owner_id" calculate="/data/meta/userID" />
 			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/save_to_case/case/@user_id" calculate="/data/meta/userID" />
@@ -34,7 +34,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/name" ref="/data/name">
+		<input vellum:ref="🍌#form/name🍌" ref="/data/name">
 			<label ref="jr:itext('name-label')" />
 		</input>
 	</h:body>

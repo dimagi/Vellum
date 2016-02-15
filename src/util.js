@@ -322,7 +322,7 @@ define([
         try {
             var expr = mug.form.xpath.parse(hashtagOrXPath);
             xpath_ = expr.toXPath();
-            hashtag = expr.toHashtag();
+            hashtag = expr.toBanana();
         } catch (err) {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
             return; 
