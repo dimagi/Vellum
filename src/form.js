@@ -153,6 +153,15 @@ define([
         removeHashtag: function(hashtag) {
             delete this.hashtagDictionary[hashtag];
         },
+        normalizeBanana: function (xpath_) {
+            // try catch is needed as workaround for having an itemset without
+            // the itemset plugin enabled
+            try {
+                return xpath_ ? this.xpath.parse(xpath_).toBanana() : xpath_;
+            } catch (err) {
+                return xpath_;
+            }
+        },
         normalizeHashtag: function (xpath_) {
             // try catch is needed as workaround for having an itemset without
             // the itemset plugin enabled
