@@ -5,6 +5,7 @@ define([
     'vellum/tree',
     'vellum/logic',
     'vellum/xpath',
+    'vellum/bananas',
     'vellum/util'
 ], function (
     require,
@@ -13,6 +14,7 @@ define([
     Tree,
     logic,
     xpath,
+    bananas,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -133,7 +135,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = xpath.createParser(xpath.makeXPathModels(this.hashtagDictionary));
+        this.xpath = bananas.Parser(xpath.createParser(xpath.makeXPathModels(this.hashtagDictionary)));
 
         //make the object event aware
         util.eventuality(this);
