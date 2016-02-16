@@ -366,7 +366,7 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (/^(🍌)?#case/.test(xpath)) {
+            if (/^🍌#case/.test(xpath)) {
                 return {
                     classes: ['label-datanode-external', 'fcc fcc-fd-external-case']
                 };
@@ -381,7 +381,7 @@ define([
                 }
             }
 
-            return {classes: ['label-datanode-external', 'fcc fcc-help']};
+            return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
 
         var xpathInfo = _parseXPath(xpath, form),
@@ -406,11 +406,6 @@ define([
         var info = extractXPathInfoFromOutputValue(value),
             xpath = form.normalizeBanana(info.reference),
             extraAttrs = _.omit(info, 'reference');
-
-        // only support absolute path right now
-        if (!form.getMugByPath(xpath) && !/^(🍌)?#case/.test(xpath)) {
-            return $('<span>').text(xml.normalize(value)).contents();
-        }
 
         return $('<div>').append(makeBubble(form, xpath, extraAttrs)).html();
     }
