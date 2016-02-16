@@ -1020,7 +1020,7 @@ define([
                 ['/output', 'DataBindOnly', 'null', 'null',
                     "instance('scores')/score[@high > 🍌#form/score🍌][@low < 🍌#form/score🍌]",
                     '{"scores":{"children":"<score low=\\"0.0\\" high=\\"500.0\\">You\'re really bad</score><score low=\\"500.0\\" high=\\"99999999.0\\">You\'re really good</score>"}}'],
-                ['/result', 'Trigger', '<output value="#form/output"></output>', 'minimal', 'null', 'null'],
+                ['/result', 'Trigger', '<output value="🍌#form/output🍌"></output>', 'minimal', 'null', 'null'],
             ];
 
             it("should properly paste", function() {
