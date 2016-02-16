@@ -153,31 +153,27 @@ define([
         removeHashtag: function(hashtag) {
             delete this.hashtagDictionary[hashtag];
         },
+        transform: function(input, transformFn) {
+            input = this.normalizeBanana(input);
+            return bananas.transform(input, transformFn);
+        },
+        normalize: function (methodName, xpath) {
+             // try catch is needed as workaround for having an itemset without
+             // the itemset plugin enabled
+             try {
+                return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
+             } catch (err) {
+                return xpath;
+             }
+         },
         normalizeBanana: function (xpath_) {
-            // try catch is needed as workaround for having an itemset without
-            // the itemset plugin enabled
-            try {
-                return xpath_ ? this.xpath.parse(xpath_).toBanana() : xpath_;
-            } catch (err) {
-                return xpath_;
-            }
+            return this.normalize('toBanana', xpath_);
         },
         normalizeHashtag: function (xpath_) {
-            // try catch is needed as workaround for having an itemset without
-            // the itemset plugin enabled
-            try {
-                return xpath_ ? this.xpath.parse(xpath_).toHashtag() : xpath_;
-            } catch (err) {
-                return xpath_;
-            }
+            return this.normalize('toHashtag', xpath_);
         },
         normalizeXPath: function (xpath_) {
-            // if it's not an xpath just return the original string
-            try {
-                return xpath_ ? this.xpath.parse(xpath_).toXPath() : xpath_;
-            } catch (err) {
-                return xpath_;
-            }
+            return this.normalize('toXPath', xpath_);
         },
         hashtagsInXPath: function (xpath_) {
             try {
