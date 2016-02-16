@@ -5,7 +5,6 @@ define([
     'jquery',
     'underscore',
     'vellum/datasources',
-    'vellum/xpath',
     'vellum/widgets',
     'vellum/window',
     'tpl!vellum/templates/external_sources_tree',
@@ -13,7 +12,6 @@ define([
     $,
     _,
     datasources,
-    xpath,
     widgets,
     window_,
     external_sources_tree
