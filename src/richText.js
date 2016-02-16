@@ -77,7 +77,7 @@ define([
                 getWidget = require('vellum/widgets').util.getWidget,
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
-            if (/^🍌#(form|case)\//.test(xpath) && widget) {
+            if (widget) {
                 var isCase = /^🍌#case\//.test(xpath),
                     isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
@@ -380,6 +380,7 @@ define([
                     };
                 }
             }
+            
 
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
@@ -406,6 +407,10 @@ define([
         var info = extractXPathInfoFromOutputValue(value),
             xpath = form.normalizeBanana(info.reference),
             extraAttrs = _.omit(info, 'reference');
+
+        if (!/^(🍌)?#(form|case)/.test(xpath)) {
+            return $('<span>').text(xml.normalize(value)).contents();
+        }
 
         return $('<div>').append(makeBubble(form, xpath, extraAttrs)).html();
     }
