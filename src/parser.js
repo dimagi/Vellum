@@ -495,15 +495,15 @@ define([
         if(!el){
             return null;
         }
-        var path = parseVellumAttrs(form, el, 'ref', noPop),
+        var path = form.normalizeHashtag(parseVellumAttrs(form, el, 'ref', noPop)),
             rootNodeName = form.tree.getRootNode().getID(),
             nodeId, pathToTry;
         if(!path){
-            path = parseVellumAttrs(form, el, 'nodeset', noPop);
+            path = form.normalizeHashtag(parseVellumAttrs(form, el, 'nodeset', noPop));
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = parseVellumAttrs(form, el, 'bind', noPop);
+            nodeId = form.normalizeHashtag(parseVellumAttrs(form, el, 'bind', noPop));
             if (nodeId) {
                 pathToTry = processPath(nodeId, rootNodeName, form);
                 if (!form.getMugByPath(pathToTry)) {
@@ -653,7 +653,7 @@ define([
         var method = (noPop ? el.attr : el.popAttr).bind(el),
             vellumAttr = method('vellum:' + key),
             xmlAttr = method(key);
-        return form.normalizeHashtag(vellumAttr ? vellumAttr : xmlAttr);
+        return form.normalizeBanana(vellumAttr ? vellumAttr : xmlAttr);
     }
 
     var _getInstances = function (xml) {

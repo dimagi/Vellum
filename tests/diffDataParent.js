@@ -58,11 +58,11 @@ define([
                 form = call("getData").core.form;
 
             util.addQuestion("Group", 'group1');
-            text2.p.dataParent = '#form/group1';
+            text2.p.dataParent = '🍌#form/group1🍌';
 
             form.moveMug(text2, 'before', text1);
 
-            assert.equal(text2.p.dataParent, '#form/group1');
+            assert.equal(text2.p.dataParent, '🍌#form/group1🍌');
         });
 
         it("should update data tree after a change to data parent", function() {
@@ -75,7 +75,7 @@ define([
             text1.p.dataParent = '#form/group1';
             assert.equal(text1.p.dataParent, "#form/group1");
             form.moveMug(group1, 'into', group2);
-            assert.equal(text1.p.dataParent, "#form/group2/group1");
+            assert.equal(text1.p.dataParent, "🍌#form/group2/group1🍌");
         });
 
         it("should clear the data parent when moving to a repeat group", function() {

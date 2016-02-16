@@ -15,6 +15,13 @@ define([
         });
     }
 
+    function toHashtag(input, xpathParser) {
+        xpathParser = xpathParser || defaultParser;
+        return transform(input, function(input) {
+            return xpathParser.parse(input).toHashtag();
+        });
+    }
+
     function toBanana(input, xpathParser) {
         if (!input) { return input; }
         xpathParser = xpathParser || defaultParser;
@@ -52,7 +59,7 @@ define([
                 }
             } else if (node instanceof models.HashtagExpr) {
                 (function() {
-                    var oldToHashtag = node.toHashtag();
+                    var oldToHashtag = node.toHashtag;
                     node.toHashtag = function() {
                         return transformFn(oldToHashtag());
                     };
@@ -140,9 +147,9 @@ define([
         var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary));
         return {
             parse: function (input) {
-                var parsed = xpathParser.parse(toXPath(input, xpathParser));
+                var parsed = xpathParser.parse(toHashtag(input, xpathParser));
                 parsed.toBanana = function() {
-                    return toBanana(input, xpathParser);
+                    return toBanana(this.toHashtag(), xpathParser);
                 };
                 return parsed;
             },
