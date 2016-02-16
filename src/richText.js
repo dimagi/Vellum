@@ -89,7 +89,7 @@ define([
                                 labelMug.p.labelItext.get() : "";
                 labelText = $('<div>').append(labelText);
                 labelText.find('output').replaceWith(function () {
-                    return extractXPathInfoFromOutputValue($(this).attr('value')).reference;
+                    return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
                 });
                 // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                 $(this.dragHandlerContainer.$).children("img").removeAttr("title");
@@ -369,7 +369,7 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (/^#case/.test(xpath)) {
+            if (/^(🍌)?#case/.test(xpath)) {
                 return {
                     classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                 };
@@ -411,7 +411,7 @@ define([
             extraAttrs = _.omit(info, 'reference');
 
         // only support absolute path right now
-        if (!form.getMugByPath(xpath) && !/^#case/.test(xpath)) {
+        if (!form.getMugByPath(xpath) && !/^(🍌)?#case/.test(xpath)) {
             return $('<span>').text(xml.normalize(value)).contents();
         }
 
