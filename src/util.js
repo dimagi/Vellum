@@ -308,11 +308,6 @@ define([
         if (!hashtagOrXPath) {
             // don't try to parse a value that doesn't exist
             return;
-        } else if (!mug) {
-            // handwritten setvalues aren't associated with a mug, but go
-            // through this method
-            xmlWriter.writeAttributeString(key, hashtagOrXPath);
-            return;
         } else if (mug.options && mug.options.ignoreHashtags) {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
             return;
