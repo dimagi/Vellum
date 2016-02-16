@@ -495,15 +495,15 @@ define([
         if(!el){
             return null;
         }
-        var path = form.normalizeHashtag(parseVellumAttrs(form, el, 'ref', noPop)),
+        var path = parseVellumAttrs(form, el, 'ref', noPop),
             rootNodeName = form.tree.getRootNode().getID(),
             nodeId, pathToTry;
         if(!path){
-            path = form.normalizeHashtag(parseVellumAttrs(form, el, 'nodeset', noPop));
+            path = parseVellumAttrs(form, el, 'nodeset', noPop);
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = form.normalizeHashtag(parseVellumAttrs(form, el, 'bind', noPop));
+            nodeId = parseVellumAttrs(form, el, 'bind', noPop);
             if (nodeId) {
                 pathToTry = processPath(nodeId, rootNodeName, form);
                 if (!form.getMugByPath(pathToTry)) {
@@ -514,7 +514,7 @@ define([
             }
         }
         path = path || nodeId || null;
-        if (path && path[0] !== "/" && path[0] !== "#") {
+        if (path && path[0] !== "/" && path[0] !== "#" && path.slice(0, 2) !== "🍌") {
             // make path absolute
             if (parentMug) {
                 var parentPath = parentMug.hashtagPath;

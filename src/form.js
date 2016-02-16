@@ -205,7 +205,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[_this.normalizeHashtag(dataParent)];
+                var dataParentMug = _this.mugMap[_this.normalizeBanana(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -858,7 +858,7 @@ define([
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
             var map = this.mugMap, newPath;
-            delete map[this.normalizeHashtag(oldHashtag)];
+            delete map[this.normalizeBanana(oldHashtag)];
             if (oldHashtag) {
                 this.removeHashtag(oldHashtag);
             }
@@ -876,7 +876,7 @@ define([
                 if (newPath) {
                     this.addHashtag(newHashtag, newPath);
                 }
-                map[this.normalizeHashtag(newHashtag)] = mug;
+                map[this.normalizeBanana(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
@@ -885,7 +885,7 @@ define([
             var path = mug.absolutePath;
             if (path) {
                 this.addHashtag(mug.hashtagPath, path);
-                this.mugMap[this.normalizeHashtag(mug.hashtagPath)] = mug;
+                this.mugMap[this.normalizeBanana(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -919,7 +919,7 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[this.normalizeHashtag(path)];
+            return this.mugMap[this.normalizeBanana(path)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -947,7 +947,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[this.normalizeHashtag(mug.hashtagPath)];
+                delete this.mugMap[this.normalizeBanana(mug.hashtagPath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
