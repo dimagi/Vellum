@@ -77,11 +77,8 @@ define([
                 getWidget = require('vellum/widgets').util.getWidget,
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
-            if (widget) {
-                xpath = widget.mug.form.normalizeHashtag(xpath);
-            }
-            if (/^#(form|case)\//.test(xpath) && widget) {
-                var isCase = /^#case\//.test(xpath),
+            if (/^🍌#(form|case)\//.test(xpath) && widget) {
+                var isCase = /^🍌#case\//.test(xpath),
                     isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
@@ -98,7 +95,7 @@ define([
                     container: 'body',
                     placement: 'bottom',
                     title: '<h3>' + util.escape(displayId) + '</h3>' +
-                           '<div class="text-muted">' + util.escape(xpath) + '</div>',
+                           '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
                     html: true,
                     content: '<p>' + labelText.text() + '</p>',
                     template: '<div contenteditable="false" class="popover rich-text-popover">' +
