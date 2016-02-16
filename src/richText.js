@@ -77,6 +77,9 @@ define([
                 getWidget = require('vellum/widgets').util.getWidget,
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
+            if (widget) {
+                xpath = widget.mug.form.normalizeHashtag(xpath);
+            }
             if (/^#(form|case)\//.test(xpath) && widget) {
                 var isCase = /^#case\//.test(xpath),
                     isText = function () { return this.nodeType === 3; },
@@ -404,7 +407,7 @@ define([
      */
     function replacePathWithBubble(form, value) {
         var info = extractXPathInfoFromOutputValue(value),
-            xpath = form.normalizeHashtag(info.reference),
+            xpath = form.normalizeBanana(info.reference),
             extraAttrs = _.omit(info, 'reference');
 
         // only support absolute path right now
@@ -412,7 +415,7 @@ define([
             return $('<span>').text(xml.normalize(value)).contents();
         }
 
-        return makeBubble(form, xpath, extraAttrs);
+        return $('<div>').append(makeBubble(form, xpath, extraAttrs)).html();
     }
 
     /**
@@ -458,39 +461,8 @@ define([
      * Wrap top-level expression nodes with bubble markup
      */
     function bubbleExpression(text, form) {
-        var el = $('<div>').html(text);
-        var EXPR = form.xpath.models.XPathInitialContextEnum.EXPR,
-            ROOT = form.xpath.models.XPathInitialContextEnum.ROOT,
-            expr = new logic.LogicExpression(text, form.xpath),
-            // Uses top level paths, because filters should not be made to bubbles
-            paths = _.chain(expr.getTopLevelPaths())
-                .filter(function(path) {
-                    var context = path.initial_context,
-                        numFilters = _.reduce(path.steps, function(memo, step) {
-                           return memo + step.predicates.length;
-                        }, 0),
-                        hasSession = /commcaresession/.test(path.toXPath());
-
-                    if (context === EXPR && (numFilters > 1 || !hasSession) ||
-                        context === ROOT && numFilters > 0) {
-                        return false;
-                    }
-
-                    return true;
-                })
-                .map(function(path) { return path.toXPath(); })
-                .uniq().value().concat(_.map(expr.getHashtags(), function(hashtag) {
-                    return hashtag.toHashtag();
-                }));
-
-        _.each(_.uniq(paths), function(path) {
-            var newPath = replacePathWithBubble(form, path);
-            el.html(el.html().replace(
-                new RegExp(RegExp.escape(path).replace(/ /g, '\\s*'), 'mg'),
-                $('<div>').append(newPath).html()
-            ));
-        });
-        return el.html();
+        text = form.normalizeBanana(text).replace('<', '&lt;').replace('>', '&gt;');
+        return form.transform(text, _.partial(replacePathWithBubble, form));
     }
 
     function unwrapBubbles(text) {
