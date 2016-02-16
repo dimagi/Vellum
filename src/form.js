@@ -4,7 +4,6 @@ define([
     'jquery',
     'vellum/tree',
     'vellum/logic',
-    'vellum/xpath',
     'vellum/bananas',
     'vellum/util'
 ], function (
@@ -13,7 +12,6 @@ define([
     $,
     Tree,
     logic,
-    xpath,
     bananas,
     util
 ) {
@@ -159,7 +157,7 @@ define([
         },
         normalize: function (methodName, xpath) {
              // try catch is needed as workaround for having an itemset without
-             // the itemset plugin enabled
+             // the itemset plugin enabled and invalid xpaths
              try {
                 return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
              } catch (err) {
