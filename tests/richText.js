@@ -29,7 +29,6 @@ define([
     'tests/utils',
     'vellum/richText',
     'vellum/javaRosa',
-    'vellum/xpath',
     'vellum/bananas',
     'ckeditor',
     'text!static/richText/burpee.xml',
@@ -40,7 +39,6 @@ define([
     util,
     richText,
     javaRosa,
-    xpath,
     bananas,
     CKEDITOR,
     BURPEE_XML
@@ -58,8 +56,13 @@ define([
                     return $('<div>').html(makeBubble(path, path.split('/').slice(-1)[0], icon_, !!mug)).html();
                 });
             },
-
             getMugByPath: function(path) {
+                if (path.startsWith("🍌")) {
+                    path = path.slice(2);
+                }
+                if (path.endsWith("🍌")) {
+                    path = path.slice(0, -2);
+                }
                 return {
                     "#form/text": {
                         options: { icon: 'fcc fcc-fd-text' },
@@ -75,7 +78,7 @@ define([
                     },
                 }[path];
             },
-            xpath: xpath.createParser(xpath.makeXPathModels(hashtagToXPath)),
+            xpath: bananas.Parser(hashtagToXPath),
         };
 
     function icon(iconClass) { 
@@ -131,8 +134,8 @@ define([
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richText.toRichText(outputValueTemplateFn(val[0].slice(2, -2)), formShim)).html(),
-                        wrapWithDivP(makeOutputValue(val[0].slice(2,-2), val[1], val[2], val[3])).html()
+                        wrapWithDiv(richText.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
+                        wrapWithDivP(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
             });
