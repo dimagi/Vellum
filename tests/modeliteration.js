@@ -64,7 +64,7 @@ define([
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             });
             assert.equal(phone.__className, "PhoneNumber");
-            assert.equal(hidden.p.calculateAttr, "#form/group/item/phone = '12345'");
+            assert.equal(hidden.p.calculateAttr, "🍌#form/group/item/phone🍌 = '12345'");
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_WITH_QUESTIONS_XML);
         });
 

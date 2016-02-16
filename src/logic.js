@@ -162,7 +162,7 @@ define([
         },
         getText: function () {
             if (this._text && this.parsed) {
-                return this.parsed.toHashtag();
+                return this.parsed.toBanana();
             } else {
                 return this._text;
             }
