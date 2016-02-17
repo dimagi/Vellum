@@ -22,6 +22,10 @@ define([
         });
     }
 
+    /*
+     * hopefully robust parser that transforms any input (whether hashtag,
+     * xpath, or banana) into banana used by internal structures
+     */
     function toBanana(input, xpathParser) {
         if (!input) { return input; }
         xpathParser = xpathParser || defaultParser;
@@ -43,6 +47,10 @@ define([
         }
     }
 
+    /*
+     * This takes in a parsed hashtag (from xpathParser.parse) and transforms
+     * each hashtag into whatever is defined by transformFn
+     */
     function transformHashtags(parsedHashtags, models, transformFn) {
         var queue = [parsedHashtags],
             EXPR = models.XPathInitialContextEnum.EXPR,
@@ -79,6 +87,9 @@ define([
         return parsedHashtags.toHashtag();
     }
 
+    /*
+     * transforms bananas based on transformFn
+     */
     function transform(input, transformFn) {
         if (!input) { return input; }
         input = getSymbols(input);
@@ -143,6 +154,9 @@ define([
         return output;
     }
 
+    /*
+     * extends xpath parser to be banana aware
+     */
     function Parser(hashtagDictionary) {
         var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary));
         return {
