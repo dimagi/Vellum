@@ -15,22 +15,38 @@ define([
             return ret[ret.length-1];
         }
 
-        var testCases = [
-            ["🍌#case/type/prop🍌", "#case/type/prop", "prop"],
-            ["(🍌#case/type/prop🍌)", "(#case/type/prop)", "(prop)"],
-            ["(🍌#case/type/prop🍌", "(#case/type/prop", "(prop"],
-            [
-                "🍌#case/type/prop🍌 = 🍌#case/type/prop2🍌",
-                "#case/type/prop = #case/type/prop2",
-                "prop = prop2",
-            ],
-            ["🍌🍌", "🍌", "🍌"],
-            ["🍊you glad I didn't use 🍌", "🍊you glad I didn't use 🍌", "🍊you glad I didn't use 🍌"],
-            ["🍌#case/type/prop🍌 = 🍌", "#case/type/prop = 🍌",  "prop = 🍌"],
-            ["🍌#case/type/prop🍌 = 🍌🍌", "#case/type/prop = 🍌", "prop = 🍌"],
-            ["🍌#case/type/🍌🍌prop🍌 = 🍌🍌", "#case/type/🍌prop = 🍌", "🍌prop = 🍌"],
-            ["🍌🍌#case/type/🍌🍌prop🍌 = 🍌🍌", "🍌#case/type/🍌prop🍌 = 🍌", "🍌#case/type/🍌prop🍌 = 🍌"],
-        ];
+        describe("#transform()", function() {
+            var testCases = [
+                ["🍌#case/type/prop🍌", "#case/type/prop", "prop"],
+                ["(🍌#case/type/prop🍌)", "(#case/type/prop)", "(prop)"],
+                ["(🍌#case/type/prop🍌", "(#case/type/prop", "(prop"],
+                [
+                    "🍌#case/type/prop🍌 = 🍌#case/type/prop2🍌",
+                    "#case/type/prop = #case/type/prop2",
+                    "prop = prop2",
+                ],
+                ["🍌🍌", "🍌", "🍌"],
+                ["🍊you glad I didn't use 🍌", "🍊you glad I didn't use 🍌", "🍊you glad I didn't use 🍌"],
+                ["🍌#case/type/prop🍌 = 🍌", "#case/type/prop = 🍌",  "prop = 🍌"],
+                ["🍌#case/type/prop🍌 = 🍌🍌", "#case/type/prop = 🍌", "prop = 🍌"],
+                ["🍌#case/type/🍌🍌prop🍌 = 🍌🍌", "#case/type/🍌prop = 🍌", "🍌prop = 🍌"],
+                ["🍌🍌#case/type/🍌🍌prop🍌 = 🍌🍌", "🍌#case/type/🍌prop🍌 = 🍌", "🍌#case/type/🍌prop🍌 = 🍌"],
+            ];
+
+            testCases.forEach(function (testCase) {
+                var input = testCase[0],
+                    outputNoTransform = testCase[1],
+                    outputToProp = testCase[2];
+
+                it("default transform should parse " + input + " into " + outputNoTransform, function() {
+                    assert.strictEqual(bananas.transform(input), outputNoTransform);
+                });
+
+                it("custom transform should parse " + input + " into " + outputToProp, function() {
+                    assert.strictEqual(bananas.transform(input, transformToProperty), outputToProp);
+                });
+            });
+        });
 
         describe("#toBanana()", function() {
             var testCases = [
@@ -65,20 +81,6 @@ define([
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
                     assert.strictEqual(bananas.toXPath(testCase[0], xpathParser), testCase[1]);
                 });
-            });
-        });
-
-        testCases.forEach(function (testCase) {
-            var input = testCase[0],
-                outputNoTransform = testCase[1],
-                outputToProp = testCase[2];
-
-            it("default transform should parse " + input + " into " + outputNoTransform, function() {
-                assert.strictEqual(bananas.transform(input), outputNoTransform);
-            });
-
-            it("custom transform should parse " + input + " into " + outputToProp, function() {
-                assert.strictEqual(bananas.transform(input, transformToProperty), outputToProp);
             });
         });
     });
