@@ -906,8 +906,11 @@ define([
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
-                    if (!mug.form.vellum.opts().features.allow_data_reference_in_setvalue) {
-                        var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
+                    var form = mug.form,
+                        xpath = form.xpath,
+                        xpathmodels = xpath.models;
+                    if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
+                        var paths = new logic.LogicExpression(mug.p.defaultValue, xpath).getPaths();
                         paths = _.filter(paths, function (path) {
                             return path.initial_context !== xpathmodels.XPathInitialContextEnum.EXPR;
                         });
