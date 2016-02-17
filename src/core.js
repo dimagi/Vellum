@@ -1183,6 +1183,8 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
+            // hacks
+            e.mug._node_control = undefined;
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1201,8 +1203,6 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         }).on('add-to-undo', function (e) {
-            // hacks
-            e.mug._node_control = undefined;
             if (e.keepUndoStack) {
                 if (e.hasChildren) {
                     undomanager.prependMug(e.mug, e.previousSibling, e.position);
@@ -1213,6 +1213,7 @@ define([
                 undomanager.resetUndo(e.mug, e.previousSibling, e.position);
             }
         });
+        undomanager.resetUndo();
     };
 
     fn.refreshMugName = function (mug) {

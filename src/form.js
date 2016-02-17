@@ -957,13 +957,17 @@ define([
             var _this = this,
                 seen = {},
                 ufids = {},
+                undoUfids = {},
                 keepUndoStack = mugs.length !== 1;
+            _.each(mugs, function (mug) {
+                _this._addToUndoManager(mug, undoUfids, true, keepUndoStack);
+            });
             _.each(mugs, function (mug) {
                 _this._removeMugFromForm(mug, ufids, false, keepUndoStack);
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _removeMugFromForm: function(mug, ufids, isInternal, keepUndoStack, previousEqualParent) {
+        _addToUndoManager: function(mug, ufids, isInternal, keepUndoStack, previousEqualParent) {
             if (ufids.hasOwnProperty(mug.ufid)) {
                 return; // already removed
             }
@@ -977,7 +981,28 @@ define([
                 for (var i = children.length - 1; i >= 0; i--) {
                     keepUndoStack = true;
                     hasChildren = true;
-                    this._removeMugFromForm(children[i], ufids, true, keepUndoStack, true);
+                    this._addToUndoManager(children[i], ufids, true, keepUndoStack, true);
+                }
+            }
+            this.fire({
+                type: 'add-to-undo',
+                mug: mug,
+                previousSibling: previousSibling,
+                position: previousSibling === parentMug ? 'first' : 'after',
+                keepUndoStack: keepUndoStack,
+                hasChildren: hasChildren,
+            });
+        },
+        _removeMugFromForm: function(mug, ufids, isInternal) {
+            if (ufids.hasOwnProperty(mug.ufid)) {
+                return; // already removed
+            }
+            ufids[mug.ufid] = null;
+            var node = this.tree.getNodeFromMug(mug);
+            if (node) {
+                var children = node.getChildrenMugs();
+                for (var i = 0; i < children.length; i++) {
+                    this._removeMugFromForm(children[i], ufids, true);
                 }
                 delete this.mugMap[mug.absolutePath];
                 this.tree.removeMug(mug);
@@ -992,14 +1017,6 @@ define([
                 type: 'question-remove',
                 mug: mug,
                 isInternal: isInternal,
-            });
-            this.fire({
-                type: 'add-to-undo',
-                mug: mug,
-                previousSibling: previousSibling,
-                position: previousSibling === parentMug ? 'first' : 'after',
-                keepUndoStack: keepUndoStack,
-                hasChildren: hasChildren,
             });
         },
         isUniqueQuestionId: function (qId, mug) {
