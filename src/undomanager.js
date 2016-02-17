@@ -36,6 +36,14 @@ define([
         toggleAlert();
     }
 
+    $.vellum.plugin("undomanager", {},
+        {
+            init: function () {
+                this.data.core.undomananger = { undoStack: [] };
+            }
+        }
+    );
+
     return {
         resetUndo: resetUndo,
         prependMug: function (mug, previousMug, position) {
