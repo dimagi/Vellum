@@ -24,7 +24,6 @@ define([
     'vellum/datasources',
     'vellum/util',
     'vellum/debugutil',
-    'vellum/undomanager',
     'vellum/base',
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
@@ -55,8 +54,7 @@ define([
     parser,
     datasources,
     util,
-    debug,
-    undomanager
+    debug
 ) {
     
     // Load these modules in the background after all runtime dependencies have
@@ -1202,18 +1200,7 @@ define([
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
-        }).on('add-to-undo', function (e) {
-            if (e.keepUndoStack) {
-                if (e.hasChildren) {
-                    undomanager.prependMug(e.mug, e.previousSibling, e.position);
-                } else {
-                    undomanager.appendMug(e.mug, e.previousSibling, e.position);
-                }
-            } else {
-                undomanager.resetUndo(e.mug, e.previousSibling, e.position);
-            }
         });
-        undomanager.resetUndo();
     };
 
     fn.refreshMugName = function (mug) {
@@ -1700,7 +1687,7 @@ define([
             _this.refreshCurrentMug();
         });
         $('.fd-undo').click(function () {
-            _this.ensureCurrentMugIsSaved(undomanager.undo);
+            _this.ensureCurrentMugIsSaved(form.undo.bind(form));
         });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')

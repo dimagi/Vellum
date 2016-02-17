@@ -5,6 +5,7 @@ define([
     'vellum/xpath',
     'vellum/tree',
     'vellum/logic',
+    'vellum/undomanager',
     'vellum/util'
 ], function (
     require,
@@ -13,6 +14,7 @@ define([
     xpath,
     Tree,
     logic,
+    undomanager,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -217,6 +219,7 @@ define([
         this.errors = [];
         this.question_counter = 1;
         this.xpath = xpath.createParser();
+        this.undomanager = new undomanager();
 
         //make the object event aware
         util.eventuality(this);
@@ -984,14 +987,16 @@ define([
                     this._addToUndoManager(children[i], ufids, true, keepUndoStack, true);
                 }
             }
-            this.fire({
-                type: 'add-to-undo',
-                mug: mug,
-                previousSibling: previousSibling,
-                position: previousSibling === parentMug ? 'first' : 'after',
-                keepUndoStack: keepUndoStack,
-                hasChildren: hasChildren,
-            });
+            var position = previousSibling === parentMug ? 'first' : 'after';
+            if (keepUndoStack) {
+                if (hasChildren) {
+                    this.undomanager.prependMug(mug, previousSibling, position);
+                } else {
+                    this.undomanager.appendMug(mug, previousSibling, position);
+                }
+            } else {
+                this.undomanager.resetUndo(mug, previousSibling, position);
+            }
         },
         _removeMugFromForm: function(mug, ufids, isInternal) {
             if (ufids.hasOwnProperty(mug.ufid)) {
@@ -1085,6 +1090,9 @@ define([
             var value = exporter.generateExportTSV(this);
             this.vellum.afterSerialize();
             return value;
+        },
+        undo: function() {
+            this.undomanager.undo();
         }
     };
 

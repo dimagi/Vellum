@@ -7,61 +7,53 @@ define([
     _,
     UNDO_ALERT
 ) {
-    var undoStack = [],
-        alertShown = false;
-
-    function createAlert() {
-        alertShown = true;
-        $('.fd-scrollable-tree').prepend(UNDO_ALERT).bind('closed.bs.alert', function() {
-            alertShown = false;
-        }).bind('close.bs.alert', function() {
-            alertShown = false;
-        });
+    function alertShown() {
+        return $('.fd-undo-delete').length;
     }
 
-    function toggleAlert() {
-        if (undoStack.length && !alertShown) {
+    function createAlert() {
+        $('.fd-scrollable-tree').prepend(UNDO_ALERT);
+    }
+
+    function toggleAlert(undoStack) {
+        if (undoStack.length && !alertShown()) {
             createAlert();
-        } else if (undoStack.length === 0 && alertShown) {
+        } else if (undoStack.length === 0 && alertShown()) {
             $('.fd-undo-delete').alert('close');
         }
     }
 
-    function resetUndo(mug, previousMug, position) {
-        if (mug) {
-            undoStack = [[mug, previousMug, position]];
-        } else {
-            undoStack = [];
-        }
-        toggleAlert();
+    function UndoManager() {
+        this.undoStack = [];
     }
 
-    $.vellum.plugin("undomanager", {},
-        {
-            init: function () {
-                this.data.core.undomananger = { undoStack: [] };
+    UndoManager.prototype = {
+        resetUndo: function (mug, previousMug, position) {
+            if (mug) {
+                this.undoStack = [[mug, previousMug, position]];
+            } else {
+                this.undoStack = [];
             }
-        }
-    );
-
-    return {
-        resetUndo: resetUndo,
+            toggleAlert(this.undoStack);
+        },
         prependMug: function (mug, previousMug, position) {
-            undoStack = [[mug, previousMug, position]].concat(undoStack);
-            toggleAlert();
+            this.undoStack = [[mug, previousMug, position]].concat(this.undoStack);
+            toggleAlert(this.undoStack);
         },
         appendMug: function (mug, previousMug, position) {
-            undoStack = undoStack.concat([[mug, previousMug, position]]);
-            toggleAlert();
+            this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
+            toggleAlert(this.undoStack);
         },
         undo: function () {
-            _.each(undoStack, function(undo) {
+            _.each(this.undoStack, function(undo) {
                 var mug = undo[0],
                     sibling = undo[1],
                     position = undo[2];
                 mug.form.insertQuestion(mug, sibling, position);
             });
-            resetUndo();
+            this.resetUndo();
         },
     };
+
+    return UndoManager;
 });
