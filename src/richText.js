@@ -380,7 +380,6 @@ define([
                     };
                 }
             }
-            
 
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
@@ -408,7 +407,7 @@ define([
             xpath = form.normalizeBanana(info.reference),
             extraAttrs = _.omit(info, 'reference');
 
-        if (!/^(🍌)?#(form|case)/.test(xpath)) {
+        if (!/^🍌#(form|case)/.test(xpath)) {
             return $('<span>').text(xml.normalize(value)).contents();
         }
 

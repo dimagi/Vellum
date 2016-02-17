@@ -53,7 +53,7 @@ define([
                 return bananas.transform(path, function (path) {
                     var mug = formShim.getMugByPath(path),
                         icon_ = mug ? icon(mug.options.icon) : externalIcon();
-                    return $('<div>').html(makeBubble(path, path.split('/').slice(-1)[0], icon_, !!mug)).html();
+                    return $('<div>').html(makeBubble("🍌" + path + "🍌", path.split('/').slice(-1)[0], icon_, !!mug)).html();
                 });
             },
             getMugByPath: function(path) {
@@ -127,14 +127,14 @@ define([
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richText.toRichText(val[0], formShim, opts)).html(),
-                        wrapWithDivP(makeBubble(val[0].slice(2,-2), val[1], val[2], val[3])).html()
+                        richText.toRichText(val[0], formShim, opts),
+                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richText.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
+                        richText.toRichText(outputValueTemplateFn(val[0]), formShim),
                         wrapWithDivP(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
@@ -144,8 +144,8 @@ define([
         describe("date conversions", function() {
             var dates = [
                     {
-                        xmlValue: "format-date(date(#form/date), '%d/%n/%y')",
-                        valueInBubble: '#form/date',
+                        xmlValue: "format-date(date(🍌#form/date🍌), '%d/%n/%y')",
+                        valueInBubble: '🍌#form/date🍌',
                         bubbleDispValue: 'date',
                         icon: icon('fa fa-calendar'),
                         internalRef: true,
@@ -167,7 +167,7 @@ define([
 
             it("bubble a drag+drop reference", function() {
                 var fmt = "%d/%n/%y",
-                    tag = javaRosa.getOutputRef("#form/text", fmt),
+                    tag = javaRosa.getOutputRef("🍌#form/text🍌", fmt),
                     bubble = richText.toRichText(tag, formShim);
                 assert.strictEqual($(bubble).find('span').data('date-format'), fmt);
             });
@@ -179,18 +179,18 @@ define([
                 equations = [
                     [
                         "🍌#form/text🍌 = 🍌#form/othertext🍌",
-                        wrapWithDiv(makeBubble('#form/text', 'text', ico, true)).html() + " = " +
-                        wrapWithDiv(makeBubble('#form/othertext', 'othertext', ico, true)).html()
+                        wrapWithDiv(makeBubble('🍌#form/text🍌', 'text', ico, true)).html() + " = " +
+                        wrapWithDiv(makeBubble('🍌#form/othertext🍌', 'othertext', ico, true)).html()
                     ],
                     [
                         "🍌#form/text🍌 <= 🍌#form/othertext🍌",
-                        wrapWithDiv(makeBubble('#form/text', 'text', ico, true)).html() + " &lt;= " +
-                        wrapWithDiv(makeBubble('#form/othertext', 'othertext', ico, true)).html()
+                        wrapWithDiv(makeBubble('🍌#form/text🍌', 'text', ico, true)).html() + " &lt;= " +
+                        wrapWithDiv(makeBubble('🍌#form/othertext🍌', 'othertext', ico, true)).html()
                     ],
                     [
                         f_1065 + " = " + f_1065,
-                        wrapWithDiv(makeBubble(f_1065.slice(2,-2), 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
-                        wrapWithDiv(makeBubble(f_1065.slice(2,-2), 'f_1065', icon('fcc-fd-external-case'))).html()
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html()
                     ],
                 ],
                 opts = {isExpression: true};
@@ -269,9 +269,9 @@ define([
 
         describe("convert value with output and escaped HTML", function () {
             var items = [
-                    ['<h1><output value="#form/text" /></h1>',
+                    ['<h1><output value="🍌#form/text🍌" /></h1>',
                      '&lt;h1&gt;{text}&lt;/h1&gt;'],
-                    ['<output value="#form/text" /> <tag /> <output value="#form/othertext" />',
+                    ['<output value="🍌#form/text🍌" /> <tag /> <output value="🍌#form/othertext🍌" />',
                      '{text} &lt;tag /&gt; {othertext}'],
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
@@ -282,8 +282,8 @@ define([
                 it("to text: " + item[0], function () {
                     var result = richText.bubbleOutputs(item[0], formShim, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
-                            if (formShim.getMugByPath("#form/" + name)) {
-                                var output = makeOutputValue("#form/" + name, name, ico, true);
+                            if (formShim.getMugByPath("🍌#form/" + name + "🍌")) {
+                                var output = makeOutputValue("🍌#form/" + name + "🍌", name, ico, true);
                                 return output[0].outerHTML;
                             }
                             return m;
