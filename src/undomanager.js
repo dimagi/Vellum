@@ -12,9 +12,9 @@ define([
 
     function createAlert() {
         alertShown = true;
-        $('.fd-scrollable-tree').prepend(UNDO_ALERT).bind('closed', function() {
+        $('.fd-scrollable-tree').prepend(UNDO_ALERT).bind('closed.bs.alert', function() {
             alertShown = false;
-        }).bind('close', function() {
+        }).bind('close.bs.alert', function() {
             alertShown = false;
         });
     }
