@@ -4,23 +4,19 @@
 		<h:title>Untitled Form</h:title>
 		<model>
 			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/4552C9DD-F297-49CD-8606-AB59AD2C4EA7" uiVersion="1" version="1" name="Untitled Form">
-					<question/>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
+					<mug />
 				</data>
 			</instance>
-			<bind vellum:nodeset="🍌#form/question🍌" nodeset="/data/question" type="xsd:string"/>
+			<instance src="jr://instance/casedb" id="casedb" />
+			<instance src="jr://instance/session" id="commcaresession" />
+			<bind nodeset="/data/mug" calculate="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="question-label" vellum:ignore="retain">
-						<value>question</value>
-					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/question" vellum:ignore="retain">
-			<label ref="jr:itext('question-label')"/>
-		</input>
 	</h:body>
 </h:html>

@@ -7,7 +7,7 @@ define([
         makeXPathModels: function (hashtagToXPath) {
             return xpath.makeXPathModels({
                 isValidNamespace: function (namespace) {
-                    return namespace === 'form';
+                    return namespace === 'form' || namespace === 'case';
                 },
                 hashtagToXPath: function (hashtagExpr) {
                     if (hashtagToXPath.hasOwnProperty(hashtagExpr)) {

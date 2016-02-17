@@ -904,12 +904,12 @@ define([
                 lang = widget.language;
             }
             value = itextItem && itextItem.get(widget.form, lang);
-            return mug.supportsRichText() ? outputToHashtag(value, widget.mug.form.xpath) : outputToXPath(value, widget.mug.form.xpath);
+            return mug.supportsRichText() ? outputToBanana(value, widget.mug.form.xpath) : outputToXPath(value, widget.mug.form.xpath);
         };
 
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
-            value = outputToHashtag(value, widget.mug.form.xpath);
+            value = outputToBanana(value, widget.mug.form.xpath);
             if (itextItem) {
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
@@ -1585,8 +1585,8 @@ define([
 
             delete this.data.javaRosa.itextMap;
             var form = this.data.core.form;
-            function _toHashtag(value) {
-                return form.xpath.parse(value).toHashtag();
+            function _toBanana(value) {
+                return form.xpath.parse(value).toBanana();
             }
             forEachItextItem(form, function (item, mug) {
                 _(item.forms).each(function (itForm) {
@@ -1599,9 +1599,9 @@ define([
                                 value = output.attr('vellum:value') || output.attr('value'),
                                 ref = output.attr('vellum:ref') || output.attr('ref');
                             if (value) {
-                                return tempOutput.attr('value', _toHashtag(value))[0].outerHTML;
+                                return tempOutput.attr('value', _toBanana(value))[0].outerHTML;
                             } else if (ref) {
-                                return tempOutput.attr('ref', _toHashtag(ref))[0].outerHTML;
+                                return tempOutput.attr('ref', _toBanana(ref))[0].outerHTML;
                             }
                         });
                         itForm.setValue(lang, value.html());
@@ -1763,13 +1763,13 @@ define([
                 var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
                     key = $(outputRef).attr('value') ? 'value' : 'ref',
                     parsed = xpathParser.parse(value),
-                    hashtag = parsed.toHashtag(),
+                    banana = parsed.toBanana(),
                     xpath_ = parsed.toXPath(),
                     ret = $("<output>");
-                if (xpath_ === hashtag) {
+                if (xpath_ === banana) {
                     return ret.attr(key, xpath_)[0].outerHTML;
                 } else {
-                    return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
+                    return ret.attr(key, xpath_).attr('vellum:' + key, banana)[0].outerHTML;
                 }
             }
 
@@ -2294,7 +2294,7 @@ define([
         }
     });
 
-    var outputToHashtag = _outputToXPathOrHashtag('toHashtag');
+    var outputToBanana = _outputToXPathOrHashtag('toBanana');
     var outputToXPath = _outputToXPathOrHashtag('toXPath');
 
     function _outputToXPathOrHashtag(functionName) {

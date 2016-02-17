@@ -39,36 +39,36 @@
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb"></instance>
-			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" vellum:constraint="#form/question20 = 2" constraint="/data/question20 = 2" vellum:relevant="#form/question20" relevant="/data/question20" jr:constraintMsg="jr:itext('question1-constraintMsg')" required="true()" />
-			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" />
-			<bind vellum:nodeset="#form/question30" nodeset="/data/question30" />
-			<bind vellum:nodeset="#form/question3" nodeset="/data/question3" />
+			<bind vellum:nodeset="🍌#form/question1🍌" nodeset="/data/question1" type="xsd:string" vellum:constraint="🍌#form/question20🍌 = 2" constraint="/data/question20 = 2" vellum:relevant="🍌#form/question20🍌" relevant="/data/question20" jr:constraintMsg="jr:itext('question1-constraintMsg')" required="true()" />
+			<bind vellum:nodeset="🍌#form/question2🍌" nodeset="/data/question2" />
+			<bind vellum:nodeset="🍌#form/question30🍌" nodeset="/data/question30" />
+			<bind vellum:nodeset="🍌#form/question3🍌" nodeset="/data/question3" />
 			<!-- arbitrary bind attributes -->
-			<bind vellum:nodeset="#form/question6" nodeset="/data/question6" spam="eggs" />
-			<bind vellum:nodeset="#form/question13" nodeset="/data/question13" type="xsd:int" />
-			<bind vellum:nodeset="#form/question14" nodeset="/data/question14" type="xsd:string" />
-			<bind vellum:nodeset="#form/question15" nodeset="/data/question15" type="xsd:double" />
-			<bind vellum:nodeset="#form/question16" nodeset="/data/question16" type="xsd:long" />
-			<bind vellum:nodeset="#form/question17" nodeset="/data/question17" type="xsd:date" />
-			<bind vellum:nodeset="#form/question18" nodeset="/data/question18" type="xsd:time" />
-			<bind vellum:nodeset="#form/question19" nodeset="/data/question19" type="xsd:dateTime" />
-			<bind vellum:nodeset="#form/question21" nodeset="/data/question21" />
-			<bind vellum:nodeset="#form/question21/question31" nodeset="/data/question21/question31" />
-			<bind vellum:nodeset="#form/question22" nodeset="/data/question22" />
-			<bind vellum:nodeset="#form/question22/question23" nodeset="/data/question22/question23" />
-			<bind vellum:nodeset="#form/question22/question23/question40" nodeset="/data/question22/question23/question40" />
-			<bind vellum:nodeset="#form/question22/question23/question41" nodeset="/data/question22/question23/question41" />
-			<bind vellum:nodeset="#form/question22/question23/question24" nodeset="/data/question22/question23/question24" type="binary" />
-			<bind vellum:nodeset="#form/question22/question23/question25" nodeset="/data/question22/question23/question25" type="binary" />
-			<bind vellum:nodeset="#form/question22/question23/question26" nodeset="/data/question22/question23/question26" type="binary" />
-			<bind vellum:nodeset="#form/question22/question23/question27" nodeset="/data/question22/question23/question27" type="geopoint" />
-			<bind vellum:nodeset="#form/question22/question23/question28" nodeset="/data/question22/question23/question28" type="xsd:string" />
-			<bind vellum:nodeset="#form/question22/question23/question29" nodeset="/data/question22/question23/question29" type="binary" />
-			<bind vellum:nodeset="#form/question22/question23/question7" nodeset="/data/question22/question23/question7" type="intent" />
-			<bind vellum:nodeset="#form/question20" nodeset="/data/question20" />
-			<bind vellum:nodeset="#form/question32" nodeset="/data/question32" calculate="1 + 2" />
+			<bind vellum:nodeset="🍌#form/question6🍌" nodeset="/data/question6" spam="eggs" />
+			<bind vellum:nodeset="🍌#form/question13🍌" nodeset="/data/question13" type="xsd:int" />
+			<bind vellum:nodeset="🍌#form/question14🍌" nodeset="/data/question14" type="xsd:string" />
+			<bind vellum:nodeset="🍌#form/question15🍌" nodeset="/data/question15" type="xsd:double" />
+			<bind vellum:nodeset="🍌#form/question16🍌" nodeset="/data/question16" type="xsd:long" />
+			<bind vellum:nodeset="🍌#form/question17🍌" nodeset="/data/question17" type="xsd:date" />
+			<bind vellum:nodeset="🍌#form/question18🍌" nodeset="/data/question18" type="xsd:time" />
+			<bind vellum:nodeset="🍌#form/question19🍌" nodeset="/data/question19" type="xsd:dateTime" />
+			<bind vellum:nodeset="🍌#form/question21🍌" nodeset="/data/question21" />
+			<bind vellum:nodeset="🍌#form/question21/question31🍌" nodeset="/data/question21/question31" />
+			<bind vellum:nodeset="🍌#form/question22🍌" nodeset="/data/question22" />
+			<bind vellum:nodeset="🍌#form/question22/question23🍌" nodeset="/data/question22/question23" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question40🍌" nodeset="/data/question22/question23/question40" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question41🍌" nodeset="/data/question22/question23/question41" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question24🍌" nodeset="/data/question22/question23/question24" type="binary" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question25🍌" nodeset="/data/question22/question23/question25" type="binary" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question26🍌" nodeset="/data/question22/question23/question26" type="binary" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question27🍌" nodeset="/data/question22/question23/question27" type="geopoint" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question28🍌" nodeset="/data/question22/question23/question28" type="xsd:string" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question29🍌" nodeset="/data/question22/question23/question29" type="binary" />
+			<bind vellum:nodeset="🍌#form/question22/question23/question7🍌" nodeset="/data/question22/question23/question7" type="intent" />
+			<bind vellum:nodeset="🍌#form/question20🍌" nodeset="/data/question20" />
+			<bind vellum:nodeset="🍌#form/question32🍌" nodeset="/data/question32" calculate="1 + 2" />
 			<!-- setvalues -->
-			<setvalue event="xforms-ready" vellum:ref="#form/question1" ref="/data/question1" value="2" />
+			<setvalue event="xforms-ready" vellum:ref="🍌#form/question1🍌" ref="/data/question1" value="2" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -310,19 +310,19 @@
 		</odkx:intent>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/question1" ref="/data/question1">
+		<input vellum:ref="🍌#form/question1🍌" ref="/data/question1">
 			<label ref="jr:itext('question1-label')">non-itext label</label>
 			<hint ref="jr:itext('question1-hint')">non-itext hint</hint>
 			<help ref="jr:itext('question1-help')" />
 			<alert ref="jr:itext('question1-constraintMsg')" />
 		</input>
-		<trigger vellum:ref="#form/question2" ref="/data/question2" appearance="minimal">
+		<trigger vellum:ref="🍌#form/question2🍌" ref="/data/question2" appearance="minimal">
 			<label ref="jr:itext('question2-label')" />
 		</trigger>
-		<trigger vellum:ref="#form/question30" ref="/data/question30">
+		<trigger vellum:ref="🍌#form/question30🍌" ref="/data/question30">
 			<label ref="jr:itext('question30-label')" />
 		</trigger>
-		<select1 vellum:ref="#form/question3" ref="/data/question3">
+		<select1 vellum:ref="🍌#form/question3🍌" ref="/data/question3">
 			<label ref="jr:itext('question3-label')" />
 			<item>
 				<label ref="jr:itext('question3-choice1-label')" />
@@ -334,7 +334,7 @@
 			</item>
 		</select1>
 		<!-- arbitrary control attributes -->
-		<select vellum:ref="#form/question6" ref="/data/question6" foo="baz">
+		<select vellum:ref="🍌#form/question6🍌" ref="/data/question6" foo="baz">
 			<label ref="jr:itext('question6-label')" />
 			<item>
 				<label ref="jr:itext('question6-choice1-label')" />
@@ -345,65 +345,65 @@
 				<value>choice2</value>
 			</item>
 		</select>
-		<input vellum:ref="#form/question13" ref="/data/question13">
+		<input vellum:ref="🍌#form/question13🍌" ref="/data/question13">
 			<label ref="jr:itext('question13-label')" />
 		</input>
-		<input vellum:ref="#form/question14" ref="/data/question14" appearance="numeric">
+		<input vellum:ref="🍌#form/question14🍌" ref="/data/question14" appearance="numeric">
 			<label ref="jr:itext('question14-label')" />
 		</input>
-		<input vellum:ref="#form/question15" ref="/data/question15">
+		<input vellum:ref="🍌#form/question15🍌" ref="/data/question15">
 			<label ref="jr:itext('question15-label')" />
 		</input>
-		<input vellum:ref="#form/question16" ref="/data/question16">
+		<input vellum:ref="🍌#form/question16🍌" ref="/data/question16">
 			<label ref="jr:itext('question16-label')" />
 		</input>
-		<input vellum:ref="#form/question17" ref="/data/question17">
+		<input vellum:ref="🍌#form/question17🍌" ref="/data/question17">
 			<label ref="jr:itext('question17-label')" />
 		</input>
-		<input vellum:ref="#form/question18" ref="/data/question18">
+		<input vellum:ref="🍌#form/question18🍌" ref="/data/question18">
 			<label ref="jr:itext('question18-label')" />
 		</input>
-		<input vellum:ref="#form/question19" ref="/data/question19">
+		<input vellum:ref="🍌#form/question19🍌" ref="/data/question19">
 			<label ref="jr:itext('question19-label')" />
 		</input>
-		<group vellum:ref="#form/question21" ref="/data/question21">
+		<group vellum:ref="🍌#form/question21🍌" ref="/data/question21">
 			<label ref="jr:itext('question21-label')" />
 			<group>
 				<label ref="jr:itext('question21/question31-label')" />
-				<repeat jr:noAddRemove="true()"  vellum:nodeset="#form/question21/question31" nodeset="/data/question21/question31" jr:count="2" />
+				<repeat jr:noAddRemove="true()"  vellum:nodeset="🍌#form/question21/question31🍌" nodeset="/data/question21/question31" jr:count="2" />
 			</group>
 		</group>
 		<group>
 			<label ref="jr:itext('question22-label')" />
-			<repeat vellum:nodeset="#form/question22" nodeset="/data/question22">
-				<group vellum:ref="#form/question22/question23" ref="/data/question22/question23" appearance="field-list">
+			<repeat vellum:nodeset="🍌#form/question22🍌" nodeset="/data/question22">
+				<group vellum:ref="🍌#form/question22/question23🍌" ref="/data/question22/question23" appearance="field-list">
 					<label ref="jr:itext('question22/question23-label')" />
-					<group vellum:ref="#form/question22/question23/question40" ref="/data/question22/question23/question40">
+					<group vellum:ref="🍌#form/question22/question23/question40🍌" ref="/data/question22/question23/question40">
 						<label ref="jr:itext('question22/question23/question40-label')" />
 					</group>
 					<group>
 						<label ref="jr:itext('question22/question23/question41-label')" />
-						<repeat vellum:nodeset="#form/question22/question23/question41" nodeset="/data/question22/question23/question41" />
+						<repeat vellum:nodeset="🍌#form/question22/question23/question41🍌" nodeset="/data/question22/question23/question41" />
 					</group>
-					<upload vellum:ref="#form/question22/question23/question24" ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px">
+					<upload vellum:ref="🍌#form/question22/question23/question24🍌" ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px">
 						<label ref="jr:itext('question22/question23/question24-label')" />
 					</upload>
-					<upload vellum:ref="#form/question22/question23/question25" ref="/data/question22/question23/question25" mediatype="audio/*">
+					<upload vellum:ref="🍌#form/question22/question23/question25🍌" ref="/data/question22/question23/question25" mediatype="audio/*">
 						<label ref="jr:itext('question22/question23/question25-label')" />
 					</upload>
-					<upload vellum:ref="#form/question22/question23/question26" ref="/data/question22/question23/question26" mediatype="video/*">
+					<upload vellum:ref="🍌#form/question22/question23/question26🍌" ref="/data/question22/question23/question26" mediatype="video/*">
 						<label ref="jr:itext('question22/question23/question26-label')" />
 					</upload>
-					<input vellum:ref="#form/question22/question23/question27" ref="/data/question22/question23/question27">
+					<input vellum:ref="🍌#form/question22/question23/question27🍌" ref="/data/question22/question23/question27">
 						<label ref="jr:itext('question22/question23/question27-label')" />
 					</input>
-					<secret vellum:ref="#form/question22/question23/question28" ref="/data/question22/question23/question28">
+					<secret vellum:ref="🍌#form/question22/question23/question28🍌" ref="/data/question22/question23/question28">
 						<label ref="jr:itext('question22/question23/question28-label')" />
 					</secret>
-					<upload vellum:ref="#form/question22/question23/question29" ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature">
+					<upload vellum:ref="🍌#form/question22/question23/question29🍌" ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature">
 						<label ref="jr:itext('question22/question23/question29-label')" />
 					</upload>
-					<input vellum:ref="#form/question22/question23/question7" ref="/data/question22/question23/question7" appearance="intent:question7">
+					<input vellum:ref="🍌#form/question22/question23/question7🍌" ref="/data/question22/question23/question7" appearance="intent:question7">
 						<label ref="jr:itext('question22/question23/question7-label')" />
 					</input>
 				</group>

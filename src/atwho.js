@@ -40,6 +40,19 @@ define([
 
     var _cachedMugData = function(cacheTime) {
             return timed(function(form) {
+                var caseData = [];
+                if (form.vellum.data.core.databrowser) {
+                    caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
+                     .map(function(absolutePath, hashtag) {
+                         return {
+                             name: hashtag,
+                             absolutePath: absolutePath,
+                             icon: 'fcc fcc-fd-external-case-data',
+                             displayLabel: null,
+                         };
+                     })
+                     .value();
+                }
                 return _.chain(form.getMugList())
                         .map(function(mug) {
                             var defaultLabel = form.vellum.getMugDisplayName(mug);
@@ -57,7 +70,7 @@ define([
                         .filter(function(choice) {
                             return choice.name && !_.isUndefined(choice.displayLabel);
                         })
-                        .value();
+                        .value().concat(caseData);
             }, cacheTime || 500);
         },
         cachedMugData = _cachedMugData();
@@ -179,7 +192,7 @@ define([
 
             $input.atwho(_atWhoOptions('/data/'));
             if (options.useRichText) {
-                $input.atwho(_atWhoOptions('#form'));
+                $input.atwho(_atWhoOptions('#'));
             }
         }
 

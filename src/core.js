@@ -1879,6 +1879,8 @@ define([
             data = {xform: formText};
         }
 
+        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+
         this.data.core.saveButton.ajax({
             type: "POST",
             url: url,
@@ -2002,7 +2004,8 @@ define([
             "requiredAttr",
             "relevantAttr",
             "constraintAttr",
-            "repeat_count"
+            "repeat_count",
+            'defaultValue',
         ];
     };
 
@@ -2010,7 +2013,6 @@ define([
         return [
             "dataSource",
             "dataValue",
-            'defaultValue',
             "xmlnsAttr",
             "label",
             "hintLabel",

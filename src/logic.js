@@ -162,7 +162,7 @@ define([
         },
         getText: function () {
             if (this._text && this.parsed) {
-                return this.parsed.toHashtag();
+                return this.parsed.toBanana();
             } else {
                 return this._text;
             }
@@ -216,14 +216,17 @@ define([
                     pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
-                    xpath = path.toHashtag();
+                    xpath = path.toHashtag(),
+                    knownHashtag = pathString.startsWith('#case') && _.contains(form.validHashtags(), xpath);
 
                 // last part is hack to allow root node in data parents
-                if (!refMug &&
+                if ((!refMug && !knownHashtag) &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
+                    unknowns.push(xpath);
+                } else if (!refMug && pathString.startsWith('#case') && !knownHashtag) {
                     unknowns.push(xpath);
                 }
                 return {
@@ -236,6 +239,12 @@ define([
             }));
             _.each(expr.instanceRefs, function (ignore, id) {
                 form.referenceInstance(id, mug, property);
+            });
+            _.each(expr.hashtags, function (hashtag) {
+                if (/^#case/.test(hashtag.toHashtag())) {
+                    form.referenceInstance('casedb', mug, property);
+                    form.referenceInstance('commcaresession', mug, property);
+                }
             });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
@@ -368,7 +377,24 @@ define([
         },
         reset: function () {
             this.all = [];
-        }
+        },
+        caseReferences: function () {
+            return _.chain(this.all)
+                .filter(function(ref) {
+                    return ref.path.startsWith('#case');
+                })
+                .map(function(ref) {
+                    var info = ref.path.split('/'),
+                        type = info[1],
+                        prop = info[2];
+                    return {
+                        caseType: type,
+                        caseProperty: prop,
+                        question: ref.sourcePath.replace('#form', '/data'),
+                    };
+                })
+                .value();
+        },
     };
 
     return {

@@ -457,7 +457,7 @@ define([
                 ["id", "type", "calculateAttr"],
                 ["/radius", "DataBindOnly", "42"],
                 ["/pi", "DataBindOnly", "3.1415"],
-                ["/circumference", "DataBindOnly", "2 * #form/pi * #form/radius"],
+                ["/circumference", "DataBindOnly", "2 * 🍌#form/pi🍌 * 🍌#form/radius🍌"],
             ]);
         });
 
@@ -1018,9 +1018,9 @@ define([
                 ['id', 'type', 'labelItext:en-default', 'appearance', 'calculateAttr', 'instances'],
                 ['/score', 'Int', 'What was your score', 'null', 'null', 'null'],
                 ['/output', 'DataBindOnly', 'null', 'null',
-                    "instance('scores')/score[@high > #form/score][@low < #form/score]",
+                    "instance('scores')/score[@high > 🍌#form/score🍌][@low < 🍌#form/score🍌]",
                     '{"scores":{"children":"<score low=\\"0.0\\" high=\\"500.0\\">You\'re really bad</score><score low=\\"500.0\\" high=\\"99999999.0\\">You\'re really good</score>"}}'],
-                ['/result', 'Trigger', '<output value="#form/output"></output>', 'minimal', 'null', 'null'],
+                ['/result', 'Trigger', '<output value="🍌#form/output🍌"></output>', 'minimal', 'null', 'null'],
             ];
 
             it("should properly paste", function() {

@@ -913,8 +913,17 @@ define([
                 xpathType: 'generic',
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                help: "Referencing a node in this form may cause errors and/or " +
-                    "unexpected behavior",
+                validationFunc: function (mug) {
+                    if (!mug.form.vellum.opts().features.allow_data_reference_in_setvalue) {
+                        var paths = mug.form.hashtagsInXPath(mug.p.defaultValue);
+                        paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
+                        if (paths.length) {
+                            return "You are referencing a node in this form. " +
+                                   "This can cause errors in the form";
+                        }
+                    }
+                    return 'pass';
+                }
             },
             comment: {
                 lstring: 'Comment',

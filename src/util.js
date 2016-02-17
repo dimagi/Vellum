@@ -308,19 +308,20 @@ define([
         if (!hashtagOrXPath) {
             // don't try to parse a value that doesn't exist
             return;
-        } else if (!mug) {
-            // handwritten setvalues aren't associated with a mug, but go
-            // through this method
-            xmlWriter.writeAttributeString(key, hashtagOrXPath);
-            return;
         } else if (mug.options && mug.options.ignoreHashtags) {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
             return;
         }
 
-        var expr = mug.form.xpath.parse(hashtagOrXPath),
-            xpath_ = expr.toXPath(),
-            hashtag = expr.toHashtag();
+        var xpath_, hashtag;
+        try {
+            var expr = mug.form.xpath.parse(hashtagOrXPath);
+            xpath_ = expr.toXPath();
+            hashtag = expr.toBanana();
+        } catch (err) {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            return; 
+        }
 
         if (hashtag !== xpath_) {
             xmlWriter.writeAttributeString('vellum:' + key, hashtag);

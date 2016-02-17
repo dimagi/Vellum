@@ -74,7 +74,8 @@ define([
                     return mug.displayName;
                 },
                 data: {
-                    atwho: {}
+                    atwho: {},
+                    core: {},
                 },
             },
             formUuid: 'test',

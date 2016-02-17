@@ -64,7 +64,7 @@ define([
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             });
             assert.equal(phone.__className, "PhoneNumber");
-            assert.equal(hidden.p.calculateAttr, "#form/group/item/phone = '12345'");
+            assert.equal(hidden.p.calculateAttr, "🍌#form/group/item/phone🍌 = '12345'");
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_WITH_QUESTIONS_XML);
         });
 
@@ -148,8 +148,8 @@ define([
         });
 
         it("should not remove instance when ignore/retain is active", function () {
-            var normal = '<bind vellum:nodeset="#form/product/item" nodeset="/data/product/item" />',
-                ignore = '<bind vellum:nodeset="#form/product/item" nodeset="/data/product/item" wierd="true()" vellum:ignore="retain" />',
+            var normal = '<bind vellum:nodeset="🍌#form/product/item🍌" nodeset="/data/product/item" />',
+                ignore = '<bind vellum:nodeset="🍌#form/product/item🍌" nodeset="/data/product/item" wierd="true()" vellum:ignore="retain" />',
                 xml = FIXTURE_REPEAT_XML.replace(normal, normal + ignore);
             assert(xml.indexOf(ignore) > 0, ignore + " not found in XML:\n\n" + xml);
             util.loadXML(xml);
