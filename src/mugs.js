@@ -3,12 +3,14 @@ define([
     'underscore',
     'vellum/tree',
     'vellum/widgets',
+    'vellum/logic',
     'vellum/util',
 ], function (
     $,
     _,
     Tree,
     widgets,
+    logic,
     util
 ) {
     /**
@@ -903,8 +905,22 @@ define([
                 xpathType: 'generic',
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                help: "Referencing a node in this form may cause errors and/or " +
-                    "unexpected behavior",
+                validationFunc: function (mug) {
+                    var form = mug.form,
+                        xpath = form.xpath,
+                        xpathmodels = xpath.models;
+                    if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
+                        var paths = new logic.LogicExpression(mug.p.defaultValue, xpath).getPaths();
+                        paths = _.filter(paths, function (path) {
+                            return path.initial_context !== xpathmodels.XPathInitialContextEnum.EXPR;
+                        });
+                        if (paths.length) {
+                            return "You are referencing a node in this form. " +
+                                   "This can cause errors in the form";
+                        }
+                    }
+                    return 'pass';
+                }
             },
             comment: {
                 lstring: 'Comment',
