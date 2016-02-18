@@ -17,20 +17,20 @@ define([
 
         describe("#transform()", function() {
             var testCases = [
-                ["🍌#case/type/prop🍌", "#case/type/prop", "prop"],
-                ["(🍌#case/type/prop🍌)", "(#case/type/prop)", "(prop)"],
-                ["(🍌#case/type/prop🍌", "(#case/type/prop", "(prop"],
+                ["`#case/type/prop`", "#case/type/prop", "prop"],
+                ["(`#case/type/prop`)", "(#case/type/prop)", "(prop)"],
+                ["(`#case/type/prop`", "(#case/type/prop", "(prop"],
                 [
-                    "🍌#case/type/prop🍌 = 🍌#case/type/prop2🍌",
+                    "`#case/type/prop` = `#case/type/prop2`",
                     "#case/type/prop = #case/type/prop2",
                     "prop = prop2",
                 ],
-                ["🍌🍌", "🍌", "🍌"],
-                ["🍊you glad I didn't use 🍌", "🍊you glad I didn't use 🍌", "🍊you glad I didn't use 🍌"],
-                ["🍌#case/type/prop🍌 = 🍌", "#case/type/prop = 🍌",  "prop = 🍌"],
-                ["🍌#case/type/prop🍌 = 🍌🍌", "#case/type/prop = 🍌", "prop = 🍌"],
-                ["🍌#case/type/🍌🍌prop🍌 = 🍌🍌", "#case/type/🍌prop = 🍌", "🍌prop = 🍌"],
-                ["🍌🍌#case/type/🍌🍌prop🍌 = 🍌🍌", "🍌#case/type/🍌prop🍌 = 🍌", "🍌#case/type/🍌prop🍌 = 🍌"],
+                ["``", "`", "`"],
+                ["🍊you glad I didn't use 🍌`", "🍊you glad I didn't use 🍌`", "🍊you glad I didn't use 🍌`"],
+                ["`#case/type/prop` = `", "#case/type/prop = `",  "prop = `"],
+                ["`#case/type/prop` = ``", "#case/type/prop = `", "prop = `"],
+                ["`#case/type/``prop` = ``", "#case/type/`prop = `", "`prop = `"],
+                ["``#case/type/``prop` = ``", "`#case/type/`prop` = `", "`#case/type/`prop` = `"],
             ];
 
             testCases.forEach(function (testCase) {
@@ -50,9 +50,9 @@ define([
 
         describe("#toBanana()", function() {
             var testCases = [
-                    ["#form/text1", "🍌#form/text1🍌"],
-                    ["/data/text1", "🍌#form/text1🍌"],
-                    ["🍌#form/text1🍌", "🍌#form/text1🍌"],
+                    ["#form/text1", "`#form/text1`"],
+                    ["/data/text1", "`#form/text1`"],
+                    ["`#form/text1`", "`#form/text1`"],
                 ],
                 translationDict = {
                     "#form/text1": "/data/text1",
@@ -69,7 +69,7 @@ define([
 
         describe("#toXPath()", function() {
             var testCases = [
-                    ["🍌#form/text1🍌", "/data/text1"],
+                    ["`#form/text1`", "/data/text1"],
                 ],
                 translationDict = {
                     "#form/text1": "/data/text1",

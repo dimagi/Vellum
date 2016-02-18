@@ -8,7 +8,7 @@
 					<breath_count />
 				</data>
 			</instance>
-			<bind vellum:nodeset="🍌#form/breath_count🍌" nodeset="/data/breath_count" type="xsd:string" />
+			<bind vellum:nodeset="`#form/breath_count`" nodeset="/data/breath_count" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="breath_count-label">
@@ -23,7 +23,7 @@
 		</odkx:intent>
 	</h:head>
 	<h:body>
-		<input vellum:ref="🍌#form/breath_count🍌" ref="/data/breath_count">
+		<input vellum:ref="`#form/breath_count`" ref="/data/breath_count">
 			<label ref="jr:itext('breath_count-label')" />
 		</input>
 	</h:body>

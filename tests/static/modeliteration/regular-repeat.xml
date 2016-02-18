@@ -8,7 +8,7 @@
 					<product jr:template="" />
 				</data>
 			</instance>
-			<bind vellum:nodeset="🍌#form/product🍌" nodeset="/data/product" />
+			<bind vellum:nodeset="`#form/product`" nodeset="/data/product" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="product-label">
@@ -21,7 +21,7 @@
 	<h:body>
 		<group>
 			<label ref="jr:itext('product-label')" />
-			<repeat vellum:nodeset="🍌#form/product🍌" nodeset="/data/product" />
+			<repeat vellum:nodeset="`#form/product`" nodeset="/data/product" />
 		</group>
 	</h:body>
 </h:html>

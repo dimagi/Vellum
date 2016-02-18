@@ -9,7 +9,7 @@
 				</data>
 			</instance>
 			<instance id="somefixture" src="jr://fixture/some-fixture" />
-			<bind vellum:nodeset="🍌#form/question2🍌" nodeset="/data/question2" />
+			<bind vellum:nodeset="`#form/question2`" nodeset="/data/question2" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question2-label">
@@ -20,7 +20,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 vellum:ref="🍌#form/question2🍌" ref="/data/question2">
+		<select1 vellum:ref="`#form/question2`" ref="/data/question2">
 			<label ref="jr:itext('question2-label')" />
 			<itemset nodeset="instance('somefixture')/foos/foo[@foo_type='woo'][1=2]/bar[@bar_type='eggs']">
 				<label ref="case_name" />

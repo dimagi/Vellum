@@ -78,7 +78,7 @@ define([
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
             if (widget) {
-                var isCase = /^🍌#case\//.test(xpath),
+                var isCase = /^\`#case\//.test(xpath),
                     isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
@@ -366,7 +366,7 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (/^🍌#case/.test(xpath)) {
+            if (/^\`#case/.test(xpath)) {
                 return {
                     classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                 };
@@ -407,7 +407,7 @@ define([
             xpath = form.normalizeBanana(info.reference),
             extraAttrs = _.omit(info, 'reference');
 
-        if (!/^🍌#(form|case)/.test(xpath)) {
+        if (!/^\`#(form|case)/.test(xpath)) {
             return $('<span>').text(xml.normalize(value)).contents();
         }
 

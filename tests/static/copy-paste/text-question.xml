@@ -8,7 +8,7 @@
 					<txt />
 				</data>
 			</instance>
-			<bind vellum:nodeset="🍌#form/txt🍌" nodeset="/data/txt" type="xsd:string" constraint="1 = 0" relevant="x = y" jr:constraintMsg="jr:itext('txt-constraintMsg')" required="true()" />
+			<bind vellum:nodeset="`#form/txt`" nodeset="/data/txt" type="xsd:string" constraint="1 = 0" relevant="x = y" jr:constraintMsg="jr:itext('txt-constraintMsg')" required="true()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="txt-label">
@@ -30,7 +30,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="🍌#form/txt🍌" ref="/data/txt">
+		<input vellum:ref="`#form/txt`" ref="/data/txt">
 			<label ref="jr:itext('txt-label')" />
 			<alert ref="jr:itext('txt-constraintMsg')" />
 		</input>

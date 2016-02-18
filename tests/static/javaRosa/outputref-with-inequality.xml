@@ -9,7 +9,7 @@
 				</data>
 			</instance>
 			<instance src="jr://fixture/commtrack:products" id="products"></instance>
-			<bind vellum:nodeset="🍌#form/product🍌" nodeset="/data/product" />
+			<bind vellum:nodeset="`#form/product`" nodeset="/data/product" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="product-label">
@@ -25,7 +25,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 vellum:ref="🍌#form/product🍌" ref="/data/product">
+		<select1 vellum:ref="`#form/product`" ref="/data/product">
 			<label ref="jr:itext('product-label')" />
 			<itemset nodeset="instance('products')/products/product[(@id &gt; 3 and @id &lt; 6) or (@id &gt;= 3 and @id &lt;= 6)]">
 				<label ref="name" />

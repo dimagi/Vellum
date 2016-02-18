@@ -144,7 +144,7 @@ define([
                 it("should override " + prop + " in question " + question, function() {
                     util.loadXML(OVERRIDE_XML);
                     var mug = util.getMug(question);
-                    assert.strictEqual(mug.p[prop], "🍌#form/question1🍌");
+                    assert.strictEqual(mug.p[prop], "`#form/question1`");
                 });
             });
 

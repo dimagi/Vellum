@@ -5,7 +5,7 @@ define([
 ) {
     var OUTSIDE_BANANA = 0,
         INSIDE_BANANA = 1,
-        DELIMITER = "🍌",
+        DELIMITER = "`",
         defaultParser = xpath.createParser(xpath.makeXPathModels({}));
 
     function toXPath(input, xpathParser) {
@@ -129,6 +129,11 @@ define([
                     currentReference = "";
                 }
             }
+        }
+
+        if (state === INSIDE_BANANA) {
+            // end of string, without the end delimiter
+            text += DELIMITER + currentReference;
         }
 
         return text;
