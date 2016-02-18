@@ -162,7 +162,7 @@ define([
 
             function testEditButton(bool) {
                 clickQuestion(bool ? "value_locked" : "normal");
-                var $but = getInput('relevantAttr').parents('.form-group').find('button:contains(Edit)');
+                var $but = getInput('relevantAttr').parents('.form-group').find('button.fd-edit-button');
                 assert.equal(1, $but.length);
                 assert.equal(bool, $but.prop('disabled'));
             }
