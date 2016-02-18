@@ -514,7 +514,7 @@ define([
             }
         }
         path = path || nodeId || null;
-        if (path && path[0] !== "/" && path[0] !== "#" && path.slice(0, 2) !== "🍌") {
+        if (path && path[0] !== "/" && path[0] !== "#" && path[0] !== "`") {
             // make path absolute
             if (parentMug) {
                 var parentPath = parentMug.hashtagPath;

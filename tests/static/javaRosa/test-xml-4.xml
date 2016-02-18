@@ -15,15 +15,15 @@
 					<question2/>
 				</data>
 			</instance>
-			<bind vellum:nodeset="🍌#form/first_question🍌" nodeset="/data/first_question" type="xsd:string"/>
-			<bind vellum:nodeset="🍌#form/question2🍌" nodeset="/data/question2" type="xsd:string"/>
+			<bind vellum:nodeset="`#form/first_question`" nodeset="/data/first_question" type="xsd:string"/>
+			<bind vellum:nodeset="`#form/question2`" nodeset="/data/question2" type="xsd:string"/>
 			<itext>
 				<translation lang="en" default="">
 					<text id="first_question-label">
 						<value>first_question</value>
 					</text>
 					<text id="question2-label">
-						<value><output vellum:value="🍌#form/first_question🍌" value="/data/first_question" /> a <output vellum:value="🍌#form/first_question🍌" value="/data/first_question" /> b <output vellum:value="🍌#form/first_question🍌" value="/data/first_question" /> c <output vellum:value="🍌#form/first_question🍌" value="/data/first_question" /> d <output vellum:value="if(🍌#form/first_question🍌 = '', '', format-date(date(🍌#form/first_question🍌), '%a%b%c'))" value="if(/data/first_question = '', '', format-date(date(/data/first_question), '%a%b%c'))" /></value>
+						<value><output vellum:value="`#form/first_question`" value="/data/first_question" /> a <output vellum:value="`#form/first_question`" value="/data/first_question" /> b <output vellum:value="`#form/first_question`" value="/data/first_question" /> c <output vellum:value="`#form/first_question`" value="/data/first_question" /> d <output vellum:value="if(`#form/first_question` = '', '', format-date(date(`#form/first_question`), '%a%b%c'))" value="if(/data/first_question = '', '', format-date(date(/data/first_question), '%a%b%c'))" /></value>
 					</text>
 				</translation>
 				<translation lang="hin">
@@ -31,17 +31,17 @@
 						<value>first_question</value>
 					</text>
 					<text id="question2-label">
-						<value><output vellum:value="🍌#form/first_question🍌" value="/data/first_question" /></value>
+						<value><output vellum:value="`#form/first_question`" value="/data/first_question" /></value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="🍌#form/first_question🍌" ref="/data/first_question">
+		<input vellum:ref="`#form/first_question`" ref="/data/first_question">
 			<label ref="jr:itext('first_question-label')"/>
 		</input>
-		<input vellum:ref="🍌#form/question2🍌" ref="/data/question2">
+		<input vellum:ref="`#form/question2`" ref="/data/question2">
 			<label ref="jr:itext('question2-label')"/>
 		</input>
 	</h:body>

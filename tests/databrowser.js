@@ -109,7 +109,7 @@ define([
                 assert.equal(getInstanceId(mug.form, casedbUri), null);
                 assert.equal(calc.length, 1);
                 util.findNode(dataTree, "dob").data.handleDrop(calc);
-                assert.equal(mug.p.calculateAttr, "🍌#case/child/dob🍌");
+                assert.equal(mug.p.calculateAttr, "`#case/child/dob`");
                 assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                 assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                 util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
@@ -126,7 +126,7 @@ define([
                 assert.equal(getInstanceId(mug.form, casedbUri), null);
                 assert.equal(calc.length, 1);
                 util.findNode(dataTree, "edd").data.handleDrop(calc);
-                assert.equal(mug.p.calculateAttr, "🍌#case/mother/edd🍌");
+                assert.equal(mug.p.calculateAttr, "`#case/mother/edd`");
                 assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                 assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                 util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
@@ -146,7 +146,7 @@ define([
                     node = util.findNode(dataTree, "child", motherNode);
                 dataTree.open_node(node);
                 util.findNode(dataTree, "dob", node).data.handleDrop(calc);
-                assert.equal(mug.p.calculateAttr, '🍌#case/child/dob🍌');
+                assert.equal(mug.p.calculateAttr, '`#case/child/dob`');
                 assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                 assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                 util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
@@ -192,7 +192,7 @@ define([
             });
 
             it("should error for unknown properties", function(done) {
-                widget.setValue("🍌#case/child/dob🍌");
+                widget.setValue("`#case/child/dob`");
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
                 event.fire("nodeError");
                 loadDataTree(function() {
