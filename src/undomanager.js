@@ -12,7 +12,7 @@ define([
     }
 
     function createAlert() {
-        $('.fd-scrollable-tree').prepend(UNDO_ALERT);
+        $('.fd-undo-container').append(UNDO_ALERT);
     }
 
     function toggleAlert(undoStack) {
