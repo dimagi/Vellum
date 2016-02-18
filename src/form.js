@@ -42,7 +42,7 @@ define([
         
         return that;
     };
-    
+
     var InstanceMetadata = function (attributes, children, mug, property) {
         var that = {},
             refs = {};

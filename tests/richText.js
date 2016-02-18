@@ -69,7 +69,7 @@ define([
         return $('<i>').addClass('fcc ' + iconClass).html('&nbsp;');
     }
 
-    function externalIcon () { return icon('fcc-fd-external-case'); }
+    function externalIcon () { return icon('fcc-fd-case-property'); }
 
     function bubbleSpan(xpath, internal, output) {
         var span = $('<span>').addClass('label label-datanode').attr({
@@ -179,8 +179,8 @@ define([
                     ],
                     [
                         f_1065 + " = " + f_1065,
-                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
-                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html()
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'))).html() + " = " +
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'))).html()
                     ],
                 ],
                 opts = {isExpression: true};

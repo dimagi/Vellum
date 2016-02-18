@@ -366,7 +366,7 @@ define([
         function _parseXPath(xpath, form) {
             if (/instance\('casedb'\)/.test(xpath)) {
                 return {
-                    classes: ['label-datanode-external', 'fcc fcc-fd-external-case']
+                    classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                 };
             }
 

@@ -704,17 +704,20 @@ define([
 
         var button = $('<button />')
             .addClass("fd-edit-button")
-            .text("Edit")
+            .html("<i class='fa fa-edit'></i>")
             .stopLink()
-            .addClass('btn btn-default')
+            .addClass('btn btn-default btn-block')
             .attr('type', 'button')
             .prop('disabled', isDisabled)
-            .click(editFn);
+            .click(editFn),
+            buttonContainer = $("<div />")
+            .addClass("col-sm-1")
+            .append(button);
 
         $uiElem.css('position', 'relative');
         $uiElem.find('.controls')
             .removeClass("col-sm-9").addClass("col-sm-8")
-            .after(button);
+            .after(buttonContainer);
         return $uiElem;
     };
     
