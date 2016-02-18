@@ -189,8 +189,8 @@ define([
                     ],
                     [
                         f_1065 + " = " + f_1065,
-                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html() + " = " +
-                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-external-case'))).html()
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'))).html() + " = " +
+                        wrapWithDiv(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'))).html()
                     ],
                 ],
                 opts = {isExpression: true};
