@@ -166,6 +166,9 @@ define([
         var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary));
         return {
             parse: function (input) {
+                if (input.startsWith("#invalid/xpath ")) {
+                    input = input.slice(15);
+                }
                 var parsed = xpathParser.parse(toHashtag(input, xpathParser));
                 parsed.toBanana = function() {
                     return toBanana(this.toHashtag(), xpathParser);

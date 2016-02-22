@@ -156,13 +156,13 @@ define([
             return bananas.transform(input, transformFn);
         },
         normalize: function (methodName, xpath) {
-             // try catch is needed as workaround for having an itemset without
-             // the itemset plugin enabled and invalid xpaths
-             try {
+            // try catch is needed as workaround for having an itemset without
+            // the itemset plugin enabled and invalid xpaths
+            try {
                 return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
-             } catch (err) {
-                return xpath;
-             }
+            } catch (err) {
+                return xpath.startsWith('#invalid/xpath ') ? xpath.slice(15) : xpath;
+            }
          },
         normalizeBanana: function (xpath_) {
             return this.normalize('toBanana', xpath_);

@@ -89,6 +89,28 @@ define([
         });
     });
 
+    describe("The form's 🍌 parser", function() {
+        beforeEach(function (done) {
+            util.init({
+                javaRosa: { langs: ['en'] },
+                core: {
+                    onReady: function () {
+                        done();
+                    }
+                },
+                features: {rich_text: false},
+            });
+        });
+
+        it("writes invalid xml with #invalid", function () {
+            util.loadXML(INVALID_XPATH_XML);
+            var text = util.getMug('text'),
+                hidden = util.getMug('hidden');
+            assert.strictEqual(text.p.relevantAttr, '(`#form/hidden`');
+            assert.strictEqual(hidden.p.calculateAttr, '`#form/text`');
+        });
+    });
+
     describe("The 🍌writer", function () { 
         beforeEach(function (done) {
             util.init({
