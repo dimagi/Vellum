@@ -2,10 +2,14 @@ define([
     'chai',
     'vellum/bananas',
     'vellum/xpath',
+    'tests/utils',
+    'text!static/bananas/invalid-xpath.xml',
 ], function (
     chai,
     bananas,
-    xpath
+    xpath,
+    util,
+    INVALID_XPATH_XML
 ) {
     var assert = chai.assert;
 
@@ -82,6 +86,33 @@ define([
                     assert.strictEqual(bananas.toXPath(testCase[0], xpathParser), testCase[1]);
                 });
             });
+        });
+    });
+
+    describe("The 🍌writer", function () { 
+        beforeEach(function (done) {
+            util.init({
+                javaRosa: { langs: ['en'] },
+                core: {
+                    onReady: function () {
+                        done();
+                    }
+                },
+                features: {rich_text: false},
+            });
+        });
+
+        it("writes invalid xml with #invalid", function () {
+            util.loadXML("");
+            var text = util.addQuestion('Text', 'text'),
+                hidden = util.addQuestion('DataBindOnly', 'hidden');
+            text.p.relevantAttr = '(`#form/hidden`'; // invalid xml
+            hidden.p.calculateAttr = '`#form/text`';
+            util.assertXmlEqual(
+                util.call("createXML"),
+                INVALID_XPATH_XML,
+                {normalize_xmlns: true}
+            );
         });
     });
 });

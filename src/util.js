@@ -319,7 +319,7 @@ define([
             xpath_ = expr.toXPath();
             hashtag = expr.toHashtag();
         } catch (err) {
-            xmlWriter.writeAttributeString('vellum: ' + key, "#invalid " + hashtagOrXPath);
+            xmlWriter.writeAttributeString('vellum:' + key, "#invalid/xpath " + hashtagOrXPath);
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
             return; 
         }
