@@ -9,8 +9,8 @@
 					<print_data />
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/text`" nodeset="/data/text" type="xsd:string" />
-			<bind vellum:nodeset="`#form/print_data`" nodeset="/data/print_data" type="intent" />
+			<bind vellum:nodeset="#form/text" nodeset="/data/text" type="xsd:string" />
+			<bind vellum:nodeset="#form/print_data" nodeset="/data/print_data" type="intent" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="text-label">
@@ -28,10 +28,10 @@
 		</odkx:intent>
 	</h:head>
 	<h:body>
-		<input vellum:ref="`#form/text`" ref="/data/text">
+		<input vellum:ref="#form/text" ref="/data/text">
 			<label ref="jr:itext('text-label')" />
 		</input>
-		<input vellum:ref="`#form/print_data`" ref="/data/print_data" appearance="intent:print_data">
+		<input vellum:ref="#form/print_data" ref="/data/print_data" appearance="intent:print_data">
 			<label ref="jr:itext('print_data-label')" />
 		</input>
 	</h:body>

@@ -8,7 +8,7 @@
 					<markdown_question />
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/markdown_question`" nodeset="/data/markdown_question" type="xsd:string" />
+			<bind vellum:nodeset="#form/markdown_question" nodeset="/data/markdown_question" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="markdown_question-label">
@@ -26,7 +26,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="`#form/markdown_question`" ref="/data/markdown_question">
+		<input vellum:ref="#form/markdown_question" ref="/data/markdown_question">
 			<label ref="jr:itext('markdown_question-label')" />
 		</input>
 	</h:body>

@@ -373,7 +373,7 @@ define([
             vellum_util.setCaretPosition(target[0], 4);
             call("handleDropFinish", target, mug1.absolutePath, mug1);
             var val = mug2.p.labelItext.get('default', 'en');
-            assert.equal(val, 'test<output value="`#form/question1`"></output> string');
+            assert.equal(val, 'test<output value="#form/question1"></output> string');
             assert.equal(target.val(), 'test<output value="/data/question1" /> string');
         });
 
@@ -419,13 +419,13 @@ define([
                 q1 = util.call("getMugByPath", "/data/question1"),
                 itext = q1.p.labelItext;
 
-            assert(itext.get().indexOf('"`#form/question2/question3`"') > 0,
-                '"`#form/question2/question3`" not in ' + itext.get());
+            assert(itext.get().indexOf('"#form/question2/question3"') > 0,
+                '"#form/question2/question3" not in ' + itext.get());
             group.p.nodeID = "group";
-            assert(itext.get('default', 'en').indexOf('"`#form/group/question3`"') > 0,
-                '"`#form/group/question3`" not in ' + itext.get('default', 'en'));
-            assert(itext.get('default', 'hin').indexOf('"`#form/group/question3`"') > 0,
-                '"`#form/group/question`3" not in ' + itext.get('default', 'hin'));
+            assert(itext.get('default', 'en').indexOf('"#form/group/question3"') > 0,
+                '"#form/group/question3" not in ' + itext.get('default', 'en'));
+            assert(itext.get('default', 'hin').indexOf('"#form/group/question3"') > 0,
+                '"#form/group/question3" not in ' + itext.get('default', 'hin'));
         });
 
         it("should add warning on add Audio output ref to itext", function () {

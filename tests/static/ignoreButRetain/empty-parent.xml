@@ -11,8 +11,8 @@
 					<update vellum:ignore="retain"/></case>
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/question1`" nodeset="/data/question1" type="xsd:string" />
-			<bind vellum:nodeset="`#form/case`" nodeset="/data/case"/>
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" />
+			<bind vellum:nodeset="#form/case" nodeset="/data/case"/>
 			<itext>
 				<translation lang="en" default=""/>
 			</itext>

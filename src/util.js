@@ -317,8 +317,9 @@ define([
         try {
             var expr = mug.form.xpath.parse(hashtagOrXPath);
             xpath_ = expr.toXPath();
-            hashtag = expr.toBanana();
+            hashtag = expr.toHashtag();
         } catch (err) {
+            xmlWriter.writeAttributeString('vellum: ' + key, "#invalid " + hashtagOrXPath);
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
             return; 
         }

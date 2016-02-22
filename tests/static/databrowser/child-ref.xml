@@ -10,7 +10,7 @@
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb" />
 			<instance src="jr://instance/session" id="commcaresession" />
-			<bind vellum:nodeset="`#form/mug`" nodeset="/data/mug" vellum:calculate="`#case/child/dob`" calculate="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" />
+			<bind vellum:nodeset="#form/mug" nodeset="/data/mug" vellum:calculate="#case/child/dob" calculate="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" />
 			<itext>
 				<translation lang="en" default="">
 				</translation>

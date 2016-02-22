@@ -9,8 +9,8 @@
 					<fox />
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/box`" nodeset="/data/box" />
-			<bind vellum:nodeset="`#form/fox`" nodeset="/data/fox" />
+			<bind vellum:nodeset="#form/box" nodeset="/data/box" />
+			<bind vellum:nodeset="#form/fox" nodeset="/data/fox" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="box-label">
@@ -44,7 +44,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 vellum:ref="`#form/box`" ref="/data/box">
+		<select1 vellum:ref="#form/box" ref="/data/box">
 			<label ref="jr:itext('box-label')" />
 			<item>
 				<label ref="jr:itext('yes-label')" />
@@ -55,7 +55,7 @@
 				<value>no</value>
 			</item>
 		</select1>
-		<select1 vellum:ref="`#form/fox`" ref="/data/fox">
+		<select1 vellum:ref="#form/fox" ref="/data/fox">
 			<label ref="jr:itext('fox-label')" />
 			<item>
 				<label ref="jr:itext('yes-label')" />

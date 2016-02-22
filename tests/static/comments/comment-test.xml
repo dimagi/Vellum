@@ -8,7 +8,7 @@
 					<mug vellum:comment="This is a comment" />
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/mug`" nodeset="/data/mug" type="xsd:string" />
+			<bind vellum:nodeset="#form/mug" nodeset="/data/mug" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="mug-label">
@@ -19,7 +19,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="`#form/mug`" ref="/data/mug">
+		<input vellum:ref="#form/mug" ref="/data/mug">
 			<label ref="jr:itext('mug-label')" />
 		</input>
 	</h:body>

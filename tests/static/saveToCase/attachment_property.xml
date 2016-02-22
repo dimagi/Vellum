@@ -15,8 +15,8 @@
 					</save_to_case>
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/question1`" nodeset="/data/question1" type="binary" />
-			<bind nodeset="/data/save_to_case/case/attachment/attach/@src" vellum:calculate="`#form/question1`" calculate="/data/question1" />
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="binary" />
+			<bind nodeset="/data/save_to_case/case/attachment/attach/@src" vellum:calculate="#form/question1" calculate="/data/question1" />
 			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/save_to_case/case/@user_id" calculate="/data/meta/userID" />
 			<bind nodeset="/data/save_to_case/case/@case_id" calculate="/data/meta/caseID" />
@@ -30,7 +30,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<upload mediatype="image/*" vellum:ref="`#form/question1`" ref="/data/question1">
+		<upload mediatype="image/*" vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')" />
 		</upload>
 	</h:body>

@@ -9,8 +9,8 @@
 					<choice />
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/text`" nodeset="/data/text" type="xsd:string" />
-			<bind vellum:nodeset="`#form/choice`" nodeset="/data/choice" />
+			<bind vellum:nodeset="#form/text" nodeset="/data/text" type="xsd:string" />
+			<bind vellum:nodeset="#form/choice" nodeset="/data/choice" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="default-label">
@@ -44,10 +44,10 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="`#form/text`" ref="/data/text">
+		<input vellum:ref="#form/text" ref="/data/text">
 			<label ref="jr:itext('default-label')" />
 		</input>
-		<select1 vellum:ref="`#form/choice`" ref="/data/choice">
+		<select1 vellum:ref="#form/choice" ref="/data/choice">
 			<label ref="jr:itext('choice-label')" />
 			<item>
 				<label ref="jr:itext('choice-true-label')" />

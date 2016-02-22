@@ -10,27 +10,27 @@
 					<question3 />
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/question1`" nodeset="/data/question1" type="xsd:string" />
-			<bind vellum:nodeset="`#form/question2`" nodeset="/data/question2" type="xsd:string" vellum:constraint="`#form/question1`" constraint="/data/question1" vellum:relevant="`#form/question1`" relevant="/data/question1" />
-			<bind vellum:nodeset="`#form/question3`" nodeset="/data/question3" vellum:calculate="`#form/question1`" calculate="/data/question1" />
-			<setvalue event="xforms-ready" vellum:ref="`#form/question2`" ref="/data/question2" vellum:value="`#form/question1`" value="/data/question1" />
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" />
+			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:string" vellum:constraint="#form/question1" constraint="/data/question1" vellum:relevant="#form/question1" relevant="/data/question1" />
+			<bind vellum:nodeset="#form/question3" nodeset="/data/question3" vellum:calculate="#form/question1" calculate="/data/question1" />
+			<setvalue event="xforms-ready" vellum:ref="#form/question2" ref="/data/question2" vellum:value="#form/question1" value="/data/question1" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
 						<value>question1</value>
 					</text>
 					<text id="question2-label">
-						<value><output vellum:value="`#form/question1`" value="/data/question1" /> question2</value>
+						<value><output vellum:value="#form/question1" value="/data/question1" /> question2</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="`#form/question1`" ref="/data/question1">
+		<input vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')" />
 		</input>
-		<input vellum:ref="`#form/question2`" ref="/data/question2">
+		<input vellum:ref="#form/question2" ref="/data/question2">
 			<label ref="jr:itext('question2-label')" />
 		</input>
 	</h:body>

@@ -12,7 +12,7 @@
 			</instance>
 			<instance id="products" src="jr://fixture/commtrack:products"/>
 			<setvalue event="xforms-ready" ref="/data/product/@count" value="count(instance('products')/products/product)" />
-			<setvalue event="jr-insert" ref="/data/product/@current_index" vellum:value="count(`#form/product/item`)" value="count(/data/product/item)" />
+			<setvalue event="jr-insert" ref="/data/product/@current_index" vellum:value="count(#form/product/item)" value="count(/data/product/item)" />
 			<setvalue event="jr-insert" ref="/data/product/item/@index" value="int(/data/product/@current_index)" />
 			<bind vellum:nodeset="#form/product" nodeset="/data/product"/>
 			<itext>
@@ -27,7 +27,7 @@
 	<h:body>
 		<group>
 			<label ref="jr:itext('product-label')"/>
-			<repeat vellum:nodeset="`#form/product/item`" nodeset="/data/product/item" jr:count="/data/product/@count">
+			<repeat vellum:nodeset="#form/product/item" nodeset="/data/product/item" jr:count="/data/product/@count">
 			</repeat>
 		</group>
 	</h:body>

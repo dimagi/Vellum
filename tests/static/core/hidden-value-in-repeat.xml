@@ -11,9 +11,9 @@
 					</repeat>
 				</data>
 			</instance>
-			<bind vellum:nodeset="`#form/repeat`" nodeset="/data/repeat" />
-			<bind vellum:nodeset="`#form/repeat/text`" nodeset="/data/repeat/text" type="xsd:string" />
-			<bind vellum:nodeset="`#form/repeat/hidden`" nodeset="/data/repeat/hidden" />
+			<bind vellum:nodeset="#form/repeat" nodeset="/data/repeat" />
+			<bind vellum:nodeset="#form/repeat/text" nodeset="/data/repeat/text" type="xsd:string" />
+			<bind vellum:nodeset="#form/repeat/hidden" nodeset="/data/repeat/hidden" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="repeat-label">
@@ -37,8 +37,8 @@
 	<h:body>
 		<group>
 			<label ref="jr:itext('repeat-label')" />
-			<repeat vellum:nodeset="`#form/repeat`" nodeset="/data/repeat">
-				<input vellum:ref="`#form/repeat/text`" ref="/data/repeat/text">
+			<repeat vellum:nodeset="#form/repeat" nodeset="/data/repeat">
+				<input vellum:ref="#form/repeat/text" ref="/data/repeat/text">
 					<label ref="jr:itext('repeat/text-label')" />
 				</input>
 			</repeat>
