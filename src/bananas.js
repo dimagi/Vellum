@@ -167,7 +167,7 @@ define([
         return {
             parse: function (input) {
                 if (input.startsWith("#invalid/xpath ")) {
-                    input = input.slice(15);
+                    throw new Error("Invalid XPath");
                 }
                 var parsed = xpathParser.parse(toHashtag(input, xpathParser));
                 parsed.toBanana = function() {
