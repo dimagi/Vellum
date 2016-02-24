@@ -326,11 +326,7 @@ define([
 
         if (hashtag !== xpath_) {
             xmlWriter.writeAttributeString('vellum:' + key, hashtag);
-            if (xpath_.replace(/ /g, '') === hashtagOrXPath.replace(/ /g, '')) {
-                xmlWriter.writeAttributeString(key, hashtagOrXPath);
-            } else {
-                xmlWriter.writeAttributeString(key, xpath_);
-            }
+            xmlWriter.writeAttributeString(key, xpath_);
         } else {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
         }
