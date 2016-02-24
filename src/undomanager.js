@@ -49,7 +49,7 @@ define([
                 var mug = undo[0],
                     sibling = undo[1],
                     position = undo[2];
-                mug.form.insertQuestion(mug, sibling, position);
+                mug.form.insertQuestion(mug, sibling, position, true);
             });
             this.resetUndo();
         },

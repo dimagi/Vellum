@@ -132,5 +132,23 @@ define([
             util.clickQuestion('text');
             util.assertJSTreeState("text", "text2");
         });
+
+        it("should undelete a multiple choice question with correct number of children", function () {
+            util.loadXML("");
+            util.addQuestion('Select', 'select');
+            util.clickQuestion('select');
+            util.assertJSTreeState("select", "  choice1", "  choice2");
+            $('.fd-button-remove').click();
+            try {
+                util.clickQuestion('select');
+                assert(false, "this better not work");
+            } catch (err) {
+                assert(true, "text doesn't exist");
+            }
+            $('.fd-undo').click();
+            debugger;
+            util.clickQuestion('select');
+            util.assertJSTreeState("select", "  choice1", "  choice2");
+        });
     });
 });
