@@ -61,17 +61,18 @@ define([
         },
         init: function() {
             // TODO: PR to ckeditor to make changing drag ui supported
-            var width = $(this.element.$).innerWidth();
-            var height = $(this.element.$).outerHeight();
-            this.dragHandlerContainer.setStyles({
+            var $this = $(this.element.$),
+                width = $this.innerWidth(),
+                height = $this.outerHeight(),
+                dragContainer = this.dragHandlerContainer;
+            dragContainer.setStyles({
                 width: width + 'px',
                 height: height + 'px',
                 left: '0px'
             });
 
             // Setup popover
-            var $this = $(this.element.$),
-                datavalue = $this.attr('data-value'),
+            var datavalue = $this.attr('data-value'),
                 // WARNING does the wrong thing for value like "/data/q + 3"
                 xpath = extractXPathInfoFromOutputValue(datavalue).reference,
                 getWidget = require('vellum/widgets').util.getWidget,
@@ -82,14 +83,16 @@ define([
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
                     labelText = labelMug && labelMug.p.labelItext ?
-                                labelMug.p.labelItext.get() : "";
+                                labelMug.p.labelItext.get() : "",
+                    $dragContainer = $(dragContainer.$),
+                    $imgs = $dragContainer.children("img");
                 labelText = $('<div>').append(labelText);
                 labelText.find('output').replaceWith(function () {
                     return extractXPathInfoFromOutputValue($(this).attr('value')).reference;
                 });
                 // Remove ckeditor-supplied title attributes, which will otherwise override popover title
-                $(this.dragHandlerContainer.$).children("img").removeAttr("title");
-                $(this.dragHandlerContainer.$).children("img").popover({
+                $imgs.removeAttr("title");
+                $imgs.popover({
                     trigger: 'hover',
                     container: 'body',
                     placement: 'bottom',
@@ -102,6 +105,10 @@ define([
                         '<div class="popover-title"></div>' +
                         '<div class="popover-content"><p></p></div>' +
                         '</div></div>'
+                });
+
+                this.on('destroy', function (e)  {
+                    $imgs.popover('destroy');
                 });
             }
         }
