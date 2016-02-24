@@ -305,10 +305,10 @@ define([
     };
 
     that.writeHashtags = function (xmlWriter, key, hashtagOrXPath, mug) {
-        if (!hashtagOrXPath) {
+        if (!_.isString(hashtagOrXPath)) {
             // don't try to parse a value that doesn't exist
             return;
-        } else if (mug.options && mug.options.ignoreHashtags) {
+        } else if (hashtagOrXPath === "" || (mug.options && mug.options.ignoreHashtags)) {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
             return;
         }
@@ -321,7 +321,7 @@ define([
         } catch (err) {
             xmlWriter.writeAttributeString('vellum:' + key, "#invalid/xpath " + hashtagOrXPath);
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
-            return; 
+            return;
         }
 
         if (hashtag !== xpath_) {
