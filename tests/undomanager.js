@@ -10,7 +10,7 @@ define([
     var assert = chai.assert;
 
     describe("The undo manager", function () {
-        before(function(done) {
+        beforeEach(function(done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: { onReady: done },
@@ -19,14 +19,12 @@ define([
         });
 
         it("should show an alert when deleting questions", function () {
-            util.loadXML("");
             util.addQuestion('Text', 'text');
             $('.fd-button-remove').click();
             assert($('.fd-undo-delete').length);
         });
 
         it("should undelete one question properly", function () {
-            util.loadXML("");
             util.addQuestion('Text', 'text');
             $('.fd-button-remove').click();
             try {
@@ -41,7 +39,6 @@ define([
         });
 
         it("should undelete two questions properly", function () {
-            util.loadXML("");
             util.addQuestion('Text', 'text');
             util.addQuestion('Text', 'text2');
             util.clickQuestion('text', 'text2');
@@ -59,7 +56,6 @@ define([
         });
 
         it("should undelete a nested question properly", function () {
-            util.loadXML("");
             util.addQuestion('Group', 'group');
             util.addQuestion('Text', 'text2');
             util.assertJSTreeState("group", "  text2");
@@ -77,7 +73,6 @@ define([
         });
 
         it("should undelete a group properly", function () {
-            util.loadXML("");
             util.addQuestion('Group', 'group');
             util.addQuestion('Text', 'text2');
             util.assertJSTreeState("group", "  text2");
@@ -96,7 +91,6 @@ define([
         });
 
         it("should undelete a nested group properly", function () {
-            util.loadXML("");
             util.addQuestion('Group', 'group');
             util.addQuestion('Group', 'group2');
             util.addQuestion('Text', 'text2');
@@ -116,7 +110,6 @@ define([
         });
 
         it("should undelete a question with question after it", function () {
-            util.loadXML("");
             util.addQuestion('Text', 'text');
             util.addQuestion('Text', 'text2');
             util.clickQuestion('text');
@@ -133,8 +126,23 @@ define([
             util.assertJSTreeState("text", "text2");
         });
 
+        it("should undelete the first question", function () {
+            util.addQuestion('Text', 'text');
+            util.clickQuestion('text');
+            util.assertJSTreeState("text");
+            $('.fd-button-remove').click();
+            try {
+                util.clickQuestion('text');
+                assert(false, "this better not work");
+            } catch (err) {
+                assert(true, "text doesn't exist");
+            }
+            $('.fd-undo').click();
+            util.clickQuestion('text');
+            util.assertJSTreeState("text");
+        });
+
         it("should undelete a multiple choice question with correct number of children", function () {
-            util.loadXML("");
             util.addQuestion('Select', 'select');
             util.clickQuestion('select');
             util.assertJSTreeState("select", "  choice1", "  choice2");
@@ -146,7 +154,6 @@ define([
                 assert(true, "text doesn't exist");
             }
             $('.fd-undo').click();
-            debugger;
             util.clickQuestion('select');
             util.assertJSTreeState("select", "  choice1", "  choice2");
         });

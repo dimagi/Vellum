@@ -1183,6 +1183,10 @@ define([
             }
             // hacks
             e.mug._node_control = undefined;
+
+            $('.fd-undo').click(function () {
+                _this.ensureCurrentMugIsSaved(form.undo.bind(form));
+            });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1685,9 +1689,6 @@ define([
             var mugs = _this.getCurrentlySelectedMug(true);
             form.removeMugsFromForm(mugs);
             _this.refreshCurrentMug();
-        });
-        $('.fd-undo').click(function () {
-            _this.ensureCurrentMugIsSaved(form.undo.bind(form));
         });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
