@@ -16,65 +16,6 @@ define([
 ) {
     var that = {};
 
-    // stripped down version of http://codepen.io/ImagineProgramming/storydump/javascript-memoization-timeout
-    var timed = function timed(f, timeout) {
-        var time = 0;
-
-        return function TimedMemoizedFunction() {
-            var now = +new Date(),
-                timedOut = (now - time) >= timeout,
-                form = arguments[0],
-                atwhoData = form.vellum.data.atwho,
-                cache = atwhoData.cache;
-
-            if(timedOut || _.isUndefined(cache)) {
-                cache = atwhoData.cache = f.apply(f, arguments);
-                if (timedOut) {
-                    time = now;
-                }
-            }
-
-            return atwhoData.cache;
-        };
-    };
-
-    var _cachedMugData = function(cacheTime) {
-            return timed(function(form) {
-                var caseData = [];
-                if (form.vellum.data.core.databrowser) {
-                    caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
-                     .map(function(absolutePath, hashtag) {
-                         return {
-                             name: hashtag,
-                             absolutePath: absolutePath,
-                             icon: 'fcc fcc-fd-external-case-data',
-                             displayLabel: null,
-                         };
-                     })
-                     .value();
-                }
-                return _.chain(form.getMugList())
-                        .map(function(mug) {
-                            var defaultLabel = form.vellum.getMugDisplayName(mug);
-
-                            return {
-                                id: mug.ufid,
-                                name: mug.hashtagPath,
-                                absolutePath: mug.absolutePath,
-                                icon: mug.options.icon,
-                                questionId: mug.p.nodeID,
-                                displayLabel: util.truncate(defaultLabel),
-                                label: defaultLabel,
-                            };
-                        })
-                        .filter(function(choice) {
-                            return choice.name && !_.isUndefined(choice.displayLabel);
-                        })
-                        .value().concat(caseData);
-            }, cacheTime || 500);
-        },
-        cachedMugData = _cachedMugData();
-
     /**
      * Turn a given input into an autocomplete, which will be populated
      * with a given set of choices and will also accept free text.
@@ -149,8 +90,7 @@ define([
 
         function addAtWhoToInput() {
             var _atWhoOptions = function(atKey) {
-                var mugData = cachedMugData(mug.form),
-                    fuse = new fusejs(mugData, { keys: ['label', 'name', 'absolutePath'] });
+                var fuse = mug.form.fuse;
 
                 return {
                     at: atKey,
@@ -167,7 +107,7 @@ define([
                             return match ? match[2] : null;
                         },
                         filter: function (query, data, searchKey) {
-                            if (!query) { return fuse.list; }
+                            if (!query) { return fuse.list(); }
                             return fuse.search(query);
                         },
                         sorter: function (query, items, searchKey) {
@@ -210,8 +150,6 @@ define([
             addAtWhoToInput();
         });
     };
-
-    that.cachedMugData = _cachedMugData;
 
     $.vellum.plugin("atwho", {},
         {
