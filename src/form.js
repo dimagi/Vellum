@@ -1093,6 +1093,7 @@ define([
         },
         undo: function() {
             this.undomanager.undo();
+            this.vellum.selectSomethingOrHideProperties();
         }
     };
 

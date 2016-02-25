@@ -138,7 +138,7 @@ define([
                 assert(true, "text doesn't exist");
             }
             $('.fd-undo').click();
-            util.clickQuestion('text');
+            assert(!$('.fd-default-panel').is(':visible'), "New Form dialog showing");
             util.assertJSTreeState("text");
         });
 
