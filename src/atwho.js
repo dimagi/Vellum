@@ -151,10 +151,9 @@ define([
             var _atWhoOptions = function(atKey) {
                 var mugData = cachedMugData(mug.form),
                     fuse = new fusejs(mugData, { keys: ['label', 'name', 'absolutePath'] });
-        
+
                 return {
                     at: atKey,
-                    data: mugData,
                     displayTpl: atwhoDisplay,
                     insertTpl: options.insertTpl,
                     limit: 10,
@@ -168,7 +167,7 @@ define([
                             return match ? match[2] : null;
                         },
                         filter: function (query, data, searchKey) {
-                            if (!query) { return data; }
+                            if (!query) { return fuse.list; }
                             return fuse.search(query);
                         },
                         sorter: function (query, items, searchKey) {
