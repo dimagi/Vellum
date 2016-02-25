@@ -3,151 +3,70 @@ define([
     'chai',
     'jquery',
     'underscore',
-    'vellum/richText',
-    'vellum/atwho',
-    'vellum/util',
-    'tpl!vellum/templates/atwho_display'
+    'text!static/atwho/test1.xml',
 ], function (
     util,
     chai,
     $,
     _,
-    richText,
-    atwho,
-    real_util,
-    ATWHO_DISPLAY
+    TEST1_XML
 ) {
-    var assert = chai.assert,
-        mugs = [
-            {
-                ufid: 0,
-                absolutePath: '/data/one',
-                options: {
-                    icon: 'fcc fcc-text',
-                },
-                p: {
-                    nodeID: 'one',
-                },
-                displayName: 'One',
-            },
-            {
-                ufid: 1,
-                absolutePath: '/data/long',
-                options: {
-                    icon: 'fcc fcc-text',
-                },
-                p: {
-                    nodeID: 'long',
-                },
-                displayName: 'This is going to be a really long display name that should be truncated',
-            },
-            {
-                ufid: 2,
-                absolutePath: undefined,
-                options: {
-                    icon: 'fcc fcc-choice',
-                },
-                p: {
-                    nodeID: 'choice',
-                },
-                displayName: 'Not going to show up',
-            },
-            {
-                ufid: 3,
-                absolutePath: '/data/modeliteration/item',
-                options: {
-                    icon: 'fcc fcc-choice',
-                },
-                p: {
-                    nodeID: 'item',
-                },
-                displayName: undefined,
-            },
-        ],
-        form = {
-            vellum: {
-                getMugDisplayName: function (mug) {
-                    return mug.displayName;
-                },
-                data: {
-                    atwho: {}
-                },
-            },
-            formUuid: 'test',
-            getMugList: function () { return mugs; },
-        };
-    _.each(mugs, function(mug) {
-        mug.form = form;
-        mug.on = function () {};
-        // for tests in editor
-        mug.icon = mug.options.icon;
-        mug.name = mug.absolutePath;
-        mug.displayLabel = real_util.truncate(form.vellum.getMugDisplayName(mug));
-        real_util.eventuality(mug);
-    });
+    var assert = chai.assert;
+
+    function getFuseData(string) {
+        var form = util.call('getData').core.form,
+            fuseRes = form.fuse.search(string);
+        return fuseRes.length ? fuseRes[0] : null;
+    }
 
     describe("atwho", function() {
-        var atwhoData;
-        before(function() {
-            atwhoData = atwho.cachedMugData(0)(form);
+        beforeEach(function(done) {
+            util.init({
+                javaRosa: {langs: ['en']},
+                core: { form: TEST1_XML, onReady: done },
+                features: {rich_text: false},
+                plugins: ['atwho','modeliteration'],
+            });
         });
 
+        function getDisplayedAtwhoViews() {
+            return $('.atwho-view').filter(function() {
+                return $(this).css('display') === 'block';
+            });
+        }
+
+        function displayAtwho(callback) {
+            var mug = util.clickQuestion('one')[0];
+            var input = $('[name=property-relevantAttr]');
+            input.val('/data/').keyup();
+            assert.strictEqual(getDisplayedAtwhoViews().length, 1);
+            callback(mug);
+            mug.fire('teardown-mug-properties');
+            assert(!getDisplayedAtwhoViews().length);
+        }
+
         it("should truncate the display label", function() {
-            var mug = _.findWhere(atwhoData, {id: 0});
+            var mug = getFuseData('one');
             assert.strictEqual(mug.displayLabel, "One");
-            mug = _.findWhere(atwhoData, {id: 1});
+            mug = getFuseData('long');
             assert.strictEqual(mug.displayLabel, "This is going to be a rea&hellip;");
         });
 
         it("should not show mugs without absolutePath", function() {
-            assert(!_.findWhere(atwhoData, {id: 2}));
+            displayAtwho(function(mug) {
+                assert(!getDisplayedAtwhoViews().find('li:contains("choice1")').length);
+            });
         });
 
-        it("should not show mugs that don't display in the question tree", function() {
-            assert(!_.findWhere(atwhoData, {id: 3}));
+        // only valid for small sets of questions
+        it("should have each mug", function () {
+            displayAtwho(function(mug) {
+                assert.strictEqual(getDisplayedAtwhoViews().find('li').length, 4);
+            });
         });
 
-        describe("in an editor", function() {
-            var el = $("<div id='input'><input /></div>"),
-                mug = mugs[0],
-                input, atwhoview;
-
-            function getDisplayedAtwhoViews() {
-                return $('.atwho-view').filter(function() {
-                    return $(this).css('display') === 'block';
-                });
-            }
-            before(function () {
-                $('.atwho-container').remove();
-                $("body").append(el);
-                input = el.children().first();
-                atwho._questionAutocomplete(input, mug);
-                input.val('/data/');
-                input.keyup();
-                atwhoview = getDisplayedAtwhoViews();
-                assert.strictEqual(atwhoview.length, 1);
-            });
-            after(function() {
-                input.atwho('destroy');
-                input.remove();
-            });
-
-            it("should pop up", function () {
-                assert.strictEqual(atwhoview.length, 1);
-            });
-
-            it("should have each mug", function () {
-                assert.strictEqual(atwhoview.length, 1);
-                var listItems = atwhoview.find('li');
-
-                _.each(listItems, function(item, index) {
-                    assert.strictEqual(listItems[index].innerHTML,
-                                       $(ATWHO_DISPLAY(mugs[index]))[0].innerHTML);
-                });
-            });
-
-            it("should destroy the atwho container on mug removal", function() {
-                assert.strictEqual(atwhoview.length, 1);
+        it("should destroy the atwho container on mug removal", function() {
+            displayAtwho(function(mug) {
                 mug.fire('teardown-mug-properties');
                 assert(!getDisplayedAtwhoViews().length);
             });
