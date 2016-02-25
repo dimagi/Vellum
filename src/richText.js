@@ -111,7 +111,11 @@ define([
                 });
 
                 this.on('destroy', function (e)  {
-                    $imgs.popover('destroy');
+                    try {
+                        $imgs.popover('destroy');
+                    } catch(err) {
+                        // sometimes HQ throws an error on destroy?
+                    }
                 });
             }
         }
