@@ -108,7 +108,11 @@ define([
                 });
 
                 this.on('destroy', function (e)  {
-                    $imgs.popover('destroy');
+                    try {
+                        $imgs.popover('destroy');
+                    } catch(err) {
+                        // sometimes these are already destroyed
+                    }
                 });
             }
         }
