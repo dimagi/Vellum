@@ -1,7 +1,6 @@
 define([
     'underscore',
     'jquery',
-    'fusejs',
     'vellum/richText',
     'vellum/util',
     'tpl!vellum/templates/atwho_display',
@@ -9,7 +8,6 @@ define([
 ], function (
     _,
     $,
-    fusejs,
     richText,
     util,
     atwhoDisplay
@@ -90,7 +88,7 @@ define([
 
         function addAtWhoToInput() {
             var _atWhoOptions = function(atKey) {
-                var fuse = mug.form.fuse;
+                var form = mug.form;
 
                 return {
                     at: atKey,
@@ -107,8 +105,8 @@ define([
                             return match ? match[2] : null;
                         },
                         filter: function (query, data, searchKey) {
-                            if (!query) { return fuse.list(); }
-                            return fuse.search(query);
+                            if (!query) { return form.fuse.list(); }
+                            return form.fuse.search(query);
                         },
                         sorter: function (query, items, searchKey) {
                             return _.map(items, function(item, idx) {
