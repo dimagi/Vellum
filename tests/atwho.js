@@ -40,9 +40,18 @@ define([
             var input = $('[name=property-relevantAttr]');
             input.val('/data/').keyup();
             assert.strictEqual(getDisplayedAtwhoViews().length, 1);
-            callback(mug);
-            mug.fire('teardown-mug-properties');
+            try {
+                callback(mug);
+            } catch (err) {
+                throw err;
+            } finally {
+                mug.fire('teardown-mug-properties');
+            }
             assert(!getDisplayedAtwhoViews().length);
+        }
+
+        function assertNumAtwhoChoices(num) {
+            assert.strictEqual(getDisplayedAtwhoViews().find('li').length, num);
         }
 
         it("should truncate the display label", function() {
@@ -61,7 +70,7 @@ define([
         // only valid for small sets of questions
         it("should have each mug", function () {
             displayAtwho(function(mug) {
-                assert.strictEqual(getDisplayedAtwhoViews().find('li').length, 4);
+                assertNumAtwhoChoices(3);
             });
         });
 
@@ -69,6 +78,12 @@ define([
             displayAtwho(function(mug) {
                 mug.fire('teardown-mug-properties');
                 assert(!getDisplayedAtwhoViews().length);
+            });
+        });
+
+        it("should not show itself in the results", function () {
+            displayAtwho(function(mug) {
+                assertNumAtwhoChoices(3);
             });
         });
     });

@@ -105,8 +105,14 @@ define([
                             return match ? match[2] : null;
                         },
                         filter: function (query, data, searchKey) {
-                            if (!query) { return form.fuse.list(); }
-                            return form.fuse.search(query);
+                            function withoutSelf (list) {
+                                return _.filter(list, function(mug_) {
+                                    return mug.ufid !== mug_.id;
+                                });
+                            }
+
+                            if (!query) { return withoutSelf(form.fuse.list()); }
+                            return withoutSelf(form.fuse.search(query));
                         },
                         sorter: function (query, items, searchKey) {
                             return _.map(items, function(item, idx) {
