@@ -1100,6 +1100,7 @@ define([
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
+                _this.data.core.form.fire('form-load-finished');
                 hidePageSpinner();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it

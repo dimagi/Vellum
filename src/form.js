@@ -139,7 +139,9 @@ define([
 
         //make the object event aware
         util.eventuality(this);
-        this.fuse = new Fuse(this);
+        this.on('form-load-finished', function() {
+            _this.fuse = new Fuse(_this);
+        });
     }
 
     Form.prototype = {
