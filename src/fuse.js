@@ -1,10 +1,12 @@
 define([
     'underscore',
     'fusejs',
+    'vellum/datasources',
     'vellum/util',
 ], function (
     _,
     fusejs,
+    datasources,
     util
 ) {
     var FUSE_CONFIG = {
@@ -12,11 +14,19 @@ define([
     };
 
     function Fuse(form) {
+        var _this = this;
         this.form = form;
-        this.dataset = generateNewFuseData(form);
+
+        datasources.getDataSources(function() {
+            _this.dataset = generateNewFuseData(_this.form);
+        });
+
+        if (!this.dataset) {
+            this.dataset = generateNewFuseData(form);
+        }
+
         this.fusejs = new fusejs(this.dataset, FUSE_CONFIG);
 
-        var _this = this;
 
         function addToDataset(e) {
             _this.dataset = _.filter(_this.dataset, function (mug) {
