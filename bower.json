@@ -31,15 +31,15 @@
         "requirejs-plugins": "~1.0.2",
         "At.js": "emord/At.js#override-insert",
         "Caret.js": "0.2.2",
-        "fuse.js": "1.2.2",
+        "fuse.js": "~2.0.0",
 
-        "jstree": "3.1.1",
+        "jstree": "~3.2.1",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath#v0.0.2",
-        "jsdiff": "~1",
-        "markdown-it": "~4.2.0"
+        "jsdiff": ">=1",
+        "markdown-it": "~6.0.0"
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
