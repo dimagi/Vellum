@@ -46,8 +46,8 @@ define([
     xml,
     CKEDITOR
 ){
-    var CASE_REF_REGEX = /^\`#case\//,
-        REF_REGEX = /^\`#(form|case)\//,
+    var CASE_REF_REGEX = /^\`?#case\//,
+        REF_REGEX = /^\`?#(form|case)\//,
         bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
