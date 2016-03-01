@@ -53,7 +53,8 @@ define([
                     '#form/date',
                     '#form/group',
                     '#case/mother/edd',
-                    '#case/child/case'
+                    '#case/child/case',
+                    '#case/child/f_1065',
                 ], this.normalizeHashtag(path));
             },
             normalizeBanana: function (path) {
@@ -71,7 +72,7 @@ define([
             transform: function (path) {
                 return bananas.transform(path, function (path) {
                     var mug = formShim.getMugByPath(path),
-                        icon_ = mug ? icon(mug.options.icon) : externalIcon();
+                        icon_ = mug ? icon(mug.options.icon) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
                     return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, !!mug)).html();
                 });
             },
@@ -99,6 +100,7 @@ define([
     }
 
     function externalIcon () { return icon('fcc-fd-case-property'); }
+    function unknownIcon () { return icon('fcc fcc-help'); }
 
     function bubbleSpan(xpath, internal, output) {
         var span = $('<span>').addClass('label label-datanode').attr({
@@ -107,8 +109,10 @@ define([
         });
         if (internal) {
             span.addClass('label-datanode-internal');
-        } else {
+        } else if (formShim.isValidHashtag(xpath)){
             span.addClass('label-datanode-external');
+        } else {
+            span.addClass('label-datanode-unknown');
         }
         return span;
     }
@@ -133,7 +137,8 @@ define([
             var simpleConversions = [
                     ['`#form/text`', 'text', icon('fcc-fd-text'), true],
                     ["`#case/child/case`", 'case', externalIcon(), false],
-                    ["`#case/mother/edd`", 'edd', externalIcon(), false]
+                    ["`#case/mother/edd`", 'edd', externalIcon(), false],
+                    ["`#case/mother/unknown`", 'unknown', unknownIcon(), false],
                 ],
                 opts = {isExpression: true};
 
