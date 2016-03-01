@@ -471,7 +471,7 @@ define([
      * Wrap top-level expression nodes with bubble markup
      */
     function bubbleExpression(text, form) {
-        text = form.normalizeBanana(text).replace('<', '&lt;').replace('>', '&gt;');
+        text = xml.normalize(form.normalizeBanana(text));
         return form.transform(text, _.partial(replacePathWithBubble, form));
     }
 
