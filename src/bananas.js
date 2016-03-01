@@ -135,6 +135,8 @@ define([
         return text;
     }
 
+    // handle 4 byte unicode properly. pulled from
+    // https://mathiasbynens.be/notes/javascript-unicode#iterating-over-symbols
     function getSymbols(string) {
         var index = 0;
         var length = string.length;
