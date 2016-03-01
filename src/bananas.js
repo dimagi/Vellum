@@ -92,16 +92,16 @@ define([
      */
     function transform(input, transformFn) {
         if (!input) { return input; }
-        input = getSymbols(input);
+        var symbols = getSymbols(input);
         transformFn = transformFn || function (input) { return input; };
         var state = OUTSIDE_BANANA,
-            strLen = input.length,
+            strLen = symbols.length,
             text = "",
             currentReference = "";
 
         for (var i = 0; i < strLen; i++) {
-            var current = input[i],
-                next = input[i+1];
+            var current = symbols[i],
+                next = symbols[i+1];
 
             if (state === OUTSIDE_BANANA) {
                 if (current === DELIMITER && next === DELIMITER) {
@@ -122,17 +122,13 @@ define([
                     currentReference = "";
                 } else if (next !== undefined){
                     currentReference += current;
-                } else {
-                    // end of string, shouldn't happen, but will not
-                    // overestimate users or Vellum devs
-                    text += DELIMITER + currentReference;
-                    currentReference = "";
                 }
             }
         }
 
         if (state === INSIDE_BANANA) {
-            // end of string, without the end delimiter
+            // end of string, shouldn't happen, but will not
+            // overestimate users or Vellum devs
             text += DELIMITER + currentReference;
         }
 

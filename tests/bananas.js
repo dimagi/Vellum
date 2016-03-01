@@ -31,6 +31,7 @@ define([
                 ],
                 ["``", "`", "`"],
                 ["🍊you glad I didn't use 🍌`", "🍊you glad I didn't use 🍌`", "🍊you glad I didn't use 🍌`"],
+                ["`🍠", "`🍠", "`🍠"], // u1f360 conflicts with ` (u0060)
                 ["`#case/type/prop` = `", "#case/type/prop = `",  "prop = `"],
                 ["`#case/type/prop` = ``", "#case/type/prop = `", "prop = `"],
                 ["`#case/type/``prop` = ``", "#case/type/`prop = `", "`prop = `"],
