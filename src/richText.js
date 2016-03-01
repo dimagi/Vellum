@@ -47,6 +47,7 @@ define([
     CKEDITOR
 ){
     var CASE_REF_REGEX = /^\`?#case\//,
+        FORM_REF_REGEX = /^\`?#form\//,
         REF_REGEX = /^\`?#(form|case)\//,
         bubbleWidgetDefinition = {
         template:
@@ -81,7 +82,7 @@ define([
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
             if (widget) {
-                var isCase = CASE_REF_REGEX.test(xpath),
+                var isFormRef = FORM_REF_REGEX.test(xpath),
                     isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
@@ -106,7 +107,7 @@ define([
                     template: '<div contenteditable="false" class="popover rich-text-popover">' +
                         '<div class="popover-inner">' +
                         '<div class="popover-title"></div>' +
-                        (isCase ? '' : '<div class="popover-content"><p></p></div>') +
+                        (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
                         '</div></div>'
                 });
 
