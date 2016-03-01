@@ -145,8 +145,8 @@ define([
     }
 
     Form.prototype = {
-        validHashtags: function() {
-            return _.keys(this.hashtagDictionary);
+        isValidHashtag: function(tag) {
+            return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
         },
         addHashtag: function(hashtag, xpath, dontOverwrite) {
             if (!dontOverwrite || !this.hashtagDictionary.hasOwnProperty(hashtag)) {

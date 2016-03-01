@@ -217,7 +217,7 @@ define([
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
                     xpath = path.toHashtag(),
-                    knownHashtag = pathString.startsWith('#case') && _.contains(form.validHashtags(), xpath);
+                    knownHashtag = pathString.startsWith('#case') && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
                 if ((!refMug && !knownHashtag) &&

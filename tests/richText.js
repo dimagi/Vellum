@@ -46,9 +46,28 @@ define([
     var assert = chai.assert,
         hashtagToXPath = {},
         formShim = {
+            isValidHashtag: function (path) {
+                return _.contains([
+                    '#form/text',
+                    '#form/othertext',
+                    '#form/date',
+                    '#form/group',
+                    '#case/mother/edd',
+                    '#case/child/case'
+                ], this.normalizeHashtag(path));
+            },
             normalizeBanana: function (path) {
                  return path;
-             },
+            },
+            normalizeHashtag: function (path) {
+                if (path.startsWith("`")) {
+                    path = path.slice(1);
+                }
+                if (path.endsWith("`")) {
+                    path = path.slice(0, -1);
+                }
+                 return path;
+            },
             transform: function (path) {
                 return bananas.transform(path, function (path) {
                     var mug = formShim.getMugByPath(path),
@@ -57,12 +76,6 @@ define([
                 });
             },
             getMugByPath: function(path) {
-                if (path.startsWith("`")) {
-                    path = path.slice(1);
-                }
-                if (path.endsWith("`")) {
-                    path = path.slice(0, -1);
-                }
                 return {
                     "#form/text": {
                         options: { icon: 'fcc fcc-fd-text' },
@@ -76,7 +89,7 @@ define([
                     "#form/group": {
                         options: { icon: 'fcc icon-folder-open' },
                     },
-                }[path];
+                }[this.normalizeHashtag(path)];
             },
             xpath: bananas.Parser(hashtagToXPath),
         };
