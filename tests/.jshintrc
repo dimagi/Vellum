@@ -20,7 +20,6 @@
         "requirejs": false,
         /* MOCHA */
         "describe": false,
-        "context": false,
         "it": false,
         "before": false,
         "beforeEach": false,

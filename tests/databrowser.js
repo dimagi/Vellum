@@ -79,7 +79,7 @@ define([
             });
             return meta ? meta.attributes.id : null;
         }
-        context("when loaded before the form", function () {
+        describe("when loaded before the form", function () {
             before(function (done) {
                 util.init({
                     features: {rich_text: false},
@@ -161,7 +161,7 @@ define([
             // TODO should remove instances when expression ref is removed
         });
 
-        context("when loaded after the form", function () {
+        describe("when loaded after the form", function () {
             var _this, widget, blue, event = {};
             vellum_util.eventuality(event);
             function loadDataTree(done) {
