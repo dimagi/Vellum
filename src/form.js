@@ -6,6 +6,7 @@ define([
     'vellum/tree',
     'vellum/logic',
     'vellum/undomanager',
+    'vellum/fuse',
     'vellum/util'
 ], function (
     require,
@@ -15,6 +16,7 @@ define([
     Tree,
     logic,
     undomanager,
+    Fuse,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -44,92 +46,7 @@ define([
         
         return that;
     };
-    
-    function processInstance(instance) {
-        instance.id = instance.id || convertToId(instance.uri);
-        _.each(instance.levels, function (level) {
-            var i = 1,
-                mappedSubsets = {};
-            _.each(level.subsets, function (subset) {
-                subset.id = i++;
-                subset.selector = normalizeXPathExpr(subset.selector);
-                mappedSubsets[subset.id] = subset;
-            });
-            level.subsets = mappedSubsets;
-        });
-        return instance;
-    }
-    
-    // Parsing the instance selectors using the XPath models and comparing the
-    // parsed expressions might be a better approach that these hacky functions.
-    function normalizeXPathExpr(str) {
-        return normalizeToSingleQuotes(removeSpaces(str));
-    }
 
-    // remove spaces around = and []
-    function removeSpaces(str) {
-        return str.replace(/\s*([=\[\]])\s*/g, function (match, p1) {
-            return p1;
-        });
-    }
-
-    // Change any top-level double quotes to single quotes. (Assumes no
-    // top-level escaped double quotes).  This may not correctly handle escaped
-    // quotes within a quote.  Moving on.
-    function normalizeToSingleQuotes(str) {
-        var ret = '';
-        eachCharByQuotedStatus(str,
-            function (c) {
-                ret += c;
-            },
-            function (c) {
-                if (c === '"') {
-                    c = "'";
-                }
-                ret += c;
-            });
-        return ret;
-    }
-
-    // abstracted this because I was using it for two things before
-    function eachCharByQuotedStatus(str, quoted, unquoted) {
-        var prevIsBackslash = false,
-            inSingleQuote = false,
-            inDoubleQuote = false;
-
-        for (var i=0, l=str.length; i < l; i++) {
-            var c = str[i],
-                inQuote = inSingleQuote || inDoubleQuote;
-          
-            if (!prevIsBackslash && ((inSingleQuote && c === "'") ||
-                                     (inDoubleQuote && c === '"'))) {
-                inQuote = false;
-            }
-            (inQuote ? quoted : unquoted)(c);
-
-            if (!prevIsBackslash) {
-                if (c === "'" && !inDoubleQuote) {
-                    inSingleQuote = !inSingleQuote;
-                } else if (c === '"' && !inSingleQuote) {
-                    inDoubleQuote = !inDoubleQuote;
-                }
-            }
-
-            if (c === '\\') {
-                prevIsBackslash = !prevIsBackslash;
-            } else {
-                prevIsBackslash = false;
-            }
-        }
-    }
-    
-    function convertToId(str) {
-        return str
-            .toLowerCase()
-            .replace(/ /g,'_')
-            .replace(/[^\w-]+/g,'');
-    }
-    
     var InstanceMetadata = function (attributes, children, mug, property) {
         var that = {},
             refs = {};
@@ -223,6 +140,9 @@ define([
 
         //make the object event aware
         util.eventuality(this);
+        this.on('form-load-finished', function() {
+            _this.fuse = new Fuse(_this);
+        });
     }
 
     Form.prototype = {
@@ -1099,8 +1019,6 @@ define([
 
     return {
         Form: Form,
-        processInstance: processInstance,
-        normalizeXPathExpr: normalizeXPathExpr,
         InstanceMetadata: InstanceMetadata
     };
 });

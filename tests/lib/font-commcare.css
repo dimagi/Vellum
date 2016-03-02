@@ -127,3 +127,9 @@
 .fcc-fd-collapse:before {
   content: "\f031";
 }
+.fcc-fd-case-property:before {
+  content: "\f032";
+}
+.fcc-fd-edit-form:before {
+  content: "\f033";
+}

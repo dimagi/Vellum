@@ -111,7 +111,7 @@ define([
                     text: tree.name,
                     icon: tree.nodes === true || tree.nodes.length ?
                             "fcc fcc-fd-external-case" :
-                            "fcc fcc-fd-external-case-data",
+                            "fcc fcc-fd-case-property",
                     state: {opened: tree.nodes !== true &&
                                     tree.nodes.length <= MAX_OPEN_NODE},
                     children: tree.nodes,

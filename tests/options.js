@@ -187,6 +187,7 @@ define(["underscore"], function (_) {
             'custom_intents': true,
             'image_resize': true,
             'markdown_in_groups': true,
+            'allow_data_reference_in_setvalue': true
         }
     };
 
