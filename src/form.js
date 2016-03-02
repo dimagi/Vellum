@@ -149,7 +149,7 @@ define([
             return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
         },
         addHashtag: function(hashtag, xpath, dontOverwrite) {
-            if (!dontOverwrite || !this.hashtagDictionary.hasOwnProperty(hashtag)) {
+            if (!dontOverwrite || !this.hashtagDictionary[hashtag]) {
                 this.hashtagDictionary[hashtag] = xpath;
             }
         },
@@ -184,6 +184,9 @@ define([
             } catch (err) {
                 return [];
             }
+        },
+        referencedHashtags: function () {
+            return this._logicManager.referencedHashtags();
         },
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),

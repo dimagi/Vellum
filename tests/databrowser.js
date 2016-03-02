@@ -11,6 +11,7 @@ define([
     'text!static/databrowser/child-ref.xml',
     'text!static/databrowser/child-ref-no-hashtag.xml',
     'text!static/databrowser/mother-ref.xml',
+    'text!static/databrowser/preloaded-hashtags.xml',
 ], function (
     options,
     util,
@@ -22,7 +23,8 @@ define([
     datasources,
     CHILD_REF_XML,
     CHILD_REF_NO_HASHTAG_XML,
-    MOTHER_REF_XML
+    MOTHER_REF_XML,
+    PRELOADED_HASHTAGS_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -80,7 +82,7 @@ define([
             return meta ? meta.attributes.id : null;
         }
         describe("when loaded before the form", function () {
-            before(function (done) {
+            beforeEach(function (done) {
                 util.init({
                     features: {rich_text: false},
                     plugins: plugins,
@@ -158,6 +160,12 @@ define([
                 util.assertXmlEqual(call("createXML"), CHILD_REF_XML);
             });
 
+            it("is not overwritten by the forms preloaded tags", function() {
+                util.loadXML(PRELOADED_HASHTAGS_XML);
+                var form = call('getData').core.form;
+                assert(form.isValidHashtag('#case/child/dob'));
+                assert.notStrictEqual(form.hashtagDictionary['#case/child/dob'], null);
+            });
             // TODO should remove instances when expression ref is removed
         });
 
@@ -170,7 +178,7 @@ define([
                     done();
                 });
             }
-            before(function (done) {
+            beforeEach(function (done) {
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
@@ -199,6 +207,16 @@ define([
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
                     done();
                 });
+            });
+
+            it("overwrites the forms preloaded tags", function() {
+                util.loadXML(PRELOADED_HASHTAGS_XML);
+                var form = call('getData').core.form;
+                assert(form.isValidHashtag('#case/child/dob'));
+                assert.strictEqual(form.hashtagDictionary['#case/child/dob'], null);
+                event.fire("nodeError");
+                assert(form.isValidHashtag('#case/child/dob'));
+                assert.notStrictEqual(form.hashtagDictionary['#case/child/dob'], null);
             });
         });
     });

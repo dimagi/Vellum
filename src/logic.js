@@ -378,6 +378,7 @@ define([
         reset: function () {
             this.all = [];
         },
+        // This is to tell HQ's case summary what is referenced
         caseReferences: function () {
             // hq implementation details
             var ret = {
@@ -400,10 +401,21 @@ define([
                         prop = 'name';
                     }
                     return [ref.sourcePath.replace(/^#form/, '/data'), prop];
-                }).object() .value();
+                }).object().value();
 
             return ret;
         },
+        // returns object of hashtags. used for writing to xml
+        // format {hashtag: xpath} (null is used fmr cases as they will be loaded later)
+        referencedHashtags: function () {
+            return _.chain(this.all)
+                .filter(function(ref) {
+                    return ref.path.startsWith('#case');
+                })
+                .map(function(ref) {
+                    return [ref.path, null];
+                }).object().value();
+        }
     };
 
     return {

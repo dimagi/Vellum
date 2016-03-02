@@ -64,14 +64,40 @@ define([
                 .clickExceptAfterDrag(toggle);
             head.click(toggle);
         },
-        loadXML: function() {
+        loadXML: function(xml) {
             this.__callOld();
-            var _this = this;
-            _.each(this.data.core.databrowser.dataHashtags, function (path, hash) {
+            var _this = this, hashtags;
+            if (!_.isEmpty(this.data.core.databrowser.dataHashtags)) {
+                hashtags = this.data.core.databrowser.dataHashtags;
+            } else {
+                hashtags = parsePreloadedHashtags(
+                    $(xml).find('h\\:head, head').children('vellum\\:hashtags, hashtags')
+                );
+            }
+            _.each(hashtags, function (path, hash) {
                 addHashtag(hash, path, _this);
             });
+
+            fixFormReferences(this.data.core.form);
+        },
+        contributeToHeadXML: function (xmlWriter, form) {
+            var hashtags = this.data.core.form.referencedHashtags();
+            if (hashtags.length) {
+                xmlWriter.writeStartElement('vellum:hashtags');
+                xmlWriter.writeString(JSON.stringify(hashtags));
+                xmlWriter.writeEndElement();
+            }
+            this.__callOld();
         },
     });
+
+    function parsePreloadedHashtags(hashtags) {
+        try {
+            return JSON.parse($.trim(hashtags.text()));
+        } catch (err) {
+            return {};
+        }
+    }
 
     function _initDataBrowser(vellum) {
         // display spinner and begin loading...
@@ -226,12 +252,7 @@ define([
 
         // done here for performance reasons. would be nice to be done after
         // every new hashtag, but only for the mugs that reference that hashtag
-        var form = vellum.data.core.form;
-        if (form) {
-            _.each(form.getMugList(), function(mug) {
-                form.fixBrokenReferences(mug);
-            });
-        }
+        fixFormReferences(vellum.data.core.form);
         return nodes.concat(siblings);
     }
 
@@ -266,6 +287,14 @@ define([
         }
         if (form && form.addHashtag) {
             form.addHashtag(hashtag, fullPath, true);
+        }
+    }
+    
+    function fixFormReferences(form) {
+        if (form) {
+            _.each(form.getMugList(), function(mug) {
+                form.fixBrokenReferences(mug);
+            });
         }
     }
 
