@@ -81,6 +81,7 @@ define([
             });
             return meta ? meta.attributes.id : null;
         }
+
         describe("when loaded before the form", function () {
             beforeEach(function (done) {
                 util.init({
@@ -156,8 +157,13 @@ define([
             });
 
             it("should hashtagify refs when written", function() {
+                // this won't write the hashtags as the logic manager won't
+                // have the #case reference but it will properly hashtagify
+                // once the databrowser is loaded
                 util.loadXML(CHILD_REF_NO_HASHTAG_XML);
-                util.assertXmlEqual(call("createXML"), CHILD_REF_XML);
+                util.assertXmlEqual(call("createXML"), CHILD_REF_XML.replace(
+                    "<vellum:hashtags>{&quot;#case/child/dob&quot;:null}</vellum:hashtags>", ''
+                ));
             });
 
             it("is not overwritten by the forms preloaded tags", function() {
@@ -166,6 +172,12 @@ define([
                 assert(form.isValidHashtag('#case/child/dob'));
                 assert.notStrictEqual(form.hashtagDictionary['#case/child/dob'], null);
             });
+
+            it("should write externally referenced hashtags to form", function() {
+                util.loadXML(PRELOADED_HASHTAGS_XML);
+                util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
+            });
+
             // TODO should remove instances when expression ref is removed
         });
 

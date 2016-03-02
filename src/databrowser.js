@@ -82,7 +82,7 @@ define([
         },
         contributeToHeadXML: function (xmlWriter, form) {
             var hashtags = this.data.core.form.referencedHashtags();
-            if (hashtags.length) {
+            if (!_.isEmpty(hashtags)) {
                 xmlWriter.writeStartElement('vellum:hashtags');
                 xmlWriter.writeString(JSON.stringify(hashtags));
                 xmlWriter.writeEndElement();
