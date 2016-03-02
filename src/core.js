@@ -1083,6 +1083,7 @@ define([
                 _this.data.core.parseWarnings = [];
                 _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
+                _this.data.core.form.fire('form-load-finished');
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.
