@@ -5,6 +5,7 @@ define([
     'vellum/tree',
     'vellum/logic',
     'vellum/xpath',
+    'vellum/fuse',
     'vellum/util'
 ], function (
     require,
@@ -13,6 +14,7 @@ define([
     Tree,
     logic,
     xpath,
+    Fuse,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -137,6 +139,9 @@ define([
 
         //make the object event aware
         util.eventuality(this);
+        this.on('form-load-finished', function() {
+            _this.fuse = new Fuse(_this);
+        });
     }
 
     Form.prototype = {

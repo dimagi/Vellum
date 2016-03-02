@@ -95,6 +95,14 @@ define([
                 text2.p.defaultValue = "instance('casedb')/case/attribute";
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
+
+            it("should not warn when referencing a case with filter", function() {
+                util.loadXML("");
+                util.addQuestion("Text", 'text1');
+                var text2 = util.addQuestion("Text", 'text2');
+                text2.p.defaultValue = "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/facility_type";
+                assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
+            });
         });
 
         describe("without allow data reference enabled", function () {
@@ -121,6 +129,14 @@ define([
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
                 text2.p.defaultValue = "instance('casedb')/case/attribute";
+                assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
+            });
+
+            it("should not warn when referencing a case with filter", function() {
+                util.loadXML("");
+                util.addQuestion("Text", 'text1');
+                var text2 = util.addQuestion("Text", 'text2');
+                text2.p.defaultValue = "instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/facility_type";
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
         });

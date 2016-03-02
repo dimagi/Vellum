@@ -183,7 +183,7 @@ define([
             );
         });
 
-        it("should select group of selected child question on collapse group", function () {
+        it("should not change mugs on collapse", function () {
             util.loadXML("");
             var group1 = util.addQuestion("Group", "group"),
                 text, selected;
@@ -197,7 +197,7 @@ define([
             util.collapseGroup(group1);
 
             selected = call("getCurrentlySelectedMug");
-            assert.equal(selected, group1,
+            assert.equal(selected, text,
                 "wrong selected mug: " + (selected && selected.p.nodeID));
         });
 
@@ -654,8 +654,6 @@ define([
                            [refPos, refMug, "->", posStr, mugStr].join(" "));
                 });
             });
-
         });
-
     });
 });

@@ -861,13 +861,6 @@ define([
             if (window.event && window.event.altKey) {
                 _this.jstree("close_all", data.node);
             }
-            var selected = _this.jstree('get_selected'),
-                sel = selected.length && _this.jstree('get_node', selected[0]);
-            if (sel && _.contains(sel.parents, data.node.id)) {
-                _this.jstree("deselect_all", true)
-                     .jstree("select_node", data.node);
-            }
-            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
@@ -1090,6 +1083,7 @@ define([
                 _this.data.core.parseWarnings = [];
                 _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
+                _this.data.core.form.fire('form-load-finished');
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.

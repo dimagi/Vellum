@@ -922,7 +922,7 @@ define([
                     if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
                         var paths = new logic.LogicExpression(mug.p.defaultValue, xpath).getPaths();
                         paths = _.filter(paths, function (path) {
-                            return path.initial_context !== xpathmodels.XPathInitialContextEnum.EXPR;
+                            return path.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
                         });
                         if (paths.length) {
                             return "You are referencing a node in this form. " +

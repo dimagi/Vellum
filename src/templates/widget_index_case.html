@@ -1,8 +1,8 @@
 <% props[""] = {calculate: "", relevant: ""}; %>
 
 <% _.each(props, function (v, k) { %>
-  <div class="fd-index-property control-row clearfix" style="margin-bottom: 5px">
-    <div class="control-row">
+  <div class="fd-index-property">
+    <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-name form-control"
                value="<%-k%>" type="text" placeholder="Case Name"/>
@@ -13,19 +13,19 @@
         </a>
       </div>
     </div>
-    <div class="control-row">
+    <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-source form-control"
                value="<%-v['calculate']%>" type="text" placeholder="Calculation" />
       </div>
     </div>
-    <div class="control-row">
+    <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-case-type form-control"
                value="<%-v['caseType']%>" type="text" placeholder="Case Type"/>
       </div>
     </div>
-    <div class="control-row">
+    <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-relationship form-control"
                value="<%-v['relationship']%>" type="text" placeholder="Relationship"/>
