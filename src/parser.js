@@ -653,7 +653,7 @@ define([
         var method = (noPop ? el.attr : el.popAttr).bind(el),
             vellumAttr = method('vellum:' + key),
             xmlAttr = method(key);
-        return form.normalizeBanana(vellumAttr ? vellumAttr : xmlAttr);
+        return form.normalizeEscapedHashtag(vellumAttr ? vellumAttr : xmlAttr);
     }
 
     var _getInstances = function (xml) {

@@ -29,7 +29,7 @@ define([
     'tests/utils',
     'vellum/richText',
     'vellum/javaRosa',
-    'vellum/bananas',
+    'vellum/escapedHashtags',
     'ckeditor',
     'text!static/richText/burpee.xml',
 ], function(
@@ -39,7 +39,7 @@ define([
     util,
     richText,
     javaRosa,
-    bananas,
+    escapedHashtags,
     CKEDITOR,
     BURPEE_XML
 ) {
@@ -57,7 +57,7 @@ define([
                     '#case/child/f_1065',
                 ], this.normalizeHashtag(path));
             },
-            normalizeBanana: function (path) {
+            normalizeEscapedHashtag: function (path) {
                  return path;
             },
             normalizeHashtag: function (path) {
@@ -70,7 +70,7 @@ define([
                  return path;
             },
             transform: function (path) {
-                return bananas.transform(path, function (path) {
+                return escapedHashtags.transform(path, function (path) {
                     var mug = formShim.getMugByPath(path),
                         icon_ = mug ? icon(mug.options.icon) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
                     return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, !!mug)).html();
@@ -92,7 +92,7 @@ define([
                     },
                 }[this.normalizeHashtag(path)];
             },
-            xpath: bananas.Parser(hashtagToXPath),
+            xpath: escapedHashtags.Parser(hashtagToXPath),
         };
 
     function icon(iconClass) { 

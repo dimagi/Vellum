@@ -116,7 +116,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/richText',
         'tests/comments',
         'tests/atwho',
-        'tests/bananas',
+        'tests/escapedHashtags',
     ], function (
         options
     ) {

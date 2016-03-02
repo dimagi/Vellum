@@ -1,19 +1,19 @@
 define([
     'chai',
-    'vellum/bananas',
+    'vellum/escapedHashtags',
     'vellum/xpath',
     'tests/utils',
-    'text!static/bananas/invalid-xpath.xml',
+    'text!static/escapedHashtags/invalid-xpath.xml',
 ], function (
     chai,
-    bananas,
+    escapedHashtags,
     xpath,
     util,
     INVALID_XPATH_XML
 ) {
     var assert = chai.assert;
 
-    describe("The 🍌 parser", function () {
+    describe("The escaped hashtag parser", function () {
         function transformToProperty(input) {
             var ret = input.split('/');
             return ret[ret.length-1];
@@ -44,16 +44,16 @@ define([
                     outputToProp = testCase[2];
 
                 it("default transform should parse " + input + " into " + outputNoTransform, function() {
-                    assert.strictEqual(bananas.transform(input), outputNoTransform);
+                    assert.strictEqual(escapedHashtags.transform(input), outputNoTransform);
                 });
 
                 it("custom transform should parse " + input + " into " + outputToProp, function() {
-                    assert.strictEqual(bananas.transform(input, transformToProperty), outputToProp);
+                    assert.strictEqual(escapedHashtags.transform(input, transformToProperty), outputToProp);
                 });
             });
         });
 
-        describe("#toBanana()", function() {
+        describe("#toEscapedHashtag()", function() {
             var testCases = [
                     ["#form/text1", "`#form/text1`"],
                     ["/data/text1", "`#form/text1`"],
@@ -67,7 +67,7 @@ define([
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(bananas.toBanana(testCase[0], xpathParser), testCase[1]);
+                    assert.strictEqual(escapedHashtags.toEscapedHashtag(testCase[0], xpathParser), testCase[1]);
                 });
             });
         });
@@ -84,13 +84,13 @@ define([
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(bananas.toXPath(testCase[0], xpathParser), testCase[1]);
+                    assert.strictEqual(escapedHashtags.toXPath(testCase[0], xpathParser), testCase[1]);
                 });
             });
         });
     });
 
-    describe("The form's 🍌 parser", function() {
+    describe("The form's escaped hashtag parser", function() {
         beforeEach(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
@@ -112,7 +112,7 @@ define([
         });
     });
 
-    describe("The 🍌writer", function () { 
+    describe("The escaped hashtag", function () {
         beforeEach(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },

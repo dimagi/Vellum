@@ -418,7 +418,7 @@ define([
      */
     function replacePathWithBubble(form, value) {
         var info = extractXPathInfoFromOutputValue(value),
-            xpath = form.normalizeBanana(info.reference),
+            xpath = form.normalizeEscapedHashtag(info.reference),
             extraAttrs = _.omit(info, 'reference');
 
         if (!REF_REGEX.test(xpath)) {
@@ -471,7 +471,7 @@ define([
      * Wrap top-level expression nodes with bubble markup
      */
     function bubbleExpression(text, form) {
-        text = xml.normalize(form.normalizeBanana(text));
+        text = xml.normalize(form.normalizeEscapedHashtag(text));
         return form.transform(text, _.partial(replacePathWithBubble, form));
     }
 

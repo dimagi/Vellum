@@ -3,8 +3,8 @@ define([
 ], function(
     xpath
 ) {
-    var OUTSIDE_BANANA = 0,
-        INSIDE_BANANA = 1,
+    var OUTSIDE_HASHTAG = 0,
+        INSIDE_HASHTAG = 1,
         DELIMITER = "`",
         defaultParser = xpath.createParser(xpath.makeXPathModels({}));
 
@@ -24,19 +24,16 @@ define([
 
     /*
      * hopefully robust parser that transforms any input (whether hashtag,
-     * xpath, or banana) into banana used by internal structures
+     * xpath, or escaped hashtag) into escaped hashtag used by internal structures
      */
-    function toBanana(input, xpathParser) {
+    function toEscapedHashtag(input, xpathParser) {
         if (!input) { return input; }
         xpathParser = xpathParser || defaultParser;
 
-        var parsedBanana = transform(input);
+        var hashtag = transform(input);
 
         try {
-            // we should really only accept bananas, but if they supply a nice
-            // looking xpath. let's turn them into pretty bananas
-            var parsed = xpathParser.parse(parsedBanana);
-            // success! now let's turn that input into bananas
+            var parsed = xpathParser.parse(hashtag);
             parsed = xpathParser.parse(parsed.toHashtag());
             return transformHashtags(parsed, xpathParser.models, function(input) {
                 return DELIMITER + input + DELIMITER;
@@ -48,11 +45,11 @@ define([
     }
 
     /*
-     * This takes in a parsed hashtag (from xpathParser.parse) and transforms
+     * This takes in a parsed object (from xpathParser.parse) and transforms
      * each hashtag into whatever is defined by transformFn
      */
-    function transformHashtags(parsedHashtags, models, transformFn) {
-        var queue = [parsedHashtags],
+    function transformHashtags(parsed, models, transformFn) {
+        var queue = [parsed],
             EXPR = models.XPathInitialContextEnum.EXPR,
             node, i, children, j, predicates;
         while (queue.length > 0) {
@@ -84,17 +81,23 @@ define([
                 }
             }
         }
-        return parsedHashtags.toHashtag();
+        return parsed.toHashtag();
     }
 
     /*
-     * transforms bananas based on transformFn
+     * transforms escaped hashtags based on transformFn
+     * 
+     * transformFn -> function(input) where input will be text inside delimiters
+     * and returns what you want that turned into without delimiters
+     *
+     * example:
+     * transform("`#form/question`", makeBubble) -> "<bubble>#form</bubble>"
      */
     function transform(input, transformFn) {
         if (!input) { return input; }
         var symbols = getSymbols(input);
         transformFn = transformFn || function (input) { return input; };
-        var state = OUTSIDE_BANANA,
+        var state = OUTSIDE_HASHTAG,
             strLen = symbols.length,
             text = "",
             currentReference = "";
@@ -103,21 +106,21 @@ define([
             var current = symbols[i],
                 next = symbols[i+1];
 
-            if (state === OUTSIDE_BANANA) {
+            if (state === OUTSIDE_HASHTAG) {
                 if (current === DELIMITER && next === DELIMITER) {
                     text += DELIMITER;
                     i++;
                 } else if (current === DELIMITER) {
-                    state = INSIDE_BANANA;
+                    state = INSIDE_HASHTAG;
                 } else {
                     text += current;
                 }
-            } else if (state === INSIDE_BANANA) {
+            } else if (state === INSIDE_HASHTAG) {
                 if (current === DELIMITER && next === DELIMITER) {
                     currentReference += DELIMITER;
                     i++;
                 } else if (current === DELIMITER) {
-                    state = OUTSIDE_BANANA;
+                    state = OUTSIDE_HASHTAG;
                     text += transformFn(currentReference);
                     currentReference = "";
                 } else if (next !== undefined){
@@ -126,7 +129,7 @@ define([
             }
         }
 
-        if (state === INSIDE_BANANA) {
+        if (state === INSIDE_HASHTAG) {
             // end of string, shouldn't happen, but will not
             // overestimate users or Vellum devs
             text += DELIMITER + currentReference;
@@ -158,7 +161,7 @@ define([
     }
 
     /*
-     * extends xpath parser to be banana aware
+     * extends xpath parser to be aware of escaped hashtags
      */
     function Parser(hashtagDictionary) {
         var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary));
@@ -168,8 +171,8 @@ define([
                     throw new Error("Invalid XPath");
                 }
                 var parsed = xpathParser.parse(toHashtag(input, xpathParser));
-                parsed.toBanana = function() {
-                    return toBanana(this.toHashtag(), xpathParser);
+                parsed.toEscapedHashtag = function() {
+                    return toEscapedHashtag(this.toHashtag(), xpathParser);
                 };
                 return parsed;
             },
@@ -178,7 +181,7 @@ define([
     }
 
     return {
-        toBanana: toBanana,
+        toEscapedHashtag: toEscapedHashtag,
         toXPath: toXPath,
         transform: transform,
         Parser: Parser,

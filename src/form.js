@@ -4,7 +4,7 @@ define([
     'jquery',
     'vellum/tree',
     'vellum/logic',
-    'vellum/bananas',
+    'vellum/escapedHashtags',
     'vellum/fuse',
     'vellum/util'
 ], function (
@@ -13,7 +13,7 @@ define([
     $,
     Tree,
     logic,
-    bananas,
+    escapedHashtags,
     Fuse,
     util
 ) {
@@ -135,7 +135,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = bananas.Parser(this.hashtagDictionary);
+        this.xpath = escapedHashtags.Parser(this.hashtagDictionary);
 
         //make the object event aware
         util.eventuality(this);
@@ -157,8 +157,8 @@ define([
             delete this.hashtagDictionary[hashtag];
         },
         transform: function(input, transformFn) {
-            input = this.normalizeBanana(input);
-            return bananas.transform(input, transformFn);
+            input = this.normalizeEscapedHashtag(input);
+            return escapedHashtags.transform(input, transformFn);
         },
         normalize: function (methodName, xpath) {
             // try catch is needed as workaround for having an itemset without
@@ -169,8 +169,8 @@ define([
                 return xpath.startsWith('#invalid/xpath ') ? xpath.slice(15) : xpath;
             }
          },
-        normalizeBanana: function (xpath_) {
-            return this.normalize('toBanana', xpath_);
+        normalizeEscapedHashtag: function (xpath_) {
+            return this.normalize('toEscapedHashtag', xpath_);
         },
         normalizeHashtag: function (xpath_) {
             return this.normalize('toHashtag', xpath_);
@@ -211,7 +211,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[_this.normalizeBanana(dataParent)];
+                var dataParentMug = _this.mugMap[_this.normalizeEscapedHashtag(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -864,7 +864,7 @@ define([
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
             var map = this.mugMap, newPath;
-            delete map[this.normalizeBanana(oldHashtag)];
+            delete map[this.normalizeEscapedHashtag(oldHashtag)];
             if (oldHashtag) {
                 this.removeHashtag(oldHashtag);
             }
@@ -882,7 +882,7 @@ define([
                 if (newPath) {
                     this.addHashtag(newHashtag, newPath);
                 }
-                map[this.normalizeBanana(newHashtag)] = mug;
+                map[this.normalizeEscapedHashtag(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
@@ -891,7 +891,7 @@ define([
             var path = mug.absolutePath;
             if (path) {
                 this.addHashtag(mug.hashtagPath, path);
-                this.mugMap[this.normalizeBanana(mug.hashtagPath)] = mug;
+                this.mugMap[this.normalizeEscapedHashtag(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -925,7 +925,7 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[this.normalizeBanana(path)];
+            return this.mugMap[this.normalizeEscapedHashtag(path)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -953,7 +953,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[this.normalizeBanana(mug.hashtagPath)];
+                delete this.mugMap[this.normalizeEscapedHashtag(mug.hashtagPath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
