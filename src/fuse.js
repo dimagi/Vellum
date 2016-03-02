@@ -47,9 +47,6 @@ define([
     }
 
     Fuse.prototype = {
-        regenerate: function() {
-            this.fusejs.set(generateNewFuseData(this.form));
-        },
         list: function () {
             return this.fusejs.list;
         },
