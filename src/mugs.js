@@ -1036,7 +1036,6 @@ define([
         // mug's ancestor even if it's not removeable
         isRemoveable: true,
         isCopyable: true,
-        isODKOnly: false,
         canOutputValue: true,
         maxChildren: -1,
         icon: null,
@@ -1216,7 +1215,6 @@ define([
         dataType: 'binary',
         tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
-        isODKOnly: true,
         mediaType: "audio/*", /* */
         canOutputValue: false,
         writeCustomXML: function (xmlWriter, mug) {
@@ -1286,7 +1284,6 @@ define([
         typeName: 'GPS',
         dataType: 'geopoint',
         icon: 'fa fa-map-marker',
-        isODKOnly: true,
         init: function (mug, form) {
         }
     });
@@ -1295,7 +1292,6 @@ define([
         typeName: 'Barcode Scan',
         dataType: 'barcode',
         icon: 'fa fa-barcode',
-        isODKOnly: true,
         init: function (mug, form) {
         }
     });
