@@ -903,9 +903,6 @@ define([
                     JSON.stringify({key3: "val3"}),
                     "commcare.org/xforms", JSON.stringify({type: "robin"})]
             ]);
-            var messages = util.getMug("app").messages.get();
-            chai.expect(messages[0]).to.include("works on Android devices");
-            assert.equal(messages.length, 1, messages);
         });
 
         it("should paste and copy an Android App Callout (old format)", function () {
@@ -933,9 +930,6 @@ define([
                     JSON.stringify({key3: "val3"}),
                     "commcare.org/xforms", JSON.stringify({type: "robin"})]
             ]);
-            var messages = util.getMug("app").messages.get();
-            chai.expect(messages[0]).to.include("works on Android devices");
-            assert.equal(messages.length, 1, messages);
         });
 
         it("should paste and copy a Balance", function () {
