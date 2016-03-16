@@ -1393,6 +1393,9 @@ define([
             } else {
                 _this.__callOld();
             }
+            if (path.contains('casedb')) {
+                window.analytics.usage("Case Management", "Form Builder", "Click and Drag");
+            }
         },
         handleNewMug: function (mug) {
             var ret = this.__callOld();
