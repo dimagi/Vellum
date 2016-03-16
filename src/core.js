@@ -755,11 +755,15 @@ define([
             }
 
             if (window.analytics) {
-                window.analytics.usage(
-                    "Question Reference",
-                    "Drag and Drop",
-                    _this.data.core.currentlyEditedProperty
-                );
+                if (path.contains('casedb')) {
+                    window.analytics.usage("Case Management", "Form Builder", "Click and Drag");
+                } else {
+                    window.analytics.usage(
+                        "Question Reference",
+                        "Drag and Drop",
+                        _this.data.core.currentlyEditedProperty
+                    );
+                }
             }
         }
 

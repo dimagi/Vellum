@@ -1388,13 +1388,13 @@ define([
                     insertOutputRef(_this, target, path, mug);
                     if (window.analytics) {
                         window.analytics.usage("Output Value", "Drag and Drop");
+                        if (path.contains('casedb')) {
+                            window.analytics.usage("Case Management", "Form Builder", "Click and Drag");
+                        }
                     }
                 }
             } else {
                 _this.__callOld();
-            }
-            if (path.contains('casedb')) {
-                window.analytics.usage("Case Management", "Form Builder", "Click and Drag");
             }
         },
         handleNewMug: function (mug) {
