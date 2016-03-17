@@ -152,6 +152,13 @@ define([
                 {normalize_xmlns: true}
             );
         });
+
+        it("should correctly set alert's auto id", function() {
+            util.loadXML(TEST_XML_2_WITH_BIND_CONSTRAINT);
+            var mug = util.getMug('question1');
+            assert(mug.p.constraintMsgItext.autoId);
+        });
+
         it("itext widget should change as default language value changes when equal", function () {
             util.loadXML(TEST_XML_1);
             util.addQuestion("Text", "temp");
