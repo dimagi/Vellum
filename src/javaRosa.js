@@ -1389,7 +1389,7 @@ define([
                     if (window.analytics) {
                         window.analytics.usage("Output Value", "Drag and Drop");
                         if (path.contains('casedb')) {
-                            window.analytics.usage("Case Management", "Form Builder", "Click and Drag");
+                            window.analytics.usage("Case Management", "Form Builder", "Drag and Drop");
                         }
                     }
                 }

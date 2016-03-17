@@ -756,7 +756,7 @@ define([
 
             if (window.analytics) {
                 if (path.contains('casedb')) {
-                    window.analytics.usage("Case Management", "Form Builder", "Click and Drag");
+                    window.analytics.usage("Case Management", "Form Builder", "Drag and Drop");
                 } else {
                     window.analytics.usage(
                         "Question Reference",
