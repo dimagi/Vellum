@@ -151,7 +151,7 @@ define([
         form.formVersion = root.attr("version");
         form.formName = root.attr("name");
 
-        if (!form.formUuid) {
+        if (!form.formUuid || form.formUuid === "undefined") {
             form.parseWarnings.push('Form does not have a unique xform XMLNS (in data block). Will be added automatically');
             form.formUuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
         }
