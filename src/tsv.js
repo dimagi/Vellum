@@ -62,6 +62,18 @@ define([
         return next;
     }
 
+    function parseRows(value, limit) {
+        var rows = [],
+            next = makeRowParser(value),
+            row = next();
+        while (row) {
+            rows.push(row);
+            if (limit && rows.length >= limit) { break; }
+            row = next();
+        }
+        return rows;
+    }
+
     /**
      * Escape a TSV field value
      *
@@ -103,6 +115,7 @@ define([
     return {
         escape: escape,
         makeRowParser: makeRowParser,
+        parseRows: parseRows,
         tabDelimit: tabDelimit
     };
 });

@@ -36,6 +36,10 @@ define([
         return error && error.stack ? error.stack : String(error);
     };
 
+    that.getTemplateObject = function (selector, params) {
+        return $(_.template($(selector).text(), params));
+    };
+    
     that.validAttributeRegex = /^[^<&'">]*$/;
     that.invalidAttributeRegex = /[<&'">]/;
 
@@ -145,6 +149,10 @@ define([
             return this;
         };
         return that;
+    };
+
+    that.pluralize = function (noun, n) {
+        return noun + (n !== 1 ? 's' : '');
     };
 
     /**

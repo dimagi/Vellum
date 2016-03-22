@@ -6,7 +6,6 @@ define([
     'vellum/tree',
     'vellum/logic',
     'vellum/undomanager',
-    'vellum/fuse',
     'vellum/util'
 ], function (
     require,
@@ -16,7 +15,6 @@ define([
     Tree,
     logic,
     undomanager,
-    Fuse,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -140,9 +138,6 @@ define([
 
         //make the object event aware
         util.eventuality(this);
-        this.on('form-load-finished', function() {
-            _this.fuse = new Fuse(_this);
-        });
     }
 
     Form.prototype = {
@@ -789,16 +784,6 @@ define([
             //if (!mug.options.isControlOnly && !this.isLoadingXForm) {
             //    this.fixBrokenReferences(mug);
             //}
-            if (mug.options.isODKOnly) {
-                // is this a good candidate for "info" message level?
-                mug.addMessage(null, {
-                    key: 'form-odk-only-warning',
-                    level: mug.WARNING,
-                    message: mug.options.typeName + ' works on Android devices ' +
-                        'and some feature phones; please test your specific ' +
-                        'model to ensure that this question type is supported'
-                });
-            }
             return mug;
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
