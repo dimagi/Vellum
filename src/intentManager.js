@@ -215,7 +215,6 @@ define([
         dataType: 'intent',
         tagName: 'input',
         icon: 'fcc fcc-fd-android-intent',
-        isODKOnly: true,
         isTypeChangeable: false,
         init: function (mug, form) {
             mug.p.intentXmlns = mug.p.intentXmlns || DEFAULT_XMLNS;

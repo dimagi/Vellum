@@ -117,6 +117,8 @@ define(["underscore"], function (_) {
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",
             saveUrl: function (data) {},
+            activityUrl: null,               // may be function or URL string
+            activityTimeout: 5 * 60 * 1000,  // 5 minutes in milliseconds
             externalLinks: {
                 changeSubscription: "#",
             },

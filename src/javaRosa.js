@@ -1671,7 +1671,7 @@ define([
                 mug.p.helpItext = parseItextRef(helpEl, "help");
             }
             if (alertEl.length && mug.getPresence("constraintMsgAttr") !== 'notallowed') {
-                mug.p.constraintMsgItext = parseItextRef(alertEl, "alert");
+                mug.p.constraintMsgItext = parseItextRef(alertEl, "constraintMsg");
             } else if (mug.p.constraintMsgAttr) {
                 var id = getITextID(mug.p.constraintMsgAttr);
                 if (id) {

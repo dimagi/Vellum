@@ -423,7 +423,7 @@ define([
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
 
-                    call("loadXML", call("createXML"));
+                    util.loadXML(call("createXML"));
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
                     tearDown(from, to);
