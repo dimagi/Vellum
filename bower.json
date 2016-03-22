@@ -36,7 +36,7 @@
         "jstree": "~3.2.1",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
-        "MediaUploader": "dimagi/MediaUploader#retry-html5",
+        "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath#v0.0.2",
         "jsdiff": ">=1",
         "markdown-it": "~6.0.0"
