@@ -241,10 +241,6 @@ define([
         return $uploadBtn;
     };
 
-    // get absolute path to current file, suitable to be loaded by swfobject.
-    var pieces = module.uri.split('/'),
-        base = pieces.slice(0, pieces.length - 1).join('/') + '/';
-   
     $.vellum.plugin("uploader", {
         objectMap: false,
         sessionid: false,
@@ -260,8 +256,7 @@ define([
                 uploadUrls = opts.uploadUrls,
                 uploadEnabled = opts.objectMap && opts.uploadUrls && 
                     opts.uploadUrls.image,
-                sessionid = opts.sessionid,
-                swfUrl = base + "../bower_components/MediaUploader/flashuploader.swf";
+                sessionid = opts.sessionid;
 
             this.data.uploader.uploadEnabled = uploadEnabled;
             this.data.uploader.objectMap = opts.objectMap;
@@ -276,28 +271,24 @@ define([
                         mediaType: 'image',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.image,
-                        swfUrl: swfUrl
                     }),
                     'audio': this.initUploadController({
                         uploaderSlug: 'fd_hqaudio',
                         mediaType: 'audio',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.audio,
-                        swfUrl: swfUrl
                     }),
                     'video': this.initUploadController({
                         uploaderSlug: 'fd_hqvideo',
                         mediaType: 'video',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
-                        swfUrl: swfUrl
                     }),
                     'text': this.initUploadController({
                         uploaderSlug: 'fd_hqtext',
                         mediaType: 'text',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.text,
-                        swfUrl: swfUrl
                     })
                 };
             };
@@ -345,7 +336,6 @@ define([
                     {
                         fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
                         uploadURL: options.uploadUrl,
-                        swfURL: options.swfUrl,
                         isMultiFileUpload: false,
                         queueTemplate: multimedia_queue,
                         errorsTemplate: multimedia_errors,
