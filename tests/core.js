@@ -363,6 +363,41 @@ define([
             assert.equal(mug.p.calculateAttr, "'choice1'");
         });
 
+        it("should notify activity url on form change", function(done) {
+            var vellum, activityUrlCalled = false;
+            // defaults: do not notify, 5 minute timeout
+            assert.equal(util.options.options.core.activityUrl, null);
+            assert.equal(util.options.options.core.activityTimeout, 5 * 60 * 1000);
+
+            util.init({
+                core: {
+                    activityTimeout: -1,  // immediate timeout
+                    activityUrl: function () {
+                        activityUrlCalled = true;
+                    },
+                    onReady: function () {
+                        // first change initializes timeout
+                        var start = Date.now(), later;
+                        vellum = this;
+                        vellum.onFormChange();
+                        assert.isAtLeast(this.data.core.activityTimestamp, start);
+
+                        // second change notifies on activity (if timed out)
+                        later = Date.now();
+                        vellum.onFormChange();
+                        assert(activityUrlCalled);
+                        assert.isAtLeast(vellum.data.core.activityTimestamp, later);
+
+                        assert.isNotNull(vellum.opts().core.activityUrl);
+                        // reset to prevent calls in other tests
+                        vellum.opts().core.activityUrl = null;
+
+                        done();
+                    }
+                }
+            });
+        });
+
         describe("should", function () {
             var form, dup;
             before(function () {

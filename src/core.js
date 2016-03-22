@@ -965,6 +965,26 @@ define([
 
     fn.onFormChange = function (mug) {
         this.data.core.saveButton.fire("change");
+        this.notifyUserActivity();
+    };
+
+    fn.notifyUserActivity = function() {
+        var now = Date.now(),
+            // default timeout: 5 minutes in ms
+            activityTimeout = this.opts().core.activityTimeout || 5 * 60 * 1000,
+            activityUrl = this.opts().core.activityUrl;
+        if (activityUrl) {
+            if (!this.data.core.activityTimestamp) {
+                this.data.core.activityTimestamp = now;
+            } else if (now - this.data.core.activityTimestamp >= activityTimeout) {
+                this.data.core.activityTimestamp = now;
+                if (_.isFunction(activityUrl)) {
+                    activityUrl();
+                } else {
+                    $.get(activityUrl);
+                }
+            }
+        }
     };
 
     fn.jstree = function () {
@@ -1083,7 +1103,6 @@ define([
                 _this.data.core.parseWarnings = [];
                 _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
-                _this.data.core.form.fire('form-load-finished');
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.

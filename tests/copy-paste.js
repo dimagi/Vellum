@@ -76,7 +76,6 @@ define([
                         "labelItext:hin-default",
                         "constraintMsgItext:en-default",
                         "constraintMsgItext:hin-default",
-                        "constraintMsgItext",
                         "constraintAttr",
                         "constraintMsgAttr",
                         "relevantAttr",
@@ -88,7 +87,6 @@ define([
                         "Hindi Text",
                         "Nope",
                         "Nope",
-                        "txt-constraintMsg",
                         "1 = 0",
                         "jr:itext('txt-constraintMsg')",
                         "x = y",
@@ -208,7 +206,6 @@ define([
                         "labelItext",
                         "constraintMsgItext:en-default",
                         "constraintMsgItext:hin-default",
-                        "constraintMsgItext",
                         "helpItext:en-default",
                         "helpItext:hin-default",
                         "helpItext:en-audio",
@@ -244,7 +241,6 @@ define([
                         "default-label",
                         "valid",
                         "valid",
-                        "text-constraintMsg",
                         "help",
                         "help",
                         "jr://file/commcare/audio/help/data/text.mp3",
@@ -903,9 +899,6 @@ define([
                     JSON.stringify({key3: "val3"}),
                     "commcare.org/xforms", JSON.stringify({type: "robin"})]
             ]);
-            var messages = util.getMug("app").messages.get();
-            chai.expect(messages[0]).to.include("works on Android devices");
-            assert.equal(messages.length, 1, messages);
         });
 
         it("should paste and copy an Android App Callout (old format)", function () {
@@ -933,9 +926,6 @@ define([
                     JSON.stringify({key3: "val3"}),
                     "commcare.org/xforms", JSON.stringify({type: "robin"})]
             ]);
-            var messages = util.getMug("app").messages.get();
-            chai.expect(messages[0]).to.include("works on Android devices");
-            assert.equal(messages.length, 1, messages);
         });
 
         it("should paste and copy a Balance", function () {
