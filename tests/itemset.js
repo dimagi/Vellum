@@ -143,7 +143,7 @@ define([
             $('[name=property-labelRef]').val('name').change();
             $('[name=property-filter]').val('name = /data/state').change();
 
-            util.assertXmlEqual(call('createXML'), ITEMSET_WITH_QUESTION_REF_XML);
+            util.assertXmlEqual(call('createXML'), ITEMSET_WITH_QUESTION_REF_XML, {normalize_xmlns: true});
         });
 
         describe("without access to lookup tables", function() {
