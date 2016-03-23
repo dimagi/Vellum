@@ -422,6 +422,14 @@ define([
                     msg.focus();
                     assert(msg[0].isContentEditable);
                 });
+
+                it("cursor should be at end of input on focus", function () {
+                    var editor = widget.input.editor;
+                    widget.setValue('testing cursor');
+                    editor.focus();
+                    var selection = editor.getSelection(true);
+                    assert.strictEqual(selection.getNative().focusOffset, 14);
+                });
             });
 
             describe("popovers", function () {
