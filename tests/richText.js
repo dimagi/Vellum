@@ -447,6 +447,30 @@ define([
                         done();
                     });
                 });
+
+                it("should destroy popover after destroy", function (done) {
+                    util.loadXML(BURPEE_XML);
+                    util.clickQuestion("total_num_burpees");
+                    widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        assert(bubble, "No bubbles detected");
+                        bubble.mouseenter();
+                        var $popover = $('.popover-content');
+                        assert.strictEqual($popover.text(),
+                                           "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                        var bubbles = widget.input.ckeditor().editor.widgets.instances;
+
+                        _.each(bubbles, function(bubble) {
+                            bubble.fire('destroy');
+                        });
+
+                        // popover destroy just fades the popover
+                        assert.strictEqual($('.popover:not(.fade)').length, 0);
+
+                        done();
+                    });
+                });
             });
         });
     });
