@@ -92,7 +92,7 @@ define([
                     },
                 }[this.normalizeHashtag(path)];
             },
-            xpath: escapedHashtags.Parser(hashtagToXPath),
+            xpath: escapedHashtags.parser(hashtagToXPath),
         };
 
     function icon(iconClass) { 

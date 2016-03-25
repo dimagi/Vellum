@@ -163,7 +163,7 @@ define([
     /*
      * extends xpath parser to be aware of escaped hashtags
      */
-    function Parser(hashtagDictionary) {
+    function parser(hashtagDictionary) {
         var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary));
         return {
             parse: function (input) {
@@ -184,6 +184,6 @@ define([
         toEscapedHashtag: toEscapedHashtag,
         toXPath: toXPath,
         transform: transform,
-        Parser: Parser,
+        parser: parser,
     };
 });

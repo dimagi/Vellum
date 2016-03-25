@@ -135,7 +135,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = escapedHashtags.Parser(this.hashtagDictionary);
+        this.xpath = escapedHashtags.parser(this.hashtagDictionary);
 
         //make the object event aware
         util.eventuality(this);
@@ -178,7 +178,7 @@ define([
         normalizeXPath: function (xpath_) {
             return this.normalize('toXPath', xpath_);
         },
-        hashtagsInXPath: function (xpath_) {
+        getHashtagsInXPath: function (xpath_) {
             try {
                 return new logic.LogicExpression(xpath_, this.xpath).getHashtags();
             } catch (err) {

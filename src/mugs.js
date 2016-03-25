@@ -918,7 +918,7 @@ define([
                 validationFunc: function (mug) {
                     var form = mug.form;
                     if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
-                        var paths = mug.form.hashtagsInXPath(mug.p.defaultValue);
+                        var paths = mug.form.getHashtagsInXPath(mug.p.defaultValue);
                         paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
                         if (paths.length) {
                             return "You are referencing a node in this form. " +
