@@ -287,8 +287,9 @@ define([
             this.__callOld();
             var _this = this;
             if (this.data.ignore.active && oldPath) {
+                // does not use normalizeXPath for oldPath as old XPath is invalid
                 oldPath = oldPath.replace(/^#form/, form.getBasePath(true));
-                newPath = newPath.replace(/^#form/, form.getBasePath(true));
+                newPath = form.normalizeXPath(newPath);
                 var oldEscaped = RegExp.escape(oldPath),
                     pathRegex = new RegExp(oldEscaped + '(\\W|$)', 'g'),
                     newPattern = newPath + "$1";

@@ -397,7 +397,7 @@ define([
                     if (prop === 'case_name') {
                         prop = 'name';
                     }
-                    return [ref.sourcePath.replace(/^#form/, '/data'), prop];
+                    return [this.form.normalizeXPath(ref.sourcePath), prop];
                 }).object().value();
 
             return ret;
