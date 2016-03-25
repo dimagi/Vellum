@@ -241,10 +241,7 @@ define([
                 form.referenceInstance(id, mug, property);
             });
             _.each(expr.hashtags, function (hashtag) {
-                if (/^#case/.test(hashtag.toHashtag())) {
-                    form.referenceInstance('casedb', mug, property);
-                    form.referenceInstance('commcaresession', mug, property);
-                }
+                form.referenceHashtag(hashtag, mug, property);
             });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {

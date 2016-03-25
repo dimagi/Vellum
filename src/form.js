@@ -188,6 +188,12 @@ define([
         referencedHashtags: function () {
             return this._logicManager.referencedHashtags();
         },
+        referenceHashtag: function(hashtag, mug, property) {
+            if (/^#case\//.test(hashtag.toHashtag())) {
+                this.referenceInstance('casedb', mug, property);
+                this.referenceInstance('commcaresession', mug, property);
+            }
+        },
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
