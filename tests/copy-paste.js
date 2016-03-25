@@ -444,16 +444,16 @@ define([
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr", "conflictedNodeId"],
-                ["/radius", "DataBindOnly", "42", "null"],
-                ["/copy-1-of-pi", "DataBindOnly", "3.1415", "pi"],
+                ["/radius", "DataBindOnly", '"42"', "null"],
+                ["/copy-1-of-pi", "DataBindOnly", '"3.1415"', "pi"],
                 ["/circumference", "DataBindOnly", "2 * #form/copy-1-of-pi * #form/radius", "null"],
             ]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "calculateAttr"],
-                ["/radius", "DataBindOnly", "42"],
-                ["/pi", "DataBindOnly", "3.1415"],
-                ["/circumference", "DataBindOnly", "2 * `#form/pi` * `#form/radius`"],
+                ["/radius", "DataBindOnly", '"42"'],
+                ["/pi", "DataBindOnly", '"3.1415"'],
+                ["/circumference", "DataBindOnly", "2 * #form/pi * #form/radius"],
             ]);
         });
 
@@ -989,6 +989,22 @@ define([
             assert(!util.markdownVisible());
         });
 
+        it("should paste invalid xpaths correctly", function() {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/invalid", "DataBindOnly", "(42"],
+                ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+            ]);
+            util.clickQuestion('invalid');
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "calculateAttr"],
+                ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
+                ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+            ]);
+        });
+
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({
@@ -1008,7 +1024,7 @@ define([
                 ['id', 'type', 'labelItext:en-default', 'appearance', 'calculateAttr', 'instances'],
                 ['/score', 'Int', 'What was your score', 'null', 'null', 'null'],
                 ['/output', 'DataBindOnly', 'null', 'null',
-                    "instance('scores')/score[@high > `#form/score`][@low < `#form/score`]",
+                    "instance('scores')/score[@high > #form/score][@low < #form/score]",
                     '{"scores":{"children":"<score low=\\"0.0\\" high=\\"500.0\\">You\'re really bad</score><score low=\\"500.0\\" high=\\"99999999.0\\">You\'re really good</score>"}}'],
                 ['/result', 'Trigger', '<output value="#form/output"></output>', 'minimal', 'null', 'null'],
             ];

@@ -719,6 +719,15 @@ define([
             data.instances = _.extend(data.instances || {},
                                       mug.form.parseInstanceRefs(value));
         }
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
         return value || undefined;
     }
 
