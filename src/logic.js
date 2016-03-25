@@ -217,7 +217,7 @@ define([
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
                     xpath = path.toHashtag(),
-                    knownHashtag = pathString.startsWith('#case/') && form.isValidHashtag(xpath);
+                    knownHashtag = isCaseReference(pathString) && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
                 if ((!refMug && !knownHashtag) &&
@@ -226,7 +226,7 @@ define([
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
                     unknowns.push(xpath);
-                } else if (!refMug && pathString.startsWith('#case/') && !knownHashtag) {
+                } else if (!refMug && isCaseReference(pathString) && !knownHashtag) {
                     unknowns.push(xpath);
                 }
                 return {
@@ -389,7 +389,7 @@ define([
 
             ret.preload = _.chain(this.all)
                 .filter(function(ref) {
-                    return ref.path.startsWith('#case/');
+                    return isCaseReference(ref.path);
                 })
                 .map(function(ref) {
                     var info = ref.path.split('/'),
@@ -407,13 +407,17 @@ define([
         referencedHashtags: function () {
             return _.chain(this.all)
                 .filter(function(ref) {
-                    return ref.path.startsWith('#case/');
+                    return isCaseReference(ref.path);
                 })
                 .map(function(ref) {
                     return [ref.path, null];
                 }).object().value();
         }
     };
+
+    function isCaseReference(hashtag) {
+        return hashtag.startsWith('#case/');
+    }
 
     return {
         LogicManager: LogicManager,
