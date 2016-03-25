@@ -211,7 +211,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[_this.normalizeEscapedHashtag(dataParent)];
+                var dataParentMug = _this.mugMap[_this.normalizeHashtag(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -854,7 +854,7 @@ define([
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
             var map = this.mugMap, newPath;
-            delete map[this.normalizeEscapedHashtag(oldHashtag)];
+            delete map[this.normalizeHashtag(oldHashtag)];
             if (oldHashtag) {
                 this.removeHashtag(oldHashtag);
             }
@@ -872,7 +872,7 @@ define([
                 if (newPath) {
                     this.addHashtag(newHashtag, newPath);
                 }
-                map[this.normalizeEscapedHashtag(newHashtag)] = mug;
+                map[this.normalizeHashtag(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
@@ -881,7 +881,7 @@ define([
             var path = mug.absolutePath;
             if (path) {
                 this.addHashtag(mug.hashtagPath, path);
-                this.mugMap[this.normalizeEscapedHashtag(mug.hashtagPath)] = mug;
+                this.mugMap[this.normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -915,7 +915,7 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[this.normalizeEscapedHashtag(path)];
+            return this.mugMap[this.normalizeHashtag(path)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -943,7 +943,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[this.normalizeEscapedHashtag(mug.hashtagPath)];
+                delete this.mugMap[this.normalizeHashtag(mug.hashtagPath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
