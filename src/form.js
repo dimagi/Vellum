@@ -148,8 +148,11 @@ define([
         isValidHashtag: function(tag) {
             return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
         },
-        addHashtag: function(hashtag, xpath, dontOverwrite) {
-            if (!dontOverwrite || !this.hashtagDictionary[hashtag]) {
+        addHashtag: function(hashtag, xpath) {
+            this.hashtagDictionary[hashtag] = xpath;
+        },
+        initHashtag: function(hashtag, xpath) {
+            if (!this.hashtagDictionary[hashtag]) {
                 this.hashtagDictionary[hashtag] = xpath;
             }
         },

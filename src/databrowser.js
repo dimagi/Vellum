@@ -286,7 +286,7 @@ define([
             dataHashtags[hashtag] = fullPath;
         }
         if (form && form.addHashtag) {
-            form.addHashtag(hashtag, fullPath, true);
+            form.initHashtag(hashtag, fullPath);
         }
     }
     
