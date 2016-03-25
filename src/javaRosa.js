@@ -848,13 +848,15 @@ define([
                             start,
                             end,
                             match;
-                        if (e.which === 8) {
-                            match = val.substr(pos - 2, 2);
-                            if (match === outputEnd) {
-                                start = val.lastIndexOf(outputBegin, pos);
-                                end = pos;
+                        if (e.which === 8) { // backspace
+                            if (pos > 1) {
+                                match = val.substr(pos - 2, 2);
+                                if (match === outputEnd) {
+                                    start = val.lastIndexOf(outputBegin, pos);
+                                    end = pos;
+                                }
                             }
-                        } else if (e.which === 46) {
+                        } else if (e.which === 46) { // delete
                             match = val.substr(pos, outputBegin.length);
                             if (match === outputBegin) {
                                 end = val.indexOf(outputEnd, pos);
