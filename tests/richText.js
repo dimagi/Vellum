@@ -495,7 +495,7 @@ define([
                         bubble.mouseenter();
                         var $popover = $('.popover-content');
                         assert.strictEqual($popover.text(),
-                                           "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                                           "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                         var bubbles = widget.input.ckeditor().editor.widgets.instances;
 
                         _.each(bubbles, function(bubble) {
