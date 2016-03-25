@@ -3,7 +3,7 @@ define([
     'underscore',
     'jsdiff',
     'vellum/markdown',
-    'vellum/xpath',
+    'vellum/escapedHashtags',
     'jquery',
     'vellum/jquery-extensions'
 ], function (
@@ -11,7 +11,7 @@ define([
     _,
     jsdiff,
     markdown,
-    xpath,
+    escapedHashtags,
     $
 ) {
     RegExp.escape = function(s) {
@@ -312,7 +312,9 @@ define([
             hashtag = expr.toHashtag();
         } catch (err) {
             xmlWriter.writeAttributeString('vellum:' + key, "#invalid/xpath " + hashtagOrXPath);
-            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
+                return mug.form.normalizeXPath(hashtag);
+            }));
             return;
         }
 
