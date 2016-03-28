@@ -422,6 +422,14 @@ define([
                     msg.focus();
                     assert(msg[0].isContentEditable);
                 });
+
+                it("cursor should be at end of input on focus", function () {
+                    var editor = widget.input.editor;
+                    widget.setValue('testing cursor');
+                    editor.focus();
+                    var selection = editor.getSelection(true);
+                    assert.strictEqual(selection.getNative().focusOffset, 14);
+                });
             });
 
             describe("popovers", function () {
@@ -444,6 +452,30 @@ define([
                         bubble.mouseenter();
                         assert.strictEqual($('.popover-content').text(),
                                            "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                        done();
+                    });
+                });
+
+                it("should destroy popover after destroy", function (done) {
+                    util.loadXML(BURPEE_XML);
+                    util.clickQuestion("total_num_burpees");
+                    widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        assert(bubble, "No bubbles detected");
+                        bubble.mouseenter();
+                        var $popover = $('.popover-content');
+                        assert.strictEqual($popover.text(),
+                                           "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                        var bubbles = widget.input.ckeditor().editor.widgets.instances;
+
+                        _.each(bubbles, function(bubble) {
+                            bubble.fire('destroy');
+                        });
+
+                        // popover destroy just fades the popover
+                        assert.strictEqual($('.popover:not(.fade)').length, 0);
+
                         done();
                     });
                 });
