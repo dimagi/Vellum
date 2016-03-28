@@ -157,5 +157,17 @@ define([
             util.clickQuestion('select');
             util.assertJSTreeState("select", "  choice1", "  choice2");
         });
+
+        it("should undelete multiple questions when selected out of order", function () {
+            util.addQuestion('Text', 'text');
+            util.addQuestion('Text', 'text2');
+            util.addQuestion('Text', 'text3');
+            util.clickQuestion('text3', 'text2');
+            util.assertJSTreeState("text", "text2", "text3");
+            $('.fd-button-remove').click();
+            util.assertJSTreeState("text");
+            $('.fd-undo').click();
+            util.assertJSTreeState("text", "text2", "text3");
+        });
     });
 });

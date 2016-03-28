@@ -1699,7 +1699,7 @@ define([
                 isCopyable: !multiselect && mug.options.isCopyable,
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mugs = _this.getCurrentlySelectedMug(true);
+            var mugs = _this.getCurrentlySelectedMug(true, true);
             form.removeMugsFromForm(mugs);
             _this.refreshCurrentMug();
         });
