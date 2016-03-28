@@ -867,6 +867,7 @@ define([
                 ufids = {},
                 undoUfids = {},
                 keepUndoStack = mugs.length !== 1;
+            this.undomanager.resetUndo();
             _.each(mugs, function (mug) {
                 _this._addToUndoManager(mug, undoUfids, true, keepUndoStack);
             });

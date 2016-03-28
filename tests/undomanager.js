@@ -169,5 +169,19 @@ define([
             $('.fd-undo').click();
             util.assertJSTreeState("text", "text2", "text3");
         });
+
+        it("should reset the undo manager after a delete", function () {
+            util.addQuestion('Text', 'text');
+            util.addQuestion('Select', 'select');
+            util.assertJSTreeState('text', 'select', '  choice1', '  choice2');
+            util.clickQuestion('text');
+            $('.fd-button-remove').click();
+            util.assertJSTreeState('select', '  choice1', '  choice2');
+            util.clickQuestion('select');
+            $('.fd-button-remove').click();
+            util.assertJSTreeState();
+            $('.fd-undo').click();
+            util.assertJSTreeState('select', '  choice1', '  choice2');
+        });
     });
 });
