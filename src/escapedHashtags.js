@@ -1,3 +1,29 @@
+/**
+ * This provides a robust parser for xpaths, hashtags, and escaped hashtags.
+ *
+ * XPaths are valid XPaths: /data/text = /data/text2
+ * Hashtags are valid XPaths with hasthags: #form/text = #form/text2
+ * Escaped hashtags are hashtags but any hashtags are escaped by `: `#form/text` = `#form/text`
+ *
+ * If an xpath is invalid it will be written as: #invalid/xpath (`#form/text`
+ *
+ * Reasoning for this split:
+ * Hashtags without escaping are useful for showing to users and hand editing
+ *
+ * Escaped hashtags are used to ensure we do not lose a bubble when copy/pasting
+ * or when an expression becomes invalid.
+ *
+ * All expressions are stored as escaped hashtags internally and are written to
+ * XML in two forms.
+ *   ex: <bind vellum:calculate="#form/text" calculate="/data/text .../>
+ *   The vellum namespaced attribute is the hashtag form. The non namespaced
+ *   attribute is the valid xform syntax.
+ *
+ * When a user saves an invalid xpath we save it as:
+ *   <bind vellum:calculate="#invalid/xpath (`#form/text`" .../>
+ *
+ * TODO: only use escaped hashtag form internally for invalid xpaths
+ */
 define([
     'vellum/xpath',
 ], function(
