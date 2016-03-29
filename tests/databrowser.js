@@ -85,7 +85,6 @@ define([
         describe("when loaded before the form", function () {
             beforeEach(function (done) {
                 util.init({
-                    features: {rich_text: false},
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
@@ -102,58 +101,79 @@ define([
                 });
             });
 
-            it("should add ref on drag/drop", function() {
+            it("should add ref on drag/drop", function(done) {
                 util.loadXML("");
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     calc = $("[name=property-calculateAttr]"),
                     sessionUri = CASE_DATA[0].uri,
-                    casedbUri = CASE_DATA[1].uri;
-                assert.equal(getInstanceId(mug.form, sessionUri), null);
-                assert.equal(getInstanceId(mug.form, casedbUri), null);
-                assert.equal(calc.length, 1);
-                util.findNode(dataTree, "dob").data.handleDrop(calc);
-                assert.equal(mug.p.calculateAttr, "`#case/child/dob`");
-                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-                util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
-                                    {normalize_xmlns: true});
+                    casedbUri = CASE_DATA[1].uri,
+                    editor = calc.ckeditor().editor,
+                    widget = util.getWidget('property-calculateAttr');
+                widget.input.promise.then(function () { 
+                    editor.on('change', function() {
+                        assert.equal(mug.p.calculateAttr, "`#case/child/dob`");
+                        assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                        assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                        util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
+                                            {normalize_xmlns: true});
+                        done();
+                    });
+                    assert.equal(getInstanceId(mug.form, sessionUri), null);
+                    assert.equal(getInstanceId(mug.form, casedbUri), null);
+                    assert.equal(calc.length, 1);
+                    util.findNode(dataTree, "dob").data.handleDrop(calc);
+                });
             });
 
-            it("should add parent ref on drag/drop", function() {
+            it("should add parent ref on drag/drop", function(done) {
                 util.loadXML("");
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     calc = $("[name=property-calculateAttr]"),
                     sessionUri = CASE_DATA[0].uri,
-                    casedbUri = CASE_DATA[1].uri;
-                assert.equal(getInstanceId(mug.form, sessionUri), null);
-                assert.equal(getInstanceId(mug.form, casedbUri), null);
-                assert.equal(calc.length, 1);
-                util.findNode(dataTree, "edd").data.handleDrop(calc);
-                assert.equal(mug.p.calculateAttr, "`#case/mother/edd`");
-                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-                util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
-                                    {normalize_xmlns: true});
+                    casedbUri = CASE_DATA[1].uri,
+                    editor = calc.ckeditor().editor,
+                    widget = util.getWidget('property-calculateAttr');
+                widget.input.promise.then(function () { 
+                    editor.on('change', function() {
+                        assert.equal(mug.p.calculateAttr, "`#case/mother/edd`");
+                        assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                        assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                        util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
+                                            {normalize_xmlns: true});
+                        done();
+                    });
+                    assert.equal(getInstanceId(mug.form, sessionUri), null);
+                    assert.equal(getInstanceId(mug.form, casedbUri), null);
+                    assert.equal(calc.length, 1);
+                    util.findNode(dataTree, "edd").data.handleDrop(calc);
+                });
             });
 
-            it("should add recursive ref on drag/drop", function() {
+            it("should add recursive ref on drag/drop", function(done) {
                 util.loadXML("");
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     calc = $("[name=property-calculateAttr]"),
                     sessionUri = CASE_DATA[0].uri,
-                    casedbUri = CASE_DATA[1].uri;
-                assert.equal(getInstanceId(mug.form, sessionUri), null);
-                assert.equal(getInstanceId(mug.form, casedbUri), null);
-                assert.equal(calc.length, 1);
-                var motherNode = util.findNode(dataTree, "mother"),
-                    node = util.findNode(dataTree, "child", motherNode);
-                dataTree.open_node(node);
-                util.findNode(dataTree, "dob", node).data.handleDrop(calc);
-                assert.equal(mug.p.calculateAttr, '`#case/child/dob`');
-                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-                util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
-                                    {normalize_xmlns: true});
+                    casedbUri = CASE_DATA[1].uri,
+                    editor = calc.ckeditor().editor,
+                    widget = util.getWidget('property-calculateAttr');
+                widget.input.promise.then(function () { 
+                    editor.on('change', function() {
+                        assert.equal(mug.p.calculateAttr, '`#case/child/dob`');
+                        assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                        assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                        util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
+                                            {normalize_xmlns: true});
+                        done();
+                    });
+                    assert.equal(getInstanceId(mug.form, sessionUri), null);
+                    assert.equal(getInstanceId(mug.form, casedbUri), null);
+                    assert.equal(calc.length, 1);
+                    var motherNode = util.findNode(dataTree, "mother"),
+                        node = util.findNode(dataTree, "child", motherNode);
+                    dataTree.open_node(node);
+                    util.findNode(dataTree, "dob", node).data.handleDrop(calc);
+                });
             });
 
             it("should hashtagify refs when written", function() {

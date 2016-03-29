@@ -45,7 +45,6 @@ define([
                 features: {
                     lookup_tables: true,
                     advanced_itemsets: false,
-                    rich_text: false
                 },
             });
         }
@@ -138,10 +137,14 @@ define([
             util.loadXML("");
             util.addQuestion("Text", 'state');
             util.addQuestion("SelectDynamic", 'district');
-            clickQuestion('district/itemset');
-            $('[name=property-valueRef]').val('@id').change();
-            $('[name=property-labelRef]').val('name').change();
-            $('[name=property-filter]').val('name = /data/state').change();
+            util.clickQuestion('district/itemset');
+            var itemset = util.getMug("district/itemset");
+            itemset.p.itemsetData = {
+                instance: itemset.p.itemsetData.instance,
+                nodeset:  itemset.p.itemsetData.nodeset + '[name = /data/state]',
+                labelRef: "name",
+                valueRef: "@id",
+            };
 
             util.assertXmlEqual(call('createXML'), ITEMSET_WITH_QUESTION_REF_XML, {normalize_xmlns: true});
         });
