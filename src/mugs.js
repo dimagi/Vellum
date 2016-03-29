@@ -735,7 +735,17 @@ define([
         if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
             mug.form.updateKnownInstances(data.instances);
         }
-        return data[key];
+        var value = data[key];
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
+        return value;
     }
 
     function resolveConflictedNodeId(mug) {

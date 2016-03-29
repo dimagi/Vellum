@@ -997,6 +997,11 @@ define([
                 ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
             ]);
             util.clickQuestion('invalid');
+            util.clickQuestion('invalid2');
+            var invalid = util.getMug('invalid'),
+                invalid2 = util.getMug('invalid2');
+            assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(invalid2.p.calculateAttr, '#invalid/xpath (42');
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "calculateAttr"],
