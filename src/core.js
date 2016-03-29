@@ -1195,6 +1195,7 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
+            e.mug._node_control = undefined;
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
