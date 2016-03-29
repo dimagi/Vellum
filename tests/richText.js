@@ -32,6 +32,8 @@ define([
     'vellum/escapedHashtags',
     'ckeditor',
     'text!static/richText/burpee.xml',
+    'text!static/richText/output-ref.xml',
+    'text!static/richText/output-value.xml',
 ], function(
     chai,
     $,
@@ -41,9 +43,12 @@ define([
     javaRosa,
     escapedHashtags,
     CKEDITOR,
-    BURPEE_XML
+    BURPEE_XML,
+    OUTPUT_REF_XML,
+    OUTPUT_VALUE_XML
 ) {
     var assert = chai.assert,
+        call = util.call,
         hashtagToXPath = {},
         formShim = {
             isValidHashtag: function (path) {
@@ -458,6 +463,11 @@ define([
                     editor.focus();
                     var selection = editor.getSelection(true);
                     assert.strictEqual(selection.getNative().focusOffset, 14);
+                });
+
+                it("should change output value to output ref", function () {
+                    util.loadXML(OUTPUT_REF_XML);
+                    util.assertXmlEqual(call('createXML'), OUTPUT_VALUE_XML);
                 });
             });
 

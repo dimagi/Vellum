@@ -554,7 +554,9 @@ define([
     }
 
     function extractXPathInfoFromOutputValue(value) {
-        var outputValueRegex = /<output\s+value="([^"]+)"/,
+        // there's no differenc between ref and value, so just change them all
+        // to value
+        var outputValueRegex = /<output\s+(ref|value)="([^"]+)"/,
             dateFormatRegex = /format-date\(date\(([^)]+)\),\s*'([^']+)'\)/,
             dateMatch = dateFormatRegex.exec(value),
             outputValueMatch = outputValueRegex.exec(value);
@@ -568,7 +570,7 @@ define([
         } else if (outputValueMatch){
             return {
                 'data-output-value': true,
-                reference: outputValueMatch[1],
+                reference: outputValueMatch[2],
             };
         }
 
