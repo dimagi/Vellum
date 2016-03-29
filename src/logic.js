@@ -385,7 +385,7 @@ define([
                     type: 'always',
                     operator: null
                 }
-            };
+            }, _this = this;
 
             ret.preload = _.chain(this.all)
                 .filter(function(ref) {
@@ -397,7 +397,7 @@ define([
                     if (prop === 'case_name') {
                         prop = 'name';
                     }
-                    return [this.form.normalizeXPath(ref.sourcePath), prop];
+                    return [_this.form.normalizeXPath(ref.sourcePath), prop];
                 }).object().value();
 
             return ret;
