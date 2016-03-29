@@ -237,10 +237,12 @@ define([
             // set the cursor to the end of text
             var selection = editor.getSelection();
             var range = selection.getRanges()[0];
-            var pCon = range.startContainer.getAscendant({p:2},true);
-            var newRange = new CKEDITOR.dom.range(range.document);
-            newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-            newRange.select();
+            if (range) {
+                var pCon = range.startContainer.getAscendant({p:2},true);
+                var newRange = new CKEDITOR.dom.range(range.document);
+                newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
+                newRange.select();
+            }
         });
         input.data("ckwrapper", wrapper);
         return wrapper;
