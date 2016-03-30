@@ -49,7 +49,6 @@ define([
         before(function (done) {
             util.init({
                 features: {
-                    rich_text: false,
                     custom_intents: true,
                 },
                 javaRosa: { langs: ['en', 'hin'] },
@@ -1013,7 +1012,6 @@ define([
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({
-                    features: { rich_text: false },
                     javaRosa: { langs: ['en'] },
                     core: {
                         onReady: function () {
@@ -1050,7 +1048,6 @@ define([
         describe("with multimedia", function () {
             before(function (done) {
                 util.init({
-                    features: { rich_text: false },
                     javaRosa: { langs: ['en', 'hin'] },
                     uploader: { objectMap: {
                         "jr://file/commcare/audio/data/question1.mp3": true
