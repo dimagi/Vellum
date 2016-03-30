@@ -3,7 +3,8 @@
 	xmlns="http://www.w3.org/2002/xforms"
 	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 	xmlns:jr="http://openrosa.org/javarosa"
-	xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	xmlns:vellum="http://commcarehq.org/xforms/vellum"
+	vellum:ignore="richText">
 	<h:head>
 		<h:title>Untitled Form</h:title>
 		<model>
@@ -14,7 +15,7 @@
 					<question1/>
 				</data>
 			</instance>
-			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" 
+			<bind nodeset="/data/question1" type="xsd:string" 
 				jr:constraintMsg="jr:itext('question1-constraintMsg')" />
 			<itext>
 				<translation lang="en" default="">
@@ -73,7 +74,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/question1" ref="/data/question1">
+		<input ref="/data/question1">
 			<label ref="jr:itext('question1-label')"/>
 			<hint ref="jr:itext('question1-hint')"/>
 			<help ref="jr:itext('question1-help')"/>
