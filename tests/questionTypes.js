@@ -183,7 +183,6 @@ define([
                             done();
                         }
                     },
-                    features: {rich_text: false }
                 });
             });
 
@@ -245,13 +244,13 @@ define([
             // - automatic generation of media paths for regular questions and choices
             util.init({
                 features: {
-                    rich_text: false,
                     templated_intents: true,
                     custom_intents: true,
                 },
                 core: {
                     form: null,
                     onReady: function () {
+                        this.data.core.form.useRichText = false;
                         _.each(questionTypes, function (q, i) {
                             var prev = (i > 0 ? questionTypes[i - 1] : {}),
                                 prevId = q.clickBeforeAdd ||

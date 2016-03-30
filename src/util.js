@@ -305,13 +305,16 @@ define([
             return;
         }
 
-        var xpath_, hashtag;
+        var form = mug.form,
+            xpath_, hashtag;
         try {
-            var expr = mug.form.xpath.parse(hashtagOrXPath);
+            var expr = form.xpath.parse(hashtagOrXPath);
             xpath_ = expr.toXPath();
             hashtag = expr.toHashtag();
         } catch (err) {
-            xmlWriter.writeAttributeString('vellum:' + key, "#invalid/xpath " + hashtagOrXPath);
+            if (form.useRichText ) {
+                xmlWriter.writeAttributeString('vellum:' + key, "#invalid/xpath " + hashtagOrXPath);
+            }
             xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
                 return mug.form.normalizeXPath(hashtag);
             }));
@@ -319,7 +322,9 @@ define([
         }
 
         if (hashtag !== xpath_) {
-            xmlWriter.writeAttributeString('vellum:' + key, hashtag);
+            if (form.useRichText ) {
+                    xmlWriter.writeAttributeString('vellum:' + key, hashtag);
+            }
             xmlWriter.writeAttributeString(key, xpath_);
         } else {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
