@@ -756,12 +756,12 @@ define([
 
             if (window.analytics) {
                 if (path.contains('casedb')) {
-                    window.analytics.usage("Case Management", "Form Builder", "Drag and Drop");
+                    window.analytics.usage("Case Reference", "Drag and Drop", "Calculation");
                 } else {
                     window.analytics.usage(
-                        "Question Reference",
+                        "Form Reference",
                         "Drag and Drop",
-                        _this.data.core.currentlyEditedProperty
+                        "Calculation"
                     );
                 }
             }

@@ -1375,22 +1375,18 @@ define([
                     menu.find('li a').click(function () {
                         var dateFormat = $(this).data('format');
                         insertOutputRef(_this, target, path, mug, dateFormat);
-                        if (window.analytics) {
-                            window.analytics.usage(
-                                "Output Value", "Drag and Drop", dateFormat
-                            );
-                        }
                         menu.remove();
                     });
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
                     insertOutputRef(_this, target, path, mug);
-                    if (window.analytics) {
-                        window.analytics.usage("Output Value", "Drag and Drop");
-                        if (path.contains('casedb')) {
-                            window.analytics.usage("Case Management", "Form Builder", "Drag and Drop");
-                        }
+                }
+                if (window.analytics) {
+                    if (path.contains('casedb')) {
+                        window.analytics.usage("Case Reference", "Drag and Drop", "Label");
+                    } else {
+                        window.analytics.usage("Form Reference", "Drag and Drop", "Label");
                     }
                 }
             } else {
