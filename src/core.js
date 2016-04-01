@@ -755,13 +755,28 @@ define([
             }
 
             if (window.analytics) {
+                var targetType;
+                switch (target[0].id) {
+                    case 'property-relevantAttr':
+                        targetType = "Display";
+                        break;
+                    case 'property-constraintAttr':
+                        targetType = "Validation";
+                        break;
+                    case 'property-calculateAttr':
+                        targetType = "Calculation"
+                        break;
+                    default:
+                        targetType = "Expression Editor"
+                        break;
+                }
                 if (path.contains('casedb')) {
-                    window.analytics.usage("Case Reference", "Drag and Drop", "Calculation");
+                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
                 } else {
                     window.analytics.usage(
                         "Form Reference",
                         "Drag and Drop",
-                        "Calculation"
+                        targetType
                     );
                 }
             }
