@@ -764,10 +764,10 @@ define([
                         targetType = "Validation";
                         break;
                     case 'property-calculateAttr':
-                        targetType = "Calculation"
+                        targetType = "Calculation";
                         break;
                     default:
-                        targetType = "Expression Editor"
+                        targetType = "Expression Editor";
                         break;
                 }
                 if (path.contains('casedb')) {
