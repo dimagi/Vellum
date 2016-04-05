@@ -1018,6 +1018,31 @@ define([
             });
         });
 
+        it("should paste valid xpaths correctly", function(done) {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/invalid", "DataBindOnly", "(42"],
+                ["/valid", "DataBindOnly", "#form/invalid"],
+            ]);
+            util.clickQuestion('valid');
+            var invalid = util.getMug('invalid'),
+                valid = util.getMug('valid');
+            assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(valid.p.calculateAttr, '#form/invalid');
+            var widget = util.getWidget('property-calculateAttr');
+            widget.input.promise.then(function () {
+                assert.strictEqual(widget.getValue(), '`#form/invalid`');
+                util.selectAll();
+                eq(mod.copy(), [
+                    ["id", "type", "calculateAttr"],
+                    ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/valid", "DataBindOnly", "#form/invalid"],
+                ]);
+                done();
+            });
+        });
+
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({
