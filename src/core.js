@@ -770,14 +770,14 @@ define([
                         targetType = "Expression Editor";
                         break;
                 }
-                if (path.contains('casedb')) {
-                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
-                } else {
+                if (_this.data.core.form.isFormReference(path)) {
                     window.analytics.usage(
                         "Form Reference",
                         "Drag and Drop",
                         targetType
                     );
+                } else {
+                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
                 }
             }
         }

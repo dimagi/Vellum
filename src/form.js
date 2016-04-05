@@ -959,6 +959,9 @@ define([
             var value = exporter.generateExportTSV(this);
             this.vellum.afterSerialize();
             return value;
+        },
+        isFormReference: function (path) {
+            return this.getMugByPath(path) ? true : false;
         }
     };
 

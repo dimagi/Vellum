@@ -1383,10 +1383,10 @@ define([
                     insertOutputRef(_this, target, path, mug);
                 }
                 if (window.analytics) {
-                    if (path.contains('casedb')) {
-                        window.analytics.usage("Case Reference", "Drag and Drop", "Label");
-                    } else {
+                    if (_this.data.core.form.isFormReference(path)) {
                         window.analytics.usage("Form Reference", "Drag and Drop", "Label");
+                    } else {
+                        window.analytics.usage("Case Reference", "Drag and Drop", "Label");
                     }
                 }
             } else {
