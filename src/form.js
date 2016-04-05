@@ -959,6 +959,9 @@ define([
             var value = exporter.generateExportTSV(this);
             this.vellum.afterSerialize();
             return value;
+        },
+        isCaseReference: function (path) {
+            return /instance\('casedb'\)/.test(path) ? true : false;
         }
     };
 
