@@ -988,25 +988,34 @@ define([
             assert(!util.markdownVisible());
         });
 
-        it("should paste invalid xpaths correctly", function() {
+        it("should paste invalid xpaths correctly", function(done) {
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr"],
                 ["/invalid", "DataBindOnly", "(42"],
                 ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+                ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
             ]);
             util.clickQuestion('invalid');
             util.clickQuestion('invalid2');
             var invalid = util.getMug('invalid'),
-                invalid2 = util.getMug('invalid2');
+                invalid2 = util.getMug('invalid2'),
+                invalid3 = util.getMug('invalid3');
             assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
             assert.strictEqual(invalid2.p.calculateAttr, '#invalid/xpath (42');
-            util.selectAll();
-            eq(mod.copy(), [
-                ["id", "type", "calculateAttr"],
-                ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
-                ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
-            ]);
+            assert.strictEqual(invalid3.p.calculateAttr, '#invalid/xpath (`#form/invalid`');
+            var widget = util.getWidget('property-calculateAttr');
+            widget.input.promise.then(function () {
+                assert.strictEqual(widget.getValue(), '(42');
+                util.selectAll();
+                eq(mod.copy(), [
+                    ["id", "type", "calculateAttr"],
+                    ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
+                ]);
+                done();
+            });
         });
 
         describe("with instances without src", function() {
