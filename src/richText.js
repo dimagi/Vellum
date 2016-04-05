@@ -231,9 +231,15 @@ define([
             },
         };
 
-        // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
-        editor.on('focus', function () {
+        editor.on('focus', function (e) {
+            // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
             editor.setReadOnly(false);
+            // remove any placeholder text that may be in the text area
+            var editable = e.editor.editable();
+            if (editable.hasClass('placeholder')) {
+                editable.removeClass('placeholder');
+                editable.setHtml('');
+            }
             // set the cursor to the end of text
             var selection = editor.getSelection();
             var range = selection.getRanges()[0];
