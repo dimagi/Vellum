@@ -1033,6 +1033,10 @@ define([
             var widget = util.getWidget('property-calculateAttr');
             widget.input.promise.then(function () {
                 assert.strictEqual(widget.getValue(), '`#form/invalid`');
+                assert.strictEqual(
+                    $('[name=property-calculateAttr]').find('span .label').data('value'),
+                    '`#form/invalid`'
+                );
                 util.selectAll();
                 eq(mod.copy(), [
                     ["id", "type", "calculateAttr"],
