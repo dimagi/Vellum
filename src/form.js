@@ -960,8 +960,8 @@ define([
             this.vellum.afterSerialize();
             return value;
         },
-        isFormReference: function (path) {
-            return this.getMugByPath(path) ? true : false;
+        isCaseReference: function (path) {
+            return /instance\('casedb'\)/.test(path) ? true : false;
         }
     };
 

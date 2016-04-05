@@ -770,14 +770,14 @@ define([
                         targetType = "Expression Editor";
                         break;
                 }
-                if (_this.data.core.form.isFormReference(path)) {
+                if (_this.data.core.form.isCaseReference(path)) {
+                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
+                } else {
                     window.analytics.usage(
                         "Form Reference",
                         "Drag and Drop",
                         targetType
                     );
-                } else {
-                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
                 }
             }
         }
