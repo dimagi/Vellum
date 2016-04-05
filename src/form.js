@@ -1035,7 +1035,7 @@ define([
             return value;
         },
         isCaseReference: function (path) {
-            return /instance\('casedb'\)/.test(path) ? true : false;
+            return /^#case/.test(path);
         }
     };
 
