@@ -1122,6 +1122,7 @@ define([
                 _this.data.core.parseWarnings = [];
                 _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
+                _this.data.core.form.fire('form-load-finished');
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.
@@ -1213,6 +1214,7 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
+            e.mug._node_control = undefined;
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1911,6 +1913,8 @@ define([
             data = {xform: formText};
         }
 
+        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+
         this.data.core.saveButton.ajax({
             type: "POST",
             url: url,
@@ -2034,7 +2038,8 @@ define([
             "requiredAttr",
             "relevantAttr",
             "constraintAttr",
-            "repeat_count"
+            "repeat_count",
+            'defaultValue',
         ];
     };
 
@@ -2042,7 +2047,6 @@ define([
         return [
             "dataSource",
             "dataValue",
-            'defaultValue',
             "xmlnsAttr",
             "label",
             "hintLabel",

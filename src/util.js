@@ -3,7 +3,7 @@ define([
     'underscore',
     'jsdiff',
     'vellum/markdown',
-    'vellum/xpath',
+    'vellum/escapedHashtags',
     'jquery',
     'vellum/jquery-extensions'
 ], function (
@@ -11,7 +11,7 @@ define([
     _,
     jsdiff,
     markdown,
-    xpath,
+    escapedHashtags,
     $
 ) {
     RegExp.escape = function(s) {
@@ -38,10 +38,6 @@ define([
         return error && error.stack ? error.stack : String(error);
     };
 
-    that.getTemplateObject = function (selector, params) {
-        return $(_.template($(selector).text(), params));
-    };
-    
     that.validAttributeRegex = /^[^<&'">]*$/;
     that.invalidAttributeRegex = /[<&'">]/;
 
@@ -151,10 +147,6 @@ define([
             return this;
         };
         return that;
-    };
-
-    that.pluralize = function (noun, n) {
-        return noun + (n !== 1 ? 's' : '');
     };
 
     /**
@@ -305,30 +297,35 @@ define([
     };
 
     that.writeHashtags = function (xmlWriter, key, hashtagOrXPath, mug) {
-        if (!hashtagOrXPath) {
+        if (!_.isString(hashtagOrXPath)) {
             // don't try to parse a value that doesn't exist
             return;
-        } else if (!mug) {
-            // handwritten setvalues aren't associated with a mug, but go
-            // through this method
-            xmlWriter.writeAttributeString(key, hashtagOrXPath);
-            return;
-        } else if (mug.options && mug.options.ignoreHashtags) {
+        } else if (hashtagOrXPath === "" || (mug.options && mug.options.ignoreHashtags)) {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
             return;
         }
 
-        var expr = mug.form.xpath.parse(hashtagOrXPath),
-            xpath_ = expr.toXPath(),
+        var form = mug.form,
+            xpath_, hashtag;
+        try {
+            var expr = form.xpath.parse(hashtagOrXPath);
+            xpath_ = expr.toXPath();
             hashtag = expr.toHashtag();
+        } catch (err) {
+            if (form.useRichText ) {
+                xmlWriter.writeAttributeString('vellum:' + key, "#invalid/xpath " + hashtagOrXPath);
+            }
+            xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
+                return mug.form.normalizeXPath(hashtag);
+            }));
+            return;
+        }
 
         if (hashtag !== xpath_) {
-            xmlWriter.writeAttributeString('vellum:' + key, hashtag);
-            if (xpath_.replace(/ /g, '') === hashtagOrXPath.replace(/ /g, '')) {
-                xmlWriter.writeAttributeString(key, hashtagOrXPath);
-            } else {
-                xmlWriter.writeAttributeString(key, xpath_);
+            if (form.useRichText ) {
+                    xmlWriter.writeAttributeString('vellum:' + key, hashtag);
             }
+            xmlWriter.writeAttributeString(key, xpath_);
         } else {
             xmlWriter.writeAttributeString(key, hashtagOrXPath);
         }

@@ -4,24 +4,19 @@
 		<h:title>Untitled Form</h:title>
 		<model>
 			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/0423112D-4950-4768-B59F-A4E4616FF73D" uiVersion="1" version="1" name="Untitled Form">
-					<label />
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
+					<mug />
 				</data>
 			</instance>
-			<bind nodeset="/data/label" />
+			<instance src="jr://instance/casedb" id="casedb" />
+			<instance src="jr://instance/session" id="commcaresession" />
+			<bind nodeset="/data/mug" calculate="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="label-label">
-						<value></value>
-						<value form="image">jr://file/commcare/image/data/label.png</value>
-					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<trigger ref="/data/label" appearance="minimal">
-			<label ref="jr:itext('label-label')" />
-		</trigger>
 	</h:body>
 </h:html>

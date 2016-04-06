@@ -162,7 +162,7 @@ define([
         },
         getText: function () {
             if (this._text && this.parsed) {
-                return this.parsed.toHashtag();
+                return this.parsed.toEscapedHashtag();
             } else {
                 return this._text;
             }
@@ -216,14 +216,17 @@ define([
                     pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
-                    xpath = path.toHashtag();
+                    xpath = path.toHashtag(),
+                    knownHashtag = isCaseReference(pathString) && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
-                if (!refMug &&
+                if ((!refMug && !knownHashtag) &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
+                    unknowns.push(xpath);
+                } else if (!refMug && isCaseReference(pathString) && !knownHashtag) {
                     unknowns.push(xpath);
                 }
                 return {
@@ -236,6 +239,9 @@ define([
             }));
             _.each(expr.instanceRefs, function (ignore, id) {
                 form.referenceInstance(id, mug, property);
+            });
+            _.each(expr.hashtags, function (hashtag) {
+                form.referenceHashtag(hashtag, mug, property);
             });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
@@ -368,8 +374,50 @@ define([
         },
         reset: function () {
             this.all = [];
+        },
+        // This is to tell HQ's case summary what is referenced
+        caseReferences: function () {
+            // hq implementation details
+            var ret = {
+                condition: {
+                    answer: null,
+                    question: null,
+                    type: 'always',
+                    operator: null
+                }
+            }, _this = this;
+
+            ret.preload = _.chain(this.all)
+                .filter(function(ref) {
+                    return isCaseReference(ref.path);
+                })
+                .map(function(ref) {
+                    var info = ref.path.split('/'),
+                        prop = info[2];
+                    if (prop === 'case_name') {
+                        prop = 'name';
+                    }
+                    return [_this.form.normalizeXPath(ref.sourcePath), prop];
+                }).object().value();
+
+            return ret;
+        },
+        // returns object of hashtags. used for writing to xml
+        // format {hashtag: xpath} (null is used fmr cases as they will be loaded later)
+        referencedHashtags: function () {
+            return _.chain(this.all)
+                .filter(function(ref) {
+                    return isCaseReference(ref.path);
+                })
+                .map(function(ref) {
+                    return [ref.path, null];
+                }).object().value();
         }
     };
+
+    function isCaseReference(hashtag) {
+        return hashtag.startsWith('#case/');
+    }
 
     return {
         LogicManager: LogicManager,

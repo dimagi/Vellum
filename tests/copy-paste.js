@@ -49,7 +49,6 @@ define([
         before(function (done) {
             util.init({
                 features: {
-                    rich_text: false,
                     custom_intents: true,
                 },
                 javaRosa: { langs: ['en', 'hin'] },
@@ -444,15 +443,15 @@ define([
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr", "conflictedNodeId"],
-                ["/radius", "DataBindOnly", "42", "null"],
-                ["/copy-1-of-pi", "DataBindOnly", "3.1415", "pi"],
+                ["/radius", "DataBindOnly", '"42"', "null"],
+                ["/copy-1-of-pi", "DataBindOnly", '"3.1415"', "pi"],
                 ["/circumference", "DataBindOnly", "2 * #form/copy-1-of-pi * #form/radius", "null"],
             ]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "calculateAttr"],
-                ["/radius", "DataBindOnly", "42"],
-                ["/pi", "DataBindOnly", "3.1415"],
+                ["/radius", "DataBindOnly", '"42"'],
+                ["/pi", "DataBindOnly", '"3.1415"'],
                 ["/circumference", "DataBindOnly", "2 * #form/pi * #form/radius"],
             ]);
         });
@@ -989,10 +988,68 @@ define([
             assert(!util.markdownVisible());
         });
 
+        it("should paste invalid xpaths correctly", function(done) {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/invalid", "DataBindOnly", "(42"],
+                ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+                ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
+            ]);
+            util.clickQuestion('invalid');
+            util.clickQuestion('invalid2');
+            var invalid = util.getMug('invalid'),
+                invalid2 = util.getMug('invalid2'),
+                invalid3 = util.getMug('invalid3');
+            assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(invalid2.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(invalid3.p.calculateAttr, '#invalid/xpath (`#form/invalid`');
+            var widget = util.getWidget('property-calculateAttr');
+            widget.input.promise.then(function () {
+                assert.strictEqual(widget.getValue(), '(42');
+                util.selectAll();
+                eq(mod.copy(), [
+                    ["id", "type", "calculateAttr"],
+                    ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
+                ]);
+                done();
+            });
+        });
+
+        it("should paste valid xpaths correctly", function(done) {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/invalid", "DataBindOnly", "(42"],
+                ["/valid", "DataBindOnly", "#form/invalid"],
+            ]);
+            util.clickQuestion('valid');
+            var invalid = util.getMug('invalid'),
+                valid = util.getMug('valid');
+            assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(valid.p.calculateAttr, '#form/invalid');
+            var widget = util.getWidget('property-calculateAttr');
+            widget.input.promise.then(function () {
+                assert.strictEqual(widget.getValue(), '`#form/invalid`');
+                assert.strictEqual(
+                    $('[name=property-calculateAttr]').find('span .label').data('value'),
+                    '`#form/invalid`'
+                );
+                util.selectAll();
+                eq(mod.copy(), [
+                    ["id", "type", "calculateAttr"],
+                    ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/valid", "DataBindOnly", "#form/invalid"],
+                ]);
+                done();
+            });
+        });
+
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({
-                    features: { rich_text: false },
                     javaRosa: { langs: ['en'] },
                     core: {
                         onReady: function () {
@@ -1029,7 +1086,6 @@ define([
         describe("with multimedia", function () {
             before(function (done) {
                 util.init({
-                    features: { rich_text: false },
                     javaRosa: { langs: ['en', 'hin'] },
                     uploader: { objectMap: {
                         "jr://file/commcare/audio/data/question1.mp3": true

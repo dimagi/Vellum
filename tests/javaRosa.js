@@ -80,6 +80,90 @@ define([
             });
         });
 
+        describe("with rich text enabled", function () {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en', 'hin']},
+                    core: {onReady: function () { done(); }},
+                });
+            });
+
+            it("should update output refs when question ids change", function (done) {
+                util.loadXML("");
+                util.addQuestion("Text", "question1");
+                util.addQuestion("Text", "question2");
+                var widget = util.getWidget('itext-en-label');
+                widget.input.promise.then(function () {
+                    widget.setValue('<output value="/data/question1" /> a ' +
+                    '<output value="/data/question1"/> b ' +
+                    '<output value="/data/question1"></output> c ' +
+                    '<output value="/data/question1" ></output> d ' +
+                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />');
+                    var widget2 = util.getWidget('itext-hin-label');
+                    widget2.input.promise.then(function () {
+                        widget2.setValue('<output value="/data/question1"></output>');
+                        util.clickQuestion("question1");
+                        $("[name=property-nodeID]").val('first_question').change();
+                        util.assertXmlEqual(
+                            call('createXML'),
+                            util.xmlines(TEST_XML_4),
+                            {normalize_xmlns: true}
+                        );
+                        done();
+                    });
+                });
+            });
+
+            it("should only update exact output ref matches when question ids change", function (done) {
+                util.loadXML("");
+                util.addQuestion("Text", "question1");
+                util.addQuestion("Text", "question2");
+                var widget = util.getWidget('itext-en-label');
+                widget.input.promise.then(function () {
+                    widget.setValue('<output value="/data/question1" /> ' +
+                        '<output value="/data/question11" /> ' +
+                        '<output value="/data/question1/b" /> ' +
+                        '<output value="/data/question1b" /> ');
+                    var widget2 = util.getWidget('itext-hin-label');
+                    widget2.input.promise.then(function () {
+                        widget2.setValue('question2');
+                        util.clickQuestion("question1");
+                        $("[name=property-nodeID]").val('first_question').change();
+                        util.assertXmlEqual(
+                            call('createXML'),
+                            OUTPUT_REFS_XML,
+                            {normalize_xmlns: true}
+                        );
+                        done();
+                    });
+                });
+            });
+
+            it("should rename itext item ID after move", function () {
+                util.loadXML("");
+                util.addQuestion("Select", "ns");
+                util.addQuestion("Select", "ew");
+                var north = util.getMug("ns/choice1"),
+                    south = util.getMug("ew/choice1");
+                north.p.nodeID = "north";
+                south.p.nodeID = "south";
+                north.form.moveMug(south, "after", north);
+                util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
+                                    {normalize_xmlns: true});
+            });
+
+            it("should rename group's child itext item IDs after move group", function () {
+                util.loadXML("");
+                var green = util.addQuestion("Group", "green"),
+                    blue = util.addQuestion("Group", "blue");
+                util.addQuestion("Text", "text");
+                blue.form.moveMug(blue, "before", green);
+                util.assertXmlEqual(util.call("createXML"),
+                                    ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
+                                    {normalize_xmlns: true});
+            });
+        });
+
         it("should not show itext errors when there is text in any language", function (done) {
             util.loadXML(TEST_XML_1);
             $("textarea[name=itext-en-constraintMsg]").val("").change();
@@ -277,45 +361,6 @@ define([
             assert(!util.saveButtonEnabled(), "click should not cause change");
             $("[name='itext-hin-constraintMsg']").val("new").change();
             assert(util.saveButtonEnabled(), "save button is disabled");
-        });
-
-        it("should update output refs when question ids change", function () {
-            util.loadXML("");
-            util.addQuestion("Text", "question1");
-            util.addQuestion("Text", "question2");
-            $("[name='itext-en-label']").val('<output value="/data/question1" /> a ' +
-                '<output value="/data/question1"/> b ' +
-                '<output value="/data/question1"></output> c ' +
-                '<output value="/data/question1" ></output> d ' +
-                '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />').change();
-            $("[name='itext-hin-label']").val('<output value="/data/question1"></output>').change();
-            util.clickQuestion("question1");
-            $("[name='property-nodeID']").val('first_question').change();
-
-            util.assertXmlEqual(
-                call('createXML'),
-                util.xmlines(TEST_XML_4),
-                {normalize_xmlns: true}
-            );
-        });
-
-        it("should only update exact output ref matches when question ids change", function () {
-            util.loadXML("");
-            util.addQuestion("Text", "question1");
-            util.addQuestion("Text", "question2");
-            $("[name='itext-en-label']").val('<output value="/data/question1" /> ' +
-                '<output value="/data/question11" /> ' +
-                '<output value="/data/question1/b" /> ' +
-                '<output value="/data/question1b" /> ').change();
-            $("[name='itext-hin-label']").val('question2').change();
-            util.clickQuestion("question1");
-            $("[name='property-nodeID']").val('first_question').change();
-
-            util.assertXmlEqual(
-                call('createXML'),
-                OUTPUT_REFS_XML,
-                {normalize_xmlns: true}
-            );
         });
 
         it("should escape inequality operators in output ref", function () {
@@ -550,30 +595,6 @@ define([
             var xml = call("createXML"),
                 $xml = $(xml);
             assert.strictEqual($xml.find("help").length, 1, "wrong <help> node count\n" + xml);
-        });
-
-        it("should rename itext item ID after move", function () {
-            util.loadXML("");
-            util.addQuestion("Select", "ns");
-            util.addQuestion("Select", "ew");
-            var north = util.getMug("ns/choice1"),
-                south = util.getMug("ew/choice1");
-            north.p.nodeID = "north";
-            south.p.nodeID = "south";
-            north.form.moveMug(south, "after", north);
-            util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
-                                {normalize_xmlns: true});
-        });
-
-        it("should rename group's child itext item IDs after move group", function () {
-            util.loadXML("");
-            var green = util.addQuestion("Group", "green"),
-                blue = util.addQuestion("Group", "blue");
-            util.addQuestion("Text", "text");
-            blue.form.moveMug(blue, "before", green);
-            util.assertXmlEqual(util.call("createXML"),
-                                ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
-                                {normalize_xmlns: true});
         });
 
         it("should not auto-update itext ID when multiple questions point to auto-ish-id", function () {

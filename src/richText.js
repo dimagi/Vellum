@@ -46,7 +46,10 @@ define([
     xml,
     CKEDITOR
 ){
-    var bubbleWidgetDefinition = {
+    var CASE_REF_REGEX = /^\`?#case\//,
+        FORM_REF_REGEX = /^\`?#form\//,
+        REF_REGEX = /^\`?#(form|case)\//,
+        bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
               '<i class="fa fa-question-circle">&nbsp;</i>' +
@@ -78,8 +81,9 @@ define([
                 getWidget = require('vellum/widgets').util.getWidget,
                 // TODO find out why widget is sometimes null (tests only?)
                 widget = getWidget($this);
-            if (/^#form\//.test(xpath) && widget) {
-                var isText = function () { return this.nodeType === 3; },
+            if (widget) {
+                var isFormRef = FORM_REF_REGEX.test(xpath),
+                    isText = function () { return this.nodeType === 3; },
                     displayId = $this.contents().filter(isText)[0].nodeValue,
                     labelMug = widget.mug.form.getMugByPath(xpath),
                     labelText = labelMug && labelMug.p.labelItext ?
@@ -88,7 +92,7 @@ define([
                     $imgs = $dragContainer.children("img");
                 labelText = $('<div>').append(labelText);
                 labelText.find('output').replaceWith(function () {
-                    return extractXPathInfoFromOutputValue($(this).attr('value')).reference;
+                    return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
                 });
                 // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                 $imgs.removeAttr("title");
@@ -97,13 +101,13 @@ define([
                     container: 'body',
                     placement: 'bottom',
                     title: '<h3>' + util.escape(displayId) + '</h3>' +
-                           '<div class="text-muted">' + util.escape(xpath) + '</div>',
+                           '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
                     html: true,
                     content: '<p>' + labelText.text() + '</p>',
                     template: '<div contenteditable="false" class="popover rich-text-popover">' +
                         '<div class="popover-inner">' +
                         '<div class="popover-title"></div>' +
-                        '<div class="popover-content"><p></p></div>' +
+                        (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
                         '</div></div>'
                 });
 
@@ -129,6 +133,7 @@ define([
     CKEDITOR.config.customConfig = '';
     CKEDITOR.config.title = false;
     CKEDITOR.config.extraPlugins = 'bubbles';
+    CKEDITOR.config.disableNativeSpellChecker = false;
 
     /**
      * Get or create a rich text editor for the given element
@@ -238,10 +243,12 @@ define([
             // set the cursor to the end of text
             var selection = editor.getSelection();
             var range = selection.getRanges()[0];
-            var pCon = range.startContainer.getAscendant({p:2},true);
-            var newRange = new CKEDITOR.dom.range(range.document);
-            newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-            newRange.select();
+            if (range) {
+                var pCon = range.startContainer.getAscendant({p:2},true);
+                var newRange = new CKEDITOR.dom.range(range.document);
+                newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
+                newRange.select();
+            }
         });
         input.data("ckwrapper", wrapper);
         return wrapper;
@@ -390,7 +397,7 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (/instance\('casedb'\)/.test(xpath)) {
+            if (CASE_REF_REGEX.test(xpath) && form.isValidHashtag(xpath)) {
                 return {
                     classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                 };
@@ -405,7 +412,7 @@ define([
                 }
             }
 
-            return {classes: ['label-datanode-external', 'fcc fcc-help']};
+            return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
 
         var xpathInfo = _parseXPath(xpath, form),
@@ -428,15 +435,14 @@ define([
      */
     function replacePathWithBubble(form, value) {
         var info = extractXPathInfoFromOutputValue(value),
-            xpath = info.reference,
+            xpath = form.normalizeEscapedHashtag(info.reference),
             extraAttrs = _.omit(info, 'reference');
 
-        // only support absolute path right now
-        if (!form.getMugByPath(xpath) && !/instance\('casedb'\)/.test(xpath)) {
+        if (!REF_REGEX.test(xpath)) {
             return $('<span>').text(xml.normalize(value)).contents();
         }
 
-        return makeBubble(form, xpath, extraAttrs);
+        return $('<div>').append(makeBubble(form, xpath, extraAttrs)).html();
     }
 
     /**
@@ -482,39 +488,8 @@ define([
      * Wrap top-level expression nodes with bubble markup
      */
     function bubbleExpression(text, form) {
-        var el = $('<div>').html(text);
-        var EXPR = form.xpath.models.XPathInitialContextEnum.EXPR,
-            ROOT = form.xpath.models.XPathInitialContextEnum.ROOT,
-            expr = new logic.LogicExpression(text, form.xpath),
-            // Uses top level paths, because filters should not be made to bubbles
-            paths = _.chain(expr.getTopLevelPaths())
-                .filter(function(path) {
-                    var context = path.initial_context,
-                        numFilters = _.reduce(path.steps, function(memo, step) {
-                           return memo + step.predicates.length;
-                        }, 0),
-                        hasSession = /commcaresession/.test(path.toXPath());
-
-                    if (context === EXPR && (numFilters > 1 || !hasSession) ||
-                        context === ROOT && numFilters > 0) {
-                        return false;
-                    }
-
-                    return true;
-                })
-                .map(function(path) { return path.toXPath(); })
-                .uniq().value().concat(_.map(expr.getHashtags(), function(hashtag) {
-                    return hashtag.toHashtag();
-                }));
-
-        _.each(paths, function(path) {
-            var newPath = replacePathWithBubble(form, path);
-            el.html(el.html().replace(
-                new RegExp(RegExp.escape(path).replace(/ /g, '\\s*'), 'mg'),
-                $('<div>').append(newPath).html()
-            ));
-        });
-        return el.html();
+        text = xml.normalize(form.normalizeEscapedHashtag(text));
+        return form.transform(text, _.partial(replacePathWithBubble, form));
     }
 
     function unwrapBubbles(text) {
@@ -585,7 +560,9 @@ define([
     }
 
     function extractXPathInfoFromOutputValue(value) {
-        var outputValueRegex = /<output\s+value="([^"]+)"/,
+        // there's no differenc between ref and value, so just change them all
+        // to value
+        var outputValueRegex = /<output\s+(ref|value)="([^"]+)"/,
             dateFormatRegex = /format-date\(date\(([^)]+)\),\s*'([^']+)'\)/,
             dateMatch = dateFormatRegex.exec(value),
             outputValueMatch = outputValueRegex.exec(value);
@@ -599,7 +576,7 @@ define([
         } else if (outputValueMatch){
             return {
                 'data-output-value': true,
-                reference: outputValueMatch[1],
+                reference: outputValueMatch[2],
             };
         }
 

@@ -71,7 +71,7 @@ define([
 
             blue.p.nodeID = "orange";
             assert.equal(green.p.nodeID, "blue");
-            assert.equal(black.p.calculateAttr, "#form/orange + #form/blue");
+            assert.equal(black.p.calculateAttr, "`#form/orange` + `#form/blue`");
             assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
             assert(util.isTreeNodeValid(green), green.getErrors().join("\n"));
             assert(util.isTreeNodeValid(black), black.getErrors().join("\n"));
@@ -91,7 +91,7 @@ define([
 
             form.moveMug(text, "into", null);
             assert.equal(text.p.nodeID, "text");
-            assert.equal(hid.p.calculateAttr, "#form/text + #form/group/text");
+            assert.equal(hid.p.calculateAttr, "`#form/text` + `#form/group/text`");
             assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
         });
 
@@ -154,7 +154,7 @@ define([
             form.duplicateMug(group);
             var green2 = util.getMug("copy-1-of-group/green");
             assert.equal(green2.p.relevantAttr,
-                "#form/copy-1-of-group/blue = 'red' and #form/red = 'blue'");
+                "`#form/copy-1-of-group/blue` = 'red' and `#form/red` = 'blue'");
         });
 
         it("should set non-standard form root node", function () {
@@ -209,7 +209,7 @@ define([
             repeat.p.repeat_count = '#form/text';
             assert.equal(repeat.p.repeat_count, '#form/text');
             text.p.nodeID = 'text2';
-            assert.equal(repeat.p.repeat_count, '#form/text2');
+            assert.equal(repeat.p.repeat_count, '`#form/text2`');
         });
 
         it ("should show warnings for duplicate choice value", function() {

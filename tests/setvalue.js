@@ -84,7 +84,7 @@ define([
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
-                text2.p.defaultValue = '/data/text1';
+                text2.p.defaultValue = '#form/text1';
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 
@@ -92,7 +92,7 @@ define([
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
-                text2.p.defaultValue = "instance('casedb')/case/attribute";
+                text2.p.defaultValue = "#case/case/attribute";
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 
@@ -120,7 +120,7 @@ define([
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
-                text2.p.defaultValue = '/data/text1';
+                text2.p.defaultValue = '#form/text1';
                 assert.notStrictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 
@@ -128,7 +128,7 @@ define([
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
-                text2.p.defaultValue = "instance('casedb')/case/attribute";
+                text2.p.defaultValue = "#case/case/attribute";
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 

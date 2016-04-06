@@ -203,15 +203,15 @@ define([
         setValues.each(function () {
             var $el = $(this);
             form.vellum.parseSetValue(
-                form, $el, processPath(parseVellumAttrs($el, 'ref', true), rootNodeName, form));
+                form, $el, processPath(parseVellumAttrs(form, $el, 'ref', true), rootNodeName, form));
         });
     }
 
     function parseSetValue(form, el, path) {
         var mug = form.getMugByPath(path),
             event = el.attr('event'),
-            ref = parseVellumAttrs(el, 'ref', true),
-            value = parseVellumAttrs(el, 'value', true);
+            ref = parseVellumAttrs(form, el, 'ref', true),
+            value = parseVellumAttrs(form, el, 'value', true);
 
         // HACK: hardcoding these as that's what setValue will support for now
         if (!mug || (event !== 'xforms-ready' && event !== 'jr-insert')) {
@@ -494,15 +494,15 @@ define([
         if(!el){
             return null;
         }
-        var path = parseVellumAttrs(el, 'ref', noPop),
+        var path = parseVellumAttrs(form, el, 'ref', noPop),
             rootNodeName = form.tree.getRootNode().getID(),
             nodeId, pathToTry;
         if(!path){
-            path = parseVellumAttrs(el, 'nodeset', noPop);
+            path = parseVellumAttrs(form, el, 'nodeset', noPop);
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = parseVellumAttrs(el, 'bind', noPop);
+            nodeId = parseVellumAttrs(form, el, 'bind', noPop);
             if (nodeId) {
                 pathToTry = processPath(nodeId, rootNodeName, form);
                 if (!form.getMugByPath(pathToTry)) {
@@ -513,7 +513,7 @@ define([
             }
         }
         path = path || nodeId || null;
-        if (path && path[0] !== "/" && path[0] !== "#") {
+        if (path && path[0] !== "/" && path[0] !== "#" && path[0] !== "`") {
             // make path absolute
             if (parentMug) {
                 var parentPath = parentMug.hashtagPath;
@@ -613,7 +613,7 @@ define([
 
         bindList.each(function () {
             var el = $(this),
-                path = parseVellumAttrs(el, 'nodeset') || parseVellumAttrs(el, 'ref');
+                path = parseVellumAttrs(form, el, 'nodeset') || parseVellumAttrs(form, el, 'ref');
 
             form.vellum.parseBindElement(
                 form, el, processPath(path, rootNodeName, form));
@@ -631,9 +631,9 @@ define([
         }
 
         var attrs = {
-            relevantAttr: parseVellumAttrs(el, 'relevant'),
-            calculateAttr: parseVellumAttrs(el, 'calculate'),
-            constraintAttr: parseVellumAttrs(el, 'constraint'),
+            relevantAttr: parseVellumAttrs(form, el, 'relevant'),
+            calculateAttr: parseVellumAttrs(form, el, 'calculate'),
+            constraintAttr: parseVellumAttrs(form, el, 'constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
         };
@@ -648,11 +648,11 @@ define([
         mug.p.setAttrs(attrs);
     }
 
-    function parseVellumAttrs(el, key, noPop) {
+    function parseVellumAttrs(form, el, key, noPop) {
         var method = (noPop ? el.attr : el.popAttr).bind(el),
             vellumAttr = method('vellum:' + key),
             xmlAttr = method(key);
-        return vellumAttr ? vellumAttr : xmlAttr;
+        return form.normalizeEscapedHashtag(vellumAttr ? vellumAttr : xmlAttr);
     }
 
     var _getInstances = function (xml) {

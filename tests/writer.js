@@ -25,7 +25,6 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 

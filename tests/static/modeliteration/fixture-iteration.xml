@@ -16,7 +16,7 @@
 			<setvalue event="xforms-ready" ref="/data/product/@ids" value="join(' ', instance('products')/products/product/@id)" />
 			<setvalue event="xforms-ready" ref="/data/product/@count" value="count-selected(/data/product/@ids)" />
 			<setvalue event="jr-insert" ref="/data/product/item/@index" value="int(/data/product/@current_index)" />
-			<setvalue event="jr-insert" ref="/data/product/item/@id" value="selected-at(/data/product/@ids,../@index)" />
+			<setvalue event="jr-insert" ref="/data/product/item/@id" value="selected-at(/data/product/@ids, ../@index)" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="product/item-label">

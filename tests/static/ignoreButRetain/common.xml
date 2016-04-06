@@ -18,9 +18,9 @@
 			<bind nodeset="/data/question9/question10" type="xsd:int" vellum:ignore="retain"/>
 			<bind vellum:nodeset="#form/question9/question11" nodeset="/data/question9/question11" type="xsd:int"/>
 			<bind nodeset="/data/question4" vellum:ignore="retain"/>
-			<setvalue event="xforms-revalidate" ref="/data/question1" value="0"/>
-			<setvalue event="xforms-ready" vellum:ref="#form/question1" ref="/data/question1" value="1" vellum:ignore="retain"/>
-			<setvalue event="xforms-ready" vellum:ref="#form/question2" ref="/data/question2" value="2" vellum:ignore="retain"/>
+			<setvalue event="xforms-revalidate" vellum:ref="#form/question1" ref="/data/question1" value="0"/>
+			<setvalue event="xforms-ready" ref="/data/question1" value="1" vellum:ignore="retain"/>
+			<setvalue event="xforms-ready" ref="/data/question2" value="2" vellum:ignore="retain"/>
 			<setvalue event="xforms-ready" ref="/data/question3" value="3"/>
 			<itext>
 				<translation lang="en" default="">

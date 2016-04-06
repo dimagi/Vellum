@@ -719,6 +719,15 @@ define([
             data.instances = _.extend(data.instances || {},
                                       mug.form.parseInstanceRefs(value));
         }
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
         return value || undefined;
     }
 
@@ -726,7 +735,17 @@ define([
         if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
             mug.form.updateKnownInstances(data.instances);
         }
-        return data[key];
+        var value = data[key];
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
+        return value;
     }
 
     function resolveConflictedNodeId(mug) {
@@ -916,14 +935,10 @@ define([
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
-                    var form = mug.form,
-                        xpath = form.xpath,
-                        xpathmodels = xpath.models;
+                    var form = mug.form;
                     if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
-                        var paths = new logic.LogicExpression(mug.p.defaultValue, xpath).getPaths();
-                        paths = _.filter(paths, function (path) {
-                            return path.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
-                        });
+                        var paths = mug.form.getHashtagsInXPath(mug.p.defaultValue);
+                        paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
                         if (paths.length) {
                             return "You are referencing a node in this form. " +
                                    "This can cause errors in the form";

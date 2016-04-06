@@ -2304,7 +2304,7 @@ define([
                 text = $("<div />").append(text);
                 text.find('output').replaceWith(function() {
                     var $this = $(this),
-                        value = xpathParser.parse($this.attr('value'));
+                        value = xpathParser.parse($this.attr('value') || $this.attr('ref'));
                     $this.attr('value', value[functionName]());
                     return $this[0].outerHTML;
                 });

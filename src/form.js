@@ -4,7 +4,8 @@ define([
     'jquery',
     'vellum/tree',
     'vellum/logic',
-    'vellum/xpath',
+    'vellum/escapedHashtags',
+    'vellum/fuse',
     'vellum/util'
 ], function (
     require,
@@ -12,7 +13,8 @@ define([
     $,
     Tree,
     logic,
-    xpath,
+    escapedHashtags,
+    Fuse,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -133,34 +135,66 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = xpath.createParser(xpath.makeXPathModels(this.hashtagDictionary));
+        this.xpath = escapedHashtags.parser(this.hashtagDictionary);
 
         //make the object event aware
         util.eventuality(this);
+        this.on('form-load-finished', function() {
+            _this.fuse = new Fuse(_this);
+        });
     }
 
     Form.prototype = {
+        isValidHashtag: function(tag) {
+            return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
+        },
         addHashtag: function(hashtag, xpath) {
             this.hashtagDictionary[hashtag] = xpath;
+        },
+        initHashtag: function(hashtag, xpath) {
+            if (!this.hashtagDictionary[hashtag]) {
+                this.hashtagDictionary[hashtag] = xpath;
+            }
         },
         removeHashtag: function(hashtag) {
             delete this.hashtagDictionary[hashtag];
         },
-        normalizeHashtag: function (xpath_) {
+        transform: function(input, transformFn) {
+            input = this.normalizeEscapedHashtag(input);
+            return escapedHashtags.transform(input, transformFn);
+        },
+        normalize: function (methodName, xpath) {
             // try catch is needed as workaround for having an itemset without
-            // the itemset plugin enabled
+            // the itemset plugin enabled and invalid xpaths
             try {
-                return xpath_ ? this.xpath.parse(xpath_).toHashtag() : xpath_;
+                return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
             } catch (err) {
-                return xpath_;
+                return xpath.startsWith('#invalid/xpath ') ? xpath.slice(15) : xpath;
+            }
+         },
+        normalizeEscapedHashtag: function (xpath_) {
+            return this.normalize('toEscapedHashtag', xpath_);
+        },
+        normalizeHashtag: function (xpath_) {
+            return this.normalize('toHashtag', xpath_);
+        },
+        normalizeXPath: function (xpath_) {
+            return this.normalize('toXPath', xpath_);
+        },
+        getHashtagsInXPath: function (xpath_) {
+            try {
+                return new logic.LogicExpression(xpath_, this.xpath).getHashtags();
+            } catch (err) {
+                return [];
             }
         },
-        normalizeXPath: function (xpath_, xpathParser) {
-            // if it's not an xpath just return the original string
-            try {
-                return xpath_ ? this.xpath.parse(xpath_).toXPath() : xpath_;
-            } catch (err) {
-                return xpath_;
+        referencedHashtags: function () {
+            return this._logicManager.referencedHashtags();
+        },
+        referenceHashtag: function(hashtag, mug, property) {
+            if (/^#case\//.test(hashtag.toHashtag())) {
+                this.referenceInstance('casedb', mug, property);
+                this.referenceInstance('commcaresession', mug, property);
             }
         },
         dataTree: function() {
@@ -1001,7 +1035,7 @@ define([
             return value;
         },
         isCaseReference: function (path) {
-            return /instance\('casedb'\)/.test(path) ? true : false;
+            return /^#case/.test(path);
         }
     };
 
