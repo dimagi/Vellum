@@ -105,14 +105,18 @@ define([
                             return match ? match[2] : null;
                         },
                         filter: function (query, data, searchKey) {
-                            function withoutSelf (list) {
+                            // filters the mug that is currently selected
+                            // and choice mugs/other mugs taht don't have
+                            // absolute paths
+                            function filterDropdown (list) {
                                 return _.filter(list, function(mug_) {
-                                    return mug.ufid !== mug_.id;
+                                    return (mug.ufid !== mug_.id) &&
+                                        (mug_.name && !_.isUndefined(mug_.displayLabel));
                                 });
                             }
 
-                            if (!query) { return withoutSelf(form.fuse.list()); }
-                            return withoutSelf(form.fuse.search(query));
+                            if (!query) { return filterDropdown(form.fuse.list()); }
+                            return filterDropdown(form.fuse.search(query));
                         },
                         sorter: function (query, items, searchKey) {
                             return _.map(items, function(item, idx) {
