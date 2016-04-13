@@ -19,11 +19,15 @@ define([
 
 
         function addToDataset(e) {
+            removeFromDataset(e);
+            _this.dataset.push(mugToData(e.mug));
+            _this.fusejs.set(_this.dataset);
+        }
+
+        function removeFromDataset(e) {
             _this.dataset = _.filter(_this.dataset, function (mug) {
                 return mug.id !== e.mug.ufid;
             });
-            _this.dataset.push(mugToData(e.mug));
-            _this.fusejs.set(_this.dataset);
         }
 
 
@@ -33,7 +37,7 @@ define([
             }
         }).on('question-label-text-change', addToDataset)
         .on('question-create', addToDataset)
-        .on('question-remove', addToDataset);
+        .on('question-remove', removeFromDataset);
     }
 
     Fuse.prototype = {
