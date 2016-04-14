@@ -1160,7 +1160,7 @@ define([
         image: 'fa fa-photo',
         audio: 'fa fa-volume-up',
         video: 'fa fa-video-camera',
-        'video-inline': 'fa fa-video-camera',
+        'video-inline': 'fa fa-play',
     };
 
     var itextMediaWidget = function (url_type) {
