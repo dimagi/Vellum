@@ -139,7 +139,7 @@ define([
 
             $input.atwho(_atWhoOptions('/data/'));
             if (options.useRichText) {
-                $input.atwho(_atWhoOptions('#form'));
+                $input.atwho(_atWhoOptions('#'));
             }
         }
 

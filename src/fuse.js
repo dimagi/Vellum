@@ -1,10 +1,12 @@
 define([
     'underscore',
     'fusejs',
+    'vellum/datasources',
     'vellum/util',
 ], function (
     _,
     fusejs,
+    datasources,
     util
 ) {
     var FUSE_CONFIG = {
@@ -14,7 +16,15 @@ define([
     function Fuse(form) {
         var _this = this;
         this.form = form;
-        this.dataset = generateNewFuseData(form);
+
+        datasources.getDataSources(function() {
+            _this.dataset = generateNewFuseData(_this.form);
+        });
+
+        if (!this.dataset) {
+            this.dataset = generateNewFuseData(form);
+        }
+
         this.fusejs = new fusejs(this.dataset, FUSE_CONFIG);
 
 
@@ -55,7 +65,7 @@ define([
 
             return {
                 id: mug.ufid,
-                name: mug.absolutePath,
+                name: mug.absolutePath || mug.hashtagPath,
                 absolutePath: mug.absolutePath,
                 icon: mug.options.icon,
                 questionId: mug.p.nodeID,
@@ -68,12 +78,25 @@ define([
     }
 
     function generateNewFuseData (form) {
+        var caseData = [];
+        if (form.vellum.data.core.databrowser) {
+            caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
+             .map(function(absolutePath, hashtag) {
+                 return {
+                     name: hashtag,
+                     absolutePath: absolutePath,
+                     icon: 'fcc fcc-fd-case-property',
+                     displayLabel: null,
+                 };
+             })
+             .value();
+        }
         return _.chain(form.getMugList())
                 .map(mugToData)
                 .filter(function(choice) {
                     return choice.name && !_.isUndefined(choice.displayLabel);
                 })
-                .value();
+                .value().concat(caseData);
     }
 
     return Fuse;
