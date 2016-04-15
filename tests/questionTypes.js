@@ -263,6 +263,7 @@ define([
                             $(".btn:contains(image)").click();
                             $(".btn:contains(audio)").click();
                             $(".btn:contains(video)").click();
+                            $(".btn:contains(video-inline)").click();
                             $(".btn:contains(long)").click();
                             $(".btn:contains(short)").click();
                             $(".btn:contains(custom)").click();

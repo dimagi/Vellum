@@ -51,6 +51,12 @@ define([
                 'extensions': '*.3gp;*.mp4'
             }
         ],
+        'video-inline': [
+            {
+                'description': 'Inline Video',
+                'extensions': '*.3gp;*.mp4'
+            }
+        ],
         text: [
             {
                 'description': 'HTML',
@@ -62,18 +68,21 @@ define([
         image: multimedia_existing_image,
         audio: multimedia_existing_audio,
         video: multimedia_existing_video,
+        'video-inline': multimedia_existing_video,
         text:  multimedia_existing_text,
     },
         SLUG_TO_CLASS = {
         image: 'CommCareImage',
         audio: 'CommCareAudio',
         video: 'CommCareVideo',
+        'video-inline': 'CommCareVideo',
         text:  'CommCareMultimedia',
     },
         SLUG_TO_UPLOADER_SLUG = {
         image: 'fd_hqimage',
         audio: 'fd_hqaudio',
         video: 'fd_hqvideo',
+        'video-inline': 'fd_hqvideo',
         text:  'fd_hqtext',
     };
 
@@ -248,6 +257,7 @@ define([
             image: false,
             audio: false,
             video: false,
+            'video-inline': false,
             text: false
         },
     }, {
@@ -283,6 +293,12 @@ define([
                         mediaType: 'video',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
+                    }),
+                    'video-inline': this.initUploadController({
+                        uploaderSlug: 'fd_hqvideo',
+                        mediaType: 'video-inline',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls['video-inline'],
                     }),
                     'text': this.initUploadController({
                         uploaderSlug: 'fd_hqtext',
