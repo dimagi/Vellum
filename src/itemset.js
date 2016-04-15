@@ -163,6 +163,7 @@ define([
     });
 
     function afterDynamicSelectInsert(form, mug) {
+        console.log("afterDynamicSelectInsert");
         return form.createQuestion(mug, 'into', "Itemset", true);
     }
 

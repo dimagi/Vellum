@@ -1432,6 +1432,7 @@ define([
     };
 
     fn.displayMugProperties = function (mug) {
+        console.log("displayMugProperties => " + mug.__className);
         var $props = this.$f.find('.fd-question-properties'),
             _getWidgetClassAndOptions = function (property) {
                 return getWidgetClassAndOptions(property, mug);
@@ -1459,7 +1460,9 @@ define([
                 .filter(_.identity);
            
             if (section.properties.length) {
+//if (mug.__className != "Itemset" || i != 0) {
                 this.getSectionDisplay(mug, section).appendTo($content);
+//}
             }
         }
 
@@ -1653,6 +1656,7 @@ define([
     };
 
     fn.getSectionDisplay = function (mug, options) {
+console.log("getSectionDisplay for a " + mug.__className);
         var _this = this,
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
@@ -1669,7 +1673,9 @@ define([
                     _this.displayXPathEditor(options);
                 }
             }));
+if (mug.__className !== "Itemset") {
             elemWidget.setValue(elemWidget.currentValue);
+}
             elemWidget.on("change", function () {
                 _this.onFormChange(mug);
             });
