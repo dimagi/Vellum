@@ -183,5 +183,22 @@ define([
             $('.fd-undo').click();
             util.assertJSTreeState('select', '  choice1', '  choice2');
         });
+
+        it("should undelete a multiple choice question when selected with others", function() {
+            util.addQuestion('Text', 'text');
+            util.addQuestion('Select', 'select');
+            util.clickQuestion('text', 'select');
+            util.assertJSTreeState('text', "select", "  choice1", "  choice2");
+            $('.fd-button-remove').click();
+            try {
+                util.clickQuestion('select');
+                assert(false, "this better not work");
+            } catch (err) {
+                assert(true, "text doesn't exist");
+            }
+            $('.fd-undo').click();
+            util.clickQuestion('select');
+            util.assertJSTreeState('text', "select", "  choice1", "  choice2");
+        });
     });
 });

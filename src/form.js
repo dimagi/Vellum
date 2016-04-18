@@ -883,20 +883,24 @@ define([
             ufids[mug.ufid] = null;
             var node = this.tree.getNodeFromMug(mug),
                 parentMug = mug.parentMug,
-                previousSibling, hasChildren;
+                previousSibling, hasChildren, position;
             if (node) {
                 previousSibling = previousEqualParent ? parentMug : mug.previousSibling;
                 var children = node.getChildrenMugs();
+                position = previousSibling === parentMug ? 'first' : 'after';
+                if (children.length > 0) {
+                    this.undomanager.appendMug(mug, previousSibling, position);
+                }
                 for (var i = children.length - 1; i >= 0; i--) {
                     keepUndoStack = true;
                     hasChildren = true;
                     this._addToUndoManager(children[i], ufids, true, keepUndoStack, true);
                 }
             }
-            var position = previousSibling === parentMug ? 'first' : 'after';
+            position = previousSibling === parentMug ? 'first' : 'after';
             if (keepUndoStack) {
                 if (hasChildren) {
-                    this.undomanager.prependMug(mug, previousSibling, position);
+                    // this.undomanager.prependMug(mug, previousSibling, position);
                 } else {
                     this.undomanager.appendMug(mug, previousSibling, position);
                 }
