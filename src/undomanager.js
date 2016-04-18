@@ -8,7 +8,11 @@ define([
     UNDO_ALERT
 ) {
     function alertShown() {
-        return $('.fd-undo-delete').length;
+        var alert = $('.fd-undo-delete');
+        if (!alert.hasClass('in')) {
+            return false;
+        }
+        return alert.length;
     }
 
     function createAlert() {
