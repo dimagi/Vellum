@@ -9,6 +9,9 @@ define([
 ) {
     function alertShown() {
         var alert = $('.fd-undo-delete');
+        // creating alert uses classes "fade in", removing alert removes in
+        // This sometimes gets triggered after in is removed but before the
+        // alert is removed from the page
         if (!alert.hasClass('in')) {
             return false;
         }
@@ -38,10 +41,6 @@ define([
             } else {
                 this.undoStack = [];
             }
-            toggleAlert(this.undoStack);
-        },
-        prependMug: function (mug, previousMug, position) {
-            this.undoStack = [[mug, previousMug, position]].concat(this.undoStack);
             toggleAlert(this.undoStack);
         },
         appendMug: function (mug, previousMug, position) {

@@ -865,47 +865,33 @@ define([
             var _this = this,
                 seen = {},
                 ufids = {},
-                undoUfids = {},
-                keepUndoStack = mugs.length !== 1;
+                undoUfids = {};
             this.undomanager.resetUndo();
             _.each(mugs, function (mug) {
-                _this._addToUndoManager(mug, undoUfids, true, keepUndoStack);
+                _this._addToUndoManager(mug, undoUfids);
             });
             _.each(mugs, function (mug) {
-                _this._removeMugFromForm(mug, ufids, false, keepUndoStack);
+                _this._removeMugFromForm(mug, ufids, false);
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _addToUndoManager: function(mug, ufids, isInternal, keepUndoStack, previousEqualParent) {
+        _addToUndoManager: function(mug, ufids) {
             if (ufids.hasOwnProperty(mug.ufid)) {
                 return; // already removed
             }
             ufids[mug.ufid] = null;
             var node = this.tree.getNodeFromMug(mug),
                 parentMug = mug.parentMug,
-                previousSibling, hasChildren, position;
-            if (node) {
-                previousSibling = previousEqualParent ? parentMug : mug.previousSibling;
-                var children = node.getChildrenMugs();
+                hasChildren = false,
+                previousSibling = mug.previousSibling,
                 position = previousSibling === parentMug ? 'first' : 'after';
-                if (children.length > 0) {
-                    this.undomanager.appendMug(mug, previousSibling, position);
+            this.undomanager.appendMug(mug, previousSibling, position);
+            if (node) {
+                var children = node.getChildrenMugs();
+                hasChildren = children.length > 0;
+                for (var i = 0; i < children.length; i++) {
+                    this._addToUndoManager(children[i], ufids);
                 }
-                for (var i = children.length - 1; i >= 0; i--) {
-                    keepUndoStack = true;
-                    hasChildren = true;
-                    this._addToUndoManager(children[i], ufids, true, keepUndoStack, true);
-                }
-            }
-            position = previousSibling === parentMug ? 'first' : 'after';
-            if (keepUndoStack) {
-                if (hasChildren) {
-                    // this.undomanager.prependMug(mug, previousSibling, position);
-                } else {
-                    this.undomanager.appendMug(mug, previousSibling, position);
-                }
-            } else {
-                this.undomanager.resetUndo(mug, previousSibling, position);
             }
         },
         _removeMugFromForm: function(mug, ufids, isInternal) {
