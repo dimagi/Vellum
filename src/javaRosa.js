@@ -993,7 +993,7 @@ define([
                 if (e.property === "nodeID") {
                     if (widget.getItextValue() === e.previous) {
                         widget.setItextValue(e.val);
-                        widget.setValue(e.val);
+                        widget.setValue(widget.getItextValue());
                     }
                 }
             }, null, "teardown-mug-properties");
@@ -1005,7 +1005,7 @@ define([
                     if (widget.getItextValue() === e.prevValue) {
                         // Make sure all the defaults keep in sync.
                         widget.setItextValue(e.value);
-                        widget.setValue(e.value);
+                        widget.setValue(widget.getItextValue());
                     }
                 }
             }, null, "teardown-mug-properties");
@@ -2310,7 +2310,7 @@ define([
                     $this.attr('value', value[functionName]());
                     return $this[0].outerHTML;
                 });
-                text = xml.humanize(text.html());
+                text = xml.normalize(text.html());
             }
             return text;
         };
