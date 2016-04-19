@@ -477,6 +477,12 @@ define([
         }
     });
 
+    Object.defineProperty(Mug.prototype, "previousSibling", {
+        get: function () {
+            return this.form.tree.getPreviousSibling(this);
+        }
+    });
+
     function copyAndProcessSpec(baseSpec, mugSpec, mugOptions) {
         var control = baseSpec.control,
             databind = baseSpec.databind;

@@ -116,6 +116,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/richText',
         'tests/comments',
         'tests/atwho',
+        'tests/undomanager',
     ], function (
         options
     ) {
