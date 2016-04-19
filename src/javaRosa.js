@@ -34,14 +34,15 @@ define([
     tsv,
     xml
 ) {
-    var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video'],
+    var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
         DEFAULT_EXTENSIONS = {
             image: 'png',
             audio: 'mp3',
-            video: '3gp'
+            video: '3gp',
+            'video-inline': '3gp'
         },
         RESERVED_ITEXT_CONTENT_TYPES = [
-            'default', 'short', 'long', 'audio', 'video', 'image'
+            'default', 'short', 'long', 'audio', 'video', 'image', 'video-inline',
         ],
         _nextItextItemKey = 1,
         NO_MARKDOWN_MUGS = ['Choice', 'Group', 'FieldList', 'Repeat'];
@@ -1159,6 +1160,7 @@ define([
         image: 'fa fa-photo',
         audio: 'fa fa-volume-up',
         video: 'fa fa-video-camera',
+        'video-inline': 'fa fa-play',
     };
 
     var itextMediaWidget = function (url_type) {
@@ -1185,7 +1187,7 @@ define([
     };
     
     var parseXLSItext = function (form, str, Itext) {
-        var forms = ["default", "audio", "image" , "video"],
+        var forms = ["default", "audio", "image" , "video", 'video-inline'],
             languages = Itext.getLanguages(),
             nextRow = tsv.makeRowParser(str),
             header = nextRow(),
@@ -1247,7 +1249,7 @@ define([
         }
 
         // TODO: should this be configurable?
-        var forms = ["default", "audio", "image" , "video"],
+        var forms = ["default", "audio", "image" , "video", 'video-inline'],
             languages = Itext.getLanguages(),
             rows = [];
 
@@ -1377,19 +1379,18 @@ define([
                     menu.find('li a').click(function () {
                         var dateFormat = $(this).data('format');
                         insertOutputRef(_this, target, path, mug, dateFormat);
-                        if (window.analytics) {
-                            window.analytics.usage(
-                                "Output Value", "Drag and Drop", dateFormat
-                            );
-                        }
                         menu.remove();
                     });
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
                     insertOutputRef(_this, target, path, mug);
-                    if (window.analytics) {
-                        window.analytics.usage("Output Value", "Drag and Drop");
+                }
+                if (window.analytics) {
+                    if (_this.data.core.form.isCaseReference(path)) {
+                        window.analytics.usage("Case Reference", "Drag and Drop", "Label");
+                    } else {
+                        window.analytics.usage("Form Reference", "Drag and Drop", "Label");
                     }
                 }
             } else {

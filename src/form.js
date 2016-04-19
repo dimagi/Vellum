@@ -990,6 +990,9 @@ define([
         undo: function() {
             this.undomanager.undo();
             this.vellum.selectSomethingOrHideProperties();
+        },
+        isCaseReference: function (path) {
+            return /instance\('casedb'\)/.test(path) ? true : false;
         }
     };
 

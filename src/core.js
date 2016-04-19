@@ -755,11 +755,30 @@ define([
             }
 
             if (window.analytics) {
-                window.analytics.usage(
-                    "Question Reference",
-                    "Drag and Drop",
-                    _this.data.core.currentlyEditedProperty
-                );
+                var targetType;
+                switch (target[0].id) {
+                    case 'property-relevantAttr':
+                        targetType = "Display";
+                        break;
+                    case 'property-constraintAttr':
+                        targetType = "Validation";
+                        break;
+                    case 'property-calculateAttr':
+                        targetType = "Calculation";
+                        break;
+                    default:
+                        targetType = "Expression Editor";
+                        break;
+                }
+                if (_this.data.core.form.isCaseReference(path)) {
+                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
+                } else {
+                    window.analytics.usage(
+                        "Form Reference",
+                        "Drag and Drop",
+                        targetType
+                    );
+                }
             }
         }
 
