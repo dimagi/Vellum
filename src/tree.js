@@ -321,6 +321,21 @@ define([
             return node.getAbsolutePath(excludeRoot);
         },
         /**
+         * Find the previous sibling of a mug
+         *
+         * First mug in a group - returns the group mug
+         * first mug in form - returns root node
+         * any other mug - returns the previous sibling
+         */
+        getPreviousSibling: function (mug) {
+            var tree = this,
+                node = tree.getNodeFromMug(mug),
+                parentMug = mug.parentMug,
+                parentNode = parentMug ? tree.getNodeFromMug(parentMug) : tree.getRootNode(),
+                mugPosition = parentNode.children.indexOf(node);
+            return (mugPosition === 0) ? parentMug : parentNode.children[mugPosition - 1].getValue();
+        },
+        /**
          * Find a sibling of refMug matching a predicate
          *
          * @param refMug

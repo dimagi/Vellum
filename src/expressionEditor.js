@@ -440,7 +440,7 @@ define([
                 } else {
                     getValidationSummary()
                         .html($(xpath_validation_errors({
-                            errors: results[1]
+                            errors: results[1].message
                         })))
                         .removeClass("hide");
                 }

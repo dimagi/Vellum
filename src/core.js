@@ -1214,7 +1214,13 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
+            // HACK: need to explicitly remove the control node so that
+            // getNodeFromMug doesn't return a node that no longer exists
             e.mug._node_control = undefined;
+
+            $('.fd-undo').click(function () {
+                _this.ensureCurrentMugIsSaved(form.undo.bind(form));
+            });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1711,36 +1717,12 @@ define([
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
-                isCopyable: !multiselect && mug.options.isCopyable
+                isCopyable: !multiselect && mug.options.isCopyable,
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mugs = _this.getCurrentlySelectedMug(true),
-                errorMessage;
-            if (mugs.length > 1) {
-                errorMessage = "Deleting multiple questions cannot be undone.";
-            } else if (mugs.length && form.getChildren(mugs[0]).length) {
-                errorMessage = "Deleting a question with children cannot be undone.";
-            }
-            if (errorMessage) {
-                _this.alert(
-                    "Delete Questions?",
-                    errorMessage,
-                    [{
-                        title: "Cancel",
-                    }, {
-                        title: "Delete",
-                        cssClasses: "btn-primary",
-                        defaultButton: true,
-                        action: function () {
-                            form.removeMugsFromForm(mugs);
-                            _this.selectSomethingOrHideProperties(true);
-                            _this.data.core.$modal.modal('hide');
-                        }
-                    }]
-                );
-            } else {
-                form.removeMugsFromForm(mugs);
-            }
+            var mugs = _this.getCurrentlySelectedMug(true, true);
+            form.removeMugsFromForm(mugs);
+            _this.refreshCurrentMug();
         });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')

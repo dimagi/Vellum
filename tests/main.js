@@ -117,6 +117,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/comments',
         'tests/atwho',
         'tests/escapedHashtags',
+        'tests/undomanager',
     ], function (
         options
     ) {

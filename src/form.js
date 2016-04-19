@@ -6,6 +6,7 @@ define([
     'vellum/logic',
     'vellum/escapedHashtags',
     'vellum/fuse',
+    'vellum/undomanager',
     'vellum/util'
 ], function (
     require,
@@ -15,6 +16,7 @@ define([
     logic,
     escapedHashtags,
     Fuse,
+    undomanager,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -136,6 +138,7 @@ define([
         this.errors = [];
         this.question_counter = 1;
         this.xpath = escapedHashtags.parser(this.hashtagDictionary);
+        this.undomanager = new undomanager();
 
         //make the object event aware
         util.eventuality(this);
@@ -935,11 +938,35 @@ define([
             }
             var _this = this,
                 seen = {},
-                ufids = {};
+                ufids = {},
+                undoUfids = {};
+            this.undomanager.resetUndo();
+            _.each(mugs, function (mug) {
+                _this._addToUndoManager(mug, undoUfids);
+            });
             _.each(mugs, function (mug) {
                 _this._removeMugFromForm(mug, ufids, false);
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
+        },
+        _addToUndoManager: function(mug, ufids) {
+            if (ufids.hasOwnProperty(mug.ufid)) {
+                return; // already removed
+            }
+            ufids[mug.ufid] = null;
+            var node = this.tree.getNodeFromMug(mug),
+                parentMug = mug.parentMug,
+                hasChildren = false,
+                previousSibling = mug.previousSibling,
+                position = previousSibling === parentMug ? 'first' : 'after';
+            this.undomanager.appendMug(mug, previousSibling, position);
+            if (node) {
+                var children = node.getChildrenMugs();
+                hasChildren = children.length > 0;
+                for (var i = 0; i < children.length; i++) {
+                    this._addToUndoManager(children[i], ufids);
+                }
+            }
         },
         _removeMugFromForm: function(mug, ufids, isInternal) {
             if (ufids.hasOwnProperty(mug.ufid)) {
@@ -964,7 +991,7 @@ define([
             this.fire({
                 type: 'question-remove',
                 mug: mug,
-                isInternal: isInternal
+                isInternal: isInternal,
             });
         },
         isUniqueQuestionId: function (qId, mug) {
@@ -1033,6 +1060,10 @@ define([
             var value = exporter.generateExportTSV(this);
             this.vellum.afterSerialize();
             return value;
+        },
+        undo: function() {
+            this.undomanager.undo();
+            this.vellum.selectSomethingOrHideProperties();
         },
         isCaseReference: function (path) {
             return /^#case/.test(path);
