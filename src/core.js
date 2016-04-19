@@ -1213,7 +1213,8 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
-            // hacks
+            // HACK: need to explicitly remove the control node so that
+            // getNodeFromMug doesn't return a node that no longer exists
             e.mug._node_control = undefined;
 
             $('.fd-undo').click(function () {
