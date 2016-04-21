@@ -2138,7 +2138,7 @@ define([
      */
     fn.updateControlNodeAdaptorMap = function (map) {};
 
-    fn.contributeToModelXML = function (xmlWriter, xpathParser) {};
+    fn.contributeToModelXML = function (xmlWriter, form) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
 

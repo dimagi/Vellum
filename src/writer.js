@@ -39,7 +39,7 @@ define([
         
         createSetValues(dataTree, form, xmlWriter);
 
-        form.vellum.contributeToModelXML(xmlWriter, form.xpath);
+        form.vellum.contributeToModelXML(xmlWriter, form);
         
         xmlWriter.writeEndElement(); //CLOSE MODEL
 

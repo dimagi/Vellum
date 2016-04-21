@@ -1747,7 +1747,7 @@ define([
                 }
             });
         },
-        contributeToModelXML: function (xmlWriter, xpathParser) {
+        contributeToModelXML: function (xmlWriter, form_) {
             // here are the rules that govern itext
             // 0. iText items which aren't referenced by any questions are 
             // cleared from the form.
@@ -1769,14 +1769,15 @@ define([
                     hashtag = parsed.toHashtag(),
                     xpath_ = parsed.toXPath(),
                     ret = $("<output>");
-                if (xpath_ === hashtag) {
+                if (!form_.useRichText || xpath_ === hashtag) {
                     return ret.attr(key, xpath_)[0].outerHTML;
                 } else {
                     return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
                 }
             }
 
-            var Itext = this.data.javaRosa.Itext,
+            var xpathParser = form_.xpath,
+                Itext = this.data.javaRosa.Itext,
                 items = this.data.javaRosa.itextItemsFromBeforeSerialize,
                 languages = Itext.getLanguages(),
                 item, forms, form, lang, val;
