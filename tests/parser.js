@@ -45,7 +45,6 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -59,7 +58,6 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -79,7 +77,6 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -125,7 +122,6 @@ define([
         describe("override", function() {
             before(function(done) {
                 util.init({
-                    features: {rich_text: false},
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
