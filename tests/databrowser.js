@@ -198,6 +198,82 @@ define([
                 util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
             });
 
+            describe("when rich_text is off", function () {
+                beforeEach(function (done) {
+                    util.init({
+                        plugins: plugins,
+                        javaRosa: {langs: ['en']},
+                        core: {
+                            dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
+                            onReady: function () {
+                                var _this = this;
+                                datasources.getDataSources(function () {
+                                    databrowser.initDataBrowser(_this);
+                                    dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
+                                    done();
+                                });
+                            }
+                        },
+                        features: { rich_text: false },
+                    });
+                });
+
+                it("should add ref on drag/drop", function() {
+                    util.loadXML("");
+                    var mug = util.addQuestion("DataBindOnly", "mug"),
+                        calc = $("[name=property-calculateAttr]"),
+                        sessionUri = CASE_DATA[0].uri,
+                        casedbUri = CASE_DATA[1].uri,
+                        where = "@case_id = instance('commcaresession')/session/data/case_id";
+                    assert.equal(getInstanceId(mug.form, sessionUri), null);
+                    assert.equal(getInstanceId(mug.form, casedbUri), null);
+                    assert.equal(calc.length, 1);
+                    util.findNode(dataTree, "dob").data.handleDrop(calc);
+                    assert.equal(mug.p.calculateAttr,
+                                 "instance('casedb')/cases/case[" + where + "]/dob");
+                    assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                    assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                });
+
+                it("should add parent ref on drag/drop", function() {
+                    util.loadXML("");
+                    var mug = util.addQuestion("DataBindOnly", "mug"),
+                        calc = $("[name=property-calculateAttr]"),
+                        sessionUri = CASE_DATA[0].uri,
+                        casedbUri = CASE_DATA[1].uri,
+                        whereSession = "@case_id = instance('commcaresession')/session/data/case_id",
+                        whereParent = "@case_id = instance('casedb')/cases/case[" + whereSession + "]/index/parent";
+                    assert.equal(getInstanceId(mug.form, sessionUri), null);
+                    assert.equal(getInstanceId(mug.form, casedbUri), null);
+                    assert.equal(calc.length, 1);
+                    util.findNode(dataTree, "edd").data.handleDrop(calc);
+                    assert.equal(mug.p.calculateAttr, "instance('casedb')/cases/case[" + whereParent + "]/edd");
+                    assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                    assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                });
+
+                it("should add recursive ref on drag/drop", function() {
+                    util.loadXML("");
+                    var mug = util.addQuestion("DataBindOnly", "mug"),
+                        calc = $("[name=property-calculateAttr]"),
+                        sessionUri = CASE_DATA[0].uri,
+                        casedbUri = CASE_DATA[1].uri,
+                        whereSession = "@case_id = instance('commcaresession')/session/data/case_id",
+                        whereParent = "@case_id = instance('casedb')/cases/case[" + whereSession + "]/index/parent",
+                        whereChild = "@case_id = instance('casedb')/cases/case[" + whereParent + "]/index/first-child";
+                    assert.equal(getInstanceId(mug.form, sessionUri), null);
+                    assert.equal(getInstanceId(mug.form, casedbUri), null);
+                    assert.equal(calc.length, 1);
+                    var motherNode = util.findNode(dataTree, "mother"),
+                        node = util.findNode(dataTree, "child", motherNode);
+                        dataTree.open_node(node);
+                        util.findNode(dataTree, "dob", node).data.handleDrop(calc);
+                    assert.equal(mug.p.calculateAttr, "instance('casedb')/cases/case[" + whereChild + "]/dob");
+                    assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                    assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                });
+            });
+
             // TODO should remove instances when expression ref is removed
         });
 

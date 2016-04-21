@@ -363,6 +363,17 @@ define([
             assert.equal(mug.p.calculateAttr, "'choice1'");
         });
 
+        it("should drop /data/ reference when rich_text is false", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.addQuestion("DataBindOnly", "mug");
+            var calc = $("[name=property-calculateAttr]"),
+                tree = $(".fd-question-tree").jstree(true);
+            assert.equal(calc.length, 1);
+            util.findNode(tree, "text").data.handleDrop(calc);
+            assert.equal(calc.val(), "/data/text");
+        });
+
         it("should notify activity url on form change", function(done) {
             var vellum, activityUrlCalled = false;
             // defaults: do not notify, 5 minute timeout
