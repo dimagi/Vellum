@@ -141,7 +141,7 @@ define([
             return function (item, id) {
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
-                if (source && source.id !== "commcaresession") {
+                if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
                     var hashtagPath = '#case/' + source.id + '/' + id;
                     addHashtag(hashtagPath, path, vellum);
                     path = hashtagPath;
