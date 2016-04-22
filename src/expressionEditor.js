@@ -233,6 +233,11 @@ define([
 
                 // add event handlers to validate the inputs
                 $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);
+                if (options.mug.supportsRichText()) {
+                    $expUI.find('.xpath-edit-node').each(function () {
+                        richText.editor($(this), form, richTextOptions).on('change', validateExpression);
+                    });
+                }
 
                 $expUI.find('.xpath-delete-expression').click(function() {
                     $expUI.remove();
