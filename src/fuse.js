@@ -65,7 +65,7 @@ define([
 
             return {
                 id: mug.ufid,
-                name: mug.absolutePath || mug.hashtagPath,
+                name: mug.absolutePath,
                 hashtagPath: mug.hashtagPath,
                 absolutePath: mug.absolutePath,
                 icon: mug.options.icon,
@@ -85,6 +85,7 @@ define([
              .map(function(absolutePath, hashtag) {
                  return {
                      name: hashtag,
+                     hashtagPath: hashtag,
                      absolutePath: absolutePath,
                      icon: 'fcc fcc-fd-case-property',
                      displayLabel: null,
