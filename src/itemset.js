@@ -167,35 +167,20 @@ console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
     function afterDynamicSelectInsert(form, mug) {
         console.log("afterDynamicSelectInsert");  // jls
         var sources = getDataSources(),
-            src = "jr://fixture/item-list:some-fixture",   // TODO: something else perhaps
+            src = "",
+            nodeset = "",
+            choices = [];
+        if (sources.length) {
+            src = sources[0].uri;
+            nodeset = "instance('" + sources[0].id + "')" + sources[0].path;
             choices = datasourceWidgets.autocompleteChoices(sources, src);
-        debugger;   // onOptionsLoaded? this.? mug.p.itemsetData
-//                    var choices = updateAutocomplete(dataSources);  // so i need dataSources...
-// mug.form.knownInstances is an object with keys like 'some-fixture' and values that are objects with key 'src'
-// and value "jr://fixture/item-list:some-fixture"
-// getDataSources should do this...but it isn't defined...?
+        }
         var newMug = form.createQuestion(mug, 'into', "Itemset", true);
-                    if (!newMug.p.labelRef) {
-                        if (_.contains(choices, "name")) {
-                            newMug.p.labelRef = "name";
-                        } else {
-                            newMug.p.labelRef = choices[0];
-                        }
-                    }
-                    if (!newMug.p.valueRef) {
-                        if (_.contains(choices, "@id")) {
-                            newMug.p.valueRef = "@id";
-                        } else {
-                            newMug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
-                        }
-                    }
-/*var nodeset = parseNodeset(???);    // TODO
-                    newMug.p.filter = nodeset.filter;
-                    newMug.p.itemsetData = {
-                        instance: form.parseInstance(
-                                    nodeset.value, newMug, "itemsetData"),
-                        nodeset: nodeset.value,
-                    };*/
+        newMug = populateNodesetAttributes(newMug, choices);
+        newMug.p.filter = '';
+        newMug.p.itemsetData = {
+            nodeset: nodeset,
+        };
 console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
 console.log(newMug.__className + "'s newMug.p.labelRef=" + newMug.p.labelRef);
         return newMug;
@@ -390,6 +375,24 @@ console.log(newMug.__className + "'s newMug.p.labelRef=" + newMug.p.labelRef);
         return sources;
     }
 
+    function populateNodesetAttributes(mug, choices) {
+        if (!mug.p.labelRef) {
+            if (_.contains(choices, "name")) {
+                mug.p.labelRef = "name";
+            } else {
+                mug.p.labelRef = choices[0];
+            }
+        }
+        if (!mug.p.valueRef) {
+            if (_.contains(choices, "@id")) {
+                mug.p.valueRef = "@id";
+            } else {
+                mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
+            }
+        }
+        return mug;
+    }
+
     function itemsetWidget(mug, options) {
         function isEmptyValue(value) {
             return !value || _.all(_.map(value, _.isEmpty));
@@ -411,25 +414,7 @@ console.log(newMug.__className + "'s newMug.p.labelRef=" + newMug.p.labelRef);
                 // because updateAutocomplete() calls super_getValue()
                 var choices = updateAutocomplete(data);
                 if (choices && choices.length && isEmptyValue(current.value)) {
-// jls
-console.log("loading the values i need"); // this loads the values. i should run this code...on the switch, probably
-                    /**************************/
-                    if (!mug.p.labelRef) {
-                        if (_.contains(choices, "name")) {
-                            mug.p.labelRef = "name";
-                        } else {
-                            mug.p.labelRef = choices[0];
-                        }
-                    }
-                    if (!mug.p.valueRef) {
-                        if (_.contains(choices, "@id")) {
-                            mug.p.valueRef = "@id";
-                        } else {
-                            mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
-                        }
-                    }
-                    /**************************/
-                    //debugger;
+                    mug = populateNodesetAttributes(mug, choices);
                     if (current.hasOwnProperty("value")) {
                         // HACK push async-loaded default value to the mug.
                         // This should not be done in UI (widget) code.
