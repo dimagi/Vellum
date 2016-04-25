@@ -781,6 +781,7 @@ define([
             //if (!mug.options.isControlOnly && !this.isLoadingXForm) {
             //    this.fixBrokenReferences(mug);
             //}
+console.log("createQuestion, " + mug.__className + ", mug.p.labelRef=" + mug.p.labelRef);
             return mug;
         },
         insertQuestion: function (mug, refMug, position, isInternal) {

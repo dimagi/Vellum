@@ -44,6 +44,8 @@ define([
         writeControlLabel: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
+console.log("writeCustomXML");  // jls
+console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
             var data = mug.p.itemsetData,
                 nodeset = data.nodeset,
                 filter = mug.p.filter,
@@ -163,8 +165,40 @@ define([
     });
 
     function afterDynamicSelectInsert(form, mug) {
-        console.log("afterDynamicSelectInsert");
-        return form.createQuestion(mug, 'into', "Itemset", true);
+        console.log("afterDynamicSelectInsert");  // jls
+        var sources = getDataSources(),
+            src = "jr://fixture/item-list:some-fixture",   // TODO: something else perhaps
+            choices = datasourceWidgets.autocompleteChoices(sources, src);
+        debugger;   // onOptionsLoaded? this.? mug.p.itemsetData
+//                    var choices = updateAutocomplete(dataSources);  // so i need dataSources...
+// mug.form.knownInstances is an object with keys like 'some-fixture' and values that are objects with key 'src'
+// and value "jr://fixture/item-list:some-fixture"
+// getDataSources should do this...but it isn't defined...?
+        var newMug = form.createQuestion(mug, 'into', "Itemset", true);
+                    if (!newMug.p.labelRef) {
+                        if (_.contains(choices, "name")) {
+                            newMug.p.labelRef = "name";
+                        } else {
+                            newMug.p.labelRef = choices[0];
+                        }
+                    }
+                    if (!newMug.p.valueRef) {
+                        if (_.contains(choices, "@id")) {
+                            newMug.p.valueRef = "@id";
+                        } else {
+                            newMug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
+                        }
+                    }
+/*var nodeset = parseNodeset(???);    // TODO
+                    newMug.p.filter = nodeset.filter;
+                    newMug.p.itemsetData = {
+                        instance: form.parseInstance(
+                                    nodeset.value, newMug, "itemsetData"),
+                        nodeset: nodeset.value,
+                    };*/
+console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
+console.log(newMug.__className + "'s newMug.p.labelRef=" + newMug.p.labelRef);
+        return newMug;
     }
 
     var itemsetDataSpec = {
@@ -377,6 +411,9 @@ define([
                 // because updateAutocomplete() calls super_getValue()
                 var choices = updateAutocomplete(data);
                 if (choices && choices.length && isEmptyValue(current.value)) {
+// jls
+console.log("loading the values i need"); // this loads the values. i should run this code...on the switch, probably
+                    /**************************/
                     if (!mug.p.labelRef) {
                         if (_.contains(choices, "name")) {
                             mug.p.labelRef = "name";
@@ -391,6 +428,8 @@ define([
                             mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
                         }
                     }
+                    /**************************/
+                    //debugger;
                     if (current.hasOwnProperty("value")) {
                         // HACK push async-loaded default value to the mug.
                         // This should not be done in UI (widget) code.
@@ -442,6 +481,7 @@ define([
         };
 
         widget.getValue = function () {
+            //console.log("itemsetWidget getValue");
             var val = super_getValue();
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : {id: null, src: null}),
@@ -450,6 +490,7 @@ define([
         };
 
         widget.setValue = function (val) {
+            //console.log("itemsetWidget setValue");
             var hasValue = current.hasOwnProperty("value");
             current.value = val;
             if (optionsLoaded && !hasValue && isEmptyValue(val)) {
