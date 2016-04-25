@@ -685,13 +685,13 @@ define([
             paste([
                 ["id", "type", "labelItext:en-default", "itemsetData"],
                 ["/select", "SelectDynamic", "select",
-                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+                 '[{"instance":null,"nodeset":"/items","labelRef":"name","valueRef":"@id"}]'],
             ]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "itemsetData"],
                 ["/select", "SelectDynamic", "select", "select",
-                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+                 '[{"instance":null,"nodeset":"/items","labelRef":"name","valueRef":"@id"}]'],
             ]);
         });
 
