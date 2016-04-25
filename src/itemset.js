@@ -171,7 +171,7 @@ define([
                 choices = datasourceWidgets.autocompleteChoices(sources, src);
             newMug = populateNodesetAttributes(newMug, choices);
             newMug.p.filter = '';
-            mug.p.itemsetData = {
+            newMug.p.itemsetData = {
                 instance: form.parseInstance(
                     nodeset, newMug, "itemsetData"),
                 nodeset: nodeset,
