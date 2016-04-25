@@ -1669,8 +1669,7 @@ define([
                     _this.displayXPathEditor(options);
                 }
             }));
-            //debugger;
-            elemWidget.setValue(elemWidget.currentValue);   // jls this is where the values get saved
+            elemWidget.setValue(elemWidget.currentValue);
             elemWidget.on("change", function () {
                 _this.onFormChange(mug);
             });

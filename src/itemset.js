@@ -44,8 +44,6 @@ define([
         writeControlLabel: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-console.log("writeCustomXML");  // jls
-console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
             var data = mug.p.itemsetData,
                 nodeset = data.nodeset,
                 filter = mug.p.filter,
@@ -165,7 +163,6 @@ console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
     });
 
     function afterDynamicSelectInsert(form, mug) {
-        console.log("afterDynamicSelectInsert");  // jls
         var sources = getDataSources(),
             src = "",
             nodeset = "",
@@ -181,8 +178,6 @@ console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
         newMug.p.itemsetData = {
             nodeset: nodeset,
         };
-console.log(mug.__className + "'s mug.p.labelRef=" + mug.p.labelRef);
-console.log(newMug.__className + "'s newMug.p.labelRef=" + newMug.p.labelRef);
         return newMug;
     }
 
@@ -466,7 +461,6 @@ console.log(newMug.__className + "'s newMug.p.labelRef=" + newMug.p.labelRef);
         };
 
         widget.getValue = function () {
-            //console.log("itemsetWidget getValue");
             var val = super_getValue();
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : {id: null, src: null}),
@@ -475,7 +469,6 @@ console.log(newMug.__className + "'s newMug.p.labelRef=" + newMug.p.labelRef);
         };
 
         widget.setValue = function (val) {
-            //console.log("itemsetWidget setValue");
             var hasValue = current.hasOwnProperty("value");
             current.value = val;
             if (optionsLoaded && !hasValue && isEmptyValue(val)) {
