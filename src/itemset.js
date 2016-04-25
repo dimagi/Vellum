@@ -164,20 +164,19 @@ define([
 
     function afterDynamicSelectInsert(form, mug) {
         var sources = getDataSources(),
-            src = "",
-            nodeset = "",
-            choices = [];
+            newMug = form.createQuestion(mug, 'into', "Itemset", true);
         if (sources.length) {
-            src = sources[0].uri;
-            nodeset = "instance('" + sources[0].id + "')" + sources[0].path;
-            choices = datasourceWidgets.autocompleteChoices(sources, src);
+            var src = sources[0].uri,
+                nodeset = "instance('" + sources[0].id + "')" + sources[0].path,
+                choices = datasourceWidgets.autocompleteChoices(sources, src);
+            newMug = populateNodesetAttributes(newMug, choices);
+            newMug.p.filter = '';
+            mug.p.itemsetData = {
+                instance: form.parseInstance(
+                    nodeset, newMug, "itemsetData"),
+                nodeset: nodeset,
+            };
         }
-        var newMug = form.createQuestion(mug, 'into', "Itemset", true);
-        newMug = populateNodesetAttributes(newMug, choices);
-        newMug.p.filter = '';
-        newMug.p.itemsetData = {
-            nodeset: nodeset,
-        };
         return newMug;
     }
 
