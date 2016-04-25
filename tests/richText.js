@@ -29,9 +29,11 @@ define([
     'tests/utils',
     'vellum/richText',
     'vellum/javaRosa',
-    'vellum/xpath',
+    'vellum/escapedHashtags',
     'ckeditor',
     'text!static/richText/burpee.xml',
+    'text!static/richText/output-ref.xml',
+    'text!static/richText/output-value.xml',
 ], function(
     chai,
     $,
@@ -39,29 +41,63 @@ define([
     util,
     richText,
     javaRosa,
-    xpath,
+    escapedHashtags,
     CKEDITOR,
-    BURPEE_XML
+    BURPEE_XML,
+    OUTPUT_REF_XML,
+    OUTPUT_VALUE_XML
 ) {
     var assert = chai.assert,
+        call = util.call,
+        hashtagToXPath = {},
         formShim = {
+            isValidHashtag: function (path) {
+                return _.contains([
+                    '#form/text',
+                    '#form/othertext',
+                    '#form/date',
+                    '#form/group',
+                    '#case/mother/edd',
+                    '#case/child/case',
+                    '#case/child/f_1065',
+                ], this.normalizeHashtag(path));
+            },
+            normalizeEscapedHashtag: function (path) {
+                 return path;
+            },
+            normalizeHashtag: function (path) {
+                if (path.startsWith("`")) {
+                    path = path.slice(1);
+                }
+                if (path.endsWith("`")) {
+                    path = path.slice(0, -1);
+                }
+                 return path;
+            },
+            transform: function (path) {
+                return escapedHashtags.transform(path, function (path) {
+                    var mug = formShim.getMugByPath(path),
+                        icon_ = mug ? icon(mug.options.icon) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
+                    return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, !!mug)).html();
+                });
+            },
             getMugByPath: function(path) {
                 return {
-                    "/data/text": {
+                    "#form/text": {
                         options: { icon: 'fcc fcc-fd-text' },
                     },
-                    "/data/othertext": {
+                    "#form/othertext": {
                         options: { icon: 'fcc fcc-fd-text' },
                     },
-                    "/data/date": {
+                    "#form/date": {
                         options: { icon: 'fcc fa fa-calendar' },
                     },
-                    "/data/group": {
+                    "#form/group": {
                         options: { icon: 'fcc icon-folder-open' },
                     },
-                }[path];
+                }[this.normalizeHashtag(path)];
             },
-            xpath: xpath.createParser(),
+            xpath: escapedHashtags.parser(hashtagToXPath),
         };
 
     function icon(iconClass) { 
@@ -69,6 +105,7 @@ define([
     }
 
     function externalIcon () { return icon('fcc-fd-case-property'); }
+    function unknownIcon () { return icon('fcc fcc-help'); }
 
     function bubbleSpan(xpath, internal, output) {
         var span = $('<span>').addClass('label label-datanode').attr({
@@ -77,8 +114,10 @@ define([
         });
         if (internal) {
             span.addClass('label-datanode-internal');
-        } else {
+        } else if (formShim.isValidHashtag(xpath)){
             span.addClass('label-datanode-external');
+        } else {
+            span.addClass('label-datanode-unknown');
         }
         return span;
     }
@@ -101,27 +140,24 @@ define([
         describe("simple conversions", function() {
             // path, display value, icon
             var simpleConversions = [
-                    ['/data/text', 'text', icon('fcc-fd-text'), true],
-                    ["instance('casedb')/cases/case" +
-                     "[@case_id = instance('commcaresession')/session/data/case_id]",
-                     'case', externalIcon(), false],
-                    ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case" +
-                     "[@case_id = instance('commcaresession')/session/data/case_id]" +
-                     "/index/parent]/edd", 'edd', externalIcon(), false]
+                    ['`#form/text`', 'text', icon('fcc-fd-text'), true],
+                    ["`#case/child/case`", 'case', externalIcon(), false],
+                    ["`#case/mother/edd`", 'edd', externalIcon(), false],
+                    ["`#case/mother/unknown`", 'unknown', unknownIcon(), false],
                 ],
                 opts = {isExpression: true};
 
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richText.toRichText(val[0], formShim, opts)).html(),
+                        richText.toRichText(val[0], formShim, opts),
                         wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
-                        wrapWithDiv(richText.toRichText(outputValueTemplateFn(val[0]), formShim)).html(),
+                        richText.toRichText(outputValueTemplateFn(val[0]), formShim),
                         wrapWithDivP(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
@@ -131,8 +167,8 @@ define([
         describe("date conversions", function() {
             var dates = [
                     {
-                        xmlValue: "format-date(date(/data/date), '%d/%n/%y')",
-                        valueInBubble: '/data/date',
+                        xmlValue: "format-date(date(`#form/date`), '%d/%n/%y')",
+                        valueInBubble: '`#form/date`',
                         bubbleDispValue: 'date',
                         icon: icon('fa fa-calendar'),
                         internalRef: true,
@@ -154,27 +190,25 @@ define([
 
             it("bubble a drag+drop reference", function() {
                 var fmt = "%d/%n/%y",
-                    tag = javaRosa.getOutputRef("/data/text", fmt),
+                    tag = javaRosa.getOutputRef("`#form/text`", fmt),
                     bubble = richText.toRichText(tag, formShim);
                 assert.strictEqual($(bubble).find('span').data('date-format'), fmt);
             });
         });
 
         describe("equation conversions", function() {
-            var f_1065 = "instance('casedb')/cases/case[" +
-                            "@case_id = instance('commcaresession')/session/data/case_id" +
-                         "]/f_1065",
+            var f_1065 = "`#case/child/f_1065`",
                 ico = icon('fcc-fd-text'),
                 equations = [
                     [
-                        "/data/text = /data/othertext",
-                        wrapWithDiv(makeBubble('/data/text', 'text', ico, true)).html() + " = " +
-                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', ico, true)).html()
+                        "`#form/text` = `#form/othertext`",
+                        wrapWithDiv(makeBubble('`#form/text`', 'text', ico, true)).html() + " = " +
+                        wrapWithDiv(makeBubble('`#form/othertext`', 'othertext', ico, true)).html()
                     ],
                     [
-                        "/data/text <= /data/othertext",
-                        wrapWithDiv(makeBubble('/data/text', 'text', ico, true)).html() + " &lt;= " +
-                        wrapWithDiv(makeBubble('/data/othertext', 'othertext', ico, true)).html()
+                        "`#form/text` <= `#form/othertext`",
+                        wrapWithDiv(makeBubble('`#form/text`', 'text', ico, true)).html() + " &lt;= " +
+                        wrapWithDiv(makeBubble('`#form/othertext`', 'othertext', ico, true)).html()
                     ],
                     [
                         f_1065 + " = " + f_1065,
@@ -258,12 +292,12 @@ define([
 
         describe("convert value with output and escaped HTML", function () {
             var items = [
-                    ['<h1><output value="/data/text" /></h1>',
+                    ['<h1><output value="`#form/text`" /></h1>',
                      '&lt;h1&gt;{text}&lt;/h1&gt;'],
-                    ['<output value="/data/text" /> <tag /> <output value="/data/othertext" />',
+                    ['<output value="`#form/text`" /> <tag /> <output value="`#form/othertext`" />',
                      '{text} &lt;tag /&gt; {othertext}'],
                     ["{blah}", "{blah}"],
-                    ['<output value="unknown(/data/text)" />', '&lt;output value="unknown(/data/text)" /&gt;'],
+                    ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                 ],
                 ico = icon('fcc-fd-text');
 
@@ -271,8 +305,8 @@ define([
                 it("to text: " + item[0], function () {
                     var result = richText.bubbleOutputs(item[0], formShim, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
-                            if (formShim.getMugByPath("/data/" + name)) {
-                                var output = makeOutputValue("/data/" + name, name, ico, true);
+                            if (formShim.getMugByPath("`#form/" + name + "`")) {
+                                var output = makeOutputValue("`#form/" + name + "`", name, ico, true);
                                 return output[0].outerHTML;
                             }
                             return m;
@@ -318,25 +352,25 @@ define([
             });
 
             it("should return just-set value on get value", function () {
-                var text = '<output value="/data/text" />';
+                var text = '<output value="#form/text" />';
                 assert.notEqual(editor.getValue(), text);
                 editor.setValue(text);
                 assert.equal(editor.getValue(), text);
             });
 
             it("should create output on insert expression into label editor", function (done) {
-                var output = '<output value="/data/text" />';
+                var output = '<output value="#form/text" />';
                 editor.setValue('one two', function () {
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
-                    editor.insertExpression("/data/text");
+                    editor.insertExpression("#form/text");
                     assert.equal(editor.getValue(), "one" + output + " two");
                     done();
                 });
             });
 
             it("should insert output into label editor", function (done) {
-                var output = '<output value="/data/text" />';
+                var output = '<output value="#form/text" />';
                 editor.setValue('one two', function () {
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
@@ -430,6 +464,11 @@ define([
                     var selection = editor.getSelection(true);
                     assert.strictEqual(selection.getNative().focusOffset, 14);
                 });
+
+                it("should change output value to output ref", function () {
+                    util.loadXML(OUTPUT_REF_XML);
+                    util.assertXmlEqual(call('createXML'), OUTPUT_VALUE_XML);
+                });
             });
 
             describe("popovers", function () {
@@ -451,7 +490,7 @@ define([
                         assert(bubble, "No bubbles detected");
                         bubble.mouseenter();
                         assert.strictEqual($('.popover-content').text(),
-                                           "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                                           "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                         done();
                     });
                 });
@@ -466,7 +505,7 @@ define([
                         bubble.mouseenter();
                         var $popover = $('.popover-content');
                         assert.strictEqual($popover.text(),
-                                           "How many burpees did you do on /data/new_burpee_data/burpee_date ?");
+                                           "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                         var bubbles = widget.input.ckeditor().editor.widgets.instances;
 
                         _.each(bubbles, function(bubble) {

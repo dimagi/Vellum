@@ -192,7 +192,7 @@ define([
             return this.data[lang];
         },
         setValue: function (lang, value) {
-            this.data[lang] = value;
+            this.data[lang] = xml.humanize(value);
             this.outputExpressions = null;
         },
         getValueOrDefault: function (lang) {
@@ -231,17 +231,21 @@ define([
         updateOutputRefExpressions: function () {
             var allRefs = {},
                 langRefs,
-                outputRe,
-                match;
+                outputs;
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*(?:\/|><\/output)>)/gim;
+                    outputs = $('<div>').append(this.data[lang]).find('output');
                     langRefs = [];
-                    match = outputRe.exec(this.data[lang]);
-                    while (match !== null) {
-                        langRefs.push(match[1]);
-                        match = outputRe.exec(this.data[lang]);
-                    }
+                    _.each(outputs, function (output) {
+                        output = $(output);
+                        var value = output.attr('vellum:value') || output.attr('value'),
+                            ref = output.attr('vellum:ref') || output.attr('ref');
+                        if (value) {
+                            langRefs.push(value);
+                        } else if (ref) {
+                            langRefs.push(ref);
+                        }
+                    });
                     allRefs[lang] = langRefs;
                 }
             }
@@ -898,15 +902,17 @@ define([
         };
 
         widget.getItextValue = function (lang) {
-            var itextItem = widget.getItextItem();
+            var itextItem = widget.getItextItem(), value;
             if (!lang) {
                 lang = widget.language;
             }
-            return itextItem && itextItem.get(widget.form, lang);
+            value = itextItem && itextItem.get(widget.form, lang);
+            return mug.supportsRichText() ? outputToHashtag(value, widget.mug.form.xpath) : outputToXPath(value, widget.mug.form.xpath);
         };
 
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
+            value = outputToHashtag(value, widget.mug.form.xpath);
             if (itextItem) {
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
@@ -987,7 +993,7 @@ define([
                 if (e.property === "nodeID") {
                     if (widget.getItextValue() === e.previous) {
                         widget.setItextValue(e.val);
-                        widget.setValue(e.val);
+                        widget.setValue(widget.getItextValue());
                     }
                 }
             }, null, "teardown-mug-properties");
@@ -999,7 +1005,7 @@ define([
                     if (widget.getItextValue() === e.prevValue) {
                         // Make sure all the defaults keep in sync.
                         widget.setItextValue(e.value);
-                        widget.setValue(e.value);
+                        widget.setValue(widget.getItextValue());
                     }
                 }
             }, null, "teardown-mug-properties");
@@ -1525,11 +1531,11 @@ define([
                             // the same
                             item.hasMarkdown = true;
                             item.getOrCreateForm("default")
-                                .setValue(lang, xml.humanize(valEl));
+                                .setValue(lang, valEl);
                             return;
                         }
                         item.getOrCreateForm(curForm)
-                            .setValue(lang, xml.humanize(valEl));
+                            .setValue(lang, valEl);
                     }
                     textEl.children().each(eachValue);
                 }
@@ -1581,6 +1587,30 @@ define([
             this.__callOld();
 
             delete this.data.javaRosa.itextMap;
+            var form = this.data.core.form;
+            function _toHashtag(value) {
+                return form.xpath.parse(value).toHashtag();
+            }
+            forEachItextItem(form, function (item, mug) {
+                _(item.forms).each(function (itForm) {
+                    _.each(langs, function (lang) {
+                        var value = $('<div>').append(itForm.getValue(lang));
+                        if (!value) { return; }
+                        value.find('output').replaceWith(function() {
+                            var tempOutput = $('<output>'),
+                                output = $(this),
+                                value = output.attr('vellum:value') || output.attr('value'),
+                                ref = output.attr('vellum:ref') || output.attr('ref');
+                            if (value) {
+                                return tempOutput.attr('value', _toHashtag(value))[0].outerHTML;
+                            } else if (ref) {
+                                return tempOutput.attr('ref', _toHashtag(ref))[0].outerHTML;
+                            }
+                        });
+                        itForm.setValue(lang, value.html());
+                    });
+                });
+            });
             Itext.on('change', function () { _this.onFormChange(); });
         },
         populateControlMug: function(mug, controlElement) {
@@ -1717,7 +1747,7 @@ define([
                 }
             });
         },
-        contributeToModelXML: function (xmlWriter) {
+        contributeToModelXML: function (xmlWriter, form_) {
             // here are the rules that govern itext
             // 0. iText items which aren't referenced by any questions are 
             // cleared from the form.
@@ -1731,8 +1761,23 @@ define([
             // will be properly set as such.
             // 4. duplicate itext ids will be automatically updated to create
             // non-duplicates
+            
+            function hashtags(outputRef) {
+                var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
+                    key = $(outputRef).attr('value') ? 'value' : 'ref',
+                    parsed = xpathParser.parse(value),
+                    hashtag = parsed.toHashtag(),
+                    xpath_ = parsed.toXPath(),
+                    ret = $("<output>");
+                if (!form_.useRichText || xpath_ === hashtag) {
+                    return ret.attr(key, xpath_)[0].outerHTML;
+                } else {
+                    return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
+                }
+            }
 
-            var Itext = this.data.javaRosa.Itext,
+            var xpathParser = form_.xpath,
+                Itext = this.data.javaRosa.Itext,
                 items = this.data.javaRosa.itextItemsFromBeforeSerialize,
                 languages = Itext.getLanguages(),
                 item, forms, form, lang, val;
@@ -1757,7 +1802,11 @@ define([
                             if(form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
-                            xmlWriter.writeXML(xml.normalize(val));
+                            val = $('<div>').append(val);
+                            val.find('output').replaceWith(function() {
+                                return hashtags(this);
+                            });
+                            xmlWriter.writeXML(xml.normalize(val.html()));
                             xmlWriter.writeEndElement();
                         }
                         if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
@@ -2248,6 +2297,25 @@ define([
             $modal.one('shown.bs.modal', function () { $textarea.focus(); });
         }
     });
+
+    var outputToHashtag = _outputToXPathOrHashtag('toHashtag');
+    var outputToXPath = _outputToXPathOrHashtag('toXPath');
+
+    function _outputToXPathOrHashtag(functionName) {
+        return function (text, xpathParser) {
+            if (text) {
+                text = $("<div />").append(text);
+                text.find('output').replaceWith(function() {
+                    var $this = $(this),
+                        value = xpathParser.parse($this.attr('value') || $this.attr('ref'));
+                    $this.attr('value', value[functionName]());
+                    return $this[0].outerHTML;
+                });
+                text = xml.normalize(text.html());
+            }
+            return text;
+        };
+    }
 
     return {
         parseXLSItext: parseXLSItext,

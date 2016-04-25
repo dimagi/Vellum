@@ -31,7 +31,7 @@ module.exports = function(grunt)  {
     mocha_phantomjs: {
         all: {
             options: {
-                urls: ['http://localhost:8000/index.html'],
+                urls: ['http://localhost:8081/index.html'],
                 reporter: 'nyan', // the only one that gives # of tests completed
                 config: {
                     'bail': true,
@@ -43,7 +43,7 @@ module.exports = function(grunt)  {
     connect: {
         server: {
             options: {
-                port: grunt.option('port') || 8000,
+                port: grunt.option('port') || 8081,
                 base: '.',
             }
         }

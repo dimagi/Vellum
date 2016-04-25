@@ -12,10 +12,10 @@
                     <question2 />
                 </data>
             </instance>
-            <bind nodeset="/data/group" />
-            <bind nodeset="/data/group/question1" type="xsd:string" />
-            <bind nodeset="/data/group/question2" type="xsd:string" />
-            <bind nodeset="/data/question2" type="xsd:string" relevant="/data/group/question1 = 'valley girl' and /data/group/question2 = 'dude'" />
+            <bind vellum:nodeset="#form/group" nodeset="/data/group" />
+            <bind vellum:nodeset="#form/group/question1" nodeset="/data/group/question1" type="xsd:string" />
+            <bind vellum:nodeset="#form/group/question2" nodeset="/data/group/question2" type="xsd:string" />
+            <bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:string" vellum:relevant="#form/group/question1 = 'valley girl' and #form/group/question2 = 'dude'" relevant="/data/group/question1 = 'valley girl' and /data/group/question2 = 'dude'" />
             <itext>
                 <translation lang="en" default="">
                     <text id="group-label">
@@ -35,16 +35,16 @@
         </model>
     </h:head>
     <h:body>
-        <group ref="/data/group">
+        <group vellum:ref="#form/group" ref="/data/group">
             <label ref="jr:itext('group-label')" />
-            <input ref="/data/group/question1">
+            <input vellum:ref="#form/group/question1" ref="/data/group/question1">
                 <label ref="jr:itext('group/question1-label')" />
             </input>
-            <input ref="/data/group/question2">
+            <input vellum:ref="#form/group/question2" ref="/data/group/question2">
                 <label ref="jr:itext('group/question2-label')" />
             </input>
         </group>
-        <input ref="/data/question2">
+        <input vellum:ref="#form/question2" ref="/data/question2">
             <label ref="jr:itext('question2-label')" />
         </input>
     </h:body>

@@ -65,6 +65,21 @@
     }
 }
 
+.label-datanode-unknown {
+    color: @cc-att-neg-low;
+    border-color:darken(desaturate(@cc-att-neg-hi, 20%), 20%);
+    background-color: desaturate(@cc-att-neg-hi, 20%);
+    .close {
+        color: @cc-att-neg-low;
+    }
+    &:hover {
+        background-color: @cc-att-neg-mid;
+        .close {
+            color: @cc-att-neg-hi;
+        }
+    }
+}
+
 .datanode-tree-bubble {
     font-size: 11px;
     color: #ffffff;

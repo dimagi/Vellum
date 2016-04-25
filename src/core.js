@@ -970,7 +970,7 @@ define([
         }
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
-        var locked = !this.isMugPathMoveable(sourceMug.absolutePath);
+        var locked = !this.isMugPathMoveable(sourceMug.hashtagPath);
         if (locked) {
             if (position === 'into' || position === 'last' || position === 'first') {
                 return sourceMug.parentMug === targetMug;
@@ -1065,7 +1065,7 @@ define([
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
-                "." : mug.absolutePath;
+                "." : (mug.supportsRichText() ? mug.hashtagPath : mug.absolutePath);
         }
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using
@@ -1122,6 +1122,7 @@ define([
                 _this.data.core.parseWarnings = [];
                 _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
+                _this.data.core.form.fire('form-load-finished');
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.
@@ -1170,8 +1171,11 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
-        form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText :
-                                                           this.opts().features.rich_text;
+        if (this.opts().features.rich_text) {
+            form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText : true;
+        } else {
+            form.useRichText = false;
+        }
         form.writeIgnoreRichText = this.opts().features.rich_text;
         form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
@@ -1714,7 +1718,7 @@ define([
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
-                    return _this.isMugRemoveable(mug, mug.absolutePath);
+                    return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
             }));
@@ -1755,7 +1759,7 @@ define([
             }
             return ret;
         };
-        var changeable = this.isMugTypeChangeable(mug, mug.absolutePath);
+        var changeable = this.isMugTypeChangeable(mug, mug.hashtagPath);
 
         var $questionTypeChanger = $(question_type_changer({
             currentQuestionIcon: mug.getIcon(),
@@ -1894,6 +1898,8 @@ define([
             data = {xform: formText};
         }
 
+        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+
         this.data.core.saveButton.ajax({
             type: "POST",
             url: url,
@@ -2017,7 +2023,8 @@ define([
             "requiredAttr",
             "relevantAttr",
             "constraintAttr",
-            "repeat_count"
+            "repeat_count",
+            'defaultValue',
         ];
     };
 
@@ -2025,7 +2032,6 @@ define([
         return [
             "dataSource",
             "dataValue",
-            'defaultValue',
             "xmlnsAttr",
             "label",
             "hintLabel",
@@ -2132,7 +2138,7 @@ define([
      */
     fn.updateControlNodeAdaptorMap = function (map) {};
 
-    fn.contributeToModelXML = function (xmlWriter) {};
+    fn.contributeToModelXML = function (xmlWriter, form) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
 

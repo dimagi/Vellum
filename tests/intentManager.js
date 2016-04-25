@@ -56,7 +56,6 @@ define([
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
                 features: {
-                    rich_text: false,
                     custom_intents: true,
                     templated_intents: true,
                 },
@@ -139,7 +138,6 @@ define([
                 util.init({
                     intents: {templates: templates},
                     features: {
-                        rich_text: false,
                         custom_intents: false,
                     },
                     core: {onReady: function () {
@@ -203,7 +201,6 @@ define([
                 util.init({
                     intents: {templates: templates},
                     features: {
-                        rich_text: false,
                         templated_intents: true,
                         custom_intents: true,
                     },
@@ -274,7 +271,6 @@ define([
                 util.init({
                     intents: {templates: templates},
                     features: {
-                        rich_text: false,
                         custom_intents: false,
                         templated_intents: false,
                     },

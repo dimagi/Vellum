@@ -35,7 +35,7 @@ define([
             util.loadXML(TEST_XML_1);
             util.getMug("question1").p.nodeID = 'question';
             var mug = util.getMug("/data/question2");
-            assert.equal("/data/question = 1", mug.p.relevantAttr);
+            assert.equal(mug.p.relevantAttr, "`#form/question` = 1");
         });
 
         it("should not update expressions for model iteration", function () {
@@ -186,7 +186,7 @@ define([
         ];
 
         _.each(expressions, function(expr) {
-            var logicExpr = new logic.LogicExpression(expr[0], xpath.createParser());
+            var logicExpr = new logic.LogicExpression(expr[0], xpath.createParser(xpath.makeXPathModels()));
 
             it("should return all paths: " + expr[0], function() {
                 var paths = _.map(logicExpr.getPaths(), getPath);
@@ -198,6 +198,77 @@ define([
                 var paths = _.map(logicExpr.getTopLevelPaths(), getPath);
                 assert.deepEqual(_.difference(paths, expr[2]), []);
                 assert.deepEqual(_.difference(expr[2], paths), []);
+            });
+        });
+
+        describe("hashtags", function() {
+            function getHashtags(expr) {
+                return expr.toHashtag();
+            }
+
+            var hashtags = [
+                {
+                    path: "#form/text1 = #form/text2",
+                    hashtags: ["#form/text1", "#form/text2"],
+                    xpath: "/data/text1 = /data/text2",
+                },
+                {
+                    path: "/data/not/in/form[#form/text1] = #form/text2",
+                    hashtags: ["#form/text1", "#form/text2"],
+                    xpath: "/data/not/in/form[/data/text1] = /data/text2",
+                },
+                {
+                    path: "/data/not/in/form[#form/text1 = /data/also/not/in/form[#form/text2]] = #form/text2",
+                    hashtags: ["#form/text1", "#form/text2"],
+                    xpath: "/data/not/in/form[/data/text1 = /data/also/not/in/form[/data/text2]] = /data/text2",
+                },
+            ],
+            incorrectHashtags = [
+                {
+                    path: "#wtf/mate",
+                    hashtags: [],
+                },
+                {
+                    path: "#wtf/mate[filter=filter]",
+                    hashtags: [],
+                },
+            ],
+            translationDict = {
+                "#form/text1": "/data/text1",
+                "#form/text2": "/data/text2",
+            },
+            xpathParser = xpath.createParser(xpath.makeXPathModels(translationDict));
+
+            function compareHashtags(expr, expected) {
+                var tags = _.map(expr.getHashtags(), getHashtags);
+                assert.sameMembers(tags, expected.hashtags);
+            }
+
+            _.each(hashtags, function(hashtag) {
+                var logicExpr = new logic.LogicExpression(hashtag.path, xpathParser);
+
+                it("should return all hashtags: " + hashtag.path, function() {
+                    compareHashtags(logicExpr, hashtag);
+                });
+
+                it("should translate " + hashtag.path + " to " + hashtag.xpath, function() {
+                    assert.strictEqual(logicExpr.parsed.toXPath(), hashtag.xpath);
+                });
+            });
+
+            _.each(incorrectHashtags, function (hashtag) {
+                var logicExpr = new logic.LogicExpression(hashtag.path, xpathParser);
+
+                it("should return all hashtags: " + hashtag.path, function() {
+                    compareHashtags(logicExpr, hashtag);
+                });
+
+                it("should not be able to translate " + hashtag.path, function() {
+                    // filtered hashtags will add an error and not parse
+                    if (!logicExpr.error) {
+                        assert.throws(logicExpr.parsed.toXPath, /translate the hashtag/);
+                    }
+                });
             });
         });
     });

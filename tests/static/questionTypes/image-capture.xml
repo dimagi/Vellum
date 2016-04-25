@@ -8,7 +8,7 @@
 					<image />
 				</data>
 			</instance>
-			<bind nodeset="/data/image" type="binary" />
+			<bind vellum:nodeset="#form/image" nodeset="/data/image" type="binary" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="image-label">
@@ -24,7 +24,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<upload mediatype="image/*" ref="/data/image">
+		<upload mediatype="image/*" vellum:ref="#form/image" ref="/data/image">
 			<label ref="jr:itext('image-label')" />
 		</upload>
 	</h:body>

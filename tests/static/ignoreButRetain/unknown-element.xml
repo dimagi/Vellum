@@ -9,13 +9,13 @@
 					<question2 vellum:ignore="retain"/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question" type="xsd:string" />
+			<bind vellum:nodeset="#form/question" nodeset="/data/question" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<unknown ref="/data/question" />
+		<unknown vellum:ref="#form/question" ref="/data/question" />
 	</h:body>
 </h:html>

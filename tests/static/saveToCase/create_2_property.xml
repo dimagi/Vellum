@@ -26,14 +26,14 @@
 					</create2>
 				</data>
 			</instance>
-			<bind nodeset="/data/name" type="xsd:string" />
+			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
 			<bind nodeset="/data/create1/case/create/case_type" calculate="caseType" />
-			<bind nodeset="/data/create1/case/create/case_name" calculate="/data/name" />
+			<bind nodeset="/data/create1/case/create/case_name" vellum:calculate="#form/name" calculate="/data/name" />
 			<bind nodeset="/data/create1/case/create/owner_id" calculate="/data/meta/userID" />
 			<bind nodeset="/data/create1/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/create1/case/@user_id" calculate="/data/meta/userID" />
 			<bind nodeset="/data/create2/case/create/case_type" calculate="caseType" />
-			<bind nodeset="/data/create2/case/create/case_name" calculate="/data/name" />
+			<bind nodeset="/data/create2/case/create/case_name" vellum:calculate="#form/name" calculate="/data/name" />
 			<bind nodeset="/data/create2/case/create/owner_id" calculate="/data/meta/userID" />
 			<bind nodeset="/data/create2/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/create2/case/@user_id" calculate="/data/meta/userID" />
@@ -49,7 +49,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/name">
+		<input vellum:ref="#form/name" ref="/data/name">
 			<label ref="jr:itext('name-label')" />
 		</input>
 	</h:body>

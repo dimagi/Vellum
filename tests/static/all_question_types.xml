@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum" vellum:ignore="richText">
 	<h:head>
 		<h:title>Untitled Form</h:title>
 		<model>
@@ -39,7 +39,7 @@
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb"></instance>
-			<bind nodeset="/data/question1" type="xsd:string" constraint="/data/question20 = 2" relevant="/data/question20" jr:constraintMsg="jr:itext('question1-constraintMsg')" required="true()" />
+			<bind nodeset="/data/question1" type="xsd:string" constraint="/data/question20 = 2" jr:constraintMsg="jr:itext('question1-constraintMsg')" relevant="/data/question20" required="true()" />
 			<bind nodeset="/data/question2" />
 			<bind nodeset="/data/question30" />
 			<bind nodeset="/data/question3" />

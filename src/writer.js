@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'XMLWriter',
-    'vellum/util'
+    'vellum/util',
 ], function (
     $,
     _,
@@ -39,7 +39,7 @@ define([
         
         createSetValues(dataTree, form, xmlWriter);
 
-        form.vellum.contributeToModelXML(xmlWriter);
+        form.vellum.contributeToModelXML(xmlWriter, form);
         
         xmlWriter.writeEndElement(); //CLOSE MODEL
 
@@ -178,9 +178,7 @@ define([
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
-                        if (value) {
-                            xmlWriter.writeAttributeString(key, value);
-                        }
+                        util.writeHashtags(xmlWriter, key, value, mug);
                     });
                     xmlWriter.writeEndElement();
                 });
@@ -190,19 +188,21 @@ define([
     };
 
     var createSetValues = function (dataTree, form, xmlWriter) {
-        function writeSetValue(setValue) {
+        function writeSetValue(setValue, mug) {
             xmlWriter.writeStartElement('setvalue');
             xmlWriter.writeAttributeString('event', setValue.event);
-            xmlWriter.writeAttributeString('ref', setValue.ref);
-            xmlWriter.writeAttributeString('value', setValue.value);
+            util.writeHashtags(xmlWriter, 'ref', setValue.ref, mug);
+            util.writeHashtags(xmlWriter, 'value', setValue.value, mug);
             xmlWriter.writeEndElement();
         }
 
-        _.each(form.getSetValues(), writeSetValue);
+        _.each(form.getSetValues(), function (sv) { writeSetValue(sv, {form: form}); });
 
         dataTree.walk(function (mug, nodeID, processChildren) {
             if(mug && mug.options.getSetValues) {
-                _.each(mug.options.getSetValues(mug), writeSetValue);
+                _.each(mug.options.getSetValues(mug), function (setValue) {
+                    writeSetValue(setValue, mug);
+                });
             }
             processChildren();
         });
@@ -249,7 +249,8 @@ define([
                 opts.writeCustomXML(xmlWriter, mug);
             }
             if (opts.writeControlRefAttr) {
-                xmlWriter.writeAttributeString(opts.writeControlRefAttr, mug.absolutePath);
+                var hashtag = mug.hashtagPath;
+                util.writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag, mug);
             }
             var appearanceAttr = mug.getAppearanceAttribute();
             if (appearanceAttr) {

@@ -37,7 +37,10 @@ define([
     }
 
     function assertXmlEqual(actual, expected, opts) {
-        opts = opts || {};
+        opts = _.defaults(opts || {}, {
+            normalize_xmlns: false,
+            not: false,
+        });
         if (opts.normalize_xmlns) {
             var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
             actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
@@ -166,10 +169,10 @@ define([
         if (opts.javaRosa && opts.javaRosa.langs) {
             vellum_options.javaRosa.langs = opts.javaRosa.langs;
         }
+        vellum_options.plugins = _.without(vellum_options.plugins, "atwho");
         if (opts.plugins) {
             vellum_options.plugins = opts.plugins;
         }
-        vellum_options.plugins = _.without(vellum_options.plugins, "atwho");
         vellum_options.core = vellum_options.core || {};
         var originalSaveUrl = vellum_options.core.saveUrl || function () {};
         vellum_options.core.saveUrl = function (data) {

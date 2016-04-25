@@ -87,8 +87,8 @@ define([
                 q2 = call("getMugByPath", "/data/question2");
             group.p.nodeID = "g8";
             assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
-            assert.equal(q2.p.relevantAttr,
-                "/data/g8/question1 = 'valley girl' and /data/g8/question2 = 'dude'");
+            assert.strictEqual(q2.p.relevantAttr,
+                "`#form/g8/question1` = 'valley girl' and `#form/g8/question2` = 'dude'");
         });
 
         it("should show warning icons on invalid questions", function () {
@@ -361,6 +361,17 @@ define([
             assert.equal(calc.length, 1);
             util.findNode(tree, "choice1").data.handleDrop(calc);
             assert.equal(mug.p.calculateAttr, "'choice1'");
+        });
+
+        it("should drop /data/ reference when rich_text is false", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.addQuestion("DataBindOnly", "mug");
+            var calc = $("[name=property-calculateAttr]"),
+                tree = $(".fd-question-tree").jstree(true);
+            assert.equal(calc.length, 1);
+            util.findNode(tree, "text").data.handleDrop(calc);
+            assert.equal(calc.val(), "/data/text");
         });
 
         it("should notify activity url on form change", function(done) {

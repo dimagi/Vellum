@@ -466,6 +466,16 @@ define([
         }
     });
 
+    Object.defineProperty(Mug.prototype, "hashtagPath", {
+        get: function () {
+            // commtrack isn't hashtaggable (ex. /data/trans[type=trans1])
+            if (this.options.isHashtaggable && this.absolutePathNoRoot) {
+                return '#form' + this.absolutePathNoRoot;
+            }
+            return this.absolutePath;
+        }
+    });
+
     Object.defineProperty(Mug.prototype, "parentMug", {
         get: function () {
             var node = this.form.tree.getNodeFromMug(this);
@@ -715,6 +725,15 @@ define([
             data.instances = _.extend(data.instances || {},
                                       mug.form.parseInstanceRefs(value));
         }
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
         return value || undefined;
     }
 
@@ -722,7 +741,17 @@ define([
         if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
             mug.form.updateKnownInstances(data.instances);
         }
-        return data[key];
+        var value = data[key];
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
+        return value;
     }
 
     function resolveConflictedNodeId(mug) {
@@ -912,14 +941,10 @@ define([
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
-                    var form = mug.form,
-                        xpath = form.xpath,
-                        xpathmodels = xpath.models;
+                    var form = mug.form;
                     if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
-                        var paths = new logic.LogicExpression(mug.p.defaultValue, xpath).getPaths();
-                        paths = _.filter(paths, function (path) {
-                            return path.initial_context === xpathmodels.XPathInitialContextEnum.ROOT;
-                        });
+                        var paths = mug.form.getHashtagsInXPath(mug.p.defaultValue);
+                        paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
                         if (paths.length) {
                             return "You are referencing a node in this form. " +
                                    "This can cause errors in the form";
@@ -982,7 +1007,7 @@ define([
                 },
                 presence: 'optional',
                 setter: function (mug, attr, value) {
-                    var oldPath = mug.absolutePath;
+                    var oldPath = mug.hashtagPath;
                     mug.p.set(attr, value);
                     mug.form._updateMugPath(mug, oldPath);
                 },
@@ -999,7 +1024,7 @@ define([
                            form.getBasePath().slice(0, -1) !== dataParent) {
                             return "Must be valid path";
                         } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
-                            return dataParentMug.absolutePath + " is not a valid data parent";
+                            return dataParentMug.hashtagPath + " is not a valid data parent";
                         } else if (!mug.spec.dataParent.visibility(mug)) {
                             return "Children of repeat groups cannot have a different data parent";
                         }
@@ -1104,7 +1129,7 @@ define([
                 constraintMsg = mug.p.constraintMsgAttr;
             }
             var attrs = {
-                nodeset: mug.absolutePath,
+                nodeset: mug.hashtagPath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
@@ -1127,7 +1152,7 @@ define([
                 ret = [{
                     value: mug.p.defaultValue,
                     event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
-                    ref: mug.absolutePath
+                    ref: mug.hashtagPath
                 }];
             }
 
@@ -1151,6 +1176,7 @@ define([
         getIcon: function (mug) {
             return mug.options.icon;
         },
+        isHashtaggable: true,
         init: function (mug, form) {},
         spec: {}
     };
@@ -1518,7 +1544,7 @@ define([
             return {"jr:template": ""};
         },
         controlChildFilter: function (children, mug) {
-            var absPath = mug.absolutePath,
+            var hashtag = mug.hashtagPath,
                 r_count = mug.p.repeat_count,
                 attrs = _.object(_.filter(_.map(mug.p.rawRepeatAttributes, function (val, key) {
                     return key.toLowerCase() !== "jr:noaddremove" ? [key, val] : null;
@@ -1526,6 +1552,7 @@ define([
             return [new Tree.Node(children, {
                 getNodeID: function () {},
                 getAppearanceAttribute: function () {},
+                form: mug.form,
                 p: {
                     rawControlAttributes: attrs
                 },
@@ -1541,7 +1568,7 @@ define([
                             xmlWriter.writeAttributeString("jr:count", String(r_count));
                             xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                         }
-                        xmlWriter.writeAttributeString("nodeset", absPath);
+                        util.writeHashtags(xmlWriter, 'nodeset', hashtag, mug);
                     },
                 }
             })];

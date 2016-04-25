@@ -1,5 +1,5 @@
 Question	Type	Text (en)	Text (hin)	Audio (en)	Audio (hin)	Image (en)	Image (hin)	Display Condition	Validation Condition	Validation Message	Calculate Condition	Required
-/question1	Text	question1 en label	question1 hin label	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/image/data/question1.png	jr://file/commcare/image/data/question1.png	/data/question20	/data/question20 = 2	question1 en validation		yes
+/question1	Text	question1 en label	question1 hin label	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/image/data/question1.png	jr://file/commcare/image/data/question1.png	`#form/question20`	`#form/question20` = 2	question1 en validation		yes
 /question2	Label	question2	question2									no
 /question30	Label	question30	question30									no
 /question3	Multiple Choice	question3	question3									no

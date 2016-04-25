@@ -6,7 +6,7 @@ define([
     'jquery',
     'vellum/atwho',
     'vellum/util',
-    'vellum/richText'
+    'vellum/richText',
 ], function (
     ui_element,
     widget_control_keyvalue,
@@ -37,7 +37,7 @@ define([
                 return !mug.spec[widget.path].enabled(mug);
             }
 
-            return mug.form.vellum.isPropertyLocked(mug.absolutePath,
+            return mug.form.vellum.isPropertyLocked(mug.hashtagPath,
                                                     widget.path);
         };
 
@@ -196,7 +196,11 @@ define([
 
             var position = util.getCaretPosition(input[0]);
             var oldvalue = input.val();
-            input.val(value);
+            if (value && widget.hasLogicReferences) {
+                input.val(mug.form.normalizeXPath(value));
+            } else {
+                input.val(value);
+            }
 
             // If this input has focus and value hasn't changed much,
             // keep the cursor in the same position
@@ -206,7 +210,13 @@ define([
         };
 
         widget.getValue = function() {
-            return input.val().replace(/&#10;/g, '\n');
+            var ret = input.val().replace(/&#10;/g, '\n');
+
+            if (ret && widget.hasLogicReferences) {
+                return mug.form.normalizeEscapedHashtag(ret);
+            } else {
+                return ret;
+            }
         };
 
         input.bind("change input", function () {
@@ -336,9 +346,10 @@ define([
                 widget.handleChange();
             });
 
+        widget.hasLogicReferences = true;
+
         return widget;
     };
-    droppableText.hasLogicReferences = true;
 
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
@@ -412,9 +423,10 @@ define([
             useRichText: mug.supportsRichText()
         });
 
+        widget.hasLogicReferences = true;
+
         return widget;
     };
-    xPath.hasLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
         // todo: make this inherit from normal

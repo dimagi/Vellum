@@ -9,8 +9,8 @@
 					<south />
 				</data>
 			</instance>
-			<bind nodeset="/data/north" type="xsd:string" />
-			<bind nodeset="/data/south" type="xsd:string" />
+			<bind vellum:nodeset="#form/north" nodeset="/data/north" type="xsd:string" />
+			<bind vellum:nodeset="#form/south" nodeset="/data/south" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="north-label">
@@ -26,10 +26,10 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/north">
+		<input vellum:ref="#form/north" ref="/data/north">
 			<label ref="jr:itext('north-label')" />
 		</input>
-		<input ref="/data/south">
+		<input vellum:ref="#form/south" ref="/data/south">
 			<label ref="jr:itext('north-label')" />
 		</input>
 	</h:body>

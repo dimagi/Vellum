@@ -54,7 +54,6 @@ define([
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {rich_text: false},
             });
         });
 

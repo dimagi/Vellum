@@ -41,7 +41,6 @@ define([
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {rich_text: false},
             });
         });
         it("should get and fix serialization errors for mugs with matching paths", function () {
@@ -64,14 +63,14 @@ define([
             var blue = util.addQuestion("Text", "blue"),
                 green = util.addQuestion("Text", "green"),
                 black = util.addQuestion("DataBindOnly", "black");
-            black.p.calculateAttr = "/data/blue + /data/green";
+            black.p.calculateAttr = "#form/blue + #form/green";
             green.p.nodeID = "blue";
             assert.notEqual(green.p.nodeID, "blue");
             assert(!util.isTreeNodeValid(green), "expected validation error");
 
             blue.p.nodeID = "orange";
             assert.equal(green.p.nodeID, "blue");
-            assert.equal(black.p.calculateAttr, "/data/orange + /data/blue");
+            assert.equal(black.p.calculateAttr, "`#form/orange` + `#form/blue`");
             assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
             assert(util.isTreeNodeValid(green), green.getErrors().join("\n"));
             assert(util.isTreeNodeValid(black), black.getErrors().join("\n"));
@@ -83,15 +82,15 @@ define([
                 text = util.addQuestion("Text", "text"),
                 group = util.addQuestion("Group", "group");
             util.addQuestion("Text", "text");
-            hid.p.calculateAttr = "/data/text + /data/group/text";
+            hid.p.calculateAttr = "#form/text + #form/group/text";
             form.moveMug(text, "into", group);
-            assert.notEqual(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert.notEqual(hid.p.calculateAttr, "#form/text + #form/group/text");
             assert.notEqual(text.p.nodeID, "text");
-            assert(!util.isTreeNodeValid(text), "expected /data/text error");
+            assert(!util.isTreeNodeValid(text), "expected #form/text error");
 
             form.moveMug(text, "into", null);
             assert.equal(text.p.nodeID, "text");
-            assert.equal(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert.equal(hid.p.calculateAttr, "`#form/text` + `#form/group/text`");
             assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
         });
 
@@ -154,7 +153,7 @@ define([
             form.duplicateMug(group);
             var green2 = util.getMug("copy-1-of-group/green");
             assert.equal(green2.p.relevantAttr,
-                "/data/copy-1-of-group/blue = 'red' and /data/red = 'blue'");
+                "`#form/copy-1-of-group/blue` = 'red' and `#form/red` = 'blue'");
         });
 
         it("should set non-standard form root node", function () {
@@ -180,12 +179,12 @@ define([
                 label = call("getMugByPath", "/data/group/label"),
                 hidden = call("getMugByPath", "/data/group/hidden");
 
-            chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/group/hidden");
             group.p.nodeID = "x";
             assert.equal(group.absolutePath, "/data/x");
             assert.equal(label.absolutePath, "/data/x/label");
             assert.equal(hidden.absolutePath, "/data/x/hidden");
-            chai.expect(label.p.relevantAttr).to.include("/data/x/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/x/hidden");
         });
 
         it("should update reference to moved hidden value in output tag", function () {
@@ -194,22 +193,22 @@ define([
                 label = call("getMugByPath", "/data/group/label"),
                 hidden = call("getMugByPath", "/data/group/hidden");
 
-            chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
-            chai.expect(label.p.labelItext.defaultValue()).to.include("/data/group/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/group/hidden");
+            chai.expect(label.p.labelItext.defaultValue()).to.include("#form/group/hidden");
             form.moveMug(hidden, "first", null);
             assert.equal(hidden.absolutePath, "/data/hidden");
-            chai.expect(label.p.relevantAttr).to.include("/data/hidden");
-            chai.expect(label.p.labelItext.defaultValue()).to.include("/data/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/hidden");
+            chai.expect(label.p.labelItext.defaultValue()).to.include("#form/hidden");
         });
 
         it("should update repeat group reference", function () {
             util.loadXML("");
             var text = util.addQuestion("Text", 'text'),
                 repeat = util.addQuestion("Repeat", 'repeat');
-            repeat.p.repeat_count = '/data/text';
-            assert.equal(repeat.p.repeat_count, '/data/text');
+            repeat.p.repeat_count = '#form/text';
+            assert.equal(repeat.p.repeat_count, '#form/text');
             text.p.nodeID = 'text2';
-            assert.equal(repeat.p.repeat_count, '/data/text2');
+            assert.equal(repeat.p.repeat_count, '`#form/text2`');
         });
 
         it ("should show warnings for duplicate choice value", function() {
