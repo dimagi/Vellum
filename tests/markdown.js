@@ -1,6 +1,7 @@
 define([
     'tests/options',
     'tests/utils',
+    'vellum/util',
     'chai',
     'jquery',
     'underscore',
@@ -10,10 +11,12 @@ define([
     'text!static/markdown/simple-markdown-no-chars.xml',
     'text!static/markdown/no-markdown.xml',
     'text!static/markdown/no-markdown-stars.xml',
-    'text!static/markdown/explicit-no-markdown.xml'
+    'text!static/markdown/explicit-no-markdown.xml',
+    'text!static/markdown/markdown-output-value.xml'
 ], function (
     options,
     util,
+    vellum_util,
     chai,
     $,
     _,
@@ -23,7 +26,8 @@ define([
     SIMPLE_MARKDOWN_NO_CHARS_XML,
     NO_MARKDOWN_XML,
     NO_MARKDOWN_STARS_XML,
-    EXPLICIT_NO_MARKDOWN_XML
+    EXPLICIT_NO_MARKDOWN_XML,
+    MARKDOWN_OUTPUT_VALUE_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -98,6 +102,19 @@ define([
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("1) first\n 2) second").change();
                 assert(markdownVisible());
+            });
+
+            it("should write /data/ to output value", function() {
+                util.loadXML("");
+                util.addQuestion("Text", 'markdown_question');
+                $('[name=itext-en-label]').val("**some markdown**").change();
+                util.addQuestion("Text", 'question1');
+                $('[name=itext-en-label]').val("* ").change();
+                var label = $("[name=itext-en-label]"),
+                    tree = $(".fd-question-tree").jstree(true);
+                vellum_util.setCaretPosition(label[0], 2);
+                util.findNode(tree, "**some markdown**").data.handleDrop(label);
+                util.assertXmlEqual(call('createXML'), MARKDOWN_OUTPUT_VALUE_XML, {normalize_xmlns: true});
             });
         });
 

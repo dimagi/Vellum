@@ -1776,6 +1776,14 @@ define([
                 }
             }
 
+            function writeValue(xmlWriter, val) {
+                val = $('<div>').append(val);
+                val.find('output').replaceWith(function() {
+                    return hashtags(this);
+                });
+                xmlWriter.writeXML(xml.normalize(val.html()));
+            }
+
             var xpathParser = form_.xpath,
                 Itext = this.data.javaRosa.Itext,
                 items = this.data.javaRosa.itextItemsFromBeforeSerialize,
@@ -1802,18 +1810,14 @@ define([
                             if(form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
-                            val = $('<div>').append(val);
-                            val.find('output').replaceWith(function() {
-                                return hashtags(this);
-                            });
-                            xmlWriter.writeXML(xml.normalize(val.html()));
+                            writeValue(xmlWriter, val);
                             xmlWriter.writeEndElement();
                         }
                         if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
                             val = item.get('default', lang);
                             xmlWriter.writeStartElement("value");
                             xmlWriter.writeAttributeString('form', 'markdown');
-                            xmlWriter.writeXML(xml.normalize(val));
+                            writeValue(xmlWriter, val);
                             xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();
