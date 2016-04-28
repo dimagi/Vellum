@@ -32,7 +32,7 @@ define([
     _,
     util,
     jr,
-    vellum_util,
+    vellumUtil,
     OUTPUTREF_GROUP_RENAME_XML,
     TEXT_QUESTION_XML,
     MULTI_LANG_TRANS_XML,
@@ -422,7 +422,7 @@ define([
 
             var target = $("[name='itext-en-label']");
             target.val("test string").change();
-            vellum_util.setCaretPosition(target[0], 4);
+            vellumUtil.setCaretPosition(target[0], 4);
             call("handleDropFinish", target, mug1.absolutePath, mug1);
             var val = mug2.p.labelItext.get('default', 'en');
             assert.equal(val, 'test<output value="#form/question1" /> string');
