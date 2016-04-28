@@ -435,7 +435,7 @@ define([
 
             var target = $("[name='itext-en-label']");
             target.val('question1 <output value="/data/question2" /> end').change();
-            vellum_util.setCaretPosition(target[0], 44);
+            vellumUtil.setCaretPosition(target[0], 44);
 
             target.trigger({
                 type: "keydown",
@@ -453,7 +453,7 @@ define([
 
             var target = $("[name='itext-en-label']");
             target.val('question1 <output value="/data/question2" /> end').change();
-            vellum_util.setCaretPosition(target[0], 10);
+            vellumUtil.setCaretPosition(target[0], 10);
 
             target.trigger({
                 type: "keydown",
