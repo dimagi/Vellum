@@ -19,6 +19,16 @@ define([
         return fuseRes.length ? fuseRes[0] : null;
     }
 
+    function getDisplayedAtwhoViews() {
+        return $('.atwho-view').filter(function() {
+            return $(this).css('display') === 'block';
+        });
+    }
+
+    function assertNumAtwhoChoices(num) {
+        assert.strictEqual(getDisplayedAtwhoViews().find('li').length, num);
+    }
+
     describe("atwho", function() {
         beforeEach(function(done) {
             util.init({
@@ -28,12 +38,6 @@ define([
                 plugins: ['atwho','modeliteration'],
             });
         });
-
-        function getDisplayedAtwhoViews() {
-            return $('.atwho-view').filter(function() {
-                return $(this).css('display') === 'block';
-            });
-        }
 
         function displayAtwho(callback) {
             var mug = util.clickQuestion('one')[0];
@@ -48,10 +52,6 @@ define([
                 mug.fire('teardown-mug-properties');
             }
             assert(!getDisplayedAtwhoViews().length);
-        }
-
-        function assertNumAtwhoChoices(num) {
-            assert.strictEqual(getDisplayedAtwhoViews().find('li').length, num);
         }
 
         it("should truncate the display label", function() {
