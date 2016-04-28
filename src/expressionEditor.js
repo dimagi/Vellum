@@ -355,8 +355,6 @@ define([
             } else {
                 showAdvancedMode(options.value);
             }
-
-            $div.find(".fd-xpath-editor-text").val(options.value);
         };
 
         // toggle simple/advanced mode
