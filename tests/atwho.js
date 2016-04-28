@@ -44,6 +44,7 @@ define([
 
             function displayAtwho(callback) {
                 var mug = util.clickQuestion('one')[0];
+                // TODO: This shouldn't rely on relevantAttr
                 var input = $('[name=property-relevantAttr]');
                 input.val('/data/').keyup();
                 assert.strictEqual(getDisplayedAtwhoViews().length, 1);
@@ -101,6 +102,7 @@ define([
         });
 
         describe("with rich text", function() {
+            // TODO: shouldn't rely on global widget
             var widget;
 
             before(function (done) {
@@ -112,6 +114,7 @@ define([
                             util.addQuestion("Text", 'text');
                             util.addQuestion("Text", 'text2');
                             util.addQuestion("Text", 'text3');
+                            // TODO: shouldn't rely on defaultValue
                             widget = util.getWidget('property-defaultValue');
                             widget.input.promise.then(function () { done(); });
                         }
