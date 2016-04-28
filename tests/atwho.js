@@ -1,11 +1,13 @@
 define([
     'tests/utils',
+    'vellum/util',
     'chai',
     'jquery',
     'underscore',
     'text!static/atwho/test1.xml',
 ], function (
     util,
+    vellumUtil,
     chai,
     $,
     _,
@@ -85,6 +87,62 @@ define([
             it("should not show itself in the results", function () {
                 displayAtwho(function(mug) {
                     assertNumAtwhoChoices(3);
+                });
+            });
+
+            it("should show questions with /data/", function() {
+                displayAtwho(function(mug) {
+                    _.map(getDisplayedAtwhoViews().find('li'), function(li) {
+                        var text = $.trim($(li).text());
+                        assert(text.startsWith('/data/'));
+                    });
+                });
+            });
+        });
+
+        describe("with rich text", function() {
+            var widget;
+
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        form: "",
+                        onReady: function() {
+                            util.addQuestion("Text", 'text');
+                            util.addQuestion("Text", 'text2');
+                            util.addQuestion("Text", 'text3');
+                            widget = util.getWidget('property-defaultValue');
+                            widget.input.promise.then(function () { done(); });
+                        }
+                    },
+                    plugins: ['atwho','modeliteration'],
+                });
+            });
+
+            function displayAtwho(callback) {
+                var mug = util.getMug('text3');
+                widget.setValue('#');
+                var editor = widget.input.editor;
+                editor.focus();
+                $('[name=property-defaultValue]').keyup();
+                assert.strictEqual(getDisplayedAtwhoViews().length, 1);
+                try {
+                    callback(mug);
+                } catch (err) {
+                    throw err;
+                } finally {
+                    mug.fire('teardown-mug-properties');
+                }
+                assert(!getDisplayedAtwhoViews().length);
+            }
+
+            it("should show questions with #form", function() {
+                displayAtwho(function(mug) {
+                    _.map(getDisplayedAtwhoViews().find('li'), function(li) {
+                        var text = $.trim($(li).text());
+                        assert(text.startsWith('#form'));
+                    });
                 });
             });
         });
