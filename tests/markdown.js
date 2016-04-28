@@ -16,7 +16,7 @@ define([
 ], function (
     options,
     util,
-    vellum_util,
+    vellumUtil,
     chai,
     $,
     _,
@@ -112,7 +112,7 @@ define([
                 $('[name=itext-en-label]').val("* ").change();
                 var label = $("[name=itext-en-label]"),
                     tree = $(".fd-question-tree").jstree(true);
-                vellum_util.setCaretPosition(label[0], 2);
+                vellumUtil.setCaretPosition(label[0], 2);
                 util.findNode(tree, "**some markdown**").data.handleDrop(label);
                 util.assertXmlEqual(call('createXML'), MARKDOWN_OUTPUT_VALUE_XML, {normalize_xmlns: true});
             });
