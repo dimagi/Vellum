@@ -15,7 +15,7 @@ define([
 ], function (
     options,
     util,
-    vellum_util,
+    vellumUtil,
     chai,
     $,
     _,
@@ -279,7 +279,7 @@ define([
 
         describe("when loaded after the form", function () {
             var _this, widget, blue, event = {};
-            vellum_util.eventuality(event);
+            vellumUtil.eventuality(event);
             function loadDataTree(done) {
                 datasources.getDataSources(function () {
                     databrowser.initDataBrowser(_this);
