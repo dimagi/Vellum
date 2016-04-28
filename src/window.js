@@ -12,18 +12,18 @@ define([
         init: function () {
             var _this = this,
                 opts = this.opts().windowManager,
-                adjustToWindowCallback = function () { adjustToWindow(_this); };
+                adjustToWindow = function () { _this.adjustToWindow(); };
 
             preventDoubleScrolling(this.$f.find('.fd-scrollable'));
             setupDraggableDivider(
                 this.$f.find('.fd-content-divider'),
                 this.$f.find('.fd-content-left'),
-                adjustToWindowCallback
+                adjustToWindow
             );
             setupDraggableDivider(
                 this.$f.find('.fd-content-left-divider'),
                 this.$f.find('.fd-accessory-pane'),
-                adjustToWindowCallback
+                adjustToWindow
             );
 
             this.data.windowManager.offset = {
@@ -32,13 +32,96 @@ define([
                 left: opts.leftOffset || this.$f.offset().left
             };
             this.data.windowManager.fullscreen = opts.fullscreen;
-            this.data.windowManager.adjustToWindow = adjustToWindowCallback;
+            this.data.windowManager.adjustToWindow = adjustToWindow;
 
             // start with accessory pane collapsed
-            $(window).resize(adjustToWindowCallback);
-            $(document).scroll(adjustToWindowCallback);
-            $(document).ready(adjustToWindowCallback);
-            adjustToWindow(_this);
+            $(window).resize(adjustToWindow);
+            $(document).scroll(adjustToWindow);
+            $(document).ready(adjustToWindow);
+            _this.adjustToWindow();
+        },
+        adjustToWindow: function() {
+            if (!this.$f.is(':visible')) {
+                return;
+            }
+    
+            var availableVertSpace = $(window).height() - this.getCurrentTopOffset(),
+                availableHorizSpace,
+                position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
+                $fdc = this.$f.find('.fd-ui-container');
+    
+            if (this.data.windowManager.fullscreen) {
+                $fdc.parent().css({height: null, width: null});
+                $fdc.css({height: null, width: null});
+                $fdc.addClass("full-screen");
+                $fdc.parent().css({
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'white'
+                });
+                $fdc.css('width', $(window).width());
+            } else {
+                $fdc.parent().css({
+                    top: '',
+                    bottom: '',
+                    left: '',
+                    right: '',
+                    backgroundColor: 'white'
+                });
+                $fdc.css('width', $fdc.parent().width());
+            }
+            // so that the document doesn't have to resize for the footer.
+            $fdc.parent().css('height', availableVertSpace + 'px');
+    
+            availableVertSpace = availableVertSpace - this.getCurrentBottomOffset();
+            $fdc.css('height', availableVertSpace + 'px');
+    
+            $fdc.css('position', position)
+                .css('left', this.getCurrentLeftOffset() + 'px');
+    
+            availableHorizSpace = $fdc.width();
+    
+            var toolbarHeight = this.$f.find('.fd-toolbar').outerHeight(false),
+                availableColumnSpace = availableVertSpace - toolbarHeight,
+                panelHeight = Math.max(availableColumnSpace,
+                                       this.opts().windowManager.minHeight),
+                treeHeight = panelHeight,
+                columnHeight = panelHeight - this.$f.find('.fd-head').outerHeight(false),
+                accessoryPane = this.$f.find(".fd-accessory-pane");
+    
+            $fdc.find('.fd-content').css('height', panelHeight + 'px');
+    
+            // Decrement tree height by height of any siblings
+            var $tree = $fdc.find('.fd-content-left .fd-tree');
+            $tree.children(":not(.fd-scrollable)").each(function(i, child) {
+                treeHeight -= $(child).outerHeight(false);
+            });
+    
+            $tree.find('.fd-scrollable').css('height', treeHeight + 'px');
+            if (accessoryPane.children().length) {
+                // Decrement tree height by height of accessory pane
+                var accessoryHeight = accessoryPane.outerHeight(false),
+                    accessoryScrollableHeight = accessoryHeight -
+                        accessoryPane.find('.fd-head').outerHeight(true);
+                treeHeight -= 2 + accessoryHeight +
+                    this.$f.find('.fd-content-left-divider').outerHeight(true);
+                accessoryPane.find(".fd-scrollable")
+                             .css('height', accessoryScrollableHeight + 'px');
+                accessoryPane.show();
+                this.$f.find(".fd-content-left-divider").show();
+            } else {
+                accessoryPane.hide();
+                this.$f.find(".fd-content-left-divider").hide();
+            }
+    
+            $fdc.find('.fd-content-right')
+                .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
+                .find('.fd-scrollable.full').css('height', columnHeight + 'px');
+    
+            $fdc.find('.fd-props-scrollable')
+                .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
         },
         getLeftWidth: function () {
             return 2 + this.$f.find('.fd-content-left').outerWidth(false) + 
@@ -70,90 +153,6 @@ define([
             return Math.min(offsetLeft - scrollLeft, offsetLeft);
         }
     });
-
-    function adjustToWindow(vellum) {
-        if (!vellum.$f.is(':visible')) {
-            return;
-        }
-
-        var availableVertSpace = $(window).height() - vellum.getCurrentTopOffset(),
-            availableHorizSpace,
-            position = (vellum.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
-            $fdc = vellum.$f.find('.fd-ui-container');
-
-        if (vellum.data.windowManager.fullscreen) {
-            $fdc.parent().css({height: null, width: null});
-            $fdc.css({height: null, width: null});
-            $fdc.addClass("full-screen");
-            $fdc.parent().css({
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-                backgroundColor: 'white'
-            });
-            $fdc.css('width', $(window).width());
-        } else {
-            $fdc.parent().css({
-                top: '',
-                bottom: '',
-                left: '',
-                right: '',
-                backgroundColor: 'white'
-            });
-            $fdc.css('width', $fdc.parent().width());
-        }
-        // so that the document doesn't have to resize for the footer.
-        $fdc.parent().css('height', availableVertSpace + 'px');
-
-        availableVertSpace = availableVertSpace - vellum.getCurrentBottomOffset();
-        $fdc.css('height', availableVertSpace + 'px');
-
-        $fdc.css('position', position)
-            .css('left', vellum.getCurrentLeftOffset() + 'px');
-
-        availableHorizSpace = $fdc.width();
-
-        var toolbarHeight = vellum.$f.find('.fd-toolbar').outerHeight(false),
-            availableColumnSpace = availableVertSpace - toolbarHeight,
-            panelHeight = Math.max(availableColumnSpace,
-                                   vellum.opts().windowManager.minHeight),
-            treeHeight = panelHeight,
-            columnHeight = panelHeight - vellum.$f.find('.fd-head').outerHeight(false),
-            accessoryPane = vellum.$f.find(".fd-accessory-pane");
-
-        $fdc.find('.fd-content').css('height', panelHeight + 'px');
-
-        // Decrement tree height by height of any siblings
-        var $tree = $fdc.find('.fd-content-left .fd-tree');
-        $tree.children(":not(.fd-scrollable)").each(function(i, child) {
-            treeHeight -= $(child).outerHeight(false);
-        });
-
-        $tree.find('.fd-scrollable').css('height', treeHeight + 'px');
-        if (accessoryPane.children().length) {
-            // Decrement tree height by height of accessory pane
-            var accessoryHeight = accessoryPane.outerHeight(false),
-                accessoryScrollableHeight = accessoryHeight -
-                    accessoryPane.find('.fd-head').outerHeight(true);
-            treeHeight -= 2 + accessoryHeight +
-                vellum.$f.find('.fd-content-left-divider').outerHeight(true);
-            accessoryPane.find(".fd-scrollable")
-                         .css('height', accessoryScrollableHeight + 'px');
-            accessoryPane.show();
-            vellum.$f.find(".fd-content-left-divider").show();
-        } else {
-            accessoryPane.hide();
-            vellum.$f.find(".fd-content-left-divider").hide();
-        }
-
-        $fdc.find('.fd-content-right')
-            .css('width', availableHorizSpace - vellum.getLeftWidth() + 'px')
-            .find('.fd-scrollable.full').css('height', columnHeight + 'px');
-
-        $fdc.find('.fd-props-scrollable')
-            .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
-    }
 
     function preventDoubleScrolling($scrollable) {
         $scrollable.on('DOMMouseScroll mousewheel', function (ev) {
@@ -228,7 +227,6 @@ define([
     }
 
     return {
-        adjustToWindow: adjustToWindow,
         preventDoubleScrolling: preventDoubleScrolling
     };
 });

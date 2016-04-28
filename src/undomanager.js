@@ -2,12 +2,10 @@ define([
     'jquery',
     'underscore',
     'tpl!vellum/templates/undo_alert',
-    'vellum/window',
 ], function(
     $,
     _,
-    UNDO_ALERT,
-    windowManager
+    UNDO_ALERT
 ) {
     function alertShown() {
         var alert = $('.fd-undo-delete');
@@ -48,7 +46,7 @@ define([
         appendMug: function (mug, previousMug, position) {
             this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
             toggleAlert(this.undoStack);
-            windowManager.adjustToWindow(mug.form.vellum);
+            mug.form.vellum.data.windowManager.adjustToWindow();
         },
         undo: function () {
             _.each(this.undoStack, function(undo) {
