@@ -118,13 +118,21 @@ define([
             availableColumnSpace = availableVertSpace - toolbarHeight,
             panelHeight = Math.max(availableColumnSpace,
                                    vellum.opts().windowManager.minHeight),
+            treeHeight = panelHeight,
             columnHeight = panelHeight - vellum.$f.find('.fd-head').outerHeight(false),
-            treeHeight = columnHeight,
             accessoryPane = vellum.$f.find(".fd-accessory-pane");
 
         $fdc.find('.fd-content').css('height', panelHeight + 'px');
 
+        // Decrement tree height by height of any siblings
+        var $tree = $fdc.find('.fd-content-left .fd-tree');
+        $tree.children(":not(.fd-scrollable)").each(function(i, child) {
+            treeHeight -= $(child).outerHeight(false);
+        });
+
+        $tree.find('.fd-scrollable').css('height', treeHeight + 'px');
         if (accessoryPane.children().length) {
+            // Decrement tree height by height of accessory pane
             var accessoryHeight = accessoryPane.outerHeight(false),
                 accessoryScrollableHeight = accessoryHeight -
                     accessoryPane.find('.fd-head').outerHeight(true);
@@ -138,9 +146,6 @@ define([
             accessoryPane.hide();
             vellum.$f.find(".fd-content-left-divider").hide();
         }
-        $fdc.find('.fd-content-left')
-            .find('.fd-tree')
-            .find('.fd-scrollable').css('height', treeHeight + 'px');
 
         $fdc.find('.fd-content-right')
             .css('width', availableHorizSpace - vellum.getLeftWidth() + 'px')
