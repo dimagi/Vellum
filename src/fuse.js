@@ -68,6 +68,7 @@ define([
                 name: mug.absolutePath,
                 hashtagPath: mug.hashtagPath,
                 absolutePath: mug.absolutePath,
+                displayPath: mug.form.useRichText ? mug.hashtagPath : mug.absolutePath,
                 icon: mug.options.icon,
                 questionId: mug.p.nodeID,
                 displayLabel: util.truncate(defaultLabel),
