@@ -71,6 +71,7 @@ define([
     var isMac = /Mac/.test(navigator.platform);
 
     var DEBUG_MODE = false;
+    console.log("stone crazy");
 
     var MESSAGE_TYPES = {
         "error": {
