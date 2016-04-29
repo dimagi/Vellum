@@ -22,29 +22,36 @@ define([
         $('.fd-undo-container').append(UNDO_ALERT);
     }
 
-    function toggleAlert(undoStack) {
+    function toggleAlert(undoStack, vellum) {
         if (undoStack.length && !alertShown()) {
             createAlert();
         } else if (undoStack.length === 0 && alertShown()) {
-            $('.fd-undo-delete').alert('close');
+            $('.fd-undo-delete').remove();
+        }
+        if (vellum) {
+            vellum.adjustToWindow();
         }
     }
 
     function UndoManager() {
-        this.undoStack = [];
+        var _this = this;
+        _this.undoStack = [];
+        _this.vellum = undefined;
     }
 
     UndoManager.prototype = {
         resetUndo: function (mug, previousMug, position) {
             if (mug) {
                 this.undoStack = [[mug, previousMug, position]];
+                this.vellum = this.vellum || mug.form.vellum;
             } else {
                 this.undoStack = [];
             }
-            toggleAlert(this.undoStack);
+            toggleAlert(this.undoStack, this.vellum);
         },
         appendMug: function (mug, previousMug, position) {
             this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
+            this.vellum = this.vellum || mug.form.vellum;
             toggleAlert(this.undoStack);
         },
         undo: function () {

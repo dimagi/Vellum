@@ -1220,6 +1220,9 @@ define([
             $('.fd-undo').click(function () {
                 _this.ensureCurrentMugIsSaved(form.undo.bind(form));
             });
+            $('.fd-undo-container').on('click', '.close', function() {
+                form.undomanager.resetUndo();
+            });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
