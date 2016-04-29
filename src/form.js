@@ -886,7 +886,6 @@ define([
                 previousSibling = mug.previousSibling,
                 position = previousSibling === parentMug ? 'first' : 'after';
             this.undomanager.appendMug(mug, previousSibling, position);
-            this.vellum.adjustToWindow();
             if (node) {
                 var children = node.getChildrenMugs();
                 hasChildren = children.length > 0;
