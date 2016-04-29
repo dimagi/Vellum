@@ -33,17 +33,16 @@ define([
         }
     }
 
-    function UndoManager() {
+    function UndoManager(form) {
         var _this = this;
         _this.undoStack = [];
-        _this.vellum = undefined;
+        _this.vellum = form.vellum;
     }
 
     UndoManager.prototype = {
         resetUndo: function (mug, previousMug, position) {
             if (mug) {
                 this.undoStack = [[mug, previousMug, position]];
-                this.vellum = this.vellum || mug.form.vellum;
             } else {
                 this.undoStack = [];
             }
@@ -51,7 +50,6 @@ define([
         },
         appendMug: function (mug, previousMug, position) {
             this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
-            this.vellum = this.vellum || mug.form.vellum;
             toggleAlert(this.undoStack);
         },
         undo: function () {
