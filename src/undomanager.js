@@ -46,7 +46,6 @@ define([
         appendMug: function (mug, previousMug, position) {
             this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
             toggleAlert(this.undoStack);
-            mug.form.vellum.data.windowManager.adjustToWindow();
         },
         undo: function () {
             _.each(this.undoStack, function(undo) {

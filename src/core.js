@@ -187,7 +187,7 @@ define([
                 _this.data.windowManager.fullscreen = true;
             }
             setFullscreenIcon();
-            _this.data.windowManager.adjustToWindow();
+            _this.adjustToWindow();
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
@@ -1306,7 +1306,7 @@ define([
 
         return true;
     };
-        
+
     fn.addQuestion = function (qType) {
         var _this = this,
             mug;
@@ -1328,6 +1328,10 @@ define([
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
         return mug;
+    };
+
+    fn.adjustToWindow = function() {
+        this.data.windowManager.adjustToWindow();
     };
 
     /**
@@ -1502,7 +1506,7 @@ define([
         refreshMessages();
 
         $props.show();
-        this.data.windowManager.adjustToWindow();
+        this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
         this.toggleConstraintItext(mug);
