@@ -1309,7 +1309,7 @@ define([
 
         return true;
     };
-
+        
     fn.addQuestion = function (qType) {
         var _this = this,
             mug;

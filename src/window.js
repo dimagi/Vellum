@@ -44,7 +44,7 @@ define([
             if (!this.$f.is(':visible')) {
                 return;
             }
-    
+
             var availableVertSpace = $(window).height() - this.getCurrentTopOffset(),
                 availableHorizSpace,
                 position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
@@ -74,15 +74,15 @@ define([
             }
             // so that the document doesn't have to resize for the footer.
             $fdc.parent().css('height', availableVertSpace + 'px');
-    
+
             availableVertSpace = availableVertSpace - this.getCurrentBottomOffset();
             $fdc.css('height', availableVertSpace + 'px');
-    
+
             $fdc.css('position', position)
                 .css('left', this.getCurrentLeftOffset() + 'px');
-    
+
             availableHorizSpace = $fdc.width();
-    
+
             var toolbarHeight = this.$f.find('.fd-toolbar').outerHeight(false),
                 availableColumnSpace = availableVertSpace - toolbarHeight,
                 panelHeight = Math.max(availableColumnSpace,
@@ -90,9 +90,9 @@ define([
                 treeHeight = panelHeight,
                 columnHeight = panelHeight - this.$f.find('.fd-head').outerHeight(false),
                 accessoryPane = this.$f.find(".fd-accessory-pane");
-    
+
             $fdc.find('.fd-content').css('height', panelHeight + 'px');
-    
+
             // Decrement tree height by height of any siblings
             var $tree = $fdc.find('.fd-content-left .fd-tree');
             $tree.children(":not(.fd-scrollable)").each(function(i, child) {
@@ -115,11 +115,11 @@ define([
                 accessoryPane.hide();
                 this.$f.find(".fd-content-left-divider").hide();
             }
-    
+
             $fdc.find('.fd-content-right')
                 .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
                 .find('.fd-scrollable.full').css('height', columnHeight + 'px');
-    
+
             $fdc.find('.fd-props-scrollable')
                 .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
         },
