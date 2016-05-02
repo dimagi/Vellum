@@ -823,6 +823,8 @@ define([
             widgetClass = options.baseWidgetClass || widgets.richTextarea,
             widget, $input;
 
+        options.language = language;
+
         if (options.idSuffix) {
             id = id + options.idSuffix;
         }

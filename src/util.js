@@ -302,6 +302,12 @@ define([
         return label;
     };
 
+    that.isRightToLeftLanguage = function (lang) {
+        return _.contains([
+            'ara', 'arc', 'div', 'fas', 'heb', 'pan', 'pus', 'snd', 'uig', 'urd', 'yid',
+        ], lang);
+    };
+
     return that;
 });
 
