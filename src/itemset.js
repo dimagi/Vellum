@@ -1,3 +1,16 @@
+/**
+ *  The itemset plugin enables questions to interact with sets of data.
+ *  Its primary use is to populate data-driven select questions.
+ *
+ *  Itemsets contain
+ *      instance: which top-level data source contains the items
+ *      nodeset: path to apply to the instance to get at the desired items
+ *      valueRef: reference to apply to each node to get the item's value
+ *      labelRef: reference to apply to each node to get the item's display name
+ *
+ *  Dynamic select mugs typically have a child itemset mug. A dynamic select's
+ *  itsemset data may also be represented by an object stored in the mug's p.itemsetData.
+ */
 define([
     'underscore',
     'jquery',
