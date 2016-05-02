@@ -134,7 +134,7 @@ define([
         this.errors = [];
         this.question_counter = 1;
         this.xpath = xpath.createParser();
-        this.undomanager = new undomanager();
+        this.undomanager = new undomanager(this);
 
         //make the object event aware
         util.eventuality(this);
