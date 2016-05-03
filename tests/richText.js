@@ -424,7 +424,7 @@ define([
             var widget;
 
             describe("", function () {
-                before(function (done) {
+                beforeEach(function (done) {
                     util.init({
                         javaRosa: {langs: ['en']},
                         form: "",
@@ -457,6 +457,13 @@ define([
                     assert(msg[0].isContentEditable);
                 });
 
+                it("should not write empty attributes", function () {
+                    util.loadXML(BURPEE_XML);
+                    var mug = util.getMug('total_num_burpees');
+                    mug.p.relevantAttr = '';
+                    util.assertXmlEqual(call('createXML'), BURPEE_XML);
+                });
+
                 it("cursor should be at end of input on focus", function () {
                     var editor = widget.input.editor;
                     widget.setValue('testing cursor');
@@ -465,7 +472,7 @@ define([
                     assert.strictEqual(selection.getNative().focusOffset, 14);
                 });
 
-                it("should change output value to output ref", function () {
+                it("should change output ref to output value", function () {
                     util.loadXML(OUTPUT_REF_XML);
                     util.assertXmlEqual(call('createXML'), OUTPUT_VALUE_XML);
                 });

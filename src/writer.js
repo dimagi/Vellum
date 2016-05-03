@@ -178,7 +178,9 @@ define([
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
-                        util.writeHashtags(xmlWriter, key, value, mug);
+                        if (value) {
+                            util.writeHashtags(xmlWriter, key, value, mug);
+                        }
                     });
                     xmlWriter.writeEndElement();
                 });
