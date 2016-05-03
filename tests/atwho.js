@@ -13,7 +13,39 @@ define([
     _,
     TEST1_XML
 ) {
-    var assert = chai.assert;
+    var assert = chai.assert,
+        dataSources = [
+            {
+                id: "commcaresession",
+                uri: "jr://instance/session",
+                path: "/session/data",
+                name: 'Session',
+                structure: {
+                    "case_id": {
+                        reference: {
+                            source: "casedb",
+                            subset: "child",
+                            key: "@case_id",
+                        },
+                    },
+                },
+            }, {
+                id: "casedb",
+                uri: "jr://instance/casedb",
+                path: "/cases/case",
+                name: 'Cases',
+                structure: {
+                    name: {},
+                },
+                subsets: [{
+                    id: "child",
+                    key: "@case_type",
+                    structure: {
+                        dob: {},
+                    },
+                }]
+            },
+        ];
 
     function getFuseData(string) {
         var form = util.call('getData').core.form,
@@ -105,11 +137,12 @@ define([
             // TODO: shouldn't rely on global widget
             var widget;
 
-            before(function (done) {
+            beforeEach(function (done) {
                 util.init({
                     javaRosa: {langs: ['en']},
                     core: {
                         form: "",
+                        dataSourcesEndpoint: function (callback) { callback(dataSources); },
                         onReady: function() {
                             util.addQuestion("Text", 'text');
                             util.addQuestion("Text", 'text2');
@@ -119,13 +152,13 @@ define([
                             widget.input.promise.then(function () { done(); });
                         }
                     },
-                    plugins: ['atwho','modeliteration'],
+                    plugins: ['atwho','modeliteration', 'databrowser'],
                 });
             });
 
-            function displayAtwho(callback) {
+            function displayAtwho(query, callback) {
                 var mug = util.getMug('text3');
-                widget.setValue('#');
+                widget.setValue(query);
                 var editor = widget.input.editor;
                 editor.focus();
                 $('[name=property-defaultValue]').keyup();
@@ -141,11 +174,35 @@ define([
             }
 
             it("should show questions with #form", function() {
-                displayAtwho(function(mug) {
-                    _.map(getDisplayedAtwhoViews().find('li'), function(li) {
+                displayAtwho('#form', function(mug) {
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
+                    _.map(atwhoEntries, function(li) {
                         var text = $.trim($(li).text());
                         assert(text.startsWith('#form'));
                     });
+                    assert(atwhoEntries, 3);
+                });
+            });
+
+            it("should show case properties with #case", function() {
+                displayAtwho('#case', function(mug) {
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
+                    _.map(atwhoEntries, function(li) {
+                        var text = $.trim($(li).text());
+                        assert(text.startsWith('#case'));
+                    });
+                    assert(atwhoEntries, 1);
+                });
+            });
+
+            it("should show case properties and form questions with #", function() {
+                displayAtwho('#', function(mug) {
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
+                    _.map(atwhoEntries, function(li) {
+                        var text = $.trim($(li).text());
+                        assert(text.startsWith('#case') || text.startsWith('#form'));
+                    });
+                    assert(atwhoEntries, 4);
                 });
             });
         });

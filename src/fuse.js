@@ -90,6 +90,7 @@ define([
                      absolutePath: absolutePath,
                      icon: 'fcc fcc-fd-case-property',
                      displayLabel: null,
+                     displayPath: hashtag,
                  };
              })
              .value();

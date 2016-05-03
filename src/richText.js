@@ -441,7 +441,7 @@ define([
             extraAttrs = _.omit(info, 'reference');
 
         if (!REF_REGEX.test(xpath)) {
-            return $('<span>').text(xml.normalize(value)).contents();
+            return $('<span>').text(xml.normalize(value)).html();
         }
 
         return $('<div>').append(makeBubble(form, xpath, extraAttrs)).html();
