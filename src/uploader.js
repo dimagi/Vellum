@@ -82,7 +82,7 @@ define([
         image: 'fd_hqimage',
         audio: 'fd_hqaudio',
         video: 'fd_hqvideo',
-        'video-inline': 'fd_hqvideo',
+        'video-inline': 'fd_hqInlineVideo',
         text:  'fd_hqtext',
     };
 
@@ -295,10 +295,10 @@ define([
                         uploadUrl: uploadUrls.video,
                     }),
                     'video-inline': this.initUploadController({
-                        uploaderSlug: 'fd_hqvideo',
+                        uploaderSlug: 'fd_hqInlineVideo',
                         mediaType: 'video-inline',
                         sessionid: sessionid,
-                        uploadUrl: uploadUrls['video-inline'],
+                        uploadUrl: uploadUrls.video,
                     }),
                     'text': this.initUploadController({
                         uploaderSlug: 'fd_hqtext',
