@@ -138,7 +138,7 @@ define([
         this.errors = [];
         this.question_counter = 1;
         this.xpath = escapedHashtags.parser(this.hashtagDictionary);
-        this.undomanager = new undomanager();
+        this.undomanager = new undomanager(this);
 
         //make the object event aware
         util.eventuality(this);
@@ -271,10 +271,9 @@ define([
                 });
                 if (!meta) {
                     // attrs.src not found, try to find by id
-                    var ids = _.chain(this.instanceMetadata)
-                        .map(function (m) { return [m.attributes.id, m]; })
-                        .object()
-                        .value();
+                    var ids = _.indexBy(this.instanceMetadata, function (m) {
+                            return m.attributes.id;
+                        });
                     meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
                     if (meta && meta.internal) {
                         // assign new src to internal instance
@@ -408,10 +407,9 @@ define([
         updateKnownInstances: function (map) {
             var instances = this.knownInstances;
             if (map) {
-                var metas = _.chain(this.instanceMetadata)
-                    .map(function (m) { return [m.attributes.id, m]; })
-                    .object()
-                    .value();
+                var metas = _.indexBy(this.instanceMetadata, function (m) {
+                        return m.attributes.id;
+                    });
                 _.each(map, function (instance, id) {
                     if (instance && !instances.hasOwnProperty(id)) {
                         if (instance.children) {

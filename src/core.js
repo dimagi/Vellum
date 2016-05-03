@@ -187,7 +187,7 @@ define([
                 _this.data.windowManager.fullscreen = true;
             }
             setFullscreenIcon();
-            _this.data.windowManager.adjustToWindow();
+            _this.adjustToWindow();
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
@@ -1224,6 +1224,9 @@ define([
             $('.fd-undo').click(function () {
                 _this.ensureCurrentMugIsSaved(form.undo.bind(form));
             });
+            $('.fd-undo-container').on('click', '.close', function() {
+                form.undomanager.resetUndo();
+            });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1332,6 +1335,10 @@ define([
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
         return mug;
+    };
+
+    fn.adjustToWindow = function() {
+        this.data.windowManager.adjustToWindow();
     };
 
     /**
@@ -1506,7 +1513,7 @@ define([
         refreshMessages();
 
         $props.show();
-        this.data.windowManager.adjustToWindow();
+        this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
         this.toggleConstraintItext(mug);

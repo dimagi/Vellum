@@ -200,5 +200,24 @@ define([
             util.clickQuestion('select');
             util.assertJSTreeState('text', "select", "  choice1", "  choice2");
         });
+
+        it("should adjust the tree's height to accommodate the undo alert message", function () {
+            var getHeight = function() { return $(".fd-tree .fd-scrollable").outerHeight(); },
+                heightWithoutAlert = getHeight();
+            util.addQuestion('Text', 'text');
+            util.addQuestion('Select', 'select');
+            util.clickQuestion('text');
+
+            $('.fd-button-remove').click();
+            var heightWithAlert = getHeight();
+
+            assert(heightWithAlert !== heightWithoutAlert, "Height changed with addition of alert.");
+            $(".fd-undo").click();
+            assert(getHeight() === heightWithoutAlert, "Height restored after undoing deletion.");
+            $('.fd-button-remove').click();
+            assert(getHeight() === heightWithAlert, "Height changed with addition of alert.");
+            $(".fd-undo-delete .close").click();
+            assert(getHeight() === heightWithoutAlert, "Height restored after closing alert.");
+        });
     });
 });

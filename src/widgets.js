@@ -188,6 +188,10 @@ define([
             input.attr('placeholder', options.placeholder);
         }
 
+        if (util.isRightToLeftLanguage(options.language)) {
+            input.attr('dir', 'rtl');
+        }
+
         widget.setValue = function (value) {
             if (value) {
                 // <input> converts newlines to spaces; this preserves them
@@ -241,6 +245,10 @@ define([
                 }
             });
 
+        if (util.isRightToLeftLanguage(options.language)) {
+            widget.input.attr('dir', 'rtl');
+        }
+
         widget.getControl = function () { 
             return widget.input;
         };
@@ -265,7 +273,10 @@ define([
             .addClass('form-control jstree-drop')
             .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
-        var opts = {isExpression: options.widget === xPath || options.widget === droppableText},
+        var opts = {
+                isExpression: options.widget === xPath || options.widget === droppableText,
+                rtl: util.isRightToLeftLanguage(options.language),
+            },
             editor = richTextUtils.editor(widget.input, mug.form, opts);
 
         mug.on('teardown-mug-properties', editor.destroy, null, "teardown-mug-properties");

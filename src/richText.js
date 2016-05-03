@@ -163,7 +163,9 @@ define([
         }
         var NOTSET = {},
             newval = NOTSET,  // HACK work around async get/set
-            editor = input.ckeditor().editor;
+            editor = input.ckeditor({
+                contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
+            }).editor;
         options = options || {};
         wrapper = {
             getValue: function (callback) {

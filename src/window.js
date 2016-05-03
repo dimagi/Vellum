@@ -38,9 +38,9 @@ define([
             $(window).resize(adjustToWindow);
             $(document).scroll(adjustToWindow);
             $(document).ready(adjustToWindow);
-            this.adjustToWindow();
+            _this.adjustToWindow();
         },
-        adjustToWindow: function () {
+        adjustToWindow: function() {
             if (!this.$f.is(':visible')) {
                 return;
             }
@@ -49,7 +49,7 @@ define([
                 availableHorizSpace,
                 position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
                 $fdc = this.$f.find('.fd-ui-container');
-
+    
             if (this.data.windowManager.fullscreen) {
                 $fdc.parent().css({height: null, width: null});
                 $fdc.css({height: null, width: null});
@@ -87,13 +87,21 @@ define([
                 availableColumnSpace = availableVertSpace - toolbarHeight,
                 panelHeight = Math.max(availableColumnSpace,
                                        this.opts().windowManager.minHeight),
+                treeHeight = panelHeight,
                 columnHeight = panelHeight - this.$f.find('.fd-head').outerHeight(false),
-                treeHeight = columnHeight,
                 accessoryPane = this.$f.find(".fd-accessory-pane");
 
             $fdc.find('.fd-content').css('height', panelHeight + 'px');
 
+            // Decrement tree height by height of any siblings
+            var $tree = $fdc.find('.fd-content-left .fd-tree');
+            $tree.children(":not(.fd-scrollable)").each(function(i, child) {
+                treeHeight -= $(child).outerHeight(false);
+            });
+    
+            $tree.find('.fd-scrollable').css('height', treeHeight + 'px');
             if (accessoryPane.children().length) {
+                // Decrement tree height by height of accessory pane
                 var accessoryHeight = accessoryPane.outerHeight(false),
                     accessoryScrollableHeight = accessoryHeight -
                         accessoryPane.find('.fd-head').outerHeight(true);
@@ -107,9 +115,6 @@ define([
                 accessoryPane.hide();
                 this.$f.find(".fd-content-left-divider").hide();
             }
-            $fdc.find('.fd-content-left')
-                .find('.fd-tree')
-                .find('.fd-scrollable').css('height', treeHeight + 'px');
 
             $fdc.find('.fd-content-right')
                 .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
