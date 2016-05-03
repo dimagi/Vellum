@@ -99,7 +99,6 @@ define([
                 treeHeight -= $(child).outerHeight(false);
             });
     
-            $tree.find('.fd-scrollable').css('height', treeHeight + 'px');
             if (accessoryPane.children().length) {
                 // Decrement tree height by height of accessory pane
                 var accessoryHeight = accessoryPane.outerHeight(false),
@@ -115,6 +114,7 @@ define([
                 accessoryPane.hide();
                 this.$f.find(".fd-content-left-divider").hide();
             }
+            $tree.find('.fd-scrollable').css('height', treeHeight + 'px');
 
             $fdc.find('.fd-content-right')
                 .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
