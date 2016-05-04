@@ -9,7 +9,8 @@
  *      labelRef: reference to apply to each node to get the item's display name
  *
  *  Dynamic select mugs have a child itemset mug. A dynamic select mug's
- *  p.itemsetData stores the itemset's persistent state.
+ *  p.itemsetData, an array with at most one item, stores the itemset's
+ *  persistent state.
  */
 define([
     'underscore',
