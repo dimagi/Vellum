@@ -180,7 +180,7 @@ define([
                         var text = $.trim($(li).text());
                         assert(text.startsWith('#form'));
                     });
-                    assert(atwhoEntries, 3);
+                    assert.strictEqual(atwhoEntries.length, 2);
                 });
             });
 
@@ -191,7 +191,7 @@ define([
                         var text = $.trim($(li).text());
                         assert(text.startsWith('#case'));
                     });
-                    assert(atwhoEntries, 1);
+                    assert.strictEqual(atwhoEntries.length, 1);
                 });
             });
 
@@ -202,7 +202,7 @@ define([
                         var text = $.trim($(li).text());
                         assert(text.startsWith('#case') || text.startsWith('#form'));
                     });
-                    assert(atwhoEntries, 4);
+                    assert.strictEqual(atwhoEntries.length, 3);
                 });
             });
         });
