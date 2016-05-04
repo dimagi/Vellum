@@ -2,11 +2,13 @@ define([
     'jquery',
     'underscore',
     'tpl!vellum/templates/undo_alert',
+    'vellum/util',
 ], function(
     $,
     _,
-    UNDO_ALERT
-) {
+    UNDO_ALERT,
+    util,
+undefined) {
     function alertShown() {
         var alert = $('.fd-undo-delete');
         // creating alert uses classes "fade in", removing alert removes in
@@ -22,21 +24,20 @@ define([
         $('.fd-undo-container').append(UNDO_ALERT);
     }
 
-    function toggleAlert(undoStack, vellum) {
+    function toggleAlert(undoStack) {
         if (undoStack.length && !alertShown()) {
             createAlert();
         } else if (undoStack.length === 0 && alertShown()) {
             $('.fd-undo-delete').remove();
-        }
-        if (vellum) {
-            vellum.adjustToWindow();
         }
     }
 
     function UndoManager(form) {
         var _this = this;
         _this.undoStack = [];
-        _this.vellum = form.vellum;
+        _this.form = form;
+
+        util.eventuality(this);
     }
 
     UndoManager.prototype = {
@@ -46,13 +47,17 @@ define([
             } else {
                 this.undoStack = [];
             }
-            toggleAlert(this.undoStack, this.vellum);
+            toggleAlert(this.undoStack);
+            this.form.fire({
+                type: 'undo-reset',
+            });
         },
         appendMug: function (mug, previousMug, position) {
             this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
             toggleAlert(this.undoStack);
         },
         undo: function () {
+            var _this = this;
             _.each(this.undoStack, function(undo) {
                 var mug = undo[0],
                     sibling = undo[1],
