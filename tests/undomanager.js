@@ -202,12 +202,12 @@ define([
         });
 
         it("should adjust the tree's height to accommodate the undo alert message", function () {
-            var getHeight = function() { return $(".fd-tree .fd-scrollable").outerHeight(); },
-                heightWithoutAlert = getHeight();
+            var getHeight = function() { return $(".fd-tree .fd-scrollable").outerHeight(); };
             util.addQuestion('Text', 'text');
             util.addQuestion('Select', 'select');
             util.clickQuestion('text');
 
+            var heightWithoutAlert = getHeight();
             $('.fd-button-remove').click();
             var heightWithAlert = getHeight();
 
