@@ -8,8 +8,8 @@
  *      valueRef: reference to apply to each node to get the item's value
  *      labelRef: reference to apply to each node to get the item's display name
  *
- *  Dynamic select mugs typically have a child itemset mug. A dynamic select's
- *  itsemset data may also be represented by an object stored in the mug's p.itemsetData.
+ *  Dynamic select mugs have a child itemset mug. A dynamic select mug's
+ *  p.itemsetData stores the itemset's persistent state.
  */
 define([
     'underscore',
@@ -96,11 +96,12 @@ define([
                 },
                 deserialize: function (data, key, mug) {
                     var value = mugs.deserializeXPath(data, key, mug);
-                    if (value && value.instance &&
-                                 value.instance.id && value.instance.src) {
-                        var instances = {};
-                        instances[value.instance.id] = value.instance.src;
-                        mug.form.updateKnownInstances(instances);
+                    if (value) {
+                        if (value.instance && value.instance.id && value.instance.src) {
+                            var instances = {};
+                            instances[value.instance.id] = value.instance.src;
+                            mug.form.updateKnownInstances(instances);
+                        }
                         //support old copy/paste
                         if (value.valueRef) {
                             mug.p.valueRef = value.valueRef;
@@ -175,25 +176,20 @@ define([
         }
     });
 
-    function afterDynamicSelectInsert(form, mug, itemsetData) {
-        var newMug = form.createQuestion(mug, 'into', "Itemset", true);
-        newMug.p.filter = '';
-        if (itemsetData) {
-            newMug.p.itemsetData = itemsetData;
-        } else {
-            // If no itemsetData was provided, default to the first external data source
-            var sources = getDataSources();
-            if (sources.length) {
-                var src = sources[0].uri,
-                    nodeset = "instance('" + sources[0].id + "')" + sources[0].path,
-                    choices = datasourceWidgets.autocompleteChoices(sources, src);
-                newMug = populateNodesetAttributes(newMug, choices);
-                newMug.p.itemsetData = {
-                    instance: form.parseInstance(
-                        nodeset, newMug, "itemsetData"),
-                    nodeset: nodeset,
-                };
-            }
+    function afterDynamicSelectInsert(form, mug) {
+        var sources = getDataSources(),
+            newMug = form.createQuestion(mug, 'into', "Itemset", true);
+        if (sources.length) {
+            var src = sources[0].uri,
+                nodeset = "instance('" + sources[0].id + "')" + sources[0].path,
+                choices = datasourceWidgets.autocompleteChoices(sources, src);
+            newMug = populateNodesetAttributes(newMug, choices);
+            newMug.p.filter = '';
+            newMug.p.itemsetData = {
+                instance: form.parseInstance(
+                    nodeset, newMug, "itemsetData"),
+                nodeset: nodeset,
+            };
         }
         return newMug;
     }
@@ -213,7 +209,7 @@ define([
             deserialize: function (data, key, mug) {
                 _.each(data[key], function (value, i) {
                     var children = mug.form.getChildren(mug),
-                        itemset = children[i] || afterDynamicSelectInsert(mug.form, mug, _.first(data.itemsetData)),
+                        itemset = children[i] || afterDynamicSelectInsert(mug.form, mug),
                         dat = _.clone(data);
                     dat[key] = value;
                     itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset);
