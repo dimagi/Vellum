@@ -1,13 +1,13 @@
 define([
     'jquery',
     'underscore',
-    'tpl!vellum/templates/undo_alert',
     'vellum/util',
+    'tpl!vellum/templates/undo_alert',
 ], function(
     $,
     _,
-    UNDO_ALERT,
     util,
+    UNDO_ALERT,
 undefined) {
     function alertShown() {
         var alert = $('.fd-undo-delete');
@@ -57,7 +57,6 @@ undefined) {
             toggleAlert(this.undoStack);
         },
         undo: function () {
-            var _this = this;
             _.each(this.undoStack, function(undo) {
                 var mug = undo[0],
                     sibling = undo[1],
