@@ -294,7 +294,7 @@ define([
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (callback) {
-                            event.on("nodeError", function() {
+                            event.on("loadCaseData", function() {
                                 callback(CASE_DATA);
                             });
                         },
@@ -316,7 +316,7 @@ define([
                         javaRosa: {langs: ['en']},
                         core: {
                             dataSourcesEndpoint: function (callback) {
-                                event.on("nodeError", function() {
+                                event.on("loadCaseData", function() {
                                     callback(CASE_DATA);
                                 });
                             },
@@ -332,7 +332,7 @@ define([
                 it("should not error for known properties", function() {
                     assert.strictEqual(widget.getValue(), escapedDobProp);
                     assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
-                    event.fire("nodeError");
+                    event.fire("loadCaseData");
                     assert.strictEqual(widget.getValue(), escapedDobProp);
                     assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
                 });
@@ -341,7 +341,7 @@ define([
                     var form = call('getData').core.form;
                     assert(form.isValidHashtag(dobProp));
                     assert.strictEqual(form.hashtagDictionary[dobProp], null);
-                    event.fire("nodeError");
+                    event.fire("loadCaseData");
                     assert(form.isValidHashtag(dobProp));
                     assert.notStrictEqual(form.hashtagDictionary[dobProp], null);
                 });
@@ -351,7 +351,7 @@ define([
                 widget.setValue(escapedDobProp);
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
-                event.fire("nodeError");
+                event.fire("loadCaseData");
                 loadDataTree(function() {
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
                     done();
