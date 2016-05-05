@@ -8,6 +8,8 @@
                     <mug />
                 </data>
             </instance>
+            <instance src="jr://instance/session" id="commcaresession" />
+            <instance src="jr://instance/casedb" id="casedb" />
             <bind vellum:nodeset="#form/mug" nodeset="/data/mug" type="xsd:string" />
             <itext>
                 <translation lang="en" default="">
@@ -16,8 +18,6 @@
                     </text>
                 </translation>
             </itext>
-            <instance src="jr://instance/session" id="commcaresession" />
-            <instance src="jr://instance/casedb" id="casedb" />
         </model>
     </h:head>
     <h:body>
