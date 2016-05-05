@@ -1,3 +1,17 @@
+/**
+ *  The itemset plugin enables questions to interact with sets of data.
+ *  Its primary use is to populate data-driven select questions.
+ *
+ *  Itemsets contain
+ *      instance: which top-level data source contains the items
+ *      nodeset: path to apply to the instance to get at the desired items
+ *      valueRef: reference to apply to each node to get the item's value
+ *      labelRef: reference to apply to each node to get the item's display name
+ *
+ *  Dynamic select mugs have a child itemset mug. A dynamic select mug's
+ *  p.itemsetData, an array with at most one item, stores the itemset's
+ *  persistent state.
+ */
 define([
     'underscore',
     'jquery',
@@ -83,11 +97,12 @@ define([
                 },
                 deserialize: function (data, key, mug) {
                     var value = mugs.deserializeXPath(data, key, mug);
-                    if (value && value.instance &&
-                                 value.instance.id && value.instance.src) {
-                        var instances = {};
-                        instances[value.instance.id] = value.instance.src;
-                        mug.form.updateKnownInstances(instances);
+                    if (value) {
+                        if (value.instance && value.instance.id && value.instance.src) {
+                            var instances = {};
+                            instances[value.instance.id] = value.instance.src;
+                            mug.form.updateKnownInstances(instances);
+                        }
                         //support old copy/paste
                         if (value.valueRef) {
                             mug.p.valueRef = value.valueRef;
@@ -163,7 +178,21 @@ define([
     });
 
     function afterDynamicSelectInsert(form, mug) {
-        return form.createQuestion(mug, 'into', "Itemset", true);
+        var sources = getDataSources(),
+            newMug = form.createQuestion(mug, 'into', "Itemset", true);
+        if (sources.length) {
+            var src = sources[0].uri,
+                nodeset = "instance('" + sources[0].id + "')" + sources[0].path,
+                choices = datasourceWidgets.autocompleteChoices(sources, src);
+            newMug = populateNodesetAttributes(newMug, choices);
+            newMug.p.filter = '';
+            newMug.p.itemsetData = {
+                instance: form.parseInstance(
+                    nodeset, newMug, "itemsetData"),
+                nodeset: nodeset,
+            };
+        }
+        return newMug;
     }
 
     var itemsetDataSpec = {
@@ -355,6 +384,24 @@ define([
         return sources;
     }
 
+    function populateNodesetAttributes(mug, choices) {
+        if (!mug.p.labelRef) {
+            if (_.contains(choices, "name")) {
+                mug.p.labelRef = "name";
+            } else {
+                mug.p.labelRef = choices[0];
+            }
+        }
+        if (!mug.p.valueRef) {
+            if (_.contains(choices, "@id")) {
+                mug.p.valueRef = "@id";
+            } else {
+                mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
+            }
+        }
+        return mug;
+    }
+
     function itemsetWidget(mug, options) {
         function isEmptyValue(value) {
             return !value || _.all(_.map(value, _.isEmpty));
@@ -376,20 +423,7 @@ define([
                 // because updateAutocomplete() calls super_getValue()
                 var choices = updateAutocomplete(data);
                 if (choices && choices.length && isEmptyValue(current.value)) {
-                    if (!mug.p.labelRef) {
-                        if (_.contains(choices, "name")) {
-                            mug.p.labelRef = "name";
-                        } else {
-                            mug.p.labelRef = choices[0];
-                        }
-                    }
-                    if (!mug.p.valueRef) {
-                        if (_.contains(choices, "@id")) {
-                            mug.p.valueRef = "@id";
-                        } else {
-                            mug.p.valueRef = choices.length > 1 ? choices[1] : choices[0];
-                        }
-                    }
+                    mug = populateNodesetAttributes(mug, choices);
                     if (current.hasOwnProperty("value")) {
                         // HACK push async-loaded default value to the mug.
                         // This should not be done in UI (widget) code.
