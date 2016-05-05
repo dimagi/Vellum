@@ -119,6 +119,18 @@ define([
             assert.equal(util.getMessages(mug), "");
         });
 
+        it("should populate itemset nodeset and refs on add single select", function () {
+            util.loadXML("");
+            util.addQuestion("SelectDynamic", "select");
+            var xml = call('createXML'),
+                $xml = $(xml),
+                itemset = $xml.find("itemset");
+            assert.equal(itemset.attr("nodeset"),
+                "instance('some-fixture')/some-fixture_list/some-fixture");
+            assert(itemset.find("label").attr("ref"), "name");
+            assert(itemset.find("value").attr("ref"), "@id");
+        });
+
         it("should load dynamic select without errors", function () {
             util.loadXML(TEST_XML_1);
             var mug = util.getMug('question1/itemset');

@@ -1494,7 +1494,7 @@ define([
             section.properties = _(section.properties)
                 .map(_getWidgetClassAndOptions)
                 .filter(_.identity);
-           
+
             if (section.properties.length) {
                 this.getSectionDisplay(mug, section).appendTo($content);
             }
@@ -1717,7 +1717,7 @@ define([
         });
         return $sec;
     };
-        
+
     fn.getMugToolbar = function (mug, multiselect) {
         var _this = this,
             form = this.data.core.form,
