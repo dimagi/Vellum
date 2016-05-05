@@ -73,7 +73,9 @@ define([
         }];
 
     describe("The data browser", function () {
-        var dataTree;
+        var escapedDobProp = '`#case/child/dob`',
+            dobProp = '#case/child/dob',
+            dataTree;
 
         function getInstanceId(form, src) {
             var meta = _.find(form.instanceMetadata, function (meta) {
@@ -111,7 +113,7 @@ define([
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () { 
                     editor.on('change', function() {
-                        assert.equal(mug.p.calculateAttr, "`#case/child/dob`");
+                        assert.equal(mug.p.calculateAttr, escapedDobProp);
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
@@ -159,7 +161,7 @@ define([
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () { 
                     editor.on('change', function() {
-                        assert.equal(mug.p.calculateAttr, '`#case/child/dob`');
+                        assert.equal(mug.p.calculateAttr, escapedDobProp);
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
@@ -189,8 +191,8 @@ define([
             it("is not overwritten by the forms preloaded tags", function() {
                 util.loadXML(PRELOADED_HASHTAGS_XML);
                 var form = call('getData').core.form;
-                assert(form.isValidHashtag('#case/child/dob'));
-                assert.notStrictEqual(form.hashtagDictionary['#case/child/dob'], null);
+                assert(form.isValidHashtag(dobProp));
+                assert.notStrictEqual(form.hashtagDictionary[dobProp], null);
             });
 
             it("should write externally referenced hashtags to form", function() {
@@ -307,9 +309,48 @@ define([
                 });
             });
 
+            describe("with loaded xml", function () {
+                beforeEach(function (done) {
+                    util.init({
+                        plugins: plugins,
+                        javaRosa: {langs: ['en']},
+                        core: {
+                            dataSourcesEndpoint: function (callback) {
+                                event.on("nodeError", function() {
+                                    callback(CASE_DATA);
+                                });
+                            },
+                            form: PRELOADED_HASHTAGS_XML,
+                            onReady: function () {
+                                widget = util.getWidget('property-calculateAttr');
+                                widget.input.promise.then(done);
+                            }
+                        }
+                    });
+                });
+
+                it("should not error for known properties", function() {
+                    assert.strictEqual(widget.getValue(), escapedDobProp);
+                    assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
+                    event.fire("nodeError");
+                    assert.strictEqual(widget.getValue(), escapedDobProp);
+                    assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
+                });
+
+                it("overwrites the forms preloaded tags", function() {
+                    var form = call('getData').core.form;
+                    assert(form.isValidHashtag(dobProp));
+                    assert.strictEqual(form.hashtagDictionary[dobProp], null);
+                    event.fire("nodeError");
+                    assert(form.isValidHashtag(dobProp));
+                    assert.notStrictEqual(form.hashtagDictionary[dobProp], null);
+                });
+            });
+
             it("should error for unknown properties", function(done) {
-                widget.setValue("`#case/child/dob`");
+                widget.setValue(escapedDobProp);
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
+                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
                 event.fire("nodeError");
                 loadDataTree(function() {
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
@@ -317,15 +358,6 @@ define([
                 });
             });
 
-            it("overwrites the forms preloaded tags", function() {
-                util.loadXML(PRELOADED_HASHTAGS_XML);
-                var form = call('getData').core.form;
-                assert(form.isValidHashtag('#case/child/dob'));
-                assert.strictEqual(form.hashtagDictionary['#case/child/dob'], null);
-                event.fire("nodeError");
-                assert(form.isValidHashtag('#case/child/dob'));
-                assert.notStrictEqual(form.hashtagDictionary['#case/child/dob'], null);
-            });
         });
     });
 });

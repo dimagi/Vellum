@@ -79,6 +79,7 @@ define([
             });
 
             fixFormReferences(this.data.core.form);
+            this.refreshVisibleData();
         },
         contributeToHeadXML: function (xmlWriter, form) {
             var hashtags = this.data.core.form.referencedHashtags();
