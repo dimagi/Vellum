@@ -36,8 +36,6 @@ define([
         var _this = this;
         _this.undoStack = [];
         _this.form = form;
-
-        util.eventuality(this);
     }
 
     UndoManager.prototype = {
