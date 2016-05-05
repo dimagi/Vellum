@@ -1240,8 +1240,6 @@ define([
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
-        }).on('undo-reset', function(e) {
-            _this.adjustToWindow();
         });
     };
 

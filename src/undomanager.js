@@ -32,10 +32,11 @@ define([
         }
     }
 
-    function UndoManager(form) {
+    function UndoManager() {
         var _this = this;
         _this.undoStack = [];
-        _this.form = form;
+
+        util.eventuality(this);
     }
 
     UndoManager.prototype = {
@@ -46,8 +47,8 @@ define([
                 this.undoStack = [];
             }
             toggleAlert(this.undoStack);
-            this.form.fire({
-                type: 'undo-reset',
+            this.fire({
+                type: 'reset',
             });
         },
         appendMug: function (mug, previousMug, position) {
