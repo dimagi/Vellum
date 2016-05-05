@@ -307,9 +307,48 @@ define([
                 });
             });
 
+            describe("with loaded xml", function () {
+                beforeEach(function (done) {
+                    util.init({
+                        plugins: plugins,
+                        javaRosa: {langs: ['en']},
+                        core: {
+                            dataSourcesEndpoint: function (callback) {
+                                event.on("nodeError", function() {
+                                    callback(CASE_DATA);
+                                });
+                            },
+                            form: PRELOADED_HASHTAGS_XML,
+                            onReady: function () {
+                                widget = util.getWidget('property-calculateAttr');
+                                widget.input.promise.then(done);
+                            }
+                        }
+                    });
+                });
+
+                it("should not error for known properties", function() {
+                    assert.strictEqual(widget.getValue(), "`#case/child/dob`");
+                    assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
+                    event.fire("nodeError");
+                    assert.strictEqual(widget.getValue(), "`#case/child/dob`");
+                    assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
+                });
+
+                it("overwrites the forms preloaded tags", function() {
+                    var form = call('getData').core.form;
+                    assert(form.isValidHashtag('#case/child/dob'));
+                    assert.strictEqual(form.hashtagDictionary['#case/child/dob'], null);
+                    event.fire("nodeError");
+                    assert(form.isValidHashtag('#case/child/dob'));
+                    assert.notStrictEqual(form.hashtagDictionary['#case/child/dob'], null);
+                });
+            });
+
             it("should error for unknown properties", function(done) {
                 widget.setValue("`#case/child/dob`");
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
+                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
                 event.fire("nodeError");
                 loadDataTree(function() {
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
@@ -317,15 +356,6 @@ define([
                 });
             });
 
-            it("overwrites the forms preloaded tags", function() {
-                util.loadXML(PRELOADED_HASHTAGS_XML);
-                var form = call('getData').core.form;
-                assert(form.isValidHashtag('#case/child/dob'));
-                assert.strictEqual(form.hashtagDictionary['#case/child/dob'], null);
-                event.fire("nodeError");
-                assert(form.isValidHashtag('#case/child/dob'));
-                assert.notStrictEqual(form.hashtagDictionary['#case/child/dob'], null);
-            });
         });
     });
 });
