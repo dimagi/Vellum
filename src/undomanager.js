@@ -7,8 +7,8 @@ define([
     $,
     _,
     util,
-    UNDO_ALERT,
-undefined) {
+    UNDO_ALERT
+) {
     function alertShown() {
         var alert = $('.fd-undo-delete');
         // creating alert uses classes "fade in", removing alert removes in
