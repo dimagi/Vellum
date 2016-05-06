@@ -53,6 +53,7 @@ define([
             this.absolutePaths = absolutePaths;
             this.hashtags = hashtags;
             this.instanceRefs = {};
+            this.functionRefs = {};
             this.referencesSelf = false;
             this.topLevelPaths = topLevelPaths;
             if (this.parsed) {
@@ -92,7 +93,9 @@ define([
                             }
                         }
                     } else if (node instanceof this._xpathParser.models.XPathFuncExpr) {
-                        this._addInstanceRef(node);
+                        if (!this._addInstanceRef(node)) {
+                            this.functionRefs[node.id] = null;
+                        }
                     } else if (node instanceof this._xpathParser.models.HashtagExpr) {
                         hashtags.push(node);
                     }
@@ -180,6 +183,7 @@ define([
 
     function LogicManager (form, opts) {
         opts.allowedDataNodeReferences = opts.allowedDataNodeReferences || {};
+        opts.allowedFunctionNames = opts.allowedFunctionNames || {};
 
         this.opts = opts;
         this.form = form;
@@ -232,6 +236,7 @@ define([
                 form = _this.form,
                 expr = new LogicExpression(value || mug.p[property], form.xpath),
                 unknowns = [],
+                unknownFunctions = [],
                 messages = [],
                 warning = "",
                 propertyName = mug.spec[property] ? mug.spec[property].lstring : property,
@@ -299,6 +304,11 @@ define([
             _.each(expr.hashtags, function (hashtag) {
                 form.referenceHashtag(hashtag, mug, property);
             });
+            _.each(expr.functionRefs, function (ignore, name) {
+                if (!_.contains(_this.opts.allowedFunctionNames, name)) {
+                    unknownFunctions.push(name);
+                }
+            });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
                     this.errors[mug.ufid] = {};
@@ -311,12 +321,24 @@ define([
                 key: "logic-bad-path-warning",
                 level: mug.WARNING,
                 message: (function () {
-                    if (!unknowns.length) {
-                        return "";
-                    } else if (unknowns.length === 1) {
-                        return "Unknown question: " + unknowns[0];
+                    var questionErrorString = "",
+                        functionErrorString = "";
+
+                    if (unknowns.length === 1) {
+                        questionErrorString = "Unknown question: " + unknowns[0];
+                    } else if (unknowns.length > 1) {
+                        questionErrorString = "Unknown questions:\n- " + unknowns.join("\n- ");
                     }
-                    return "Unknown questions:\n- " + unknowns.join("\n- ");
+                    if (unknownFunctions.length === 1) {
+                        functionErrorString += "Unknown function: " + unknownFunctions[0];
+                    } else if (unknownFunctions.length > 1) {
+                        functionErrorString += "Unknown functions:\n- " + unknownFunctions.join("\n- ");
+                    }
+
+                    if (questionErrorString) {
+                        return questionErrorString + "\n\n" + functionErrorString;
+                    }
+                    return questionErrorString + functionErrorString;
                 })()
             });
             return messages;

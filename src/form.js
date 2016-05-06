@@ -117,7 +117,8 @@ define([
         this._setValueId = 1;
 
         this._logicManager = new logic.LogicManager(this, {
-                allowedDataNodeReferences: opts.allowedDataNodeReferences
+                allowedDataNodeReferences: opts.allowedDataNodeReferences,
+                allowedFunctionNames: opts.allowedFunctionNames,
             });
 
         // Some things in the form and mug methods depend on the UI.  These

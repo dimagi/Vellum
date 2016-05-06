@@ -123,6 +123,9 @@ define(["underscore"], function (_) {
                 "meta/timeEnd",
                 "meta/location",
             ],
+            allowedFunctionNames: [
+                'blah',
+            ],
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
             invalidCaseProperties: ['name'],
             saveType: "patch",

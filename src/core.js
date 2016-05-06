@@ -1259,7 +1259,8 @@ define([
         });
         options = _.extend({
             mugTypes: this.data.core.mugTypes,
-            allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
+            allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences,
+            allowedFunctionNames: this.opts().core.allowedFunctionNames,
             enableInstanceRefCounting: true
         }, options);
         if (this.data.core.form) {
@@ -2260,6 +2261,7 @@ define([
         saveType: 'full',
         staticPrefix: "",
         allowedDataNodeReferences: [],
+        allowedFunctionNames: [],
         noTextString: '[no text]',
         onReady: function () {},
         onFormSave: function (data) {},
