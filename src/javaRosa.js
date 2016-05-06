@@ -936,7 +936,7 @@ define([
 
             // display current values
             $textarea = $updateForm.find('textarea');
-            $textarea.val(generateItextXLS(form, Itext));
+            $textarea.val(jr_util.generateItextXLS(form, Itext));
 
             $modal.modal('show');
             $modal.one('shown.bs.modal', function () { $textarea.focus(); });
