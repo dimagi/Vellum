@@ -138,7 +138,11 @@ define([
         this.errors = [];
         this.question_counter = 1;
         this.xpath = escapedHashtags.parser(this.hashtagDictionary);
-        this.undomanager = new undomanager(this);
+        this.undomanager = new undomanager();
+
+        this.undomanager.on('reset', function(e) {
+            _this.vellum.adjustToWindow();
+        });
 
         //make the object event aware
         util.eventuality(this);
