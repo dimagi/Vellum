@@ -5,6 +5,7 @@ define([
     'underscore',
     'tests/utils',
     'vellum/javaRosa',
+    'vellum/javaRosa/itextMarkdownWidget',
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
@@ -32,6 +33,7 @@ define([
     _,
     util,
     jr,
+    itextMarkdownWidget,
     vellum_util,
     OUTPUTREF_GROUP_RENAME_XML,
     TEXT_QUESTION_XML,
@@ -853,7 +855,7 @@ define([
             "**a bold phrase**",
         ], function (text) {
             it("should recognize " + JSON.stringify(text), function() {
-                assert(jr.looksLikeMarkdown(text), "fail");
+                assert(itextMarkdownWidget.looksLikeMarkdown(text), "fail");
             });
         });
 
@@ -861,7 +863,7 @@ define([
             "**not\nbold**",
         ], function (text) {
             it("should NOT recognize " + JSON.stringify(text), function() {
-                assert(!jr.looksLikeMarkdown(text), "fail");
+                assert(!itextMarkdownWidget.looksLikeMarkdown(text), "fail");
             });
         });
     });
