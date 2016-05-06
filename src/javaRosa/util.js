@@ -260,6 +260,8 @@ define([
     };
 
     return {
+        ITEXT_PROPERTIES: ITEXT_PROPERTIES,
+        SUPPORTED_MEDIA_TYPES: SUPPORTED_MEDIA_TYPES,
         forEachItextItem: forEachItextItem,
         generateItextXLS: generateItextXLS,
         getDefaultItextRoot: getDefaultItextRoot,
