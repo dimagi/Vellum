@@ -12,7 +12,7 @@ define([
     util,
     atwho
 ) {
-    return function (mug, language, form, options) {
+    var widget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
             // todo: id->class
@@ -246,5 +246,9 @@ define([
         };
 
         return widget;
+    };
+
+    return {
+        widget: widget,
     };
 });

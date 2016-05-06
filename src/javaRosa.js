@@ -594,7 +594,7 @@ define([
         var block = baseItextBlock(mug, options);
         if ((!options.vellum.opts().features.markdown_in_groups &&
              _.contains(NO_MARKDOWN_MUGS, mug.__className)) || mug.form.noMarkdown) {
-            block.itextWidget = itextLabelWidget;
+            block.itextWidget = itextLabelWidget.widget;
         } else {
             block.itextWidget = itextMarkdownWidget.widget;
         }
@@ -820,7 +820,7 @@ define([
     var itextFormWidget = function (mug, language, form, options) {
         options = options || {};
         options.idSuffix = "-" + form;
-        var widget = itextLabelWidget(mug, language, form, options);
+        var widget = itextLabelWidget.widget(mug, language, form, options);
 
         widget.getDisplayName = function () {
             return form + widget.getLangDesc();

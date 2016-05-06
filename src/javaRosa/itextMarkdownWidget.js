@@ -27,7 +27,7 @@ define([
     var widget = function (mug, language, form, options) {
         options = options || {};
         var parent = options.parent;
-        var widget = itextLabelWidget(mug, language, form, options),
+        var widget = itextLabelWidget.widget(mug, language, form, options),
             super_setValue = widget.setValue,
             super_getUIElement = widget.getUIElement,
             super_handleChange = widget.handleChange,
