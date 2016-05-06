@@ -5,829 +5,31 @@
 define([
     'underscore',
     'jquery',
-    'tpl!vellum/templates/auto_box',
-    'text!vellum/templates/button_remove.html',
-    'tpl!vellum/templates/control_group',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
-    'vellum/widgets',
     'vellum/richText',
     'vellum/util',
-    'vellum/atwho',
     'vellum/tsv',
     'vellum/xml',
-    'vellum/javaRosa/itextLabel',
-    'vellum/javaRosa/itextMarkdown',
+    'vellum/javaRosa/itext',
+    'vellum/javaRosa/itextBlock',
+    'vellum/javaRosa/itextWidget',
+    'vellum/javaRosa/util',
     'vellum/core'
 ], function (
     _,
     $,
-    auto_box,
-    button_remove,
-    control_group,
     edit_source,
     language_selector,
-    widgets,
     richText,
     util,
-    atwho,
     tsv,
     xml,
-    itextLabel,
-    itextMarkdown
+    itext,
+    itextBlock,
+    itextWidget,
+    jr_util
 ) {
-    var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
-        DEFAULT_EXTENSIONS = {
-            image: 'png',
-            audio: 'mp3',
-            video: '3gp',
-            'video-inline': '3gp'
-        },
-        RESERVED_ITEXT_CONTENT_TYPES = [
-            'default', 'short', 'long', 'audio', 'video', 'image', 'video-inline',
-        ],
-        _nextItextItemKey = 1,
-        NO_MARKDOWN_MUGS = ['Choice', 'Group', 'FieldList', 'Repeat'];
-
-    function ItextItem(options) {
-        this.forms = options.forms || [];
-        this.id = options.id || "";
-        this.autoId = _.isUndefined(options.autoId) ? true : options.autoId;
-        this.hasMarkdown = _.isUndefined(options.hasMarkdown) ? false : options.hasMarkdown;
-        this.itextModel = options.itextModel;
-        this.key = String(_nextItextItemKey++);
-        this.refCount = 1;
-    }
-    ItextItem.prototype = {
-        clone: function () {
-            var item = new ItextItem({
-                forms: _.map(this.forms, function (f) { return f.clone(); }),
-                id: this.id,
-                autoId: this.autoId,
-                itextModel: this.itextModel,
-                hasMarkdown: this.hasMarkdown
-            });
-            return item;
-        },
-        getForms: function () {
-            return this.forms;
-        },
-        getFormNames: function () {
-            return this.forms.map(function (form) {
-                return form.name;
-            });
-        },
-        hasForm: function (name) {
-            return this.getFormNames().indexOf(name) !== -1;
-        },
-        getForm: function (name) {
-            return util.reduceToOne(this.forms, function (form) {
-                return form.name === name;
-            }, "form name = " + name);
-        },
-        getOrCreateForm: function (name) {
-            try {
-                return this.getForm(name);
-            } catch (err) {
-                return this.addForm(name);
-            }
-        },
-        addForm: function (name) {
-            if (!this.hasForm(name)) {
-                var newForm = new ItextForm({
-                    name: name,
-                    itextModel: this.itextModel
-                });
-                this.forms.push(newForm);
-                return newForm;
-            }
-        },
-        removeForm: function (name) {
-            var names = this.getFormNames();
-            var index = names.indexOf(name);
-            if (index !== -1) {
-                this.forms.splice(index, 1);
-            }
-        },
-        cloneForm: function (cloneFrom, cloneTo) {
-            var newForm = this.getOrCreateForm(cloneFrom).clone();
-            newForm.name = cloneTo;
-            this.forms.push(newForm);
-        },
-        get: function(form, language) {
-            if (_.isUndefined(form) || form === null) {
-                form = "default";
-            }
-            if (_.isUndefined(language) || language === null) {
-                language = this.itextModel.getDefaultLanguage();
-            }
-            if (this.hasForm(form)) {
-                return this.getForm(form).getValue(language);
-            }
-        },
-        /**
-         * Set the value of this item
-         *
-         * @param value - The value to set.
-         * @param form - The form for which a value should be set.
-         *        Defaults to `"default"` if not specified.
-         * @param language - The language to set. If not specified, the
-         *        default language will be unconditionally set to the
-         *        given value. Additionally, any other language whose
-         *        value is empty or matches the previous value of the
-         *        default language will be set to the new value.
-         */
-        set: function(value, form, language) {
-            if (_.isUndefined(form) || form === null) {
-                form = "default";
-            }
-            var itextForm = this.getOrCreateForm(form);
-            if (_.isUndefined(language) || language === null) {
-                language = this.itextModel.getDefaultLanguage();
-                var oldDefault = itextForm.getValue(language);
-                itextForm.setValue(language, value);
-                // also set each language that does not have a value
-                // or whose value matches the old default value
-                _.each(this.itextModel.languages, function (lang) {
-                    var old = itextForm.getValue(lang);
-                    if (!old || old === oldDefault) {
-                        itextForm.setValue(lang, value);
-                    }
-                });
-            } else {
-                itextForm.setValue(language, value);
-            }
-        },
-        defaultValue: function() {
-            return this.get();
-        },
-        isEmpty: function () {
-            if (this.forms) {
-                return _.every(this.forms, function (form) {
-                    return form.isEmpty();
-                });
-            }
-            return true;
-        },
-        hasHumanReadableItext: function() {
-            return Boolean(this.hasForm('default') || 
-                           this.hasForm('long')    || 
-                           this.hasForm('short'));
-        }
-    };
-
-    function ItextForm (options) {
-        this.itextModel = options.itextModel;
-        this.data = options.data || {};
-        this.name = options.name || "default";
-        this.outputExpressions = null;
-    }
-    ItextForm.prototype = {
-        clone: function () {
-            return new ItextForm({
-                itextModel: this.itextModel,
-                data: _.clone(this.data),
-                name: this.name
-            });
-        },
-        getValue: function (lang) {
-            return this.data[lang];
-        },
-        setValue: function (lang, value) {
-            this.data[lang] = value;
-            this.outputExpressions = null;
-        },
-        getValueOrDefault: function (lang) {
-            // check the actual language first
-            if (this.data[lang]) {
-                return this.data[lang];
-            }
-            var defLang = this.itextModel.getDefaultLanguage();
-            // check the default, if necesssary
-            if (lang !== defLang && this.data[defLang]) {
-                return this.data[defLang];
-            }
-            // check arbitrarily for something
-            for (var i in this.data) {
-                if (this.data.hasOwnProperty(i) && this.data[i]) {
-                    return this.data[i];
-                }
-            }
-            // there wasn't anything
-            return "";
-        },
-        isEmpty: function () {
-            for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    return false;
-                }
-            }
-            return true;
-        },
-        getOutputRefExpressions: function () {
-            if (this.outputExpressions === null) {
-                this.updateOutputRefExpressions();
-            }
-            return this.outputExpressions;
-        },
-        updateOutputRefExpressions: function () {
-            var allRefs = {},
-                langRefs,
-                outputRe,
-                match;
-            for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*(?:\/|><\/output)>)/gim;
-                    langRefs = [];
-                    match = outputRe.exec(this.data[lang]);
-                    while (match !== null) {
-                        langRefs.push(match[1]);
-                        match = outputRe.exec(this.data[lang]);
-                    }
-                    allRefs[lang] = langRefs;
-                }
-            }
-            this.outputExpressions = allRefs;
-        }
-    };
-
-    /**
-     * The itext holder object. Access all Itext through this gate.
-     *
-     * Expected forms of itext:
-     * - default (i.e. no special form)
-     * - long
-     * - short
-     * - image
-     * - audio
-     * - hint
-     *
-     */
-    function ItextModel () {
-        util.eventuality(this);
-        
-        this.languages = [];
-    }
-    ItextModel.prototype = {
-        getLanguages: function () {
-            return this.languages;
-        },
-        hasLanguage: function (lang) {
-            return this.languages.indexOf(lang) !== -1;
-        },
-        addLanguage: function (lang) {
-            if (!this.hasLanguage(lang)) {
-                this.languages.push(lang);
-            } 
-        },
-        removeLanguage: function (lang) {
-            if(this.hasLanguage(lang)) {
-                this.languages.splice(this.languages.indexOf(lang), 1);
-            }
-            // if we removed the default, reset it
-            if (this.getDefaultLanguage() === lang) {
-                this.setDefaultLanguage(this.languages.length > 0 ? this.languages[0] : "");
-            }
-        },
-        setDefaultLanguage: function (lang) {
-            this.defaultLanguage = lang;
-        },
-        getDefaultLanguage: function () {
-            if (this.defaultLanguage) {
-                return this.defaultLanguage;
-            } else {
-                return this.languages.length > 0 ? this.languages[0] : "";
-            }
-        },
-        /*
-         * Create a new blank item
-         */
-        createItem: function (id, autoId, hasMarkdown) {
-            return new ItextItem({
-                id: id,
-                autoId: autoId,
-                itextModel: this,
-                forms: [new ItextForm({
-                    name: "default",
-                    itextModel: this
-                })],
-                hasMarkdown: hasMarkdown
-            });
-        },
-        updateForNewMug: function(mug) {
-            // for new mugs, generate a label
-            return this.updateForMug(mug, mug.getDefaultLabelValue());
-        },
-        updateForExistingMug: function(mug) {
-            // for existing, just use what's there
-            return this.updateForMug(mug, mug.getLabelValue());
-        },
-        updateForMug: function (mug, defaultLabelValue) {
-            // set default itext id/values
-            if (!mug.options.isDataOnly) {
-                if (!mug.p.labelItext && mug.getPresence("labelItext") !== "notallowed") {
-                    var item = mug.p.labelItext = this.createItem();
-                    item.set(defaultLabelValue);
-                }
-                if (!mug.p.hintItext && mug.getPresence("hintItext") !== "notallowed") {
-                    mug.p.hintItext = this.createItem();
-                }
-                if (!mug.p.helpItext && mug.getPresence("helpItext") !== "notallowed") {
-                    mug.p.helpItext = this.createItem();
-                }
-            }
-            if (!mug.options.isControlOnly) {
-                // set constraint msg if legal and not there
-                if (mug.getPresence("constraintMsgItext") !== "notallowed" &&
-                    !mug.p.constraintMsgItext) {
-                    mug.p.constraintMsgItext = this.createItem();
-                }
-            }
-        }
-    };
-
-    var ITEXT_PROPERTIES = [
-            'labelItext',
-            'hintItext',
-            'helpItext',
-            'constraintMsgItext'
-        ];
-
-    /**
-     * Call visitor function for each Itext item in the form
-     */
-    function forEachItextItem(form, visit) {
-        var seen = {};
-
-        form.tree.walk(function (mug, nodeID, processChildren) {
-            if(mug) { // skip root node
-                _.each(ITEXT_PROPERTIES, function (property) {
-                    var item = mug.p[property];
-                    if (item && !item.key) {
-                        // this should never happen
-                        window.console.log(
-                            "ignoring ItextItem without a key: " + item.id);
-                        return;
-                    } else if (item && !seen.hasOwnProperty(item.key)) {
-                        seen[item.key] = true;
-                        visit(item, mug, property);
-                    }
-                });
-            }
-            processChildren();
-        });
-    }
-
-    /**
-     * Walks the tree and grabs Itext items from mugs
-     *
-     * This updates the ID of each returned Itext item according to it's
-     * autoId property. IDs of items with autoId turned off will not be
-     * modified unless the ID is blank or it conflicts with another item.
-     * NOTE because this mutates itext IDs it could cause subtle side
-     * effects if anything depends on Itext IDs not changing at random
-     * times such as save, copy, paste, export translations, etc.
-     *
-     * @param form - the vellum instance's Form object.
-     * @param asObject - if true, return all items in an object keyed by id;
-     *                   otherwise return a list of non-empty Itext items.
-     * @returns - a list or object containing Itext items (see `asObject`).
-     */
-    function getItextItemsFromMugs(form, asObject) {
-        var empty = asObject,
-            items = [],
-            byId = {},
-            props = _.object(_.map(ITEXT_PROPERTIES, function (thing) {
-                return [thing, thing.replace("Itext", "")];
-            }));
-
-        forEachItextItem(form, function (item, mug, property) {
-            var itemIsEmpty = item.isEmpty();
-            if (!itemIsEmpty || empty) {
-                var id = item.autoId || !item.id ?
-                         getDefaultItextId(mug, props[property]) : item.id,
-                    origId = id,
-                    count = 2;
-                if (byId.hasOwnProperty(id) && (itemIsEmpty || item === byId[id])) {
-                    // ignore same or empty item with duplicate ID
-                    return;
-                }
-                while (byId.hasOwnProperty(id)) {
-                    id = origId + count;
-                    count++;
-                }
-                item.id = id;
-                byId[id] = item;
-                if (!asObject) {
-                    items.push(item);
-                }
-            }
-        });
-        return asObject ? byId : items;
-    }
-
-    var iTextIDWidget = function (mug, options) {
-        var widget = widgets.text(mug, options),
-            $input = widget.input,
-            currentValue = null;
-
-        function autoGenerateId() {
-            return getDefaultItextId(mug, widget.path);
-        }
-
-        function updateAutoId() {
-            _setValue(autoGenerateId());
-            setAutoMode(true);
-        }
-
-        function unlinkSharedItext() {
-            if (currentValue.refCount > 1) {
-                currentValue.refCount--;
-                currentValue = currentValue.clone();
-            }
-        }
-
-        var _setValue = widget.setValue;
-
-        widget.setValue = function (value) {
-            currentValue = value;
-            if (value.autoId) {
-                updateAutoId();
-            } else {
-                _setValue(value.id);
-                setAutoMode(false);
-            }
-        };
-
-        widget.getValue = function() {
-            currentValue.id = $input.val();
-            currentValue.autoId = getAutoMode();
-            return currentValue;
-        };
-
-        // auto checkbox
-        var $autoBox = $("<input />").attr("type", "checkbox");
-
-        $autoBox.change(function () {
-            if ($(this).prop('checked')) {
-                unlinkSharedItext();
-                updateAutoId();
-                widget.handleChange();
-            }
-        });
-
-        function setAutoMode(autoMode) {
-            $autoBox.prop("checked", autoMode);
-        }
-
-        function getAutoMode() {
-            return $autoBox.prop('checked');
-        }
-
-        var _getUIElement = widget.getUIElement;
-        widget.getUIElement = function () {
-            var $uiElem = _getUIElement().css('position', 'relative'),
-                $autoBoxContainer = $(auto_box());
-
-            $autoBoxContainer.find("label").prepend($autoBox);
-            $uiElem.find('.controls')
-                .removeClass("col-sm-9")
-                .addClass("col-sm-8")
-                .after($autoBoxContainer);
-
-            return $uiElem;
-        };
-
-        widget.input.keyup(function () {
-            // turn off auto-mode if the id is ever manually overridden
-            var newVal = $(this).val();
-            if (newVal !== autoGenerateId()) {
-                setAutoMode(false);
-            }
-        });
-
-        mug.on("property-changed", function (e) {
-            if (getAutoMode() && e.property === "nodeID") {
-                $input.val(autoGenerateId());
-            }
-        }, null, "teardown-mug-properties");
-
-        return widget;
-    };
-
-    var baseItextBlock = function (mug, options) {
-        var Itext = mug.form.vellum.data.javaRosa.Itext,
-            block = {};
-        util.eventuality(block);
-
-        block.mug = mug;
-        block.itextType = options.itextType;
-        block.languages = Itext.getLanguages();
-        block.defaultLang = Itext.getDefaultLanguage();
-        block.forms = options.forms || ["default"];
-
-        block.getItextItem = function () {
-            return options.getItextByMug(block.mug);
-        };
-
-        block.setValue = function (val) {
-            // none
-        };
-
-        block.getValue = function (val) {
-            // none
-        };
-
-        var $messages = $("<div />").addClass("controls").addClass("messages"),
-            $blockUI = $("<div />")
-            .addClass('itext-block-container')
-            .addClass("itext-block-" + block.itextType);
-
-        block.getFormGroupClass = function (form) {
-            return 'itext-block-' + block.itextType + '-group-' + form;
-        };
-
-        block.getFormGroupContainer = function (form) {
-            return $("<div />")
-                .addClass(block.getFormGroupClass(form))
-                .addClass('itext-lang-group');
-        };
-
-        block.getForms = function () {
-            return block.forms;
-        };
-
-        block.refreshMessages = function () {
-            if (options.messagesPath) {
-                var messages = widgets.util.getMessages(mug, options.messagesPath);
-                $messages.empty().append(messages);
-            }
-        };
-
-        mug.on("messages-changed",
-               function () { block.refreshMessages(); }, null, "teardown-mug-properties");
-
-        block.getUIElement = function () {
-            _.each(block.getForms(), function (form) {
-                var $formGroup = block.getFormGroupContainer(form);
-                _.each(block.languages, function (lang) {
-                    var itextWidget = block.itextWidget(block.mug, lang, form,
-                                                        _.extend(options, {parent: $blockUI}));
-                    itextWidget.init();
-                    itextWidget.on("change", function () {
-                        block.fire("change");
-                    });
-                    var $ui = itextWidget.getUIElement();
-                    widgets.util.setWidget($ui, itextWidget);
-                    $formGroup.append($ui);
-                });
-                $blockUI.append($formGroup);
-            });
-            $blockUI.append($messages);
-            return $blockUI;
-        };
-
-        return block;
-    };
-
-    var itextLabelBlock = function (mug, options) {
-        var block = baseItextBlock(mug, options);
-        if ((!options.vellum.opts().features.markdown_in_groups &&
-             _.contains(NO_MARKDOWN_MUGS, mug.__className)) || mug.form.noMarkdown) {
-            block.itextWidget = itextLabel.widget;
-        } else {
-            block.itextWidget = itextMarkdown.widget;
-        }
-        return block;
-    };
-
-    var itextConfigurableBlock = function (mug, options) {
-        var block = baseItextBlock(mug, options);
-
-        block.isCustomAllowed = options.isCustomAllowed;
-        block.activeForms = block.getItextItem().getFormNames();
-        block.displayName = options.displayName;
-        block.formToIcon = options.formToIcon || {};
-
-        block.itextWidget = itextFormWidget;
-
-        block.getForms = function () {
-            var customForms = _.difference(block.activeForms, RESERVED_ITEXT_CONTENT_TYPES),
-                relevantForms = _.intersection(block.activeForms, block.forms);
-            return _.union(customForms, relevantForms);
-        };
-
-        var _getFormGroupContainer = block.getFormGroupContainer;
-        block.getFormGroupContainer = function (form) {
-            var $formGroup = _getFormGroupContainer(form);
-            $formGroup.addClass("itext-lang-group-config")
-                .addClass("well")
-                .data('formtype', form);
-            return $formGroup;
-        };
-
-        block.getAddFormButtonClass = function (form) {
-            return 'itext-block-' + block.itextType + '-add-form-' + form;
-        };
-
-        block.getAddFormButtons = function () {
-            var $buttonGroup = $("<div />").addClass("btn-group itext-options");
-            _.each(block.forms, function (form) {
-                var $btn = $('<div />');
-                $btn.text(' ' + form)
-                    .addClass(block.getAddFormButtonClass(form))
-                    .addClass('btn btn-default itext-option').click(function () {
-                        block.addItext(form);
-                    });
-
-                var iconClass = block.formToIcon[form];
-                if (iconClass) {
-                    $btn.prepend($('<i />').addClass(iconClass).after(" "));
-                }
-
-                if (block.activeForms.indexOf(form) !== -1) {
-                    $btn.addClass('disabled');
-                }
-                $buttonGroup.append($btn);
-            });
-
-            if (block.isCustomAllowed) {
-                $buttonGroup.append(block.getAddCustomItextButton());
-            }
-            return $buttonGroup;
-        };
-
-        block.getAddCustomItextButton = function () {
-            var $customButton = $("<button />")
-                    .text("custom...")
-                    .addClass('btn btn-default')
-                    .attr('type', 'button'),
-                newItextBtnClass = 'fd-new-itext-button';
-
-            $customButton.click(function () {
-                var $modal, $newItemForm, $newItemInput;
-                $modal = mug.form.vellum.generateNewModal("New Content Type", [
-                    {
-                        title: "Add",
-                        cssClasses: newItextBtnClass + " disabled ",
-                        attributes: {
-                            disabled: "disabled"
-                        }
-                    }
-                ]);
-
-                $newItemForm = $(control_group({
-                    label: "Content Type"
-                }));
-
-                $newItemInput = $("<input />").attr("type", "text").addClass("form-control");
-                $newItemInput.keyup(function () {
-                    var currentValue = $(this).val(),
-                        $addButton = mug.form.vellum.$f.find('.' + newItextBtnClass);
-                    if (!currentValue || 
-                        RESERVED_ITEXT_CONTENT_TYPES.indexOf(currentValue) !== -1 || 
-                        block.activeForms.indexOf(currentValue) !== -1) 
-                    {
-                        $addButton
-                            .addClass('disabled')
-                            .removeClass('btn-primary')
-                            .attr('disabled', 'disabled');
-                    } else {
-                        $addButton
-                            .removeClass('disabled')
-                            .addClass('btn-primary')
-                            .removeAttr('disabled');
-                    }
-                });
-
-                $newItemForm.find('.controls').append($newItemInput);
-                $modal
-                    .find('.modal-body')
-                    .append($newItemForm);
-                mug.form.vellum.$f.find('.' + newItextBtnClass).click(function () {
-                    var newItemType = $newItemInput.val();
-                    if (newItemType) {
-                        block.addItext($newItemInput.val());
-                        $modal.modal('hide');
-                    }
-                });
-                $modal.modal('show');
-                $modal.one('shown.bs.modal', function () {
-                    $newItemInput.focus();
-                });
-            });
-
-            return $customButton;
-        };
-
-        block.deleteItextForm = function (form) {
-            var itextItem = block.getItextItem();
-            if (itextItem) {
-                itextItem.removeForm(form);
-            }
-            block.activeForms = _.without(block.activeForms, form);
-            block.fire("change");
-        };
-
-        block.getDeleteFormButton = function (form) {
-            var $deleteButton = $(button_remove);
-            $deleteButton.addClass('pull-right')
-                .click(function () {
-                    var $formGroup = $('.' + block.getFormGroupClass(form));
-                    block.deleteItextForm(form);
-                    block.mug.fire({
-                        type: 'question-itext-deleted',
-                        form: form
-                    });
-                    $formGroup.remove();
-                    $(this).remove();
-                    $('.' + block.getAddFormButtonClass(form))
-                        .removeClass('disabled');
-                });
-            return $deleteButton;
-        };
-
-        block.addItext = function (form) {
-            if (block.activeForms.indexOf(form) !== -1) {
-                return;
-            }
-            block.activeForms.push(form);
-            block.fire("change");
-
-            $('.' + block.getAddFormButtonClass(form)).addClass('disabled');
-            var $groupContainer = block.getFormGroupContainer(form);
-            _.each(block.languages, function (lang) {
-                var itextWidget = block.itextWidget(block.mug, lang, form, options);
-                itextWidget.init(true);
-                itextWidget.on("change", function () {
-                    block.fire("change");
-                });
-                var $ui = itextWidget.getUIElement();
-                widgets.util.setWidget($ui, itextWidget);
-                $groupContainer.append($ui);
-            });
-            $blockUI.find('.new-itext-form-group').after($groupContainer);
-            $groupContainer.find(".col-sm-9").removeClass("col-sm-9").addClass("col-sm-8");
-            $groupContainer.before(block.getDeleteFormButton(form));
-        };
-
-        var $blockUI = $('<div />'),
-            _getParentUIElement = block.getUIElement;
-        block.getUIElement = function () {
-            $blockUI = _getParentUIElement();
-
-            var $addFormControls = $(control_group({
-                label: block.displayName,
-            }));
-            $addFormControls.addClass('new-itext-form-group')
-                .find('.controls')
-                .append(block.getAddFormButtons());
-            $blockUI.prepend($addFormControls);
-
-            var $formGroup = $blockUI.find('.itext-lang-group');
-            $formGroup.each(function () {
-                $(this).find(".col-sm-9").removeClass("col-sm-9").addClass("col-sm-8");
-                $(this).before(block.getDeleteFormButton($(this).data('formtype')));
-            });
-
-            return $blockUI;
-        };
-
-        return block;
-    };
-
-    var itextMediaBlock = function (mug, options) {
-        var block = itextConfigurableBlock(mug, options),
-            pathPrefix = options.pathPrefix;
-
-        if(!_.isString(options.pathPrefix)) {
-            pathPrefix = '/' + options.itextType;
-        }
-
-        block.getForms = function () {
-            return _.intersection(block.activeForms, block.forms);
-        };
-
-        // this used to be the form ID instead of 'data'.  Since
-        // only hand-made forms will ever end up with a different
-        // ID (the ability to set it in the UI has been broken for
-        // a while), it seemed ok to make it just 'data'
-        block.itextWidget = itextMediaWidget(pathPrefix + mug.form.getBasePath());
-
-        return block;
-    };
-
-    var itextFormWidget = function (mug, language, form, options) {
-        options = options || {};
-        options.idSuffix = "-" + form;
-        var widget = itextLabel.widget(mug, language, form, options);
-
-        widget.getDisplayName = function () {
-            return form + widget.getLangDesc();
-        };
-        return widget;
-    };
-
     var ICONS = {
         image: 'fa fa-photo',
         audio: 'fa fa-volume-up',
@@ -835,194 +37,14 @@ define([
         'video-inline': 'fa fa-play',
     };
 
-    var itextMediaWidget = function (url_type) {
-        return function (mug, language, form, options) {
-            options.baseWidgetClass = widgets.text;
-            var widget = itextFormWidget(mug, language, form, options);
-
-            widget.getDefaultValue = function () {
-                if (SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
-                    // default formats
-                    // image: jr://file/commcare/image/form_id/question_id.png
-                    // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                    var extension = DEFAULT_EXTENSIONS[form];
-                    return "jr://file/commcare/" + form + url_type +
-                           getDefaultItextRoot(widget.mug) + "." + extension;
-                }
-                return null;
-            };
-
-            widget.mug.form.vellum.initWidget(widget);
-
-            return widget;
-        };
-    };
-    
-    var parseXLSItext = function (form, str, Itext) {
-        var forms = ["default", "audio", "image" , "video", 'video-inline'],
-            languages = Itext.getLanguages(),
-            nextRow = tsv.makeRowParser(str),
-            header = nextRow(),
-            i, cells, head, item;
-
-        if (header) {
-            header = _.map(header, function (val) {
-                var formlang = val.split(/[-_]/);
-                if (forms.indexOf(formlang[0]) === -1 ||
-                        languages.indexOf(formlang[1]) === -1) {
-                    return null;
-                }
-                return {form: formlang[0], lang: formlang[1]};
-            });
-        }
-
-        var items = getItextItemsFromMugs(form, true);
-        for (cells = nextRow(); cells; cells = nextRow()) {
-            item = items[cells[0]];
-            if (!item) {
-                // TODO alert user that row was skipped
-                continue;
-            }
-            for (i = 1; i < cells.length; i++) {
-                head = header[i];
-                if (head) {
-                    if (item.hasForm(head.form)) {
-                        item.getForm(head.form).setValue(head.lang, cells[i]);
-                    } else if ($.trim(cells[i])) {
-                        item.getOrCreateForm(head.form).setValue(head.lang, cells[i]);
-                    }
-                }
-            }
-        }
-        Itext.fire("change");
-    };
-
-    var generateItextXLS = function (form, Itext) {
-        function rowify(firstVal, languages, forms, func) {
-            var row = [firstVal];
-            _.each(forms, function (form) {
-                _.each(languages, function (language) {
-                    row.push(func(language, form));
-                });
-            });
-            return row;
-        }
-
-        function makeRow(item, languages, forms) {
-            return rowify(item.id, languages, forms, function (language, form) {
-                return item.hasForm(form) ? item.get(form, language) : "";
-            });
-        }
-
-        function makeHeadings(languages, forms) {
-            return rowify("label", languages, forms, function (language, form) {
-                return form + '_' + language;
-            });
-        }
-
-        // TODO: should this be configurable?
-        var forms = ["default", "audio", "image" , "video", 'video-inline'],
-            languages = Itext.getLanguages(),
-            rows = [];
-
-        if (languages.length > 0) {
-            var items = getItextItemsFromMugs(form);
-            rows.push(makeHeadings(languages, forms));
-            _.each(items, function (item) {
-                rows.push(makeRow(item, languages, forms));
-            });
-        }
-        return tsv.tabDelimit(rows);
-    };
-
-    function warnOnNonOutputableValue(form, mug, path) {
-        if (!mug.options.canOutputValue) {
-            // TODO display message near where it was dropped
-            // HACK should be in the itext widget, which has the mug and path
-            var current = form.vellum.getCurrentlySelectedMug(),
-                typeName = mug.options.typeName;
-            if (current) {
-                current.addMessage(null, {
-                    key: "javaRosa-output-value-type-error",
-                    level: mug.WARNING,
-                    message: typeName + " nodes cannot be used in an " +
-                        "output value. Please remove the output value for " +
-                        "'" + path + "' or your form will have errors."
-                });
-            }
-        }
-    }
-
-    function getOutputRef(path, dateFormat) {
-        if (dateFormat) {
-            return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>';
-        } else {
-            return '<output value="' + path + '" />';
-        }
-    }
-
-    function warnOnCircularReference(property, mug, path, refName, propName) {
-        // TODO track output refs in logic manager
-        if (path === "." && property === 'label') {
-            var fieldName = mug.p.getDefinition(property).lstring;
-            mug.addMessage(propName, {
-                key: "core-circular-reference-warning",
-                level: mug.WARNING,
-                message: "The " + fieldName + " for a question " +
-                    "is not allowed to reference the question itself. " +
-                    "Please remove the " + refName + " from the " +
-                    fieldName +" or your form will have errors."
-            });
-        }
-    }
-
-    function insertOutputRef(vellum, target, path, mug, dateFormat) {
-        var output = getOutputRef(path, dateFormat),
-            form = vellum.data.core.form;
-        if ((!mug && vellum.opts().features.rich_text) || (mug && mug.supportsRichText())) {
-            richText.editor(target).insertOutput(output);
-        } else {
-            util.insertTextAtCursor(target, output, true);
-        }
-        if (mug) {
-            warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
-            warnOnNonOutputableValue(form, mug, path);
-        }
-    }
-
-    function getDefaultItextRoot(mug) {
-        if (mug.__className === "Choice") {
-            var regex = new RegExp(util.invalidAttributeRegex.source, 'g');
-            return getDefaultItextRoot(mug.parentMug) + "-" +
-                mug.getNodeID().replace(regex, '_');
-        } else {
-            var path = mug.absolutePathNoRoot;
-            if (!path) {
-                if (mug.parentMug) {
-                    path = mug.parentMug.absolutePathNoRoot +
-                            "/" + mug.getNodeID();
-                } else {
-                    // fall back to nodeID if mug path still not found
-                    // this can happen with malformed XForms
-                    path = "/" + mug.getNodeID();
-                }
-            }
-            return path.slice(1);
-        }
-    }
-
-    function getDefaultItextId(mug, property) {
-        return getDefaultItextRoot(mug) + "-" + property;
-    }
-
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
         displayLanguage: 'en'
     }, {
         init: function () {
             // todo: plugin abstraction barrier
-            this.data.javaRosa.ItextItem = ItextItem;
-            this.data.javaRosa.ItextForm = ItextForm;
+            this.data.javaRosa.ItextItem = itext.item;
+            this.data.javaRosa.ItextForm = itext.form;
             this.data.javaRosa.ICONS = ICONS;
         },
         handleDropFinish: function (target, path, mug) {
@@ -1050,13 +72,13 @@ define([
                     $('body').append(menu);
                     menu.find('li a').click(function () {
                         var dateFormat = $(this).data('format');
-                        insertOutputRef(_this, target, path, mug, dateFormat);
+                        jr_util.insertOutputRef(_this, target, path, mug, dateFormat);
                         menu.remove();
                     });
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
-                    insertOutputRef(_this, target, path, mug);
+                    jr_util.insertOutputRef(_this, target, path, mug);
                 }
                 if (window.analytics) {
                     if (_this.data.core.form.isCaseReference(path)) {
@@ -1167,7 +189,7 @@ define([
                 langs = this.opts().javaRosa.langs,
                 Itext, itextMap;
 
-            this.data.javaRosa.Itext = Itext = new ItextModel();
+            this.data.javaRosa.Itext = Itext = new itext.model();
             this.data.javaRosa.itextMap = itextMap = {};
 
             function eachLang() {
@@ -1277,7 +299,7 @@ define([
             }
 
             function getItextItem(id, property) {
-                var auto = !id || id === getDefaultItextId(mug, property);
+                var auto = !id || id === jr_util.getDefaultItextId(mug, property);
                 if (id) {
                     var item = itextMap[id];
                     if (item && itextMap.hasOwnProperty(id)) {
@@ -1354,7 +376,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
-            forEachItextItem(form, function (item, mug) {
+            jr_util.forEachItextItem(form, function (item, mug) {
                 change = false;
                 _(item.forms).each(function (itForm) {
                     _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
@@ -1382,7 +404,7 @@ define([
         },
         duplicateMugProperties: function (mug) {
             this.__callOld();
-            _.each(ITEXT_PROPERTIES, function (path) {
+            _.each(jr_util.ITEXT_PROPERTIES, function (path) {
                 var itext = mug.p[path];
                 if (itext && itext.autoId) {
                     mug.p[path] = itext.clone();
@@ -1450,7 +472,7 @@ define([
             this.__callOld();
             // update and dedup all non-empty Itext items IDs
             this.data.javaRosa.itextItemsFromBeforeSerialize =
-                getItextItemsFromMugs(this.data.core.form);
+                jr_util.getItextItemsFromMugs(this.data.core.form);
         },
         afterSerialize: function () {
             this.__callOld();
@@ -1458,7 +480,7 @@ define([
         },
         beforeBulkInsert: function (form) {
             this.__callOld();
-            this.data.javaRosa.itextById = getItextItemsFromMugs(form, true);
+            this.data.javaRosa.itextById = jr_util.getItextItemsFromMugs(form, true);
         },
         afterBulkInsert: function () {
             this.__callOld();
@@ -1540,7 +562,7 @@ define([
                     var dlang = item.itextModel.getDefaultLanguage(),
                         languages = item.itextModel.languages,
                         nodeID = "",
-                        mmForms = _.object(SUPPORTED_MEDIA_TYPES, SUPPORTED_MEDIA_TYPES),
+                        mmForms = _.object(jr_util.SUPPORTED_MEDIA_TYPES, jr_util.SUPPORTED_MEDIA_TYPES),
                         // HACK reach into media uploader options
                         objectMap = that.data.uploader.objectMap || {};
                     if (data.id) {
@@ -1590,7 +612,7 @@ define([
                         });
                     });
                     if (found && !data[name]) {
-                        item.id = getDefaultItextId(mug, name.replace(/Itext$/, ""));
+                        item.id = jr_util.getDefaultItextId(mug, name.replace(/Itext$/, ""));
                     }
                     if (data[name + ":hasMarkdown"]) {
                         item.hasMarkdown = true;
@@ -1639,7 +661,7 @@ define([
                 },
                 lstring: 'Validation Message',
                 widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
+                    return itextBlock.label(mug, $.extend(options, {
                         itextType: "constraintMsg",
                         messagesPath: "constraintMsgItext",
                         getItextByMug: function (mug) {
@@ -1673,7 +695,7 @@ define([
                 visibility: 'constraintMsgItext',
                 presence: 'optional',
                 lstring: "Validation Message Itext ID",
-                widget: iTextIDWidget,
+                widget: itextWidget.id,
                 widgetValuePath: "constraintMsgItext"
             };
             databind.constraintMediaIText = function (mugOptions) {
@@ -1684,13 +706,13 @@ define([
                     presence: 'optional',
                     lstring: 'Add Validation Media',
                     widget: function (mug, options) {
-                        return itextMediaBlock(mug, $.extend(options, {
+                        return itextBlock.media(mug, $.extend(options, {
                             displayName: "Add Validation Media",
                             itextType: "constraintMsg",
                             getItextByMug: function (mug) {
                                 return mug.p.constraintMsgItext;
                             },
-                            forms: SUPPORTED_MEDIA_TYPES,
+                            forms: jr_util.SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
                         }));
                     }
@@ -1708,7 +730,7 @@ define([
                 presence: 'optional',
                 lstring: "Label",
                 widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
+                    return itextBlock.label(mug, $.extend(options, {
                         itextType: "label",
                         messagesPath: "labelItext",
                         getItextByMug: function (mug) {
@@ -1724,7 +746,7 @@ define([
                 visibility: 'labelItext',
                 presence: 'optional',
                 lstring: "Label Itext ID",
-                widget: iTextIDWidget,
+                widget: itextWidget.id,
                 widgetValuePath: "labelItext"
             };
 
@@ -1735,7 +757,7 @@ define([
                 },
                 lstring: "Hint Message",
                 widget: function (mug, options) {
-                    return itextLabelBlock(mug, $.extend(options, {
+                    return itextBlock.label(mug, $.extend(options, {
                         itextType: "hint",
                         messagesPath: "hintItext",
                         getItextByMug: function (mug) {
@@ -1750,7 +772,7 @@ define([
             control.hintItextID = {
                 visibility: 'hintItext',
                 lstring: "Hint Itext ID",
-                widget: iTextIDWidget,
+                widget: itextWidget.id,
                 widgetValuePath: "hintItext"
             };
 
@@ -1761,7 +783,7 @@ define([
                 },
                 lstring: "Help Message",
                 widget: function (mug, options) {
-                    var block = itextLabelBlock(mug, $.extend(options, {
+                    var block = itextBlock.label(mug, $.extend(options, {
                             itextType: "help",
                             messagesPath: "helpItext",
                             getItextByMug: function (mug) {
@@ -1778,7 +800,7 @@ define([
             control.helpItextID = {
                 visibility: 'helpItext',
                 lstring: "Help Itext ID",
-                widget: iTextIDWidget,
+                widget: itextWidget.id,
                 widgetValuePath: "helpItext"
             };
 
@@ -1789,7 +811,7 @@ define([
                     presence: 'optional',
                     lstring: "Add Other Content",
                     widget: function (mug, options) {
-                        return itextConfigurableBlock(mug, $.extend(options, {
+                        return itextBlock.configurable(mug, $.extend(options, {
                             displayName: "Add Other Content",
                             itextType: "label",
                             getItextByMug: function (mug) {
@@ -1808,14 +830,14 @@ define([
                     presence: 'optional',
                     lstring: 'Add Multimedia',
                     widget: function (mug, options) {
-                        return itextMediaBlock(mug, $.extend(options, {
+                        return itextBlock.media(mug, $.extend(options, {
                             displayName: "Add Multimedia",
                             itextType: "label",
                             pathPrefix: "",
                             getItextByMug: function (mug) {
                                 return mug.p.labelItext;
                             },
-                            forms: SUPPORTED_MEDIA_TYPES,
+                            forms: jr_util.SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
                         }));
                     }
@@ -1828,13 +850,13 @@ define([
                     presence: 'optional',
                     lstring: 'Add Help Media',
                     widget: function (mug, options) {
-                        return itextMediaBlock(mug, $.extend(options, {
+                        return itextBlock.media(mug, $.extend(options, {
                             displayName: "Add Help Media",
                             itextType: "help",
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
                             },
-                            forms: SUPPORTED_MEDIA_TYPES,
+                            forms: jr_util.SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
                         }));
                     }
@@ -1897,7 +919,7 @@ define([
                     title: "Update Translations",
                     cssClasses: "btn-primary",
                     action: function () {
-                        parseXLSItext(form, $textarea.val(), Itext);
+                        jr_util.parseXLSItext(form, $textarea.val(), Itext);
                         $modal.modal('hide');
                         done();
                     }
@@ -1920,10 +942,4 @@ define([
             $modal.one('shown.bs.modal', function () { $textarea.focus(); });
         }
     });
-
-    return {
-        parseXLSItext: parseXLSItext,
-        generateItextXLS: generateItextXLS,
-        getOutputRef: getOutputRef,
-    };
 });

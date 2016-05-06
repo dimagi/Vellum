@@ -1,6 +1,9 @@
 define([
     'underscore',
     'jquery',
+    'tpl!vellum/templates/auto_box',
+    'tpl!vellum/templates/markdown_help',
+    'vellum/javaRosa/util',
     'vellum/widgets',
     'vellum/util',
     'vellum/atwho',
@@ -8,11 +11,110 @@ define([
 ], function (
     _,
     $,
+    auto_box,
+    markdown_help,
+    jr_util,
     widgets,
     util,
     atwho
 ) {
-    var widget = function (mug, language, form, options) {
+    var DEFAULT_EXTENSIONS = {
+            image: 'png',
+            audio: 'mp3',
+            video: '3gp',
+            'video-inline': '3gp'
+        };
+
+    var iTextIDWidget = function (mug, options) {
+        var widget = widgets.text(mug, options),
+            $input = widget.input,
+            currentValue = null;
+
+        function autoGenerateId() {
+            return jr_util.getDefaultItextId(mug, widget.path);
+        }
+
+        function updateAutoId() {
+            _setValue(autoGenerateId());
+            setAutoMode(true);
+        }
+
+        function unlinkSharedItext() {
+            if (currentValue.refCount > 1) {
+                currentValue.refCount--;
+                currentValue = currentValue.clone();
+            }
+        }
+
+        var _setValue = widget.setValue;
+
+        widget.setValue = function (value) {
+            currentValue = value;
+            if (value.autoId) {
+                updateAutoId();
+            } else {
+                _setValue(value.id);
+                setAutoMode(false);
+            }
+        };
+
+        widget.getValue = function() {
+            currentValue.id = $input.val();
+            currentValue.autoId = getAutoMode();
+            return currentValue;
+        };
+
+        // auto checkbox
+        var $autoBox = $("<input />").attr("type", "checkbox");
+
+        $autoBox.change(function () {
+            if ($(this).prop('checked')) {
+                unlinkSharedItext();
+                updateAutoId();
+                widget.handleChange();
+            }
+        });
+
+        function setAutoMode(autoMode) {
+            $autoBox.prop("checked", autoMode);
+        }
+
+        function getAutoMode() {
+            return $autoBox.prop('checked');
+        }
+
+        var _getUIElement = widget.getUIElement;
+        widget.getUIElement = function () {
+            var $uiElem = _getUIElement().css('position', 'relative'),
+                $autoBoxContainer = $(auto_box());
+
+            $autoBoxContainer.find("label").prepend($autoBox);
+            $uiElem.find('.controls')
+                .removeClass("col-sm-9")
+                .addClass("col-sm-8")
+                .after($autoBoxContainer);
+
+            return $uiElem;
+        };
+
+        widget.input.keyup(function () {
+            // turn off auto-mode if the id is ever manually overridden
+            var newVal = $(this).val();
+            if (newVal !== autoGenerateId()) {
+                setAutoMode(false);
+            }
+        });
+
+        mug.on("property-changed", function (e) {
+            if (getAutoMode() && e.property === "nodeID") {
+                $input.val(autoGenerateId());
+            }
+        }, null, "teardown-mug-properties");
+
+        return widget;
+    };
+
+    var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
             // todo: id->class
@@ -248,7 +350,129 @@ define([
         return widget;
     };
 
+    var itextMarkdownWidget = function (mug, language, form, options) {
+        options = options || {};
+        var parent = options.parent;
+        var widget = itextLabelWidget(mug, language, form, options),
+            super_setValue = widget.setValue,
+            super_getUIElement = widget.getUIElement,
+            super_handleChange = widget.handleChange,
+            wantsMarkdown = true,
+            markdownOff, markdownOn, markdownOutput;
+
+        widget.toggleMarkdown = function() {
+            parent.toggleClass("has-markdown");
+            widget.mug.form.fire('change');
+        };
+
+        markdownOutput = $('<div>').addClass("controls well markdown-output col-sm-9");
+
+        widget.handleChange = function() {
+            super_handleChange();
+            var val = widget.getValue(),
+                item = widget.getItextItem();
+            if (jr_util.looksLikeMarkdown(val)) {
+                if (wantsMarkdown) {
+                    parent.removeClass("markdown-ignorant");
+                    parent.addClass("has-markdown");
+                }
+            } else if (!val) {
+                parent.removeClass("has-markdown");
+            }
+            item.hasMarkdown = markdownOff.is(":visible");
+            markdownOutput.html(util.markdown(val)).closest('.form-group').removeClass('hide');
+        };
+
+        widget.setValue = function (val, callback) {
+            super_setValue(val, callback);
+            if (!val) {
+                markdownOutput.closest('.form-group').addClass('hide');
+            }
+            markdownOutput.html(util.markdown(val));
+        };
+
+        widget.getUIElement = function() {
+            var elem = super_getUIElement(),
+                val = widget.getValue(),
+                markdownSpacer = $("<div />").addClass("col-sm-3"),
+                markdownContainer = $("<div />").addClass("col-sm-9"),
+                markdownRow = $("<div />").addClass("form-group").addClass("markdown-group");
+
+            elem.detach('.markdown-output');
+            markdownRow.append(markdownSpacer);
+            markdownContainer.append(markdownOutput);
+            markdownRow.append(markdownContainer);
+            elem.append(markdownRow);
+            elem.find('.control-label').append(markdown_help({title:options.lstring }));
+
+            markdownOff = elem.find('.turn-markdown-off').click(function() {
+                wantsMarkdown = false;
+                widget.getItextItem().hasMarkdown = false;
+                widget.toggleMarkdown();
+                return false;
+            });
+            markdownOn = elem.find('.turn-markdown-on').click(function() {
+                wantsMarkdown = true;
+                widget.getItextItem().hasMarkdown = true;
+                widget.toggleMarkdown();
+                return false;
+            });
+
+            if (widget.getItextItem().hasMarkdown) {
+                parent.addClass("has-markdown");
+            }
+            else {
+                parent.addClass("markdown-ignorant");
+            }
+            if (jr_util.looksLikeMarkdown(val)) {
+                markdownOutput.html(util.markdown(val));
+                markdownOff.removeClass('hide');
+            }
+            return elem;
+        };
+
+        return widget;
+    };
+
+    var itextFormWidget = function (mug, language, form, options) {
+        options = options || {};
+        options.idSuffix = "-" + form;
+        var widget = itextLabelWidget(mug, language, form, options);
+
+        widget.getDisplayName = function () {
+            return form + widget.getLangDesc();
+        };
+        return widget;
+    };
+
+    var itextMediaWidget = function (url_type) {
+        return function (mug, language, form, options) {
+            options.baseWidgetClass = widgets.text;
+            var widget = itextFormWidget(mug, language, form, options);
+
+            widget.getDefaultValue = function () {
+                if (jr_util.SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
+                    // default formats
+                    // image: jr://file/commcare/image/form_id/question_id.png
+                    // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                    var extension = DEFAULT_EXTENSIONS[form];
+                    return "jr://file/commcare/" + form + url_type +
+                           jr_util.getDefaultItextRoot(widget.mug) + "." + extension;
+                }
+                return null;
+            };
+
+            widget.mug.form.vellum.initWidget(widget);
+
+            return widget;
+        };
+    };
+
     return {
-        widget: widget,
+        form: itextFormWidget,
+        id: iTextIDWidget,
+        label: itextLabelWidget,
+        markdown: itextMarkdownWidget,
+        media: itextMediaWidget,
     };
 });
