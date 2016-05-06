@@ -272,11 +272,11 @@ define([
                 isLabel = true;
             }
             if (isLabel) {
-                $('<div>').append(mug.p[property].get()).find('output').each(function(index, value) {
+                return _.flatten($('<div>').append(mug.p[property].get()).find('output').map(function(index, value) {
                     _this._addReferences(mug, property, $(value).attr('value'));
-                });
+                }).get(), true);
             } else {
-                this._addReferences(mug, property, value);
+                return this._addReferences(mug, property, value);
             }
         },
         updateReferences: function (mug, property, value) {
