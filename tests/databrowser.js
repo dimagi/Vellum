@@ -178,15 +178,13 @@ define([
                 });
             });
 
-            it("jls should add instances on drag/drop of case property into itext", function(done) {
+            it("should add instances on drag/drop of case property into itext", function(done) {
                 util.loadXML("");
-                var mug = util.addQuestion("Text", "mug"),
-                    itext = $("[name=itext-en-label]"),
-                    sessionUri = CASE_DATA[0].uri,
-                    casedbUri = CASE_DATA[1].uri,
+                var itext = $("[name=itext-en-label]"),
                     editor = itext.ckeditor().editor,
                     widget = util.getWidget('itext-en-label');
 
+                util.addQuestion("Text", "mug");
                 widget.input.promise.then(function () { 
                     editor.on('change', function() {
                         util.assertXmlEqual(call("createXML"), ITEXT_XML,
