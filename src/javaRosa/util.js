@@ -1,11 +1,12 @@
 define([
     'underscore',
     'jquery',
-    'vellum/util',
-    'vellum/core'
+    'vellum/tsv',
+    'vellum/util'
 ], function (
     _,
     $,
+    tsv,
     util
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
