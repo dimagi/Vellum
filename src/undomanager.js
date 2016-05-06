@@ -1,10 +1,12 @@
 define([
     'jquery',
     'underscore',
+    'vellum/util',
     'tpl!vellum/templates/undo_alert',
 ], function(
     $,
     _,
+    util,
     UNDO_ALERT
 ) {
     function alertShown() {
@@ -22,21 +24,19 @@ define([
         $('.fd-undo-container').append(UNDO_ALERT);
     }
 
-    function toggleAlert(undoStack, vellum) {
+    function toggleAlert(undoStack) {
         if (undoStack.length && !alertShown()) {
             createAlert();
         } else if (undoStack.length === 0 && alertShown()) {
             $('.fd-undo-delete').remove();
         }
-        if (vellum) {
-            vellum.adjustToWindow();
-        }
     }
 
-    function UndoManager(form) {
+    function UndoManager() {
         var _this = this;
         _this.undoStack = [];
-        _this.vellum = form.vellum;
+
+        util.eventuality(this);
     }
 
     UndoManager.prototype = {
@@ -46,7 +46,10 @@ define([
             } else {
                 this.undoStack = [];
             }
-            toggleAlert(this.undoStack, this.vellum);
+            toggleAlert(this.undoStack);
+            this.fire({
+                type: 'reset',
+            });
         },
         appendMug: function (mug, previousMug, position) {
             this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
