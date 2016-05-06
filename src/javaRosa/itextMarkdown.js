@@ -3,14 +3,14 @@ define([
     'jquery',
     'tpl!vellum/templates/markdown_help',
     'vellum/util',
-    'vellum/javaRosa/itextLabelWidget',
+    'vellum/javaRosa/itextLabel',
     'vellum/core'
 ], function (
     _,
     $,
     markdown_help,
     util,
-    itextLabelWidget
+    itextLabel
 ) {
     var looksLikeMarkdown = function(val) {
         /* Regex checks (in order):
@@ -27,7 +27,7 @@ define([
     var widget = function (mug, language, form, options) {
         options = options || {};
         var parent = options.parent;
-        var widget = itextLabelWidget.widget(mug, language, form, options),
+        var widget = itextLabel.widget(mug, language, form, options),
             super_setValue = widget.setValue,
             super_getUIElement = widget.getUIElement,
             super_handleChange = widget.handleChange,

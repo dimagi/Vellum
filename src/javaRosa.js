@@ -16,8 +16,8 @@ define([
     'vellum/atwho',
     'vellum/tsv',
     'vellum/xml',
-    'vellum/javaRosa/itextLabelWidget',
-    'vellum/javaRosa/itextMarkdownWidget',
+    'vellum/javaRosa/itextLabel',
+    'vellum/javaRosa/itextMarkdown',
     'vellum/core'
 ], function (
     _,
@@ -33,8 +33,8 @@ define([
     atwho,
     tsv,
     xml,
-    itextLabelWidget,
-    itextMarkdownWidget
+    itextLabel,
+    itextMarkdown
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
         DEFAULT_EXTENSIONS = {
@@ -594,9 +594,9 @@ define([
         var block = baseItextBlock(mug, options);
         if ((!options.vellum.opts().features.markdown_in_groups &&
              _.contains(NO_MARKDOWN_MUGS, mug.__className)) || mug.form.noMarkdown) {
-            block.itextWidget = itextLabelWidget.widget;
+            block.itextWidget = itextLabel.widget;
         } else {
-            block.itextWidget = itextMarkdownWidget.widget;
+            block.itextWidget = itextMarkdown.widget;
         }
         return block;
     };
@@ -820,7 +820,7 @@ define([
     var itextFormWidget = function (mug, language, form, options) {
         options = options || {};
         options.idSuffix = "-" + form;
-        var widget = itextLabelWidget.widget(mug, language, form, options);
+        var widget = itextLabel.widget(mug, language, form, options);
 
         widget.getDisplayName = function () {
             return form + widget.getLangDesc();
