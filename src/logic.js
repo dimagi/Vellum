@@ -287,9 +287,7 @@ define([
             var _this = this,
                 messages = {};
             if (property) {
-                if (arguments.length > 2 || XPATH_REFERENCES.indexOf(property) !== -1) {
-                    update(property);
-                }
+                update(property);
             } else {
                 _.each(XPATH_REFERENCES, update);
             }
