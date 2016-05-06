@@ -11,6 +11,7 @@ define([
     'text!static/databrowser/child-ref.xml',
     'text!static/databrowser/child-ref-no-hashtag.xml',
     'text!static/databrowser/mother-ref.xml',
+    'text!static/databrowser/child-ref-output-value.xml',
     'text!static/databrowser/preloaded-hashtags.xml',
 ], function (
     options,
@@ -24,6 +25,7 @@ define([
     CHILD_REF_XML,
     CHILD_REF_NO_HASHTAG_XML,
     MOTHER_REF_XML,
+    CHILD_REF_OUTPUT_VALUE_XML,
     PRELOADED_HASHTAGS_XML
 ) {
     var assert = chai.assert,
@@ -196,6 +198,30 @@ define([
             it("should write externally referenced hashtags to form", function() {
                 util.loadXML(PRELOADED_HASHTAGS_XML);
                 util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
+            });
+
+            it("should add the casedb instance when referencing a case in a label", function(done) {
+                util.loadXML("");
+                var mug = util.addQuestion("Text", "mug"),
+                    label = $("[name=itext-en-label]"),
+                    sessionUri = CASE_DATA[0].uri,
+                    casedbUri = CASE_DATA[1].uri,
+                    editor = label.ckeditor().editor,
+                    widget = util.getWidget('itext-en-label');
+                widget.input.promise.then(function () { 
+                    editor.on('change', function() {
+                        assert.equal(mug.p.labelItext.get(), 'question1<output value="#case/child/dob" />');
+                        assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                        assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                        util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_XML,
+                                            {normalize_xmlns: true});
+                        done();
+                    });
+                    assert.equal(getInstanceId(mug.form, sessionUri), null);
+                    assert.equal(getInstanceId(mug.form, casedbUri), null);
+                    assert.equal(label.length, 1);
+                    util.findNode(dataTree, "dob").data.handleDrop(label);
+                });
             });
 
             describe("when rich_text is off", function () {
