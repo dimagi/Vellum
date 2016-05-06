@@ -1814,10 +1814,6 @@ define([
                             }
                             writeValue(xmlWriter, val);
                             xmlWriter.writeEndElement();
-                            if (val.search(/#case\//) !== -1) {
-                                form_.addInstanceIfNotExists({ id: 'commcaresession' });
-                                form_.addInstanceIfNotExists({ id: 'casedb' });
-                            }
                         }
                         if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
                             val = item.get('default', lang);

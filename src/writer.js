@@ -30,16 +30,16 @@ define([
         createDataBlock(form, dataTree, xmlWriter);
         xmlWriter.writeEndElement(); //CLOSE MAIN INSTANCE
         
+        // other instances
+        for (var i = 1; i < form.instanceMetadata.length; i++) {
+            _writeInstance(xmlWriter, form.instanceMetadata[i]);
+        }
+        
         createBindList(dataTree, xmlWriter);
         
         createSetValues(dataTree, form, xmlWriter);
 
         form.vellum.contributeToModelXML(xmlWriter, form);
-        
-        // other instances
-        for (var i = 1; i < form.instanceMetadata.length; i++) {
-            _writeInstance(xmlWriter, form.instanceMetadata[i]);
-        }
         
         xmlWriter.writeEndElement(); //CLOSE MODEL
 
