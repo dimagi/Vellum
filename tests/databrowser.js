@@ -89,7 +89,7 @@ define([
         }
 
         describe("when loaded before the form", function () {
-            beforeEach(function (done) {
+            before(function (done) {
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
@@ -276,7 +276,7 @@ define([
             });
 
             describe("when rich_text is off", function () {
-                beforeEach(function (done) {
+                before(function (done) {
                     util.init({
                         plugins: plugins,
                         javaRosa: {langs: ['en']},
@@ -363,7 +363,7 @@ define([
                     done();
                 });
             }
-            beforeEach(function (done) {
+            before(function (done) {
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},

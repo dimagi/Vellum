@@ -65,7 +65,7 @@ define([
 
     describe("atwho", function() {
         describe("without rich text", function() {
-            beforeEach(function(done) {
+            before(function(done) {
                 util.init({
                     javaRosa: {langs: ['en']},
                     core: { form: TEST1_XML, onReady: done },
