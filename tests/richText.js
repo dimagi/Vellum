@@ -28,7 +28,7 @@ define([
     'underscore',
     'tests/utils',
     'vellum/richText',
-    'vellum/javaRosa',
+    'vellum/javaRosa/util',
     'vellum/xpath',
     'ckeditor',
     'text!static/richText/burpee.xml',

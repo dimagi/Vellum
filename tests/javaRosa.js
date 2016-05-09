@@ -4,7 +4,7 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'vellum/javaRosa',
+    'vellum/javaRosa/util',
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
