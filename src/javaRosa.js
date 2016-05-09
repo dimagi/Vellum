@@ -171,7 +171,14 @@ define([
             return Boolean(this.hasForm('default') || 
                            this.hasForm('long')    || 
                            this.hasForm('short'));
-        }
+        },
+        forEachLogicExpression: function (fn) {
+            var text = this.get(),
+                ret = $('<div>').append(text).find('output').map(function(idx, value) {
+                    return fn($(value).attr('value'));
+                }).get();
+            return _.flatten(ret, true);
+        },
     };
 
     function ItextForm (options) {

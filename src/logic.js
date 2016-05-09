@@ -266,15 +266,8 @@ define([
         },
         addReferences: function (mug, property, value) {
             // get absolute paths from mug property's value
-            var isLabel = false,
-                _this = this;
-            if (!value && mug.p[property] && _.isFunction(mug.p[property].get)) {
-                isLabel = true;
-            }
-            if (isLabel) {
-                return _.flatten($('<div>').append(mug.p[property].get()).find('output').map(function(index, value) {
-                    _this._addReferences(mug, property, $(value).attr('value'));
-                }).get(), true);
+            if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
+                return mug.p[property].forEachLogicExpression(_.bind(this._addReferences, this, mug, property));
             } else {
                 return this._addReferences(mug, property, value);
             }
