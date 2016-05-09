@@ -271,7 +271,5 @@ define([
         insertOutputRef: insertOutputRef,
         looksLikeMarkdown: looksLikeMarkdown,
         parseXLSItext: parseXLSItext,
-        warnOnCircularReference: warnOnCircularReference,
-        warnOnNonOutputableValue: warnOnNonOutputableValue,
     };
 });
