@@ -28,7 +28,7 @@ define([
     itext,
     itextBlock,
     itextWidget,
-    jr_util
+    jrUtil
 ) {
     var ICONS = {
         image: 'fa fa-photo',
@@ -72,13 +72,13 @@ define([
                     $('body').append(menu);
                     menu.find('li a').click(function () {
                         var dateFormat = $(this).data('format');
-                        jr_util.insertOutputRef(_this, target, path, mug, dateFormat);
+                        jrUtil.insertOutputRef(_this, target, path, mug, dateFormat);
                         menu.remove();
                     });
                     var e = window.event;
                     menu.css({'top': e.clientY, 'left': e.clientX}).show();
                 } else {
-                    jr_util.insertOutputRef(_this, target, path, mug);
+                    jrUtil.insertOutputRef(_this, target, path, mug);
                 }
                 if (window.analytics) {
                     if (_this.data.core.form.isCaseReference(path)) {
@@ -299,7 +299,7 @@ define([
             }
 
             function getItextItem(id, property) {
-                var auto = !id || id === jr_util.getDefaultItextId(mug, property);
+                var auto = !id || id === jrUtil.getDefaultItextId(mug, property);
                 if (id) {
                     var item = itextMap[id];
                     if (item && itextMap.hasOwnProperty(id)) {
@@ -376,7 +376,7 @@ define([
                 oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
             }
 
-            jr_util.forEachItextItem(form, function (item, mug) {
+            jrUtil.forEachItextItem(form, function (item, mug) {
                 change = false;
                 _(item.forms).each(function (itForm) {
                     _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
@@ -404,7 +404,7 @@ define([
         },
         duplicateMugProperties: function (mug) {
             this.__callOld();
-            _.each(jr_util.ITEXT_PROPERTIES, function (path) {
+            _.each(jrUtil.ITEXT_PROPERTIES, function (path) {
                 var itext = mug.p[path];
                 if (itext && itext.autoId) {
                     mug.p[path] = itext.clone();
@@ -472,7 +472,7 @@ define([
             this.__callOld();
             // update and dedup all non-empty Itext items IDs
             this.data.javaRosa.itextItemsFromBeforeSerialize =
-                jr_util.getItextItemsFromMugs(this.data.core.form);
+                jrUtil.getItextItemsFromMugs(this.data.core.form);
         },
         afterSerialize: function () {
             this.__callOld();
@@ -480,7 +480,7 @@ define([
         },
         beforeBulkInsert: function (form) {
             this.__callOld();
-            this.data.javaRosa.itextById = jr_util.getItextItemsFromMugs(form, true);
+            this.data.javaRosa.itextById = jrUtil.getItextItemsFromMugs(form, true);
         },
         afterBulkInsert: function () {
             this.__callOld();
@@ -562,7 +562,7 @@ define([
                     var dlang = item.itextModel.getDefaultLanguage(),
                         languages = item.itextModel.languages,
                         nodeID = "",
-                        mmForms = _.object(jr_util.SUPPORTED_MEDIA_TYPES, jr_util.SUPPORTED_MEDIA_TYPES),
+                        mmForms = _.object(jrUtil.SUPPORTED_MEDIA_TYPES, jrUtil.SUPPORTED_MEDIA_TYPES),
                         // HACK reach into media uploader options
                         objectMap = that.data.uploader.objectMap || {};
                     if (data.id) {
@@ -612,7 +612,7 @@ define([
                         });
                     });
                     if (found && !data[name]) {
-                        item.id = jr_util.getDefaultItextId(mug, name.replace(/Itext$/, ""));
+                        item.id = jrUtil.getDefaultItextId(mug, name.replace(/Itext$/, ""));
                     }
                     if (data[name + ":hasMarkdown"]) {
                         item.hasMarkdown = true;
@@ -712,7 +712,7 @@ define([
                             getItextByMug: function (mug) {
                                 return mug.p.constraintMsgItext;
                             },
-                            forms: jr_util.SUPPORTED_MEDIA_TYPES,
+                            forms: jrUtil.SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
                         }));
                     }
@@ -837,7 +837,7 @@ define([
                             getItextByMug: function (mug) {
                                 return mug.p.labelItext;
                             },
-                            forms: jr_util.SUPPORTED_MEDIA_TYPES,
+                            forms: jrUtil.SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
                         }));
                     }
@@ -856,7 +856,7 @@ define([
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
                             },
-                            forms: jr_util.SUPPORTED_MEDIA_TYPES,
+                            forms: jrUtil.SUPPORTED_MEDIA_TYPES,
                             formToIcon: ICONS
                         }));
                     }
@@ -919,7 +919,7 @@ define([
                     title: "Update Translations",
                     cssClasses: "btn-primary",
                     action: function () {
-                        jr_util.parseXLSItext(form, $textarea.val(), Itext);
+                        jrUtil.parseXLSItext(form, $textarea.val(), Itext);
                         $modal.modal('hide');
                         done();
                     }
@@ -936,7 +936,7 @@ define([
 
             // display current values
             $textarea = $updateForm.find('textarea');
-            $textarea.val(jr_util.generateItextXLS(form, Itext));
+            $textarea.val(jrUtil.generateItextXLS(form, Itext));
 
             $modal.modal('show');
             $modal.one('shown.bs.modal', function () { $textarea.focus(); });

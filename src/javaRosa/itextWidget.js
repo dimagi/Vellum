@@ -13,7 +13,7 @@ define([
     $,
     auto_box,
     markdown_help,
-    jr_util,
+    jrUtil,
     widgets,
     util,
     atwho
@@ -31,7 +31,7 @@ define([
             currentValue = null;
 
         function autoGenerateId() {
-            return jr_util.getDefaultItextId(mug, widget.path);
+            return jrUtil.getDefaultItextId(mug, widget.path);
         }
 
         function updateAutoId() {
@@ -371,7 +371,7 @@ define([
             super_handleChange();
             var val = widget.getValue(),
                 item = widget.getItextItem();
-            if (jr_util.looksLikeMarkdown(val)) {
+            if (jrUtil.looksLikeMarkdown(val)) {
                 if (wantsMarkdown) {
                     parent.removeClass("markdown-ignorant");
                     parent.addClass("has-markdown");
@@ -424,7 +424,7 @@ define([
             else {
                 parent.addClass("markdown-ignorant");
             }
-            if (jr_util.looksLikeMarkdown(val)) {
+            if (jrUtil.looksLikeMarkdown(val)) {
                 markdownOutput.html(util.markdown(val));
                 markdownOff.removeClass('hide');
             }
@@ -451,13 +451,13 @@ define([
             var widget = itextFormWidget(mug, language, form, options);
 
             widget.getDefaultValue = function () {
-                if (jr_util.SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
+                if (jrUtil.SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
                     // default formats
                     // image: jr://file/commcare/image/form_id/question_id.png
                     // audio: jr://file/commcare/audio/form_id/question_id.mp3
                     var extension = DEFAULT_EXTENSIONS[form];
                     return "jr://file/commcare/" + form + url_type +
-                           jr_util.getDefaultItextRoot(widget.mug) + "." + extension;
+                           jrUtil.getDefaultItextRoot(widget.mug) + "." + extension;
                 }
                 return null;
             };
