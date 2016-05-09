@@ -164,7 +164,7 @@ define([
     'vellum/ignoreButRetain',
     'vellum/intentManager',
     'vellum/itemset',
-    'vellum/javaRosa',
+    'vellum/javaRosa/plugin',
     'vellum/datasources',
     'vellum/lock',
     'vellum/databrowser',
