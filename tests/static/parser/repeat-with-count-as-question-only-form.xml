@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/6830242E-8941-4752-BF6F-F40F4C964878" uiVersion="1" version="1" name="Untitled Form">
+					<question1 />
+					<question2 jr:template="">
+						<question3 />
+					</question2>
+				</data>
+			</instance>
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:int" />
+			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" />
+			<bind vellum:nodeset="#form/question2/question3" nodeset="/data/question2/question3" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="question1-label">
+						<value>question1</value>
+					</text>
+					<text id="question2-label">
+						<value>question2</value>
+					</text>
+					<text id="question2/question3-label">
+						<value>question3</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="question1-label">
+						<value>question1</value>
+					</text>
+					<text id="question2-label">
+						<value>question2</value>
+					</text>
+					<text id="question2/question3-label">
+						<value>question3</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input vellum:ref="#form/question1" ref="/data/question1">
+			<label ref="jr:itext('question1-label')" />
+		</input>
+		<group>
+			<label ref="jr:itext('question2-label')" />
+			<repeat vellum:jr__count="#form/question1" jr:noAddRemove="true()" vellum:nodeset="#form/question2" nodeset="/data/question2">
+				<input vellum:ref="#form/question2/question3" ref="/data/question2/question3">
+					<label ref="jr:itext('question2/question3-label')" />
+				</input>
+			</repeat>
+		</group>
+	</h:body>
+</h:html>

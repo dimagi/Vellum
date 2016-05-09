@@ -77,7 +77,7 @@ define([
                 children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
                     if (r_count) {
-                        xmlWriter.writeAttributeString("jr:count", String(r_count));
+                        util.writeHashtags(xmlWriter, 'jr:count', String(r_count), mug);
                         xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
                     util.writeHashtags(xmlWriter, 'nodeset', nodeset, mug);
