@@ -12,6 +12,7 @@ define([
     'text!static/databrowser/child-ref-no-hashtag.xml',
     'text!static/databrowser/mother-ref.xml',
     'text!static/databrowser/child-ref-output-value.xml',
+    'text!static/databrowser/child-ref-output-value-other-lang.xml',
     'text!static/databrowser/preloaded-hashtags.xml',
 ], function (
     options,
@@ -26,6 +27,7 @@ define([
     CHILD_REF_NO_HASHTAG_XML,
     MOTHER_REF_XML,
     CHILD_REF_OUTPUT_VALUE_XML,
+    CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
     PRELOADED_HASHTAGS_XML
 ) {
     var assert = chai.assert,
@@ -221,6 +223,53 @@ define([
                     assert.equal(getInstanceId(mug.form, casedbUri), null);
                     assert.equal(label.length, 1);
                     util.findNode(dataTree, "dob").data.handleDrop(label);
+                });
+            });
+
+            describe("with two languages", function () {
+                beforeEach(function (done) {
+                    util.init({
+                        plugins: plugins,
+                        javaRosa: {langs: ['en', 'hin']},
+                        core: {
+                            dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
+                            onReady: function () {
+                                var _this = this;
+                                datasources.getDataSources(function () {
+                                    databrowser.initDataBrowser(_this);
+                                    dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
+                                    done();
+                                });
+                            }
+                        }
+                    });
+                });
+
+                it("should add the casedb instance when referencing a case in a label of non default language", function(done) {
+                    util.loadXML("");
+                    var mug = util.addQuestion("Text", "mug");
+                    // util.addQuestion sets nodeId and labelItext in a way that doesn't affect UI
+                    util.clickQuestion('mug');
+                    var label = $("[name=itext-hin-label]"),
+                        sessionUri = CASE_DATA[0].uri,
+                        casedbUri = CASE_DATA[1].uri,
+                        editor = label.ckeditor().editor,
+                        widget = util.getWidget('itext-hin-label');
+                    widget.input.promise.then(function () { 
+                        editor.on('change', function() {
+                            assert.equal(mug.p.labelItext.get(), 'mug');
+                            assert.equal(mug.p.labelItext.get(null, 'hin'), 'mug<output value="#case/child/dob" />');
+                            assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                            assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+                            util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
+                                                {normalize_xmlns: true});
+                            done();
+                        });
+                        assert.equal(getInstanceId(mug.form, sessionUri), null);
+                        assert.equal(getInstanceId(mug.form, casedbUri), null);
+                        assert.equal(label.length, 1);
+                        util.findNode(dataTree, "dob").data.handleDrop(label);
+                    });
                 });
             });
 

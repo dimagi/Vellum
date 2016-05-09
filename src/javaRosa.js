@@ -173,11 +173,15 @@ define([
                            this.hasForm('short'));
         },
         forEachLogicExpression: function (fn) {
-            var text = this.get(),
-                ret = $('<div>').append(text).find('output').map(function(idx, value) {
-                    return fn($(value).attr('value'));
-                }).get();
-            return _.flatten(ret, true);
+            var forms = this.getForms(),
+                ret = _.map(forms, function(form) {
+                    return _.map(form.getOutputRefExpressions(), function (exprs, lang) {
+                        return _.map(exprs, function (expr) {
+                            return fn(expr);
+                        });
+                    });
+                });
+            return _.flatten(ret);
         },
     };
 
