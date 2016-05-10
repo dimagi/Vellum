@@ -149,7 +149,7 @@ define([
      *    normalizeEscapedHashtag - transforms to escaped hashtag form
      *    transform - transforms escaped hashtags
      *    isValidHashtag - boolean if hashtag translation exists
-     *    getMugByPath - only used for mug.options.icon
+     *    getIconFromPath - only used for mug.options.icon
      *    xpath - xpath parser
      * @param options -
      *    rtl - use right to left text
@@ -412,13 +412,11 @@ define([
                 };
             }
 
-            if (form) {
-                var mug = form.getMugByPath(xpath);
-                if (mug) {
-                    return {
-                        classes: ['label-datanode-internal', mug.options.icon],
-                    };
-                }
+            var icon = form.getIconFromPath(xpath);
+            if (icon) {
+                return {
+                    classes: ['label-datanode-internal', icon],
+                };
             }
 
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
@@ -600,7 +598,10 @@ define([
             normalizeEscapedHashtag: _.bind(form.normalizeEscapedHashtag, form),
             transform: _.bind(form.transform, form),
             isValidHashtag: _.bind(form.isValidHashtag, form),
-            getMugByPath: _.bind(form.getMugByPath, form),
+            getIconFromPath: function (path) {
+                var mug = form.getMugByPath(path);
+                return mug ? mug.options.icon : null;
+            },
             xpath: form.xpath,
         };
     }

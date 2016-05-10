@@ -150,14 +150,14 @@ define([
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(val[0], formShim, opts),
+                        richText.toRichText(val[0], richText.createFormModelForEditor(formShim), opts),
                         wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(outputValueTemplateFn(val[0]), formShim),
+                        richText.toRichText(outputValueTemplateFn(val[0]), richText.createFormModelForEditor(formShim)),
                         wrapWithDivP(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
@@ -180,7 +180,7 @@ define([
 
             _.each(dates, function(val) {
                 it("from text to html with output value: " + val.xmlValue, function() {
-                    var real = richText.toRichText(outputValueTemplateFn(val.xmlValue), formShim),
+                    var real = richText.toRichText(outputValueTemplateFn(val.xmlValue), richText.createFormModelForEditor(formShim)),
                         test = makeOutputValue(val.valueInBubble, val.bubbleDispValue,
                                               val.icon, val.internalRef).attr(val.extraAttrs);
                     assert(wrapWithDiv(real)[0].isEqualNode(wrapWithDivP(test)[0]),
@@ -191,7 +191,7 @@ define([
             it("bubble a drag+drop reference", function() {
                 var fmt = "%d/%n/%y",
                     tag = javaRosa.getOutputRef("`#form/text`", fmt),
-                    bubble = richText.toRichText(tag, formShim);
+                    bubble = richText.toRichText(tag, richText.createFormModelForEditor(formShim));
                 assert.strictEqual($(bubble).find('span').data('date-format'), fmt);
             });
         });
@@ -221,7 +221,7 @@ define([
             _.each(equations, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(val[0], formShim, opts),
+                        richText.toRichText(val[0], richText.createFormModelForEditor(formShim), opts),
                         "<p>" + val[1] + "</p>"
                     );
                 });
@@ -283,7 +283,7 @@ define([
             _.each(nonConversions, function(val) {
                 it("from text to html: " + val, function() {
                     assert.strictEqual(
-                        richText.toRichText(val, formShim, opts),
+                        richText.toRichText(val, richText.createFormModelForEditor(formShim), opts),
                         "<p>" + val + "</p>"
                     );
                 });
@@ -303,7 +303,7 @@ define([
 
             _.each(items, function (item) {
                 it("to text: " + item[0], function () {
-                    var result = richText.bubbleOutputs(item[0], formShim, true),
+                    var result = richText.bubbleOutputs(item[0], richText.createFormModelForEditor(formShim), true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
                             if (formShim.getMugByPath("`#form/" + name + "`")) {
                                 var output = makeOutputValue("`#form/" + name + "`", name, ico, true);
@@ -325,7 +325,7 @@ define([
             before(function (done) {
                 $("body").append(el);
                 input = el.children().first();
-                editor = richText.editor(input, formShim, options);
+                editor = richText.editor(input, richText.createFormModelForEditor(formShim), options);
                 // wait for editor to be ready; necessary to change selection
                 input.promise.then(function () { done(); });
             });
