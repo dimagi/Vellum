@@ -1565,7 +1565,7 @@ define([
                     writeControlRefAttr: null,
                     writeCustomXML: function (xmlWriter, mug) {
                         if (r_count) {
-                            xmlWriter.writeAttributeString("jr:count", String(r_count));
+                            util.writeHashtags(xmlWriter, 'jr:count', String(r_count));
                             xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                         }
                         util.writeHashtags(xmlWriter, 'nodeset', hashtag, mug);

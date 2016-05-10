@@ -13,6 +13,8 @@ define([
     'text!static/parser/override.xml',
     'text!static/parser/overridden.xml',
     'text!static/parser/first-time-hashtag.xml',
+    'text!static/parser/repeat-with-count-as-question-only-form.xml',
+    'text!static/writer/repeat-with-count-as-question.xml',
 ], function (
     chai,
     $,
@@ -26,7 +28,9 @@ define([
     TEST_XML_2,
     OVERRIDE_XML,
     OVERRIDDEN_XML,
-    FIRST_TIME_HASHTAG_XML
+    FIRST_TIME_HASHTAG_XML,
+    REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML,
+    REPEAT_WITH_COUNT_AS_QUESTION_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -152,6 +156,22 @@ define([
             it("should generate hashtags correctly on first load", function() {
                 util.loadXML(FIRST_TIME_HASHTAG_XML);
                 util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
+            });
+
+            describe("with two languages", function () {
+                before(function(done) {
+                    util.init({
+                        plugins: plugins,
+                        javaRosa: {langs: ['en', 'hin']},
+                        core: {
+                            onReady: done
+                        }
+                    });
+                });
+                it("should load jr__count as jr:count", function() {
+                    util.loadXML(REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML);
+                    util.assertXmlEqual(util.call('createXML'), REPEAT_WITH_COUNT_AS_QUESTION_XML);
+                });
             });
         });
     });

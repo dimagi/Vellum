@@ -306,6 +306,7 @@ define([
         }
 
         var form = mug.form,
+            vellumKey = key.replace(':', '__'),
             xpath_, hashtag;
         try {
             var expr = form.xpath.parse(hashtagOrXPath);
@@ -313,7 +314,7 @@ define([
             hashtag = expr.toHashtag();
         } catch (err) {
             if (form.useRichText ) {
-                xmlWriter.writeAttributeString('vellum:' + key, "#invalid/xpath " + hashtagOrXPath);
+                xmlWriter.writeAttributeString('vellum:' + vellumKey, "#invalid/xpath " + hashtagOrXPath);
             }
             xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
                 return mug.form.normalizeXPath(hashtag);
@@ -323,7 +324,7 @@ define([
 
         if (hashtag !== xpath_) {
             if (form.useRichText ) {
-                    xmlWriter.writeAttributeString('vellum:' + key, hashtag);
+                    xmlWriter.writeAttributeString('vellum:' + vellumKey, hashtag);
             }
             xmlWriter.writeAttributeString(key, xpath_);
         } else {

@@ -425,7 +425,7 @@ define([
                     if (repeat.length === 1) {
                         var adapt = function (mug, form) {
                             mug = makeMugAdaptor('Repeat')(mug, form);
-                            mug.p.repeat_count = repeat.popAttr('jr:count') || null;
+                            mug.p.repeat_count = repeat.popAttr('vellum:jr__count') || repeat.popAttr('jr:count') || null;
                             mug.p.rawRepeatAttributes = getAttributes(repeat);
                             return mug;
                         };
