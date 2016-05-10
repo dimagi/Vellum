@@ -76,13 +76,14 @@ define([
             },
             transform: function (path) {
                 return escapedHashtags.transform(path, function (path) {
-                    var mug = formShim.getMugByPath(path),
-                        icon_ = mug ? icon(mug.options.icon) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
-                    return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, !!mug)).html();
+                    var icon_ = formShim.getIconFromPath(path),
+                        iconExists = !!icon_;
+                    icon_ = iconExists ? icon(icon_) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
+                    return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, iconExists)).html();
                 });
             },
-            getMugByPath: function(path) {
-                return {
+            getIconFromPath: function(path) {
+                var mug = {
                     "#form/text": {
                         options: { icon: 'fcc fcc-fd-text' },
                     },
@@ -96,6 +97,7 @@ define([
                         options: { icon: 'fcc icon-folder-open' },
                     },
                 }[this.normalizeHashtag(path)];
+                return mug ? mug.options.icon : null;
             },
             xpath: escapedHashtags.parser(hashtagToXPath),
         };
@@ -150,14 +152,14 @@ define([
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(val[0], richText.createFormModelForEditor(formShim), opts),
+                        richText.toRichText(val[0], formShim, opts),
                         wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(outputValueTemplateFn(val[0]), richText.createFormModelForEditor(formShim)),
+                        richText.toRichText(outputValueTemplateFn(val[0]), formShim),
                         wrapWithDivP(makeOutputValue(val[0], val[1], val[2], val[3])).html()
                     );
                 });
@@ -180,7 +182,7 @@ define([
 
             _.each(dates, function(val) {
                 it("from text to html with output value: " + val.xmlValue, function() {
-                    var real = richText.toRichText(outputValueTemplateFn(val.xmlValue), richText.createFormModelForEditor(formShim)),
+                    var real = richText.toRichText(outputValueTemplateFn(val.xmlValue), formShim),
                         test = makeOutputValue(val.valueInBubble, val.bubbleDispValue,
                                               val.icon, val.internalRef).attr(val.extraAttrs);
                     assert(wrapWithDiv(real)[0].isEqualNode(wrapWithDivP(test)[0]),
@@ -191,7 +193,7 @@ define([
             it("bubble a drag+drop reference", function() {
                 var fmt = "%d/%n/%y",
                     tag = javaRosa.getOutputRef("`#form/text`", fmt),
-                    bubble = richText.toRichText(tag, richText.createFormModelForEditor(formShim));
+                    bubble = richText.toRichText(tag, formShim);
                 assert.strictEqual($(bubble).find('span').data('date-format'), fmt);
             });
         });
@@ -221,7 +223,7 @@ define([
             _.each(equations, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(val[0], richText.createFormModelForEditor(formShim), opts),
+                        richText.toRichText(val[0], formShim, opts),
                         "<p>" + val[1] + "</p>"
                     );
                 });
@@ -283,7 +285,7 @@ define([
             _.each(nonConversions, function(val) {
                 it("from text to html: " + val, function() {
                     assert.strictEqual(
-                        richText.toRichText(val, richText.createFormModelForEditor(formShim), opts),
+                        richText.toRichText(val, formShim, opts),
                         "<p>" + val + "</p>"
                     );
                 });
@@ -303,9 +305,9 @@ define([
 
             _.each(items, function (item) {
                 it("to text: " + item[0], function () {
-                    var result = richText.bubbleOutputs(item[0], richText.createFormModelForEditor(formShim), true),
+                    var result = richText.bubbleOutputs(item[0], formShim, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
-                            if (formShim.getMugByPath("`#form/" + name + "`")) {
+                            if (formShim.getIconFromPath("`#form/" + name + "`")) {
                                 var output = makeOutputValue("`#form/" + name + "`", name, ico, true);
                                 return output[0].outerHTML;
                             }
@@ -325,7 +327,7 @@ define([
             before(function (done) {
                 $("body").append(el);
                 input = el.children().first();
-                editor = richText.editor(input, richText.createFormModelForEditor(formShim), options);
+                editor = richText.editor(input, formShim, options);
                 // wait for editor to be ready; necessary to change selection
                 input.promise.then(function () { done(); });
             });
