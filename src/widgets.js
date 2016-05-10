@@ -277,7 +277,7 @@ define([
                 isExpression: options.widget === xPath || options.widget === droppableText,
                 rtl: util.isRightToLeftLanguage(options.language),
             },
-            editor = richTextUtils.editor(widget.input, mug.form, opts);
+            editor = richTextUtils.editor(widget.input, richTextUtils.createFormModelForEditor(mug.form), opts);
 
         mug.on('teardown-mug-properties', editor.destroy, null, "teardown-mug-properties");
         editor.on('change', function () { widget.handleChange(); });

@@ -595,10 +595,21 @@ define([
         };
     }
 
+    function createFormModelForEditor(form) {
+        return {
+            normalizeEscapedHashtag: _.bind(form.normalizeEscapedHashtag, form),
+            transform: _.bind(form.transform, form),
+            isValidHashtag: _.bind(form.isValidHashtag, form),
+            getMugByPath: _.bind(form.getMugByPath, form),
+            xpath: form.xpath,
+        };
+    }
+
     return {
         bubbleOutputs: bubbleOutputs,
         editor: editor,
         fromRichText: fromRichText,
         toRichText: toRichText,
+        createFormModelForEditor: createFormModelForEditor,
     };
 });
