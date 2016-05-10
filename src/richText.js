@@ -145,8 +145,15 @@ define([
      * if the editor does not exist.
      *
      * @param input - editor jQuery HTML element.
-     * @param form - form object; used for creating bubbles.
-     * @param options - rich text bubble options.
+     * @param form - form object, functions used:
+     *    normalizeEscapedHashtag - transforms to escaped hashtag form
+     *    transform - transforms escaped hashtags
+     *    isValidHashtag - boolean if hashtag translation exists
+     *    getMugByPath - only used for mug.options.icon
+     *    xpath - xpath parser
+     * @param options -
+     *    rtl - use right to left text
+     *    isExpression - treat input as xpath or itext
      */
     var editor = function(input, form, options) {
         var wrapper = input.data("ckwrapper");
