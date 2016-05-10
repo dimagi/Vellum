@@ -1,6 +1,17 @@
 /*
  * A Vellum plugin to support JavaRosa extensions to the XForm spec,
  * particularly IText.
+ *
+ * Itext handles text that may be displayed in multiple languages. An IText block contains a translation for
+ * each required language. Each translation contains a set of text elements, each with an id and containing
+ * one or more values. Each value represents a different form of the text appropriate for that language.
+ * (e.g., plain text versus multimedia equivalent). See https://bitbucket.org/javarosa/javarosa/wiki/ITextAPI
+ *
+ * Mugs have the following Itext properties:
+ *  labelItext: for the question label itself
+ *  hintItext: for question hint (visible along with question)
+ *  helpItext: for question help (one click away)
+ *  constraintMsgItext: for the message to display if the question fails validation
  */
 define([
     'underscore',

@@ -1,3 +1,36 @@
+/**
+ * A mug is a question, containing data, bind, and control elements.
+ *
+ * Main Properties
+ *  nodeID
+ *  label
+ *  readOnlyControl
+ *  imageSize: Images only. Options to reduce image size before sending form.
+ *
+ * Data Source Properties
+ *
+ * Media Properties
+ *  mediaItext: Multimedia (image, audio, video, inline video) attached to the question.
+ *
+ * Logic Properties
+ *  calculateAttr: Hidden questions only. The calculation that generates the question's value.
+ *  requiredAttr: Boolean. Whether or not user must enter a value for the question.
+ *  relevantAttr: Boolean expression that determines whether or not to display a question to the end user.
+ *  constraintAttr: Boolean expression that, if false, will prevent the user from proceeding past the question.
+ *  repeat_count: Repeat groups only. An integer expression that determines the number of groups to generate.
+ *
+ * Advanced Properties
+ *  dataSource
+ *  dataValue: Deprecated.
+ *  defaultValue: An expression that will be assigned to a question before/until a user changes the value.
+ *  xmlnsAttr
+ *  label
+ *  hintLabel
+ *  constraintMsgAttr: Message to display if question fails validation (constraintAttr evaluates to false).
+ *  dataParent
+ *  appearance
+ *  comment: User-entered comment to help other users understand the purpose or implementation of the question.
+ */
 define([
     'jquery',
     'underscore',
@@ -13,9 +46,6 @@ define([
     logic,
     util
 ) {
-    /**
-     * A question, containing data, bind, and control elements.
-     */
     function Mug(options, form, baseSpec, attrs) {
         var properties = null;
         util.eventuality(this);
