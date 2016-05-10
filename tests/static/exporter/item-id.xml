@@ -10,8 +10,8 @@
 					</group>
 				</data>
 			</instance>
-			<bind nodeset="/data/group" />
-			<bind nodeset="/data/group/question1" />
+			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
+			<bind vellum:nodeset="#form/group/question1" nodeset="/data/group/question1" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="group-label">
@@ -31,9 +31,9 @@
 		</model>
 	</h:head>
 	<h:body>
-		<group ref="/data/group">
+		<group vellum:ref="#form/group" ref="/data/group">
 			<label ref="jr:itext('group-label')" />
-			<select1 ref="/data/group/question1">
+			<select1 vellum:ref="#form/group/question1" ref="/data/group/question1">
 				<label ref="jr:itext('question1-label')" />
 				<item>
 					<label ref="jr:itext('question1-1x-label')" />

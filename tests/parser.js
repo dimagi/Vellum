@@ -10,6 +10,11 @@ define([
     'text!static/parser/missing-bind.xml',
     'text!static/parser/test-xml-1.xml',
     'text!static/parser/test-xml-2.xml',
+    'text!static/parser/override.xml',
+    'text!static/parser/overridden.xml',
+    'text!static/parser/first-time-hashtag.xml',
+    'text!static/parser/repeat-with-count-as-question-only-form.xml',
+    'text!static/writer/repeat-with-count-as-question.xml',
 ], function (
     chai,
     $,
@@ -20,7 +25,12 @@ define([
     LABEL_WITHOUT_ITEXT_XML,
     MISSING_BIND_XML,
     TEST_XML_1,
-    TEST_XML_2
+    TEST_XML_2,
+    OVERRIDE_XML,
+    OVERRIDDEN_XML,
+    FIRST_TIME_HASHTAG_XML,
+    REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML,
+    REPEAT_WITH_COUNT_AS_QUESTION_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -39,7 +49,6 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -53,7 +62,6 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -73,14 +81,13 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
         it("should not drop newlines in calculate conditions", function () {
             util.loadXML(TEST_XML_2);
             var mug = call("getMugByPath", "/data/question1");
-            assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
+            assert.equal(mug.p.calculateAttr, 'concat("Line 1", "\nLine 2")');
         });
 
         var ignoreWarnings = /Form (JRM namespace|does not have a (Name|(UI)?Version))/;
@@ -114,6 +121,58 @@ define([
             util.loadXML(MISSING_BIND_XML);
             util.clickQuestion("text");
             assert(!$('[name=property-dataValue]').length);
+        });
+
+        describe("override", function() {
+            before(function(done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        onReady: done
+                    }
+                });
+            });
+
+            var properties = {
+                'relevantAttr': 'question2',
+                'constraintAttr': 'question2',
+                'calculateAttr': 'question3',
+            };
+
+            _.each(properties, function(question, prop) {
+                it("should override " + prop + " in question " + question, function() {
+                    util.loadXML(OVERRIDE_XML);
+                    var mug = util.getMug(question);
+                    assert.strictEqual(mug.p[prop], "`#form/question1`");
+                });
+            });
+
+            it("should override correctly", function() {
+                util.loadXML(OVERRIDE_XML);
+                util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
+            });
+
+            it("should generate hashtags correctly on first load", function() {
+                util.loadXML(FIRST_TIME_HASHTAG_XML);
+                util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
+            });
+
+            describe("with two languages", function () {
+                before(function(done) {
+                    util.init({
+                        plugins: plugins,
+                        javaRosa: {langs: ['en', 'hin']},
+                        core: {
+                            onReady: done
+                        }
+                    });
+                });
+                it("should load jr__count as jr:count", function() {
+                    util.loadXML(REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML);
+                    util.assertXmlEqual(util.call('createXML'), REPEAT_WITH_COUNT_AS_QUESTION_XML);
+                });
+            });
         });
     });
 });

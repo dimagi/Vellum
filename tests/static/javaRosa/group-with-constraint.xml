@@ -9,8 +9,8 @@
 					<Group />
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" />
-			<bind nodeset="/data/Group" relevant="true()" />
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" />
+			<bind vellum:nodeset="#form/Group" nodeset="/data/Group" relevant="true()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -21,9 +21,9 @@
 		</model>
 	</h:head>
 	<h:body>
-		<trigger ref="/data/question1" appearance="minimal">
+		<trigger vellum:ref="#form/question1" ref="/data/question1" appearance="minimal">
 			<label ref="jr:itext('question1-label')" />
 		</trigger>
-		<group ref="/data/Group" />
+		<group vellum:ref="#form/Group" ref="/data/Group" />
 	</h:body>
 </h:html>

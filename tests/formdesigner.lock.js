@@ -23,7 +23,6 @@ define([
     
     function beforeFn(done) {
         util.init({
-            features: {rich_text: false},
             javaRosa: {langs: ['en']},
             core: {
                 onReady: function () {
@@ -54,42 +53,42 @@ define([
         });
 
         it("disallows renaming a locked node", function () {
-            assert(locked('/data/node_locked', 'nodeID'));
-            assert(locked('/data/value_locked', 'nodeID'));
-            assert.isFalse(locked('/data/none_locked', 'nodeID'));
-            assert.isFalse(locked('/data/normal', 'nodeID'));
+            assert(locked('#form/node_locked', 'nodeID'));
+            assert(locked('#form/value_locked', 'nodeID'));
+            assert.isFalse(locked('#form/none_locked', 'nodeID'));
+            assert.isFalse(locked('#form/normal', 'nodeID'));
         });
 
         it("disallows moving a locked node to a different parent", function () {
-            assert.isFalse(moveable('/data/node_locked'));
-            assert.isFalse(moveable('/data/value_locked'));
-            assert(moveable('/data/none_locked'));
-            assert(moveable('/data/normal'));
+            assert.isFalse(moveable('#form/node_locked'));
+            assert.isFalse(moveable('#form/value_locked'));
+            assert(moveable('#form/none_locked'));
+            assert(moveable('#form/normal'));
         });
 
         it("disallows deleting a locked node", function () {
-            assert.isFalse(deleteable('/data/node_locked'));
-            assert.isFalse(deleteable('/data/value_locked'));
-            assert(deleteable('/data/none_locked'));
-            assert(deleteable('/data/normal'));
+            assert.isFalse(deleteable('#form/node_locked'));
+            assert.isFalse(deleteable('#form/value_locked'));
+            assert(deleteable('#form/none_locked'));
+            assert(deleteable('#form/normal'));
         });
 
         it("disallows changing the type only of a 'value' locked node", function () {
-            assert.isFalse(changeable('/data/value_locked'));
-            assert(changeable('/data/node_locked'));
-            assert(changeable('/data/none_locked'));
-            assert(changeable('/data/normal'));
+            assert.isFalse(changeable('#form/value_locked'));
+            assert(changeable('#form/node_locked'));
+            assert(changeable('#form/none_locked'));
+            assert(changeable('#form/normal'));
         });
 
         it("allows changing only the Itext IDs of a 'value' locked node", function () {
-            assert.isFalse(locked('/data/value_locked', 'constraintMsgItext'));
-            assert(locked('/data/value_locked', 'constraintAttr'));
+            assert.isFalse(locked('#form/value_locked', 'constraintMsgItext'));
+            assert(locked('#form/value_locked', 'constraintAttr'));
         });
 
         it("allows changing any property of a non-locked node", function () {
-            assert.isFalse(locked('/data/node_locked'));
-            assert.isFalse(locked('/data/none_locked'));
-            assert.isFalse(locked('/data/normal'));
+            assert.isFalse(locked('#form/node_locked'));
+            assert.isFalse(locked('#form/none_locked'));
+            assert.isFalse(locked('#form/normal'));
         });
     });
 

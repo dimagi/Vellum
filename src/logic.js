@@ -35,12 +35,14 @@ define([
             var paths = [],
                 absolutePaths = [],
                 topLevelPaths = [],
+                hashtags = [],
                 ROOT = this._xpathParser.models.XPathInitialContextEnum.ROOT,
                 RELATIVE = this._xpathParser.models.XPathInitialContextEnum.RELATIVE,
                 EXPR = this._xpathParser.models.XPathInitialContextEnum.EXPR,
                 predicates;
             this.paths = paths;
             this.absolutePaths = absolutePaths;
+            this.hashtags = hashtags;
             this.instanceRefs = {};
             this.referencesSelf = false;
             this.topLevelPaths = topLevelPaths;
@@ -82,6 +84,8 @@ define([
                         }
                     } else if (node instanceof this._xpathParser.models.XPathFuncExpr) {
                         this._addInstanceRef(node);
+                    } else if (node instanceof this._xpathParser.models.HashtagExpr) {
+                        hashtags.push(node);
                     }
                     children = node.getChildren();
                     for (i = 0; i < children.length; i++) {
@@ -123,9 +127,16 @@ define([
             }
             return this.topLevelPaths;
         },
+        getHashtags: function () {
+            if (!this.hashtags) {
+                this.analyze();
+            }
+            return this.hashtags;
+        },
         updatePath: function (from, to) {
             var paths = this.getPaths(),
-                path;
+                hashtags = this.getHashtags(),
+                path, i;
 
             var replacePathInfo = function (source, destination) {
                 // copies information from source to destination in place,
@@ -136,16 +147,22 @@ define([
                 destination.filter = source.filter;
             };
             
-            for (var i = 0; i < paths.length; i++) {
+            for (i = 0; i < paths.length; i++) {
                 path = paths[i];
-                if (path.toXPath() === from) {
+                if (path.toHashtag() === from) {
+                    replacePathInfo(this._xpathParser.parse(to), path);
+                }
+            }
+            for (i = 0; i < hashtags.length; i++) {
+                path = hashtags[i];
+                if (path.toHashtag() === from) {
                     replacePathInfo(this._xpathParser.parse(to), path);
                 }
             }
         },
         getText: function () {
             if (this._text && this.parsed) {
-                return this.parsed.toXPath();
+                return this.parsed.toEscapedHashtag();
             } else {
                 return this._text;
             }
@@ -168,8 +185,7 @@ define([
                 return elem.mug !== mug.ufid || elem.property !== property;
             });
         },
-        addReferences: function (mug, property, value) {
-            // get absolute paths from mug property's value
+        _addReferences: function (mug, property, value) {
             var _this = this,
                 form = _this.form,
                 expr = new LogicExpression(value || mug.p[property], form.xpath),
@@ -194,18 +210,22 @@ define([
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
-            this.all = this.all.concat(expr.absolutePaths.map(function (path) {
-                var pathString = path.pathWithoutPredicates(),
-                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
+            this.all = this.all.concat(expr.absolutePaths.concat(expr.hashtags).map(function (path) {
+                var isHashtag = path.toHashtag().startsWith('#'),
+                    pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
+                    pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
-                    xpath = path.toXPath();
+                    xpath = path.toHashtag(),
+                    knownHashtag = isCaseReference(pathString) && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
-                if (!refMug &&
+                if ((!refMug && !knownHashtag) &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
+                    unknowns.push(xpath);
+                } else if (!refMug && isCaseReference(pathString) && !knownHashtag) {
                     unknowns.push(xpath);
                 }
                 return {
@@ -213,11 +233,14 @@ define([
                     ref: refMug ? refMug.ufid : "", // referenced Mug
                     property: property,
                     path: xpath, // path to refMug
-                    sourcePath: mug.absolutePath
+                    sourcePath: mug.hashtagPath
                 };      
             }));
             _.each(expr.instanceRefs, function (ignore, id) {
                 form.referenceInstance(id, mug, property);
+            });
+            _.each(expr.hashtags, function (hashtag) {
+                form.referenceHashtag(hashtag, mug, property);
             });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
@@ -241,6 +264,14 @@ define([
             });
             return messages;
         },
+        addReferences: function (mug, property, value) {
+            // get absolute paths from mug property's value
+            if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
+                return mug.p[property].forEachLogicExpression(_.bind(this._addReferences, this, mug, property));
+            } else {
+                return this._addReferences(mug, property, value);
+            }
+        },
         updateReferences: function (mug, property, value) {
             function update(property) {
                 _this.clearReferences(mug, property);
@@ -249,9 +280,7 @@ define([
             var _this = this,
                 messages = {};
             if (property) {
-                if (arguments.length > 2 || XPATH_REFERENCES.indexOf(property) !== -1) {
-                    update(property);
-                }
+                update(property);
             } else {
                 _.each(XPATH_REFERENCES, update);
             }
@@ -350,8 +379,50 @@ define([
         },
         reset: function () {
             this.all = [];
+        },
+        // This is to tell HQ's case summary what is referenced
+        caseReferences: function () {
+            // hq implementation details
+            var ret = {
+                condition: {
+                    answer: null,
+                    question: null,
+                    type: 'always',
+                    operator: null
+                }
+            }, _this = this;
+
+            ret.preload = _.chain(this.all)
+                .filter(function(ref) {
+                    return isCaseReference(ref.path);
+                })
+                .map(function(ref) {
+                    var info = ref.path.split('/'),
+                        prop = info[2];
+                    if (prop === 'case_name') {
+                        prop = 'name';
+                    }
+                    return [_this.form.normalizeXPath(ref.sourcePath), prop];
+                }).object().value();
+
+            return ret;
+        },
+        // returns object of hashtags. used for writing to xml
+        // format {hashtag: xpath} (null is used fmr cases as they will be loaded later)
+        referencedHashtags: function () {
+            return _.chain(this.all)
+                .filter(function(ref) {
+                    return isCaseReference(ref.path);
+                })
+                .map(function(ref) {
+                    return [ref.path, null];
+                }).object().value();
         }
     };
+
+    function isCaseReference(hashtag) {
+        return hashtag.startsWith('#case/');
+    }
 
     return {
         LogicManager: LogicManager,

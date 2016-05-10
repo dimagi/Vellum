@@ -2,11 +2,13 @@ define([
     'underscore',
     'jquery',
     'vellum/util',
+    'vellum/xml',
     'vellum/core'
 ], function (
     _,
     $,
-    util
+    util,
+    xml
 ) {
     var _nextItextItemKey = 1;
     var ItextItem = function(options) {
@@ -133,7 +135,18 @@ define([
             return Boolean(this.hasForm('default') || 
                            this.hasForm('long')    || 
                            this.hasForm('short'));
-        }
+        },
+        forEachLogicExpression: function (fn) {
+            var forms = this.getForms(),
+                ret = _.map(forms, function(form) {
+                    return _.map(form.getOutputRefExpressions(), function (exprs, lang) {
+                        return _.map(exprs, function (expr) {
+                            return fn(expr);
+                        });
+                    });
+                });
+            return _.flatten(ret);
+        },
     };
 
     var ItextForm  = function (options) {
@@ -154,7 +167,7 @@ define([
             return this.data[lang];
         },
         setValue: function (lang, value) {
-            this.data[lang] = value;
+            this.data[lang] = xml.humanize(value);
             this.outputExpressions = null;
         },
         getValueOrDefault: function (lang) {
@@ -193,17 +206,21 @@ define([
         updateOutputRefExpressions: function () {
             var allRefs = {},
                 langRefs,
-                outputRe,
-                match;
+                outputs;
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    outputRe = /(?:<output (?:value|ref)=")(.*?)(?:"\s*(?:\/|><\/output)>)/gim;
+                    outputs = $('<div>').append(this.data[lang]).find('output');
                     langRefs = [];
-                    match = outputRe.exec(this.data[lang]);
-                    while (match !== null) {
-                        langRefs.push(match[1]);
-                        match = outputRe.exec(this.data[lang]);
-                    }
+                    _.each(outputs, function (output) {
+                        output = $(output);
+                        var value = output.attr('vellum:value') || output.attr('value'),
+                            ref = output.attr('vellum:ref') || output.attr('ref');
+                        if (value) {
+                            langRefs.push(value);
+                        } else if (ref) {
+                            langRefs.push(ref);
+                        }
+                    });
                     allRefs[lang] = langRefs;
                 }
             }

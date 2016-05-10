@@ -148,9 +148,20 @@ define([
                 }
                 return '/' + this.getID();
             }
-            var mug = this.value, parentPath;
-            if (mug.p.dataParent) {
-                parentPath = mug.p.dataParent;
+            var mug = this.value,
+                dataParent = mug.p.dataParent,
+                parentPath;
+            if (dataParent) {
+                var dataParentMug = mug.form.getMugByPath(dataParent);
+                if (!dataParentMug) {
+                    if (excludeRoot) {
+                        parentPath = '';
+                    } else {
+                        parentPath = '/' + this.getRootNode().rootNodeId;
+                    }
+                } else {
+                    parentPath = mug.form.getAbsolutePath(dataParentMug, excludeRoot);
+                }
             } else {
                 parentPath = this.parent.getAbsolutePath(excludeRoot);
                 if (parentPath === null) {
@@ -161,7 +172,7 @@ define([
             if (mug.options.getPathName) {
                 name = mug.options.getPathName(mug, name);
             }
-            return parentPath + '/' + name;
+            return (parentPath ? parentPath : '') + '/' + name;
         },
         validateTree: function (validateValue) {
             var i, childResult;

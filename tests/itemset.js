@@ -12,7 +12,8 @@ define([
     'text!static/itemset/test1-with-appearance.xml',
     'text!static/itemset/inner-filters.xml',
     'text!static/itemset/dropdown-fixture.xml',
-    'text!static/itemset/data-itemset.xml'
+    'text!static/itemset/data-itemset.xml',
+    'text!static/itemset/itemset-with-question-ref.xml',
 ], function (
     options,
     util,
@@ -27,7 +28,8 @@ define([
     TEST_XML_1_WITH_APPEARANCE,
     INNER_FILTERS_XML,
     DROPDOWN_FIXTURE_XML,
-    DATA_ITEMSET_XML
+    DATA_ITEMSET_XML,
+    ITEMSET_WITH_QUESTION_REF_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -43,7 +45,6 @@ define([
                 features: {
                     lookup_tables: true,
                     advanced_itemsets: false,
-                    rich_text: false
                 },
             });
         }
@@ -142,6 +143,22 @@ define([
             util.saveButtonEnabled(false);
             clickQuestion('question1/itemset');
             assert(!util.saveButtonEnabled(), "save button should not be enabled");
+        });
+
+        it("should save the hashtag format correctly", function() {
+            util.loadXML("");
+            util.addQuestion("Text", 'state');
+            util.addQuestion("SelectDynamic", 'district');
+            util.clickQuestion('district/itemset');
+            var itemset = util.getMug("district/itemset");
+            itemset.p.itemsetData = {
+                instance: itemset.p.itemsetData.instance,
+                nodeset:  itemset.p.itemsetData.nodeset + '[name = /data/state]',
+                labelRef: "name",
+                valueRef: "@id",
+            };
+
+            util.assertXmlEqual(call('createXML'), ITEMSET_WITH_QUESTION_REF_XML, {normalize_xmlns: true});
         });
 
         describe("without access to lookup tables", function() {

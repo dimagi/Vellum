@@ -25,7 +25,6 @@ define([
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {rich_text: false}
             });
         });
 
@@ -261,12 +260,19 @@ define([
             assert.equal(mug.__className, "Dispense");
         });
 
-        it("should enable save button when a transfer's source or destination changes", function () {
+        it("should enable save button when a transfer's source or destination changes", function (done) {
             util.loadXML(TRANSFER_BLOCK_XML);
             util.saveButtonEnabled(false);
             util.clickQuestion("transfer[@type='trans-1']");
-            $("input[name='property-dest']").change();
-            assert(util.saveButtonEnabled(), "save button is disabled");
+            var editor = $('[name=property-dest]').ckeditor().editor,
+                widget = util.getWidget('property-dest');
+            widget.input.promise.then(function () {
+                editor.on('change', function() {
+                    assert(util.saveButtonEnabled(), "save button is disabled");
+                    done();
+                });
+                editor.fire('change');
+            });
         });
 
         _.each(["Balance", "Transfer", "Dispense", "Receive"], function (type) {

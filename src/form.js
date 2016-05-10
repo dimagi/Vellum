@@ -2,18 +2,20 @@ define([
     'require',
     'underscore',
     'jquery',
-    'vellum/xpath',
     'vellum/tree',
     'vellum/logic',
+    'vellum/escapedHashtags',
+    'vellum/fuse',
     'vellum/undomanager',
     'vellum/util'
 ], function (
     require,
     _,
     $,
-    xpath,
     Tree,
     logic,
+    escapedHashtags,
+    Fuse,
     undomanager,
     util
 ) {
@@ -123,7 +125,9 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
+        this.hashtagDictionary = {};
         this.tree = new Tree('data', 'control');
+        this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
@@ -133,7 +137,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = xpath.createParser();
+        this.xpath = escapedHashtags.parser(this.hashtagDictionary);
         this.undomanager = new undomanager();
 
         this.undomanager.on('reset', function(e) {
@@ -142,9 +146,64 @@ define([
 
         //make the object event aware
         util.eventuality(this);
+        this.on('form-load-finished', function() {
+            _this.fuse = new Fuse(_this);
+        });
     }
 
     Form.prototype = {
+        isValidHashtag: function(tag) {
+            return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
+        },
+        addHashtag: function(hashtag, xpath) {
+            this.hashtagDictionary[hashtag] = xpath;
+        },
+        initHashtag: function(hashtag, xpath) {
+            if (!this.hashtagDictionary[hashtag]) {
+                this.hashtagDictionary[hashtag] = xpath;
+            }
+        },
+        removeHashtag: function(hashtag) {
+            delete this.hashtagDictionary[hashtag];
+        },
+        transform: function(input, transformFn) {
+            input = this.normalizeEscapedHashtag(input);
+            return escapedHashtags.transform(input, transformFn);
+        },
+        normalize: function (methodName, xpath) {
+            // try catch is needed as workaround for having an itemset without
+            // the itemset plugin enabled and invalid xpaths
+            try {
+                return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
+            } catch (err) {
+                return xpath.startsWith('#invalid/xpath ') ? xpath.slice(15) : xpath;
+            }
+         },
+        normalizeEscapedHashtag: function (xpath_) {
+            return this.normalize('toEscapedHashtag', xpath_);
+        },
+        normalizeHashtag: function (xpath_) {
+            return this.normalize('toHashtag', xpath_);
+        },
+        normalizeXPath: function (xpath_) {
+            return this.normalize('toXPath', xpath_);
+        },
+        getHashtagsInXPath: function (xpath_) {
+            try {
+                return new logic.LogicExpression(xpath_, this.xpath).getHashtags();
+            } catch (err) {
+                return [];
+            }
+        },
+        referencedHashtags: function () {
+            return this._logicManager.referencedHashtags();
+        },
+        referenceHashtag: function(hashtag, mug, property) {
+            if (/^#case\//.test(hashtag.toHashtag())) {
+                this.referenceInstance('casedb', mug, property);
+                this.referenceInstance('commcaresession', mug, property);
+            }
+        },
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
@@ -168,7 +227,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[dataParent];
+                var dataParentMug = _this.mugMap[_this.normalizeHashtag(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -444,6 +503,7 @@ define([
         },
         setFormID: function (id) {
             this.tree.setRootID(id);
+            this.addHashtag('#form', '/' + id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -563,11 +623,11 @@ define([
                     return;
                 }
                 oldId = mug.p.nodeID;
-                oldPath = mug.absolutePath;
+                oldPath = mug.hashtagPath;
                 oldParent = conflictParent = mug.parentMug;
             } else {
                 oldId = mug.p.nodeID;
-                oldPath = mug.absolutePath;
+                oldPath = mug.hashtagPath;
                 oldParent = mug.parentMug;
                 this.insertMug(refMug, mug, position);
                 var spec = mug.spec.dataParent;
@@ -592,7 +652,7 @@ define([
                 }
             }
 
-            var newPath = mug.absolutePath;
+            var newPath = mug.hashtagPath;
             this.vellum.handleMugRename(
                 this, mug, newId, oldId, newPath, oldPath, oldParent);
 
@@ -639,7 +699,7 @@ define([
                 return;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
-                postMovePaths = _(mugs).map(function(mug) { return mug.absolutePath; }),
+                postMovePaths = _(mugs).map(function(mug) { return mug.hashtagPath; }),
                 postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
                 updates = {},
                 preMovePath;
@@ -682,7 +742,7 @@ define([
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];
-                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, duplicate.absolutePath);
+                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, duplicate.hashtagPath);
             }
             return duplicate;
         },
@@ -725,8 +785,8 @@ define([
 
             pathReplacements.push({
                 mugId: mug.ufid,
-                from: mug.absolutePath,
-                to: duplicate.absolutePath,
+                from: mug.hashtagPath,
+                to: duplicate.hashtagPath,
             });
 
             return [duplicate, pathReplacements];
@@ -806,14 +866,27 @@ define([
                 mug.options.afterInsert(this, mug);
             }
         },
-        _updateMugPath: function (mug, oldPath, newPath) {
-            var map = this.mugMap;
-            delete map[oldPath];
-            if (_.isUndefined(newPath)) {
-                newPath = mug.absolutePath;
+        _updateMugPath: function (mug, oldHashtag, newHashtag) {
+            var map = this.mugMap, newPath;
+            delete map[this.normalizeHashtag(oldHashtag)];
+            if (oldHashtag) {
+                this.removeHashtag(oldHashtag);
             }
-            if (newPath) {
-                map[newPath] = mug;
+            if (_.isUndefined(newHashtag)) {
+                newPath = mug.absolutePath;
+                newHashtag = mug.hashtagPath;
+            } else {
+                newPath = newHashtag.replace(/^#form/, this.getBasePath(true));
+                if (newPath === newHashtag) {
+                    // this happens if _updateMugPath is commtrack (#supply one day)
+                    newPath = null;
+                }
+            }
+            if (newHashtag) {
+                if (newPath) {
+                    this.addHashtag(newHashtag, newPath);
+                }
+                map[this.normalizeHashtag(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
@@ -821,7 +894,8 @@ define([
             this.mugMap[mug.ufid] = mug;
             var path = mug.absolutePath;
             if (path) {
-                this.mugMap[path] = mug;
+                this.addHashtag(mug.hashtagPath, path);
+                this.mugMap[this.normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -855,7 +929,7 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[path];
+            return this.mugMap[this.normalizeHashtag(path)];
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -907,7 +981,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[mug.absolutePath];
+                delete this.mugMap[this.normalizeHashtag(mug.hashtagPath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
@@ -994,7 +1068,7 @@ define([
             this.vellum.selectSomethingOrHideProperties();
         },
         isCaseReference: function (path) {
-            return /instance\('casedb'\)/.test(path) ? true : false;
+            return /^#case/.test(path);
         }
     };
 

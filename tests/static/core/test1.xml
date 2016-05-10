@@ -11,7 +11,7 @@
                 </data>
             </instance>
             <instance id="states" src="jr://fixture/item-list:state"></instance>
-            <bind nodeset="/data/state" />
+            <bind vellum:nodeset="#form/state" nodeset="/data/state" />
             <itext>
                 <translation lang="en" default="">
                     <text id="state-label">
@@ -22,7 +22,7 @@
         </model>
     </h:head>
     <h:body>
-        <select1 ref="/data/state">
+        <select1 vellum:ref="#form/state" ref="/data/state">
             <label ref="jr:itext('state-label')" />
             <itemset nodeset="instance('states')/state_list/state">
               <label ref="name"></label>

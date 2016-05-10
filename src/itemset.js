@@ -66,7 +66,7 @@ define([
             if (filter) {
                 nodeset += '[' + filter + ']';
             }
-            xmlWriter.writeAttributeString('nodeset', nodeset || '');
+            util.writeHashtags(xmlWriter, 'nodeset', nodeset || '', mug);
             xmlWriter.writeStartElement('label');
             xmlWriter.writeAttributeString('ref', labelRef || '');
             xmlWriter.writeEndElement();

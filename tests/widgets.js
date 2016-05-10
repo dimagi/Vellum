@@ -88,6 +88,29 @@ define([
                 done();
             }, null, "showXPathEditor");
         });
+
+        it("xPath widget should show /data/ when in advanced editor without rich_text", function (done) {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            var value = '/data/text',
+                escaped = '`#form/text`',
+                hidden = util.addQuestion("DataBindOnly", "hidden", {
+                    calculateAttr: escaped
+                });
+            assert.equal(hidden.p.calculateAttr, escaped);
+            util.clickQuestion("/data/hidden");
+
+            // click Edit button
+            var input = $("[name=property-calculateAttr]");
+            input.closest(".form-group").find(".fd-edit-button").click();
+
+            events.on("showXPathEditor", function () {
+                var textarea = $(".xpath-advanced").find("textarea");
+                assert.equal(textarea.val(), value, "input value showing #form");
+                assert.equal(hidden.p.calculateAttr, escaped, "value not in vellum internal form");
+                done();
+            }, null, "showXPathEditor");
+        });
     });
 
     describe("The rich text widget", function () {
@@ -152,7 +175,7 @@ define([
             disp.input.promise.then(function () { // wait for editor to be ready
                 util.findNode(tree, "hidden").data.handleDrop(disp.input);
                 disp.handleChange();
-                assert.equal(text.p.relevantAttr, '/data/hidden');
+                assert.equal(text.p.relevantAttr, '`#form/hidden`');
                 done();
             });
         });

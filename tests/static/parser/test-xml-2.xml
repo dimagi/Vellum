@@ -8,7 +8,7 @@
 					<question1 />
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" calculate="concat(&quot;Line 1&quot;,&quot;&#10;Line 2&quot;)" />
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" calculate="concat(&quot;Line 1&quot;,&quot;&#10;Line 2&quot;)" />
 			<itext>
 				<translation lang="en" default=""/>
 			</itext>

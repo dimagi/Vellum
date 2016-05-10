@@ -359,10 +359,12 @@ define([
                     $div.find('.fd-add-exp').click();
                 }
             } else {
-                showAdvancedMode(options.value);
+                if (options.mug.supportsRichText()) {
+                    showAdvancedMode(options.value);
+                } else {
+                    showAdvancedMode(form.normalizeXPath(options.value));
+                }
             }
-
-            $div.find(".fd-xpath-editor-text").val(options.value);
         };
 
         // toggle simple/advanced mode

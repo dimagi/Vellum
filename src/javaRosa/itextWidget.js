@@ -7,6 +7,7 @@ define([
     'vellum/widgets',
     'vellum/util',
     'vellum/atwho',
+    'vellum/xml',
     'vellum/core'
 ], function (
     _,
@@ -16,7 +17,8 @@ define([
     jrUtil,
     widgets,
     util,
-    atwho
+    atwho,
+    xml
 ) {
     var DEFAULT_EXTENSIONS = {
             image: 'png',
@@ -114,9 +116,27 @@ define([
         return widget;
     };
 
+    function _outputToXPathOrHashtag(functionName) {
+        return function (text, xpathParser) {
+            if (text) {
+                text = $("<div />").append(text);
+                text.find('output').replaceWith(function() {
+                    var $this = $(this),
+                        value = xpathParser.parse($this.attr('value') || $this.attr('ref'));
+                    $this.attr('value', value[functionName]());
+                    return $this[0].outerHTML;
+                });
+                text = xml.normalize(text.html());
+            }
+            return text;
+        };
+    }
+
     var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
+            outputToHashtag = _outputToXPathOrHashtag('toHashtag'),
+            outputToXPath = _outputToXPathOrHashtag('toXPath'),
             // todo: id->class
             id = "itext-" + language + "-" + options.itextType,
             widgetClass = options.baseWidgetClass || widgets.richTextarea,
@@ -199,15 +219,17 @@ define([
         };
 
         widget.getItextValue = function (lang) {
-            var itextItem = widget.getItextItem();
+            var itextItem = widget.getItextItem(), value;
             if (!lang) {
                 lang = widget.language;
             }
-            return itextItem && itextItem.get(widget.form, lang);
+            value = itextItem && itextItem.get(widget.form, lang);
+            return mug.supportsRichText() ? outputToHashtag(value, widget.mug.form.xpath) : outputToXPath(value, widget.mug.form.xpath);
         };
 
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
+            value = outputToHashtag(value, widget.mug.form.xpath);
             if (itextItem) {
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
@@ -288,7 +310,7 @@ define([
                 if (e.property === "nodeID") {
                     if (widget.getItextValue() === e.previous) {
                         widget.setItextValue(e.val);
-                        widget.setValue(e.val);
+                        widget.setValue(widget.getItextValue());
                     }
                 }
             }, null, "teardown-mug-properties");

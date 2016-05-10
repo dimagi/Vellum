@@ -8,7 +8,7 @@
 					<question1/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:string"/>
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string"/>
 			<bind nodeset="/data/question1" vellum:ignore="retain"/>
 			<bind nodeset="/data/question1" vellum:ignore="retain"/>
 			<itext>

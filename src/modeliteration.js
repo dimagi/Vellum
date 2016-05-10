@@ -39,7 +39,7 @@ define([
                 key: "id",
                 event: "jr-insert",
                 path: "/item",
-                query: "selected-at({}/@ids,../@index)"
+                query: "selected-at({}/@ids, ../@index)"
             }
         ],
         joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
@@ -72,15 +72,15 @@ define([
                 })];
             },
             controlChildFilter: function (children, mug) {
-                var nodeset = mug.absolutePath,
+                var nodeset = mug.hashtagPath,
                     r_count = mug.p.repeat_count;
                 children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
                     if (r_count) {
-                        xmlWriter.writeAttributeString("jr:count", String(r_count));
+                        util.writeHashtags(xmlWriter, 'jr:count', String(r_count), mug);
                         xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
-                    xmlWriter.writeAttributeString("nodeset", nodeset);
+                    util.writeHashtags(xmlWriter, 'nodeset', nodeset, mug);
                 };
                 return children;
             },
@@ -333,19 +333,19 @@ define([
         }
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
             var nodeID = mug.p.nodeID,
-                currentPath = mug.absolutePath,
+                hashPath = mug.hashtagPath,
                 oldParent = mug.parentMug,
-                oldPath;
+                oldHash;
             if (value && value.idsQuery) {
-                oldPath = currentPath.replace(/\/item$/, "");
+                oldHash = hashPath.replace(/\/item$/, "");
             } else {
-                oldPath = currentPath + "/item";
+                oldHash = hashPath + "/item";
                 if (/\/@count$/.test(mug.p.repeat_count)) {
                     mug.p.repeat_count = "";
                 }
             }
             mug.form.vellum.handleMugRename(
-                mug.form, mug, nodeID, nodeID, currentPath, oldPath, oldParent);
+                mug.form, mug, nodeID, nodeID, hashPath, oldHash, oldParent);
         }
     }
 

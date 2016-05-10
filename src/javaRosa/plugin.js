@@ -219,11 +219,11 @@ define([
                             // the same
                             item.hasMarkdown = true;
                             item.getOrCreateForm("default")
-                                .setValue(lang, xml.humanize(valEl));
+                                .setValue(lang, valEl);
                             return;
                         }
                         item.getOrCreateForm(curForm)
-                            .setValue(lang, xml.humanize(valEl));
+                            .setValue(lang, valEl);
                     }
                     textEl.children().each(eachValue);
                 }
@@ -275,6 +275,30 @@ define([
             this.__callOld();
 
             delete this.data.javaRosa.itextMap;
+            var form = this.data.core.form;
+            function _toHashtag(value) {
+                return form.xpath.parse(value).toHashtag();
+            }
+            jrUtil.forEachItextItem(form, function (item, mug) {
+                _(item.forms).each(function (itForm) {
+                    _.each(langs, function (lang) {
+                        var value = $('<div>').append(itForm.getValue(lang));
+                        if (!value) { return; }
+                        value.find('output').replaceWith(function() {
+                            var tempOutput = $('<output>'),
+                                output = $(this),
+                                value = output.attr('vellum:value') || output.attr('value'),
+                                ref = output.attr('vellum:ref') || output.attr('ref');
+                            if (value) {
+                                return tempOutput.attr('value', _toHashtag(value))[0].outerHTML;
+                            } else if (ref) {
+                                return tempOutput.attr('ref', _toHashtag(ref))[0].outerHTML;
+                            }
+                        });
+                        itForm.setValue(lang, value.html());
+                    });
+                });
+            });
             Itext.on('change', function () { _this.onFormChange(); });
         },
         populateControlMug: function(mug, controlElement) {
@@ -411,7 +435,7 @@ define([
                 }
             });
         },
-        contributeToModelXML: function (xmlWriter) {
+        contributeToModelXML: function (xmlWriter, form_) {
             // here are the rules that govern itext
             // 0. iText items which aren't referenced by any questions are 
             // cleared from the form.
@@ -426,7 +450,30 @@ define([
             // 4. duplicate itext ids will be automatically updated to create
             // non-duplicates
 
-            var Itext = this.data.javaRosa.Itext,
+            function hashtags(outputRef) {
+                var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
+                    key = $(outputRef).attr('value') ? 'value' : 'ref',
+                    parsed = xpathParser.parse(value),
+                    hashtag = parsed.toHashtag(),
+                    xpath_ = parsed.toXPath(),
+                    ret = $("<output>");
+                if (!form_.useRichText || xpath_ === hashtag) {
+                    return ret.attr(key, xpath_)[0].outerHTML;
+                } else {
+                    return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
+                }
+            }
+
+            function writeValue(xmlWriter, val) {
+                val = $('<div>').append(val);
+                val.find('output').replaceWith(function() {
+                    return hashtags(this);
+                });
+                xmlWriter.writeXML(xml.normalize(val.html()));
+            }
+
+            var xpathParser = form_.xpath,
+                Itext = this.data.javaRosa.Itext,
                 items = this.data.javaRosa.itextItemsFromBeforeSerialize,
                 languages = Itext.getLanguages(),
                 item, forms, form, lang, val;
@@ -451,14 +498,14 @@ define([
                             if(form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
-                            xmlWriter.writeXML(xml.normalize(val));
+                            writeValue(xmlWriter, val);
                             xmlWriter.writeEndElement();
                         }
                         if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
                             val = item.get('default', lang);
                             xmlWriter.writeStartElement("value");
                             xmlWriter.writeAttributeString('form', 'markdown');
-                            xmlWriter.writeXML(xml.normalize(val));
+                            writeValue(xmlWriter, val);
                             xmlWriter.writeEndElement();
                         }
                         xmlWriter.writeEndElement();

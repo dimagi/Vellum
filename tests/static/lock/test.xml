@@ -19,11 +19,11 @@
 					<group />
 				</data>
 			</instance>
-			<bind nodeset="/data/node_locked" type="xsd:string" vellum:lock="node" />
-			<bind nodeset="/data/value_locked" type="xsd:string" vellum:lock="value"/>
-			<bind nodeset="/data/none_locked" type="xsd:string" vellum:lock="none" />
-			<bind nodeset="/data/normal" type="xsd:string" />
-			<bind nodeset="/data/group" />
+			<bind vellum:nodeset="#form/node_locked" nodeset="/data/node_locked" type="xsd:string" vellum:lock="node" />
+			<bind vellum:nodeset="#form/value_locked" nodeset="/data/value_locked" type="xsd:string" vellum:lock="value"/>
+			<bind vellum:nodeset="#form/none_locked" nodeset="/data/none_locked" type="xsd:string" vellum:lock="none" />
+			<bind vellum:nodeset="#form/normal" nodeset="/data/normal" type="xsd:string" />
+			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="node_locked-label">
@@ -43,18 +43,18 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/node_locked">
+		<input vellum:ref="#form/node_locked" ref="/data/node_locked">
 			<label ref="jr:itext('node_locked-label')" />
 		</input>
-		<input ref="/data/value_locked">
+		<input vellum:ref="#form/value_locked" ref="/data/value_locked">
 			<label ref="jr:itext('value_locked-label')" />
 		</input>
-		<input ref="/data/none_locked">
+		<input vellum:ref="#form/none_locked" ref="/data/none_locked">
 			<label ref="jr:itext('none_locked-label')" />
 		</input>
-		<input ref="/data/normal">
+		<input vellum:ref="#form/normal" ref="/data/normal">
 			<label ref="jr:itext('normal-label')" />
 		</input>
-		<group ref="/data/group"></group>
+		<group vellum:ref="#form/group" ref="/data/group"></group>
 	</h:body>
 </h:html>
