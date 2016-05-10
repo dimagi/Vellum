@@ -85,19 +85,19 @@ define([
             getIconFromPath: function(path) {
                 var mug = {
                     "#form/text": {
-                        options: { icon: 'fcc fcc-fd-text' },
+                        getIcon: function () { return 'fcc fcc-fd-text'; },
                     },
                     "#form/othertext": {
-                        options: { icon: 'fcc fcc-fd-text' },
+                        getIcon: function () { return 'fcc fcc-fd-text'; },
                     },
                     "#form/date": {
-                        options: { icon: 'fcc fa fa-calendar' },
+                        getIcon: function () { return 'fcc fa fa-calendar'; },
                     },
                     "#form/group": {
-                        options: { icon: 'fcc icon-folder-open' },
+                        getIcon: function () { return 'fcc icon-folder-open'; },
                     },
                 }[this.normalizeHashtag(path)];
-                return mug ? mug.options.icon : null;
+                return mug ? mug.getIcon() : null;
             },
             xpath: escapedHashtags.parser(hashtagToXPath),
         };

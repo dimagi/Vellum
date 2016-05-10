@@ -600,7 +600,7 @@ define([
             isValidHashtag: _.bind(form.isValidHashtag, form),
             getIconFromPath: function (path) {
                 var mug = form.getMugByPath(path);
-                return mug ? mug.options.icon : null;
+                return mug ? mug.getIcon() : null;
             },
             xpath: form.xpath,
         };
