@@ -5,7 +5,6 @@
  *  nodeID
  *  label
  *  readOnlyControl
- *  itemsetData
  *  imageSize: Images only. Options to reduce image size before sending form.
  *
  * Data Source Properties
@@ -22,7 +21,7 @@
  *
  * Advanced Properties
  *  dataSource
- *  dataValue
+ *  dataValue: Deprecated.
  *  defaultValue: An expression that will be assigned to a question before/until a user changes the value.
  *  xmlnsAttr
  *  label
