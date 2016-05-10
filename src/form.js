@@ -146,8 +146,16 @@ define([
 
         //make the object event aware
         util.eventuality(this);
+
         this.on('form-load-finished', function() {
             _this.fuse = new Fuse(_this);
+        }).on('question-label-text-change', function(e) {
+            // Make sure form contains instances for any case references used by labels
+            // Long-term, the logic manager should be responsible for itext and handle this
+            if (e.text.search(/#case\//) !== -1) {
+                _this.addInstanceIfNotExists({ id: 'commcaresession' });
+                _this.addInstanceIfNotExists({ id: 'casedb' });
+            }
         });
     }
 

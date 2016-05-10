@@ -10,6 +10,7 @@ define([
     'vellum/datasources',
     'text!static/databrowser/child-ref.xml',
     'text!static/databrowser/child-ref-no-hashtag.xml',
+    'text!static/databrowser/itext.xml',
     'text!static/databrowser/mother-ref.xml',
     'text!static/databrowser/child-ref-output-value.xml',
     'text!static/databrowser/child-ref-output-value-other-lang.xml',
@@ -25,6 +26,7 @@ define([
     datasources,
     CHILD_REF_XML,
     CHILD_REF_NO_HASHTAG_XML,
+    ITEXT_XML,
     MOTHER_REF_XML,
     CHILD_REF_OUTPUT_VALUE_XML,
     CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
@@ -179,6 +181,23 @@ define([
                         node = util.findNode(dataTree, "child", motherNode);
                     dataTree.open_node(node);
                     util.findNode(dataTree, "dob", node).data.handleDrop(calc);
+                });
+            });
+
+            it("should add instances on drag/drop of case property into itext", function(done) {
+                util.loadXML("");
+                var itext = $("[name=itext-en-label]"),
+                    editor = itext.ckeditor().editor,
+                    widget = util.getWidget('itext-en-label');
+
+                util.addQuestion("Text", "mug");
+                widget.input.promise.then(function () { 
+                    editor.on('change', function() {
+                        util.assertXmlEqual(call("createXML"), ITEXT_XML,
+                                            {normalize_xmlns: true});
+                        done();
+                    });
+                    util.findNode(dataTree, "dob").data.handleDrop(itext);
                 });
             });
 
