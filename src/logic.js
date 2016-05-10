@@ -185,8 +185,7 @@ define([
                 return elem.mug !== mug.ufid || elem.property !== property;
             });
         },
-        addReferences: function (mug, property, value) {
-            // get absolute paths from mug property's value
+        _addReferences: function (mug, property, value) {
             var _this = this,
                 form = _this.form,
                 expr = new LogicExpression(value || mug.p[property], form.xpath),
@@ -265,6 +264,14 @@ define([
             });
             return messages;
         },
+        addReferences: function (mug, property, value) {
+            // get absolute paths from mug property's value
+            if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
+                return mug.p[property].forEachLogicExpression(_.bind(this._addReferences, this, mug, property));
+            } else {
+                return this._addReferences(mug, property, value);
+            }
+        },
         updateReferences: function (mug, property, value) {
             function update(property) {
                 _this.clearReferences(mug, property);
@@ -273,9 +280,7 @@ define([
             var _this = this,
                 messages = {};
             if (property) {
-                if (arguments.length > 2 || XPATH_REFERENCES.indexOf(property) !== -1) {
-                    update(property);
-                }
+                update(property);
             } else {
                 _.each(XPATH_REFERENCES, update);
             }

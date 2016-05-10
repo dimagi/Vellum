@@ -91,7 +91,7 @@ define([
     });
 
     describe("The form's escaped hashtag parser", function() {
-        beforeEach(function (done) {
+        before(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
                 core: {
@@ -113,7 +113,7 @@ define([
     });
 
     describe("The escaped hashtag", function () {
-        beforeEach(function (done) {
+        before(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
                 core: {

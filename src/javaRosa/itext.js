@@ -135,7 +135,18 @@ define([
             return Boolean(this.hasForm('default') || 
                            this.hasForm('long')    || 
                            this.hasForm('short'));
-        }
+        },
+        forEachLogicExpression: function (fn) {
+            var forms = this.getForms(),
+                ret = _.map(forms, function(form) {
+                    return _.map(form.getOutputRefExpressions(), function (exprs, lang) {
+                        return _.map(exprs, function (expr) {
+                            return fn(expr);
+                        });
+                    });
+                });
+            return _.flatten(ret);
+        },
     };
 
     var ItextForm  = function (options) {
@@ -156,7 +167,7 @@ define([
             return this.data[lang];
         },
         setValue: function (lang, value) {
-            this.data[lang] = xml.humanize(value);;
+            this.data[lang] = xml.humanize(value);
             this.outputExpressions = null;
         },
         getValueOrDefault: function (lang) {
