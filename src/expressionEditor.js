@@ -76,7 +76,7 @@ define([
 
         var setExpression = function(input, val) {
             if (options.mug.supportsRichText()) {
-                richText.editor(input, richText.createFormModelForEditor(form), richTextOptions).setValue(val);
+                richText.editor(input, form, richTextOptions).setValue(val);
             } else {
                 input.val(val);
             }
@@ -84,7 +84,7 @@ define([
 
         var getExpression = function(input) {
             if (options.mug.supportsRichText()) {
-                return richText.editor(input, richText.createFormModelForEditor(form), richTextOptions).getValue();
+                return richText.editor(input, form, richTextOptions).getValue();
             } else {
                 return input.val();
             }
@@ -200,7 +200,7 @@ define([
 
                 if (options.mug.supportsRichText()) {
                     $expUI.find('.fd-input').each(function () {
-                        richText.editor($(this), richText.createFormModelForEditor(form), richTextOptions);
+                        richText.editor($(this), form, richTextOptions);
                     });
                 }
 
@@ -234,7 +234,7 @@ define([
                 // add event handlers to validate the inputs
                 if (options.mug.supportsRichText()) {
                     $expUI.find('.xpath-edit-node').each(function () {
-                        richText.editor($(this), richText.createFormModelForEditor(form), richTextOptions).on('change', validateExpression);
+                        richText.editor($(this), form, richTextOptions).on('change', validateExpression);
                     });
                 } else {
                     $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);

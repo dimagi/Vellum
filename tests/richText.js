@@ -82,6 +82,22 @@ define([
                     return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, iconExists)).html();
                 });
             },
+            getMugByPath: function (path) {
+                return {
+                    "#form/text": {
+                        getIcon: function () { return 'fcc fcc-fd-text'; },
+                    },
+                    "#form/othertext": {
+                        getIcon: function () { return 'fcc fcc-fd-text'; },
+                    },
+                    "#form/date": {
+                        getIcon: function () { return 'fcc fa fa-calendar'; },
+                    },
+                    "#form/group": {
+                        getIcon: function () { return 'fcc icon-folder-open'; },
+                    },
+                }[this.normalizeHashtag(path)];
+            },
             getIconFromPath: function(path) {
                 var mug = {
                     "#form/text": {

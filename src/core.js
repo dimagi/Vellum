@@ -462,7 +462,7 @@ define([
 
     fn.showSourceXMLModal = function (done) {
         var _this = this;
- 
+
         function validateMug(mug) {
             mug.validate();
             return !mug.getErrors().length;
