@@ -314,10 +314,6 @@ define([
             return _.intersection(block.activeForms, block.forms);
         };
 
-        // this used to be the form ID instead of 'data'.  Since
-        // only hand-made forms will ever end up with a different
-        // ID (the ability to set it in the UI has been broken for
-        // a while), it seemed ok to make it just 'data'
         block.itextWidget = itextWidget.media(pathPrefix + mug.form.getBasePath());
 
         return block;
