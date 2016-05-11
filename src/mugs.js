@@ -1251,7 +1251,10 @@ define([
         init: function (mug, form) {
             Text.init(mug, form);
             mug.p.appearance = "numeric";
-        }
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
+        },
     });
 
     var Secret = util.extend(defaultOptions, {
@@ -1339,7 +1342,10 @@ define([
         init: function (mug, form) {
             Image.init(mug, form);
             mug.p.appearance = "signature";
-        }
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
+        },
     });
 
     var Geopoint = util.extend(defaultOptions, {
@@ -1474,7 +1480,7 @@ define([
             mug.p.appearance = "minimal";
         },
         changeTypeTransform: function (mug) {
-            delete mug.p.appearance;
+            mug.p.appearance = undefined;
         },
         spec: {
             dataValue: { presence: 'optional' },
@@ -1560,6 +1566,9 @@ define([
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
         },
     });
 

@@ -451,7 +451,7 @@ define([
 
             it("should remove appearance attribute from label", function () {
                 var from = "Trigger",
-                    to = "Text",
+                    to = "MSelect",
                     mug = setup(from, to);
                 call("changeMugType", mug, to);
                 mug = util.getMug(mug.p.nodeID);
@@ -465,7 +465,7 @@ define([
             });
 
             it("should add appearance attribute to label", function () {
-                var from = "Text",
+                var from = "MSelect",
                     to = "Trigger",
                     mug = setup(from, to);
                 call("changeMugType", mug, to);
