@@ -502,7 +502,10 @@ define([
                         javaRosa: {langs: ['en']},
                         form: "",
                         core: { onReady: done },
-                        features: {rich_text: true},
+                        features: {
+                            rich_text: true,
+                            disable_popovers: false,
+                        },
                     });
                 });
 

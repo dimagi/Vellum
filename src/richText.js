@@ -586,7 +586,7 @@ define([
         if (form) {
             form_ = createFormModelForEditor(form);
         }
-        if (options).features.remove_popovers) {
+        if (options && form.vellum && !form.vellum.opts().features.disable_popovers) {
             options = _.extend(options, {
                 createPopover: function( editor, ckwidget ) {
                     var $this = $(ckwidget.element.$),

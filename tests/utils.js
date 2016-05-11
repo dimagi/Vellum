@@ -173,6 +173,10 @@ define([
         if (opts.plugins) {
             vellum_options.plugins = opts.plugins;
         }
+        if (vellum_options && vellum_options.features &&
+            _.isUndefined(vellum_options.features.disable_popovers)) {
+            vellum_options.features.disable_popovers = true;
+        }
         vellum_options.core = vellum_options.core || {};
         var originalSaveUrl = vellum_options.core.saveUrl || function () {};
         vellum_options.core.saveUrl = function (data) {
