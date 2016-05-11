@@ -77,6 +77,8 @@ define([
 
             if (editor.commands.createPopover) {
                 var _this = this;
+                // if the editor is still being initialized then this command
+                // won't be enabled until it is ready
                 if (editor.status === "ready") {
                     editor.execCommand('createPopover', _this);
                 } else {
