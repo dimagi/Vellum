@@ -380,6 +380,24 @@ define([
                     //["Group", "Text"],
                     //["Repeat", "Text"],
                     //["FieldList", "Text"]
+                ],
+                questionWithoutDefaultAppearance = [
+                    "Text", "Select", "MSelect", "Audio", "Video", "Image",
+                ],
+                questionWithDefaultAppearance = {
+                    Trigger: "minimal",
+                    PhoneNumber: "numeric",
+                    Signature: "signature",
+                },
+                remove_appearance = [
+                    ["Trigger", questionWithoutDefaultAppearance],
+                    ["PhoneNumber", questionWithoutDefaultAppearance],
+                    ["Signature", questionWithoutDefaultAppearance],
+                ],
+                change_appearance = [
+                    ["Trigger", _.omit(questionWithDefaultAppearance, "Trigger")],
+                    ["PhoneNumber", _.omit(questionWithDefaultAppearance, "PhoneNumber")],
+                    ["Signature", _.omit(questionWithDefaultAppearance, "Signature")],
                 ];
 
             before(function (done) {
@@ -449,34 +467,40 @@ define([
                 });
             });
 
-            it("should remove appearance attribute from label", function () {
-                var from = "Trigger",
-                    to = "MSelect",
-                    mug = setup(from, to);
-                call("changeMugType", mug, to);
-                mug = util.getMug(mug.p.nodeID);
-                assert.equal(mug.__className, to);
-                assert.equal(mug.p.appearance, undefined);
+            _.each(remove_appearance, function (change) {
+                var from = change[0];
+                _.each(change[1], function(to) {
+                    it("should remove appearance attribute when changing " + from + " to " + to, function () {
+                        var mug = setup(from, to);
+                        call("changeMugType", mug, to);
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        assert.equal(mug.p.appearance, undefined);
 
-                call("loadXML", call("createXML"));
-                mug = util.getMug(mug.p.nodeID);
-                assert.equal(mug.__className, to);
-                tearDown(from, to);
+                        call("loadXML", call("createXML"));
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        tearDown(from, to);
+                    });
+                });
             });
 
-            it("should add appearance attribute to label", function () {
-                var from = "MSelect",
-                    to = "Trigger",
-                    mug = setup(from, to);
-                call("changeMugType", mug, to);
-                mug = util.getMug(mug.p.nodeID);
-                assert.equal(mug.__className, to);
-                assert.equal(mug.p.appearance, 'minimal');
+            _.each(change_appearance, function (change) {
+                var from = change[0];
+                _.each(change[1], function(newAppearance, to) {
+                    it("should change appearance attribute when changing " + from + " to " + to, function () {
+                        var mug = setup(from, to);
+                        call("changeMugType", mug, to);
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        assert.equal(mug.p.appearance, newAppearance);
 
-                call("loadXML", call("createXML"));
-                mug = util.getMug(mug.p.nodeID);
-                assert.equal(mug.__className, to);
-                tearDown(from, to);
+                        call("loadXML", call("createXML"));
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        tearDown(from, to);
+                    });
+                });
             });
         });
 
