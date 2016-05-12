@@ -389,6 +389,10 @@ define([
 
         markdownOutput = $('<div>').addClass("controls well markdown-output col-sm-9");
 
+        if (util.isRightToLeftLanguage(options.language)) {
+            markdownOutput.attr('dir', 'rtl');
+        }
+
         widget.handleChange = function() {
             super_handleChange();
             var val = widget.getValue(),
