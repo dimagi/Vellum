@@ -179,6 +179,7 @@ define(["underscore"], function (_) {
             'atwho',
         ],
         features: {
+            // 'remove_popvers': false, // disabled for most tests
             'lookup_tables': true,
             'group_in_field_list': true,
             'rich_text': true,
@@ -189,7 +190,7 @@ define(["underscore"], function (_) {
             'custom_intents': true,
             'image_resize': true,
             'markdown_in_groups': true,
-            'allow_data_reference_in_setvalue': true
+            'allow_data_reference_in_setvalue': true,
         }
     };
 

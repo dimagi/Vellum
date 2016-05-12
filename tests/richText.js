@@ -76,26 +76,20 @@ define([
             },
             transform: function (path) {
                 return escapedHashtags.transform(path, function (path) {
-                    var mug = formShim.getMugByPath(path),
-                        icon_ = mug ? icon(mug.options.icon) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
-                    return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, !!mug)).html();
+                    var icon_ = formShim.getIconByPath(path),
+                        iconExists = !!icon_;
+                    icon_ = iconExists ? icon(icon_) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
+                    return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, iconExists)).html();
                 });
             },
-            getMugByPath: function(path) {
-                return {
-                    "#form/text": {
-                        options: { icon: 'fcc fcc-fd-text' },
-                    },
-                    "#form/othertext": {
-                        options: { icon: 'fcc fcc-fd-text' },
-                    },
-                    "#form/date": {
-                        options: { icon: 'fcc fa fa-calendar' },
-                    },
-                    "#form/group": {
-                        options: { icon: 'fcc icon-folder-open' },
-                    },
+            getIconByPath: function(path) {
+                var icon = {
+                    "#form/text": 'fcc fcc-fd-text',
+                    "#form/othertext": 'fcc fcc-fd-text',
+                    "#form/date": 'fcc fa fa-calendar',
+                    "#form/group": 'fcc icon-folder-open',
                 }[this.normalizeHashtag(path)];
+                return icon || null;
             },
             xpath: escapedHashtags.parser(hashtagToXPath),
         };
@@ -305,7 +299,7 @@ define([
                 it("to text: " + item[0], function () {
                     var result = richText.bubbleOutputs(item[0], formShim, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
-                            if (formShim.getMugByPath("`#form/" + name + "`")) {
+                            if (formShim.getIconByPath("`#form/" + name + "`")) {
                                 var output = makeOutputValue("`#form/" + name + "`", name, ico, true);
                                 return output[0].outerHTML;
                             }
@@ -484,7 +478,10 @@ define([
                         javaRosa: {langs: ['en']},
                         form: "",
                         core: { onReady: done },
-                        features: {rich_text: true},
+                        features: {
+                            rich_text: true,
+                            disable_popovers: false,
+                        },
                     });
                 });
 

@@ -67,57 +67,25 @@ define([
             var $this = $(this.element.$),
                 width = $this.innerWidth(),
                 height = $this.outerHeight(),
-                dragContainer = this.dragHandlerContainer;
+                dragContainer = this.dragHandlerContainer,
+                editor = this.editor;
             dragContainer.setStyles({
                 width: width + 'px',
                 height: height + 'px',
                 left: '0px'
             });
 
-            // Setup popover
-            var datavalue = $this.attr('data-value'),
-                // WARNING does the wrong thing for value like "/data/q + 3"
-                xpath = extractXPathInfoFromOutputValue(datavalue).reference,
-                getWidget = require('vellum/widgets').util.getWidget,
-                // TODO find out why widget is sometimes null (tests only?)
-                widget = getWidget($this);
-            if (widget) {
-                var isFormRef = FORM_REF_REGEX.test(xpath),
-                    isText = function () { return this.nodeType === 3; },
-                    displayId = $this.contents().filter(isText)[0].nodeValue,
-                    labelMug = widget.mug.form.getMugByPath(xpath),
-                    labelText = labelMug && labelMug.p.labelItext ?
-                                labelMug.p.labelItext.get() : "",
-                    $dragContainer = $(dragContainer.$),
-                    $imgs = $dragContainer.children("img");
-                labelText = $('<div>').append(labelText);
-                labelText.find('output').replaceWith(function () {
-                    return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
-                });
-                // Remove ckeditor-supplied title attributes, which will otherwise override popover title
-                $imgs.removeAttr("title");
-                $imgs.popover({
-                    trigger: 'hover',
-                    container: 'body',
-                    placement: 'bottom',
-                    title: '<h3>' + util.escape(displayId) + '</h3>' +
-                           '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
-                    html: true,
-                    content: '<p>' + labelText.text() + '</p>',
-                    template: '<div contenteditable="false" class="popover rich-text-popover">' +
-                        '<div class="popover-inner">' +
-                        '<div class="popover-title"></div>' +
-                        (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
-                        '</div></div>'
-                });
-
-                this.on('destroy', function (e)  {
-                    try {
-                        $imgs.popover('destroy');
-                    } catch(err) {
-                        // sometimes these are already destroyed
-                    }
-                });
+            if (editor.commands.createPopover) {
+                var _this = this;
+                // if the editor is still being initialized then this command
+                // won't be enabled until it is ready
+                if (editor.status === "ready") {
+                    editor.execCommand('createPopover', _this);
+                } else {
+                    editor.on('instanceReady', function () {
+                        editor.execCommand('createPopover', _this);
+                    });
+                }
             }
         }
     };
@@ -145,8 +113,17 @@ define([
      * if the editor does not exist.
      *
      * @param input - editor jQuery HTML element.
-     * @param form - form object; used for creating bubbles.
-     * @param options - rich text bubble options.
+     * @param form - form object, functions used:
+     *    normalizeEscapedHashtag - transforms to escaped hashtag form
+     *    transform - transforms escaped hashtags
+     *    isValidHashtag - boolean if hashtag translation exists
+     *    getIconByPath - only used for mug.options.icon
+     *    xpath - xpath parser
+     * @param options -
+     *    rtl - use right to left text
+     *    isExpression - treat input as xpath or itext
+     *    createPopover - function to create a popover on the bubble.
+     *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
         var wrapper = input.data("ckwrapper");
@@ -252,6 +229,13 @@ define([
                 newRange.select();
             }
         });
+
+        if (_.isFunction(options.createPopover)) {
+            editor.addCommand('createPopover', {
+                exec: options.createPopover,
+            });
+        }
+
         input.data("ckwrapper", wrapper);
         return wrapper;
     };
@@ -405,13 +389,11 @@ define([
                 };
             }
 
-            if (form) {
-                var mug = form.getMugByPath(xpath);
-                if (mug) {
-                    return {
-                        classes: ['label-datanode-internal', mug.options.icon],
-                    };
-                }
+            var icon = form.getIconByPath(xpath);
+            if (icon) {
+                return {
+                    classes: ['label-datanode-internal', icon],
+                };
             }
 
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
@@ -588,9 +570,66 @@ define([
         };
     }
 
+    function initEditor(input, form, options) {
+        if (options && form.vellum && !form.vellum.opts().features.disable_popovers) {
+            options = _.extend(options, {
+                createPopover: function( editor, ckwidget ) {
+                    var $this = $(ckwidget.element.$),
+                        dragContainer = ckwidget.dragHandlerContainer;
+                    // Setup popover
+                    var datavalue = $this.attr('data-value'),
+                        // WARNING does the wrong thing for value like "/data/q + 3"
+                        xpath = extractXPathInfoFromOutputValue(datavalue).reference,
+                        getWidget = require('vellum/widgets').util.getWidget,
+                        // TODO find out why widget is sometimes null (tests only?)
+                        widget = getWidget($this);
+                    if (widget) {
+                        var isFormRef = FORM_REF_REGEX.test(xpath),
+                            isText = function () { return this.nodeType === 3; },
+                            displayId = $this.contents().filter(isText)[0].nodeValue,
+                            labelMug = widget.mug.form.getMugByPath(xpath),
+                            labelText = labelMug && labelMug.p.labelItext ?
+                                        labelMug.p.labelItext.get() : "",
+                            $dragContainer = $(dragContainer.$),
+                            $imgs = $dragContainer.children("img");
+                        labelText = $('<div>').append(labelText);
+                        labelText.find('output').replaceWith(function () {
+                            return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
+                        });
+                        // Remove ckeditor-supplied title attributes, which will otherwise override popover title
+                        $imgs.removeAttr("title");
+                        $imgs.popover({
+                            trigger: 'hover',
+                            container: 'body',
+                            placement: 'bottom',
+                            title: '<h3>' + util.escape(displayId) + '</h3>' +
+                                   '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
+                            html: true,
+                            content: '<p>' + labelText.text() + '</p>',
+                            template: '<div contenteditable="false" class="popover rich-text-popover">' +
+                                '<div class="popover-inner">' +
+                                '<div class="popover-title"></div>' +
+                                (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
+                                '</div></div>'
+                        });
+
+                        ckwidget.on('destroy', function (e)  {
+                            try {
+                                $imgs.popover('destroy');
+                            } catch(err) {
+                                // sometimes these are already destroyed
+                            }
+                        });
+                    }
+                },
+            });
+        }
+        return editor(input, form, options);
+    }
+
     return {
         bubbleOutputs: bubbleOutputs,
-        editor: editor,
+        editor: initEditor,
         fromRichText: fromRichText,
         toRichText: toRichText,
     };
