@@ -570,24 +570,7 @@ define([
         };
     }
 
-    function createFormModelForEditor(form) {
-        return {
-            normalizeEscapedHashtag: _.bind(form.normalizeEscapedHashtag, form),
-            transform: _.bind(form.transform, form),
-            isValidHashtag: _.bind(form.isValidHashtag, form),
-            getIconByPath: function (path) {
-                var mug = form.getMugByPath(path);
-                return mug ? mug.getIcon() : null;
-            },
-            xpath: form.xpath,
-        };
-    }
-
     function initEditor(input, form, options) {
-        var form_ = form;
-        if (form) {
-            form_ = createFormModelForEditor(form);
-        }
         if (options && form.vellum && !form.vellum.opts().features.disable_popovers) {
             options = _.extend(options, {
                 createPopover: function( editor, ckwidget ) {
@@ -641,7 +624,7 @@ define([
                 },
             });
         }
-        return editor(input, form_, options);
+        return editor(input, form, options);
     }
 
     return {
@@ -649,6 +632,5 @@ define([
         editor: initEditor,
         fromRichText: fromRichText,
         toRichText: toRichText,
-        createFormModelForEditor: createFormModelForEditor,
     };
 });

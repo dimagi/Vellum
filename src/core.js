@@ -453,7 +453,7 @@ define([
                    this.data.javaRosa.Itext.getDefaultLanguage(),
             val = mug.getDisplayName(lang, false);
         if (mug.supportsRichText()) {
-            val = richText.bubbleOutputs(val, richText.createFormModelForEditor(this.data.core.form), true);
+            val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
             val = util.escape(val);
         }

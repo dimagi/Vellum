@@ -82,38 +82,14 @@ define([
                     return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, iconExists)).html();
                 });
             },
-            getMugByPath: function (path) {
-                return {
-                    "#form/text": {
-                        getIcon: function () { return 'fcc fcc-fd-text'; },
-                    },
-                    "#form/othertext": {
-                        getIcon: function () { return 'fcc fcc-fd-text'; },
-                    },
-                    "#form/date": {
-                        getIcon: function () { return 'fcc fa fa-calendar'; },
-                    },
-                    "#form/group": {
-                        getIcon: function () { return 'fcc icon-folder-open'; },
-                    },
-                }[this.normalizeHashtag(path)];
-            },
             getIconByPath: function(path) {
-                var mug = {
-                    "#form/text": {
-                        getIcon: function () { return 'fcc fcc-fd-text'; },
-                    },
-                    "#form/othertext": {
-                        getIcon: function () { return 'fcc fcc-fd-text'; },
-                    },
-                    "#form/date": {
-                        getIcon: function () { return 'fcc fa fa-calendar'; },
-                    },
-                    "#form/group": {
-                        getIcon: function () { return 'fcc icon-folder-open'; },
-                    },
+                var icon = {
+                    "#form/text": 'fcc fcc-fd-text',
+                    "#form/othertext": 'fcc fcc-fd-text',
+                    "#form/date": 'fcc fa fa-calendar',
+                    "#form/group": 'fcc icon-folder-open',
                 }[this.normalizeHashtag(path)];
-                return mug ? mug.getIcon() : null;
+                return icon || null;
             },
             xpath: escapedHashtags.parser(hashtagToXPath),
         };
