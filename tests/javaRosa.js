@@ -164,6 +164,35 @@ define([
             });
         });
 
+        describe("and one has is right to left", function () {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en', 'heb']},
+                    core: {
+                        onReady: function () {
+                            util.addQuestion("Text");
+                            done();
+                        }},
+                    features: {rich_text: false},
+                });
+            });
+
+            it("should have rtl attribute", function () {
+                assert.isUndefined($('[name=itext-en-label]').attr('dir'));
+                assert.strictEqual($('[name=itext-heb-label]').attr('dir'), 'rtl');
+            });
+
+            it("should have rtl attribute on markdown preview", function () {
+                var $enInput = $('[name=itext-en-label]'),
+                    $hebInput = $('[name=itext-heb-label]'), 
+                    $enMarkdown = $enInput.closest('.form-group').parent().find('.markdown-output'),
+                    $hebMarkdown = $hebInput.closest('.form-group').parent().find('.markdown-output');
+                $enInput.val('* markdown');
+                assert.isUndefined($enMarkdown.attr('dir'));
+                assert.strictEqual($hebMarkdown.attr('dir'), 'rtl');
+            });
+        });
+
         it("should not show itext errors when there is text in any language", function (done) {
             util.loadXML(TEST_XML_1);
             $("textarea[name=itext-en-constraintMsg]").val("").change();
