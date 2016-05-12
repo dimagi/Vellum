@@ -931,6 +931,10 @@ define([
             }
             return this.mugMap[this.normalizeHashtag(path)];
         },
+        getIconByPath: function (path) {
+            var mug = this.getMugByPath(path);
+            return mug ? mug.getIcon() : null;
+        },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
                 if (mug && !seen.hasOwnProperty(mug.ufid)) {

@@ -76,7 +76,7 @@ define([
             },
             transform: function (path) {
                 return escapedHashtags.transform(path, function (path) {
-                    var icon_ = formShim.getIconFromPath(path),
+                    var icon_ = formShim.getIconByPath(path),
                         iconExists = !!icon_;
                     icon_ = iconExists ? icon(icon_) : (formShim.isValidHashtag(path) ? externalIcon() : unknownIcon());
                     return $('<div>').html(makeBubble("`" + path + "`", path.split('/').slice(-1)[0], icon_, iconExists)).html();
@@ -98,7 +98,7 @@ define([
                     },
                 }[this.normalizeHashtag(path)];
             },
-            getIconFromPath: function(path) {
+            getIconByPath: function(path) {
                 var mug = {
                     "#form/text": {
                         getIcon: function () { return 'fcc fcc-fd-text'; },
@@ -323,7 +323,7 @@ define([
                 it("to text: " + item[0], function () {
                     var result = richText.bubbleOutputs(item[0], formShim, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
-                            if (formShim.getIconFromPath("`#form/" + name + "`")) {
+                            if (formShim.getIconByPath("`#form/" + name + "`")) {
                                 var output = makeOutputValue("`#form/" + name + "`", name, ico, true);
                                 return output[0].outerHTML;
                             }
