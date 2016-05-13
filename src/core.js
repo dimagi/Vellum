@@ -2094,6 +2094,7 @@ define([
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
         form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
+        window.location.hash = mug.hashtagPath;
     };
 
     fn.duplicateMugProperties = function(mug) {};

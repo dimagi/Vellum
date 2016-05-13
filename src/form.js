@@ -722,7 +722,6 @@ define([
                     this.moveMug(conflict, "rename", oldId);
                 }
             }
-            window.location.hash = mug.hashtagPath;
         },
         changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
