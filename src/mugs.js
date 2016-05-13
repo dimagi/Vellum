@@ -473,9 +473,6 @@ define([
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
         },
-        select: function() {
-            $('#' + this.ufid + '_anchor').click();
-        },
         isInRepeat: function() {
             if (this.__className === "Repeat") { // HACK hard-coded class name
                 return true;

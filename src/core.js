@@ -1293,7 +1293,7 @@ define([
         if (qId) {
             var mug = _this.getMugByPath(qId);
             if (mug) {
-                mug.select();
+                _this.selectSomethingOrHideProperties(true, mug.ufid);
             } else {
                 _this.selectSomethingOrHideProperties(true);
             }
@@ -1303,15 +1303,19 @@ define([
 
     };
 
-    fn.selectSomethingOrHideProperties = function (forceDeselect) {
+    fn.selectSomethingOrHideProperties = function (forceDeselect, ufid) {
         if (forceDeselect) {
             this.jstree('deselect_all');
         }
         // ensure something is selected if possible
         if (!this.jstree('get_selected').length) {
             // if there's any nodes in the tree, just select the first
-            var all_nodes = this.data.core.$tree.find("li");
-            if (all_nodes.length > 0) {
+            var all_nodes = this.data.core.$tree.find("li"),
+                selected = all_nodes.filter('[id= ' + ufid + ']');
+            if (selected.length > 0) {
+                this.jstree('select_node', selected[0]);
+                return true;
+            } else if (all_nodes.length > 0) {
                 this.jstree('select_node', all_nodes[0]);
                 return true;
             } else {
