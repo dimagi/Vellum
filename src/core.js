@@ -23,7 +23,7 @@ define([
     'vellum/parser',
     'vellum/datasources',
     'vellum/util',
-    'vellum/javaRosa/itextWidget',
+    'vellum/javaRosa/util',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -55,7 +55,7 @@ define([
     parser,
     datasources,
     util,
-    jrWidget,
+    jrUtil,
     debug
 ) {
     
@@ -457,7 +457,7 @@ define([
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
-            val = util.escape(jrWidget.outputToXPathOrHashtag('toXPath')(val, mug.form.xpath));
+            val = util.escape(jrUtil.outputToXPathOrHashtag('toXPath')(val, mug.form.xpath));
         }
         return val;
     };

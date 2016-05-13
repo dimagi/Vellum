@@ -7,7 +7,6 @@ define([
     'vellum/widgets',
     'vellum/util',
     'vellum/atwho',
-    'vellum/xml',
     'vellum/core'
 ], function (
     _,
@@ -17,8 +16,7 @@ define([
     jrUtil,
     widgets,
     util,
-    atwho,
-    xml
+    atwho
 ) {
     var DEFAULT_EXTENSIONS = {
             image: 'png',
@@ -116,27 +114,11 @@ define([
         return widget;
     };
 
-    function outputToXPathOrHashtag(functionName) {
-        return function (text, xpathParser) {
-            if (text) {
-                text = $("<div />").append(text);
-                text.find('output').replaceWith(function() {
-                    var $this = $(this),
-                        value = xpathParser.parse($this.attr('value') || $this.attr('ref'));
-                    $this.attr('value', value[functionName]());
-                    return $this[0].outerHTML;
-                });
-                text = xml.normalize(text.html());
-            }
-            return text;
-        };
-    }
-
     var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
-            outputToHashtag = outputToXPathOrHashtag('toHashtag'),
-            outputToXPath = outputToXPathOrHashtag('toXPath'),
+            outputToHashtag = jrUtil.outputToXPathOrHashtag('toHashtag'),
+            outputToXPath = jrUtil.outputToXPathOrHashtag('toXPath'),
             // todo: id->class
             id = "itext-" + language + "-" + options.itextType,
             widgetClass = options.baseWidgetClass || widgets.richTextarea,
@@ -500,6 +482,5 @@ define([
         label: itextLabelWidget,
         markdown: itextMarkdownWidget,
         media: itextMediaWidget,
-        outputToXPathOrHashtag: outputToXPathOrHashtag
     };
 });
