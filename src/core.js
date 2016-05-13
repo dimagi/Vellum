@@ -457,7 +457,7 @@ define([
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
-            val = util.escape(jrUtil.outputToXPathOrHashtag('toXPath')(val, mug.form.xpath));
+            val = util.escape(jrUtil.outputToXPath(val, mug.form.xpath));
         }
         return val;
     };

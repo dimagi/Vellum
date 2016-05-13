@@ -117,8 +117,6 @@ define([
     var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
-            outputToHashtag = jrUtil.outputToXPathOrHashtag('toHashtag'),
-            outputToXPath = jrUtil.outputToXPathOrHashtag('toXPath'),
             // todo: id->class
             id = "itext-" + language + "-" + options.itextType,
             widgetClass = options.baseWidgetClass || widgets.richTextarea,
@@ -206,12 +204,16 @@ define([
                 lang = widget.language;
             }
             value = itextItem && itextItem.get(widget.form, lang);
-            return mug.supportsRichText() ? outputToHashtag(value, widget.mug.form.xpath) : outputToXPath(value, widget.mug.form.xpath);
+            if (mug.supportsRichText()) {
+                return jrUtil.outputToHashtag(value, widget.mug.form.xpath);
+            } else {
+                return jrUtil.outputToXPath(value, widget.mug.form.xpath);
+            }
         };
 
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
-            value = outputToHashtag(value, widget.mug.form.xpath);
+            value = jrUtil.outputToHashtag(value, widget.mug.form.xpath);
             if (itextItem) {
                 if (widget.isDefaultLang) {
                     widget.mug.fire({
