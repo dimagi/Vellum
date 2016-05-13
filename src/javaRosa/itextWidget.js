@@ -116,7 +116,7 @@ define([
         return widget;
     };
 
-    function _outputToXPathOrHashtag(functionName) {
+    function outputToXPathOrHashtag(functionName) {
         return function (text, xpathParser) {
             if (text) {
                 text = $("<div />").append(text);
@@ -135,8 +135,8 @@ define([
     var itextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
-            outputToHashtag = _outputToXPathOrHashtag('toHashtag'),
-            outputToXPath = _outputToXPathOrHashtag('toXPath'),
+            outputToHashtag = outputToXPathOrHashtag('toHashtag'),
+            outputToXPath = outputToXPathOrHashtag('toXPath'),
             // todo: id->class
             id = "itext-" + language + "-" + options.itextType,
             widgetClass = options.baseWidgetClass || widgets.richTextarea,
@@ -500,5 +500,6 @@ define([
         label: itextLabelWidget,
         markdown: itextMarkdownWidget,
         media: itextMediaWidget,
+        outputToXPathOrHashtag: outputToXPathOrHashtag
     };
 });
