@@ -10,9 +10,9 @@
 					<black />
 				</data>
 			</instance>
-			<bind nodeset="/data/blue" type="xsd:string" />
-			<bind nodeset="/data/green" type="xsd:string" />
-			<bind nodeset="/data/black" type="xsd:string" relevant="/data/blue = 'abc'" />
+			<bind vellum:nodeset="#form/blue" nodeset="/data/blue" type="xsd:string" />
+			<bind vellum:nodeset="#form/green" nodeset="/data/green" type="xsd:string" />
+			<bind vellum:nodeset="#form/black" nodeset="/data/black" type="xsd:string" vellum:relevant="#form/blue = 'abc'" relevant="/data/blue = 'abc'" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="blue-label">
@@ -29,13 +29,13 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/blue">
+		<input vellum:ref="#form/blue" ref="/data/blue">
 			<label ref="jr:itext('blue-label')" />
 		</input>
-		<input ref="/data/green">
+		<input vellum:ref="#form/green" ref="/data/green">
 			<label ref="jr:itext('green-label')" />
 		</input>
-		<input ref="/data/black">
+		<input vellum:ref="#form/black" ref="/data/black">
 			<label ref="jr:itext('black-label')" />
 		</input>
 	</h:body>

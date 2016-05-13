@@ -12,12 +12,14 @@
 				</data>
 			</instance>
 			<instance id="ledger" src="jr://instance/ledgerdb" />
+			<instance id="commcaresession" src="jr://instance/session" />
 			<instance id="products" src="jr://fixture/commtrack:products" />
-			<bind nodeset="/data/stock_amount" type="xsd:int" />
-			<bind nodeset="/data/balance[@type='bal-0']/entry/@quantity" calculate="/data/stock_amount" relevant="/data/stock_amount != 0" />
+			<bind vellum:nodeset="#form/stock_amount" nodeset="/data/stock_amount" type="xsd:int" />
+			<bind nodeset="/data/balance[@type='bal-0']" vellum:relevant="#form/stock_amount != 0" relevant="/data/stock_amount != 0" />
+			<bind nodeset="/data/balance[@type='bal-0']/entry/@quantity" vellum:calculate="#form/stock_amount" calculate="/data/stock_amount" />
 			<setvalue event="xforms-ready" ref="/data/balance[@type='bal-0']/entry/@id" value="instance('commcaresession')/session/data/product_id" />
 			<setvalue event="xforms-ready" ref="/data/balance[@type='bal-0']/@entity-id" value="instance('commcaresession')/session/data/case_id" />
-			<setvalue event="xforms-ready" ref="/data/balance[@type='bal-0']/@date" value="today()" />
+			<setvalue event="xforms-ready" ref="/data/balance[@type='bal-0']/@date" value="now()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="stock_amount-label">
@@ -28,7 +30,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/stock_amount">
+		<input vellum:ref="#form/stock_amount" ref="/data/stock_amount">
 			<label ref="jr:itext('stock_amount-label')" />
 		</input>
 	</h:body>

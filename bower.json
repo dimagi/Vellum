@@ -21,24 +21,25 @@
         "tests"
     ],
     "dependencies": {
-        "almond": "~0.2.9", 
-        "underscore": "~1.5.2",
+        "underscore": "~1.6.0",
         "jquery": "~1.11.1",
-        "jquery-ui": "~1.11.2",
         "requirejs": "~2.1.11",
         "requirejs-text": "~2.0.12",
         "require-less": "~0.1.2",
         "require-css": "~0.1.5",
         "requirejs-tpl": "jfparadis/requirejs-tpl",
         "requirejs-plugins": "~1.0.2",
+        "At.js": "emord/At.js#override-insert",
+        "Caret.js": "0.2.2",
+        "fuse.js": "~2.0.0",
 
-        "jstree": "vakata/jstree#110b6681ffd5fc7206c27ea174d87ce1b348776d",
+        "jstree": "~3.2.1",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
-        "xpath": "dimagi/js-xpath",
-        "bootstrap-better-typeahead": "ptnplanet/Bootstrap-Better-Typeahead",
-        "jsdiff": "kpdecker/jsdiff"
+        "xpath": "dimagi/js-xpath#v0.0.2",
+        "jsdiff": ">=1",
+        "markdown-it": "~6.0.0"
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",

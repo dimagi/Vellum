@@ -40,20 +40,13 @@ requirejs.config({
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
-        'jquery-ui': '../bower_components/jquery-ui/jquery-ui',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
-        'jquery.fancybox': '../lib/fancybox/jquery.fancybox-1.3.4',
         'jquery.bootstrap': '../lib/bootstrap',
-        'jquery.bootstrap-popout': '../lib/bootstrap-popout',
-        'jquery.bootstrap-better-typeahead': '../bower_components/bootstrap-better-typeahead/js/bootstrap-better-typeahead',
         'underscore': '../bower_components/underscore/underscore',
         'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
         // todo: should convert xpath submodule to AMD
         'xpath': '../bower_components/xpath/xpath',
-        'xpathmodels': '../bower_components/xpath/models',
-        'scheme-number': '../bower_components/xpath/lib/schemeNumber',
-        'biginteger': '../bower_components/xpath/lib/biginteger',
 
         'langCodes': '../bower_components/langcodes/langs.json',
 
@@ -64,9 +57,14 @@ requirejs.config({
         'yui-loader': '../bower_components/MediaUploader/yui-loader',
         'yui-uploader': '../bower_components/MediaUploader/yui-uploader',
 
-        'swfobject': '../bower_components/MediaUploader/swfobject',
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
         'jsdiff': '../bower_components/jsdiff/diff',
+        'markdown-it': '../bower_components/markdown-it/dist/markdown-it',
+        'caretjs': '../bower_components/Caret.js/dist/jquery.caret',
+        'atjs': '../bower_components/At.js/dist/js/jquery.atwho',
+        'ckeditor': '../lib/ckeditor/ckeditor',
+        'ckeditor-jquery': '../lib/ckeditor/adapters/jquery',
+        'fusejs': '../bower_components/fuse.js/src/fuse'
     },
     shim: {
         'codemirror': {
@@ -83,28 +81,13 @@ requirejs.config({
             exports: 'diff_match_patch'
         },
 
-        'jquery-ui': {
-            deps: ['jquery', 'css!../bower_components/jquery-ui/themes/redmond/jquery-ui'],
-            exports: '$.fn.autocomplete'
-        },
         'jquery.jstree': {
             deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
         },
-        'jquery.fancybox': {
-            deps: ['jquery', 'css!../lib/fancybox/jquery.fancybox-1.3.4'],
-            exports: '$.fn.fancybox'
-        },
         'jquery.bootstrap': {
             deps: ['jquery'],
             exports: '$.fn.popover'
-        },
-        'jquery.bootstrap-popout': {
-            deps: ['jquery.bootstrap'],
-            exports: '$.fn.popout'
-        },
-        'jquery.bootstrap-better-typeahead': {
-            deps: ['jquery.bootstrap']
         },
         'underscore': {
             exports: '_'
@@ -129,31 +112,37 @@ requirejs.config({
             deps: ['yui-base', 'yui-loader', 'css!yui-combo'],
             exports: 'YUI'
         },
-        'swfobject': {
-            exports: 'swfobject'
-        },
         'file-uploader': {
-            deps: ['yui-uploader', 'swfobject', 'underscore', 'jquery'],
+            deps: ['yui-uploader', 'underscore', 'jquery'],
             exports: 'HQMediaFileUploadController'
         },
 
         'xpath': {
-            deps: ['xpathmodels'],
             exports: 'xpath'
-        },
-        'xpathmodels': {
-            deps: ['scheme-number'],
-            exports: 'xpathmodels'
-        },
-        'scheme-number': {
-            deps: ['biginteger'],
-            exports: 'SchemeNumber'
-        },
-        'biginteger': {
-            exports: 'BigInteger'
         },
         'jsdiff': {
             exports: 'JsDiff'
+        },
+        'markdown-it': {
+            exports: 'markdown-it'
+        },
+        'caretjs': {
+            deps: ['jquery'],
+            exports: 'caretjs'
+        },
+        'atjs': {
+            deps: ['jquery', 'caretjs', 'css!../bower_components/At.js/dist/css/jquery.atwho'],
+            exports: 'atjs'
+        },
+        'ckeditor': {
+            exports: 'CKEDITOR'
+        },
+        'ckeditor-jquery': {
+            deps: ['jquery', 'ckeditor'],
+            exports: '$.fn.ckeditor'
+        },
+        'fusejs': {
+            exports: 'fusejs'
         }
     },
     less: {
@@ -167,16 +156,6 @@ if (window.jQuery) {
     define('jquery', [], function() {
         return window.jQuery;
     });
-    if (window.jQuery.fn.typeahead) {
-        define('jquery.bootstrap', [], function () {});
-    }
-    if (window.jQuery.fn.popout) {
-        define('jquery.bootstrap-popout', [], function () {});
-    }
-
-    if (window.jQuery.fn.datepicker) {
-        define('jquery-ui', [], function () {});
-    }
 }
 
 define([
@@ -185,14 +164,17 @@ define([
     'vellum/ignoreButRetain',
     'vellum/intentManager',
     'vellum/itemset',
-    'vellum/javaRosa',
+    'vellum/javaRosa/plugin',
+    'vellum/datasources',
     'vellum/lock',
+    'vellum/databrowser',
     'vellum/commtrack',
     'vellum/modeliteration',
     'vellum/saveToCase',
     'vellum/uploader',
     'vellum/window',
-    'vellum/polyfills'
+    'vellum/polyfills',
+    'vellum/copy-paste'
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect

@@ -1,11 +1,10 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
     'vellum/mugs',
-    'vellum/parser',
     'vellum/tree',
     'vellum/util',
+    'vellum/atwho',
     'vellum/widgets',
     'tpl!vellum/templates/widget_update_case',
     'tpl!vellum/templates/widget_index_case',
@@ -13,13 +12,12 @@ define([
     'tpl!vellum/templates/widget_save_to_case',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
     mugs,
-    parser,
     Tree,
     util,
+    atwho,
     widgets,
     widget_update_case,
     widget_index_case,
@@ -54,7 +52,7 @@ define([
     function addSetValue(mug) {
         var path = mug.absolutePath;
 
-        if (createsCase(mug)) {
+        if (createsCase(mug) && !mug.isInRepeat()) {
             mug.form.addSetValue('xforms-ready', path + "/case/@case_id", mug.p.case_id);
         }
     }
@@ -63,6 +61,7 @@ define([
             var widget = widgets.normal(mug, options),
                 id = options.id,
                 internal_template = options.template;
+            options.noRichText = true;
 
             widget.input = $('<div class="control-row" />').attr('name', id);
 
@@ -81,6 +80,10 @@ define([
                 });
                 widget.input.find('.fd-add-property').click(widget.addProperty);
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
+                widget.input.find('input').addClass('jstree-drop');
+                widget.input.find('input').each(function() {
+                    atwho.questionAutocomplete($(this), mug);
+                });
             };
 
             widget.setValue = function (value) {
@@ -169,33 +172,41 @@ define([
         };
 
     var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
-        VALID_PROP_REGEX = /^[a-z_]+$/i,
+        VALID_PROP_REGEX = /^[a-z0-9_]+$/i,
         saveToCaseMugOptions = {
             typeName: 'Save to Case',
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
-            icon: 'icon-save',
-            init: function (mug, form) {},
+            icon: 'fa fa-save',
+            init: function (mug, form) {
+                mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
+            },
             spec: {
                 xmlnsAttr: { presence: "optional" },
                 "date_modified": {
-                    lstring: "Date modified",
+                    lstring: "Date Modified",
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 "user_id": {
                     lstring: "User ID",
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.xPath
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 "case_id": {
                     lstring: "Case ID",
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 useCreate: {
                     lstring: "Create Case",
@@ -246,7 +257,9 @@ define([
                     lstring: "Close Condition",
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.xPath
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
                 },
                 useUpdate: {
                     lstring: "Update Case",
@@ -407,12 +420,12 @@ define([
                 }
 
                 return [new Tree.Node(actions, {
-                    getNodeID: function () { return "c:case"; },
+                    getNodeID: function () { return "case"; },
                     p: {rawDataAttributes: null},
                     options: { 
                         getExtraDataAttributes: function (mug) {
                             return {
-                                "xmlns:c": CASE_XMLNS,
+                                "xmlns": CASE_XMLNS,
                                 case_id: '',
                                 date_modified: '',
                                 user_id: '',
@@ -434,6 +447,12 @@ define([
                 }
 
                 if (createsCase(mug)) {
+                    if (mug.isInRepeat()) {
+                        ret = ret.concat({
+                            nodeset: mug.absolutePath + "/case/@case_id",
+                            calculate: mug.p.case_id
+                        });
+                    }
                     ret = ret.concat(generateBinds('create', mug.p.createProperty));
                 }
                 if (updatesCase(mug)) {

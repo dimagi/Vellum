@@ -3,7 +3,6 @@ define([
     'module',
     'underscore',
     'jquery',
-    'vellum/util',
     'tpl!vellum/templates/multimedia_modal',
     'tpl!vellum/templates/multimedia_upload_trigger',
     'text!vellum/templates/multimedia_queue.html',
@@ -11,6 +10,7 @@ define([
     'text!vellum/templates/multimedia_existing_image.html',
     'text!vellum/templates/multimedia_existing_audio.html',
     'text!vellum/templates/multimedia_existing_video.html',
+    'text!vellum/templates/multimedia_existing_text.html',
     'tpl!vellum/templates/multimedia_nomedia',
     'text!vellum/templates/multimedia_block.html',
     'vellum/core'
@@ -19,7 +19,6 @@ define([
     module,
     _,
     $,
-    util,
     multimedia_modal,
     multimedia_upload_trigger,
     multimedia_queue,
@@ -27,6 +26,7 @@ define([
     multimedia_existing_image,
     multimedia_existing_audio,
     multimedia_existing_video,
+    multimedia_existing_text,
     multimedia_nomedia,
     multimedia_block
 ) {
@@ -35,7 +35,7 @@ define([
     var SUPPORTED_EXTENSIONS = {
         image: [
             {
-                'description': 'Images',
+                'description': 'Image',
                 'extensions': '*.jpg;*.png;*.gif'
             }
         ],
@@ -50,22 +50,40 @@ define([
                 'description': 'Video',
                 'extensions': '*.3gp;*.mp4'
             }
-        ]
+        ],
+        'video-inline': [
+            {
+                'description': 'Inline Video',
+                'extensions': '*.3gp;*.mp4'
+            }
+        ],
+        text: [
+            {
+                'description': 'HTML',
+                'extensions': '*.html'
+            }
+        ],
     },
         PREVIEW_TEMPLATES = {
         image: multimedia_existing_image,
         audio: multimedia_existing_audio,
-        video: multimedia_existing_video
+        video: multimedia_existing_video,
+        'video-inline': multimedia_existing_video,
+        text:  multimedia_existing_text,
     },
         SLUG_TO_CLASS = {
         image: 'CommCareImage',
         audio: 'CommCareAudio',
-        video: 'CommCareVideo'
+        video: 'CommCareVideo',
+        'video-inline': 'CommCareVideo',
+        text:  'CommCareMultimedia',
     },
         SLUG_TO_UPLOADER_SLUG = {
         image: 'fd_hqimage',
         audio: 'fd_hqaudio',
-        video: 'fd_hqvideo'
+        video: 'fd_hqvideo',
+        'video-inline': 'fd_hqInlineVideo',
+        text:  'fd_hqtext',
     };
 
     // These functions were extracted out when separating the uploader code from
@@ -110,8 +128,9 @@ define([
     var addUploaderToWidget = function (widget, objectMap, uploadControls) {
         widget.mediaRef = multimediaReference(
             widget.form, objectMap, uploadControls);
-    
-        var $input = widget.getControl(),
+
+        var getValue = widget.getItextValue || widget.getValue,
+            $input = widget.getControl(),
             $uiElem = $('<div />'),
             _getParentUIElement = widget.getUIElement,
             $previewContainer = $('<div />')
@@ -168,9 +187,9 @@ define([
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
                 var newExtension = '.' + data.ref.path.split('.').pop().toLowerCase(),
-                    oldExtension = '.' + widget.getItextValue().split('.').pop().toLowerCase();
+                    oldExtension = '.' + getValue().split('.').pop().toLowerCase();
                 if (newExtension !== oldExtension) {
-                    var currentPath = widget.getItextValue().replace(/\.[^/.]+$/, newExtension);
+                    var currentPath = getValue().replace(/\.[^/.]+$/, newExtension);
                     widget.getControl().val(currentPath);
                     widget.handleChange();
                 }
@@ -191,16 +210,17 @@ define([
         };
 
         widget.updateReference = function () {
-            var currentPath = widget.getItextValue();
+            var currentPath = getValue();
             $uiElem.attr('data-hqmediapath', currentPath);
             widget.mediaRef.updateRef(currentPath);
         };
     };
 
     var getPreviewUI = function (widget, objectMap, ICONS) {
-        var currentPath = widget.getItextValue(),
+        var javarosa = _.isFunction(widget.getItextValue),
+            currentPath = javarosa ? widget.getItextValue() : widget.getValue(),
             previewHtml;
-        if (!currentPath && !widget.isDefaultLang) {
+        if (!javarosa && !currentPath && !widget.isDefaultLang) {
             currentPath = widget.getItextItem().get(widget.form, widget.defaultLang);
         }
         if (currentPath in objectMap) {
@@ -217,12 +237,12 @@ define([
     };
 
     var getUploadButtonUI = function (widget, objectMap) {
-        var currentPath = widget.getItextValue(),
+        var currentPath = widget.getItextValue ? widget.getItextValue() : widget.getValue(),
             $uploadBtn;
         $uploadBtn = $(multimedia_upload_trigger({
             multimediaExists: currentPath in objectMap,
             uploaderId: SLUG_TO_UPLOADER_SLUG[widget.form],
-            mediaType: widget.form
+            mediaType: SUPPORTED_EXTENSIONS[widget.form][0].description
         }));
         $uploadBtn.click(function () {
             widget.mediaRef.updateController();
@@ -230,17 +250,15 @@ define([
         return $uploadBtn;
     };
 
-    // get absolute path to current file, suitable to be loaded by swfobject.
-    var pieces = module.uri.split('/'),
-        base = pieces.slice(0, pieces.length - 1).join('/') + '/';
-   
     $.vellum.plugin("uploader", {
         objectMap: false,
         sessionid: false,
         uploadUrls: {
             image: false,
             audio: false,
-            video: false
+            video: false,
+            'video-inline': false,
+            text: false
         },
     }, {
         init: function () {
@@ -248,8 +266,7 @@ define([
                 uploadUrls = opts.uploadUrls,
                 uploadEnabled = opts.objectMap && opts.uploadUrls && 
                     opts.uploadUrls.image,
-                sessionid = opts.sessionid,
-                swfUrl = base + "../bower_components/MediaUploader/flashuploader.swf";
+                sessionid = opts.sessionid;
 
             this.data.uploader.uploadEnabled = uploadEnabled;
             this.data.uploader.objectMap = opts.objectMap;
@@ -264,21 +281,30 @@ define([
                         mediaType: 'image',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.image,
-                        swfUrl: swfUrl
                     }),
                     'audio': this.initUploadController({
                         uploaderSlug: 'fd_hqaudio',
                         mediaType: 'audio',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.audio,
-                        swfUrl: swfUrl
                     }),
                     'video': this.initUploadController({
                         uploaderSlug: 'fd_hqvideo',
                         mediaType: 'video',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
-                        swfUrl: swfUrl
+                    }),
+                    'video-inline': this.initUploadController({
+                        uploaderSlug: 'fd_hqInlineVideo',
+                        mediaType: 'video-inline',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.video,
+                    }),
+                    'text': this.initUploadController({
+                        uploaderSlug: 'fd_hqtext',
+                        mediaType: 'text',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.text,
                     })
                 };
             };
@@ -326,7 +352,6 @@ define([
                     {
                         fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
                         uploadURL: options.uploadUrl,
-                        swfURL: options.swfUrl,
                         isMultiFileUpload: false,
                         queueTemplate: multimedia_queue,
                         errorsTemplate: multimedia_errors,
@@ -350,6 +375,7 @@ define([
                 }
                 delete control.value;
             });
+            this.__callOld();
         }
     });
 });

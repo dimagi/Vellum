@@ -2,34 +2,20 @@ define([
     'json!langCodes',
     'underscore',
     'jsdiff',
+    'vellum/markdown',
+    'vellum/escapedHashtags',
     'jquery',
-    'jquery.bootstrap-popout'
+    'vellum/jquery-extensions'
 ], function (
     langCodes,
     _,
     jsdiff,
+    markdown,
+    escapedHashtags,
     $
 ) {
     RegExp.escape = function(s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    };
-    
-    $.fn.stopLink = function() {
-        // stops anchor tags from clicking through
-        this.click(function (e) {
-            e.preventDefault();
-        });
-        return this;
-    };
-
-    $.fn.fdHelp = function () {
-        // creates a help popover, requires twitter bootstrap
-        this.append($('<i />').addClass('icon-question-sign'))
-            .popout({
-                trigger: 'hover',
-                html: true
-            });
-        return this;
     };
 
     var that = {};
@@ -48,20 +34,12 @@ define([
         that.langCodeToName[lang.two] = name;
     });
 
-    that.XPATH_REFERENCES = [
-        "relevantAttr",
-        "calculateAttr",
-        "constraintAttr",
-        "dataParent",
-        "repeat_count"
-    ];
-
-    that.getTemplateObject = function (selector, params) {
-        return $(_.template($(selector).text(), params));
+    that.formatExc = function (error) {
+        return error && error.stack ? error.stack : String(error);
     };
-    
-    that.validAttributeRegex = /^[^<&'"]*$/;
-    that.invalidAttributeRegex = /[<&'"]/;
+
+    that.validAttributeRegex = /^[^<&'">]*$/;
+    that.invalidAttributeRegex = /[<&'">]/;
 
     /**
      * Check if value is a valid XML attribute value (additionally disallow all
@@ -75,9 +53,10 @@ define([
     // Just run your object through this function to make it event aware.
     // Adapted from 'JavaScript: The Good Parts' chapter 5
     that.eventuality = function (that) {
-        var registry = {};
+        var registry = {},
+            unbinders = {};
         /**
-         * Fire event, calling all registered handlers and unbind `one` handlers
+         * Fire event, calling all registered handlers
          */
         that.fire = function (event) {
             var array,
@@ -100,39 +79,69 @@ define([
         };
         /**
          * Register an event handler to be called each time an event is fired.
+         *
+         * @param type - Event type string.
+         * @param method - Event handler method.
+         * @param parameters - Parameters to be passed to method. If null
+         *      or not provided, the event object itself will be passed.
+         * @param unbindOn - (optional) Event type on which to unbind
+         *      all handlers associated with `context`. To make a one-
+         *      shot, use the same value for this parameter as for
+         *      `type`.
+         * @param context - (optional) Context for `unbind`. The
+         *      default is `null`. The handler (and all other handlers
+         *      bound to the same context) will be unbound the next time
+         *      the `unbindOn` event fires or `this.unbind(context)` is
+         *      called, whichever happens first.
          */
-        that.on = function (type, method, parameters, bindingContext) {
+        that.on = function (type, method, parameters, unbindOn, context) {
+            if (arguments.length < 5) {
+                context = null;
+            }
             var handler = {
                 method: method,
                 parameters: parameters,
-                bindingContext: bindingContext || method
+                context: context
             };
             if (registry.hasOwnProperty(type)) {
                 registry[type].push(handler);
             } else {
                 registry[type] = [handler];
             }
+            if (unbindOn) {
+                if (!unbinders[unbindOn]) {
+                    unbinders[unbindOn] = [];
+                }
+                if (unbinders[unbindOn].indexOf(context) === -1) {
+                    unbinders[unbindOn].push(context);
+                    that.on(unbindOn, function () {
+                        that.unbind(context);
+                        unbinders[unbindOn] = _.filter(unbinders[unbindOn], function (cx) {
+                            return cx !== context;
+                        });
+                    }, null, null, context);
+                }
+            }
             return this;
         };
         /**
          * Unbind an event handler for a given binding context
          *
-         * @param bindingContext - the binding context or method that was
-         *        passed to `on`.
+         * @param context - the binding context that was passed to `on`.
          * @param type - optional event type. If undefined, all handlers
          *        for the given binding context will be unbound.
          */
-        that.unbind = function (bindingContext, type) {
+        that.unbind = function (context, type) {
             if (_.isUndefined(type)) {
                 registry = _.object(_.map(registry, function (handlers, type, reg) {
                     handlers = _.filter(handlers, function (handler) {
-                        return handler.bindingContext !== bindingContext;
+                        return handler.context !== context;
                     });
                     return [type, handlers];
                 }));
             } else if (registry.hasOwnProperty(type)) {
                 registry[type] = _.filter(registry[type], function (handler) {
-                    return handler.bindingContext !== bindingContext;
+                    return handler.context !== context;
                 });
             }
             return this;
@@ -140,8 +149,11 @@ define([
         return that;
     };
 
-    that.pluralize = function (noun, n) {
-        return noun + (n !== 1 ? 's' : '');
+    /**
+     * Escape string for use as HTML. May alter whitespace within string.
+     */
+    that.escape = function (string) {
+        return $("<div>").text(string).html();
     };
 
     /* jshint bitwise: false */
@@ -207,33 +219,6 @@ define([
         return that.getOneOrFail(_(list).filter(func), infoMsg);
     };
     
-    // a wrapper for object properties that triggers the form change event when
-    // sub-properties are changed
-    that.BoundPropertyMap = function (form, data) {
-        this._form = form;
-        this._data = data || {};
-    };
-    that.BoundPropertyMap.prototype = {
-        clone: function () {
-            return new that.BoundPropertyMap(this._form, this._data);
-        },
-        setAttr: function (name, val) {
-            this._data[name] = val;
-            if (this._form) {
-                this._form.fire({
-                    type: 'change'
-                });
-            }
-        },
-        getAttr: function (name, default_) {
-            if (name in this._data) {
-                return this._data[name];
-            } else {
-                return default_;
-            }
-        }
-    };
-
     that.getCaretPosition = function (ctrl) {
         var pos = 0;
         if (ctrl.createTextRange) {
@@ -300,7 +285,59 @@ define([
                 "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         return patch;
     };
-        
+
+    that.markdown = markdown;
+
+    that.truncate = function (label, length) {
+        length = length || 25;
+        if (label && label.length > length) {
+            return label.slice(0, length) + '&hellip;';
+        }
+        return label;
+    };
+
+    that.writeHashtags = function (xmlWriter, key, hashtagOrXPath, mug) {
+        if (!_.isString(hashtagOrXPath)) {
+            // don't try to parse a value that doesn't exist
+            return;
+        } else if (hashtagOrXPath === "" || (mug.options && mug.options.ignoreHashtags)) {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            return;
+        }
+
+        var form = mug.form,
+            vellumKey = key.replace(':', '__'),
+            xpath_, hashtag;
+        try {
+            var expr = form.xpath.parse(hashtagOrXPath);
+            xpath_ = expr.toXPath();
+            hashtag = expr.toHashtag();
+        } catch (err) {
+            if (form.useRichText ) {
+                xmlWriter.writeAttributeString('vellum:' + vellumKey, "#invalid/xpath " + hashtagOrXPath);
+            }
+            xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
+                return mug.form.normalizeXPath(hashtag);
+            }));
+            return;
+        }
+
+        if (hashtag !== xpath_) {
+            if (form.useRichText ) {
+                    xmlWriter.writeAttributeString('vellum:' + vellumKey, hashtag);
+            }
+            xmlWriter.writeAttributeString(key, xpath_);
+        } else {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+        }
+    };
+
+    that.isRightToLeftLanguage = function (lang) {
+        return _.contains([
+            'ara', 'arc', 'div', 'fas', 'heb', 'pan', 'pus', 'snd', 'uig', 'urd', 'yid',
+        ], lang);
+    };
+
     return that;
 });
 

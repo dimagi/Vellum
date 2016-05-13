@@ -8,43 +8,43 @@
 					<question1 />
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" />
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
 						<value>question1</value>
 					</text>
-					<text id="question1-item1-label">
-						<value>item1</value>
+					<text id="question1-choice1-label">
+						<value>choice1</value>
 					</text>
-					<text id="question1-item2-label">
-						<value>item2</value>
+					<text id="question1-choice2-label">
+						<value>choice2</value>
 					</text>
 				</translation>
 				<translation lang="hin">
 					<text id="question1-label">
 						<value>question1</value>
 					</text>
-					<text id="question1-item1-label">
-						<value>item1</value>
+					<text id="question1-choice1-label">
+						<value>choice1</value>
 					</text>
-					<text id="question1-item2-label">
-						<value>item2</value>
+					<text id="question1-choice2-label">
+						<value>choice2</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<select1 ref="/data/question1">
+		<select1 vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')" />
 			<item>
-				<label ref="jr:itext('question1-item1-label')" />
-				<value>item1</value>
+				<label ref="jr:itext('question1-choice1-label')" />
+				<value>choice1</value>
 			</item>
 			<item>
-				<label ref="jr:itext('question1-item2-label')" />
-				<value>item2</value>
+				<label ref="jr:itext('question1-choice2-label')" />
+				<value>choice2</value>
 			</item>
 		</select1>
 	</h:body>

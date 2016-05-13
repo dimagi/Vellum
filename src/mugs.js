@@ -1,28 +1,57 @@
+/**
+ * A mug is a question, containing data, bind, and control elements.
+ *
+ * Main Properties
+ *  nodeID
+ *  label
+ *  readOnlyControl
+ *  imageSize: Images only. Options to reduce image size before sending form.
+ *
+ * Data Source Properties
+ *
+ * Media Properties
+ *  mediaItext: Multimedia (image, audio, video, inline video) attached to the question.
+ *
+ * Logic Properties
+ *  calculateAttr: Hidden questions only. The calculation that generates the question's value.
+ *  requiredAttr: Boolean. Whether or not user must enter a value for the question.
+ *  relevantAttr: Boolean expression that determines whether or not to display a question to the end user.
+ *  constraintAttr: Boolean expression that, if false, will prevent the user from proceeding past the question.
+ *  repeat_count: Repeat groups only. An integer expression that determines the number of groups to generate.
+ *
+ * Advanced Properties
+ *  dataSource
+ *  dataValue: Deprecated.
+ *  defaultValue: An expression that will be assigned to a question before/until a user changes the value.
+ *  xmlnsAttr
+ *  label
+ *  hintLabel
+ *  constraintMsgAttr: Message to display if question fails validation (constraintAttr evaluates to false).
+ *  dataParent
+ *  appearance
+ *  comment: User-entered comment to help other users understand the purpose or implementation of the question.
+ */
 define([
     'jquery',
     'underscore',
     'vellum/tree',
-    'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
-    'vellum/util'
+    'vellum/logic',
+    'vellum/util',
 ], function (
     $,
     _,
     Tree,
-    jr,
     widgets,
-    util,
-    undefined
+    logic,
+    util
 ) {
-    /**
-     * A question, containing data, bind, and control elements.
-     */
-    function Mug(options, form, baseSpec, copyFromMug) {
+    function Mug(options, form, baseSpec, attrs) {
         var properties = null;
         util.eventuality(this);
 
-        if (copyFromMug) {
-            properties = _.object(_.map(copyFromMug.p.getAttrs(), function (val, key) {
+        if (attrs) {
+            properties = _.object(_.map(attrs, function (val, key) {
                 if (val && typeof val === "object") {
                     // avoid potential duplicate references (e.g., itext items)
                     if ($.isPlainObject(val)) {
@@ -41,14 +70,14 @@ define([
 
         this.ufid = util.get_guid();
         this.form = form;
+        this.messages = new MugMessages();
         this._baseSpec = baseSpec;
         this.setOptionsAndProperties(options, properties);
     }
     Mug.prototype = {
         // set or change question type
         setOptionsAndProperties: function (options, properties) {
-            var _this = this,
-                currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
+            var currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
 
             // These could both be calculated once for each type instead of
             // each instance.
@@ -67,10 +96,10 @@ define([
             this.p = new MugProperties({
                 spec: this.spec,
                 mug: this,
-                shouldChange: _this.form.shouldMugPropertyChange.bind(_this.form),
             });
             this.options.init(this, this.form);
             this.p.setAttrs(currentAttrs);
+            this.p.shouldChange = this.form.shouldMugPropertyChange.bind(this.form);
         },
         getAppearanceAttribute: function () {
             return this.options.getAppearanceAttribute(this);
@@ -78,11 +107,182 @@ define([
         getIcon: function () {
             return this.options.getIcon(this);
         },
-        getErrors: function () {
-            return this.p.getErrors();
+        /**
+         * Validate mug
+         *
+         * This method may fire a "messages-changed" event.
+         *
+         * @param attr - The property to validate. All properties will
+         *      be validated if this argument is omitted.
+         * @returns - True if validation messages changed else false.
+         */
+        validate: function (attr) {
+            var mug = this;
+            return this._withMessages(function () {
+                var changed = false;
+                mug.form.updateLogicReferences(mug, attr);
+                if (attr) {
+                    changed = mug._validate(attr);
+                } else {
+                    _.each(_.keys(mug.p.__data), function (attr) {
+                        changed = mug._validate(attr) || changed;
+                    });
+                }
+                return changed;
+            });
         },
-        isValid: function () {
-            return !this.getErrors().length;
+        _validate: function (attr) {
+            var mug = this,
+                spec = mug.spec[attr];
+            if (!spec) {
+                // should throw error?
+                window.console.log("unexpected property: " + attr);
+                return false;
+            }
+            var value = mug.p[attr],
+                presence = mug.getPresence(attr),
+                label = spec.lstring || attr,
+                message = "";
+
+            // TODO use data.hasOwnProperty(attr) rather than !value?
+            if (!value && presence === 'required') {
+                // can the user always fix this error?
+                message = label + ' is required.';
+            } else if (value && presence === 'notallowed') {
+                // can the user always fix this error?
+                message = label + ' is not allowed.';
+            } else if (spec.validationFunc) {
+                try {
+                    message = spec.validationFunc(mug);
+                } catch (err) {
+                    // this should never happen
+                    message = label + " validation failed\n" + util.formatExc(err);
+                }
+                if (message === "pass") {
+                    message = "";
+                }
+            }
+
+            return this.messages.update(attr, {
+                key: "mug-" + attr + "-error",
+                level: this.ERROR,
+                message: message
+            });
+        },
+        // message levels
+        ERROR: "error",
+        WARNING: "warning",
+        /**
+         * Add a message for a property
+         *
+         * Adding a message object with the same key as an existing
+         * message will replace the existing message.
+         * See `MugMessages.update` for more about message objects.
+         *
+         * This method may fire a "messages-changed" event.
+         *
+         * @param attr - The property to which the message pertains.
+         * @param msg - The message object. If omitted, all messages
+         *          for the given property will be removed.
+         */
+        addMessage: function (attr, msg) {
+            var messages = this.messages;
+            this._withMessages(function () {
+                return messages.update(attr, msg);
+            });
+        },
+        dropMessage: function (attr, key) {
+            var spec = this.spec[attr];
+            this.addMessage(attr, {key: key});
+            if (spec && spec.dropMessage) {
+                spec.dropMessage(this, attr, key);
+            }
+        },
+        /**
+         * Add many messages for many properties at once
+         *
+         * @param messages - An object mapping property names to lists
+         *          of message objects.
+         */
+        addMessages: function (messages) {
+            var mug = this;
+            this._withMessages(function () {
+                return _.reduce(messages, function (m1, list, attr) {
+                    return _.reduce(list, function (m2, msg) {
+                        return mug.messages.update(attr, msg) || m2;
+                    }, false) || m1;
+                }, false);
+            });
+        },
+        _withMessages: function (func) {
+            var unset = _.isUndefined(this._messagesChanged),
+                changed = false;
+            if (unset) {
+                this._messagesChanged = false;
+            }
+            try {
+                changed = func() || this._messagesChanged;
+                if (changed) {
+                    if (unset) {
+                        this.fire({type: "messages-changed", mug: this});
+                    } else {
+                        this._messagesChanged = true;
+                    }
+                }
+            } finally {
+                if (unset) {
+                    delete this._messagesChanged;
+                }
+            }
+            return changed;
+        },
+        /**
+         * Get a list of error message strings
+         *
+         * Currently there are only two message levels: "warning" and
+         * "error", and this function returns both. If a lower level
+         * message type such as "info" is added we may want to change
+         * this to drop "info" messages.
+         */
+        getErrors: function () {
+            return _.uniq(this.messages.get());
+        },
+        /**
+         * Get a list of form serialization warnings
+         *
+         * All warnings returned by this function should also be reported
+         * by the normal mug validation process. Serialization warnings
+         * can be ignored or fixed automatically, but the user may
+         * prefer to fix them manually.
+         *
+         * @returns - A list of warning objects, each having a `message`
+         * attribute describing the warning. This list can be passed to
+         * `fixSerializationWarnings` to automatically fix the warnings.
+         */
+        getSerializationWarnings: function () {
+            var warnings = [];
+            this.messages.each(function (msg) {
+                if (msg.fixSerializationWarning) {
+                    warnings.push(msg);
+                }
+            });
+            return warnings;
+        },
+        /**
+         * Automatically fix serialization warnings
+         *
+         * No warnings should be reported by `getSerializationWarnings`
+         * after calling this function with the list of warnings
+         * returned by `getSerializationWarnings`.
+         *
+         * @param warnings - The list of warnings returned by
+         *                 `getSerializationWarnings`.
+         */
+        fixSerializationWarnings: function (warnings) {
+            var mug = this;
+            _.each(warnings, function (warning) {
+                warning.fixSerializationWarning(mug);
+            });
         },
         /*
          * Gets a default label, auto-generating if necessary
@@ -94,8 +294,6 @@ define([
                 return label;
             } else if (nodeID) {
                 return nodeID;
-            } else if (this.__className === "Item") {
-                return this.p.defaultValue;
             }
         },
 
@@ -111,8 +309,11 @@ define([
                 return "";
             }
         },
+        /**
+         * deprecated
+         */
         getNodeID: function () {
-            return this.p.nodeID || this.p.defaultValue;
+            return this.p.nodeID;
         },
         /**
          * Get property presence (does this mug have the given property)
@@ -181,19 +382,20 @@ define([
                 .replace("$2", property)
                 .replace("$3", String(vis)));
         },
-        getDisplayName: function (lang) {
+        getDisplayName: function (lang, escape) {
+            if (escape === undefined) { escape = true; }
             var itextItem = this.p.labelItext,
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
                 disp,
                 defaultDisp,
-                nodeID = this.getNodeID();
+                nodeID = this.p.conflictedNodeId || this.p.nodeID;
 
             if (this.__className === "ReadOnly") {
                 return "Unknown (read-only) question type";
             }
             if (this.__className === "Itemset") {
-                return "External Data";
+                return "Lookup Table Data";
             }
 
             if (!itextItem || lang === '_ids') {
@@ -212,10 +414,61 @@ define([
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
-                return $('<div>').text(disp).html();
+                return escape ? $('<div>').text(disp).html() : disp;
             }
 
             return nodeID;
+        },
+        serialize: function () {
+            var mug = this,
+                data = {type: mug.__className};
+            _.each(mug.spec, function (spec, key) {
+                if (mug.getPresence(key) === "notallowed") {
+                    return;
+                }
+                var value = mug.p[key];
+                if (spec.serialize) {
+                    value = spec.serialize(value, key, mug, data);
+                    if (!_.isUndefined(value)) {
+                        data[key] = value;
+                    }
+                } else if (value && !(_.isEmpty(value) &&
+                                      (_.isObject(value) || _.isArray(value))
+                          )) {
+                    data[key] = value;
+                }
+            });
+            return data;
+        },
+        /**
+         * Deserialize mug property data
+         *
+         * @param data - An object containing mug property data.
+         * @param errors - A `MugMessages` object with a convenience
+         *      `add(message)` method for global errors.
+         * @returns - An array of `Later` objects to be executed as the
+         *      final step in deserializing a group of related mugs.
+         */
+        deserialize: function (data, errors) {
+            var mug = this,
+                later = [];
+            _.each(mug.spec, function (spec, key) {
+                if (mug.getPresence(key) !== 'notallowed') {
+                    if (spec.deserialize) {
+                        var value = spec.deserialize(data, key, mug, errors);
+                        if (!_.isUndefined(value)) {
+                            if (value instanceof Later) {
+                                later.push(value);
+                            } else {
+                                mug.p[key] = value;
+                            }
+                        }
+                    } else if (data.hasOwnProperty(key)) {
+                        mug.p[key] = data[key];
+                    }
+                }
+            });
+            return later;
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
@@ -223,11 +476,36 @@ define([
         select: function() {
             $('#' + this.ufid + '_anchor').click();
         },
+        isInRepeat: function() {
+            if (this.__className === "Repeat") { // HACK hard-coded class name
+                return true;
+            }
+            return this.parentMug && this.parentMug.isInRepeat();
+        },
+        supportsRichText: function() {
+            return this.options.richText && this.form.useRichText !== false;
+        }
     };
 
     Object.defineProperty(Mug.prototype, "absolutePath", {
         get: function () {
             return this.form.getAbsolutePath(this);
+        }
+    });
+
+    Object.defineProperty(Mug.prototype, "absolutePathNoRoot", {
+        get: function () {
+            return this.form.getAbsolutePath(this, true);
+        }
+    });
+
+    Object.defineProperty(Mug.prototype, "hashtagPath", {
+        get: function () {
+            // commtrack isn't hashtaggable (ex. /data/trans[type=trans1])
+            if (this.options.isHashtaggable && this.absolutePathNoRoot) {
+                return '#form' + this.absolutePathNoRoot;
+            }
+            return this.absolutePath;
         }
     });
 
@@ -239,6 +517,12 @@ define([
             } else {
                 return null;
             }
+        }
+    });
+
+    Object.defineProperty(Mug.prototype, "previousSibling", {
+        get: function () {
+            return this.form.tree.getPreviousSibling(this);
         }
     });
 
@@ -268,36 +552,130 @@ define([
         return spec;
     }
 
-    function validateRule(ruleKey, ruleValue, testingObj, mug) {
-        var presence = mug.getPresence(ruleKey),
-            retBlock = {
-                result: 'pass'
-            };
+    function Later(execute) {
+        this.execute = execute;
+    }
 
-        if (presence === 'required' && !testingObj) {
-            retBlock.result = 'fail';
-            retBlock.resultMessage = '"' + ruleKey + '" value is required but is NOT present!';
-        } else if (presence === 'notallowed' && testingObj) {
-            retBlock.result = 'fail';
-            retBlock.resultMessage = '"' + ruleKey + '" IS NOT ALLOWED';
-        }
-
-        if (retBlock.result !== "fail" && ruleValue.validationFunc) {
-            var funcRetVal = ruleValue.validationFunc(mug);
-            if (funcRetVal !== 'pass') {
-                retBlock.result = 'fail';
-                retBlock.resultMessage = funcRetVal;
+    function MugMessages() {
+        this.messages = {};
+    }
+    MugMessages.prototype = {
+        /**
+         * Update message for property
+         *
+         * @param attr - The attribute to which the message applies.
+         *      This may be a falsey value (typically `null`) for
+         *      messages that are not associated with a property.
+         * @param msg - A message object. A message object with a blank
+         *      message will cause an existing message with the same
+         *      key to be discarded.
+         *
+         *      {
+         *          key: <message type key>,
+         *          level: <"warning", or "error">,
+         *          message: <message string>
+         *      }
+         *
+         * @returns - true if changed else false
+         */
+        update: function (attr, msg) {
+            attr = attr || "";
+            if (arguments.length === 1) {
+                if (this.messages.hasOwnProperty(attr)) {
+                    delete this.messages[attr];
+                    return true;
+                }
+                return false;
+            }
+            if (!this.messages.hasOwnProperty(attr) && !msg.message) {
+                return false;
+            }
+            if (!msg.key) {
+                // should never happen
+                throw new Error("missing key: " + JSON.stringify(msg));
+            }
+            var messages = this.messages[attr] || [],
+                removed = false;
+            for (var i = messages.length - 1; i >= 0; i--) {
+                var obj = messages[i];
+                if (obj.key === msg.key) {
+                    if (obj.level === msg.level && obj.message === msg.message) {
+                        // message already exists (no change)
+                        return false;
+                    }
+                    messages.splice(i, 1);
+                    removed = true;
+                    break;
+                }
+            }
+            if (msg.message) {
+                messages.push(msg);
+            } else if (!removed) {
+                return false;
+            }
+            if (messages.length) {
+                this.messages[attr] = messages;
+            } else {
+                delete this.messages[attr];
+            }
+            return true;
+        },
+        /**
+         * Get messages
+         *
+         * @param attr - The attribute for which to get messages.
+         * @param key - (optional) The key of the message to get.
+         *      If this is given then the entire message object will be
+         *      returned; otherwise only message strings are returned.
+         * @returns - An array of message strings, or if the `key` param
+         *      is provided, the message object for the given key; null
+         *      if no message is found with the given key.
+         */
+        get: function (attr, key) {
+            if (arguments.length) {
+                if (key) {
+                    return _.find(this.messages[attr || ""], function (msg) {
+                        return msg.key === key;
+                    }) || null;
+                }
+                return _.pluck(this.messages[attr || ""], "message");
+            }
+            return _.flatten(_.map(this.messages, function (messages) {
+                return _.pluck(messages, "message");
+            }));
+        },
+        /**
+         * Execute a function for each message
+         *
+         * @param attr - Optional property limiting the messages visited.
+         *          The callback signature is `callback(msg)` if
+         *          this argument is provided, and otherwise
+         *          `callback(msg, property)`. In all cases the first
+         *          argument `msg` is a message object.
+         * @param callback - A function to be called for each message object.
+         */
+        each: function () {
+            var attr, callback;
+            if (arguments.length > 1) {
+                attr = arguments[0] || "";
+                callback = arguments[1];
+                _.each(this.messages[attr], callback);
+            } else {
+                callback = arguments[0];
+                _.each(this.messages, function (messages, attr) {
+                    _.each(messages, function (msg) {
+                        callback(msg, attr);
+                    });
+                });
             }
         }
-
-        return retBlock;
-    }
+    };
 
     function MugProperties (options) {
         this.__data = {};
         this.__spec = options.spec;
         this.__mug = options.mug;
-        this.shouldChange = options.shouldChange || function () { return function () {}; };
+        this.shouldChange = function () { return function () {}; };
     }
     MugProperties.setBaseSpec = function (baseSpec) {
         _.each(baseSpec, function (spec, name) {
@@ -325,26 +703,42 @@ define([
         getAttrs: function () {
             return _.clone(this.__data);
         },
+        has: function (attr) {
+            return this.__data.hasOwnProperty(attr);
+        },
+        set: function (attr, val) {
+            // set or clear property without triggering events, unlike _set
+            if (arguments.length > 1) {
+                this.__data[attr] = val;
+            } else {
+                delete this.__data[attr];
+            }
+        },
         _get: function (attr) {
             return this.__data[attr];
         },
         _set: function (attr, val) {
             var spec = this.__spec[attr],
-                prev = this.__data[attr];
+                prev = this.__data[attr],
+                mug = this.__mug;
 
             if (!spec || val === prev ||
                 // only set attr if spec allows this attr, except if mug is a
                 // DataBindOnly (which all mugs are before the control block has
                 // been parsed).
-                (this.__mug.getPresence(attr) === 'notallowed' &&
-                 this.__mug.__className !== 'DataBindOnly'))
+                (mug.getPresence(attr) === 'notallowed' &&
+                 mug.__className !== 'DataBindOnly'))
             {
                 return;
             }
 
-            var callback = this.shouldChange(this.__mug, attr, val, prev);
+            var callback = this.shouldChange(mug, attr, val, prev);
             if (callback) {
-                this.__data[attr] = val;
+                if (spec.setter) {
+                    spec.setter(mug, attr, val);
+                } else {
+                    this.__data[attr] = val;
+                }
                 callback();
             }
         },
@@ -353,37 +747,50 @@ define([
             _(attrs).each(function (val, attr) {
                 _this[attr] = val;
             });
-        },
-        getErrors: function () {
-            var _this = this,
-                errors = [];
-
-            _.each(this.__data, function (value, key) {
-                var rule = _this.__spec[key];
-
-                if (!rule && value) {
-                    // this should never happen.  Probably safe to remove.
-                    errors.push(
-                        "Property '" + key + "' found " + 
-                        "but no rule is present for that property.");
-                    return;
-                } else if (rule) {
-                    var result = validateRule(key, rule, value, _this.__mug);
-                    if (result.result === 'fail') {
-                        errors.push(result.resultMessage);
-                    }
-                }
-            });
-            return errors;
         }
     };
 
-    var validateElementName = function (value, displayName) {
-        if (!util.isValidElementName(value)) {
-            return value + " is not a legal " + displayName + ". Must start with a letter and contain only letters, numbers, and '-' or '_' characters.";
+    /**
+     * Add instances referenced to serialized data
+     */
+    function serializeXPath(value, key, mug, data) {
+        if (value && /\binstance\(/.test(value)) {
+            data.instances = _.extend(data.instances || {},
+                                      mug.form.parseInstanceRefs(value));
         }
-        return "pass";            
-    };
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
+        return value || undefined;
+    }
+
+    function deserializeXPath(data, key, mug) {
+        if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
+            mug.form.updateKnownInstances(data.instances);
+        }
+        var value = data[key];
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
+        return value;
+    }
+
+    function resolveConflictedNodeId(mug) {
+        // clear warning; mug already has copy-N-of-... ID
+        mug.p.conflictedNodeId = null;
+    }
 
     var baseSpecs = {
         databind: {
@@ -392,14 +799,98 @@ define([
                 visibility: 'visible',
                 presence: 'required',
                 lstring: 'Question ID',
+                setter: function (mug, attr, value) {
+                    mug.form.moveMug(mug, "rename", value);
+                },
+                mugValue: function (mug, value) {
+                    if (arguments.length === 1) {
+                        if (mug.p.has("conflictedNodeId")) {
+                            return mug.p.conflictedNodeId;
+                        }
+                        return mug.p.nodeID;
+                    }
+                    mug.p.nodeID = value;
+                },
+                widget: widgets.identifier,
                 validationFunc: function (mug) {
-                    return validateElementName(mug.p.nodeID, "Question ID");
+                    var caseWarning = {
+                            key: "mug-nodeID-case-warning",
+                            level: mug.WARNING,
+                        };
+                    if (!mug.parentMug && mug.p.nodeID === "case") {
+                        caseWarning.message = "The ID 'case' may cause " +
+                            "problems with case management. It is " +
+                            "recommended to pick a different Question ID.";
+                    }
+                    mug.addMessage("nodeID", caseWarning);
+                    if (!util.isValidElementName(mug.p.nodeID)) {
+                        return mug.p.nodeID + " is not a legal Question ID. " +
+                            "It must start with a letter and contain only " +
+                            "letters, numbers, and '-' or '_' characters.";
+                    }
+                    return "pass";
+                },
+                dropMessage: function (mug, attr, key) {
+                    if (attr === "nodeID" && key === "mug-conflictedNodeId-warning") {
+                        resolveConflictedNodeId(mug);
+                    }
+                },
+                serialize: function (value, key, mug, data) {
+                    data.id = mug.absolutePathNoRoot;
+                },
+                deserialize: function (data, key, mug) {
+                    if (data.id && data.id !== mug.p.nodeID) {
+                        mug.p.nodeID = data.id.slice(data.id.lastIndexOf("/") + 1) ||
+                                       mug.form.generate_question_id(null, mug);
+                        if (data.conflictedNodeId) {
+                            // Obscure edge case: if mug.p.nodeID conflicts with
+                            // an existing question then expressions will be
+                            // associated with that question and this Later
+                            // assignment will not restore those connections to
+                            // this mug.
+                            return new Later(function () {
+                                // after all other properties are deserialized,
+                                // assign conflicted ID to convert expressions
+                                // or setup new conflict
+                                mug.p.nodeID = data.conflictedNodeId;
+                            });
+                        }
+                    }
+                    return new Later(function () {
+                        if (mug.p.conflictedNodeId) {
+                            resolveConflictedNodeId(mug);
+                        }
+                    });
+                }
+            },
+            conflictedNodeId: {
+                visibility: 'hidden',
+                presence: 'optional',
+                setter: function (mug, attr, value) {
+                    var message = null;
+                    if (value) {
+                        mug.p.set(attr, value);
+                        message = "This question has the same " +
+                            "Question ID as another question in the same " +
+                            "group. Please choose a unique Question ID.";
+                    } else {
+                        mug.p.set(attr);
+                    }
+                    mug.addMessage("nodeID", {
+                        key: "mug-conflictedNodeId-warning",
+                        level: mug.WARNING,
+                        message: message,
+                        fixSerializationWarning: resolveConflictedNodeId
+                    });
+                },
+                deserialize: function () {
+                    // deserialization is done by nodeID
                 }
             },
             dataValue: {
-                visibility: 'visible',
+                visibility: 'visible_if_present',
                 presence: 'optional',
-                lstring: 'Default Data Value'
+                lstring: 'Default Data Value',
             },
             xmlnsAttr: {
                 visibility: 'visible',
@@ -408,7 +899,7 @@ define([
             },
             rawDataAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Data Attributes'
+                lstring: 'Extra Data Attributes',
             },
 
             // BIND ELEMENT
@@ -417,6 +908,8 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "bool",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
                 lstring: 'Display Condition'
             },
             calculateAttr: {
@@ -428,13 +921,20 @@ define([
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: "generic",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
                 lstring: 'Calculate Condition'
             },
             constraintAttr: {
                 visibility: 'visible',
                 presence: 'optional',
+                validationFunc: function (mug) {
+                    return baseSpecs.databind.constraintMsgAttr.validationFunc(mug);
+                },
                 widget: widgets.xPath,
                 xpathType: "bool",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
                 lstring: 'Validation Condition'
             },
             // non-itext constraint message
@@ -442,13 +942,8 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 validationFunc : function (mug) {
-                    var hasConstraint = mug.p.constraintAttr,
-                        constraintMsgItext = mug.p.constraintMsgItext,
-                        hasConstraintMsg = (mug.p.constraintMsgAttr || 
-                                            (constraintMsgItext &&
-                                             !constraintMsgItext.isEmpty()));
-                    if (hasConstraintMsg && !hasConstraint) {
-                        return 'ERROR: You cannot have a Validation Error Message with no Validation Condition!';
+                    if (mug.p.constraintMsgAttr && !mug.p.constraintAttr) {
+                        return 'You cannot have a Validation Error Message with no Validation Condition!';
                     } else {
                         return 'pass';
                     }
@@ -458,7 +953,7 @@ define([
             requiredAttr: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Is this Question Required?",
+                lstring: "Required",
                 widget: widgets.checkbox
             },
             nodeset: {
@@ -469,6 +964,32 @@ define([
             rawBindAttributes: {
                 presence: 'optional',
                 lstring: 'Extra Bind Attributes'
+            },
+            defaultValue: {
+                visibility: 'visible',
+                presence: 'optional',
+                lstring: 'Default Value',
+                widget: widgets.xPath,
+                xpathType: 'generic',
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
+                validationFunc: function (mug) {
+                    var form = mug.form;
+                    if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
+                        var paths = mug.form.getHashtagsInXPath(mug.p.defaultValue);
+                        paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
+                        if (paths.length) {
+                            return "You are referencing a node in this form. " +
+                                   "This can cause errors in the form";
+                        }
+                    }
+                    return 'pass';
+                }
+            },
+            comment: {
+                lstring: 'Comment',
+                visibility: 'visible',
+                widget: widgets.multilineText,
             }
         },
 
@@ -497,7 +1018,7 @@ define([
             },
             rawControlAttributes: {
                 presence: 'optional',
-                lstring: "Extra Control Attributes"
+                lstring: "Extra Control Attributes",
             },
             rawControlXML: {
                 presence: 'optional',
@@ -518,6 +1039,11 @@ define([
                     return recFunc(mug.parentMug);
                 },
                 presence: 'optional',
+                setter: function (mug, attr, value) {
+                    var oldPath = mug.hashtagPath;
+                    mug.p.set(attr, value);
+                    mug.form._updateMugPath(mug, oldPath);
+                },
                 widget: widgets.droppableText,
                 validationFunc: function(mug) {
                     var dataParent = mug.p.dataParent,
@@ -531,7 +1057,7 @@ define([
                            form.getBasePath().slice(0, -1) !== dataParent) {
                             return "Must be valid path";
                         } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
-                            return dataParentMug.absolutePath + " is not a valid data parent";
+                            return dataParentMug.hashtagPath + " is not a valid data parent";
                         } else if (!mug.spec.dataParent.visibility(mug)) {
                             return "Children of repeat groups cannot have a different data parent";
                         }
@@ -567,11 +1093,13 @@ define([
         typeChangeError: function (mug, typeName) {
             return '';
         },
+        changeTypeTransform: function (mug) {
+            return;
+        },
         // controls whether delete button shows up - you can still delete a
         // mug's ancestor even if it's not removeable
         isRemoveable: true,
         isCopyable: true,
-        isODKOnly: false,
         canOutputValue: true,
         maxChildren: -1,
         icon: null,
@@ -634,15 +1162,13 @@ define([
                 constraintMsg = mug.p.constraintMsgAttr;
             }
             var attrs = {
-                nodeset: mug.form.getAbsolutePath(mug),
+                nodeset: mug.hashtagPath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
                 relevant: mug.p.relevantAttr,
                 required: util.createXPathBoolFromJS(mug.p.requiredAttr),
                 calculate: mug.p.calculateAttr,
-                "jr:preload": mug.p.preload,
-                "jr:preloadParams": mug.p.preloadParams
             };
             _.each(mug.p.rawBindAttributes, function (value, key) {
                 if (!attrs.hasOwnProperty(key) || _.isUndefined(attrs[key])) {
@@ -652,10 +1178,25 @@ define([
             return attrs.nodeset ? [attrs] : [];
         },
 
+        getSetValues: function (mug) {
+            var ret = [];
+
+            if (mug.p.defaultValue) {
+                ret = [{
+                    value: mug.p.defaultValue,
+                    event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
+                    ref: mug.hashtagPath
+                }];
+            }
+
+            return ret;
+        },
+
         // control node writer options
         writeControlLabel: true,
         writeControlHint: true,
         writeControlHelp: true,
+        writeControlAlert: true,
         writeControlRefAttr: 'ref',
         // a function with signature `(xmlWriter, mug)` to write custom XML
         writeCustomXML: null,
@@ -668,6 +1209,7 @@ define([
         getIcon: function (mug) {
             return mug.options.icon;
         },
+        isHashtaggable: true,
         init: function (mug, form) {},
         spec: {}
     };
@@ -708,18 +1250,21 @@ define([
 
     var PhoneNumber = util.extend(Text, {
         typeName: 'Phone Number or Numeric ID',
-        icon: 'icon-signal',
+        icon: 'fa fa-signal',
         init: function (mug, form) {
             Text.init(mug, form);
             mug.p.appearance = "numeric";
-        }
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
+        },
     });
 
     var Secret = util.extend(defaultOptions, {
         typeName: 'Password',
         dataType: 'xsd:string',
         tagName: 'secret',
-        icon: 'icon-key',
+        icon: 'fa fa-key',
         canOutputValue: false,
         init: function (mug, form) {
         }
@@ -738,7 +1283,6 @@ define([
         dataType: 'binary',
         tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
-        isODKOnly: true,
         mediaType: "audio/*", /* */
         canOutputValue: false,
         writeCustomXML: function (xmlWriter, mug) {
@@ -748,30 +1292,69 @@ define([
 
     var Image = util.extend(Audio, {
         typeName: 'Image Capture',
-        icon: 'icon-camera',
+        icon: 'fa fa-camera',
         mediaType: "image/*", /* */
+        spec: {
+            imageSize: {
+                lstring: "Image Size",
+                visibility: 'visible',
+                widget: widgets.dropdown,
+                enabled: function(mug) {
+                    return mug.options.resize_enabled;
+                },
+                defaultOptions: [
+                    { text: "Small", value: "250" },
+                    { text: "Medium", value: "500" },
+                    { text: "Large", value: "1000" },
+                    { text: "Original", value: "" },
+                ],
+                help: "This will resize the image before sending the form. " +
+                    "Use this option to send smaller images in areas of poor " +
+                    "connectivity.<ul><li>Small - 0.1 megapixels</li><li>" +
+                    "Medium - 0.2 megapixels</li><li>Large - 0.5 megapixels</li></ul>",
+            }
+        },
+        writeCustomXML: function (xmlWriter, mug) {
+            Audio.writeCustomXML(xmlWriter, mug);
+            if (mug.__className === "Image" && mug.p.imageSize) {
+                xmlWriter.writeAttributeString("jr:imageDimensionScaledMax", mug.p.imageSize + "px");
+            }
+        },
+        init: function (mug, form) {
+            Audio.init(mug, form);
+            if (mug.p.imageSize !== "") {
+                mug.p.imageSize = mug.p.imageSize || 250;
+            }
+        }
     });
 
     var Video = util.extend(Audio, {
         typeName: 'Video Capture',
-        icon: 'icon-facetime-video',
+        icon: 'fa fa-video-camera',
         mediaType: "video/*", /* */
     });
 
     var Signature = util.extend(Image, {
         typeName: 'Signature Capture',
         icon: 'fcc fcc-fd-signature',
+        spec: {
+            imageSize: {
+                visibility: 'hidden',
+            }
+        },
         init: function (mug, form) {
             Image.init(mug, form);
             mug.p.appearance = "signature";
-        }
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
+        },
     });
 
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         dataType: 'geopoint',
-        icon: 'icon-map-marker',
-        isODKOnly: true,
+        icon: 'fa fa-map-marker',
         init: function (mug, form) {
         }
     });
@@ -779,8 +1362,7 @@ define([
     var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
         dataType: 'barcode',
-        icon: 'icon-barcode',
-        isODKOnly: true,
+        icon: 'fa fa-barcode',
         init: function (mug, form) {
         }
     });
@@ -788,7 +1370,7 @@ define([
     var Date = util.extend(defaultOptions, {
         typeName: 'Date',
         dataType: 'xsd:date',
-        icon: 'icon-calendar',
+        icon: 'fa fa-calendar',
         init: function (mug, form) {
         }
     });
@@ -804,7 +1386,7 @@ define([
     var Time = util.extend(defaultOptions, {
         typeName: 'Time',
         dataType: 'xsd:time',
-        icon: 'icon-time',
+        icon: 'fa fa-clock-o',
         init: function (mug, form) {
         }
     });
@@ -827,7 +1409,7 @@ define([
         }
     });
 
-    var Item = util.extend(defaultOptions, {
+    var Choice = util.extend(defaultOptions, {
         isControlOnly: true,
         typeName: 'Choice',
         tagName: 'item',
@@ -843,60 +1425,79 @@ define([
         },
         writeControlHint: false,
         writeControlHelp: false,
+        writeControlAlert: false,
         writeControlRefAttr: null,
         writeCustomXML: function (xmlWriter, mug) {
-            var defaultValue = mug.p.defaultValue;
-            if (defaultValue) {
+            var value = mug.p.nodeID;
+            if (value) {
                 xmlWriter.writeStartElement('value');
-                xmlWriter.writeString(defaultValue);
+                xmlWriter.writeString(value);
                 xmlWriter.writeEndElement();
             }
         },
         init: function (mug, form) {
         },
         spec: {
-            hintLabel: { presence: 'notallowed' },
-            hintItext: { presence: 'notallowed' },
-            helpItext: { presence: 'notallowed' },
-            defaultValue: {
+            nodeID: {
                 lstring: 'Choice Value',
                 visibility: 'visible',
                 presence: 'required',
+                widget: widgets.identifier,
+                setter: null,
                 validationFunc: function (mug) {
-                    if (/\s/.test(mug.p.defaultValue)) {
+                    if (/\s/.test(mug.p.nodeID)) {
                         return "Whitespace in values is not allowed.";
                     }
-                    var num = 0;
-                    _.each(mug.form.getChildren(mug.parentMug), function(ele, index) {
-                        if (ele.p.defaultValue === mug.p.defaultValue) {
-                            num++;
+                    if (mug.parentMug) {
+                        var siblings = mug.form.getChildren(mug.parentMug),
+                            dup = _.any(siblings, function(ele) {
+                                return ele !== mug && ele.p.nodeID === mug.p.nodeID;
+                            });
+                        if (dup) {
+                            return "This choice value has been used in the same question";
                         }
-                    });
-                    if (num > 1) {
-                        return "This choice value has been used in the same question";
                     }
                     return "pass";
+                },
+                serialize: function (value, key, mug, data) {
+                    var path = mug.parentMug.absolutePathNoRoot;
+                    data.id = path + "/" + value;
+                },
+                deserialize: function (data) {
+                    return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
-            }
+            },
+            conflictedNodeId: { presence: 'notallowed' },
+            hintLabel: { presence: 'notallowed' },
+            hintItext: { presence: 'notallowed' },
+            helpItext: { presence: 'notallowed' },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
 
     var Trigger = util.extend(defaultOptions, {
         typeName: 'Label',
         tagName: 'trigger',
-        icon: 'icon-tag',
+        icon: 'fa fa-tag',
         init: function (mug, form) {
             mug.p.appearance = "minimal";
         },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
+        },
         spec: {
-            dataValue: { presence: 'optional' }
+            dataValue: { presence: 'optional' },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
+            requiredAttr: { visibility: function (mug) {
+                return mug.p.appearance !== "minimal";
+            }},
         }
     });
 
     var BaseSelect = util.extend(defaultOptions, {
-        validChildTypes: ["Item"],
+        validChildTypes: ["Choice"],
         controlNodeChildren: function ($node) {
-            return $node.children().not('label, value, hint, help');
+            return $node.children().not('label, value, hint, help, alert');
         },
         typeChangeError: function (mug, typeName) {
             if (mug.form.getChildren(mug).length > 0 && !typeName.match(/^M?Select$/)) {
@@ -907,43 +1508,42 @@ define([
             return '';
         },
         afterInsert: function (form, mug) {
-            var item = "Item";
-            form.createQuestion(mug, 'into', item, true);
-            form.createQuestion(mug, 'into', item, true);
+            var choice = "Choice";
+            form.createQuestion(mug, 'into', choice, true);
+            form.createQuestion(mug, 'into', choice, true);
+        },
+        spec: {
+            appearance: {
+                deleteOnCopy: false,
+            }
         },
     });
 
     var MSelect = util.extend(BaseSelect, {
-        typeName: 'Multiple Answer',
+        typeName: 'Checkbox',
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
-        init: function (mug, form) {
-        },
-        spec: {
-        },
         defaultOperator: "selected"
     });
 
-    var Select = util.extend(MSelect, {
-        typeName: 'Single Answer',
+    var Select = util.extend(BaseSelect, {
+        typeName: 'Multiple Choice',
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
-        init: function (mug, form) {
-        },
         defaultOperator: null
     });
 
     var Group = util.extend(defaultOptions, {
         typeName: 'Group',
         tagName: 'group',
-        icon: 'icon-folder-open',
+        icon: 'fa fa-folder-open',
         isSpecialGroup: true,
         isNestableGroup: true,
         isTypeChangeable: false,
         possibleDataParent: true,
         canOutputValue: false,
         controlNodeChildren: function ($node) {
-            return $node.children().not('label, value, hint, help');
+            return $node.children().not('label, value, hint, help, alert');
         },
         init: function (mug, form) {
         },
@@ -956,6 +1556,7 @@ define([
             constraintMsgAttr: { presence: "notallowed" },
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
+            defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
     
@@ -964,16 +1565,19 @@ define([
     // nest other group types and it has a very different end-user functionality
     var FieldList = util.extend(Group, {
         typeName: 'Question List',
-        icon: 'icon-reorder',
+        icon: 'fa fa-reorder',
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
         },
     });
 
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
-        icon: 'icon-retweet',
+        icon: 'fa fa-retweet',
         possibleDataParent: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
@@ -982,7 +1586,7 @@ define([
             return {"jr:template": ""};
         },
         controlChildFilter: function (children, mug) {
-            var absPath = mug.form.getAbsolutePath(mug),
+            var hashtag = mug.hashtagPath,
                 r_count = mug.p.repeat_count,
                 attrs = _.object(_.filter(_.map(mug.p.rawRepeatAttributes, function (val, key) {
                     return key.toLowerCase() !== "jr:noaddremove" ? [key, val] : null;
@@ -990,6 +1594,7 @@ define([
             return [new Tree.Node(children, {
                 getNodeID: function () {},
                 getAppearanceAttribute: function () {},
+                form: mug.form,
                 p: {
                     rawControlAttributes: attrs
                 },
@@ -998,13 +1603,14 @@ define([
                     writeControlLabel: false,
                     writeControlHint: false,
                     writeControlHelp: false,
+                    writeControlAlert: false,
                     writeControlRefAttr: null,
                     writeCustomXML: function (xmlWriter, mug) {
                         if (r_count) {
-                            xmlWriter.writeAttributeString("jr:count", String(r_count));
+                            util.writeHashtags(xmlWriter, 'jr:count', String(r_count));
                             xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                         }
-                        xmlWriter.writeAttributeString("nodeset", absPath);
+                        util.writeHashtags(xmlWriter, 'nodeset', hashtag, mug);
                     },
                 }
             })];
@@ -1018,11 +1624,30 @@ define([
                 lstring: 'Repeat Count',
                 visibility: 'visible_if_present',
                 presence: 'optional',
-                widget: widgets.droppableText
+                widget: widgets.droppableText,
+                validationFunc: function (mug) {
+                    function insideFieldList(mug) {
+                        if (!mug) { return false; }
+
+                        var parentMug = mug.parentMug;
+
+                        if (parentMug && parentMug.__className === 'FieldList') {
+                            return true;
+                        }
+
+                        return insideFieldList(parentMug);
+                    }
+
+                    if (!$.trim(mug.p.repeat_count) && insideFieldList(mug)) {
+                        return "Repeat Count is required.";
+                    }
+
+                    return "pass";
+                },
             },
             rawRepeatAttributes: {
                 presence: 'optional',
-                lstring: "Extra Repeat Attributes"
+                lstring: "Extra Repeat Attributes",
             }
         }
     });
@@ -1030,7 +1655,9 @@ define([
     function MugTypesManager(baseSpec, mugTypes, opts) {
         var _this = this,
             // Nestable Field List not supported in CommCare before v2.16
-            group_in_field_list = opts.features.group_in_field_list;
+            group_in_field_list = opts.features.group_in_field_list,
+            richText = opts.features.rich_text;
+        Image.resize_enabled = opts.features.image_resize;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
         this.normalTypes = mugTypes.normal;
@@ -1079,6 +1706,7 @@ define([
 
         _.each(this.allTypes, function (Mug, name) {
             Mug.__className = name;
+            Mug.richText = richText;
 
             // set on this for easy access
             _this[name] = Mug;
@@ -1087,7 +1715,8 @@ define([
     MugTypesManager.prototype = {
         make: function (typeName, form, copyFrom) {
             var mugType = this.allTypes[typeName];
-            return new Mug(mugType, form, this.baseSpec, copyFrom);
+            var attrs = copyFrom ? copyFrom.p.getAttrs() : null;
+            return new Mug(mugType, form, this.baseSpec, attrs);
         },
         changeType: function (mug, typeName) {
             var form = mug.form,
@@ -1097,6 +1726,7 @@ define([
             if (message) {
                 throw new Error(message);
             }
+            this.allTypes[mug.__className].changeTypeTransform(mug);
 
             mug.setOptionsAndProperties(this.allTypes[typeName]);
 
@@ -1109,6 +1739,7 @@ define([
                 });
             }
 
+            mug.validate();
             form.fire({
                 type: 'question-type-change',
                 qType: typeName,
@@ -1147,10 +1778,15 @@ define([
                 "Video": Video
             },
             auxiliary: {
-                "Item": Item
+                "Choice": Choice
             }
         },
         MugTypesManager: MugTypesManager,
-        baseSpecs: baseSpecs
+        MugMessages: MugMessages,
+        WARNING: Mug.WARNING,
+        ERROR: Mug.ERROR,
+        baseSpecs: baseSpecs,
+        deserializeXPath: deserializeXPath,
+        serializeXPath: serializeXPath,
     };
 });

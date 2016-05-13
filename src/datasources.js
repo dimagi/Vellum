@@ -1,235 +1,148 @@
+/**
+ * Asynchronously loads data sources from vellum.opts().core.dataSourcesEndpoint
+ * Currently only supports fixtures
+ *
+ * Format in opts:
+ * dataSourcesEndpoint: function(callback) or string (URL)
+ *
+ * The endpoint function receives a callback argument. It should call the
+ * `callback` with a list of the following structure (for a URL, the response
+ * should be JSON in this format):
+ * [
+ *      {
+ *          id: string (used in instance definition)
+ *          uri: string (used in the instance definition)
+ *          path: string (used in nodeset)
+ *          name: string (human readable name)
+ *          structure: nested dictionary of elements and attributes
+ *          {
+ *              element: {
+ *                  structure: {
+ *                      inner-element: { }
+ *                  }
+ *                  name: "Element" (the text used in dropdown for this element)
+ *              },
+ *              ref-element: {
+ *                  reference: {
+ *                      source: string (optional data source id, defaults to this data source)
+ *                      subset: string (optional subset id)
+ *                      key: string (referenced property)
+ *                  }
+ *              },
+ *              @attribute: { }
+ *          },
+ *          subsets: [{
+ *              id: string (unique identifier for this subset)
+ *              key: string (unique identifier property name)
+ *              name: string (human readable name)
+ *              structure: { ... }
+ *              related: {
+ *                  string (relationship): string (related subset name),
+ *                  ...
+ *              }
+ *          }]
+ *      },
+ *      ...
+ * ]
+ *
+ * Elements can be nested indefinitely with structure keys describing inner
+ * elements and attributes. Any element that has a `structure` key may also
+ * have a `subsets` key, which defines structure specific to a subset of the
+ * elements at that level of the tree. The structure of a subset is merged
+ * with the unfiltered element structure, which means that all elements and
+ * attributes available in the unfiltered element are also avaliable in the
+ * filtered subset.
+ *
+ * The result of that would be (if used in an itemset):
+ *
+ *     <instance src="{source.uri}" id="{source.id}">
+ *     ...
+ *     <itemset nodeset="instance('{source.id}'){source.path}" />
+ *
+ *
+ * The dropdown would have options:
+ *
+ *     name             (nodeset: instance('{source.id}'){source.path})
+ *     name - Element   (nodeset: instance('{source.id}'){source.path}/element)
+ *
+ */
 define([
     'jquery',
     'underscore',
-    'vellum/widgets',
-    'tpl!vellum/templates/data_source_editor',
-    'tpl!vellum/templates/select_data_source'
+    'vellum/util',
 ], function (
     $,
     _,
-    widgets,
-    edit_source,
-    select_source
+    util
 ) {
-    var vellum, dataSources;
+    var dataSourcesEndpoint, dataCache, dataCallbacks;
 
+    // called during core init
     function init(instance) {
-        vellum = instance;
-        dataSources = vellum.opts().core.dataSources || [];
+        dataSourcesEndpoint = instance.opts().core.dataSourcesEndpoint;
+        reset();
     }
 
-    function getDataSources(type, callback) {
-        var source = _.find(dataSources, function (src) {
-            return src.key === type;
-        });
-
-        if (source) {
-            if (_.isString(source.endpoint)) {
-                $.ajax({
-                    type: 'GET',
-                    url: source.endpoint,
-                    dataType: 'json',
-                    success: function (data) { callback(data); },
-                    // TODO error handling
-                    data: {}
-                });
-            } else {
-                callback(source.endpoint());
-            }
-        } else {
-            callback([]);
-        }
-    }
-
-    function selectDataSource(callback) {
-        var $modal = vellum.generateNewModal("Select Data Source", [
-                {
-                    title: "Set Data Source",
-                    cssClasses: "btn-primary",
-                    action: function () {
-                        var sel = $source.find(":selected"),
-                            src = (sel && sel.data("source")) || {};
-                        callback({
-                            instance: {
-                                id: src.defaultId,
-                                src: src.sourceUri
-                            },
-                            idsQuery: $query.val(),
-                        });
-                        $modal.modal('hide');
-                    }
-                }
-            ]),
-            $exportForm = $(select_source({}));
-        $modal.find('.modal-body').html($exportForm);
-
-        var $type = $exportForm.find('[name=type-selector]'),
-            $source = $exportForm.find('[name=source-selector]'),
-            $query = $exportForm.find('[name=source-query]'),
-            $text = $exportForm.find('textarea');
-
-        $text.attr("disabled", "disabled");
-        $type.empty();
-        $type.append($("<option />").text("-- Select a source type --"));
-        _.each(dataSources, function(source) {
-            $type.append($("<option />").val(source.key).text(source.name));
-        });
-
-        function populate() {
-            var key = $type.val();
-            $source.empty();
-            if (!key) {
-                select();
-                return;
-            }
-            getDataSources(key, function (sources) {
-                $source.append($("<option />").text("-- Select a source --"));
-                _.each(sources, function (source) {
-                    $source.append($("<option />").data("source", source)
-                                                  .text(source.name));
-                });
-                select();
-            });
-        }
-
-        function select() {
-            var selected = $source.find(":selected"),
-                source = selected && selected.data("source");
-            if (source) {
-                $query.val("instance('{1}')/{2}"
-                    .replace("{1}", source.defaultId)
-                    .replace("{2}", source.rootNodeName)
-                );
-                $text.text([
-                    source.defaultId,
-                    source.sourceUri,
-                ].join("\n"));
-            } else {
-                $query.val("");
-                $text.text("");
-            }
-        }
-
-        $type.change(populate);
-        $source.change(select);
-
-        // display current values
-        $modal.modal('show');
+    function reset() {
+        dataCache = null;
+        dataCallbacks = null;
     }
 
     /**
-     * Load data source editor
+     * Asynchronously load data sources
      *
-     * @param $div - jQuery object in which editor will be created.
-     * @param options - Object containing editor options:
-     *      {
-     *          source: {
-     *              id: "<instance id>",
-     *              src: "<instance src>",
-     *              query: "<query expression>"
-     *          },
-     *          change: callback,   // called when the editor content changes
-     *          done: callback      // called with no arguments on cancel
-     *      }
+     * @param callback - A function to be called when the data sources
+     *      have been loaded. This function should accept one argument,
+     *      a list of data source objects.
      */
-    function loadDataSourceEditor($div, options) {
-        var $ui = $(edit_source()),
-            $instanceId = $ui.find("[name=instance-id]"),
-            $instanceSrc = $ui.find("[name=instance-src]"),
-            $query = $ui.find("[name=query]");
-        $div.empty().append($ui);
-
-        if (options.source) {
-            $instanceId.val(options.source.id || "");
-            $instanceSrc.val(options.source.src || "");
-            $query.val(options.source.query || "");
+    function getDataSources(callback) {
+        if (dataCache) {
+            callback(dataCache);
+            return;
+        }
+        if (dataCallbacks) {
+            dataCallbacks.push(callback);
+            return;
         }
 
-        function getDataSource() {
-            return {
-                id: $instanceId.val(),
-                src: $instanceSrc.val(),
-                query: $query.val()
-            };
-        }
-
-        if (options.change) {
-            $instanceId.on('change keyup', function () {
-                options.change(getDataSource());
+        function finish(data) {
+            dataCache = data.length ? data : [{
+                id: "",
+                uri: "",
+                path: "",
+                name: "Not Found",
+                structure: {}
+            }];
+            _.each(dataCallbacks, function (callback) {
+                callback(dataCache);
             });
-
-            $instanceSrc.on('change keyup', function () {
-                options.change(getDataSource());
-            });
-
-            $query.on('change keyup', function () {
-                options.change(getDataSource());
-            });
+            dataCallbacks = null;
         }
-
-        var done = function (val) {
-            $div.find('.fd-data-source-editor').hide();
-            options.done(val);
-        };
-
-        $ui.find('.fd-data-source-save-button').click(function () {
-            done(getDataSource());
-        });
-
-        $ui.find('.fd-data-source-cancel-button').click(function () {
-            done();
-        });
-    }
-
-    function dataSourceWidget(mug, options, labelText) {
-        var widget = widgets.text(mug, options),
-            getUIElement = widgets.util.getUIElement,
-            getUIElementWithEditButton = widgets.util.getUIElementWithEditButton,
-            super_getValue = widget.getValue,
-            super_setValue = widget.setValue,
-            currentValue = null;
-
-        widget.getUIElement = function () {
-            var query = getUIElementWithEditButton(
-                    getUIElement(widget.input, labelText),
-                    function () {
-                        vellum.displaySecondaryEditor({
-                            source: local_getValue(),
-                            headerText: labelText,
-                            loadEditor: loadDataSourceEditor,
-                            done: function (source) {
-                                if (!_.isUndefined(source)) {
-                                    local_setValue(source);
-                                    widget.handleChange();
-                                }
-                            }
-                        });
-                    }
-                );
-            return $("<div></div>").append(query);
-        };
-
-        function local_getValue() {
-            currentValue.query = super_getValue();
-            return currentValue;
+        dataCallbacks = [callback];
+        if (dataSourcesEndpoint) {
+            if (_.isString(dataSourcesEndpoint)) {
+                $.ajax({
+                    type: 'GET',
+                    url: dataSourcesEndpoint,
+                    dataType: 'json',
+                    success: finish,
+                    error: function (jqXHR, errorType, exc) {
+                        finish([]);
+                        window.console.log(util.formatExc(exc || errorType));
+                    },
+                    data: {}
+                });
+            } else {
+                dataSourcesEndpoint(finish);
+            }
+        } else {
+            finish([]);
         }
-
-        function local_setValue(val) {
-            currentValue = val;
-            super_setValue(val.query || "");
-        }
-
-        widget.getValue = local_getValue;
-        widget.setValue = local_setValue;
-
-        return widget;
     }
 
     return {
         init: init,
+        reset: reset,
         getDataSources: getDataSources,
-        selectDataSource: selectDataSource,
-        dataSourceWidget: dataSourceWidget
     };
-
 });

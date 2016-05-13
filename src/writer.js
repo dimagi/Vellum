@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'XMLWriter',
-    'vellum/util'
+    'vellum/util',
 ], function (
     $,
     _,
@@ -16,7 +16,7 @@ define([
         xmlWriter.writeStartDocument();
         //Generate header boilerplate up to instance level
         xmlWriter.writeStartElement('h:html');
-        write_html_tag_boilerplate(xmlWriter);
+        write_html_tag_boilerplate(xmlWriter, form);
         xmlWriter.writeStartElement('h:head');
         xmlWriter.writeStartElement('h:title');
         xmlWriter.writeString(form.formName);
@@ -32,20 +32,14 @@ define([
         
         // other instances
         for (var i = 1; i < form.instanceMetadata.length; i++) {
-            _writeInstance(xmlWriter, form.instanceMetadata[i], true);
+            _writeInstance(xmlWriter, form.instanceMetadata[i]);
         }
         
         createBindList(dataTree, xmlWriter);
         
-        _.each(form.getSetValues(), function (setValue) {
-            xmlWriter.writeStartElement('setvalue');
-            xmlWriter.writeAttributeString('event', setValue.event);
-            xmlWriter.writeAttributeString('ref', setValue.ref);
-            xmlWriter.writeAttributeString('value', setValue.value);
-            xmlWriter.writeEndElement();
-        });
+        createSetValues(dataTree, form, xmlWriter);
 
-        form.vellum.contributeToModelXML(xmlWriter);
+        form.vellum.contributeToModelXML(xmlWriter, form);
         
         xmlWriter.writeEndElement(); //CLOSE MODEL
 
@@ -73,7 +67,7 @@ define([
             jrm = "http://dev.commcarehq.org/jr/xforms";
         }
 
-        uuid = form.formUuid; //gets set at parse time/by UI
+        uuid = form.formUuid;
         if(!uuid) {
             uuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
         }
@@ -85,32 +79,43 @@ define([
         xmlWriter.writeAttributeString("name", form.formName || "New Form");
     };
 
-    function write_html_tag_boilerplate (xmlWriter) {
+    function write_html_tag_boilerplate (xmlWriter, form) {
         xmlWriter.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
         xmlWriter.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
         xmlWriter.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
         xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
         xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
         xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
+        // todo: remove writeIgnoreRichText once bubbles is released
+        // Here for future compatibility
+        if (form.writeIgnoreRichText && form.useRichText === false) {
+            xmlWriter.writeAttributeString("vellum:ignore", 'richText');
+        }
+        if (form.noMarkdown) {
+            xmlWriter.writeAttributeString("vellum:ignore", 'markdown');
+        }
     }
 
     var _writeInstanceAttributes = function (writer, instanceMetadata) {
-        for (var attrId in instanceMetadata.attributes) {
-            if (instanceMetadata.attributes.hasOwnProperty(attrId)) {
-                writer.writeAttributeString(attrId, instanceMetadata.attributes[attrId]);
+        var attrs = instanceMetadata.attributes;
+        for (var attrId in attrs) {
+            if (attrs.hasOwnProperty(attrId) && attrs[attrId]) {
+                writer.writeAttributeString(attrId, attrs[attrId]);
             }
         }
     };
-    
-    var _writeInstance = function (writer, instanceMetadata, manualChildren) {
-        writer.writeStartElement('instance');
-        _writeInstanceAttributes(writer, instanceMetadata);
-        if (manualChildren && instanceMetadata.children) {
-            // seriously, this is what you have to do
-            // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
-            writer.writeXML($('<div>').append(instanceMetadata.children).clone().html());
+
+    var _writeInstance = function (writer, instanceMetadata) {
+        if (!instanceMetadata.internal) {
+            writer.writeStartElement('instance');
+            _writeInstanceAttributes(writer, instanceMetadata);
+            if (instanceMetadata.children.length) {
+                // seriously, this is what you have to do
+                // HT: http://stackoverflow.com/questions/652763/jquery-object-to-string
+                writer.writeXML($('<div>').append(instanceMetadata.children).clone().html());
+            }
+            writer.writeEndElement();
         }
-        writer.writeEndElement(); 
     };
 
     var createDataBlock = function (form, dataTree, xmlWriter) {
@@ -140,7 +145,6 @@ define([
                 }
 
                 var dataValue = mug.p.dataValue,
-                    keyAttr = mug.p.keyAttr,
                     xmlnsAttr = mug.p.xmlnsAttr;
                 
                 if (dataValue){
@@ -149,8 +153,8 @@ define([
                 if (mug.options.writeDataNodeXML) {
                     mug.options.writeDataNodeXML(xmlWriter, mug);
                 }
-                if (keyAttr){
-                    xmlWriter.writeAttributeString("key", keyAttr);
+                if (mug.p.comment) {
+                    xmlWriter.writeAttributeString('vellum:comment', mug.p.comment);
                 }
                 if (xmlnsAttr){
                     xmlWriter.writeAttributeString("xmlns", xmlnsAttr);
@@ -175,10 +179,31 @@ define([
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
                         if (value) {
-                            xmlWriter.writeAttributeString(key, value);
+                            util.writeHashtags(xmlWriter, key, value, mug);
                         }
                     });
                     xmlWriter.writeEndElement();
+                });
+            }
+            processChildren();
+        });
+    };
+
+    var createSetValues = function (dataTree, form, xmlWriter) {
+        function writeSetValue(setValue, mug) {
+            xmlWriter.writeStartElement('setvalue');
+            xmlWriter.writeAttributeString('event', setValue.event);
+            util.writeHashtags(xmlWriter, 'ref', setValue.ref, mug);
+            util.writeHashtags(xmlWriter, 'value', setValue.value, mug);
+            xmlWriter.writeEndElement();
+        }
+
+        _.each(form.getSetValues(), function (sv) { writeSetValue(sv, {form: form}); });
+
+        dataTree.walk(function (mug, nodeID, processChildren) {
+            if(mug && mug.options.getSetValues) {
+                _.each(mug.options.getSetValues(mug), function (setValue) {
+                    writeSetValue(setValue, mug);
                 });
             }
             processChildren();
@@ -212,6 +237,9 @@ define([
             if (opts.writeControlHelp) {
                 createHelp(xmlWriter, mug);
             }
+            if (opts.writeControlAlert) {
+                createAlert(xmlWriter, mug);
+            }
             // Write custom attributes first
             var attributes = mug.p.rawControlAttributes;
             for (var k in attributes) {
@@ -223,8 +251,8 @@ define([
                 opts.writeCustomXML(xmlWriter, mug);
             }
             if (opts.writeControlRefAttr) {
-                var absPath = form.getAbsolutePath(mug);
-                xmlWriter.writeAttributeString(opts.writeControlRefAttr, absPath);
+                var hashtag = mug.hashtagPath;
+                util.writeHashtags(xmlWriter, opts.writeControlRefAttr, hashtag, mug);
             }
             var appearanceAttr = mug.getAppearanceAttribute();
             if (appearanceAttr) {
@@ -285,6 +313,16 @@ define([
             xmlWriter.writeStartElement('help');
             var helpRef = "jr:itext('" + helpItext.id + "')";
             xmlWriter.writeAttributeString('ref', helpRef);
+            xmlWriter.writeEndElement();
+        }
+    }
+
+    function createAlert(xmlWriter, mug) {
+        var alertItext = mug.p.constraintMsgItext;
+        if (alertItext && !alertItext.isEmpty()) {
+            xmlWriter.writeStartElement('alert');
+            var alertRef = "jr:itext('" + alertItext.id + "')";
+            xmlWriter.writeAttributeString('ref', alertRef);
             xmlWriter.writeEndElement();
         }
     }

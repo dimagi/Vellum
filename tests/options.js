@@ -1,73 +1,106 @@
-define(function () {
-    var INSTANCES = [
+define(["underscore"], function (_) {
+    var dataSources = [
         {
-            name: "All Cases",
-            sourceUri: "jr://instance/casedb",
-            defaultId: "casedb",
-            rootNodeName: "casedb",
-            levels: [
-                {
-                    nodeName: "case",
-                    properties: [
-                        {
-                            id: 'case_name'
-                        },
-                        {
-                            id: '@case_id'
-                        }
-                    ],
-                    subsets: [
-                        {
-                            name: "mother Cases",
-                            selector: "@case_type='mother'",
-                            properties: [
-                                {
-                                    id: 'edd' 
-                                }
-                            ]
-                        },
-                        {
-                            name: "child Cases",
-                            selector: "@case_type = 'child'",
-                            properties: [
-                                {
-                                    id: 'dob'
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
-        },
-        {
-            name: "Some Fixture",
-            sourceUri: "jr://fixture/some-fixture",
-            defaultId: "somefixture",
-            rootNodeName: "foos",
-            levels: [
-                {
-                    nodeName: "foo",
-                    subsets: [
-                        {
-                            name: "woos",
-                            // should handle quotes
-                            selector: "@foo_type=\"woo\""
-                        }
-                    ]
+            id: "commcaresession",
+            uri: "jr://instance/session",
+            path: "/session/data",
+            name: 'Session',
+            structure: {
+                "case_id": {
+                    reference: {
+                        source: "casedb",
+                        subset: "child",
+                        key: "@case_id",
+                    },
                 },
-                {
-                    nodeName: "bar",
-                    subsets: [
-                        {
-                            name: "eggs",
-                            selector: "@bar_type='eggs'"
-                        }
-                    ]
+            },
+        }, {
+            id: "casedb",
+            uri: "jr://instance/casedb",
+            path: "/cases/case",
+            name: 'Cases',
+            structure: {
+                name: {},
+            },
+            subsets: [{
+                id: "mother",
+                key: "@case_type",
+                structure: {
+                    edd: {},
+                },
+                related: {
+                    "first-child": "child",
                 }
-            ]
-        }
+            }, {
+                id: "child",
+                key: "@case_type",
+                structure: {
+                    dob: {},
+                    f_0762: {},
+                    f_1065: {},
+                    f_1089: {},
+                    f_2685: {},
+                    f_2841: {},
+                    f_3017: {},
+                    f_3280: {},
+                    f_3291: {},
+                    f_3605: {},
+                    f_4021: {},
+                    f_4793: {},
+                    f_5683: {},
+                    f_6103: {},
+                    f_6542: {},
+                    f_6819: {},
+                    f_6912: {},
+                    f_7346: {},
+                    f_7541: {},
+                    f_8612: {},
+                    f_8967: {},
+                    f_8970: {},
+                    f_9147: {},
+                    f_9814: {},
+                },
+                related: {
+                    parent: "mother",
+                },
+            }]
+        }, {
+            id: "some-fixture",
+            uri: "jr://fixture/item-list:some-fixture",
+            path: "/some-fixture_list/some-fixture",
+            name: 'some-fixture-name',
+            structure: {
+                "inner-attribute": {
+                    structure: {
+                        "extra-inner-attribute": {}
+                    }
+                },
+                "@id": {
+                    no_option: true
+                },
+                name: {
+                    no_option: true
+                }
+            }
+        }, {
+            id: "some-other-fixture",
+            uri: "jr://fixture/item-list:some-other-fixture",
+            path: "/some-other-fixture_list/some-other-fixture",
+            name: 'some-other-fixture-name',
+            structure: {
+                "other-inner-attribute": {
+                    no_option: true
+                },
+                "@id-other": {
+                    no_option: true
+                },
+                "name-other": {
+                    no_option: true
+                }
+            }
+        },
     ];
-    
+
     var OPTIONS = {
         core: {
             loadDelay: 0,
@@ -78,25 +111,56 @@ define(function () {
                 "meta/username",
                 "meta/userID",
                 "meta/timeStart",
-                "meta/timeEnd"
+                "meta/timeEnd",
+                "meta/location",
             ],
-            dataSources: [
-                {
-                    key: "case",
-                    name: "Cases",
-                    endpoint: function () { return [INSTANCES[0]]; }
-                }, {
-                    key: "fixture",
-                    name: "Fixtures",
-                    endpoint: function () { return INSTANCES.slice(1); }
-                }
-            ],
+            dataSourcesEndpoint: function (callback) { callback(dataSources); },
             saveType: "patch",
-            saveUrl: function (data) {}
+            saveUrl: function (data) {},
+            activityUrl: null,               // may be function or URL string
+            activityTimeout: 5 * 60 * 1000,  // 5 minutes in milliseconds
+            externalLinks: {
+                changeSubscription: "#",
+            },
         },
         javaRosa: {
             langs: ['en', 'hin'],
             displayLanguage: 'en'
+        },
+        intents: {
+            templates: [
+                {
+                    icon: "fa fa-map-marker",
+                    name: "Area Mapper",
+                    id: "com.richard.lu.areamapper",
+                    extra: {ext: "value"},
+                    response: {
+                        r1: "x",
+                        r2: "y",
+                        r3: "z",
+                        r4: "",
+                    },
+                },
+                {
+                    icon: "fa fa-barcode",
+                    name: "Barcode Scanner",
+                    id: "com.google.zxing.client.android.SCAN",
+                    extra: {},
+                    response: {},
+                },
+                {
+                    icon: "icon-vellum-android-intent",
+                    name: "Breath Counter",
+                    id: "org.commcare.respiratory.BREATHCOUNT",
+                },
+            ],
+        },
+        itemset: {
+            dataSourcesFilter: function (sources) {
+                return _.filter(sources, function (source) {
+                    return !source.uri || /^jr:\/\/fixture\//.test(source.uri);
+                });
+            }
         },
         uploader: {
             uploadUrls: {
@@ -106,15 +170,31 @@ define(function () {
             },
             objectMap: {}  // todo
         },
-        plugins: ['itemset', 'modeliteration', 'commtrack', 'saveToCase'],
+        plugins: [
+            'databrowser',
+            'itemset',
+            'modeliteration',
+            'commtrack',
+            'saveToCase',
+            'atwho',
+        ],
         features: {
+            // 'remove_popvers': false, // disabled for most tests
+            'lookup_tables': true,
             'group_in_field_list': true,
-            'help_markdown': true
+            'rich_text': true,
+            'advanced_itemsets': true,
+            'experimental_ui': true,
+            'printing': true,
+            'templated_intents': true,
+            'custom_intents': true,
+            'image_resize': true,
+            'markdown_in_groups': true,
+            'allow_data_reference_in_setvalue': true,
         }
     };
 
     return {
-        options: OPTIONS,
-        instances: INSTANCES
+        options: OPTIONS
     };
 });

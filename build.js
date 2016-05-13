@@ -8,6 +8,11 @@
     removeCombined: true,
     skipDirOptimize: true,
     optimize: 'uglify2',
+    uglify2: {
+        output: {
+            'ascii_only': true
+        }
+    },
     preserveLicenseComments: false,
     // Separate CSS because relative URLs (images) within the CSS do not load
     // properly in a production environment.
@@ -64,11 +69,8 @@
             name: 'global-deps',
             include: [
                 'jquery',
-                'jquery-ui',
                 'jquery.bootstrap',
-
-                // shim plugin dependencies don't get automatically included
-                'css/css!../bower_components/jquery-ui/themes/redmond/jquery-ui'
+                'underscore'
             ],
             exclude: [
                 'exclude'
@@ -113,20 +115,18 @@
             create: true,
             name: 'local-deps',
             include: [
-                'underscore',
                 'jquery.jstree',
-                'jquery.fancybox',
-                'jquery.bootstrap-popout',
-                'jquery.bootstrap-better-typeahead',
                 'save-button',
+                'ckeditor',
+                'ckeditor-jquery',
 
                 // shim plugin dependencies don't automatically get included
                 // NOTE less! and css! cannot be combined in the same module
                 // https://github.com/guybedford/require-less/issues/48
                 'css/css!../lib/codemirror/codemirror',
                 'css/css!../bower_components/jstree/dist/themes/default/style',
-                'css/css!../lib/fancybox/jquery.fancybox-1.3.4',
-                'css/css!yui-combo'
+                'css/css!yui-combo',
+                'css/css!../bower_components/At.js/dist/css/jquery.atwho'
             ],
             exclude: [
                 'exclude',

@@ -16,14 +16,14 @@
 					<hidden1 />
 				</data>
 			</instance>
-			<bind nodeset="/data/text1" type="xsd:string" />
-			<bind nodeset="/data/text2" type="xsd:string" />
-			<bind nodeset="/data/group" />
-			<bind nodeset="/data/group/text3" type="xsd:string" />
-			<bind nodeset="/data/group/text4" type="xsd:string" />
-			<bind nodeset="/data/group/hidden2" />
-			<bind nodeset="/data/text5" type="xsd:string" />
-			<bind nodeset="/data/hidden1" />
+			<bind vellum:nodeset="#form/text1" nodeset="/data/text1" type="xsd:string" />
+			<bind vellum:nodeset="#form/text2" nodeset="/data/text2" type="xsd:string" />
+			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
+			<bind vellum:nodeset="#form/group/text3" nodeset="/data/group/text3" type="xsd:string" />
+			<bind vellum:nodeset="#form/group/text4" nodeset="/data/group/text4" type="xsd:string" />
+			<bind vellum:nodeset="#form/group/hidden2" nodeset="/data/group/hidden2" />
+			<bind vellum:nodeset="#form/text5" nodeset="/data/text5" type="xsd:string" />
+			<bind vellum:nodeset="#form/hidden1" nodeset="/data/hidden1" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="text1-label">
@@ -49,22 +49,22 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/text1">
+		<input vellum:ref="#form/text1" ref="/data/text1">
 			<label ref="jr:itext('text1-label')" />
 		</input>
-		<input ref="/data/text2">
+		<input vellum:ref="#form/text2" ref="/data/text2">
 			<label ref="jr:itext('text2-label')" />
 		</input>
-		<group ref="/data/group">
+		<group vellum:ref="#form/group" ref="/data/group">
 			<label ref="jr:itext('group-label')" />
-			<input ref="/data/group/text3">
+			<input vellum:ref="#form/group/text3" ref="/data/group/text3">
 				<label ref="jr:itext('group/text3-label')" />
 			</input>
-			<input ref="/data/group/text4">
+			<input vellum:ref="#form/group/text4" ref="/data/group/text4">
 				<label ref="jr:itext('group/text4-label')" />
 			</input>
 		</group>
-		<input ref="/data/text5">
+		<input vellum:ref="#form/text5" ref="/data/text5">
 			<label ref="jr:itext('text5-label')" />
 		</input>
 	</h:body>

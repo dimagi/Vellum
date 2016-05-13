@@ -9,8 +9,8 @@
                     <question2 />
                 </data>
             </instance>
-            <bind nodeset="/data/question1" />
-            <bind nodeset="/data/question2" />
+            <bind vellum:nodeset="#form/question1" nodeset="/data/question1" />
+            <bind vellum:nodeset="#form/question2" nodeset="/data/question2" />
             <itext>
                 <translation lang="en" default="">
                     <text id="question1-label">
@@ -36,7 +36,7 @@
         </model>
     </h:head>
     <h:body>
-        <select1 ref="/data/question1">
+        <select1 vellum:ref="#form/question1" ref="/data/question1">
             <label ref="jr:itext('question1-label')" />
             <item>
                 <label ref="jr:itext('question1-item1-label')" />
@@ -51,7 +51,7 @@
                 <value>item2</value>
             </item>
         </select1>
-        <select ref="/data/question2">
+        <select vellum:ref="#form/question2" ref="/data/question2">
             <label ref="jr:itext('question2-label')" />
             <item>
                 <label ref="jr:itext('question2-item2-label')" />

@@ -4,13 +4,13 @@ define([
     'require',
     'save-button',
     'underscore',
-    'xpathmodels',
     'jquery',
-    'text!vellum/templates/main.html',
+    'tpl!vellum/templates/main',
     'tpl!vellum/templates/question_type_group',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/confirm_overwrite',
     'tpl!vellum/templates/control_group_stdInput',
+    'tpl!vellum/templates/form_errors_template',
     'tpl!vellum/templates/question_fieldset',
     'tpl!vellum/templates/question_type_changer',
     'tpl!vellum/templates/question_toolbar',
@@ -19,6 +19,7 @@ define([
     'tpl!vellum/templates/modal_button',
     'vellum/mugs',
     'vellum/widgets',
+    'vellum/richText',
     'vellum/parser',
     'vellum/datasources',
     'vellum/util',
@@ -28,19 +29,19 @@ define([
     'less!vellum/less-style/main',
     'jquery.jstree',
     'jquery.bootstrap',
-    'jquery.fancybox',  // only thing we use fancybox for is its spinner, no actual display of anything
-    'jquery-ui'  // used for buttons in Edit Source XML, and dialogs
+    'caretjs',
+    'atjs'
 ], function (
     require,
     SaveButton,
     _,
-    xpathmodels,
     $,
     main_template,
     question_type_group,
     edit_source,
     confirm_overwrite,
     control_group_stdInput,
+    form_errors_template,
     question_fieldset,
     question_type_changer,
     question_toolbar,
@@ -49,6 +50,7 @@ define([
     modal_button,
     mugs,
     widgets,
+    richText,
     parser,
     datasources,
     util,
@@ -66,24 +68,25 @@ define([
         ], function () {});
     }, 0);
 
+    var isMac = /Mac/.test(navigator.platform);
+
     var DEBUG_MODE = false;
-    xpathmodels.DEBUG_MODE = DEBUG_MODE;
 
     var MESSAGE_TYPES = {
         "error": {
-            cssClass: "alert-error",
+            cssClass: "alert-danger",
             title: "Error",
-            icon: "icon-exclamation-sign"
+            icon: "fa fa-exclamation-circle",
         },
         "parse-warning": {
             cssClass: "",
             title: "Warning",
-            icon: "icon-warning-sign"
+            icon: "fa fa-warning",
         },
         "form-warning": {
             cssClass: "",
             title: "Form Warning",
-            icon: "icon-info-sign"
+            icon: "fa fa-info-circle",
         }
     };
 
@@ -154,27 +157,28 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
-                    if (!_.isUndefined(window.analytics)) {
-                        window.analytics.track("Clicked Save in Formbuilder");
+                    if (window.analytics) {
+                        window.analytics.workflow("Clicked Save in form builder");
                     }
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
-            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
+            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!',
+            csrftoken: _this.opts().csrftoken
         });
         var setFullscreenIcon = function () {
-            var $i = $('i', _this.data.core.$fullscreenButton);
+            var $i = $('i', _this.data.core.$fullscreenButton).addClass("fa");
             if (_this.data.windowManager.fullscreen) {
-                $i.addClass('icon-resize-small').removeClass('icon-resize-full');
+                $i.addClass('fa-compress').removeClass('fa-expand');
             } else {
-                $i.removeClass('icon-resize-small').addClass('icon-resize-full');
+                $i.removeClass('fa-compress').addClass('fa-expand');
             }
         };
         setTimeout(setFullscreenIcon, 0);
-        this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
+        this.data.core.$fullscreenButton = $('<button class="btn btn-default"><i/></button>').click(function (e) {
             e.preventDefault();
-            if (typeof window.ga !== "undefined") {
-                window.ga('send', 'event', 'Form Builder', 'Full Screen Mode',
+            if (window.analytics) {
+                window.analytics.usage('Form Builder', 'Full Screen Mode',
                           _this.opts().core.formId);
             }
             if (_this.data.windowManager.fullscreen) {
@@ -183,7 +187,7 @@ define([
                 _this.data.windowManager.fullscreen = true;
             }
             setFullscreenIcon();
-            _this.data.windowManager.adjustToWindow();
+            _this.adjustToWindow();
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
@@ -191,14 +195,26 @@ define([
 
         this.data.core.lastSavedXForm = this.opts().core.form;
 
+        var ctrl = "Ctrl+",
+            alt = "Alt+";
+        if (isMac) {
+            ctrl = "\u2318";
+            alt = "\u2325";
+        }
         this.$f.addClass('formdesigner');
-        this.$f.empty().append(main_template);
+        this.$f.empty().append(main_template({ctrl: ctrl, alt: alt}));
+        $(document).on("keydown", function (e) {
+            var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
+                metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
+                key = (ctrlKey ? "Ctrl+" : "") +
+                      (e.altKey ? "Alt+" : "") + 
+                      (e.shiftKey ? "Shift+" : "") +
+                      (metaKey ? "Meta+" : "") + e.keyCode;
+            (hotkeys[key] || _.identity).call(_this, e);
+        });
 
         this._init_toolbar();
-        this._init_extra_tools();
         this._createJSTree();
-        this._init_modal_dialogs();
-        this._setup_fancybox();
         datasources.init(this);
     };
 
@@ -208,10 +224,20 @@ define([
             // Allow onReady to access vellum instance (mostly for tests)
             _this.opts().core.onReady.apply(_this);
         }
+        this._init_extra_tools();
         parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
             setTimeout(onReady, 0);
         });
+    };
+
+    var hotkeys = {
+        "Ctrl+Alt+187" /* = */: function () {
+            this.data.core.$tree.jstree("open_all");
+        },
+        "Ctrl+Alt+189" /* - */: function () {
+            this.data.core.$tree.jstree("close_all");
+        },
     };
 
     fn.getMugTypes = function () {
@@ -271,9 +297,7 @@ define([
             {
                 group: ["Select", 'Multiple Choice'],
                 related: [
-                    "Item"
-                    // an Itemset is added automatically when you add a new dynamic
-                    // select
+                    "Choice"
                 ],
                 questions: this.getSelectQuestions()
             },
@@ -336,7 +360,6 @@ define([
             "Geopoint",
             "Barcode",
             "Secret",
-            "AndroidIntent"
         ];
     };
 
@@ -367,6 +390,20 @@ define([
         this.$f.find('.fd-collapse-all').click(function() {
             _this.data.core.$tree.jstree("close_all");
         });
+
+        this.$f.find('.fd-button-copy').click(function () {
+            if (window.analytics) {
+                window.analytics.usage("Copy Paste", "Copy Button");
+                window.analytics.workflow("Clicked Copy Button in form builder");
+            }
+            _this.ensureCurrentMugIsSaved(function () {
+                _this.displayMultipleSelectionView();
+                var selected = _this.jstree("get_selected");
+                if (selected.length) {
+                    $("#" + selected[0] + " a").focus();
+                }
+            });
+        });
     };
 
     fn.getToolsMenuItems = function () {
@@ -375,19 +412,19 @@ define([
             {
                 name: "Export Form Contents",
                 action: function (done) {
-                    _this.showExportDialog(done);
+                    _this.showExportModal(done);
                 }
             },
             {
                 name: "Edit Source XML",
                 action: function (done) {
-                    _this.showSourceXMLDialog(done);
+                    _this.showSourceXMLModal(done);
                 }
             },
             {
                 name: "Form Properties",
                 action: function (done) {
-                    _this.showFormPropertiesDialog(done);
+                    _this.showFormPropertiesModal(done);
                 }
             }
         ];
@@ -408,82 +445,70 @@ define([
         var curMug = this.getCurrentlySelectedMug();
         if (curMug) {
             this.displayMugProperties(curMug);
-            if (this.data.core.unsavedDuplicateNodeId) {
-                this.getCurrentMugInput("nodeID")
-                    .val(this.data.core.unsavedDuplicateNodeId);
-            }
         }
     };
 
     fn.getMugDisplayName = function (mug) {
-        return mug.getDisplayName(
-            this.data.core.currentItextDisplayLanguage || 
-            this.data.javaRosa.Itext.getDefaultLanguage());
-    };
-
-    fn._showConfirmDialog = function () {
-        $('.fd-dialog-confirm').dialog("open");
-    };
-
-    fn._hideConfirmDialog = function () {
-        $('.fd-dialog-confirm').dialog("close");
-    };
-
-    /**
-     * Set the values for the Confirm Modal Dialog
-     * (box that pops up that has a confirm and cancel button)
-     */
-    fn.setDialogInfo = function (message, confButName, confFunction,
-                                 cancelButName, cancelButFunction, title) {
-        title = title || "";
-        var buttons = {},
-            $dial = $('.fd-dialog-confirm'), contentStr;
-        buttons[confButName] = confFunction;
-        buttons[cancelButName] = cancelButFunction;
-
-        $dial.empty();
-        contentStr = '<p>' +
-                '<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>' +
-                '<span class="fd-message">These items will be permanently deleted and cannot be recovered. Are you sure?</span></p>';
-        $dial.append(contentStr);
-        if (!message || typeof(message) !== "string") {
-            message = "";
+        var lang = this.data.core.currentItextDisplayLanguage ||
+                   this.data.javaRosa.Itext.getDefaultLanguage(),
+            val = mug.getDisplayName(lang, false);
+        if (mug.supportsRichText()) {
+            val = richText.bubbleOutputs(val, this.data.core.form, true);
+        } else {
+            val = util.escape(val);
         }
-        $dial.find('.fd-message').text(message);
-        $dial.dialog("option", {buttons: buttons, "title": title});
+        return val;
     };
 
-    fn.showSourceXMLDialog = function (done) {
+    fn.showSourceXMLModal = function (done) {
         var _this = this;
-        
-        function onContinue () {
-            _this._hideConfirmDialog();
-            _this.showSourceInModal(done);
-        }
 
-        function onAbort () {
-            _this._hideConfirmDialog();
-        }
         function validateMug(mug) {
-            return !_this.getErrors(mug).length;
+            mug.validate();
+            return !mug.getErrors().length;
         }
         // todo: should this also show up for saving? Did it at some point in
         // the past?
-        if (!this.data.core.form.isFormValid(validateMug)) {
-
-            var msg = "There are validation errors in the form.  Do you want to continue anyway? WARNING:" +
-                      "The form will not be valid and likely not perform correctly on your device!";
-            this.setDialogInfo(msg, 'Continue', onContinue, 'Abort', onAbort);
-            this._showConfirmDialog();
+        if (!_this.data.core.form.isFormValid(validateMug)) {
+            var $modal = _this.generateNewModal("Error", [
+                {
+                    title: 'Continue',
+                    cssClasses: "btn-default",
+                    action: function() {
+                        _this.closeModal(function() {
+                            _this.showSourceInModal(done);
+                        });
+                    }
+                },
+                {
+                    title: 'Abort',
+                    cssClasses: "btn-primary",
+                    action: function() {
+                        _this.closeModal();
+                    }
+                }
+            ], false, "fa fa-warning");
+            var content = "There are validation errors in the form.  Do you want to continue anyway?";
+            content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
+            $modal.find(".modal-body").html(content);
+            $modal.modal('show');
         } else {
-            this.showSourceInModal(done);
+            _this.showSourceInModal(done);
         }
+    };
+
+    fn._resizeFullScreenModal = function($modal) {
+        var modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
+        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
+        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
+        modalHeight = $(window).height() - 40;
+        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+        $modal.find(".modal-body").css('height', modalBodyHeight + 'px');
     };
 
     fn.showSourceInModal = function (done) {
         var _this = this,
-            $modal, $updateForm, $textarea, codeMirror, modalHeaderHeight,
-            modalFooterHeight, modalHeight, modalBodyHeight;
+            $modal, $updateForm, $textarea, codeMirror;
 
         $modal = this.generateNewModal("Edit Form's Source XML", [
             {
@@ -502,20 +527,12 @@ define([
             description: "This is the raw XML. You can edit or paste into this box to make changes " +
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
-        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
-        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
-        modalHeight = $(window).height() - 40;
-        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-
-        $modal
-            .css('height', modalHeight + 'px')
-            .css('width', $(window).width() - 40 + 'px');
 
         $modal.addClass('fd-source-modal')
-            .removeClass('form-horizontal')
             .find('.modal-body')
-            .html($updateForm)
-            .css('height', modalBodyHeight + 'px');
+            .removeClass('form-horizontal').removeClass('form')
+            .html($updateForm);
+        this._resizeFullScreenModal($modal);
 
         $textarea = $updateForm.find('textarea');
 
@@ -529,16 +546,19 @@ define([
         codeMirror = require('codemirror').fromTextArea($textarea.get(0));
         codeMirror.setOption('viewportMargin', Infinity);
         codeMirror.setOption('lineNumbers', true);
-        codeMirror.setSize('100%', '100%');
 
         $modal.modal('show');
-        $modal.one('shown', function () {
+        $modal.one('shown.bs.modal', function () {
+            var $body = $modal.find(".modal-body"),
+                bodyHeight = $body.height(),
+                pHeight = $body.find("p").outerHeight(true);
+            codeMirror.setSize('100%', bodyHeight - pHeight);
             codeMirror.refresh();
             codeMirror.focus();
         });
     };
 
-    fn.showExportDialog = function(done) {
+    fn.showExportModal = function(done) {
         var $modal,
             $exportForm;
 
@@ -553,20 +573,21 @@ define([
         var $text = $exportForm.find('textarea');
         $text.val(this.data.core.form.getExportTSV());
         $modal.modal('show');
-        $modal.one('shown', function () { $text.focus(); });
+        $modal.one('shown.bs.modal', function () { $text.focus(); });
     };
 
     fn.showOverwriteWarning = function(send, formText, serverForm) {
-        var $modal, $overwriteForm;
+        var $modal, $overwriteForm, _this = this;
 
-        $modal = this.generateNewModal("Lost work warning", [
+        $modal = _this.generateNewModal("Lost Work Warning", [
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
+                defaultButton: true,
                 action: function () {
                     $('#form-differences').hide();
                     send(formText, 'full');
-                    $modal.modal('hide');
+                    _this.closeModal();
                 }
             },
             {
@@ -575,25 +596,16 @@ define([
                 action: function () {
                     $('#form-differences').show();
 
-                    var modalHeaderHeight = $modal.find('.modal-header').outerHeight(false),
-                        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false),
-                        modalHeight = $(window).height() - 40,
-                        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-
-                    $modal
-                        .css('height', modalHeight + 'px')
-                        .css('width', $(window).width() - 40 + 'px');
-
                     $modal.addClass('fd-source-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
-                        .html($overwriteForm)
-                        .css('height', modalBodyHeight + 'px');
+                        .html($overwriteForm);
+                    _this._resizeFullScreenModal($modal);
 
                     $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
             }
-        ], "Cancel");
+        ], "Cancel", "fa fa-warning");
 
         var diff = util.xmlDiff(formText, serverForm);
 
@@ -601,15 +613,15 @@ define([
             description: "Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
                          "to overwrite their work?",
-            xmldiff: $('<div>').text(diff).html()
+            xmldiff: util.escape(diff),
         }));
         $modal.find('.modal-body').html($overwriteForm);
 
         $('#form-differences').hide();
         $modal.modal('show');
     };
-        
-    fn.showFormPropertiesDialog = function () {
+
+    fn.showFormPropertiesModal = function () {
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
         var _this = this,
@@ -621,45 +633,66 @@ define([
                     slug: "formName"
                 },
                 {
-                    label: "Form ID",
-                    slug: "formID",
-                    cleanValue: function (val) {
-                        return val.replace(/ /g, '_');
+                    label: "Disable Text Formatting",
+                    slug: "noMarkdown",
+                    type: "checkbox",
+                    value: function(jq, val) {
+                        return val ? jq.prop('checked', val) : jq.prop('checked');
                     }
                 }
             ];
 
-        $modalBody.append($('<p />').text(
-            "Note: changing the Form ID here will not automatically change " +
-            "the Form ID in existing references in your logic conditions.  " +
-            "If you change the Form ID, you must manually change any " +
-            "existing logic references."));
+        if (this.opts().features.rich_text) {
+            formProperties.push({
+                label: "Use Rich Text?",
+                slug: "useRichText",
+                type: "checkbox",
+                value: function(jq, val) {
+                    return val ? jq.prop('checked', val) : jq.prop('checked');
+                }
+            });
+        }
 
         _.each(formProperties, function (prop) {
             var $propertyInput = $(control_group_stdInput({
-                label: prop.label
+                label: prop.label,
+                type: prop.type || 'text',
             }));
             $modalBody.append($propertyInput);
             $propertyInput.find('input')
                 .val(_this.data.core.form[prop.slug])
-                .on('keyup', function () {
+                .on('change', function () {
                     var $this = $(this),
                         currentVal = $this.val();
-                    if (typeof prop.cleanValue === 'function') {
-                        currentVal = prop.cleanValue(currentVal);
-                        $this.val(currentVal);
+                    if (prop.value) {
+                        currentVal = prop.value($this);
                     }
                     _this.data.core.form.setAttr(prop.slug, currentVal);
+                    _this.refreshVisibleData();
                 });
+            if (prop.value) {
+                prop.value($propertyInput.find('input'), _this.data.core.form[prop.slug]);
+            }
         });
 
         $modal.modal('show');
-        $modal.one('shown', function () {
+        $modal.one('shown.bs.modal', function () {
             $modalBody.find("input:first").focus().select();
         });
     };
+
+    fn.closeModal = function (done) {
+        var _this = this,
+            $modal = _this.$f.find('.fd-modal-generic-container .modal');
+        if (done) {
+            $modal.one('hidden.bs.modal', function() {
+                done.apply(_this);
+            });
+        }
+        $modal.modal('hide');
+    };
     
-    fn.generateNewModal = function (title, buttons, closeButtonTitle) {
+    fn.generateNewModal = function (title, buttons, closeButtonTitle, headerIcon) {
         if (typeof closeButtonTitle === "undefined") {
             closeButtonTitle = "Close";
         }
@@ -669,15 +702,25 @@ define([
             return button;
         });
 
-        var $modalContainer = this.$f.find('.fd-modal-generic-container'),
-            $modal = $(modal_content({
+        var _this = this,
+            $modalContainer = _this.$f.find('.fd-modal-generic-container');
+
+        // Close any existing modal - multiple modals is a bad state
+        _this.closeModal();
+
+        var $modal = $(modal_content({
                 title: title,
-                closeButtonTitle: closeButtonTitle
+                closeButtonTitle: closeButtonTitle,
+                headerIcon: headerIcon,
             }));
+        $modal.one("shown.bs.modal", function () {
+            $modal.find(".btn-default:last").focus();
+        });
 
         _.each(buttons, function (button) {
+            button.defaultButton = button.defaultButton || false;
             button.action = button.action || function () {
-                $modal.modal('hide');
+                _this.closeModal();
             };
             $modal.find('.modal-footer').prepend(
                 $(modal_button(button)).click(button.action));
@@ -686,49 +729,56 @@ define([
         return $modal;
     };
 
-    fn._init_modal_dialogs = function () {
-        this.$f.find('.fd-dialog-confirm').dialog({
-            resizable: false,
-            modal: true,
-            buttons: {
-                "Confirm": function() {
-                    $(this).dialog("close");
-                },
-                "Cancel": function() {
-                    $(this).dialog("close");
-                }
-            },
-            autoOpen: false
-        });
-    };
-        
-    fn._setup_fancybox = function () {
-        $.fancybox.init();
-        this.$f.find("a.inline").fancybox({
-            hideOnOverlayClick: false,
-            hideOnContentClick: false,
-            enableEscapeButton: false,
-            showCloseButton : true,
-            onClosed: function() {}
-        });
+    var showPageSpinner = function() {
+        var spinner = $("<div><div><div></div></div></div>");
+        spinner.addClass("fd-form-saving");
+        $('body').append(spinner);
     };
 
-    fn.handleDropFinish = function(target, sourceUid, mug) {
+    var hidePageSpinner = function() {
+        $(".fd-form-saving").remove();
+    };
+
+    fn.handleDropFinish = function(target, path, mug) {
         var _this = this,
             ops = target.closest(".xpath-expression-row").find(".op-select");
 
         if (target) {
-            var path = _this.mugToXPathReference(mug);
             // the .change fires the validation controls
-            target.val(target.val() + path).change();
+            if (!widgets.util.getWidget(target, this).options.noRichText &&
+                ((!mug && _this.data.core.form.useRichText !== false &&
+                 this.opts().features.rich_text) ||
+                 (mug && mug.supportsRichText()))) {
+                richText.editor(target).insertExpression(path);
+            } else {
+                target.val(target.val() + path).change();
+            }
 
-            if (_this.data.core.currentlyEditedProperty) {
-                _this.warnOnCircularReference(
-                    _this.data.core.currentlyEditedProperty,
-                    _this.data.core.form,
-                    mug,
-                    path,
-                    'period');
+            if (window.analytics) {
+                var targetType;
+                switch (target[0].id) {
+                    case 'property-relevantAttr':
+                        targetType = "Display";
+                        break;
+                    case 'property-constraintAttr':
+                        targetType = "Validation";
+                        break;
+                    case 'property-calculateAttr':
+                        targetType = "Calculation";
+                        break;
+                    default:
+                        targetType = "Expression Editor";
+                        break;
+                }
+                if (_this.data.core.form.isCaseReference(path)) {
+                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
+                } else {
+                    window.analytics.usage(
+                        "Form Reference",
+                        "Drag and Drop",
+                        targetType
+                    );
+                }
             }
         }
 
@@ -746,7 +796,7 @@ define([
                 valid_children: this.data.core.mugTypes.Group.validChildTypes
             },
             "default": {
-                icon: 'icon-question-sign',
+                icon: 'fa fa-question-circle',
                 max_children: 0,
                 valid_children: []
             }
@@ -765,7 +815,7 @@ define([
             "core": {
                 data: [],
                 worker: false,
-                multiple: false, // single-item selection
+                multiple: true,
                 strings: {
                     'New node': this.opts().core.noTextString
                 },
@@ -789,26 +839,6 @@ define([
                 should_activate: function () {
                     return _this.ensureCurrentMugIsSaved();
                 },
-                should_move: function (obj, par) {
-                    var form = _this.data.core.form,
-                        mug = (_.isArray(obj) ? obj[0] : obj).data.mug,
-                        nodeID = mug.p.nodeID,
-                        parent = this.get_node(par),
-                        parentMug = parent.data ? parent.data.mug : null;
-
-                    // disallow moving node if it would have the same ID as a sibling
-                    if (nodeID) {
-                        var childMug = form.getMugChildrenByNodeID(parentMug, nodeID)[0];
-                        if (childMug && childMug !== mug) {
-                            // setup state for alert
-                            _this.setUnsavedDuplicateNodeId(nodeID, true);
-                            // trigger alert
-                            _this.ensureCurrentMugIsSaved();
-                            return false;
-                        }
-                    }
-                    return true;
-                },
                 redraw_node: function (obj) {
                     var args = Array.prototype.slice.call(arguments),
                         node = this.parent.redraw_node.apply(this.inst, args);
@@ -826,31 +856,37 @@ define([
             // plugin needs to stay enabled because it adds CSS selectors to
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
-        }).bind("select_node.jstree", function (e, data) {
-            var mug = _this.data.core.form.getMugByUFID(data.node.id);
-            _this.displayMugProperties(mug);
-            _this.activateQuestionTypeGroup(mug);
-            window.location.hash = '#' + mug.absolutePath;
+        }).bind("select_node.jstree deselect_node.jstree", function (e, data) {
+            var selected = _this.jstree('get_selected');
+            if (!selected.length) {
+                _this.hideQuestionProperties();
+            } else if (selected.length < 2) {
+                var mug = _this.data.core.form.getMugByUFID(selected[0]);
+                _this.displayMugProperties(mug);
+                _this.activateQuestionTypeGroup(mug);
+                window.location.hash = mug.hashtagPath;
+            } else {
+                _this.displayMultipleSelectionView();
+            }
         }).bind("open_node.jstree", function (e, data) {
+            if (window.event && window.event.altKey) {
+                _this.jstree("open_all", data.node);
+            }
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
             _this.activateQuestionTypeGroup(mug);
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
         }).bind("close_node.jstree", function (e, data) {
-            var selected = _this.jstree('get_selected'),
-                sel = selected.length && _this.jstree('get_node', selected[0]);
-            if (sel && _.contains(sel.parents, data.node.id)) {
-                _this.jstree("deselect_all", true)
-                     .jstree("select_node", data.node);
+            if (window.event && window.event.altKey) {
+                _this.jstree("close_all", data.node);
             }
-            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
                 refMug = data.parent !== "#" ? form.getMugByUFID(data.parent) : null,
                 rel = _this.getRelativePosition(refMug, data.position);
-            form.moveMug(mug, rel.mug, rel.position);
+            form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
         }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
@@ -880,7 +916,7 @@ define([
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.hasClass("jstree-drop")) {
+            if (target.closest('.jstree-drop').length) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
@@ -889,12 +925,15 @@ define([
     }).on("dnd_stop.vakata.jstree", function (e, data) {
         var vellum = $(data.data.obj.context).vellum("get"),
             target = $(data.event.target),
-            inst = $.jstree.reference(target),
-            sourceUid, mug;
-        if (!inst && target.hasClass("jstree-drop") && vellum === target.vellum("get")) {
-            sourceUid = data.data.nodes[0];
-            mug = vellum.data.core.form.getMugByUFID(sourceUid);
-            vellum.handleDropFinish(target, sourceUid, mug);
+            inst = $.jstree.reference(target);
+
+        if (!inst && (target.closest('.jstree-drop').length) && vellum === target.vellum("get")) {
+            if (data.data.origin) {
+                var node = data.data.origin.get_node(data.data.nodes[0]);
+                if (node.data && node.data.handleDrop) {
+                    node.data.handleDrop(target.closest('.jstree-drop'));
+                }
+            }
         }
     });
 
@@ -926,10 +965,13 @@ define([
     fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
         var form = this.data.core.form,
             targetMug = form.getMugByUFID(dstId),
-            sourceMug = form.getMugByUFID(srcId),
-            locked = !this.isMugPathMoveable(sourceMug.absolutePath);
+            sourceMug = form.getMugByUFID(srcId);
+        if (!sourceMug) {
+            return false;
+        }
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
+        var locked = !this.isMugPathMoveable(sourceMug.hashtagPath);
         if (locked) {
             if (position === 'into' || position === 'last' || position === 'first') {
                 return sourceMug.parentMug === targetMug;
@@ -942,29 +984,27 @@ define([
     };
 
     fn.onFormChange = function (mug) {
-        // Widget change events, in addition to form change events,
-        // trigger mug validation and save button activation because
-        // some mug property values have sub-properties that do not
-        // trigger mug property change events when they are changed.
-        // util.BoundPropertyMap is a possible alternative, but has its
-        // own set of complexities (binding event handlers to mug
-        // property values).
-        if (mug) {
-            try {
-                this.setTreeValidationIcon(mug);
-            } catch (err) {
-                // Some changes can temporarily leave the form in a state where
-                // this will raise an exception (copying a question and you try
-                // to get errors for it before all of its elements have been
-                // populated).
-                // It might be better to add an option for these changes not to
-                // fire a change event.
-                // TODO track them down and handle the errors at their source
-                // rather than here. setTreeValidationIcon should never raise
-                // an error under normal circumstances.
+        this.data.core.saveButton.fire("change");
+        this.notifyUserActivity();
+    };
+
+    fn.notifyUserActivity = function() {
+        var now = Date.now(),
+            // default timeout: 5 minutes in ms
+            activityTimeout = this.opts().core.activityTimeout || 5 * 60 * 1000,
+            activityUrl = this.opts().core.activityUrl;
+        if (activityUrl) {
+            if (!this.data.core.activityTimestamp) {
+                this.data.core.activityTimestamp = now;
+            } else if (now - this.data.core.activityTimestamp >= activityTimeout) {
+                this.data.core.activityTimestamp = now;
+                if (_.isFunction(activityUrl)) {
+                    activityUrl();
+                } else {
+                    $.get(activityUrl);
+                }
             }
         }
-        this.data.core.saveButton.fire("change");
     };
 
     fn.jstree = function () {
@@ -973,19 +1013,43 @@ define([
     };
 
     /**
-     * Use only when absolutely necessary, or you're probably doing something
-     * wrong!
+     * Get currently selected mug or mugs
+     *
+     * This depends on the UI. Avoid using it unless there is no way to
+     * get the mug from other context.
+     *
+     * @param multiple - If false (default) get the first selected mug;
+     *      null if there is no selection. Otherwise get a (possibly
+     *      empty) list of selected mugs.
+     * @param treeOrder - If false (default) return mugs in the order they
+     *      were selected. Otherwise return them in the order they appear
+     *      in the tree. Ignored if `multiple` is false.
+     * @returns - A list of mugs, single mug, or null, depending on
+     *      parameters and the UI state.
      */
-    fn.getCurrentlySelectedMug = function () {
+    fn.getCurrentlySelectedMug = function (multiple, treeOrder) {
         var selected = this.jstree('get_selected'),
-            ret;
-
-        if (!selected.length) {
-            ret = null;
-        } else {
-            ret = this.data.core.form.getMugByUFID(selected[0]);
+            form = this.data.core.form;
+        if (multiple) {
+            if (treeOrder && selected.length > 1) {
+                var ids = _.object(_.map(selected, function (id) {
+                        return [id, true];
+                    })),
+                    count = selected.length,
+                    mugs = [];
+                form.tree.walk(function (mug, nodeID, processChildren) {
+                    if (mug && ids.hasOwnProperty(mug.ufid)) {
+                        mugs.push(mug);
+                    }
+                    if (mugs.length !== count) {
+                        processChildren();
+                    }
+                });
+                return mugs;
+            }
+            return _.map(selected, form.getMugByUFID.bind(form));
         }
-        return ret;
+        return selected.length ? form.getMugByUFID(selected[0]) : null;
     };
 
     fn.getCurrentMugInput = function (propPath) {
@@ -997,12 +1061,12 @@ define([
     fn.mugToXPathReference = function (mug) {
         // for choices, return the quoted value.
         // for everything else return the path
-        if (mug.__className === "Item") {
-            return '"' + mug.p.defaultValue + '"';
+        if (mug.__className === "Choice") {
+            return "'" + mug.p.nodeID + "'";
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
-                "." : this.data.core.form.getAbsolutePath(mug);
+                "." : (mug.supportsRichText() ? mug.hashtagPath : mug.absolutePath);
         }
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using
@@ -1029,75 +1093,17 @@ define([
             .addClass('disabled');
     };
 
-    fn.setUnsavedDuplicateNodeId = function (nodeId, forMove) {
-        this.data.core.unsavedDuplicateNodeId = nodeId;
-        this.data.core.duplicateIsForMove = forMove;
-    };
-
     // Attempt to guard against doing actions when there are unsaved or invalid
-    // pending changes. In the case of an invalid duplicate sibling ID, it tries
-    // to call 'callback' after the user automatically fixes the invalid state,
-    // if they choose, but in any case returns false immediately if the current
-    // mug is not saved, for use when this is called in response to a JSTree
-    // event that needs to immediately be decided whether to stop propagation
-    // of.
+    // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
-        callback = callback || function () {};
-
-        var _this = this,
-            mug = this.getCurrentlySelectedMug(),
-            duplicate = this.data.core.unsavedDuplicateNodeId,
-            duplicateIsForMove = this.data.core.duplicateIsForMove;
-
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
                 "You have UNSAVED changes in the Expression Editor. " +
                 "Please save changes before continuing.");
             return false;
-        } else if (duplicate) {
-            var verb = duplicateIsForMove ? 'would have' : 'has',
-                newQuestionId = this.data.core.form.generate_question_id(duplicate);
-
-            this.alert(
-                "Duplicate Question ID",
-                "'" + duplicate + "' " + verb + " the same Question ID as " +
-                "another question in the same group. Please change '" + 
-                duplicate + "' to a unique Question ID before continuing.",
-                [
-                    {
-                        title: "Fix Manually",
-                        action: function () {
-                            // Since we just changed state to trigger this
-                            // message when calling ensureCurrentMugIsSaved()
-                            // when attempting a move, reset the state.  It will
-                            // be changed again if the same move is attempted.
-                            if (duplicateIsForMove) {
-                                _this.setUnsavedDuplicateNodeId(false);
-                            }
-                            _this.data.core.$modal.modal('hide');
-                            var input = _this.getCurrentMugInput("nodeID");
-                            if (input) {
-                                input.select().focus();
-                            }
-                        }
-                    },
-                    {
-                        title: "Automatically rename to '" + newQuestionId + "'",
-                        cssClasses: 'btn-primary',
-                        action: function () {
-                            mug.p.nodeID = newQuestionId;
-                            _this.setUnsavedDuplicateNodeId(false);
-                            _this.data.core.$modal.modal('hide');
-                            _this.refreshVisibleData();
-                            callback();
-                        } 
-                    }
-                
-                ]);
-            return false;
         } else {
-            callback();
+            (callback || function () {})();
             return true;
         }
     };
@@ -1106,7 +1112,7 @@ define([
         done = done || function () {};
         var _this = this;
 
-        $.fancybox.showActivity();
+        showPageSpinner();
         //wait for the spinner to come up.
         window.setTimeout(function () {
             //universal flag for indicating that there's something wrong enough
@@ -1117,17 +1123,18 @@ define([
                 _this.data.core.parseWarnings = [];
                 _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
+                _this.data.core.form.fire('form-load-finished');
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.
-                    _this.enableUI();
+                    _this.showQuestionProperties();
                     if (updateSaveButton) {
                         _this.data.core.saveButton.fire('change');
                     }
                 } else {
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
-                $.fancybox.hideActivity();
+                hidePageSpinner();
             } catch (e) {
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
@@ -1136,66 +1143,22 @@ define([
                     msg = "Parsing Error. Please check that your form is valid XML.";
                 }
 
-                // this button doesn't seem to actually exist
-                // todo: fix
-                //var showSourceButton = $('#fd-editsource-button');
-                //disable all buttons and inputs
-                _this.disableUI();
-                //enable the view source button so the form can be tweaked by
-                //hand.
-                //showSourceButton.button('enable');
+                _this.hideQuestionProperties();
 
-                _this.setDialogInfo(msg, 
-                    'ok', function() {
-                        _this._hideConfirmDialog();
-                    }, 
-                    'cancel', function(){
-                        _this._hideConfirmDialog();
-                    });
-                _this._showConfirmDialog();
-                
+                var $modal = _this.generateNewModal("Error", [], "OK", "fa fa-warning");
+                $modal.find(".modal-body").text(msg);
+                $modal.modal('show');
+
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
 
-                // ok to hard code this because it's public
-                var validator_url = "https://www.commcarehq.org/formtranslate/";
-                
-                msg = "We're sorry. The form builder cannot load your form.  You " +
-                    "can edit your form directly by clicking the \"Edit Source" +
-                    "XML\" button or go back to download your form. <br>" +
-                    "It is likely that your form contains errors.  You can " + 
-                    "check to see if your form is valid by pasting your" +
-                    "entire form into the " + '<a href="' + validator_url +
-                    '" target="_blank">Form Validator</a>';
-
-                //_this.data.core.form.updateError({
-                    //message: msg,
-                    //level: "error"
-                //});
-                $.fancybox.hideActivity();
+                hidePageSpinner();
                 throw e;
             }
             done();
         }, this.opts().core.loadDelay);
     };
 
-    fn.disableUI = function () {
-        this.flipUI(false);
-    };
-
-    fn.enableUI = function () {
-        this.flipUI(true);
-    };
-
-    fn.flipUI = function (state) {
-        var $props = this.$f.find('.fd-question-properties');
-        if (state) {
-            $props.show();
-        } else {
-            $props.hide();
-        }
-    };
-        
     fn.loadXML = function (formXML, options) {
         var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
@@ -1209,10 +1172,25 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
+        if (this.opts().features.rich_text) {
+            form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText : true;
+        } else {
+            form.useRichText = false;
+        }
+        form.writeIgnoreRichText = this.opts().features.rich_text;
+        form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
         }
+        datasources.getDataSources(function (data) {
+            form.updateKnownInstances(
+                _.chain(data)
+                 .map(function (source) { return [source.id, source.uri]; })
+                 .object()
+                 .value()
+            );
+        });
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.mug.ufid, e.qType);
@@ -1224,13 +1202,15 @@ define([
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
         }).on('question-remove', function (e) {
+            if (e.mug) {
+                e.mug.unbind(_this.data.core);
+            }
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
                 _this.displayMugProperties(currentMug);
             }
             if (!e.isInternal) {
                 var prev = _this.jstree("get_prev_dom", e.mug.ufid);
-                _this.showVisualValidation(null);
                 _this.jstree("delete_node", e.mug.ufid);
                 if (prev) {
                     _this.jstree("select_node", prev);
@@ -1238,8 +1218,16 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
-        }).on('error-change', function (e) {
-            _this._resetMessages(e.errors);
+            // HACK: need to explicitly remove the control node so that
+            // getNodeFromMug doesn't return a node that no longer exists
+            e.mug._node_control = undefined;
+
+            $('.fd-undo').click(function () {
+                _this.ensureCurrentMugIsSaved(form.undo.bind(form));
+            });
+            $('.fd-undo-container').on('click', '.close', function() {
+                form.undomanager.resetUndo();
+            });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1247,8 +1235,7 @@ define([
                 _this.displayMugProperties(currentMug);
             }
             if (!e.isInternal) {
-                _this.jstree("deselect_all", true)
-                     .jstree('select_node', e.mug.ufid);
+                _this.setCurrentMug(e.mug);
             }
         }).on('change', function (e) {
             _this.onFormChange(e.mug);
@@ -1256,26 +1243,13 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         }).on('mug-property-change', function (e) {
-            // The nodeID property for the current question successfully
-            // changed, so it wasn't caught as a duplicate, so remove any
-            // existing duplicate warning state.
-            if (e.property === 'nodeID') {
-                _this.setUnsavedDuplicateNodeId(false);
-            }
-
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
-        }).on('question-move', function(e) {
-            if (e.mug.spec.dataParent &&
-                e.mug.spec.dataParent.validationFunc(e.mug) !== 'pass') {
-                e.mug.p.dataParent = undefined;
-            }
         });
     };
 
-    fn.refreshMugName = function (mug, displayLang) {
-        displayLang = displayLang || this.data.core.currentItextDisplayLanguage;
-        var name = mug.getDisplayName(displayLang);
+    fn.refreshMugName = function (mug) {
+        var name = this.getMugDisplayName(mug);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
         }
@@ -1309,7 +1283,10 @@ define([
             _this.handleMugParseFinish(mug);
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
-                _this.setTreeValidationIcon(mug);
+                var changed = mug.validate();
+                if (!changed && mug.getErrors().length) {
+                    _this.setTreeValidationIcon(mug);
+                }
             }
         });
 
@@ -1359,8 +1336,8 @@ define([
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
             }
-            if (!_.isUndefined(window.analytics)) {
-                window.analytics.track("Added a question");
+            if (window.analytics) {
+                window.analytics.workflow("Added question in form builder");
             }
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
@@ -1373,19 +1350,26 @@ define([
         return mug;
     };
 
+    fn.adjustToWindow = function() {
+        this.data.windowManager.adjustToWindow();
+    };
+
     /**
      * Find insertion position for new mug of type `qType`.
      *
      * Try insert into `refMug`, then after `refMug`, then after each of
      * `refMug`'s ancestors.
      *
+     * @param refMug - Mug relative to which to insert.
+     * @param qType - Type of question being inserted.
+     * @param after - (optional) Try insert after instead of into `refMug`.
      * @returns - `{mug: <refMug>, position: <position>}` or, if there is
      *      no valid insert position for the given question type, `null`.
      *      Valid positions: before, after, first, last, into (same as last).
      *      In practice position will be one of `"last"` or `"after"`.
      */
-    fn.getInsertTargetAndPosition = function (refMug, qType) {
-        var parent, childTypes, position = 'last';
+    fn.getInsertTargetAndPosition = function (refMug, qType, after) {
+        var parent, childTypes, position = after ? 'after' : 'last';
         while (refMug) {
             if (position === 'after') {
                 parent = refMug.parentMug;
@@ -1442,8 +1426,8 @@ define([
                                 refMug.__className + " not implemented");
             }
         } else if (position !== "into" && position !== "first" && position !== "last") {
-            throw new Error("validation of insert " + position + " " +
-                            refMug.__className + " not implemented");
+            throw new Error("validation of insert " + position +
+                            " root node not implemented");
             //return false;
         }
         return typeData[parentType].valid_children.indexOf(type) !== -1;
@@ -1459,12 +1443,22 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
+        var _this = this;
+        mug.on("messages-changed", function (event) {
+            _this.setTreeValidationIcon(event.mug);
+        }, null, null, this.data.core);
         return this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
                 text: this.getMugDisplayName(mug),
                 type: mug.__className,
-                data: { mug: mug },
+                data: {
+                    mug: mug,
+                    handleDrop: function (target) {
+                        var path = _this.mugToXPathReference(mug);
+                        _this.handleDropFinish(target, path, mug);
+                    }
+                },
                 li_attr: {
                     id: mug.ufid,
                     rel: mug.__className
@@ -1482,7 +1476,11 @@ define([
     fn.getMugByPath = function (path) {
         return this.data.core.form.getMugByPath(path);
     };
-    
+
+    fn.setCurrentMug = function (mug) {
+        this.jstree("deselect_all", true).jstree('select_node', mug.ufid);
+    };
+
     fn.displayMugProperties = function (mug) {
         var $props = this.$f.find('.fd-question-properties'),
             _getWidgetClassAndOptions = function (property) {
@@ -1493,15 +1491,13 @@ define([
         /* update display */
         $props.animate({}, 200);
 
-        this.showContent();
-        this.hideQuestionProperties();
+        this.showContentRight();
+        $props.hide();
 
-        if (this._propertiesMug) {
-            this._propertiesMug.teardownProperties();
-        }
-        this._propertiesMug = mug;
+        this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),
-            sections = this.getSections(mug);
+            sections = this.getSections(mug),
+            $messages = $("<div class='messages' />");
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
@@ -1511,30 +1507,67 @@ define([
             section.properties = _(section.properties)
                 .map(_getWidgetClassAndOptions)
                 .filter(_.identity);
-           
+
             if (section.properties.length) {
-                this.getSectionDisplay(mug, section)
-                    .appendTo($content);
+                this.getSectionDisplay(mug, section).appendTo($content);
             }
         }
 
+        // Setup area for messages not associated with a property/widget.
+        if ($content.children().length) {
+            $messages.insertAfter($content.children().first());
+        } else {
+            $messages.appendTo($content);
+        }
+        function refreshMessages() {
+            $messages.empty().append(widgets.util.getMessages(mug, null));
+        }
+        mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
+        refreshMessages();
+
         $props.show();
-        this.$f.find('.fd-help').fdHelp();
+        this.adjustToWindow();
+        this.$f.find('.fd-help a').fdHelp();
 
         this.toggleConstraintItext(mug);
-        this.showVisualValidation(mug);
-    };
-        
-    fn.hideQuestionProperties = function() {
-        this.disableUI();
     };
 
-    fn.showContent = function () {
+    fn._setPropertiesMug = function (mug) {
+        if (this._propertiesMug) {
+            this._propertiesMug.teardownProperties();
+            try {
+                this._propertiesMug.validate();
+            } catch (err) {
+                // ignore error
+            }
+        }
+        this._propertiesMug = mug;
+    };
+
+    fn.displayMultipleSelectionView = function () {
+        var mugs = this.getCurrentlySelectedMug(true);
+        this.showContentRight();
+        this.hideQuestionProperties();
+        this._setPropertiesMug(null);
+        this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mugs, true));
+        this.$f.find(".fd-props-content").empty();
+        this.showQuestionProperties();
+    };
+
+    fn.showContentRight = function () {
         this.$f.find('.fd-content-right').show();
     };
 
-    fn.hideContent = function () {
+    fn.hideContentRight = function () {
         this.$f.find('.fd-content-right').hide();
+    };
+
+    fn.showQuestionProperties = function () {
+        this.$f.find('.fd-question-properties').show();
+    };
+
+    fn.hideQuestionProperties = function () {
+        this.$f.find('.fd-question-properties').hide();
     };
 
     /**
@@ -1554,9 +1587,9 @@ define([
         var _this = this,
             $editor = this.$f.find('.fd-xpath-editor');
 
-        $editor.find('.fd-head').text(options.headerText);
+        $editor.find('.fd-head h2').text(options.headerText);
         options.DEBUG_MODE = DEBUG_MODE;
-        this.disableUI();
+        this.hideQuestionProperties();
 
         var done = options.done;
         options.done = function (val) {
@@ -1567,7 +1600,7 @@ define([
                 _this.refreshCurrentMug();
             } else {
                 $editor.hide();
-                _this.enableUI();
+                _this.showQuestionProperties();
             }
         };
         var change = options.change;
@@ -1599,9 +1632,11 @@ define([
 
         var _this = this;
         this.data.core.isAlertVisible = true;
+        if (!buttons.length) {
+            buttons.push({title: "OK", defaultButton: true});
+        }
 
-        var $modal = this.generateNewModal(
-            title, buttons, buttons.length ? false : "OK");
+        var $modal = this.generateNewModal(title, buttons, false, "fa fa-warning");
 
         // store a reference to $modal on this so modal button actions can
         // reference it in order to hide it at the right point in time.  This is
@@ -1610,69 +1645,31 @@ define([
         this.data.core.$modal = $modal;
 
         $modal.removeClass('fade');
-        $modal.find('.modal-body')
-            .append($('<p />').text(message));
+        if (message instanceof $) {
+            $modal.find('.modal-body').append(message);
+        } else {
+            $modal.find('.modal-body').append($('<p />').text(message));
+        }
         $modal
             .modal('show')
-            .on('hide', function () {
+            .on('hide.bs.modal', function () {
                 _this.data.core.isAlertVisible = false;
             });
-    };
-
-    fn.showVisualValidation = function (mug) {
-        //function setValidationFailedIcon(li, showIcon, message) {
-            //var $li = $(li),
-                //exists = ($li.find('.fd-props-validate').length > 0);
-            //if (exists && showIcon) {
-                //$li.find('.fd-props-validate').attr("title", message).addClass("ui-icon");
-            //} else if (exists && !showIcon) {
-                //$li.find('.fd-props-validate').removeClass('ui-icon').attr("title", "");
-            //} else if (!exists && showIcon) {
-                //var icon = $('<span class="fd-props-validate ui-icon ui-icon-alert"></span>');
-                //icon.attr('title', message);
-                //$li.append(icon);
-            //}
-        //}
-
-        //function findInputByReference(blockName, elementName) {
-            // todo: make this work (it hasn't in a while)
-            //return $('#' + blockName + '-' + elementName);
-        //}
-
-        // for now form warnings get reset every time validation gets called.
-        this.data.core.form.clearErrors('form-warning');
-      
-        if (mug) {
-            this._resetMessages(
-                this.data.core.form.errors.concat(
-                    _.map(this.getErrors(mug), function (error) {
-                        return {
-                            message: error,
-                            level: "form-warning",
-                        };
-                    })));
-            this.setTreeValidationIcon(mug);
-        }
     };
 
     fn.setTreeValidationIcon = function (mug) {
         var node = mug.ufid && this.jstree("get_node", mug.ufid);
         if (node) {
-            var errors = this.getErrors(mug);
+            var errors = mug.getErrors();
             if (errors.length) {
-                var msg = errors.join("<p>").replace(/"/g, "'");
-                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
-                    'icon-exclamation-triangle" title="' + msg + '"></div>';
+                var msg = errors.join("\n").replace(/"/g, "'");
+                node.data.errors = '<i class="fd-tree-valid-alert-icon ' +
+                    'fa fa-warning" title="' + msg + '"></i>';
             } else {
                 node.data.errors = null;
             }
             this.jstree("redraw_node", node);
         }
-    };
-
-    fn.getErrors = function (mug) {
-        return mug.getErrors().concat(
-            this.data.core.form._logicManager.getErrors(mug));
     };
 
     fn._resetMessages = function (errors) {
@@ -1705,23 +1702,6 @@ define([
         }
     };
 
-    fn.warnOnCircularReference = function(property, form, mug, path, refName) {
-        if (path === "." && (
-            property === "relevantAttr" ||
-            property === "calculateAttr" ||
-            property === "label"
-        )) {
-            var fieldName = mug.p.getDefinition(property).lstring;
-            form.updateError({
-                level: "form-warning",
-                message: "The " + fieldName + " for a question " + 
-                    "is not allowed to reference the question itself. " + 
-                    "Please remove the " + refName + " from the " + fieldName +
-                    " or your form will have errors."
-            }, {updateUI: true});
-        }
-    };
-
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
             $sec = $(question_fieldset({
@@ -1733,9 +1713,7 @@ define([
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
             var elemWidget = prop.widget(mug, $.extend(prop.options, {
-                afterChange: function () {
-                    _this.showVisualValidation(mug);
-                },
+                vellum: _this,
                 displayXPathEditor: function (options) {
                     _this.data.core.currentlyEditedProperty = prop.options.path;
                     _this.displayXPathEditor(options);
@@ -1745,34 +1723,34 @@ define([
             elemWidget.on("change", function () {
                 _this.onFormChange(mug);
             });
-            $fieldsetContent.append(elemWidget.getUIElement());
+            var $ui = elemWidget.getUIElement();
+            widgets.util.setWidget($ui, elemWidget);
+            $fieldsetContent.append($ui);
+            elemWidget.refreshMessages();
         });
         return $sec;
     };
-        
-    fn.getMugToolbar = function (mug) {
-        var _this = this;
-        var $baseToolbar = $(question_toolbar({
-            isDeleteable: this.isMugRemoveable(mug,
-                    this.data.core.form.getAbsolutePath(mug)),
-            isCopyable: mug.options.isCopyable
-        }));
+
+    fn.getMugToolbar = function (mug, multiselect) {
+        var _this = this,
+            form = this.data.core.form,
+            mugs = multiselect ? mug : [mug],
+            $baseToolbar = $(question_toolbar({
+                comment: multiselect ? '' : mug.p.comment,
+                isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
+                    return _this.isMugRemoveable(mug, mug.hashtagPath);
+                }),
+                isCopyable: !multiselect && mug.options.isCopyable,
+            }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mug = _this.getCurrentlySelectedMug();
-            _this.data.core.form.removeMugFromForm(mug);
+            var mugs = _this.getCurrentlySelectedMug(true, true);
+            form.removeMugsFromForm(mugs);
+            _this.refreshCurrentMug();
         });
-        $baseToolbar.find('.fd-button-copy').click(function () {
-            _this.ensureCurrentMugIsSaved(function () {
-                var duplicate = _this.data.core.form.duplicateMug(
-                    _this.getCurrentlySelectedMug());
-
-                _this.jstree("deselect_all", true)
-                     .jstree("select_node", duplicate.ufid);
-            });
-        });
-        $baseToolbar.find('.btn-toolbar.pull-left')
-            .prepend(this.getQuestionTypeChanger(mug));
-
+        if (!multiselect) {
+            $baseToolbar.find('.btn-toolbar.pull-left')
+                .prepend(this.getQuestionTypeChanger(mug));
+        }
         return $baseToolbar;
     };
 
@@ -1801,8 +1779,7 @@ define([
             }
             return ret;
         };
-        var form = this.data.core.form,
-            changeable = this.isMugTypeChangeable(mug, form.getAbsolutePath(mug));
+        var changeable = this.isMugTypeChangeable(mug, mug.hashtagPath);
 
         var $questionTypeChanger = $(question_type_changer({
             currentQuestionIcon: mug.getIcon(),
@@ -1829,17 +1806,53 @@ define([
         return this.data.core.form.createXML();
     };
 
-    fn.validateAndSaveXForm = function (forceFullSave) {
+    fn.canSerializeXForm = function (forAction, retry) {
         var _this = this,
-            formText = this.createXML(),
-            isValidXML = true;
+            form = this.data.core.form,
+            displayLanguage = this.data.core.currentItextDisplayLanguage,
+            warnings = form.getSerializationWarnings();
+        if (warnings.length) {
+            var message = $(form_errors_template({
+                    errors: warnings,
+                    displayLanguage: displayLanguage
+                }));
+            forAction = forAction ? " and " + forAction : "";
+            this.alert("There are errors in the form", message, [
+                {
+                    title: "Fix Manually",
+                    action: function () {
+                        _this.data.core.$modal.modal('hide');
+                    }
+                }, {
+                    title: "Fix Automatically" + forAction,
+                    cssClasses: 'btn-primary',
+                    defaultButton: true,
+                    action: function () {
+                        form.fixSerializationWarnings(warnings);
+                        _this.data.core.$modal.modal('hide');
+                        retry();
+                        _this.refreshVisibleData();
+                    }
+                }
+            ]);
+            return false;
+        }
+        return true;
+    };
 
+    fn.validateAndSaveXForm = function (forceFullSave) {
+        function retry() {
+            _this.validateAndSaveXForm(forceFullSave);
+        }
+        var _this = this;
+        if (!this.canSerializeXForm("Save", retry)) {
+            return; // validate/create XML failed
+        }
+        var formText = this.createXML();
         try {
             // ensure that form is valid XML; throws an error if not
             $.parseXML(formText);
         } catch (err) {
-            isValidXML = false;
-            formText = false;
             // something went wrong parsing, but maybe the user wants to save anyway
             // let's ask them with a scary message encouraging them not to.
             var theScaryWarning = "It looks like your form is not valid XML. This can " +
@@ -1847,21 +1860,29 @@ define([
                 "Characters to look out for are <, >, and &. You can still save, but " +
                 "you CANNOT LOAD THIS FORM again until you fix the XML by hand. " +
                 "What would you like to do?";
-            _this.setDialogInfo(theScaryWarning,
-                'Fix the problem (recommended)', function () {
-                    $(this).dialog("close");
+            var $modal = _this.generateNewModal("Form Validation Error", [
+                {
+                    title: 'Fix the problem (recommended)',
+                    cssClasses: "btn-primary",
+                    action: function() {
+                        _this.closeModal();
+                    },
                 },
-                'Save anyway', function () {
-                    $(this).dialog("close");
-                    _this.send(formText, forceFullSave ? 'full' : null);
+                {
+                    title: 'Save anyway',
+                    cssClasses: "btn-default",
+                    action: function() {
+                        _this.closeModal();
+                        _this.send(formText, forceFullSave ? 'full' : null);
+                    },
                 },
-                'Form Validation Error');
-            this._showConfirmDialog();
+            ], false, "fa fa-warning");
+            $modal.find(".modal-body").html(theScaryWarning);
+            $modal.modal('show');
+            return;
         }
 
-        if (isValidXML) {
-            this.send(formText, forceFullSave ? 'full' : null);
-        }
+        this.send(formText, forceFullSave ? 'full' : null);
     };
         
     fn.send = function (formText, saveType) {
@@ -1873,12 +1894,7 @@ define([
 
         var url = saveType === 'patch' ?  opts.patchUrl : opts.saveUrl;
 
-        $(document).ajaxStart(function () {
-            _this.showWaitingDialog();
-        });
-        $(document).ajaxStop(function () {
-            _this._hideConfirmDialog();
-        });
+        showPageSpinner();
 
         if (saveType === 'patch') {
             var diff_match_patch = require('diff-match-patch'),
@@ -1902,11 +1918,16 @@ define([
             data = {xform: formText};
         }
 
+        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+
         this.data.core.saveButton.ajax({
             type: "POST",
             url: url,
             data: data,
             dataType: 'json',
+            error: function() {
+                hidePageSpinner();
+            },
             success: function (data) {
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
@@ -1914,7 +1935,7 @@ define([
                             // unconditionally overwrite if no xform to compare
                             _this.send(formText, 'full');
                         } else {
-                            _this._hideConfirmDialog();
+                            hidePageSpinner();
                             _this.showOverwriteWarning(_this.send.bind(_this),
                                                        formText, data.xform);
                         }
@@ -1924,41 +1945,11 @@ define([
                         _this.send(formText, 'full');
                     }
                 }
-                _this._hideConfirmDialog();
+                hidePageSpinner();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
             }
         });
-    };
-
-    fn.showWaitingDialog = function (msg) {
-        var dial = $('.fd-dialog-confirm'), contentStr;
-        if (!msg || typeof msg !== 'string') {
-            msg = 'Saving form to server...';
-        }
-        dial.empty();
-        dial.dialog("destroy");
-        dial.dialog({
-            modal: true,
-            autoOpen: false,
-            buttons : {},
-            closeOnEscape: false,
-            open: function(event) {
-                // where in the DOM are these?
-                $(".ui-dialog-titlebar-close").hide();
-            },
-            close: function(event) {
-                $(".ui-dialog-titlebar-close").show();
-            },
-            title: "Processing..."
-        });
-        contentStr = '<p><span class="fd-message">' + msg + 
-            '</span><div class="fd-form-saving-anim"></div></p>';
-        dial.append(contentStr);
-        dial.find('.fd-form-saving-anim').append(
-            '<span class="fd-form-saving-img"></span>');
-
-        this._showConfirmDialog();
     };
 
     fn.getSections = function (mug) {
@@ -1972,8 +1963,7 @@ define([
                     text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
                         "It does not appear on the phone. It is the name of the question in data exports.</p>" +
                         "<p>The <strong>Label</strong> is text that appears in the application. " +
-                        "This text will not appear in data exports.</p> " +
-                        "<p>Click through for more info.</p>",
+                        "This text will not appear in data exports.</p> ",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
@@ -2030,16 +2020,15 @@ define([
     fn.getMainProperties = function () {
         return [
             "nodeID",
-            "defaultValue",
             "label",
-            "readOnlyControl"
+            "readOnlyControl",
+            "itemsetData",
+            "imageSize",
         ];
     };
 
     fn.getDataSourceProperties = function () {
-        return [
-            "itemsetData"
-        ];
+        return [ ];
     };
 
     fn.getMediaProperties = function () {
@@ -2054,7 +2043,8 @@ define([
             "requiredAttr",
             "relevantAttr",
             "constraintAttr",
-            "repeat_count"
+            "repeat_count",
+            'defaultValue',
         ];
     };
 
@@ -2067,7 +2057,8 @@ define([
             "hintLabel",
             "constraintMsgAttr",
             "dataParent",
-            'appearance'
+            'appearance',
+            'comment',
         ];
     };
 
@@ -2102,15 +2093,19 @@ define([
         return mug.options.isTypeChangeable;
     };
 
-    fn.handleMugRename = function (form, mug, val, previous, currentPath, oldPath) {
-        form.handleMugRename(mug, val, previous, currentPath, oldPath);
+    fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
+        form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
     };
 
     fn.duplicateMugProperties = function(mug) {};
 
     fn.beforeSerialize = function () {};
-
     fn.afterSerialize = function () {};
+
+    fn.beforeBulkInsert = function (form) {};
+    fn.afterBulkInsert = function (form) {
+        this.refreshVisibleData();
+    };
 
     fn.parseDataElement = function (form, el, parentMug, role) {
         return parser.parseDataElement(form, el, parentMug, role);
@@ -2118,6 +2113,10 @@ define([
 
     fn.parseBindElement = function (form, el, path) {
         return parser.parseBindElement(form, el, path);
+    };
+
+    fn.parseSetValue = function (form, el, path) {
+        return parser.parseSetValue(form, el, path);
     };
 
     fn.getControlNodeAdaptorFactory = function (tagName) {
@@ -2159,9 +2158,11 @@ define([
      */
     fn.updateControlNodeAdaptorMap = function (map) {};
 
-    fn.contributeToModelXML = function (xmlWriter) {};
+    fn.contributeToModelXML = function (xmlWriter, form) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
+
+    fn.addAutocomplete = function (input, form, options) {};
 
     fn.initWidget = function (widget) {};
 

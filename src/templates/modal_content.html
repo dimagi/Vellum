@@ -1,13 +1,24 @@
-<div class="modal hide fade">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3><%=title%></h3>
-    </div>
-    <div class="modal-body form form-horizontal">
-    </div>
-    <div class="modal-footer">
-        <% if (closeButtonTitle) { %>
-        <button class="btn" data-dismiss="modal" aria-hidden="true"><%=closeButtonTitle%></button>
-        <% } %>
+<div class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">
+                    <% if (headerIcon) { %>
+                        <i class="<%=headerIcon%>"></i>
+                    <% } %>
+                    <%=title%>
+                </h4>
+            </div>
+            <div class="modal-body form form-horizontal">
+            </div>
+            <div class="modal-footer">
+                <% if (closeButtonTitle) { %>
+                <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">
+                    <%=closeButtonTitle%>
+                </button>
+                <% } %>
+            </div>
+        </div>
     </div>
 </div>

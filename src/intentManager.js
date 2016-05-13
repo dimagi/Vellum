@@ -1,3 +1,14 @@
+/*
+ * Android app callout module
+ *
+ * Can be either templated or custom.
+ *
+ * Templated means that there is only a dropdown, options are defined by
+ * the options passed in to the vellum instance
+ *
+ * Custom intents has the same dropdown, but also has an input used to define
+ * an app id
+ */
 define([
     'vellum/mugs',
     'vellum/widgets',
@@ -13,229 +24,276 @@ define([
     $
 ) {
     "use strict";
-    function makeODKXIntentTag (form, nodeID, path) {
-        return new ODKXIntentTag(form, {
-            path: path || "",
-            xmlns: "http://opendatakit.org/xforms",
-            extra: {},
-            response: {},
+    var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
+        INTENT_SPECIFIC_SPECS = [
+            "androidIntentAppId",
+            "docTemplate",
+            "androidIntentExtra",
+            "androidIntentResponse",
+            "unknownAttributes",
+            "intentXmlns",
+        ],
+        intentTemplates;
+
+    function makeODKXIntentTag (nodeID, appID) {
+        return {
+            androidIntentAppId: appID || "",
+            intentXmlns: DEFAULT_XMLNS,
+            androidIntentExtra: {},
+            androidIntentResponse: {},
             unknownAttributes: {},
-            initialNodeID: nodeID
-        });
+            nodeID: nodeID
+        };
     }
-    function ODKXIntentTag(form, data) {
-        util.BoundPropertyMap.call(this, form, data);
+
+    function intentAppIdWidget(mug, options) {
+        options.defaultOptions = intentTemplates;
+
+        var features = options.vellum.opts().features,
+            widget;
+
+        if (noIntents(features) || onlyTemplatedIntents(features)) {
+            widget = widgets.dropdown(mug, options);
+        } else {
+            widget = widgets.dropdownWithInput(mug, options);
+        }
+
+        return widget;
     }
-    ODKXIntentTag.prototype = Object.create(util.BoundPropertyMap.prototype);
-    ODKXIntentTag.prototype.clone = function () {
-        return new ODKXIntentTag(this._form, this._data);
-    };
+
     var parseInnerTags = function (tagObj, innerTag) {
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
-            var $innerTag = $(inner);
-            store[$innerTag.attr('key')] = $innerTag.attr('ref');
+            var $innerTag = $(inner),
+                key = $innerTag.attr('key'),
+                value;
+            value = $innerTag.attr('ref');
+            if (store.hasOwnProperty(key)) {
+                if (_.isArray(store[key])) {
+                    store[key].push(value);
+                } else {
+                    store[key] = [store[key], value];
+                }
+            } else {
+                store[key] = value;
+            }
         });
         return store;
     };
+
     var writeInnerTagXML = function(xmlWriter, innerTag, store) {
         if (store) {
             _.each(store, function (ref, key) {
                 if (key) {
-                    xmlWriter.writeStartElement(innerTag);
-                    xmlWriter.writeAttributeString("key", key);
-                    xmlWriter.writeAttributeString("ref", ref);
-                    xmlWriter.writeEndElement();
+                    _.each(_.isArray(ref) ? ref : [ref], function (ref) {
+                        xmlWriter.writeStartElement(innerTag);
+                        xmlWriter.writeAttributeString("key", key);
+                        xmlWriter.writeAttributeString("ref", ref);
+                        xmlWriter.writeEndElement();
+                    });
                 }
             });
         }
     };
-    ODKXIntentTag.prototype.writeXML = function (xmlWriter, currentNodeID) {
+
+    function writeXML(xmlWriter, properties) {
         xmlWriter.writeStartElement('odkx:intent');
-        xmlWriter.writeAttributeString("xmlns:odkx", this.getAttr('xmlns'));
-        xmlWriter.writeAttributeString("id", currentNodeID || this.getAttr('initialNodeID'));
-        xmlWriter.writeAttributeString("class", this.getAttr('path'));
-        _.each(this.getAttr('unknownAttributes'), function (value, name) {
+        xmlWriter.writeAttributeString("xmlns:odkx", properties.intentXmlns);
+        xmlWriter.writeAttributeString("id", properties.nodeID);
+        xmlWriter.writeAttributeString("class", properties.androidIntentAppId);
+        _.each(properties.unknownAttributes, function (value, name) {
             xmlWriter.writeAttributeString(name, value);
         });
-        writeInnerTagXML(xmlWriter, 'extra', this.getAttr('extra'));
-        writeInnerTagXML(xmlWriter, 'response', this.getAttr('response'));
+        writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
+        if (properties.docTemplate) {
+            writeInnerTagXML(xmlWriter, 'extra', {
+                'cc:print_template_reference': "'" + properties.docTemplate + "'"
+            });
+        }
+        writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse);
         xmlWriter.writeEndElement('odkx:intent');
-    };
+    }
 
-    var intentManager = function () {
-        var that = {};
-        that.unmappedIntentTags = {};
+    function parseIntentTags(tags) {
+        var intentTags = {};
 
-        that.parseIntentTagsFromHead = function (tags) {
-            _.each(tags, function (tagXML) {
-                var $tag, tagId, newTag, xmlns;
-                $tag = $(tagXML);
+        _.each(tags, function (tagXML) {
+            var $tag, tagId, newTag;
+            $tag = $(tagXML);
 
-                tagId = $tag.attr('id');
-                newTag = makeODKXIntentTag(null, tagId, $tag.attr('class'));
+            tagId = $tag.attr('id');
+            newTag = makeODKXIntentTag(tagId, $tag.attr('class'));
 
-                xmlns = $tag.attr('xmlns:odkx');
-                newTag.setAttr('xmlns', xmlns || newTag.getAttr('xmlns'));
-                newTag.setAttr('extra', parseInnerTags($tag, 'extra'));
-                newTag.setAttr('response', parseInnerTags($tag, 'response'));
-                var unknowns = newTag.getAttr('unknownAttributes');
-                _.each(tagXML.attributes, function (attr) {
-                    if (attr.nodeName !== 'id' &&
-                        attr.nodeName !== 'class' &&
-                        attr.nodeName !== 'xmlns:odkx')
-                    {
-                        unknowns[attr.nodeName] = attr.nodeValue;
-                    }
-                });
-                that.unmappedIntentTags[tagId] = newTag;
-            });
-        };
+            newTag.xmlns = $tag.attr('xmlns:odkx') || newTag.intentXmlns;
+            newTag.androidIntentExtra = parseInnerTags($tag, 'extra');
+            newTag.androidIntentResponse = parseInnerTags($tag, 'response');
 
-        that.getParsedIntentTagWithID = function (nodeID) {
-            var intentTag = null;
-            _.each(that.unmappedIntentTags, function (tag) {
-                if (tag.getAttr('initialNodeID') === nodeID) {
-                    intentTag = tag;
+            _.chain(tagXML.attributes)
+             .filter(function(attr) {
+                 return !_.contains(['id', 'class', 'xmlns:odk'], attr.nodeName);
+             })
+             .each(function(attr) {
+                 newTag.unknownAttributes[attr.nodeName] = attr.nodeValue;
+             });
+
+            intentTags[tagId] = newTag;
+        });
+
+        return intentTags;
+    }
+
+    function syncMugWithIntent (tags, mug) {
+        // called when initializing a mug from a parsed form
+        if (mug.__className === "AndroidIntent" ||
+            mug.__className === "PrintIntent") {
+            var nodeID = mug.p.nodeID,
+                tag = tags.hasOwnProperty(nodeID) ? tags[nodeID] : makeODKXIntentTag(nodeID);
+
+            _.each(INTENT_SPECIFIC_SPECS, function (key) {
+                if (!mug.p[key]) {
+                    mug.p[key] = tag[key];
                 }
             });
-            return intentTag;
-        };
 
-        that.syncMugWithIntent = function (mug) {
-            // called when initializing a mug from a parsed form
-            if (mug.__className === "AndroidIntent") {
-                var nodeID = mug.p.nodeID,
-                    tag = that.getParsedIntentTagWithID(nodeID);
-                if (!tag) {
-                    var path = (mug.intentTag) ? mug.intentTag.getAttr('path') : null;
-                    tag = makeODKXIntentTag(mug.form, nodeID, path);
-                }
-                mug.intentTag = tag;
-                mug.intentTag._form = mug.form;
-                delete that.unmappedIntentTags[tag.getAttr('initialNodeID')];
+            delete tags[tag.nodeID];
+        }
+
+        if (mug.p.androidIntentAppId === "org.commcare.dalvik.action.PRINT") {
+            mug.form.changeMugType(mug, 'PrintIntent');
+        } else if (!mug.p.androidIntentAppId) {
+            mug.p.androidIntentAppId = intentTemplates[0].value;
+        }
+
+        if (mug.__className === "PrintIntent") {
+            if (mug.p.androidIntentExtra['cc:print_template_reference']) {
+                mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'].replace(/^'|'$/g, '');
+                delete mug.p.androidIntentExtra['cc:print_template_reference'];
+            } else {
+                mug.p.docTemplate = "jr://file/commcare/text/" + mug.p.nodeID+ ".html";
             }
-        };
+        }
+    }
 
-        that.writeIntentXML = function (xmlWriter, tree) {
-            // make sure any leftover intent tags are still kept
-            _.each(that.unmappedIntentTags, function (tag) {
-               tag.writeXML(xmlWriter, null);
+    function writeIntentXML (unmappedIntentTags, xmlWriter, tree) {
+        // make sure any leftover intent tags are still kept
+        _.each(unmappedIntentTags, function (tag) {
+            writeXML(xmlWriter, tag);
+        });
+
+        tree.treeMap(function(node) {
+            var mug = node.getValue();
+            if (mug && mug.options.dataType === 'intent') {
+                writeXML(xmlWriter, mug.p);
+            }
+        });
+    }
+
+    function serializeAttrs(value, key, mug, data) {
+        data[key] = _.clone(mug.p[key]);
+        if (data[key][""] === "") {
+            delete data[key][""];
+        }
+    }
+
+    function parseFields (html) {
+        var field_regex = /{{\s*([^}\s]+)\s*}}/gm,
+            match = field_regex.exec(html),
+            fields = {};
+
+        while (match) {
+            _.each(match.splice(1), function(field) {
+                fields[field] = field;
             });
+            match = field_regex.exec(html);
+        }
 
-            var intents,
-                getIntentMugs = function(node) {
-                    var mug = node.getValue();
-                    if (!mug || node.isRootNode) {
-                        return null;
-                    }
-                    if (mug.options.dataType === 'intent') {
-                        return mug;
-                    } else {
-                        return null;
-                    }
-                };
-            intents = tree.treeMap(getIntentMugs);
-            if (intents.length > 0) {
-                intents.map(function (intentMug) {
-                    intentMug.intentTag.writeXML(
-                        xmlWriter, intentMug.p.nodeID);
-                });
-            }
-        };
-        return that;
-    };
-    
-    function androidIntentAppId(mug, options) {
-        options.id = "intent-app-id";
-        var widget = widgets.base(mug, options);
-
-        widget.definition = mug.p.getDefinition('androidIntentAppId');
-        widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('path') : "";
-        
-        var input = $("<input />")
-            .attr("name", widget.id)
-            .attr("type", "text")
-            .attr('placeholder', 'Insert Android Application ID');
-
-        widget.getControl = function () {
-            if (widget.isDisabled()) {
-                input.prop('disabled', true);
-            }
-            return input;
-        };
-
-        widget.setValue = function (value) {
-            input.val(value);
-        };
-
-        widget.getValue = function() {
-            return input.val();
-        };
-
-        widget.updateValue = function () {
-            widget.mug.intentTag.setAttr('path', widget.getValue());
-        };
-
-        input.bind("change keyup", widget.updateValue);
-        return widget;
+        return fields;
     }
 
-    function androidIntentExtra(mug, options) {
-        options.id = "intent-extra";
-        var widget = widgets.baseKeyValue(mug, options);
-        widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('extra') : {};
-        widget.definition = mug.p.getDefinition('androidIntentExtra');
-
-        widget.save = function () {
-            if (widget.mug.intentTag) {
-                widget.mug.intentTag.setAttr('extra', widget.getValidValues());
-            }
-        };
-
-        return widget;
-    }
-
-    function androidIntentResponse(mug, options) {
-        options.id = "intent-response";
-        var widget = widgets.baseKeyValue(mug, options);
-        widget.currentValue = (mug.intentTag) ? mug.intentTag.getAttr('response') : {};
-        widget.definition = mug.p.getDefinition('androidIntentResponse');
-
-        widget.save = function () {
-            if (widget.mug.intentTag) {
-                widget.mug.intentTag.setAttr('response', widget.getValidValues());
-            }
-        };
-
-        return widget;
-    }
-    
     var AndroidIntent = util.extend(mugs.defaultOptions, {
         typeName: 'Android App Callout',
         dataType: 'intent',
         tagName: 'input',
-        icon: 'icon-vellum-android-intent',
-        isODKOnly: true,
+        icon: 'fcc fcc-fd-android-intent',
         isTypeChangeable: false,
-        intentTag: null,
         init: function (mug, form) {
+            mug.p.intentXmlns = mug.p.intentXmlns || DEFAULT_XMLNS;
         },
         spec: {
             androidIntentAppId: {
-                lstring: 'Intent ID',
+                lstring: 'External App',
                 visibility: 'visible',
-                widget: androidIntentAppId
+                widget: intentAppIdWidget,
+                noCustom: true,
+                placeholder: 'Insert Android Application ID',
+                deserialize: function (data, key, mug) {
+                    if (data.intent) {
+                        // support old format for now
+                        mug.p.androidIntentAppId = data.intent.path || "";
+                        _.each([
+                            ["intentXmlns", "xmlns"],
+                            ["androidIntentExtra", "extra"],
+                            ["androidIntentResponse", "response"],
+                            ["unknownAttributes", "unknownAttributes"],
+                        ], function (keys) {
+                            var attr = keys[0], key = keys[1];
+                            if (!_.isEmpty(data.intent[key])) {
+                                mug.p[attr] = data.intent[key];
+                            }
+                        });
+                    } else {
+                        mug.p[key] = data[key];
+                    }
+                },
+                validationFunc: function (mug) {
+                    function valueNotInIntentTemplates (val) {
+                        return _.chain(intentTemplates)
+                                .map(function(template) { return template.value; })
+                                .find(function(appId) { return appId === val; })
+                                .isUndefined()
+                                .value();
+                    }
+                    var opts = mug.form.vellum.opts(),
+                        features = opts.features,
+                        link = opts.core.externalLinks.changeSubscription,
+                        text = link ? "[change your subscription](" + link + ")" : "change your subscription";
+                    if (noIntents(features)) {
+                        return "You no longer have access to built in or external integration in your application.\n\n" +
+                            "Built in integrations are available on the Pro plan and higher. " +
+                            "External integrations are available on the Advanced plan and higher. " +
+                            "Before you can make a new version of your application, " +
+                            "you must " + text + " or delete this question.";
+                    } else if (onlyTemplatedIntents(features) &&
+                               valueNotInIntentTemplates(mug.p.androidIntentAppId)) {
+                         return "Your subscription only has access to built-in integration.\n\n" +
+                             "External integrations are available on the Advanced plan and higher. " +
+                             "Before you can make a new version of your application, " +
+                             "you must " + text + " or delete this question.";
+                    }
+                    return 'pass';
+                },
             },
             androidIntentExtra: {
                 lstring: 'Extra',
                 visibility: 'visible',
-                widget: androidIntentExtra
+                widget: widgets.baseKeyValue,
+                serialize: serializeAttrs,
             },
             androidIntentResponse: {
                 lstring: 'Response',
                 visibility: 'visible',
-                widget: androidIntentResponse
+                widget: widgets.baseKeyValue,
+                serialize: serializeAttrs,
+            },
+            unknownAttributes: {
+                visibility: 'hidden',
+                presence: 'optional',
+                serialize: serializeAttrs,
+            },
+            intentXmlns: {
+                visibility: 'hidden',
+                presence: 'optional',
+                lstring: "Special Intent XMLNS attribute",
             }
         },
         // todo: move to spec system
@@ -244,40 +302,89 @@ define([
         }
     });
 
-    $.vellum.plugin("intents", {}, {
-        loadXML: function (xml) {
-            var manager = intentManager(null);
-            this.data.intents.manager = manager;
-            this.data.intents.manager.parseIntentTagsFromHead(
-                $(xml).find('h\\:head, head')
-                    .children("odkx\\:intent, intent"));
+    var PrintIntent = util.extend(AndroidIntent, {
+        typeName: 'Print',
+        icon: 'fa fa-print',
+        init: function (mug, form) {
+            AndroidIntent.init(mug, form);
+            mug.p.androidIntentAppId = "org.commcare.dalvik.action.PRINT";
+        },
+        spec: {
+            docTemplate: {
+                lstring: 'Document Template',
+                visibility: 'visible',
+                widget: widgets.media,
+            },
+            androidIntentAppId: { visibility: 'hidden' },
+        }
+    });
 
+    function noIntents(features) {
+        return !features.custom_intents && !features.templated_intents;
+    }
+
+    function onlyTemplatedIntents(features) {
+        return features.templated_intents && !features.custom_intents;
+    }
+
+    function intents(features) {
+        return !noIntents(features);
+    }
+
+    $.vellum.plugin("intents", {}, {
+        init: function() {
+            var opts = this.opts().intents;
+            intentTemplates = _.map(opts && opts.templates, function (temp) {
+                return {value: temp.id, text: temp.name};
+            });
+        },
+        loadXML: function (xml) {
+            this.data.intents.unmappedIntentTags = parseIntentTags(
+                $(xml).find('h\\:head, head').children("odkx\\:intent, intent")
+            );
             this.__callOld();
         },
         contributeToHeadXML: function (xmlWriter, form) {
             this.__callOld();
-            this.data.intents.manager.writeIntentXML(xmlWriter, form.tree);
+            writeIntentXML(this.data.intents.unmappedIntentTags, xmlWriter, form.tree);
         },
         handleNewMug: function (mug) {
             var ret = this.__callOld();
-            this.data.intents.manager.syncMugWithIntent(mug);
+            syncMugWithIntent(this.data.intents.unmappedIntentTags, mug);
             return ret;
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
-            this.data.intents.manager.syncMugWithIntent(mug);
+            syncMugWithIntent(this.data.intents.unmappedIntentTags, mug);
         },
         getMugTypes: function () {
             var types = this.__callOld();
             types.normal.AndroidIntent = AndroidIntent;
+            types.normal.PrintIntent = PrintIntent;
             return types;
         },
+        getAdvancedQuestions: function () {
+            var ret = this.__callOld();
+            if (intents(this.opts().features)) {
+                ret.push("AndroidIntent");
+                if (this.opts().features.printing) {
+                    ret.push("PrintIntent");
+                }
+            }
+            return ret;
+        },
         getMainProperties: function () {
-            return this.__callOld().concat([
-                "androidIntentAppId",
-                "androidIntentExtra",
-                "androidIntentResponse"
-            ]);
-        }
+            var ret = this.__callOld().concat(INTENT_SPECIFIC_SPECS);
+            if (onlyTemplatedIntents(this.opts().features)) {
+                ret = _.without(ret, "androidIntentExtra", "androidIntentResponse");
+            }
+            return ret;
+        },
     });
+
+    return {
+        test: {
+            parseFields: parseFields,
+        }
+    };
 });

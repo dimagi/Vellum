@@ -1,52 +1,143 @@
 define([
-    'vellum/util',
-    'xpath',
-    'xpathmodels',
+    'jquery',
     'underscore'
 ], function (
-    util,
-    xpath,
-    xpathmodels,
+    $,
     _
 ) {
-    function LogicExpression (exprText) {
+    var XPATH_REFERENCES = [
+            "relevantAttr",
+            "calculateAttr",
+            "constraintAttr",
+            "dataParent",
+            "repeat_count",
+            "filter",
+            "defaultValue"
+        ],
+        NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
+
+    function LogicExpression (exprText, xpathParser) {
         this._text = exprText || "";
-        
-        this.valid = false;
-        if (exprText) {
+        this._xpathParser = xpathParser;
+        if ($.trim(exprText)) {
             try {
-                this.parsed = xpath.parse(exprText);
-                this.valid = true;
+                this.parsed = this._xpathParser.parse(exprText);
             } catch (err) {
-                // nothing to do
+                this.parsed = null;
+                this.error = err;
             }
         } else {
-            this.empty = true;
+            this.parsed = null;
         }
     }
     LogicExpression.prototype = {
-        getPaths: function () {
-            var paths = [];
+        analyze: function () {
+            var paths = [],
+                absolutePaths = [],
+                topLevelPaths = [],
+                hashtags = [],
+                ROOT = this._xpathParser.models.XPathInitialContextEnum.ROOT,
+                RELATIVE = this._xpathParser.models.XPathInitialContextEnum.RELATIVE,
+                EXPR = this._xpathParser.models.XPathInitialContextEnum.EXPR,
+                predicates;
+            this.paths = paths;
+            this.absolutePaths = absolutePaths;
+            this.hashtags = hashtags;
+            this.instanceRefs = {};
+            this.referencesSelf = false;
+            this.topLevelPaths = topLevelPaths;
             if (this.parsed) {
-                var queue = [this.parsed], 
-                    node, i, children;
+                var queue = [{xpath: this.parsed, insideFilter: false}],
+                    node, i, children, j, k, insideFilter;
                 while (queue.length > 0) {
-                    node = queue.shift();
-                    if (node instanceof xpathmodels.XPathPathExpr) {
+                    k = queue.shift();
+                    node = k.xpath;
+                    insideFilter = k.insideFilter;
+                    if (node instanceof this._xpathParser.models.XPathPathExpr) {
                         paths.push(node);
+                        if (!insideFilter) {
+                            topLevelPaths.push(node);
+                        }
+
+                        insideFilter = true;
+
+                        if (node.initial_context === ROOT) {
+                            absolutePaths.push(node);
+                        } else if (node.initial_context === RELATIVE &&
+                                   node.steps.length === 1 &&
+                                   node.steps[0].axis === 'self') {
+                            this.referencesSelf = true;
+                        } else if (node.initial_context === EXPR) {
+                            if (!this._addInstanceRef(node.filter.expr)) {
+                                queue.push({
+                                    xpath: node.filter.expr,
+                                    insideFilter: insideFilter
+                                });
+                            }
+                            predicates = node.filter.predicates;
+                            for (i = 0; i < predicates.length; i++) {
+                                queue.push({
+                                    xpath: predicates[i],
+                                    insideFilter: insideFilter
+                                });
+                            }
+                        }
+                    } else if (node instanceof this._xpathParser.models.XPathFuncExpr) {
+                        this._addInstanceRef(node);
+                    } else if (node instanceof this._xpathParser.models.HashtagExpr) {
+                        hashtags.push(node);
                     }
                     children = node.getChildren();
                     for (i = 0; i < children.length; i++) {
-                        queue.push(children[i]);
+                        queue.push({
+                            xpath: children[i],
+                            insideFilter: insideFilter
+                        });
+                        if (children[i].predicates && children[i].predicates.length) {
+                            predicates = children[i].predicates;
+                            for (j = 0; j < predicates.length; j++) {
+                                queue.push({
+                                    xpath: predicates[j],
+                                    insideFilter: insideFilter
+                                });
+                            }
+                        }
                     }
                 }
             }
-            return paths;
+        },
+        _addInstanceRef: function (expr) {
+            if (expr.id === "instance" && expr.args.length === 1 &&
+                    expr.args[0] instanceof this._xpathParser.models.XPathStringLiteral) {
+                var id = expr.args[0].value;
+                this.instanceRefs[id] = null;
+                return true;
+            }
+            return false;
+        },
+        getPaths: function () {
+            if (!this.paths) {
+                this.analyze();
+            }
+            return this.paths;
+        },
+        getTopLevelPaths: function () {
+            if (!this.topLevelPaths) {
+                this.analyze();
+            }
+            return this.topLevelPaths;
+        },
+        getHashtags: function () {
+            if (!this.hashtags) {
+                this.analyze();
+            }
+            return this.hashtags;
         },
         updatePath: function (from, to) {
             var paths = this.getPaths(),
-                path;
-            
+                hashtags = this.getHashtags(),
+                path, i;
+
             var replacePathInfo = function (source, destination) {
                 // copies information from source to destination in place,
                 // resulting in mutating destination while preserving the 
@@ -56,16 +147,22 @@ define([
                 destination.filter = source.filter;
             };
             
-            for (var i = 0; i < paths.length; i++) {
+            for (i = 0; i < paths.length; i++) {
                 path = paths[i];
-                if (path.toXPath() === from) {
-                    replacePathInfo(xpath.parse(to), path);
+                if (path.toHashtag() === from) {
+                    replacePathInfo(this._xpathParser.parse(to), path);
+                }
+            }
+            for (i = 0; i < hashtags.length; i++) {
+                path = hashtags[i];
+                if (path.toHashtag() === from) {
+                    replacePathInfo(this._xpathParser.parse(to), path);
                 }
             }
         },
         getText: function () {
-            if (this.valid) {
-                return this.parsed.toXPath();
+            if (this._text && this.parsed) {
+                return this.parsed.toEscapedHashtag();
             } else {
                 return this._text;
             }
@@ -82,76 +179,112 @@ define([
     }
 
     LogicManager.prototype = {
-        getErrors: function (mug) {
-            return _.pluck(
-                _.values(this.errors[mug.ufid] || {}), 'message');
-        },
         clearReferences: function (mug, property) {
+            mug.form.dropAllInstanceReferences(mug, property, true);
             this.all = this.all.filter(function (elem) { 
                 return elem.mug !== mug.ufid || elem.property !== property;
             });
         },
-        addReferences: function (mug, property) {
-            // get absolute paths from mug property's value
+        _addReferences: function (mug, property, value) {
             var _this = this,
-                expr = new LogicExpression(mug.p[property]),
-                paths = expr.getPaths().filter(function (p) {
-                    // currently we don't do anything with relative paths
-                    return p.initial_context ===
-                        xpathmodels.XPathInitialContextEnum.ROOT; 
-                }),
-                error = {
-                    level: "form-warning",
-                    key: mug.ufid + "-" + property + "-badpath",
-                    message: []
-                };
+                form = _this.form,
+                expr = new LogicExpression(value || mug.p[property], form.xpath),
+                unknowns = [],
+                messages = [],
+                warning = "",
+                propertyName = mug.spec[property] ? mug.spec[property].lstring : property;
+
+            expr.analyze();
+            if (expr.referencesSelf && _.contains(NO_SELF_REFERENCES, property)) {
+                warning = "The " + propertyName + " for a question " +
+                    "is not allowed to reference the question itself. " +
+                    "Please remove the . from the " +
+                    propertyName +" or your form will have errors.";
+            }
+
+            messages.push({
+                key: "core-circular-reference-warning",
+                level: mug.WARNING,
+                message: warning
+            });
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
-            this.all = this.all.concat(paths.map(function (path) {
-                var pathString = path.pathWithoutPredicates(),
-                    pathWithoutRoot = pathString.substring(1 + pathString.indexOf('/', 1)),
-                    refMug = _this.form.getMugByPath(pathString);
+            this.all = this.all.concat(expr.absolutePaths.concat(expr.hashtags).map(function (path) {
+                var isHashtag = path.toHashtag().startsWith('#'),
+                    pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
+                    pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
+                    refMug = form.getMugByPath(pathString),
+                    xpath = path.toHashtag(),
+                    knownHashtag = isCaseReference(pathString) && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
-                if (!refMug &&
+                if ((!refMug && !knownHashtag) &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
-                    !(property === "dataParent" && pathString === _this.form.getBasePath().slice(0,-1))) {
-                    error.message.push("The question '" + mug.p.nodeID + 
-                        "' references an unknown question " + path.toXPath() + 
-                        " in its " + mug.p.getDefinition(property).lstring + ".");
-
+                    !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
+                {
+                    unknowns.push(xpath);
+                } else if (!refMug && isCaseReference(pathString) && !knownHashtag) {
+                    unknowns.push(xpath);
                 }
                 return {
                     mug: mug.ufid, // mug with property value referencing refMug
                     ref: refMug ? refMug.ufid : "", // referenced Mug
                     property: property,
-                    path: path.toXPath(), // path to refMug
-                    sourcePath: _this.form.getAbsolutePath(mug)
+                    path: xpath, // path to refMug
+                    sourcePath: mug.hashtagPath
                 };      
             }));
-           
-            if (error.message.length > 0) {
+            _.each(expr.instanceRefs, function (ignore, id) {
+                form.referenceInstance(id, mug, property);
+            });
+            _.each(expr.hashtags, function (hashtag) {
+                form.referenceHashtag(hashtag, mug, property);
+            });
+            if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
                     this.errors[mug.ufid] = {};
                 }
-                this.errors[mug.ufid][property] = error;
-            } else {
-                if (this.errors[mug.ufid]) {
-                    delete this.errors[mug.ufid][property];
-                }
-            }        
-        },
-        updateAllReferences: function (mug) {
-            // avoid control-only nodes
-            if (mug.p.nodeID) {
-                for (var i = 0; i < util.XPATH_REFERENCES.length; i++) {
-                    var property = util.XPATH_REFERENCES[i];
-                    this.clearReferences(mug, property);
-                    this.addReferences(mug, property);
-                }
+                this.errors[mug.ufid][property] = true;
+            } else if (this.errors[mug.ufid]) {
+                delete this.errors[mug.ufid][property];
             }
+            messages.push({
+                key: "logic-bad-path-warning",
+                level: mug.WARNING,
+                message: (function () {
+                    if (!unknowns.length) {
+                        return "";
+                    } else if (unknowns.length === 1) {
+                        return "Unknown question: " + unknowns[0];
+                    }
+                    return "Unknown questions:\n- " + unknowns.join("\n- ");
+                })()
+            });
+            return messages;
+        },
+        addReferences: function (mug, property, value) {
+            // get absolute paths from mug property's value
+            if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
+                return mug.p[property].forEachLogicExpression(_.bind(this._addReferences, this, mug, property));
+            } else {
+                return this._addReferences(mug, property, value);
+            }
+        },
+        updateReferences: function (mug, property, value) {
+            function update(property) {
+                _this.clearReferences(mug, property);
+                messages[property] = _this.addReferences(mug, property, value);
+            }
+            var _this = this,
+                messages = {};
+            if (property) {
+                update(property);
+            } else {
+                _.each(XPATH_REFERENCES, update);
+            }
+            mug.addMessages(messages);
         },
         /**
          * Update references to a node with its new path. Used when a node is
@@ -181,18 +314,20 @@ define([
          *        beginning with this path (no trailing /)
          */
         updatePaths: function (data, subtree) {
-            var seen = {};
+            var seen = {},
+                form = this.form;
             function updatePath(mug, property, paths) {
                 var pkey = mug.ufid + " " + property + " " + paths[0];
                 if (seen.hasOwnProperty(pkey)) {
                     return;
                 }
                 seen[pkey] = null;
-                var expr = new LogicExpression(mug.p[property]),
+                var expr = new LogicExpression(mug.p[property], form.xpath),
                     orig = expr.getText();
                 expr.updatePath(paths[0], paths[1]);
                 if (orig !== expr.getText()) {
-                    mug.p[property] = expr.getText();
+                    // update without triggering validation/events
+                    mug.p.set(property, expr.getText());
                 }
             }
             this.forEachReferencingProperty(data, updatePath, subtree);
@@ -204,9 +339,12 @@ define([
          * references.
          */
         forEachBrokenReference: function(func) {
-            _.each(this.errors, function (errorsByProperty, ufid) {
-                if (_.find(errorsByProperty, function(error) { return error; })) {
-                    func(this.form.getMugByUFID(ufid));
+            _.each(_.keys(this.errors), function (ufid) {
+                var mug = this.form.getMugByUFID(ufid);
+                if (mug) {
+                    func(mug);
+                } else {
+                    delete this.errors[ufid];
                 }
             }, this);
         },
@@ -241,10 +379,55 @@ define([
         },
         reset: function () {
             this.all = [];
+        },
+        // This is to tell HQ's case summary what is referenced
+        caseReferences: function () {
+            // hq implementation details
+            var ret = {
+                condition: {
+                    answer: null,
+                    question: null,
+                    type: 'always',
+                    operator: null
+                }
+            }, _this = this;
+
+            ret.preload = _.chain(this.all)
+                .filter(function(ref) {
+                    return isCaseReference(ref.path);
+                })
+                .map(function(ref) {
+                    var info = ref.path.split('/'),
+                        prop = info[2];
+                    if (prop === 'case_name') {
+                        prop = 'name';
+                    }
+                    return [_this.form.normalizeXPath(ref.sourcePath), prop];
+                }).object().value();
+
+            return ret;
+        },
+        // returns object of hashtags. used for writing to xml
+        // format {hashtag: xpath} (null is used fmr cases as they will be loaded later)
+        referencedHashtags: function () {
+            return _.chain(this.all)
+                .filter(function(ref) {
+                    return isCaseReference(ref.path);
+                })
+                .map(function(ref) {
+                    return [ref.path, null];
+                }).object().value();
         }
     };
 
+    function isCaseReference(hashtag) {
+        return hashtag.startsWith('#case/');
+    }
+
     return {
-        LogicManager: LogicManager
+        LogicManager: LogicManager,
+        LogicExpression: LogicExpression,
+        XPATH_REFERENCES: XPATH_REFERENCES,
+        NO_SELF_REFERENCES: NO_SELF_REFERENCES,
     };
 });

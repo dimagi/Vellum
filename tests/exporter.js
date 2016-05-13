@@ -1,5 +1,5 @@
 /*jshint multistr: true */
-require([
+define([
     'chai',
     'jquery',
     'underscore',
@@ -30,7 +30,8 @@ require([
                     onReady: function () {
                         done();
                     }
-                }
+                },
+                features: {rich_text: false},
             });
         });
 

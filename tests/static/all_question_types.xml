@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum" vellum:ignore="richText">
 	<h:head>
 		<h:title>Untitled Form</h:title>
 		<model>
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/526523F0-DA37-439C-B697-B620DB933526" uiVersion="1" version="1" name="Untitled Form">
-					<question1 key="jr preload key value">default data value</question1>
+					<question1>default data value</question1>
 					<question2 />
 					<question30 />
 					<question3 />
@@ -39,7 +39,7 @@
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb"></instance>
-			<bind nodeset="/data/question1" type="xsd:string" constraint="/data/question20 = 2" jr:constraintMsg="jr:itext('question1-constraintMsg')" relevant="/data/question20" required="true()" jr:preload="jr preload" jr:preloadParams="jr preload param" />
+			<bind nodeset="/data/question1" type="xsd:string" constraint="/data/question20 = 2" jr:constraintMsg="jr:itext('question1-constraintMsg')" relevant="/data/question20" required="true()" />
 			<bind nodeset="/data/question2" />
 			<bind nodeset="/data/question30" />
 			<bind nodeset="/data/question3" />
@@ -76,6 +76,7 @@
 						<value form="image">jr://file/commcare/image/data/question1.png</value>
 						<value form="audio">jr://file/commcare/audio/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/data/question1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/data/question1.3gp</value>
 						<value form="long">question1 en long</value>
 						<value form="short">question1 en short</value>
 						<value form="custom">question1 en custom</value>
@@ -85,13 +86,17 @@
 					</text>
 					<text id="question1-help">
 						<value>question1 en help</value>
-						<value form="markdown">question1 en help</value>
 						<value form="image">jr://file/commcare/image/help/data/question1.png</value>
 						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/help/data/question1.3gp</value>
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 en validation</value>
+						<value form="image">jr://file/commcare/image/constraintMsg/data/question1.png</value>
+						<value form="audio">jr://file/commcare/audio/constraintMsg/data/question1.mp3</value>
+						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/constraintMsg/data/question1.3gp</value>
 					</text>
 					<text id="question2-label">
 						<value>question2</value>
@@ -102,26 +107,27 @@
 					<text id="question3-label">
 						<value>question3</value>
 					</text>
-					<text id="question3-item1-label">
-						<value>item1</value>
-						<value form="image">jr://file/commcare/image/data/question3-item1.png</value>
-						<value form="audio">jr://file/commcare/audio/data/question3-item1.mp3</value>
-						<value form="video">jr://file/commcare/video/data/question3-item1.3gp</value>
-						<value form="long">item1 long en</value>
-						<value form="short">item1 short en</value>
-						<value form="custom">item1 custom en</value>
+					<text id="question3-choice1-label">
+						<value>choice1</value>
+						<value form="image">jr://file/commcare/image/data/question3-choice1.png</value>
+						<value form="audio">jr://file/commcare/audio/data/question3-choice1.mp3</value>
+						<value form="video">jr://file/commcare/video/data/question3-choice1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/data/question3-choice1.3gp</value>
+						<value form="long">choice1 long en</value>
+						<value form="short">choice1 short en</value>
+						<value form="custom">choice1 custom en</value>
 					</text>
-					<text id="question3-item2-label">
-						<value>item2</value>
+					<text id="question3-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question6-label">
 						<value>question6</value>
 					</text>
-					<text id="question6-item1-label">
-						<value>item1</value>
+					<text id="question6-choice1-label">
+						<value>choice1</value>
 					</text>
-					<text id="question6-item2-label">
-						<value>item2</value>
+					<text id="question6-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question13-label">
 						<value>question13</value>
@@ -190,6 +196,7 @@
 						<value form="image">jr://file/commcare/image/data/question1.png</value>
 						<value form="audio">jr://file/commcare/audio/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/data/question1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/data/question1.3gp</value>
 						<value form="long">question1 hin long</value>
 						<value form="short">question1 hin short</value>
 						<value form="custom">question1 hin custom</value>
@@ -199,13 +206,17 @@
 					</text>
 					<text id="question1-help">
 						<value>question1 hin help</value>
-						<value form="markdown">question1 hin help</value>
 						<value form="image">jr://file/commcare/image/help/data/question1.png</value>
 						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/help/data/question1.3gp</value>
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 hin validation</value>
+						<value form="image">jr://file/commcare/image/constraintMsg/data/question1.png</value>
+						<value form="audio">jr://file/commcare/audio/constraintMsg/data/question1.mp3</value>
+						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/constraintMsg/data/question1.3gp</value>
 					</text>
 					<text id="question2-label">
 						<value>question2</value>
@@ -216,26 +227,27 @@
 					<text id="question3-label">
 						<value>question3</value>
 					</text>
-					<text id="question3-item1-label">
-						<value>item1</value>
-						<value form="image">jr://file/commcare/image/data/question3-item1.png</value>
-						<value form="audio">jr://file/commcare/audio/data/question3-item1.mp3</value>
-						<value form="video">jr://file/commcare/video/data/question3-item1.3gp</value>
-						<value form="long">item1 long hin</value>
-						<value form="short">item1 short hin</value>
-						<value form="custom">item1 custom hin</value>
+					<text id="question3-choice1-label">
+						<value>choice1</value>
+						<value form="image">jr://file/commcare/image/data/question3-choice1.png</value>
+						<value form="audio">jr://file/commcare/audio/data/question3-choice1.mp3</value>
+						<value form="video">jr://file/commcare/video/data/question3-choice1.3gp</value>
+						<value form="video-inline">jr://file/commcare/video-inline/data/question3-choice1.3gp</value>
+						<value form="long">choice1 long hin</value>
+						<value form="short">choice1 short hin</value>
+						<value form="custom">choice1 custom hin</value>
 					</text>
-					<text id="question3-item2-label">
-						<value>item2</value>
+					<text id="question3-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question6-label">
 						<value>question6</value>
 					</text>
-					<text id="question6-item1-label">
-						<value>item1</value>
+					<text id="question6-choice1-label">
+						<value>choice1</value>
 					</text>
-					<text id="question6-item2-label">
-						<value>item2</value>
+					<text id="question6-choice2-label">
+						<value>choice2</value>
 					</text>
 					<text id="question13-label">
 						<value>question13</value>
@@ -310,6 +322,7 @@
 			<label ref="jr:itext('question1-label')">non-itext label</label>
 			<hint ref="jr:itext('question1-hint')">non-itext hint</hint>
 			<help ref="jr:itext('question1-help')" />
+			<alert ref="jr:itext('question1-constraintMsg')" />
 		</input>
 		<trigger ref="/data/question2" appearance="minimal">
 			<label ref="jr:itext('question2-label')" />
@@ -320,24 +333,24 @@
 		<select1 ref="/data/question3">
 			<label ref="jr:itext('question3-label')" />
 			<item>
-				<label ref="jr:itext('question3-item1-label')" />
-				<value>item1</value>
+				<label ref="jr:itext('question3-choice1-label')" />
+				<value>choice1</value>
 			</item>
 			<item>
-				<label ref="jr:itext('question3-item2-label')" />
-				<value>item2</value>
+				<label ref="jr:itext('question3-choice2-label')" />
+				<value>choice2</value>
 			</item>
 		</select1>
 		<!-- arbitrary control attributes -->
 		<select ref="/data/question6" foo="baz">
 			<label ref="jr:itext('question6-label')" />
 			<item>
-				<label ref="jr:itext('question6-item1-label')" />
-				<value>item1</value>
+				<label ref="jr:itext('question6-choice1-label')" />
+				<value>choice1</value>
 			</item>
 			<item>
-				<label ref="jr:itext('question6-item2-label')" />
-				<value>item2</value>
+				<label ref="jr:itext('question6-choice2-label')" />
+				<value>choice2</value>
 			</item>
 		</select>
 		<input ref="/data/question13">
@@ -380,7 +393,7 @@
 						<label ref="jr:itext('question22/question23/question41-label')" />
 						<repeat nodeset="/data/question22/question23/question41" />
 					</group>
-					<upload ref="/data/question22/question23/question24" mediatype="image/*">
+					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px">
 						<label ref="jr:itext('question22/question23/question24-label')" />
 					</upload>
 					<upload ref="/data/question22/question23/question25" mediatype="audio/*">

@@ -1,171 +1,177 @@
+// Styling for the vellum container and its main content blocks: question tree, question properties panel, etc.
 @import "lib/main";
 
-.fd-ui-container {
-  top: 0;
-  width: 100%;
-}
+// Wrapper around all of vellum, gets no styling
+.formdesigner {
 
-.fd-toolbar {
-  padding: 5px;
-  margin-top: 0px;
-  vertical-align: middle;
-}
+    // Another wrapper around all of vellum, can be styled (say, for full-screen mode)
+    .fd-ui-container {
+        top: 0;
+        width: 100%;
+        background-color: white;
 
-.fd-row {
-  width: 100%;
-  clear: both;
-}
+        &.full-screen {
+            z-index: @zindexUIContainer;
+        }
 
-.fd-content {
-  float: left;
-}
-.fd-content-left {
-  width: 30%;
-}
+        // Major content block (column or divider)
+        .fd-content {
+            float: left;
 
-.fd-content-divider {
-  width: 5px;
-  margin: 0 1px;
-  background: @navbarBackground;
-}
+            // Left column: question tree & data tree
+            &.fd-content-left {
+                width: 30%;
 
-.fd-scrollable {
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  height: @containerHeight;
-}
+                // Bottom half of left column: data tree
+                .fd-accessory-pane {
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                }
+            }
 
-.fd-message {
-  padding: .8em;
-  margin: .8em;
-}
+            // Right column: question properties or expression editor
+            &.fd-content-right {
+                // Initially empty
+                .fd-question-properties,
+                .fd-xpath-editor {
+                    display: none;
+                }
 
-.fd-head {
-  color: @white;
-  font-size: 17px;
-  font-weight: bold;
-  height: 24px;
-  padding: 0;
-  text-align: center;
-  z-index: 3;
-  line-height:25px;
-  width: 100%;
-}
+                // Tweak bootstrap's well styles
+                .well {
+                    padding: 10px;
 
-.fd-form-saving-img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  background-image: url('../images/ajax-loader.gif');
-}
+                    // Vellum's wells use col-sm-1 columns to squeeze in small items that usually have enough padding
+                    .col-sm-1 {
+                        padding: 0;
+                    }
+                }
+            }
 
-.fd-toolbar {
-  .fd-container-question-type-group {
-    display: inline-block;
-    vertical-align: middle;
-  }
-  @toolbarVerticalPadding: 6px;
-  @toolbarButtonPadding: @toolbarVerticalPadding 10px;
-  .btn{
-    padding: @toolbarButtonPadding;
-  }
+            // Intro content for any panel ("New Form, please add questions above...")
+            .fd-default-panel {
+                padding-left: @contentPaddingVellum;
+            }
 
-  .fd-question-type-group {
-    .btn.fd-question-type > span {
-      display: block;
-      width: 40px;
-      text-align: center;
-      padding: @toolbarVerticalPadding 0;
+            // Heading for any panel (question tree, expression editor, etc.)
+            .fd-head {
+                color: @white;
+                background-color: @cc-brand-low;
+                font-size: 17px;    // size icons
+                height: @treeBrowserHeadHeight;
+                position: relative;
+
+                // Icon to expand/collapse panel
+                .fd-head-max-indicator {
+                    position: absolute;
+                    right: 10px;
+
+                    i {
+                        color: @cc-neutral-hi;
+                    }
+                }
+
+                // Light up expand/collapse icon when mouseover header
+                &:hover .fd-head-max-indicator i {
+                    color: @white;
+                }
+
+                > h2 {
+                    font-size: @baseFontSize * 0.8    ;
+                    padding: 1px @contentPaddingVellum 0;
+                    margin: 0;
+                    font-weight: normal;
+                    line-height: 23px;
+                    text-transform: uppercase;
+                }
+
+                // Question tree menu (language switcher, copy, paste, etc.)
+                .fd-questions-menu-container {
+                    position: absolute;
+                    right: 0px;
+                    top: 0px;
+                    line-height: 23px;
+                    font-size: @baseFontSize * 0.9;
+
+                    // Icon link to open dropdown
+                    > a {
+                        color: @white;
+                        cursor: pointer;
+                        display: block;
+                        padding: 0 @contentPaddingVellum;
+                        text-decoration: none;
+
+                        &:hover {
+                            text-decoration: none;
+                            background-color: @cc-brand-mid;
+                        }
+                    }
+
+                    // Menu options
+                    #fd-questions-dropdown-menu a {
+                        min-width: 170px;
+
+                        // Checkmarks to show selected language
+                        i.fa-check {
+                            display: none;
+                        }
+
+                        &.selected i.fa-check {
+                            display: inline-block;
+                            margin-left: -14px;
+                            margin-right: 2px;
+                        }
+
+                        > .hotkey {
+                            float: right;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Draggable separators between .fd-content blocks
+        .fd-content-vertical-divider {
+            width: 5px;
+            margin: 0 1px;
+            background: @navbarBackground;
+        }
+
+        .fd-content-horizontal-divider {
+            height: 5px;
+            margin: 1px 0;
+            background: @navbarBackground;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-image: url('../images/ellipsis.png');
+            background-size: auto 80%;
+        }
+
+        // Vellum-level messages displayed across bottom of screen
+        .fd-messages {
+            position: fixed;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+
+            .alert {
+                .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
+                margin: @gridGutterWidth;
+                height: auto;
+                overflow: scroll;
+                max-height: 200px;
+            }
+        }
+
+        // Let major content blocks scroll independently (i.e., tree versus expression editor)
+        .fd-scrollable {
+            width: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: @containerHeight;
+
+            // Prevent scrollbars underneath the modal from bleeding through on OSX
+            transform: translate3d(0, 0, 0);
+        }
     }
-    .btn:nth-of-type(2) {
-      padding: @toolbarVerticalPadding @toolbarVerticalPadding @toolbarVerticalPadding 1px;
-      .btn > span {
-        width:auto;
-      }
-    }
-    .btn,
-    .btn:only-of-type {
-      padding: 0;
-    }
-    .btn {
-      &.disabled,
-      &[disabled] {
-        .opacity(100);
-        border: 1px solid @btnBackgroundHighlight;
-        > span { #gradient > .vertical(lighten(@btnBackgroundHighlight, 5), @btnBackground); }
-        i { .opacity(30); }
-      }
-    }
-
-    &.fd-question-type-group-advanced {
-      .btn {
-        padding: @toolbarButtonPadding;
-        font-size: @baseFontSize;
-      }
-    }
-  }
 }
-
-.fd-question-type .tooltip {
-  display: absolute !important;
-}
-
-.fd-head {
-  background: @blue;
-  font-weight: normal !important;
-  padding: 2px 0 !important;
-  font-size: @baseFontSize*1.1 !important;
-}
-
-.fd-form-actions {
-  padding-right: @gridGutterWidth;
-  > div {
-    display: inline-block;
-  }
-}
-
-.fd-save-button {
-  > .pull-right {
-    float: none; // HACK HACK HACK The javascript from main.js is causing issues.
-  }
-}
-
-.fd-source-modal {
-  left: 20px;
-  margin-left: 0;
-  height: 93%;
-
-  &.fade.in { top: 20px;}
-
-  .modal-body {
-    max-height: none;
-  }
-  .fd-source-container {
-    height: 100%;
-    >.control-row {
-      height: 95%;
-      textarea {
-        height: 100%;
-      }
-    }
-  }
-}
-
-.fd-messages {
-  .alert {
-    .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
-    margin: @gridGutterWidth;
-    height: auto;
-    overflow: scroll;
-    max-height: 200px;
-  }
-}
-
-.fd-toolbar .tooltip {
-  .tooltip-inner { .box-shadow(0px 0px 10px rgba(255, 255, 255, 0.75)); }
-  &.in {
-    .opacity(100);
-  }
-}
-

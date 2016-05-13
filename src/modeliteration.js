@@ -1,18 +1,16 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
-    'vellum/datasources',
+    'vellum/dataSourceWidgets',
     'vellum/mugs',
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
-    datasources,
+    datasourceWidgets,
     mugs,
     parser,
     Tree,
@@ -41,7 +39,7 @@ define([
                 key: "id",
                 event: "jr-insert",
                 path: "/item",
-                query: "selected-at({}/@ids,../@index)"
+                query: "selected-at({}/@ids, ../@index)"
             }
         ],
         joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
@@ -74,15 +72,15 @@ define([
                 })];
             },
             controlChildFilter: function (children, mug) {
-                var nodeset = mug.form.getAbsolutePath(mug),
+                var nodeset = mug.hashtagPath,
                     r_count = mug.p.repeat_count;
                 children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
                     if (r_count) {
-                        xmlWriter.writeAttributeString("jr:count", String(r_count));
+                        util.writeHashtags(xmlWriter, 'jr:count', String(r_count), mug);
                         xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
-                    xmlWriter.writeAttributeString("nodeset", nodeset);
+                    util.writeHashtags(xmlWriter, 'nodeset', nodeset, mug);
                 };
                 return children;
             },
@@ -100,7 +98,7 @@ define([
                 };
             },
             getBindList: function (mug) {
-                var path = mug.form.getAbsolutePath(mug),
+                var path = mug.absolutePath,
                     binds = oldRepeat.getBindList(mug);
                 if (mug.p.dataSource.idsQuery) {
                     binds.splice(0, 0, {
@@ -119,6 +117,17 @@ define([
                 mug.p.dataSourceChanged = false;
             },
             spec: {
+                nodeID: {
+                    deserialize: function (data, key, mug) {
+                        var deserialize = mugs.baseSpecs.databind.nodeID.deserialize;
+                        if (data.dataSource) {
+                            var id = data.id.slice(0, data.id.lastIndexOf("/")) || data.id,
+                                copy = _.extend({}, data, {id: id});
+                            return deserialize(copy, key, mug);
+                        }
+                        return deserialize(data, key, mug);
+                    }
+                },
                 repeat_count: _.extend({}, oldRepeat.spec.repeat_count, {
                     visibility: function (mug) {
                         return !mug.p.dataSource.idsQuery;
@@ -129,6 +138,29 @@ define([
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: idsQueryDataSourceWidget,
+                    validationFunc: function (mug) {
+                        if (mug.p.dataSource.idsQuery) {
+                            mug.form.updateLogicReferences(
+                                mug, "dataSource", mug.p.dataSource.idsQuery);
+                        }
+                    },
+                    serialize: function (value, key, mug, data) {
+                        if (value && value.idsQuery) {
+                            return {idsQuery:
+                                mugs.serializeXPath(value.idsQuery, key, mug, data)};
+                        }
+                    },
+                    deserialize: function (data, key, mug) {
+                        var value = mugs.deserializeXPath(data, key, mug) || {};
+                        if (value && value.instance &&
+                                     value.instance.id && value.instance.src) {
+                            // legacy serialization format
+                            var instances = {};
+                            instances[value.instance.id] = value.instance.src;
+                            mug.form.updateKnownInstances(instances);
+                        }
+                        return {idsQuery: value.idsQuery};
+                    }
                 }
             },
             ignoreReferenceWarning: function(mug) {
@@ -189,7 +221,7 @@ define([
             if (mug.__className !== "Repeat") {
                 return;
             }
-            var path = mug.form.getAbsolutePath(mug),
+            var path = mug.absolutePath,
                 container = null;
             if (mug.p.dataSource.idsQuery) {
                 container = path.replace(/\/item$/, "");
@@ -201,11 +233,13 @@ define([
             if (container === null) {
                 return;
             }
-            var values = _.object(_.map(mug.form.getSetValues(), function (value) {
+            var isNested = mug.parentMug && mug.parentMug.isInRepeat(),
+                values = _.object(_.map(mug.form.getSetValues(), function (value) {
                     return [value.event + " " + value.ref, value];
                 }));
             _.each(setvalueData, function (data) {
-                var value = values[data.event + " " + container + data.path + "/@" + data.key];
+                var event = isNested ? "jr-insert" : data.event,
+                    value = values[event + " " + container + data.path + "/@" + data.key];
                 if (value) {
                     mug.p.setvalues[data.key] = value;
                     if (data.key === "ids") {
@@ -222,7 +256,7 @@ define([
             });
             if (mug.p.dataSource.idsQuery) {
                 mug.p.dataSource.instance = mug.form.parseInstance(
-                        mug.p.dataSource.idsQuery, mug, "dataSource.instance");
+                        mug.p.dataSource.idsQuery, mug, "dataSource");
             } else {
                 // keep paths consistent for malformed model repeat with
                 // missing IDs query. this XPath returns the empty set
@@ -250,7 +284,7 @@ define([
     }
 
     function idsQueryDataSourceWidget(mug, options) {
-        var widget = datasources.dataSourceWidget(
+        var widget = datasourceWidgets.advancedDataSourceWidget(
                                     mug, options, "Model Iteration ID Query"),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
@@ -299,23 +333,24 @@ define([
         }
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
             var nodeID = mug.p.nodeID,
-                currentPath = mug.form.getAbsolutePath(mug),
-                oldPath;
+                hashPath = mug.hashtagPath,
+                oldParent = mug.parentMug,
+                oldHash;
             if (value && value.idsQuery) {
-                oldPath = currentPath.replace(/\/item$/, "");
+                oldHash = hashPath.replace(/\/item$/, "");
             } else {
-                oldPath = currentPath + "/item";
+                oldHash = hashPath + "/item";
                 if (/\/@count$/.test(mug.p.repeat_count)) {
                     mug.p.repeat_count = "";
                 }
             }
             mug.form.vellum.handleMugRename(
-                mug.form, mug, nodeID, nodeID, currentPath, oldPath);
+                mug.form, mug, nodeID, nodeID, hashPath, oldHash, oldParent);
         }
     }
 
     function prepareForWrite(mug) {
-        var path = mug.form.getAbsolutePath(mug);
+        var path = mug.absolutePath;
         if (!mug.p.dataSourceChanged && mug.p.originalPath === path) {
             return;
         }
@@ -327,10 +362,12 @@ define([
             mug.p.repeat_count = path + "/@count";
 
             // add/update <setvalue> elements
-            var setvalues = mug.p.setvalues,
+            var isNested = mug.parentMug && mug.parentMug.isInRepeat(),
+                setvalues = mug.p.setvalues,
                 setvaluesById = _.groupBy(mug.form.getSetValues(), "_id");
             _.each(setvalueData, function (data) {
-                var value = setvalues[data.key],
+                var event = isNested ? "jr-insert": data.event,
+                    value = setvalues[data.key],
                     setvalue = null;
                 if (value) {
                     setvalue = setvaluesById[value._id] || {};
@@ -341,7 +378,9 @@ define([
                 value.value = data.query.replace("{}", data.key === "ids" ? query : path);
                 if (!value.event) {
                     setvalues[data.key] = mug.form.addSetValue(
-                        data.event, value.ref, value.value);
+                        event, value.ref, value.value);
+                } else {
+                    value.event = event;
                 }
             });
         } else {

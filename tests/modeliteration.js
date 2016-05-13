@@ -1,4 +1,4 @@
-require([
+define([
     'chai',
     'jquery',
     'underscore',
@@ -63,7 +63,7 @@ require([
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             });
             assert.equal(phone.__className, "PhoneNumber");
-            assert.equal(hidden.p.calculateAttr, "/data/group/item/phone = '12345'");
+            assert.equal(hidden.p.calculateAttr, "`#form/group/item/phone` = '12345'");
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_WITH_QUESTIONS_XML);
         });
 
@@ -147,8 +147,8 @@ require([
         });
 
         it("should not remove instance when ignore/retain is active", function () {
-            var normal = '<bind nodeset="/data/product/item" />',
-                ignore = '<bind nodeset="/data/product/item" wierd="true()" vellum:ignore="retain" />',
+            var normal = '<bind vellum:nodeset="#form/product/item" nodeset="/data/product/item" />',
+                ignore = '<bind vellum:nodeset="#form/product/item" nodeset="/data/product/item" wierd="true()" vellum:ignore="retain" />',
                 xml = FIXTURE_REPEAT_XML.replace(normal, normal + ignore);
             assert(xml.indexOf(ignore) > 0, ignore + " not found in XML:\n\n" + xml);
             util.loadXML(xml);
@@ -191,17 +191,17 @@ require([
                 blue = util.addQuestion("Text", "blue"),
                 text = util.addQuestion("Text", "text"),
                 getPath = blue.form.getAbsolutePath.bind(blue.form);
-            assert.equal(getPath(blue), "/data/product/blue");
-            assert.equal(getPath(text), "/data/product/text");
-            text.p.calculateAttr = getPath(blue);
-            blue.p.labelItext.set('<output value="' + getPath(text) + '"/>');
+            assert.equal(blue.hashtagPath, "#form/product/blue");
+            assert.equal(text.hashtagPath, "#form/product/text");
+            text.p.calculateAttr = blue.hashtagPath;
+            blue.p.labelItext.set('<output value="' + text.hashtagPath + '"/>');
             repeat.p.dataSource = {
                 instance: {id: "casedb", src: "jr://instance/casedb"},
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             };
             var xml = $(call("createXML"));
-            assert.equal(getPath(blue), "/data/product/item/blue");
-            assert.equal(getPath(text), "/data/product/item/text");
+            assert.equal(blue.hashtagPath, "#form/product/item/blue");
+            assert.equal(text.hashtagPath, "#form/product/item/text");
             var textBind = xml.find("bind[nodeset='" + getPath(text) + "']");
             assert.equal(
                 textBind.attr("calculate"),
@@ -211,7 +211,7 @@ require([
                          "/data/product/item/text",
                          "output value mismatch");
             var errors = _.flatten(_.map([blue, text], function (mug) {
-                    return call("getErrors", mug);
+                    return mug.getErrors();
                 }));
             assert(!errors.length, errors.join("\n"));
         });
@@ -224,18 +224,17 @@ require([
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             };
             var blue = util.addQuestion("Text", "blue"),
-                text = util.addQuestion("Text", "text"),
-                getPath = blue.form.getAbsolutePath.bind(blue.form);
-            text.p.calculateAttr = getPath(blue);
-            blue.p.labelItext.set('<output value="' + getPath(text) + '"/>');
-            assert.equal(getPath(blue), "/data/product/item/blue");
-            assert.equal(getPath(text), "/data/product/item/text");
+                text = util.addQuestion("Text", "text");
+            text.p.calculateAttr = blue.hashtagPath;
+            blue.p.labelItext.set('<output value="' + text.hashtagPath + '"/>');
+            assert.equal(blue.hashtagPath, "#form/product/item/blue");
+            assert.equal(text.hashtagPath, "#form/product/item/text");
 
             repeat.p.dataSource = {};
-            assert.equal(getPath(blue), "/data/product/blue");
-            assert.equal(getPath(text), "/data/product/text");
+            assert.equal(blue.hashtagPath, "#form/product/blue");
+            assert.equal(text.hashtagPath, "#form/product/text");
             var xml = $(call("createXML")),
-                textBind = xml.find("bind[nodeset='" + getPath(text) + "']");
+                textBind = xml.find("bind[nodeset='" + text.absolutePath + "']");
             assert.equal(
                 textBind.attr("calculate"),
                 "/data/product/blue",
@@ -244,7 +243,7 @@ require([
                          "/data/product/text",
                          "output value mismatch");
             var errors = _.flatten(_.map([blue, text], function (mug) {
-                    return call("getErrors", mug);
+                    return mug.getErrors();
                 }));
             assert(!errors.length, errors.join("\n"));
         });
@@ -280,6 +279,21 @@ require([
             });
         });
 
+        it("should change instance when idsQuery changes", function () {
+            var form = util.loadXML(FIXTURE_REPEAT_XML),
+                repeat = util.getMug("product/item");
+            form.updateKnownInstances({"foo": "jr://foo"});
+            repeat.p.dataSource = {
+                idsQuery: "instance('foo')/products/product/@id"
+            };
+            var xml = call('createXML'),
+                $xml = $(xml);
+            assert($xml.find("instance[id=foo]").length,
+                   "foo instance not found:\n" + xml);
+            assert.equal($xml.find("instance[id=products]").length, 0,
+                   "somefixture instance not found:\n" + xml);
+        });
+
         it("should sync instance name with existing instance", function () {
             util.loadXML(FIXTURE_REPEAT_XML);
             var repeat = util.getMug("product/item"),
@@ -304,6 +318,22 @@ require([
                 instance: {id: "products", src: "jr://fixture/commtrack:products"},
                 idsQuery: "instance('products')/products/product/@id"
             });
+        });
+
+        it("should use jr-insert event for nested model iteration setvalues", function () {
+            util.loadXML(FIXTURE_REPEAT_XML);
+            var nested = util.addQuestion.bind({prevId: "product/item"})("Repeat", "nested");
+            nested.p.dataSource = {
+                instance: {id: "products", src: "jr://fixture/commtrack:products"},
+                idsQuery: "instance('products')/products/product/@id"
+            };
+            var xml = call('createXML'),
+                $xml = $(xml),
+                ref = "setvalue[ref='/data/product/";
+            assert.equal($xml.find(ref + "@ids']").attr("event"), "xforms-ready",
+                   "wrong setvalue event for outer repeat: " + xml);
+            assert.equal($xml.find(ref + "item/nested/@ids']").attr("event"), "jr-insert",
+                   "wrong setvalue event for nested repeat: " + xml);
         });
     });
 });

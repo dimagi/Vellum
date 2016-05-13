@@ -17,7 +17,7 @@
     "unused": "vars",
     "globals": {
         "define": false,
-        "require": false,
+        "requirejs": false,
         /* MOCHA */
         "describe": false,
         "it": false,

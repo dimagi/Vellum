@@ -1,18 +1,22 @@
 define([
     'require',
     'underscore',
-    'xpath',
+    'jquery',
     'vellum/tree',
     'vellum/logic',
-    'vellum/widgets',
+    'vellum/escapedHashtags',
+    'vellum/fuse',
+    'vellum/undomanager',
     'vellum/util'
 ], function (
     require,
     _,
-    xpath,
+    $,
     Tree,
     logic,
-    widgets,
+    escapedHashtags,
+    Fuse,
+    undomanager,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -42,93 +46,7 @@ define([
         
         return that;
     };
-    
-    function processInstance(instance) {
-        instance.defaultId = instance.defaultId || convertToId(instance.sourceUri);
-        instance.id = instance.defaultId;
-        _.each(instance.levels, function (level) {
-            var i = 1,
-                mappedSubsets = {};
-            _.each(level.subsets, function (subset) {
-                subset.id = i++;
-                subset.selector = normalizeXPathExpr(subset.selector);
-                mappedSubsets[subset.id] = subset;
-            });
-            level.subsets = mappedSubsets;
-        });
-        return instance;
-    }
-    
-    // Parsing the instance selectors using the XPath models and comparing the
-    // parsed expressions might be a better approach that these hacky functions.
-    function normalizeXPathExpr(str) {
-        return normalizeToSingleQuotes(removeSpaces(str));
-    }
 
-    // remove spaces around = and []
-    function removeSpaces(str) {
-        return str.replace(/\s*([=\[\]])\s*/g, function (match, p1) {
-            return p1;
-        });
-    }
-
-    // Change any top-level double quotes to single quotes. (Assumes no
-    // top-level escaped double quotes).  This may not correctly handle escaped
-    // quotes within a quote.  Moving on.
-    function normalizeToSingleQuotes(str) {
-        var ret = '';
-        eachCharByQuotedStatus(str,
-            function (c) {
-                ret += c;
-            },
-            function (c) {
-                if (c === '"') {
-                    c = "'";
-                }
-                ret += c;
-            });
-        return ret;
-    }
-
-    // abstracted this because I was using it for two things before
-    function eachCharByQuotedStatus(str, quoted, unquoted) {
-        var prevIsBackslash = false,
-            inSingleQuote = false,
-            inDoubleQuote = false;
-
-        for (var i=0, l=str.length; i < l; i++) {
-            var c = str[i],
-                inQuote = inSingleQuote || inDoubleQuote;
-          
-            if (!prevIsBackslash && ((inSingleQuote && c === "'") ||
-                                     (inDoubleQuote && c === '"'))) {
-                inQuote = false;
-            }
-            (inQuote ? quoted : unquoted)(c);
-
-            if (!prevIsBackslash) {
-                if (c === "'" && !inDoubleQuote) {
-                    inSingleQuote = !inSingleQuote;
-                } else if (c === '"' && !inSingleQuote) {
-                    inDoubleQuote = !inDoubleQuote;
-                }
-            }
-
-            if (c === '\\') {
-                prevIsBackslash = !prevIsBackslash;
-            } else {
-                prevIsBackslash = false;
-            }
-        }
-    }
-    
-    function convertToId(str) {
-        return str
-            .toLowerCase()
-            .replace(/ /g,'_')
-            .replace(/[^\w-]+/g,'');
-    }
-    
     var InstanceMetadata = function (attributes, children, mug, property) {
         var that = {},
             refs = {};
@@ -188,7 +106,7 @@ define([
         }
         return that;
     };
-    var INSTANCE_REGEXP = /^instance\((['"])([^'"]+)\1\)/i;
+    var INSTANCE_REGEXP = /(^)instance\((['"])([^'"]+)\2\)/i;
 
     function Form (opts, vellum, mugTypes) {
         var _this = this;
@@ -207,20 +125,85 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
+        this.hashtagDictionary = {};
         this.tree = new Tree('data', 'control');
+        this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
+        // {<instance id>: { src or children: <instance src or children>}
+        this.knownInstances = {};
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        
+        this.xpath = escapedHashtags.parser(this.hashtagDictionary);
+        this.undomanager = new undomanager();
+
+        this.undomanager.on('reset', function(e) {
+            _this.vellum.adjustToWindow();
+        });
+
         //make the object event aware
         util.eventuality(this);
+        this.on('form-load-finished', function() {
+            _this.fuse = new Fuse(_this);
+        });
     }
 
     Form.prototype = {
+        isValidHashtag: function(tag) {
+            return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
+        },
+        addHashtag: function(hashtag, xpath) {
+            this.hashtagDictionary[hashtag] = xpath;
+        },
+        initHashtag: function(hashtag, xpath) {
+            if (!this.hashtagDictionary[hashtag]) {
+                this.hashtagDictionary[hashtag] = xpath;
+            }
+        },
+        removeHashtag: function(hashtag) {
+            delete this.hashtagDictionary[hashtag];
+        },
+        transform: function(input, transformFn) {
+            input = this.normalizeEscapedHashtag(input);
+            return escapedHashtags.transform(input, transformFn);
+        },
+        normalize: function (methodName, xpath) {
+            // try catch is needed as workaround for having an itemset without
+            // the itemset plugin enabled and invalid xpaths
+            try {
+                return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
+            } catch (err) {
+                return xpath.startsWith('#invalid/xpath ') ? xpath.slice(15) : xpath;
+            }
+         },
+        normalizeEscapedHashtag: function (xpath_) {
+            return this.normalize('toEscapedHashtag', xpath_);
+        },
+        normalizeHashtag: function (xpath_) {
+            return this.normalize('toHashtag', xpath_);
+        },
+        normalizeXPath: function (xpath_) {
+            return this.normalize('toXPath', xpath_);
+        },
+        getHashtagsInXPath: function (xpath_) {
+            try {
+                return new logic.LogicExpression(xpath_, this.xpath).getHashtags();
+            } catch (err) {
+                return [];
+            }
+        },
+        referencedHashtags: function () {
+            return this._logicManager.referencedHashtags();
+        },
+        referenceHashtag: function(hashtag, mug, property) {
+            if (/^#case\//.test(hashtag.toHashtag())) {
+                this.referenceInstance('casedb', mug, property);
+                this.referenceInstance('commcaresession', mug, property);
+            }
+        },
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
@@ -244,7 +227,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[dataParent];
+                var dataParentMug = _this.mugMap[_this.normalizeHashtag(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -264,9 +247,10 @@ define([
          * Add an instance if it is not already on the form
          *
          * @param attrs - Instance attributes. The `src` attribute is used to
-         *          match other instances on the form, and is required. The
-         *          instance will be unconditionally added and it's id returned
-         *          if the instance has no `src` attribute.
+         *          match other instances on the form. A matching instance will
+         *          be found by `id` if the instance has no `src` attribute.
+         *          If no matching instance is found, a new instance will be
+         *          added with a unique `id`.
          * @param mug - (optional) The mug with which this query is associated.
          *          This and the next parameter are used for instance ref
          *          counting. If omitted, ref counting will be disabled for the
@@ -275,23 +259,63 @@ define([
          * @returns - The `id` of the added or already-existing instance.
          */
         addInstanceIfNotExists: function (attrs, mug, property) {
-            if (attrs.src === null || _.isUndefined(attrs.src)) {
-                // no ref counting for instances without a `src` since they cannot be dropped
-                this.instanceMetadata.push(InstanceMetadata({
-                    src: attrs.src,
-                    id: attrs.id
-                }));
-                return attrs.id;
+            function getUniqueId(id, ids) {
+                var temp = (id || "data") + "-",
+                    num = 1;
+                while (!id || ids.hasOwnProperty(id)) {
+                    id = temp + num;
+                    num++;
+                }
+                return id;
             }
-
-            var meta = _.find(this.instanceMetadata, function (m) {
+            var meta;
+            if (attrs.src) {
+                meta = _.find(this.instanceMetadata, function (m) {
                     return m.attributes.src === attrs.src;
                 });
+                if (!meta) {
+                    // attrs.src not found, try to find by id
+                    var ids = _.indexBy(this.instanceMetadata, function (m) {
+                            return m.attributes.id;
+                        });
+                    meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
+                    if (meta && meta.internal) {
+                        // assign new src to internal instance
+                        meta.internal = false;
+                        meta.attributes.src = attrs.src;
+                    } else {
+                        // assign unique id to attrs (will create new meta)
+                        attrs = _.clone(attrs);
+                        attrs.id = getUniqueId(attrs.id, ids);
+                        meta = null;
+                    }
+                    this.knownInstances[attrs.id] = { src: attrs.src };
+                }
+            } else if (attrs.id) {
+                // attrs has no src, find by id
+                meta = _.find(this.instanceMetadata, function (m) {
+                    return m.attributes.id === attrs.id;
+                });
+                if (meta) {
+                    if (meta.internal && this.knownInstances.hasOwnProperty(attrs.id)) {
+                        meta.internal = false;
+                        meta.attributes.src = this.knownInstances[attrs.id].src;
+                    }
+                } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
+                    _.defaults(attrs, this.knownInstances[attrs.id]);
+                }
+            } else {
+                throw new Error("unsupported: non-primary instance without id or src");
+            }
             if (!meta) {
-                this.instanceMetadata.push(InstanceMetadata({
+                meta = InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }, null, mug || null, property));
+                }, attrs.children, mug || null, property);
+                if (!attrs.src && !attrs.children) {
+                    meta.internal = true;
+                }
+                this.instanceMetadata.push(meta);
                 return attrs.id;
             } else if (this.enableInstanceRefCounting) {
                 meta.addReference(mug, property);
@@ -303,6 +327,10 @@ define([
          *
          * This adds a reference to the instance if found.
          *
+         * TODO eliminate this method after refactoring callers to not
+         * use it (there can be more than one instance reference in an
+         * XPath query, so this doesn't make much sense).
+         *
          * @param query - A query string, which may start with "instance(...)"
          * @param mug - The mug with which this query is associated.
          * @param property - (optional) The mug property name for the query.
@@ -312,20 +340,49 @@ define([
             var match = query.match(INSTANCE_REGEXP),
                 instance = null;
             if (match) {
-                var instanceId = match[2],
-                    meta = this._referenceInstance(instanceId, mug, property);
+                var instanceId = match[3],
+                    meta = this.referenceInstance(instanceId, mug, property);
                 if (meta) {
                     instance = _.clone(meta.attributes);
                 }
             }
             return instance;
         },
-        _referenceInstance: function (id, mug, property) {
-            var meta = _.find(this.instanceMetadata, function (meta) {
-                    return meta.attributes.id === id;
-                });
-            if (meta && this.enableInstanceRefCounting) {
-                meta.addReference(mug, property);
+        /**
+         * Parse query and get a mapping of instance id: src
+         *
+         * @param query - A query string, which may contain "instance(...)"
+         * @param mug - The mug with which this query is associated.
+         * @param property - (optional) The mug property name for the query.
+         * @reutrns - {<id>: <src>, ...}
+         */
+        parseInstanceRefs: function (query, mug, property) {
+            var expr = new logic.LogicExpression(query, this.xpath),
+                knownInstances = this.knownInstances,
+                instances = {};
+            expr.analyze();
+            _.each(expr.instanceRefs, function (ignore, id) {
+                if (knownInstances.hasOwnProperty(id) && knownInstances[id]) {
+                    instances[id] = util.extend(knownInstances[id]);
+                    if (instances[id].children) {
+                        instances[id].children = $('<div>').append(instances[id].children).html();
+                    }
+                }
+            });
+            return instances;
+        },
+        referenceInstance: function (id, mug, property) {
+            function idMatch(meta) {
+                return meta.attributes.id === id;
+            }
+            var meta = _.find(this.instanceMetadata, idMatch);
+            if (this.enableInstanceRefCounting) {
+                if (meta) {
+                    meta.addReference(mug, property);
+                } else {
+                    id = this.addInstanceIfNotExists({id: id}, mug, property);
+                    meta = _.find(this.instanceMetadata, idMatch);
+                }
             }
             return meta || null;
         },
@@ -336,8 +393,57 @@ define([
          * There might be edge cases where a user is entering a
          * custom instance and query and does not want this.
          */
-        updateInstanceQuery: function (query, instanceId) {
-            return query.replace(INSTANCE_REGEXP, "instance('" + instanceId + "')");
+        updateInstanceQuery: function (query, instanceId, oldId) {
+            var regexp = INSTANCE_REGEXP;
+            if (oldId) {
+                regexp = new RegExp("(^|\W)instance\\((['\"])" +
+                                    RegExp.escape(oldId) + "\2\\)", "ig");
+            }
+            return query.replace(regexp, "$1instance('" + instanceId + "')");
+        },
+        /**
+         * Update internal record of instances known by this form
+         *
+         * @param map - an object mapping instance IDs to instance sources.
+         *      If not given, update the form's internal known instances
+         *      using instance metadata in the form.
+         */
+        updateKnownInstances: function (map) {
+            var instances = this.knownInstances;
+            if (map) {
+                var metas = _.indexBy(this.instanceMetadata, function (m) {
+                        return m.attributes.id;
+                    });
+                _.each(map, function (instance, id) {
+                    if (instance && !instances.hasOwnProperty(id)) {
+                        if (instance.children) {
+                            instances[id] = { children: $(instance.children)};
+                        } else if (_.isString(instance)){
+                            // assume a string is the src
+                            instances[id] = { src: instance };
+                        } else {
+                            // assume we are fed a correct instance dict
+                            instances[id] = instance;
+                        }
+                        var meta = metas[id];
+                        if (meta && meta.internal) {
+                            meta.internal = false;
+                            meta.attributes.src = instances[id].src;
+                        }
+                    }
+                });
+            } else {
+                _.each(this.instanceMetadata, function (meta) {
+                    if (!meta.attributes.id) {
+                        return;
+                    }
+                    if (meta.attributes.src) {
+                        instances[meta.attributes.id] = { src: meta.attributes.src };
+                    } else if (meta.children) {
+                        instances[meta.attributes.id] = { children: meta.children };
+                    }
+                });
+            }
         },
         /**
          * Drop instance reference, possibly removing the instance
@@ -361,6 +467,14 @@ define([
                 }
             }
             return false;
+        },
+        /**
+         * Drop all instance references from the given mug/property
+         */
+        dropAllInstanceReferences: function (mug, property) {
+            this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
+                return !meta.dropReference(mug, property);
+            });
         },
         // todo: update references on rename
         addSetValue: function (event, ref, value) {
@@ -389,6 +503,7 @@ define([
         },
         setFormID: function (id) {
             this.tree.setRootID(id);
+            this.addHashtag('#form', '/' + id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -414,9 +529,13 @@ define([
                 return node.getValue();
             });
         },
-        updateError: function (errObj, options) {
+        /**
+         * Add parsing error to the form
+         *
+         * NOTE these errors are displayed on form load only.
+         */
+        updateError: function (errObj) {
             errObj = FormError(errObj);
-            options = options || {};
             if (!errObj.key) {
                 this.errors.push(errObj);
             }
@@ -431,55 +550,115 @@ define([
                     this.errors.push(errObj);
                 }
             }
-            this.fire({
-                type: 'error-change',
-                errors: this.errors
-            });
         },
-        clearErrors: function (type, options) {
-            var filterFn = function (err) {
-                return err.level !== type;
-            };
-            options = options || {};
-            for (var i = 0; i < this.errors.length; i++) {
-                this.errors = this.errors.filter(filterFn);
-            }
-            this.fire({
-                type: 'error-change',
-                errors: this.errors
+        /**
+         * Get a list of warnings pertaining to form serialization
+         *
+         * All serialization warnings reported here can be fixed
+         * automatically, but the user may prefer to fix them manually.
+         *
+         * @returns - A list of error objects. See
+         * `Mug.getSerializationWarnings` for more details.
+         */
+        getSerializationWarnings: function () {
+            var errors = [];
+            this.walkMugs(function (mug) {
+                var errs = mug.getSerializationWarnings();
+                if (errs.length) {
+                    errors.push({mug: mug, errors: errs});
+                }
+            });
+            return errors;
+        },
+        /**
+         * Automatically fix serialization errors
+         *
+         * After fixing serialization errors, no more errors
+         * should be reported by `getSerializationWarnings`.
+         *
+         * @param errors - The list of error objects returned by
+         *                 `getSerializationWarnings`.
+         */
+        fixSerializationWarnings: function (errors) {
+            _.each(errors || [], function (error) {
+                error.mug.fixSerializationWarnings(error.errors);
             });
         },
         isFormValid: function (validateMug) {
             return this.tree.isTreeValid(validateMug);
         },
-        getMugChildrenByNodeID: function (mug, nodeID) {
-            var parentNode = (mug ? this.tree.getNodeFromMug(mug)
-                                  : this.tree.rootNode);
-            return _.filter(parentNode.getChildrenMugs(), function (m) {
-                return m.p.nodeID === nodeID;
-            });
+        findFirstMatchingChild: function (parentMug, match) {
+            var parent = (parentMug ? this.tree.getNodeFromMug(parentMug)
+                                    : this.tree.rootNode);
+            return _.find(parent.getChildrenMugs(), match);
         },
         insertMug: function (refMug, newMug, position) {
             this.tree.insertMug(newMug, position, refMug);
         },
         /**
          * Move a mug from its current place to
-         * the position specified by the arguments,
+         * the position specified by the arguments.
+         *
+         * NOTE the cannonical way to rename a mug is to set its
+         * `nodeID` property: `mug.p.nodeID = "name"`
+         *
+         * @param mug - The mug to be moved.
+         * @param position - The position relative to `refMug`
+         *          ("after", "into", "last", etc.) or "rename", in
+         *          which case `refMug` is the new name.
+         * @param refMug - The mug relative to which `mug` is moving.
+         *          Alternately, the new name if `position` is "rename".
          */
-        moveMug: function (mug, refMug, position) {
-            var oldPath = this.tree.getAbsolutePath(mug);
+        moveMug: function (mug, position, refMug) {
+            function match(sibling) {
+                return sibling !== mug && sibling.p.nodeID === newId;
+            }
+            var newId, oldId, oldPath, oldParent, conflictParent;
 
-            this.insertMug(refMug, mug, position);
+            if (position === "rename") {
+                newId = refMug;
+                if (!this.tree.getNodeFromMug(mug)) {
+                    // skip conflict resolution if not in tree
+                    mug.p.set("nodeID", newId);
+                    return;
+                }
+                oldId = mug.p.nodeID;
+                oldPath = mug.hashtagPath;
+                oldParent = conflictParent = mug.parentMug;
+            } else {
+                oldId = mug.p.nodeID;
+                oldPath = mug.hashtagPath;
+                oldParent = mug.parentMug;
+                this.insertMug(refMug, mug, position);
+                var spec = mug.spec.dataParent;
+                if (spec && spec.validationFunc(mug) !== 'pass') {
+                    mug.p.set("dataParent"); // clear dataParent
+                }
+                newId = mug.p.conflictedNodeId || oldId;
+                conflictParent = mug.parentMug;
+            }
 
-            var currentPath = this.tree.getAbsolutePath(mug);
+            if (!mug.options.isControlOnly) {
+                if (this.findFirstMatchingChild(conflictParent, match)) {
+                    mug.p.conflictedNodeId = newId;
+                    newId = this.generate_question_id(newId, mug);
+                } else if (mug.p.has("conflictedNodeId")) {
+                    mug.p.conflictedNodeId = null;
+                }
+
+                if (mug.p.nodeID !== newId) {
+                    // rename without events; nodeID setter calls form.moveMug
+                    mug.p.set("nodeID", newId);
+                }
+            }
+
+            var newPath = mug.hashtagPath;
             this.vellum.handleMugRename(
-                this, mug, mug.p.nodeID, mug.p.nodeID, currentPath, oldPath);
+                this, mug, newId, oldId, newPath, oldPath, oldParent);
 
-            this.fire({
-                type: 'question-move',
-                mug: mug
-            });
-            this.fireChange(mug);
+            if (position !== "rename") {
+                this.fireChange(mug);
+            }
         },
         /**
          * Walk through the mugs of the tree and call valueFunc on each mug
@@ -503,30 +682,25 @@ define([
             }
             return desc;
         },
-        handleMugRename: function (mug, currentId, oldId, currentPath, oldPath) {
-            this._logicManager.updatePath(mug.ufid, oldPath, currentPath);
-            this.mugWasRenamed(mug, oldId, oldPath);
-        },
         /**
          * Update references to mug and its children after it is renamed.
          */
-        mugWasRenamed: function(mug, oldName, oldPath) {
+        handleMugRename: function (mug, newId, oldId, newPath, oldPath, oldParent) {
             function getPreMovePath(postPath) {
-                if (postPath === mugPath) {
+                if (postPath === newPath) {
                     return oldPath;
                 }
                 return postPath.replace(postRegExp, oldPath + "/");
             }
-            var tree = this.tree,
-                mugPath = tree.getAbsolutePath(mug);
-            if (!mugPath) {
+            this._logicManager.updatePath(mug.ufid, oldPath, newPath);
+            if (!newPath) {
                 // Items don't have an absolute path. I wonder if it would
                 // matter if they had one?
                 return;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
-                postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
-                postRegExp = new RegExp("^" + RegExp.escape(mugPath) + "/"),
+                postMovePaths = _(mugs).map(function(mug) { return mug.hashtagPath; }),
+                postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
                 updates = {},
                 preMovePath;
             for (var i = 0; i < mugs.length; i++) {
@@ -538,6 +712,16 @@ define([
             }
             this._logicManager.updatePaths(updates);
             this.fixBrokenReferences(mug);
+            // TODO make Item not a special case
+            if (oldId && mug.__className !== "Choice") {
+                // update first child of old parent with matching conflicted nodeID
+                var conflict = this.findFirstMatchingChild(oldParent, function (mug) {
+                        return mug.p.conflictedNodeId === oldId;
+                    });
+                if (conflict) {
+                    this.moveMug(conflict, "rename", oldId);
+                }
+            }
         },
         changeMugType: function (mug, questionType) {
             this.mugTypes.changeType(mug, questionType);
@@ -552,14 +736,13 @@ define([
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
-            if (typeof window.ga !== "undefined") {
-                window.ga('send', 'event', 'Form Builder', 'Copy', duplicate.options.typeName);
+            if (window.analytics) {
+                window.analytics.usage('Form Builder', 'Copy', duplicate.options.typeName);
             }
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];
-                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, 
-                    this.getAbsolutePath(duplicate));
+                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, duplicate.hashtagPath);
             }
             return duplicate;
         },
@@ -579,13 +762,10 @@ define([
 
             if (depth === 0) {
                 var nodeID = mug.p.nodeID;
-                if (nodeID) {
-                    var newQuestionID = this.generate_question_id(nodeID); 
-                    duplicate.p.nodeID = newQuestionID;
+                if (duplicate.p.conflictedNodeId) {
+                    duplicate.p.conflictedNodeId = null;
                 } else {
-                    var newItemValue = this.generate_question_id(
-                        mug.p.defaultValue);
-                    duplicate.p.defaultValue = newItemValue;
+                    duplicate.p.nodeID = this.generate_question_id(nodeID, mug);
                 }
                 
                 this.insertQuestion(duplicate, mug, 'after', true);
@@ -593,7 +773,7 @@ define([
                 this.insertQuestion(duplicate, parentMug, 'into', true);
             }
 
-            this.updateAllLogicReferences(duplicate);
+            this.updateLogicReferences(duplicate);
             this.vellum.duplicateMugProperties(duplicate);
 
             var children = this.getChildren(mug),
@@ -605,14 +785,14 @@ define([
 
             pathReplacements.push({
                 mugId: mug.ufid,
-                from: this.getAbsolutePath(mug),
-                to: this.getAbsolutePath(duplicate)
+                from: mug.hashtagPath,
+                to: duplicate.hashtagPath,
             });
 
             return [duplicate, pathReplacements];
         },
-        updateAllLogicReferences: function (mug) {
-            this._logicManager.updateAllReferences(mug);
+        updateLogicReferences: function (mug, property, value) {
+            this._logicManager.updateReferences(mug, property, value);
         },
         /**
          * Determine if a mug property should change
@@ -627,14 +807,6 @@ define([
                 // skip property change handlers during loading phase
                 return function () {};
             }
-            // update the logic properties that reference the mug
-            if (property === 'nodeID' && previous &&
-                this.getMugChildrenByNodeID(mug.parentMug, value).length > 0)
-            {
-                // Short-circuit invalid change and trigger warning in UI
-                this.vellum.setUnsavedDuplicateNodeId(value);
-                return null;
-            }
 
             return function () {
                 var event = {
@@ -644,7 +816,7 @@ define([
                     val: value,
                     previous: previous
                 };
-                this.handleMugPropertyChange(mug, event);
+                mug.validate(property);
                 this.fire(event);
 
                 // legacy, enables auto itext ID behavior, don't add
@@ -660,54 +832,20 @@ define([
                 this.fireChange(mug);
             }.bind(this);
         },
-        handleMugPropertyChange: function (mug, e) {
-            if (e.property === 'nodeID') {
-                var currentPath = this.getAbsolutePath(mug),
-                    valid = true,
-                    parsed;
-                try {
-                    parsed = xpath.parse(currentPath);
-                    if (_.isUndefined(parsed.steps)) {
-                        valid = false;
-                    }
-                } catch (err) {
-                    valid = false;
-                }
-                if (valid) {
-                    parsed.steps[parsed.steps.length - 1].name = e.previous;
-                    var oldPath = parsed.toXPath();
-                    this.vellum.handleMugRename(this, mug, e.val, e.previous, currentPath, oldPath);
-                    window.location = '#' + currentPath;
-                }
-            } else {
-                if (mug.p.getDefinition(e.property).widget === widgets.xPath ||
-                    mug.p.getDefinition(e.property).widget === widgets.droppableText) {
-                    this.updateAllLogicReferences(mug);
-                }
-            }
-        },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
             if (!mug.options.isControlOnly) {
                 mug.p.nodeID = this.generate_question_id();
             }
-            if (mug.__className === "Item") {
-                var parent = refMug.__className === "Item" ? refMug.parentMug : refMug;
-                mug.p.defaultValue = this.generate_item_label(parent);
+            if (mug.__className === "Choice") {
+                var parent = refMug.__className === "Choice" ? refMug.parentMug : refMug;
+                mug.p.nodeID = this.generate_item_label(parent);
             }
             this.insertQuestion(mug, refMug, position, isInternal);
             // should we fix broken references when nodeID is auto-generated?
             //if (!mug.options.isControlOnly && !this.isLoadingXForm) {
             //    this.fixBrokenReferences(mug);
             //}
-            if (mug.options.isODKOnly) {
-                this.updateError({
-                    message: mug.options.typeName + ' works on Android devices ' +
-                        'and some feature phones; please test your specific ' +
-                        'model to ensure that this question type is supported',
-                    level: 'form-warning'
-                });
-            }
             return mug;
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
@@ -728,28 +866,41 @@ define([
                 mug.options.afterInsert(this, mug);
             }
         },
-        _updateMugPath: function (mug, oldPath, newPath) {
-            var map = this.mugMap;
-            delete map[oldPath];
-            if (_.isUndefined(newPath)) {
-                newPath = this.getAbsolutePath(mug);
+        _updateMugPath: function (mug, oldHashtag, newHashtag) {
+            var map = this.mugMap, newPath;
+            delete map[this.normalizeHashtag(oldHashtag)];
+            if (oldHashtag) {
+                this.removeHashtag(oldHashtag);
             }
-            if (newPath) {
-                map[newPath] = mug;
+            if (_.isUndefined(newHashtag)) {
+                newPath = mug.absolutePath;
+                newHashtag = mug.hashtagPath;
+            } else {
+                newPath = newHashtag.replace(/^#form/, this.getBasePath(true));
+                if (newPath === newHashtag) {
+                    // this happens if _updateMugPath is commtrack (#supply one day)
+                    newPath = null;
+                }
+            }
+            if (newHashtag) {
+                if (newPath) {
+                    this.addHashtag(newHashtag, newPath);
+                }
+                map[this.normalizeHashtag(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
             // parser needs this because it inserts directly into the tree
             this.mugMap[mug.ufid] = mug;
-            var path = this.tree.getAbsolutePath(mug);
+            var path = mug.absolutePath;
             if (path) {
-                this.mugMap[path] = mug;
+                this.addHashtag(mug.hashtagPath, path);
+                this.mugMap[this.normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
             function updateReferences(mug) {
-                _this.updateAllLogicReferences(mug);
-                _this.vellum.setTreeValidationIcon(mug);
+                _this.updateLogicReferences(mug);
             }
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
@@ -778,30 +929,64 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[path];
+            return this.mugMap[this.normalizeHashtag(path)];
         },
-        removeMugFromForm: function (mug) {
+        getIconByPath: function (path) {
+            var mug = this.getMugByPath(path);
+            return mug ? mug.getIcon() : null;
+        },
+        removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
-                if (!seen.hasOwnProperty(mug.ufid)) {
+                if (mug && !seen.hasOwnProperty(mug.ufid)) {
                     seen[mug.ufid] = null;
-                    _this.updateAllLogicReferences(mug);
-                    _this.vellum.setTreeValidationIcon(mug);
+                    _this.updateLogicReferences(mug);
                 }
             }
             var _this = this,
                 seen = {},
-                mugs = this.getDescendants(mug).concat([mug]),
-                ufids = _.object(_(mugs).map(function(mug) { return [mug.ufid, null]; }));
-            this._removeMugFromForm(mug, false);
+                ufids = {},
+                undoUfids = {};
+            this.undomanager.resetUndo();
+            _.each(mugs, function (mug) {
+                _this._addToUndoManager(mug, undoUfids);
+            });
+            _.each(mugs, function (mug) {
+                _this._removeMugFromForm(mug, ufids, false);
+            });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _removeMugFromForm: function(mug, isInternal) {
-            var fromTree = this.tree.getNodeFromMug(mug);
-            if (fromTree) {
-                var children = this.tree.getNodeFromMug(mug).getChildrenMugs();
+        _addToUndoManager: function(mug, ufids) {
+            if (ufids.hasOwnProperty(mug.ufid)) {
+                return; // already removed
+            }
+            ufids[mug.ufid] = null;
+            var node = this.tree.getNodeFromMug(mug),
+                parentMug = mug.parentMug,
+                hasChildren = false,
+                previousSibling = mug.previousSibling,
+                position = previousSibling === parentMug ? 'first' : 'after';
+            this.undomanager.appendMug(mug, previousSibling, position);
+            if (node) {
+                var children = node.getChildrenMugs();
+                hasChildren = children.length > 0;
                 for (var i = 0; i < children.length; i++) {
-                    this._removeMugFromForm(children[i], true);
+                    this._addToUndoManager(children[i], ufids);
                 }
+            }
+        },
+        _removeMugFromForm: function(mug, ufids, isInternal) {
+            if (ufids.hasOwnProperty(mug.ufid)) {
+                return; // already removed
+            }
+            ufids[mug.ufid] = null;
+            var node = this.tree.getNodeFromMug(mug);
+            if (node) {
+                var children = node.getChildrenMugs();
+                for (var i = 0; i < children.length; i++) {
+                    this._removeMugFromForm(children[i], ufids, true);
+                }
+                delete this.mugMap[this.normalizeHashtag(mug.hashtagPath)];
+                this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
                 this.instanceMetadata = _.filter(this.instanceMetadata, function (meta) {
@@ -809,44 +994,44 @@ define([
                 });
             }
             delete this.mugMap[mug.ufid];
-            delete this.mugMap[this.tree.getAbsolutePath(mug)];
-            this.tree.removeMug(mug);
             this.fire({
                 type: 'question-remove',
                 mug: mug,
-                isInternal: isInternal
+                isInternal: isInternal,
             });
         },
-        questionIdCount: function (qId) {
-            var allMugs = this.getMugList(),
-                count = 0;
-            for (var i = 0; i < allMugs.length; i++) {
-                var mug = allMugs[i];
-                if (qId === mug.p.nodeID || qId === mug.p.defaultValue) {
-                    count++; 
-                }
+        isUniqueQuestionId: function (qId, mug) {
+            var mugs;
+            if (!mug) {
+                mugs = this.getMugList(); // check against entire form
+            } else {
+                var node = this.tree.getNodeFromMug(mug);
+                mugs = this.tree.getParentNode(node).getChildrenMugs();
             }
-            return count;
+            return !_.any(mugs, function (mug) { return mug.p.nodeID === qId; });
         },
 
         /**
-         * Generates a unique question ID (unique in this form) and
-         * returns it as a string.
+         * Generates a unique question ID
+         *
+         * @param question_id - a proposed question ID (may be empty)
+         * @param mug
          */
-        generate_question_id: function (question_id) {
+        generate_question_id: function (question_id, mug) {
             if (question_id) {
                 var match = /^copy-(\d+)-of-(.+)$/.exec(question_id) ;
                 if (match) {
                     question_id = match[2]; 
                 }
+                var new_id = question_id;
                 for (var i = 1;; i++) {
-                    var new_id = "copy-" + i + "-of-" + question_id;
-                    if (!this.questionIdCount(new_id)) {
+                    if (this.isUniqueQuestionId(new_id, mug)) {
                         return new_id; 
                     }
+                    new_id = "copy-" + i + "-of-" + question_id;
                 }
             } else {
-                return this._make_label('question');
+                return this._make_label('question', mug);
             }
         },
         generate_item_label: function (parentMug, name, i) {
@@ -854,26 +1039,26 @@ define([
                                   : this.tree.rootNode),
                 items = node.getChildrenMugs(),
                 ret;
-            if (!name) { name = "item"; }
+            if (!name) { name = "choice"; }
             if (arguments.length < 3) {
                 i = items.length + 1;
             }
             do {
                 ret = name + i++;
             } while (_.any(items, function (item) {
-                return item.getNodeID() === ret;
+                return item.p.nodeID === ret;
             }));
             return ret;
         },
         /**
          * Private method for constructing unique questionIDs, labels for items, etc
          */
-        _make_label: function (prefixStr) {
+        _make_label: function (prefixStr, mug) {
             var ret;
             do {
                 ret = prefixStr + this.question_counter;
                 this.question_counter += 1;
-            } while (this.questionIdCount(ret));
+            } while (!this.isUniqueQuestionId(ret, mug));
             return ret;
         },
         getExportTSV: function () {
@@ -881,13 +1066,18 @@ define([
             var value = exporter.generateExportTSV(this);
             this.vellum.afterSerialize();
             return value;
+        },
+        undo: function() {
+            this.undomanager.undo();
+            this.vellum.selectSomethingOrHideProperties();
+        },
+        isCaseReference: function (path) {
+            return /^#case/.test(path);
         }
     };
 
     return {
         Form: Form,
-        processInstance: processInstance,
-        normalizeXPathExpr: normalizeXPathExpr,
         InstanceMetadata: InstanceMetadata
     };
 });

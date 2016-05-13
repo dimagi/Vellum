@@ -1,12 +1,18 @@
-<div class="well well-small form form-inline clearfix">
+<div class="well fd-kv">
     <% pairs[""] = ""; %>
-    <% _.each(pairs, function (v, k) { %>
-        <div class="fd-kv-pair control-row clearfix" style="margin-bottom: 5px;">
-            <div class="span3"><input class="fd-kv-key input-block-level" type="text" value="<%=k%>" placeholder="key" /></div>
-            <div class="span1" style="text-align:center;">&rarr;</div>
-            <div class="span7"><input class="fd-kv-val input-block-level jstree-drop" type="text" value="<%=v%>" placeholder="value" /></div>
-            <div class="span1"><a href="#" class="btn fd-kv-remove-pair btn-small btn-danger<% if (k =='') { %> hide<% } %>"><i class="icon-remove"></i></a></div>
+    <% _.each(pairs, function (v, k) { _.each(_.isArray(v) ? v : [v], function (v) { %>
+        <div class="fd-kv-pair form-group">
+            <div class="col-sm-3">
+                <input class="fd-kv-key form-control" type="text" value="<%=k%>" placeholder="key" />
+            </div>
+            <div class="col-sm-1 fd-kv-arrow"><i class="fa fa-arrow-right"></i></div>
+            <div class="col-sm-7"><input class="fd-kv-val form-control jstree-drop" type="text" value="<%=v%>" placeholder="value" /></div>
+            <div class="col-sm-1">
+                <a href="#" class="btn fd-kv-remove-pair btn-sm btn-danger<% if (k =='') { %> hide<% } %>">
+                    <i class="fa fa-remove"></i>
+                </a>
+            </div>
         </div>
-    <% }); %>
-    <a href="#" class="btn fd-kv-add-pair hide"><i class="icon-plus"></i> Add Key&rarr;Value Pair</a>
+    <% }); }); %>
+    <a href="#" class="btn btn-default fd-kv-add-pair hide"><i class="fa fa-plus"></i> Add Key&rarr;Value Pair</a>
 </div>

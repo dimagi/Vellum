@@ -1,68 +1,95 @@
 define([
     'jquery',
+    'underscore',
     'vellum/debugutil',
-    'xpath',
-    'xpathmodels',
+    'vellum/atwho',
+    'vellum/richText',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
     'less!vellum/less-style/xpath-editor'
 ], function (
     $,
+    _,
     debug,
-    xpath,
-    xpathmodels,
+    atwho,
+    richText,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
 ) {
-    // Handlers for the simple expression editor
-    var simpleExpressions = {};
-    var operationOpts = [];
-    var expTypes = xpathmodels.XPathExpressionTypeEnum;
-    var BinOpHandler = {
-        toString: function(op, left, right) {
-            // make sure we wrap the vals in parens in case they were necessary
-            // todo, construct manually, and validate individual parts.
-            return "(" + left + ") " + 
-                xpathmodels.expressionTypeEnumToXPathLiteral(op) + 
-                " (" + right + ")";
-        },
-        typeLeftRight: function(expOp) {
-            return expOp;
-        }
-    };
-    var FunctionHandler = {
-        toString: function(op, left, right) {
-            return op + "(" + left + ", " + right + ")";
-        },
-        typeLeftRight: function(expOp) {
-            if (expOp.args.length !== 2) return false;
-            return {
-                type: expOp.id,
-                left: expOp.args[0],
-                right: expOp.args[1]
-            };
-        }
-    };
-    function addOp(expr, value, label) {
-        simpleExpressions[value] = expr;
-        operationOpts.push([label, value]);
-    }
-    addOp(BinOpHandler, expTypes.EQ, "is equal to");
-    addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
-    addOp(BinOpHandler, expTypes.LT, "is less than");
-    addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
-    addOp(BinOpHandler, expTypes.GT, "is greater than");
-    addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
-    addOp(FunctionHandler, "selected", "has selected value");
-
     function showXPathEditor($div, options) {
-        var editorContent = $div;
+        var editorContent = $div,
+            richTextOptions = {isExpression: true},
+            form = options.mug.form;
+        options = _.defaults(options, {
+            leftPlaceholder: "Drag question here",
+            rightPlaceholder: "Drag question here",
+        });
+
+        // Handlers for the simple expression editor
+        var simpleExpressions = {};
+        var operationOpts = [];
+        var expTypes = form.xpath.models.XPathExpressionTypeEnum;
+        var BinOpHandler = {
+            toString: function(op, left, right) {
+                // make sure we wrap the vals in parens in case they were necessary
+                // todo, construct manually, and validate individual parts.
+                return "(" + left + ") " + 
+                    form.xpath.models.expressionTypeEnumToXPathLiteral(op) + 
+                    " (" + right + ")";
+            },
+            typeLeftRight: function(expOp) {
+                return expOp;
+            }
+        };
+        var FunctionHandler = {
+            toString: function(op, left, right) {
+                return op + "(" + left + ", " + right + ")";
+            },
+            typeLeftRight: function(expOp) {
+                if (expOp.args.length !== 2) return false;
+                return {
+                    type: expOp.id,
+                    left: expOp.args[0],
+                    right: expOp.args[1]
+                };
+            }
+        };
+        function addOp(expr, value, label) {
+            value = form.xpath.models.expressionTypeEnumToXPathLiteral(value);
+            simpleExpressions[value] = expr;
+            operationOpts.push([label, value]);
+        }
+
+        addOp(BinOpHandler, expTypes.EQ, "is equal to");
+        addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
+        addOp(BinOpHandler, expTypes.LT, "is less than");
+        addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
+        addOp(BinOpHandler, expTypes.GT, "is greater than");
+        addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
+        addOp(FunctionHandler, "selected", "has selected value");
 
         var getExpressionInput = function () {
             return $div.find(".fd-xpath-editor-text");
         };
+
+        var setExpression = function(input, val) {
+            if (options.mug.supportsRichText()) {
+                richText.editor(input, form, richTextOptions).setValue(val);
+            } else {
+                input.val(val);
+            }
+        };
+
+        var getExpression = function(input) {
+            if (options.mug.supportsRichText()) {
+                return richText.editor(input, form, richTextOptions).getValue();
+            } else {
+                return input.val();
+            }
+        };
+
         var getValidationSummary = function () {
             return $div.find(".fd-xpath-validation-summary");
         };
@@ -72,6 +99,20 @@ define([
         var getTopLevelJoinSelect = function () {
             return $(editorContent.find(".top-level-join-select")[0]);
         };
+        var addAutocomplete = function (input, choices) {
+            if (choices) {
+                if (_.isFunction(choices)) {
+                    choices = choices();
+                }
+                atwho.questionAutocomplete(input, options.mug, {choices: choices});
+            }
+            else {
+                atwho.questionAutocomplete(input, options.mug, {
+                    property: options.path,
+                    useRichText: options.mug.supportsRichText(),
+                });
+            }
+        };
 
         var getExpressionFromSimpleMode = function () {
             // basic
@@ -79,8 +120,9 @@ define([
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
             pane.children().each(function() {
-                var left = $($(this).find(".left-question")[0]).val();
-                var right = $($(this).find(".right-question")[0]).val();
+                var left = getExpression($(this).find(".left-question")),
+                    right = getExpression($(this).find(".right-question"));
+
                 // ignore empty expressions
                 if (left === "" && right === "") {
                     return;
@@ -101,7 +143,7 @@ define([
         var getExpressionFromUI = function () {
             if ($div.find(".xpath-simple").hasClass('hide')) {
                 // advanced
-                return getExpressionInput().val();
+                return getExpression(getExpressionInput());
             } else {
                 return getExpressionFromSimpleMode();
             }
@@ -110,7 +152,7 @@ define([
         var validate = function (expr) {
             if (expr) {
                 try {
-                    var parsed = xpath.parse(expr);
+                    var parsed = form.xpath.parse(expr);
                     return [true, parsed];
                 } catch (err) {
                     return [false, err];
@@ -131,21 +173,36 @@ define([
 
             var isJoiningOp = function (subElement) {
                 // something that joins expressions
-                return (subElement instanceof xpathmodels.XPathBoolExpr);
+                return (subElement instanceof form.xpath.models.XPathBoolExpr);
             };
 
             var isExpressionOp = function (subElement) {
                 // something that can be put into an expression
-                return (subElement instanceof xpathmodels.XPathCmpExpr ||
-                        subElement instanceof xpathmodels.XPathEqExpr ||
+                return (subElement instanceof form.xpath.models.XPathCmpExpr ||
+                        subElement instanceof form.xpath.models.XPathEqExpr ||
                         simpleExpressions.hasOwnProperty(subElement.id));
             };
 
             var newExpressionUIElement = function (expOp) {
+                var tag = 'input', tagArgs = '';
+                if (options.mug.supportsRichText()) {
+                    tag = 'div';
+                    tagArgs = 'contenteditable="true"';
+                }
 
                 var $expUI = $(xpath_expression({
-                    operationOpts: operationOpts
+                    operationOpts: operationOpts,
+                    leftPlaceholder: options.leftPlaceholder,
+                    rightPlaceholder: options.rightPlaceholder,
+                    tag: tag,
+                    tagArgs: tagArgs,
                 }));
+
+                if (options.mug.supportsRichText()) {
+                    $expUI.find('.fd-input').each(function () {
+                        richText.editor($(this), form, richTextOptions);
+                    });
+                }
 
                 var getLeftQuestionInput = function () {
                     return $($expUI.find(".left-question")[0]);
@@ -157,25 +214,31 @@ define([
 
                 var validateExpression = function(item) {
                     options.change();
+                    var le = getExpression(getLeftQuestionInput()),
+                        re = getExpression(getRightQuestionInput());
 
-                    var le = getLeftQuestionInput().val(),
-                        re = getRightQuestionInput().val();
 
                     $expUI.find('.validation-results').addClass('hide');
 
                     if (le && validate(le)[0] && re && validate(re)[0]) {
                         $expUI.find('.validation-results.alert-success').removeClass('hide');
                     } else {
-                        $expUI.find('.validation-results.alert-error').removeClass('hide');
+                        $expUI.find('.validation-results.alert-danger').removeClass('hide');
                     }
                 };
 
                 var populateQuestionInputBox = function (input, expr, pairedExpr) {
-                    input.val(expr.toXPath());
+                    setExpression(input, expr.toXPath());
                 };
 
                 // add event handlers to validate the inputs
-                $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);
+                if (options.mug.supportsRichText()) {
+                    $expUI.find('.xpath-edit-node').each(function () {
+                        richText.editor($(this), form, richTextOptions).on('change', validateExpression);
+                    });
+                } else {
+                    $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);
+                }
 
                 $expUI.find('.xpath-delete-expression').click(function() {
                     $expUI.remove();
@@ -195,11 +258,15 @@ define([
                         if (!expOp) return false;
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
-                    $expUI.find('.op-select').val(xpathmodels.expressionTypeEnumToXPathLiteral(expOp.type));
+                    $expUI.find('.op-select').val(form.xpath.models.expressionTypeEnumToXPathLiteral(expOp.type));
                     // the population of the left can affect the right,
                     // so we need to update the reference
                     populateQuestionInputBox(getRightQuestionInput(), expOp.right, expOp.left);
                 }
+
+                addAutocomplete(getLeftQuestionInput(), options.leftAutocompleteChoices);
+                addAutocomplete(getRightQuestionInput(), options.rightAutocompleteChoices);
+
                 return $expUI;
             };
 
@@ -292,15 +359,18 @@ define([
                     $div.find('.fd-add-exp').click();
                 }
             } else {
-                showAdvancedMode(options.value);
+                if (options.mug.supportsRichText()) {
+                    showAdvancedMode(options.value);
+                } else {
+                    showAdvancedMode(form.normalizeXPath(options.value));
+                }
             }
-
-            $div.find(".fd-xpath-editor-text").val(options.value);
         };
 
         // toggle simple/advanced mode
         var showAdvancedMode = function (text, showNotice) {
-            getExpressionInput().val(text);
+            setExpression(getExpressionInput(), text);
+            addAutocomplete(getExpressionInput());
             getExpressionPane().empty();
 
             $div.find(".xpath-advanced").removeClass('hide');
@@ -326,17 +396,25 @@ define([
         };
 
         var initXPathEditor = function() {
+            var tag = 'textarea', tagArgs = 'rows="5"';
+            if (options.mug.supportsRichText()) {
+                tag = 'div';
+                tagArgs = 'contenteditable="true"';
+            }
+
             var $xpathUI = $(xpath_tpl({
                 topLevelJoinOpts: [
                     ["True when ALL of the expressions are true.", expTypes.AND],
                     ["True when ANY of the expressions are true.", expTypes.OR]
-                ]
+                ],
+                tag: tag,
+                tagArgs: tagArgs,
             }));
             editorContent.empty().append($xpathUI);
 
             $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
-                if (typeof window.ga !== "undefined") {
-                    window.ga('send', 'event', 'Form Builder', 'Edit Expression',
+                if (window.analytics) {
+                    window.analytics.usage('Form Builder', 'Edit Expression',
                               'Show Advanced Mode');
                 }
 
@@ -345,7 +423,7 @@ define([
             });
 
             $xpathUI.find('.fd-xpath-show-simple-button').click(function () {
-                showSimpleMode(getExpressionInput().val());
+                showSimpleMode(getExpression(getExpressionInput()));
             });
 
             $xpathUI.find('.fd-add-exp').click(function () {
@@ -363,23 +441,14 @@ define([
 
             $xpathUI.find('.fd-xpath-save-button').click(function() {
                 var uiExpression  = getExpressionFromUI();
-                getExpressionInput().val(uiExpression);
-                var results = validate(uiExpression),
-                    hasInstance = uiExpression.match('instance\\(');
-                if (results[0] || hasInstance) {
-                    if (hasInstance) {
-                        window.alert(
-                            "This expression is too complex for us to verify; " +
-                            "specifically, it makes use of the 'instance' " +
-                            "construct. Please be aware that if you use this " +
-                            "construct you're on your own in verifying that " +
-                            "your expression is correct.");
-                    }
+                setExpression(getExpressionInput(), uiExpression);
+                var results = validate(uiExpression);
+                if (results[0]) {
                     done(uiExpression);
                 } else {
                     getValidationSummary()
                         .html($(xpath_validation_errors({
-                            errors: results[1]
+                            errors: results[1].message
                         })))
                         .removeClass("hide");
                 }
@@ -388,10 +457,14 @@ define([
             $xpathUI.find('.fd-xpath-cancel-button').click(function () {
                 done(false);
             });
+            return $xpathUI;
         };
 
-        initXPathEditor();
+        var $xpathUI = initXPathEditor();
         updateXPathEditor(options);
+        if (options.onLoad) {
+            options.onLoad($xpathUI);
+        }
     }
 
     return {

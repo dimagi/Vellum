@@ -46,6 +46,30 @@
 .fcc-messaging:before {
   content: "\f018";
 }
+.fcc-chart-report:before {
+  content: "\f020";
+}
+.fcc-form-report:before {
+  content: "\f021";
+}
+.fcc-user-report:before {
+  content: "\f022";
+}
+.fcc-datatable-report:before {
+  content: "\f023";
+}
+.fcc-piegraph-report:before {
+  content: "\f024";
+}
+.fcc-survey:before {
+  content: "\f025";
+}
+.fcc-casemgt:before {
+  content: "\f026";
+}
+.fcc-blankapp:before {
+  content: "\f027";
+}
 .fcc-fd-text:before {
   content: "\f001";
 }
@@ -90,4 +114,22 @@
 }
 .fcc-fd-hash:before {
   content: "\f019";
+}
+.fcc-fd-external-case:before {
+  content: "\f028";
+}
+.fcc-fd-external-case-data:before {
+  content: "\f029";
+}
+.fcc-fd-expand:before {
+  content: "\f030";
+}
+.fcc-fd-collapse:before {
+  content: "\f031";
+}
+.fcc-fd-case-property:before {
+  content: "\f032";
+}
+.fcc-fd-edit-form:before {
+  content: "\f033";
 }

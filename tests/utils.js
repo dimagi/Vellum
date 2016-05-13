@@ -5,6 +5,9 @@ define([
     'jsdiff',
     'underscore',
     'jquery',
+    'vellum/copy-paste',
+    'vellum/tsv',
+    'vellum/widgets',
     'jquery.jstree',
     'jquery.vellum'
 ], function (
@@ -13,12 +16,20 @@ define([
     EquivalentXml,
     jsdiff,
     _,
-    $
+    $,
+    copypaste,
+    tsv,
+    widgets
 ) {
     var assert = chai.assert,
         savedForm = null,
-        saveCount = 0;
-    
+        saveCount = 0,
+        PASTE_HEADER = ["Form Builder clip", "version 1"];
+
+    // monkey-patch chai to use ===/!== instead of ==/!= in assert.equal
+    assert.equal = assert.strictEqual;
+    assert.notEqual = assert.notStrictEqual;
+
     function xmlEqual(str1, str2) {
         var xml1 = EquivalentXml.xml(str1),
             xml2 = EquivalentXml.xml(str2);
@@ -26,7 +37,10 @@ define([
     }
 
     function assertXmlEqual(actual, expected, opts) {
-        opts = opts || {};
+        opts = _.defaults(opts || {}, {
+            normalize_xmlns: false,
+            not: false,
+        });
         if (opts.normalize_xmlns) {
             var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
             actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
@@ -39,10 +53,8 @@ define([
         if (!result) {
             actual = cleanForDiff(actual);
             expected = cleanForDiff(expected);
-            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/,
-                    "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
-            assert(false, colorDiff(patch));
+            assertEqual(actual, expected,
+                "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
         }
     }
 
@@ -68,11 +80,7 @@ define([
         }
         var expected = Array.prototype.slice.call(arguments).join("\n") + "\n",
             actual = repr(call("jstree", "get_node", "#")) + "\n";
-        if (expected !== actual) {
-            var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/, "Unexpected jstree state");
-            assert(false, colorDiff(patch));
-        }
+        assertEqual(actual, expected, "Unexpected jstree state");
     }
 
     function assertTreeState(tree) {
@@ -91,9 +99,16 @@ define([
         }
         var expected = Array.prototype.slice.call(arguments, 1).join("\n") + "\n",
             actual = repr(tree.rootNode, 0) + "\n";
-        if (expected !== actual) {
+        assertEqual(actual, expected, "Unexpected tree state");
+    }
+
+    /**
+     * Assert equality, diff actual/expected if unequal
+     */
+    function assertEqual(actual, expected, message) {
+        if (actual !== expected) {
             var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
-            patch = patch.replace(/^Index:/, "Unexpected jstree state");
+            patch = patch.replace(/^Index:/, message || "Not equal:");
             assert(false, colorDiff(patch));
         }
     }
@@ -130,6 +145,12 @@ define([
         return call("getCurrentMugInput", property);
     }
 
+    function getWidget(name) {
+        var vellum = $("#vellum").vellum("get"),
+            target = $("[name=" + name + "]");
+        return widgets.util.getWidget(target, vellum);
+    }
+
     function assertInputCount(nameOrInputs, num, name) {
         if (_.isString(nameOrInputs)) {
             name = " for " + (name ? name + " " : "") + nameOrInputs;
@@ -148,8 +169,13 @@ define([
         if (opts.javaRosa && opts.javaRosa.langs) {
             vellum_options.javaRosa.langs = opts.javaRosa.langs;
         }
+        vellum_options.plugins = _.without(vellum_options.plugins, "atwho");
         if (opts.plugins) {
             vellum_options.plugins = opts.plugins;
+        }
+        if (vellum_options && vellum_options.features &&
+            _.isUndefined(vellum_options.features.disable_popovers)) {
+            vellum_options.features.disable_popovers = true;
         }
         vellum_options.core = vellum_options.core || {};
         var originalSaveUrl = vellum_options.core.saveUrl || function () {};
@@ -163,10 +189,7 @@ define([
         if (old) {
             old.destroy();
 
-            // clean up modal dialog artifacts
-            $('.fd-dialog-confirm').dialog("destroy");
-            $('body > div.ui-dialog, ' +
-              'body > div.modal, ' +
+            $('body > div.modal, ' +
               'body > div.modal-backdrop').remove();
         }
         vellum.empty().vellum(vellum_options);
@@ -196,17 +219,31 @@ define([
         return data.core.form; // return the Form object
     }
 
-    function clickQuestion(path) {
-        var node, mug = getMug(path);
-        if (!(mug && mug.ufid)) {
-            throw new Error("mug not found: " + path);
+    function paste(rows, errors, print) {
+        if (!_.isString(rows)) {
+            rows = tsv.tabDelimit([PASTE_HEADER].concat(rows));
         }
-        node = $("#" + mug.ufid + "_anchor");
-        if (!node.length) {
-            throw new Error("tree node not found: " + path);
-        }
-        $(node).click();
-        return node;
+        if (print) { window.console.log(rows); } // debugging helper
+        assert.deepEqual(copypaste.paste(rows), errors || []);
+    }
+
+    function clickQuestion() {
+        var mugs = [],
+            ufids = _.map(arguments, function (path) {
+                var mug = getMug(path);
+                if (!(mug && mug.ufid)) {
+                    throw new Error("mug not found: " + path);
+                }
+                mugs.push(mug);
+                return mug.ufid;
+            });
+        call("jstree", "deselect_all", true);
+        call("jstree", "select_node", ufids);
+        return mugs;
+    }
+
+    function selectAll() {
+        call("jstree", "select_all");
     }
 
     /**
@@ -235,7 +272,7 @@ define([
                     return children[0];
                 }
                 for (var i = 0; i < children.length; i++) {
-                    if (children[i].p.defaultValue === nodeID) {
+                    if (children[i].p.nodeID === nodeID) {
                         return children[i];
                     }
                 }
@@ -244,11 +281,16 @@ define([
         return mug;
     }
 
-    function deleteQuestion (path) {
-        var mug = getMug(path);
-        assert(mug, "mug not found: " + path);
-        call("getData").core.form.removeMugFromForm(mug);
-        assert(!getMug(path), "mug not removed: " + path);
+    function deleteQuestion () {
+        var mugs = _.map(arguments, function (path) {
+                var mug = getMug(path);
+                assert(mug, "mug not found: " + path);
+                return mug;
+            });
+        call("getData").core.form.removeMugsFromForm(mugs);
+        _.each(arguments, function (path) {
+            assert(!getMug(path), "mug not removed: " + path);
+        });
     }
 
     /**
@@ -277,8 +319,89 @@ define([
         call("jstree", "redraw_node", mug.ufid, true, false, false);
     }
 
+    function getMessages(mug) {
+        var messages = [],
+            last = null;
+        if (_.isString(mug)) {
+            var path = mug;
+            mug = getMug(path);
+            assert(mug, "mug not found: " + path);
+        }
+        mug.messages.each(function (msg, attr) {
+            if (attr !== last) {
+                messages.push(attr + ":");
+                last = attr;
+            }
+            messages.push("  - " + msg.message); // + " [" + msg.key + "]");
+        });
+        return messages.join("\n");
+    }
+
+    function findNode(tree, predicate, node) {
+        if (_.isString(predicate)) {
+            var text = predicate;
+            predicate = function (node) {
+                return node.text === text;
+            };
+        }
+        function find(node) {
+            var i, len, result;
+            if (predicate(node)) {
+                return node;
+            }
+            for (i = 0, len = node.children.length; i < len; i++) {
+                result = find(tree.get_node(node.children[i]));
+                if (result) {
+                    return result;
+                }
+            }
+            return null;
+        }
+        return find(node || tree.get_node("#"));
+    }
+
+    /**
+     * Report full stack trace on async callback error
+     *
+     * Wrap async callback functions with this function to report the
+     * full stack trace if they fail. It is recommended to only use this
+     * temporarily while debugging a test that is throwing a hard-to-
+     * trace error. It destroys pretty assertion diff output. Also,
+     * assertion errors thrown from within an async callback do include
+     * full stack trace information.
+     *
+     * Fixes the problem described in
+     * https://github.com/mochajs/mocha/issues/815
+     *
+     * Usage:
+     *
+     *  it("will always fail", function (done) {
+     *      someAsyncFunction(asyncatch(function (arg) {
+     *          doSomethingThatThrowsAnError();
+     *          done();
+     *      }));
+     *  });
+     */
+    function asyncatch(fn) {
+        return function () {
+            try {
+                var args = Array.prototype.slice.call(arguments);
+                return fn.apply(this, args);
+            } catch (err) {
+                throw err && err.stack ? new Error(err.stack) : err;
+            }
+        };
+    }
+
+    function markdownVisible() {
+        return $('.itext-block-label-group-default')
+            .find('.markdown-output')
+            .is(':visible');
+    }
+
     return {
         options: options,
+        asyncatch: asyncatch,
         init: init,
         call: call,
         loadXML: loadXML,
@@ -287,6 +410,8 @@ define([
         },
         getMug: getMug,
         getInput: getInput,
+        getWidget: getWidget,
+        assertEqual: assertEqual,
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,
         assertXmlNotEqual: assertXmlNotEqual,
@@ -318,14 +443,24 @@ define([
             });
             return mug;
         },
+        paste: paste,
         clickQuestion: clickQuestion,
+        selectAll: selectAll,
         deleteQuestion: deleteQuestion,
         saveButtonEnabled: saveButtonEnabled,
         expandGroup: expandGroup,
         collapseGroup: collapseGroup,
+        getMessages: getMessages,
+        findNode: findNode,
         isTreeNodeValid: function (mug) {
+            if (_.isString(mug)) {
+                var path = mug;
+                mug = getMug(path);
+                assert(mug, "mug not found: " + path);
+            }
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.children(".fd-tree-valid-alert-icon").length === 0;
-        }
+        },
+        markdownVisible: markdownVisible,
     };
 });

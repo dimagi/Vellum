@@ -10,9 +10,9 @@
 					<h1 />
 				</data>
 			</instance>
-			<bind nodeset="/data/q0" type="xsd:string" />
-			<bind nodeset="/data/q1" type="xsd:string" relevant="/data/q2 = 'missing'" />
-			<bind nodeset="/data/h1" calculate="/data/q3" />
+			<bind vellum:nodeset="#form/q0" nodeset="/data/q0" type="xsd:string" />
+			<bind vellum:nodeset="#form/q1" nodeset="/data/q1" type="xsd:string" relevant="/data/q2 = 'missing'" />
+			<bind vellum:nodeset="#form/h1" nodeset="/data/h1" calculate="/data/q3" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="q0-label">
@@ -34,10 +34,10 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/q0">
+		<input vellum:ref="#form/q0" ref="/data/q0">
 			<label ref="jr:itext('q0-label')" />
 		</input>
-		<input ref="/data/q1">
+		<input vellum:ref="#form/q1" ref="/data/q1">
 			<label ref="jr:itext('q1-label')" />
 		</input>
 	</h:body>

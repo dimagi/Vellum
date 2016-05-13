@@ -53,10 +53,10 @@ define([
             }
 
             if (mug.options.tagName !== "item") {
-                row.Question = form.getAbsolutePath(mug, true);
+                row.Question = mug.absolutePathNoRoot;
             } else {
-                row.Question = form.getAbsolutePath(mug.parentMug, true) +
-                                "-" + mug.p.defaultValue;
+                row.Question = mug.parentMug.absolutePathNoRoot +
+                                "-" + mug.p.nodeID;
             }
             row.Type = mug.options.typeName;
 

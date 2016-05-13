@@ -1,15 +1,17 @@
-require([
+define([
     'chai',
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/all_question_types.xml'
+    'text!static/all_question_types.xml',
+    'text!static/questionTypes/image-capture.xml'
 ], function (
     chai,
     $,
     _,
     util,
-    TEST_XML
+    TEST_XML,
+    IMAGE_CAPTURE_XML
 ) {
     var call = util.call,
         clickQuestion = util.clickQuestion,
@@ -33,13 +35,10 @@ require([
                 type: 'Text',
                 nodeId: 'question1',
                 attrs: {
-                    keyAttr: 'jr preload key value',
                     dataValue: 'default data value',
                     constraintAttr: '/data/question20 = 2',
                     relevantAttr: '/data/question20',
                     requiredAttr: true,
-                    preload: "jr preload",
-                    preloadParams: "jr preload param"
                 },
                 inputs: {
                     calculateAttr: 0
@@ -51,7 +50,7 @@ require([
                     // TODO add more input counts for each question type
                     calculateAttr: 0,
                     constraintAttr: 1,
-                    requiredAttr: 1,
+                    requiredAttr: 0,
                     relevantAttr: 1
                 }
             }, {
@@ -183,7 +182,7 @@ require([
                         onReady: function () {
                             done();
                         }
-                    }
+                    },
                 });
             });
 
@@ -244,9 +243,14 @@ require([
             // - automatic adding of choices when you add a select
             // - automatic generation of media paths for regular questions and choices
             util.init({
+                features: {
+                    templated_intents: true,
+                    custom_intents: true,
+                },
                 core: {
                     form: null,
                     onReady: function () {
+                        this.data.core.form.useRichText = false;
                         _.each(questionTypes, function (q, i) {
                             var prev = (i > 0 ? questionTypes[i - 1] : {}),
                                 prevId = q.clickBeforeAdd ||
@@ -258,6 +262,7 @@ require([
                             $(".btn:contains(image)").click();
                             $(".btn:contains(audio)").click();
                             $(".btn:contains(video)").click();
+                            $(".btn:contains(video-inline)").click();
                             $(".btn:contains(long)").click();
                             $(".btn:contains(short)").click();
                             $(".btn:contains(custom)").click();
@@ -297,27 +302,28 @@ require([
                         $("[name='itext-hin-label-custom']")
                             .val("question1 hin custom").change();
 
-                        clickQuestion("question3/item1");
+                        clickQuestion("question3/choice1");
                         addAllForms();
                         $("[name='itext-en-label-long']")
-                            .val("item1 long en").change();
+                            .val("choice1 long en").change();
                         $("[name='itext-hin-label-long']")
-                            .val("item1 long hin").change();
+                            .val("choice1 long hin").change();
                         $("[name='itext-en-label-short']")
-                            .val("item1 short en").change();
+                            .val("choice1 short en").change();
                         $("[name='itext-hin-label-short']")
-                            .val("item1 short hin").change();
+                            .val("choice1 short hin").change();
                         $("[name='itext-en-label-custom']")
-                            .val("item1 custom en").change();
+                            .val("choice1 custom en").change();
                         $("[name='itext-hin-label-custom']")
-                            .val("item1 custom hin").change();
+                            .val("choice1 custom hin").change();
 
                         clickQuestion("question22/question23/question7");
-                        $("[name='intent-app-id']").val("app_id").change();
-                        $("[name='intent-extra'] .fd-kv-key").val('key1').change();
-                        $("[name='intent-extra'] .fd-kv-val").val('value1').change();
-                        $("[name='intent-response'] .fd-kv-key").val('key2').change();
-                        $("[name='intent-response'] .fd-kv-val").val('value2').change();
+                        $("[name='property-androidIntentAppId']").val("").change();
+                        $("[name='property-androidIntentAppId-text']").val("app_id").change();
+                        $("[name='property-androidIntentExtra'] .fd-kv-key").val('key1').change();
+                        $("[name='property-androidIntentExtra'] .fd-kv-val").val('value1').change();
+                        $("[name='property-androidIntentResponse'] .fd-kv-key").val('key2').change();
+                        $("[name='property-androidIntentResponse'] .fd-kv-val").val('value2').change();
                         util.assertXmlEqual(
                             call('createXML'),
                             TEST_XML
@@ -352,6 +358,10 @@ require([
                     ["PhoneNumber", "Text"],
                     ["Select", "Text"],
                     ["MSelect", "Text"],
+                    ["Select", "SelectDynamic"],
+                    ["Select", "MSelectDynamic"],
+                    ["MSelect", "SelectDynamic"],
+                    ["MSelect", "MSelectDynamic"],
                     ["Select", "MSelect"],
                     ["MSelect", "Select"],
                     ["Select + Choices", "MSelect"],
@@ -362,14 +372,37 @@ require([
                     //["Text", "Repeat"],
                     //["Text", "FieldList"],
                     ["MSelect + Choices", "Text"],
-                    ["Select + Choices", "Text"]
+                    ["Select + Choices", "Text"],
+                    ["Select + Choices", "SelectDynamic"],
+                    ["Select + Choices", "MSelectDynamic"],
+                    ["MSelect + Choices", "SelectDynamic"],
+                    ["MSelect + Choices", "MSelectDynamic"],
                     //["Group", "Text"],
                     //["Repeat", "Text"],
                     //["FieldList", "Text"]
+                ],
+                questionWithoutDefaultAppearance = [
+                    "Text", "Select", "MSelect", "Audio", "Video", "Image",
+                ],
+                questionWithDefaultAppearance = {
+                    Trigger: "minimal",
+                    PhoneNumber: "numeric",
+                    Signature: "signature",
+                },
+                remove_appearance = [
+                    ["Trigger", questionWithoutDefaultAppearance],
+                    ["PhoneNumber", questionWithoutDefaultAppearance],
+                    ["Signature", questionWithoutDefaultAppearance],
+                ],
+                change_appearance = [
+                    ["Trigger", _.omit(questionWithDefaultAppearance, "Trigger")],
+                    ["PhoneNumber", _.omit(questionWithDefaultAppearance, "PhoneNumber")],
+                    ["Signature", _.omit(questionWithDefaultAppearance, "Signature")],
                 ];
 
             before(function (done) {
                 util.init({
+                    features: {rich_text: false },
                     core: {
                         onReady: function () {
                             done();
@@ -384,12 +417,19 @@ require([
                 var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to),
                     mug = addQuestion(from, nodeId);
                 if (!choices && from.indexOf("Select") > -1) {
-                    util.deleteQuestion(nodeId + "/item1");
-                    util.deleteQuestion(nodeId + "/item2");
+                    util.deleteQuestion(nodeId + "/choice1");
+                    util.deleteQuestion(nodeId + "/choice2");
                 }
                 assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
                 assert.equal(mug.__className, from, "wrong mug type");
                 return mug;
+            }
+
+            function tearDown(from, to) {
+                var choices = from.indexOf(" + Choices") > -1;
+                from = (choices ? from.replace(" + Choices", "") : from);
+                var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to);
+                util.deleteQuestion(nodeId);
             }
 
             _.each(changes, function (change) {
@@ -401,9 +441,10 @@ require([
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
 
-                    call("loadXML", call("createXML"));
+                    util.loadXML(call("createXML"));
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
+                    tearDown(from, to);
                 });
             });
 
@@ -422,25 +463,59 @@ require([
                     assert(ok, "Error not raised when changing " + from + " to " + to);
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, from.replace(" + Choices", ""));
+                    tearDown(from, to);
+                });
+            });
+
+            _.each(remove_appearance, function (change) {
+                var from = change[0];
+                _.each(change[1], function(to) {
+                    it("should remove appearance attribute when changing " + from + " to " + to, function () {
+                        var mug = setup(from, to);
+                        call("changeMugType", mug, to);
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        assert.equal(mug.p.appearance, undefined);
+
+                        call("loadXML", call("createXML"));
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        tearDown(from, to);
+                    });
+                });
+            });
+
+            _.each(change_appearance, function (change) {
+                var from = change[0];
+                _.each(change[1], function(newAppearance, to) {
+                    it("should change appearance attribute when changing " + from + " to " + to, function () {
+                        var mug = setup(from, to);
+                        call("changeMugType", mug, to);
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        assert.equal(mug.p.appearance, newAppearance);
+
+                        call("loadXML", call("createXML"));
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        tearDown(from, to);
+                    });
                 });
             });
         });
 
-        it("question type change survives save + load", function (done) {
-            function test() {
-                addQuestion("Text", "question");
-                var mug = call("getMugByPath", "/data/question");
+        it("question type change survives save + load", function () {
+            util.loadXML("");
+            addQuestion("Text", "question");
+            var mug = call("getMugByPath", "/data/question");
 
-                call("changeMugType", mug, "Trigger");
+            call("changeMugType", mug, "Trigger");
 
-                util.saveAndReload(function () {
-                    // verify type change
-                    mug = call("getMugByPath", "/data/question");
-                    assert.equal(mug.__className, "Trigger");
-                    done();
-                });
-            }
-            util.init({core: {onReady: test}});
+            util.saveAndReload(function () {
+                // verify type change
+                mug = call("getMugByPath", "/data/question");
+                assert.equal(mug.__className, "Trigger");
+            });
         });
 
         it("should allow user to view longs but not add them", function() {
@@ -476,10 +551,58 @@ require([
             assert.equal($options.length, 1);
             assert.equal($options.length, $options.filter("[data-qtype*='Select']").length);
 
-            util.deleteQuestion("question1/item1");
-            util.deleteQuestion("question1/item2");
+            util.deleteQuestion("question1/choice1");
+            util.deleteQuestion("question1/choice2");
             util.clickQuestion("question1");
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
+        });
+
+        it("should show error on delete validation condition but not message", function() {
+            util.loadXML("");
+            var text = util.addQuestion("Text", "text");
+            text.p.constraintAttr = "a = b";
+            text.p.constraintMsgItext.set("A != B");
+            text.p.constraintAttr = "";
+            assert(!util.isTreeNodeValid(text), "question should not be valid");
+        });
+
+        it("should require a repeat_count when inside of a question list", function () {
+            util.loadXML("");
+            util.addQuestion("FieldList", "fieldlist");
+            var repeat = util.addQuestion("Repeat", "repeat");
+            assert.notStrictEqual(repeat.spec.repeat_count.validationFunc(repeat), "pass",
+                                  "question should not be valid");
+        });
+
+        it("should require a repeat_count when inside of a group in a question list", function () {
+            util.loadXML("");
+            util.addQuestion("FieldList", "fieldlist");
+            util.addQuestion("Group", "group");
+            var repeat = util.addQuestion("Repeat", "repeat");
+            assert.notStrictEqual(repeat.spec.repeat_count.validationFunc(repeat), "pass",
+                                  "question should not be valid");
+        });
+
+        it("should not require a repeat_count when inside of a group", function () {
+            util.loadXML("");
+            util.addQuestion("Group", "group");
+            var repeat = util.addQuestion("Repeat", "repeat");
+            assert.strictEqual(repeat.spec.repeat_count.validationFunc(repeat), "pass",
+                                  "question should be valid");
+        });
+    });
+
+    describe("Image Questions", function() {
+        it("should default to small image size", function() {
+            util.loadXML("");
+            var image = util.addQuestion("Image", 'image');
+            assert.strictEqual(image.p.imageSize, 250);
+        });
+
+        it("should select original size if there is no option", function() {
+            util.loadXML(IMAGE_CAPTURE_XML);
+            var image = call("getMugByPath", "/data/image");
+            assert.strictEqual(image.p.imageSize, '');
         });
     });
 });
