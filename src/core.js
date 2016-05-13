@@ -1160,7 +1160,7 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
-        var form, _this = this;
+        var form, _this = this, qId = window.location.hash;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
@@ -1181,7 +1181,7 @@ define([
         form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
-            _this._populateTree();
+            _this._populateTree(qId);
         }
         datasources.getDataSources(function (data) {
             form.updateKnownInstances(
@@ -1273,7 +1273,7 @@ define([
         }
     };
 
-    fn._populateTree = function () {
+    fn._populateTree = function (qId) {
         // NOTE: this performs the final step in the mug parsing process.
         // It should only be called once after a new XForm is loaded.
         var _this = this,
@@ -1290,7 +1290,6 @@ define([
             }
         });
 
-        var qId = window.location.hash;
         if (qId) {
             var mug = _this.getMugByPath(qId);
             if (mug) {
