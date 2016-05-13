@@ -1290,16 +1290,16 @@ define([
             }
         });
 
-        var qId = window.location.hash.substr(1);
+        var qId = window.location.hash;
         if (qId) {
             var mug = _this.getMugByPath(qId);
             if (mug) {
                 mug.select();
             } else {
-                this.selectSomethingOrHideProperties(true);
+                _this.selectSomethingOrHideProperties(true);
             }
         } else {
-            this.selectSomethingOrHideProperties(true);
+            _this.selectSomethingOrHideProperties(true);
         }
 
     };
