@@ -1,5 +1,4 @@
-/*jshint multistr: true */
-require([
+requirejs([
     'chai',
     'jquery',
     'underscore',
