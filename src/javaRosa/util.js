@@ -263,7 +263,7 @@ define([
         }
     };
 
-    var outputToXPathOrHashtag = function(functionName) {
+    function _outputToXPathOrHashtag (functionName) {
         return function (text, xpathParser) {
             if (text) {
                 text = $("<div />").append(text);
@@ -277,7 +277,7 @@ define([
             }
             return text;
         };
-    };
+    }
 
 
     return {
@@ -292,6 +292,7 @@ define([
         insertOutputRef: insertOutputRef,
         looksLikeMarkdown: looksLikeMarkdown,
         parseXLSItext: parseXLSItext,
-        outputToXPathOrHashtag: outputToXPathOrHashtag,
+        outputToXPath: _outputToXPathOrHashtag('toXPath'),
+        outputToHashtag: _outputToXPathOrHashtag('toHashtag'),
     };
 });
