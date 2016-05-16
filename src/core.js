@@ -864,7 +864,7 @@ define([
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
                 _this.activateQuestionTypeGroup(mug);
-                window.location.hash = '#' + mug.hashtagPath;
+                window.history.replaceState(null, null, mug.hashtagPath);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -1160,7 +1160,7 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
-        var form, _this = this, qId = window.location.hash.substr(1);
+        var form, _this = this, qId = window.location.hash;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
@@ -2098,7 +2098,7 @@ define([
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
         form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
-        window.location.hash = '#' + mug.hashtagPath;
+        window.history.replaceState(null, null, mug.hashtagPath);
     };
 
     fn.duplicateMugProperties = function(mug) {};
