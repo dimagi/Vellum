@@ -1290,17 +1290,8 @@ define([
             }
         });
 
-        if (qId) {
-            var mug = _this.getMugByPath(qId);
-            if (mug) {
-                _this.selectSomethingOrHideProperties(true, mug.ufid);
-            } else {
-                _this.selectSomethingOrHideProperties(true);
-            }
-        } else {
-            _this.selectSomethingOrHideProperties(true);
-        }
-
+        var mug = qId && _this.getMugByPath(qId) || undefined;
+        _this.selectSomethingOrHideProperties(true, mug && mug.ufid);
     };
 
     fn.selectSomethingOrHideProperties = function (forceDeselect, ufid) {
@@ -1311,8 +1302,11 @@ define([
         if (!this.jstree('get_selected').length) {
             // if there's any nodes in the tree, just select the first
             var all_nodes = this.data.core.$tree.find("li"),
+                selected;
+            if (ufid) {
                 selected = all_nodes.filter('[id= ' + ufid + ']');
-            if (selected.length > 0) {
+            }
+            if (selected && selected.length > 0) {
                 this.jstree('select_node', selected[0]);
                 return true;
             } else if (all_nodes.length > 0) {
