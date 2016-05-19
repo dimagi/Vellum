@@ -48,6 +48,12 @@ define([
                 name: "Breath Counter",
                 id: "org.commcare.respiratory.BREATHCOUNT",
             },
+            {
+                icon: "icon-vellum-android-intent",
+                name: "Fingerprint Scanner",
+                id: "com.simprints.id.REGISTER",
+                mime: "text/plain",
+            },
         ];
 
     describe("The intent manager plugin", function() {
@@ -155,6 +161,14 @@ define([
 
             it("should not show validation error on question add", function() {
                 assert.strictEqual(mug.spec.androidIntentAppId.validationFunc(mug), 'pass');
+            });
+
+            it("should write the mime/type if supplied", function() {
+                $("[name=property-androidIntentAppId]").val("com.simprints.id.REGISTER").change();
+                var xml = util.call("createXML"),
+                    $xml = $($.parseXML(xml)),
+                    type = $xml.find('h\\:head, head').children("odkx\\:intent, intent").attr('type');
+                assert.strictEqual(type, 'text/plain');
             });
 
             _.each(templates, function (temp) {
