@@ -153,6 +153,12 @@ define(["underscore"], function (_) {
                     name: "Breath Counter",
                     id: "org.commcare.respiratory.BREATHCOUNT",
                 },
+                {
+                    icon: "icon-vellum-android-intent",
+                    name: "Fingerprint Scanner",
+                    id: "com.simprints.id.REGISTER",
+                    mime: "text/plain",
+                },
             ],
         },
         itemset: {
