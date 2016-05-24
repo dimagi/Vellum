@@ -57,7 +57,7 @@ define([
      *                  category: sent to analytics
      *                  insertTpl: string to add to input when question is selected
      *                  property: sent to analytics
-     *                  useRichText: use rich text editor insert method
+     *                  noRichText: skip rich text editor insert method
      *                  outputValue: use output value in the template
      */
     that.questionAutocomplete = function ($input, mug, options) {
@@ -70,11 +70,11 @@ define([
             insertTpl: '${name}',
             property: '',
             outputValue: false,
-            useRichText: false,
+            noRichText: true,
             functionOverrides: {},
         });
 
-        if (options.useRichText) {
+        if (!options.noRichText) {
             options.insertTpl = '${name}';
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
@@ -138,7 +138,7 @@ define([
             };
 
             $input.atwho(_atWhoOptions('/data/'));
-            if (options.useRichText) {
+            if (!options.noRichText) {
                 $input.atwho(_atWhoOptions('#'));
             }
         }

@@ -177,7 +177,7 @@ define([
                 insertTpl: '<output value="${name}" />',
                 property: "labelItext",
                 outputValue: true,
-                useRichText: mug.supportsRichText(),
+                noRichText: !mug.supportsRichText(),
             });
         }
 

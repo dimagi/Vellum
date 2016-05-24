@@ -431,7 +431,7 @@ define([
 
         atwho.questionAutocomplete(widget.input, mug, {
             property: options.path,
-            useRichText: mug.supportsRichText()
+            noRichText: !mug.supportsRichText()
         });
 
         widget.hasLogicReferences = true;
@@ -445,7 +445,7 @@ define([
             path = options.widgetValuePath || options.path,
             id = options.id || 'property-' + path;
         widget.definition = mug.p.getDefinition(options.path);
-        options.noRichText = true;
+        options.noRichText = false;
 
         widget.mugValue = options.mugValue || function (mug, value) {
             if (arguments.length === 1) {
