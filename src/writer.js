@@ -88,7 +88,7 @@ define([
         xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
         // todo: remove writeIgnoreRichText once bubbles is released
         // Here for future compatibility
-        if (form.writeIgnoreRichText && form.noRichText === true) {
+        if (form.writeIgnoreRichText && form.noRichText) {
             xmlWriter.writeAttributeString("vellum:ignore", 'richText');
         }
         if (form.noMarkdown) {

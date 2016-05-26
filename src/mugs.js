@@ -480,7 +480,7 @@ define([
             return this.parentMug && this.parentMug.isInRepeat();
         },
         supportsRichText: function() {
-            return this.options.richText && this.form.noRichText === false;
+            return this.options.richText && !this.form.noRichText;
         }
     };
 
