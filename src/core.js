@@ -747,7 +747,7 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            if (!widgets.util.getWidget(target, this).options.noRichText && _this.data.core.form.richText) {
+            if (widgets.util.getWidget(target, this).options.richText && _this.data.core.form.richText) {
                 richText.editor(target).insertExpression(path);
             } else {
                 target.val(target.val() + path).change();

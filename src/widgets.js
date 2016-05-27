@@ -20,7 +20,7 @@ define([
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
-        options.noRichText = false;
+        options.richText = true;
         widget.options = options;
         widget.mug = mug;
         widget.id = options.id;
@@ -446,7 +446,7 @@ define([
             path = options.widgetValuePath || options.path,
             id = options.id || 'property-' + path;
         widget.definition = mug.p.getDefinition(options.path);
-        options.noRichText = true;
+        options.richText = false;
 
         widget.mugValue = options.mugValue || function (mug, value) {
             if (arguments.length === 1) {
