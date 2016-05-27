@@ -432,7 +432,7 @@ define([
 
         atwho.questionAutocomplete(widget.input, mug, {
             property: options.path,
-            noRichText: !mug.supportsRichText()
+            useRichText: mug.supportsRichText()
         });
 
         widget.hasLogicReferences = true;

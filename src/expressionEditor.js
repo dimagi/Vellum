@@ -109,7 +109,7 @@ define([
             else {
                 atwho.questionAutocomplete(input, options.mug, {
                     property: options.path,
-                    noRichText: !options.mug.supportsRichText(),
+                    useRichText: options.mug.supportsRichText(),
                 });
             }
         };
