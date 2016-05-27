@@ -20,6 +20,7 @@ define([
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
+        options.noRichText = false;
         widget.options = options;
         widget.mug = mug;
         widget.id = options.id;

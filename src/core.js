@@ -747,10 +747,7 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            if (!widgets.util.getWidget(target, this).options.noRichText &&
-                ((!mug && _this.data.core.form.noRichText !== false &&
-                 this.opts().features.rich_text) ||
-                 (mug && mug.supportsRichText()))) {
+            if (!widgets.util.getWidget(target, this).options.noRichText && !_this.data.core.form.noRichText) {
                 richText.editor(target).insertExpression(path);
             } else {
                 target.val(target.val() + path).change();
