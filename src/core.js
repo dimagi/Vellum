@@ -647,7 +647,7 @@ define([
         if (this.opts().features.rich_text) {
             formProperties.push({
                 label: "Use Raw References",
-                slug: "noRichText",
+                slug: "richText",
                 type: "checkbox",
                 value: function(jq, val) {
                     return val ? jq.prop('checked', val) : jq.prop('checked');
@@ -747,7 +747,7 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            if (!widgets.util.getWidget(target, this).options.noRichText && !_this.data.core.form.noRichText) {
+            if (!widgets.util.getWidget(target, this).options.noRichText && _this.data.core.form.richText) {
                 richText.editor(target).insertExpression(path);
             } else {
                 target.val(target.val() + path).change();
@@ -1171,9 +1171,9 @@ define([
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
         if (this.opts().features.rich_text) {
-            form.noRichText = _.isBoolean(form.noRichText) ? form.noRichText : false;
+            form.richText = _.isBoolean(form.richText) ? form.richText : true;
         } else {
-            form.noRichText = true;
+            form.richText = false;
         }
         form.writeIgnoreRichText = this.opts().features.rich_text;
         form.noMarkdown = form.noMarkdown || false;

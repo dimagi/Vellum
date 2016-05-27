@@ -68,7 +68,7 @@ define([
                 name: mug.absolutePath,
                 hashtagPath: mug.hashtagPath,
                 absolutePath: mug.absolutePath,
-                displayPath: mug.form.noRichText ? mug.absolutePath : mug.hashtagPath,
+                displayPath: mug.form.richText ? mug.hashtagPath : mug.absolutePath,
                 icon: mug.options.icon,
                 questionId: mug.p.nodeID,
                 displayLabel: util.truncate(defaultLabel),
@@ -81,7 +81,7 @@ define([
 
     function generateNewFuseData (form) {
         var caseData = [];
-        if (form.vellum.data.core.databrowser && !form.noRichText) {
+        if (form.vellum.data.core.databrowser && form.richText) {
             caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
              .map(function(absolutePath, hashtag) {
                  return {

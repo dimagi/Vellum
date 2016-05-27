@@ -464,7 +464,7 @@ define([
                     hashtag = parsed.toHashtag(),
                     xpath_ = parsed.toXPath(),
                     ret = $("<output>");
-                if (form_.noRichText || xpath_ === hashtag) {
+                if (!form_.richText || xpath_ === hashtag) {
                     return ret.attr(key, xpath_)[0].outerHTML;
                 } else {
                     return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;

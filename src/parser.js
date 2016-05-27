@@ -58,9 +58,9 @@ define([
             form.formName = $(title).text();
         }
 
-        form.noRichText = false;
+        form.richText = true;
         if(xml.find('[vellum\\:ignore=richText]').length > 0) {
-            form.noRichText = true;
+            form.richText = false;
         }
         if(xml.find('[vellum\\:ignore=markdown]').length > 0) {
             form.noMarkdown = true;
