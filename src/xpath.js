@@ -13,6 +13,10 @@ define([
                     if (hashtagToXPath.hasOwnProperty(hashtagExpr)) {
                         return hashtagToXPath[hashtagExpr];
                     }
+                    var p = hashtagExpr.replace(/\/[^\/]*$/, "/");
+                    if (hashtagToXPath.hasOwnProperty(p)) {
+                        return hashtagToXPath[p](hashtagExpr.replace(/.*\//, ""));
+                    }
                     return hashtagExpr;
                 },
                 toHashtag: function (xpath_) {

@@ -389,9 +389,11 @@ define([
                         classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                     };
                 } else {
-                    return {
-                        classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
-                    };
+                    if (form.isValidHashtag(form.normalizeHashtag(xpath).replace(/\/[^\/]*$/, "/"))) {
+                        return {
+                            classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
+                        };
+                    }
                 }
             }
 

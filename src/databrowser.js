@@ -146,6 +146,11 @@ define([
                     var hashtagPath = '#case/' + source.id + '/' + id;
                     addHashtag(hashtagPath, path, vellum);
                     path = hashtagPath;
+                    if (parentPath) {
+                        addHashtag('#case/' + source.id + '/', function(prop) {
+                            return parentPath + "/" + prop;
+                        }, vellum);
+                    }
                 }
                 return {
                     text: tree.name,
