@@ -383,10 +383,16 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (CASE_REF_REGEX.test(xpath) && form.isValidHashtag(xpath)) {
-                return {
-                    classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
-                };
+            if (CASE_REF_REGEX.test(xpath)) {
+                if (form.isValidHashtag(xpath)) {
+                    return {
+                        classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
+                    };
+                } else {
+                    return {
+                        classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
+                    };
+                }
             }
 
             var icon = form.getIconByPath(xpath);
