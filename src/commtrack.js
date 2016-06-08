@@ -1,19 +1,15 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
     'vellum/mugs',
-    'vellum/parser',
     'vellum/tree',
     'vellum/util',
     'vellum/widgets',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
     mugs,
-    parser,
     Tree,
     util,
     widgets
@@ -130,13 +126,14 @@ define([
             },
             getBindList: function (mug) {
                 return [{
-                    nodeset: mug.absolutePath,
+                    nodeset: mug.hashtagPath,
                     relevant: mug.p.relevantAttr,
                 }, {
-                    nodeset: mug.absolutePath + "/entry/@quantity",
+                    nodeset: mug.hashtagPath + "/entry/@quantity",
                     calculate: mug.p.quantity,
                 }];
             },
+            isHashtaggable: false,
             spec: {
                 date: {
                     visibility: 'hidden',
@@ -183,7 +180,7 @@ define([
                 },
             },
             getSetValues: function (mug) {
-                var path = mug.absolutePath,
+                var path = mug.hashtagPath,
                     event = mug.isInRepeat() ? "jr-insert" : "xforms-ready",
                     ret = [];
 
@@ -221,7 +218,7 @@ define([
                 mug.p.sectionId = "";
                 mug.p.entryId = "";
                 mug.p.quantity = "";
-                mug.p.date = "/data/meta/timeEnd";
+                mug.p.date = "now()";
                 addLedgerDBInstance(mug, form);
             },
             spec: {
@@ -298,7 +295,7 @@ define([
                 mug.p.sectionId = "";
                 mug.p.entryId = "";
                 mug.p.quantity = "";
-                mug.p.date = "/data/meta/timeEnd";
+                mug.p.date = "now()";
                 addLedgerDBInstance(mug, form);
             },
             spec: {
@@ -469,7 +466,7 @@ define([
     function serializeNodeId(value, key, mug, data) {
         var parent = mug.parentMug,
             path = parent ?
-                mug.form.getAbsolutePath(parent, true) + "/" : "/";
+                mug.absolutePathNoRoot + "/" : "/";
         data.id = path + mug.p.nodeID;
     }
 });

@@ -3,15 +3,15 @@ define([
     'underscore',
     'jsdiff',
     'vellum/markdown',
+    'vellum/escapedHashtags',
     'jquery',
-    'jquery.bootstrap-popout',
-    'jquery.bootstrap-stickyover',
     'vellum/jquery-extensions'
 ], function (
     langCodes,
     _,
     jsdiff,
     markdown,
+    escapedHashtags,
     $
 ) {
     RegExp.escape = function(s) {
@@ -38,10 +38,6 @@ define([
         return error && error.stack ? error.stack : String(error);
     };
 
-    that.getTemplateObject = function (selector, params) {
-        return $(_.template($(selector).text(), params));
-    };
-    
     that.validAttributeRegex = /^[^<&'">]*$/;
     that.invalidAttributeRegex = /[<&'">]/;
 
@@ -153,8 +149,11 @@ define([
         return that;
     };
 
-    that.pluralize = function (noun, n) {
-        return noun + (n !== 1 ? 's' : '');
+    /**
+     * Escape string for use as HTML. May alter whitespace within string.
+     */
+    that.escape = function (string) {
+        return $("<div>").text(string).html();
     };
 
     /* jshint bitwise: false */
@@ -288,6 +287,56 @@ define([
     };
 
     that.markdown = markdown;
+
+    that.truncate = function (label, length) {
+        length = length || 25;
+        if (label && label.length > length) {
+            return label.slice(0, length) + '&hellip;';
+        }
+        return label;
+    };
+
+    that.writeHashtags = function (xmlWriter, key, hashtagOrXPath, mug) {
+        if (!_.isString(hashtagOrXPath)) {
+            // don't try to parse a value that doesn't exist
+            return;
+        } else if (hashtagOrXPath === "" || (mug.options && mug.options.ignoreHashtags)) {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+            return;
+        }
+
+        var form = mug.form,
+            vellumKey = key.replace(':', '__'),
+            xpath_, hashtag;
+        try {
+            var expr = form.xpath.parse(hashtagOrXPath);
+            xpath_ = expr.toXPath();
+            hashtag = expr.toHashtag();
+        } catch (err) {
+            if (form.useRichText ) {
+                xmlWriter.writeAttributeString('vellum:' + vellumKey, "#invalid/xpath " + hashtagOrXPath);
+            }
+            xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
+                return mug.form.normalizeXPath(hashtag);
+            }));
+            return;
+        }
+
+        if (hashtag !== xpath_) {
+            if (form.useRichText ) {
+                    xmlWriter.writeAttributeString('vellum:' + vellumKey, hashtag);
+            }
+            xmlWriter.writeAttributeString(key, xpath_);
+        } else {
+            xmlWriter.writeAttributeString(key, hashtagOrXPath);
+        }
+    };
+
+    that.isRightToLeftLanguage = function (lang) {
+        return _.contains([
+            'ara', 'arc', 'div', 'fas', 'heb', 'pan', 'pus', 'snd', 'uig', 'urd', 'yid',
+        ], lang);
+    };
 
     return that;
 });

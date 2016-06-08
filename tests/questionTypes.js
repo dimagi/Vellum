@@ -1,4 +1,4 @@
-require([
+define([
     'chai',
     'jquery',
     'underscore',
@@ -183,7 +183,6 @@ require([
                             done();
                         }
                     },
-                    features: {rich_text: false }
                 });
             });
 
@@ -245,13 +244,13 @@ require([
             // - automatic generation of media paths for regular questions and choices
             util.init({
                 features: {
-                    rich_text: false,
                     templated_intents: true,
                     custom_intents: true,
                 },
                 core: {
                     form: null,
                     onReady: function () {
+                        this.data.core.form.useRichText = false;
                         _.each(questionTypes, function (q, i) {
                             var prev = (i > 0 ? questionTypes[i - 1] : {}),
                                 prevId = q.clickBeforeAdd ||
@@ -263,6 +262,7 @@ require([
                             $(".btn:contains(image)").click();
                             $(".btn:contains(audio)").click();
                             $(".btn:contains(video)").click();
+                            $(".btn:contains(video-inline)").click();
                             $(".btn:contains(long)").click();
                             $(".btn:contains(short)").click();
                             $(".btn:contains(custom)").click();
@@ -358,6 +358,10 @@ require([
                     ["PhoneNumber", "Text"],
                     ["Select", "Text"],
                     ["MSelect", "Text"],
+                    ["Select", "SelectDynamic"],
+                    ["Select", "MSelectDynamic"],
+                    ["MSelect", "SelectDynamic"],
+                    ["MSelect", "MSelectDynamic"],
                     ["Select", "MSelect"],
                     ["MSelect", "Select"],
                     ["Select + Choices", "MSelect"],
@@ -368,10 +372,32 @@ require([
                     //["Text", "Repeat"],
                     //["Text", "FieldList"],
                     ["MSelect + Choices", "Text"],
-                    ["Select + Choices", "Text"]
+                    ["Select + Choices", "Text"],
+                    ["Select + Choices", "SelectDynamic"],
+                    ["Select + Choices", "MSelectDynamic"],
+                    ["MSelect + Choices", "SelectDynamic"],
+                    ["MSelect + Choices", "MSelectDynamic"],
                     //["Group", "Text"],
                     //["Repeat", "Text"],
                     //["FieldList", "Text"]
+                ],
+                questionWithoutDefaultAppearance = [
+                    "Text", "Select", "MSelect", "Audio", "Video", "Image",
+                ],
+                questionWithDefaultAppearance = {
+                    Trigger: "minimal",
+                    PhoneNumber: "numeric",
+                    Signature: "signature",
+                },
+                remove_appearance = [
+                    ["Trigger", questionWithoutDefaultAppearance],
+                    ["PhoneNumber", questionWithoutDefaultAppearance],
+                    ["Signature", questionWithoutDefaultAppearance],
+                ],
+                change_appearance = [
+                    ["Trigger", _.omit(questionWithDefaultAppearance, "Trigger")],
+                    ["PhoneNumber", _.omit(questionWithDefaultAppearance, "PhoneNumber")],
+                    ["Signature", _.omit(questionWithDefaultAppearance, "Signature")],
                 ];
 
             before(function (done) {
@@ -399,6 +425,13 @@ require([
                 return mug;
             }
 
+            function tearDown(from, to) {
+                var choices = from.indexOf(" + Choices") > -1;
+                from = (choices ? from.replace(" + Choices", "") : from);
+                var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to);
+                util.deleteQuestion(nodeId);
+            }
+
             _.each(changes, function (change) {
                 var from = change[0],
                     to = change[1];
@@ -408,9 +441,10 @@ require([
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
 
-                    call("loadXML", call("createXML"));
+                    util.loadXML(call("createXML"));
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, to);
+                    tearDown(from, to);
                 });
             });
 
@@ -429,6 +463,43 @@ require([
                     assert(ok, "Error not raised when changing " + from + " to " + to);
                     mug = util.getMug(mug.p.nodeID);
                     assert.equal(mug.__className, from.replace(" + Choices", ""));
+                    tearDown(from, to);
+                });
+            });
+
+            _.each(remove_appearance, function (change) {
+                var from = change[0];
+                _.each(change[1], function(to) {
+                    it("should remove appearance attribute when changing " + from + " to " + to, function () {
+                        var mug = setup(from, to);
+                        call("changeMugType", mug, to);
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        assert.equal(mug.p.appearance, undefined);
+
+                        call("loadXML", call("createXML"));
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        tearDown(from, to);
+                    });
+                });
+            });
+
+            _.each(change_appearance, function (change) {
+                var from = change[0];
+                _.each(change[1], function(newAppearance, to) {
+                    it("should change appearance attribute when changing " + from + " to " + to, function () {
+                        var mug = setup(from, to);
+                        call("changeMugType", mug, to);
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        assert.equal(mug.p.appearance, newAppearance);
+
+                        call("loadXML", call("createXML"));
+                        mug = util.getMug(mug.p.nodeID);
+                        assert.equal(mug.__className, to);
+                        tearDown(from, to);
+                    });
                 });
             });
         });

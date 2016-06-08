@@ -1,4 +1,5 @@
 define([
+    'tpl!vellum/templates/ui_element',
     'tpl!vellum/templates/widget_control_keyvalue',
     'tpl!vellum/templates/widget_control_message',
     'underscore',
@@ -6,23 +7,16 @@ define([
     'vellum/atwho',
     'vellum/util',
     'vellum/richText',
-    'ckeditor',
-    'ckeditor-jquery'
 ], function (
+    ui_element,
     widget_control_keyvalue,
     widget_control_message,
     _,
     $,
     atwho,
     util,
-    richTextUtils,
-    CKEDITOR
+    richTextUtils
 ) {
-    CKEDITOR.config.allowedContent = true;
-    CKEDITOR.config.customConfig = '';
-    CKEDITOR.config.title = false;
-    CKEDITOR.config.extraPlugins = 'bubbles';
-
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
@@ -43,7 +37,7 @@ define([
                 return !mug.spec[widget.path].enabled(mug);
             }
 
-            return mug.form.vellum.isPropertyLocked(mug.absolutePath,
+            return mug.form.vellum.isPropertyLocked(mug.hashtagPath,
                                                     widget.path);
         };
 
@@ -150,7 +144,7 @@ define([
 
         widget.getMessagesContainer = function () {
             return widget.getControl()
-                    .closest(".widget.control-group")
+                    .closest(".widget")
                     .find(".messages:last");
         };
 
@@ -159,9 +153,15 @@ define([
         };
 
         widget.refreshMessages = function () {
-            widget.getMessagesContainer()
-                .empty()
-                .append(widget.getMessages(mug, path));
+            var messages = widget.getMessages(mug, path);
+            var $container = widget.getMessagesContainer();
+            $container.empty();
+            if (messages.length) {
+                $container.append(messages);
+                $container.removeClass("hide");
+            } else {
+                $container.addClass("hide");
+            }
         };
 
         mug.on("messages-changed",
@@ -182,10 +182,14 @@ define([
     var text = function (mug, options) {
         var widget = normal(mug, options),
             input = widget.input;
-        input.attr("type", "text").addClass('input-block-level');
+        input.attr("type", "text").addClass('form-control');
 
         if (options.placeholder) {
             input.attr('placeholder', options.placeholder);
+        }
+
+        if (util.isRightToLeftLanguage(options.language)) {
+            input.attr('dir', 'rtl');
         }
 
         widget.setValue = function (value) {
@@ -196,7 +200,11 @@ define([
 
             var position = util.getCaretPosition(input[0]);
             var oldvalue = input.val();
-            input.val(value);
+            if (value && widget.hasLogicReferences) {
+                input.val(mug.form.normalizeXPath(value));
+            } else {
+                input.val(value);
+            }
 
             // If this input has focus and value hasn't changed much,
             // keep the cursor in the same position
@@ -206,7 +214,13 @@ define([
         };
 
         widget.getValue = function() {
-            return input.val().replace(/&#10;/g, '\n');
+            var ret = input.val().replace(/&#10;/g, '\n');
+
+            if (ret && widget.hasLogicReferences) {
+                return mug.form.normalizeEscapedHashtag(ret);
+            } else {
+                return ret;
+            }
         };
 
         input.bind("change input", function () {
@@ -222,15 +236,18 @@ define([
             .attr("name", widget.id)
             .attr("id", widget.id)
             .attr("rows", "2")
-            .addClass('input-block-level')
+            .addClass('form-control')
             .on('change input', function (e) { widget.handleChange(); })
-            .focus(function() { this.select(); })
             .keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
                 if (e.which === 9) {
                     this.select();
                 }
             });
+
+        if (util.isRightToLeftLanguage(options.language)) {
+            widget.input.attr('dir', 'rtl');
+        }
 
         widget.getControl = function () { 
             return widget.input;
@@ -248,112 +265,35 @@ define([
     };
 
     var richText = function(mug, options) {
-        var widget = normal(mug, options), editor;
-
-        // Each bubble in rich text has a popover on hover that will display
-        // the path
-        function addPopovers(input) {
-            input.find('.label-datanode').each(function () {
-                var $this = $(this),
-                    datavalue = $this.attr('data-value'),
-                    match =  datavalue.match('output value="(.*)"'),
-                    xpath = match ? match[1] : datavalue,
-                    displayId = $this.clone().children().remove().end().text(),
-                    labelMug, labelText;
-                if (/^\/data\//.test(xpath)) {
-                    labelMug = mug.form.getMugByPath(xpath);
-                    labelText = labelMug ? labelMug.p.labelItext.get() : "";
-                } else {
-                    return;
-                }
-                $this.siblings('.cke_widget_drag_handler_container').children().stickyover({
-                    title: displayId + '<small>' + xpath + '</small>',
-                    html: true,
-                    content: '<p>' + labelText + '</p>',
-                    template: '<div contenteditable="false" class="popover fd-popover">' +
-                        '<div class="popover-inner">' +
-                        '<h3 class="popover-title"></h3>' +
-                        '<div class="popover-content"><p></p></div>' +
-                        '</div></div>'
-                });
-            });
-        }
-
-        function addCloseButton(widget, input) {
-            input.find('.label-datanode').each(function () {
-                var _this = this;
-                $(this).find('.close').click(function() {
-                    _this.remove();
-                    widget.handleChange();
-                    return false;
-                });
-            });
-        }
+        var widget = normal(mug, options);
 
         widget.input = $("<div />")
             .attr("contenteditable", true)
             .attr("name", widget.id)
-            .addClass('input-block-level jstree-drop');
-        if (options.singleLine) {
-            widget.input.addClass('fd-input');
-        } else {
-            widget.input.addClass('fd-textarea');
-        }
+            .addClass('form-control jstree-drop')
+            .addClass(options.singleLine ? 'fd-input' : 'fd-textarea');
 
-        widget.input.ckeditor().promise.then(function() {
-            editor = widget.input.ckeditor().editor;
+        var opts = {
+                isExpression: options.widget === xPath || options.widget === droppableText,
+                rtl: util.isRightToLeftLanguage(options.language),
+            },
+            editor = richTextUtils.editor(widget.input, mug.form, opts);
 
-            mug.on('teardown-mug-properties', function() {
-                if (editor) {
-                    editor.destroy();
-                }
-            }, null, "teardown-mug-properties");
-
-            editor.on('change', function() {
-                widget.handleChange();
-                widget.input.find('.label-datanode').each(function(k, v) {
-                    var value = $(v);
-                    // ckeditor likes to move title attribute to data-original-title
-                    value.attr('title', value.attr('data-original-title'));
-                });
-            });
-
-            editor.on('afterInsertHtml', function (e) {
-                addCloseButton(widget, widget.input);
-                addPopovers(widget.input);
-            });
-
-            editor.on('dataReady', function (e) {
-                addCloseButton(widget, widget.input);
-                addPopovers(widget.input);
-            });
-        });
+        mug.on('teardown-mug-properties', editor.destroy, null, "teardown-mug-properties");
+        editor.on('change', function () { widget.handleChange(); });
 
         widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
             // gets rid of atwho wrapper
             // tod: find out why this is needed and move elsewhere
             $(this).find('.atwho-inserted').children().unwrap();
-            addCloseButton(widget, widget.input);
-            addPopovers(widget.input);
         });
 
         widget.getControl = function () {
             return widget.input;
         };
 
-        widget.setValue = function (val) {
-            widget.input.ckeditor().promise.then(function() {
-                editor.setData(richTextUtils.toRichText(val, mug.form, true));
-            });
-        };
-
-        widget.getValue = function () {
-            var val = "";
-            widget.input.ckeditor().promise.then(function() {
-                val = richTextUtils.fromRichText(editor.getData());
-            });
-            return val.replace('&nbsp;', ' ').trim();
-        };
+        widget.setValue = editor.setValue;
+        widget.getValue = editor.getValue;
 
         return widget;
     };
@@ -410,16 +350,17 @@ define([
     };
 
     var droppableText = function (mug, options) {
-        var widget = text(mug, options);
+        var widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
-            .attr('placeholder', 'Hint: drag a question here.')
+            .attr('placeholder', 'Drag question here')
             .change(function () {
                 widget.handleChange();
             });
 
+        widget.hasLogicReferences = true;
+
         return widget;
     };
-    droppableText.hasLogicReferences = true;
 
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
@@ -493,9 +434,10 @@ define([
             useRichText: mug.supportsRichText()
         });
 
+        widget.hasLogicReferences = true;
+
         return widget;
     };
-    xPath.hasLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
         // todo: make this inherit from normal
@@ -503,6 +445,7 @@ define([
             path = options.widgetValuePath || options.path,
             id = options.id || 'property-' + path;
         widget.definition = mug.p.getDefinition(options.path);
+        options.noRichText = true;
 
         widget.mugValue = options.mugValue || function (mug, value) {
             if (arguments.length === 1) {
@@ -593,7 +536,7 @@ define([
         var widget = normal(mug, options);
         widget.dropdown = widget.input = $("<select />")
             .attr("name", widget.id)
-            .addClass('input-block-level');
+            .addClass('form-control');
 
         var input = widget.input;
 
@@ -685,15 +628,15 @@ define([
         var widget = dropdown(mug, options),
             super_handleChange = widget.handleChange;
         widget.input = widget.text = $('<input />')
-            .addClass('input-block-level')
+            .addClass('form-control')
             .attr({
                 type: 'text',
                 name: widget.id + '-text',
             });
 
         var control = $('<div class="control-row row">')
-                .append($("<div class='span4'>").append(widget.dropdown))
-                .append($("<div class='span8'>").append(widget.text));
+                .append($("<div class='col-sm-4'>").append(widget.dropdown))
+                .append($("<div class='col-sm-8'>").append(widget.text));
 
         widget.setValue = function (value) {
             var val = widget.equivalentOption(value);
@@ -771,52 +714,37 @@ define([
         }
 
         var button = $('<button />')
-            .addClass("fd-edit-button pull-right")
-            .text("Edit")
+            .addClass("fd-edit-button")
+            .html("<i class='fa fa-edit'></i>")
             .stopLink()
-            .addClass('btn')
+            .addClass('btn btn-default btn-block')
             .attr('type', 'button')
             .prop('disabled', isDisabled)
-            .click(editFn);
+            .click(editFn),
+            buttonContainer = $("<div />")
+            .addClass("col-sm-1")
+            .append(button);
 
         $uiElem.css('position', 'relative');
-        $uiElem.find('.controls').not('.messages')
-            .addClass('fd-edit-controls')
-            .css('margin-right', '60px')
-            .after(button);
+        $uiElem.find('.controls')
+            .removeClass("col-sm-9").addClass("col-sm-8")
+            .after(buttonContainer);
         return $uiElem;
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
-        var uiElem = $("<div />").addClass("widget control-group"),
-            $controls = $('<div class="controls" />'),
-            $messages = $('<div class="controls messages" />'),
-            $label = $('<div />').append($("<label />").text(labelText));
-        $label.addClass('control-label');
-        if (help) {
-            var link = "";
-            if (help.url) {
-                link = "<p><a href='" + help.url + "' target='_blank'>See more</a></p>";
-            }
-            var $link = $("<a />").attr({
-                "href": "#",
-                "data-title": labelText,
-                "data-content": help.text + link
-            });
-            if (!help.url) {
-                $link.click(function (e) { e.preventDefault(); });
-            }
-            var $help = $("<div/>").addClass("fd-help");
-            $help.append($link);
-            $label.append($help);
-        }
-        uiElem.append($label);
-
+        var $uiElem = $(ui_element({
+            labelText: labelText,
+            help: help,
+        }));
         $input.prop('disabled', !!isDisabled);
-        $controls.append($input);
-        uiElem.append($controls);
-        uiElem.append($messages);
-        return uiElem;
+        $uiElem.find(".controls").prepend($input);
+
+        if (help && !help.url) {
+            $uiElem.find(".fd-help a").click(function (e) { e.preventDefault(); });
+        }
+
+        return $uiElem;
     };
 
     function getMessages(mug, path) {
@@ -843,7 +771,7 @@ define([
             widget;
         while (obj && obj.length) {
             widget = obj.data("vellum_widget");
-            if (widget && vellum === obj.vellum("get")) {
+            if (widget && (!vellum || vellum === obj.vellum("get"))) {
                 return widget;
             }
             obj = obj.parent();
@@ -861,7 +789,6 @@ define([
         normal: normal,
         text: text,
         multilineText: multilineText,
-        richInput: richInput,
         richTextarea: richTextarea,
         identifier: identifier,
         droppableText: droppableText,

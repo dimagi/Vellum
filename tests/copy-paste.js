@@ -1,4 +1,4 @@
-require([
+define([
     'chai',
     'jquery',
     'underscore',
@@ -8,6 +8,7 @@ require([
     'text!static/copy-paste/text-question.xml',
     'text!static/copy-paste/two-choices.xml',
     'text!static/copy-paste/two-questions.xml',
+    'text!static/form/manual-instance-reference.xml',
     'vellum/copy-paste',
     'vellum/tsv'
 ], function (
@@ -20,6 +21,7 @@ require([
     TEXT_QUESTION_XML,
     TWO_CHOICES_XML,
     TWO_QUESTIONS_XML,
+    MANUAL_INSTANCE_REFERENCE_XML,
     mod,
     tsv
 ) {
@@ -47,7 +49,6 @@ require([
         before(function (done) {
             util.init({
                 features: {
-                    rich_text: false,
                     custom_intents: true,
                 },
                 javaRosa: { langs: ['en', 'hin'] },
@@ -74,7 +75,6 @@ require([
                         "labelItext:hin-default",
                         "constraintMsgItext:en-default",
                         "constraintMsgItext:hin-default",
-                        "constraintMsgItext",
                         "constraintAttr",
                         "constraintMsgAttr",
                         "relevantAttr",
@@ -86,7 +86,6 @@ require([
                         "Hindi Text",
                         "Nope",
                         "Nope",
-                        "txt-constraintMsg",
                         "1 = 0",
                         "jr:itext('txt-constraintMsg')",
                         "x = y",
@@ -206,7 +205,6 @@ require([
                         "labelItext",
                         "constraintMsgItext:en-default",
                         "constraintMsgItext:hin-default",
-                        "constraintMsgItext",
                         "helpItext:en-default",
                         "helpItext:hin-default",
                         "helpItext:en-audio",
@@ -242,7 +240,6 @@ require([
                         "default-label",
                         "valid",
                         "valid",
-                        "text-constraintMsg",
                         "help",
                         "help",
                         "jr://file/commcare/audio/help/data/text.mp3",
@@ -446,16 +443,16 @@ require([
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr", "conflictedNodeId"],
-                ["/radius", "DataBindOnly", "42", "null"],
-                ["/copy-1-of-pi", "DataBindOnly", "3.1415", "pi"],
-                ["/circumference", "DataBindOnly", "2 * /data/copy-1-of-pi * /data/radius", "null"],
+                ["/radius", "DataBindOnly", '"42"', "null"],
+                ["/copy-1-of-pi", "DataBindOnly", '"3.1415"', "pi"],
+                ["/circumference", "DataBindOnly", "2 * #form/copy-1-of-pi * #form/radius", "null"],
             ]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "calculateAttr"],
-                ["/radius", "DataBindOnly", "42"],
-                ["/pi", "DataBindOnly", "3.1415"],
-                ["/circumference", "DataBindOnly", "2 * /data/pi * /data/radius"],
+                ["/radius", "DataBindOnly", '"42"'],
+                ["/pi", "DataBindOnly", '"3.1415"'],
+                ["/circumference", "DataBindOnly", "2 * #form/pi * #form/radius"],
             ]);
         });
 
@@ -480,7 +477,7 @@ require([
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
                 ["/text", "Text", "text", "text"],
-            ], ["Cannot insert Text into Single Answer"]);
+            ], ["Cannot insert Text into Multiple Choice"]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
@@ -712,7 +709,7 @@ require([
         it("should copy dynamic select with itemset data and instance", function () {
             var data = [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "instances", "itemsetData"],
-                ["/select", "SelectDynamic", "select", "select", '{"foo":"jr://foo"}',
+                ["/select", "SelectDynamic", "select", "select", '{"foo":{"src":"jr://foo"}}',
                  '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
@@ -727,7 +724,7 @@ require([
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "filter", "instances", "itemsetData"],
                 ["/select", "SelectDynamic", "select", "select",
                  '["type = instance(\'fum\')/fum/@type"]',
-                 '{"foo":"jr://foo","fum":"jr://fum"}',
+                 '{"foo":{"src":"jr://foo"},"fum":{"src":"jr://fum"}}',
                  '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
@@ -846,7 +843,7 @@ require([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
                 ['/repeat/item', 'Repeat', 'repeat', 'repeat',
                     '{"idsQuery":"instance(\'products\')/products/product/@id"}',
-                    '{"products":"jr://commtrack:products"}'],
+                    '{"products":{"src":"jr://commtrack:products"}}'],
             ];
             util.loadXML("");
             paste(data);
@@ -869,7 +866,7 @@ require([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
                 ['/repeat/item', 'Repeat', 'repeat', 'repeat',
                     '{"idsQuery":"instance(\'products\')/products/product/@id"}',
-                    '{"products":"jr://commtrack:products"}'],
+                    '{"products":{"src":"jr://commtrack:products"}}'],
             ]);
             assert(util.isTreeNodeValid("repeat/item"), util.getMessages("repeat/item"));
         });
@@ -901,9 +898,6 @@ require([
                     JSON.stringify({key3: "val3"}),
                     "commcare.org/xforms", JSON.stringify({type: "robin"})]
             ]);
-            var messages = util.getMug("app").messages.get();
-            chai.expect(messages[0]).to.include("works on Android devices");
-            assert.equal(messages.length, 1, messages);
         });
 
         it("should paste and copy an Android App Callout (old format)", function () {
@@ -931,9 +925,6 @@ require([
                     JSON.stringify({key3: "val3"}),
                     "commcare.org/xforms", JSON.stringify({type: "robin"})]
             ]);
-            var messages = util.getMug("app").messages.get();
-            chai.expect(messages[0]).to.include("works on Android devices");
-            assert.equal(messages.length, 1, messages);
         });
 
         it("should paste and copy a Balance", function () {
@@ -984,10 +975,117 @@ require([
             assert.equal(input.val(), "other");
         });
 
+        it("should paste markdown correctly", function() {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "labelItext:hasMarkdown"],
+                ["/text", "Text", "*text*", true],
+                ["/text2", "Text", "text2", false],
+            ]);
+            util.clickQuestion('text');
+            assert(util.markdownVisible());
+            util.clickQuestion('text2');
+            assert(!util.markdownVisible());
+        });
+
+        it("should paste invalid xpaths correctly", function(done) {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/invalid", "DataBindOnly", "(42"],
+                ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+                ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
+            ]);
+            util.clickQuestion('invalid');
+            util.clickQuestion('invalid2');
+            var invalid = util.getMug('invalid'),
+                invalid2 = util.getMug('invalid2'),
+                invalid3 = util.getMug('invalid3');
+            assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(invalid2.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(invalid3.p.calculateAttr, '#invalid/xpath (`#form/invalid`');
+            var widget = util.getWidget('property-calculateAttr');
+            widget.input.promise.then(function () {
+                assert.strictEqual(widget.getValue(), '(42');
+                util.selectAll();
+                eq(mod.copy(), [
+                    ["id", "type", "calculateAttr"],
+                    ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
+                ]);
+                done();
+            });
+        });
+
+        it("should paste valid xpaths correctly", function(done) {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/invalid", "DataBindOnly", "(42"],
+                ["/valid", "DataBindOnly", "#form/invalid"],
+            ]);
+            util.clickQuestion('valid');
+            var invalid = util.getMug('invalid'),
+                valid = util.getMug('valid');
+            assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
+            assert.strictEqual(valid.p.calculateAttr, '#form/invalid');
+            var widget = util.getWidget('property-calculateAttr');
+            widget.input.promise.then(function () {
+                assert.strictEqual(widget.getValue(), '`#form/invalid`');
+                assert.strictEqual(
+                    $('[name=property-calculateAttr]').find('span .label').data('value'),
+                    '`#form/invalid`'
+                );
+                util.selectAll();
+                eq(mod.copy(), [
+                    ["id", "type", "calculateAttr"],
+                    ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
+                    ["/valid", "DataBindOnly", "#form/invalid"],
+                ]);
+                done();
+            });
+        });
+
+        describe("with instances without src", function() {
+            before(function (done) {
+                util.init({
+                    javaRosa: { langs: ['en'] },
+                    core: {
+                        onReady: function () {
+                            assert(this.isPluginEnabled("copyPaste"),
+                                   "copyPaste plugin should be enabled");
+                            done();
+                        }
+                    }
+                });
+            });
+
+            var data = [
+                ['id', 'type', 'labelItext:en-default', 'appearance', 'calculateAttr', 'instances'],
+                ['/score', 'Int', 'What was your score', 'null', 'null', 'null'],
+                ['/output', 'DataBindOnly', 'null', 'null',
+                    "instance('scores')/score[@high > #form/score][@low < #form/score]",
+                    '{"scores":{"children":"<score low=\\"0.0\\" high=\\"500.0\\">You\'re really bad</score><score low=\\"500.0\\" high=\\"99999999.0\\">You\'re really good</score>"}}'],
+                ['/result', 'Trigger', '<output value="#form/output"></output>', 'minimal', 'null', 'null'],
+            ];
+
+            it("should properly paste", function() {
+                util.loadXML("");
+                paste(data);
+                util.assertXmlEqual(call("createXML"), MANUAL_INSTANCE_REFERENCE_XML, {normalize_xmlns: true});
+            });
+
+            it("should properly copy", function() {
+                util.loadXML(MANUAL_INSTANCE_REFERENCE_XML);
+                util.selectAll();
+                eq(mod.copy(), data);
+            });
+        });
+
         describe("with multimedia", function () {
             before(function (done) {
                 util.init({
-                    features: { rich_text: false },
                     javaRosa: { langs: ['en', 'hin'] },
                     uploader: { objectMap: {
                         "jr://file/commcare/audio/data/question1.mp3": true

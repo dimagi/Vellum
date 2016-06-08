@@ -4,7 +4,6 @@ define([
     'require',
     'save-button',
     'underscore',
-    'xpathmodels',
     'jquery',
     'tpl!vellum/templates/main',
     'tpl!vellum/templates/question_type_group',
@@ -24,6 +23,7 @@ define([
     'vellum/parser',
     'vellum/datasources',
     'vellum/util',
+    'vellum/javaRosa/util',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -36,7 +36,6 @@ define([
     require,
     SaveButton,
     _,
-    xpathmodels,
     $,
     main_template,
     question_type_group,
@@ -56,6 +55,7 @@ define([
     parser,
     datasources,
     util,
+    jrUtil,
     debug
 ) {
     
@@ -73,23 +73,22 @@ define([
     var isMac = /Mac/.test(navigator.platform);
 
     var DEBUG_MODE = false;
-    xpathmodels.DEBUG_MODE = DEBUG_MODE;
 
     var MESSAGE_TYPES = {
         "error": {
-            cssClass: "alert-error",
+            cssClass: "alert-danger",
             title: "Error",
-            icon: "icon-exclamation-sign"
+            icon: "fa fa-exclamation-circle",
         },
         "parse-warning": {
             cssClass: "",
             title: "Warning",
-            icon: "icon-warning-sign"
+            icon: "fa fa-warning",
         },
         "form-warning": {
             cssClass: "",
             title: "Form Warning",
-            icon: "icon-info-sign"
+            icon: "fa fa-info-circle",
         }
     };
 
@@ -166,18 +165,19 @@ define([
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
-            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!'
+            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!',
+            csrftoken: _this.opts().csrftoken
         });
         var setFullscreenIcon = function () {
-            var $i = $('i', _this.data.core.$fullscreenButton);
+            var $i = $('i', _this.data.core.$fullscreenButton).addClass("fa");
             if (_this.data.windowManager.fullscreen) {
-                $i.addClass('icon-resize-small').removeClass('icon-resize-full');
+                $i.addClass('fa-compress').removeClass('fa-expand');
             } else {
-                $i.removeClass('icon-resize-small').addClass('icon-resize-full');
+                $i.removeClass('fa-compress').addClass('fa-expand');
             }
         };
         setTimeout(setFullscreenIcon, 0);
-        this.data.core.$fullscreenButton = $('<button class="btn"><i/></button>').click(function (e) {
+        this.data.core.$fullscreenButton = $('<button class="btn btn-default"><i/></button>').click(function (e) {
             e.preventDefault();
             if (window.analytics) {
                 window.analytics.usage('Form Builder', 'Full Screen Mode',
@@ -189,7 +189,7 @@ define([
                 _this.data.windowManager.fullscreen = true;
             }
             setFullscreenIcon();
-            _this.data.windowManager.adjustToWindow();
+            _this.adjustToWindow();
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
@@ -451,17 +451,20 @@ define([
     };
 
     fn.getMugDisplayName = function (mug) {
-        var val = mug.getDisplayName(this.data.core.currentItextDisplayLanguage ||
-            this.data.javaRosa.Itext.getDefaultLanguage());
+        var lang = this.data.core.currentItextDisplayLanguage ||
+                   this.data.javaRosa.Itext.getDefaultLanguage(),
+            val = mug.getDisplayName(lang, false);
         if (mug.supportsRichText()) {
-            val = richText.toRichText(val, this.data.core.form);
+            val = richText.bubbleOutputs(val, this.data.core.form, true);
+        } else {
+            val = util.escape(jrUtil.outputToXPath(val, mug.form.xpath));
         }
         return val;
     };
 
     fn.showSourceXMLModal = function (done) {
         var _this = this;
- 
+
         function validateMug(mug) {
             mug.validate();
             return !mug.getErrors().length;
@@ -472,9 +475,11 @@ define([
             var $modal = _this.generateNewModal("Error", [
                 {
                     title: 'Continue',
+                    cssClasses: "btn-default",
                     action: function() {
-                        _this.closeModal();
-                        _this.showSourceInModal(done);
+                        _this.closeModal(function() {
+                            _this.showSourceInModal(done);
+                        });
                     }
                 },
                 {
@@ -484,7 +489,7 @@ define([
                         _this.closeModal();
                     }
                 }
-            ], false, "icon-warning-sign");
+            ], false, "fa fa-warning");
             var content = "There are validation errors in the form.  Do you want to continue anyway?";
             content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
             $modal.find(".modal-body").html(content);
@@ -494,10 +499,18 @@ define([
         }
     };
 
+    fn._resizeFullScreenModal = function($modal) {
+        var modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
+        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
+        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
+        modalHeight = $(window).height() - 40;
+        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
+        $modal.find(".modal-body").css('height', modalBodyHeight + 'px');
+    };
+
     fn.showSourceInModal = function (done) {
         var _this = this,
-            $modal, $updateForm, $textarea, codeMirror, modalHeaderHeight,
-            modalFooterHeight, modalHeight, modalBodyHeight;
+            $modal, $updateForm, $textarea, codeMirror;
 
         $modal = this.generateNewModal("Edit Form's Source XML", [
             {
@@ -516,20 +529,12 @@ define([
             description: "This is the raw XML. You can edit or paste into this box to make changes " +
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
-        modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
-        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
-        modalHeight = $(window).height() - 40;
-        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-
-        $modal
-            .css('height', modalHeight + 'px')
-            .css('width', $(window).width() - 40 + 'px');
 
         $modal.addClass('fd-source-modal')
-            .removeClass('form-horizontal')
             .find('.modal-body')
-            .html($updateForm)
-            .css('height', modalBodyHeight + 'px');
+            .removeClass('form-horizontal').removeClass('form')
+            .html($updateForm);
+        this._resizeFullScreenModal($modal);
 
         $textarea = $updateForm.find('textarea');
 
@@ -543,10 +548,13 @@ define([
         codeMirror = require('codemirror').fromTextArea($textarea.get(0));
         codeMirror.setOption('viewportMargin', Infinity);
         codeMirror.setOption('lineNumbers', true);
-        codeMirror.setSize('100%', '100%');
 
         $modal.modal('show');
-        $modal.one('shown', function () {
+        $modal.one('shown.bs.modal', function () {
+            var $body = $modal.find(".modal-body"),
+                bodyHeight = $body.height(),
+                pHeight = $body.find("p").outerHeight(true);
+            codeMirror.setSize('100%', bodyHeight - pHeight);
             codeMirror.refresh();
             codeMirror.focus();
         });
@@ -567,13 +575,13 @@ define([
         var $text = $exportForm.find('textarea');
         $text.val(this.data.core.form.getExportTSV());
         $modal.modal('show');
-        $modal.one('shown', function () { $text.focus(); });
+        $modal.one('shown.bs.modal', function () { $text.focus(); });
     };
 
     fn.showOverwriteWarning = function(send, formText, serverForm) {
         var $modal, $overwriteForm, _this = this;
 
-        $modal = _this.generateNewModal("Lost work warning", [
+        $modal = _this.generateNewModal("Lost Work Warning", [
             {
                 title: "Overwrite their work",
                 cssClasses: "btn-primary",
@@ -590,25 +598,16 @@ define([
                 action: function () {
                     $('#form-differences').show();
 
-                    var modalHeaderHeight = $modal.find('.modal-header').outerHeight(false),
-                        modalFooterHeight = $modal.find('.modal-footer').outerHeight(false),
-                        modalHeight = $(window).height() - 40,
-                        modalBodyHeight = modalHeight - (modalFooterHeight - modalHeaderHeight) - 126;
-
-                    $modal
-                        .css('height', modalHeight + 'px')
-                        .css('width', $(window).width() - 40 + 'px');
-
                     $modal.addClass('fd-source-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
-                        .html($overwriteForm)
-                        .css('height', modalBodyHeight + 'px');
+                        .html($overwriteForm);
+                    _this._resizeFullScreenModal($modal);
 
                     $modal.find('.btn-info').attr('disabled', 'disabled');
                 }
             }
-        ], "Cancel", "icon-warning-sign");
+        ], "Cancel", "fa fa-warning");
 
         var diff = util.xmlDiff(formText, serverForm);
 
@@ -616,14 +615,14 @@ define([
             description: "Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
                          "to overwrite their work?",
-            xmldiff: $('<div>').text(diff).html()
+            xmldiff: util.escape(diff),
         }));
         $modal.find('.modal-body').html($overwriteForm);
 
         $('#form-differences').hide();
         $modal.modal('show');
     };
-        
+
     fn.showFormPropertiesModal = function () {
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
@@ -679,13 +678,20 @@ define([
         });
 
         $modal.modal('show');
-        $modal.one('shown', function () {
+        $modal.one('shown.bs.modal', function () {
             $modalBody.find("input:first").focus().select();
         });
     };
 
-    fn.closeModal = function () {
-        this.$f.find('.fd-modal-generic-container .modal').modal('hide');
+    fn.closeModal = function (done) {
+        var _this = this,
+            $modal = _this.$f.find('.fd-modal-generic-container .modal');
+        if (done) {
+            $modal.one('hidden.bs.modal', function() {
+                done.apply(_this);
+            });
+        }
+        $modal.modal('hide');
     };
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle, headerIcon) {
@@ -709,7 +715,7 @@ define([
                 closeButtonTitle: closeButtonTitle,
                 headerIcon: headerIcon,
             }));
-        $modal.one("shown", function () {
+        $modal.one("shown.bs.modal", function () {
             $modal.find(".btn-default:last").focus();
         });
 
@@ -741,20 +747,40 @@ define([
 
         if (target) {
             // the .change fires the validation controls
-            if ((!mug && _this.data.core.form.useRichText !== false &&
+            if (!widgets.util.getWidget(target, this).options.noRichText &&
+                ((!mug && _this.data.core.form.useRichText !== false &&
                  this.opts().features.rich_text) ||
-                 (mug && mug.supportsRichText())) {
-                target.ckeditor().editor.insertHtml(richText.toRichText(path, _this.data.core.form, true) + " ");
+                 (mug && mug.supportsRichText()))) {
+                richText.editor(target).insertExpression(path);
             } else {
                 target.val(target.val() + path).change();
             }
 
             if (window.analytics) {
-                window.analytics.usage(
-                    "Question Reference",
-                    "Drag and Drop",
-                    _this.data.core.currentlyEditedProperty
-                );
+                var targetType;
+                switch (target[0].id) {
+                    case 'property-relevantAttr':
+                        targetType = "Display";
+                        break;
+                    case 'property-constraintAttr':
+                        targetType = "Validation";
+                        break;
+                    case 'property-calculateAttr':
+                        targetType = "Calculation";
+                        break;
+                    default:
+                        targetType = "Expression Editor";
+                        break;
+                }
+                if (_this.data.core.form.isCaseReference(path)) {
+                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
+                } else {
+                    window.analytics.usage(
+                        "Form Reference",
+                        "Drag and Drop",
+                        targetType
+                    );
+                }
             }
         }
 
@@ -772,7 +798,7 @@ define([
                 valid_children: this.data.core.mugTypes.Group.validChildTypes
             },
             "default": {
-                icon: 'icon-question-sign',
+                icon: 'fa fa-question-circle',
                 max_children: 0,
                 valid_children: []
             }
@@ -856,13 +882,6 @@ define([
             if (window.event && window.event.altKey) {
                 _this.jstree("close_all", data.node);
             }
-            var selected = _this.jstree('get_selected'),
-                sel = selected.length && _this.jstree('get_node', selected[0]);
-            if (sel && _.contains(sel.parents, data.node.id)) {
-                _this.jstree("deselect_all", true)
-                     .jstree("select_node", data.node);
-            }
-            _this.activateQuestionTypeGroup(_this.data.core.form.getMugByUFID(data.node.id));
         }).bind("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
@@ -953,7 +972,7 @@ define([
         }
         if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
-        var locked = !this.isMugPathMoveable(sourceMug.absolutePath);
+        var locked = !this.isMugPathMoveable(sourceMug.hashtagPath);
         if (locked) {
             if (position === 'into' || position === 'last' || position === 'first') {
                 return sourceMug.parentMug === targetMug;
@@ -967,6 +986,26 @@ define([
 
     fn.onFormChange = function (mug) {
         this.data.core.saveButton.fire("change");
+        this.notifyUserActivity();
+    };
+
+    fn.notifyUserActivity = function() {
+        var now = Date.now(),
+            // default timeout: 5 minutes in ms
+            activityTimeout = this.opts().core.activityTimeout || 5 * 60 * 1000,
+            activityUrl = this.opts().core.activityUrl;
+        if (activityUrl) {
+            if (!this.data.core.activityTimestamp) {
+                this.data.core.activityTimestamp = now;
+            } else if (now - this.data.core.activityTimestamp >= activityTimeout) {
+                this.data.core.activityTimestamp = now;
+                if (_.isFunction(activityUrl)) {
+                    activityUrl();
+                } else {
+                    $.get(activityUrl);
+                }
+            }
+        }
     };
 
     fn.jstree = function () {
@@ -1024,11 +1063,11 @@ define([
         // for choices, return the quoted value.
         // for everything else return the path
         if (mug.__className === "Choice") {
-            return '"' + mug.p.nodeID + '"';
+            return "'" + mug.p.nodeID + "'";
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
-                "." : this.data.core.form.getAbsolutePath(mug);
+                "." : (mug.supportsRichText() ? mug.hashtagPath : mug.absolutePath);
         }
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using
@@ -1085,6 +1124,7 @@ define([
                 _this.data.core.parseWarnings = [];
                 _this.loadXML(formString, {});
                 delete _this.data.core.parseWarnings;
+                _this.data.core.form.fire('form-load-finished');
 
                 if (formString) {
                     //re-enable all buttons and inputs in case they were disabled before.
@@ -1106,7 +1146,7 @@ define([
 
                 _this.hideQuestionProperties();
 
-                var $modal = _this.generateNewModal("Error", [], "OK", "icon-warning-sign");
+                var $modal = _this.generateNewModal("Error", [], "OK", "fa fa-warning");
                 $modal.find(".modal-body").text(msg);
                 $modal.modal('show');
 
@@ -1133,8 +1173,11 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
-        form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText :
-                                                           this.opts().features.rich_text;
+        if (this.opts().features.rich_text) {
+            form.useRichText = _.isBoolean(form.useRichText) ? form.useRichText : true;
+        } else {
+            form.useRichText = false;
+        }
         form.writeIgnoreRichText = this.opts().features.rich_text;
         form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
@@ -1176,6 +1219,16 @@ define([
                     _this.selectSomethingOrHideProperties();
                 }
             }
+            // HACK: need to explicitly remove the control node so that
+            // getNodeFromMug doesn't return a node that no longer exists
+            e.mug._node_control = undefined;
+
+            $('.fd-undo').click(function () {
+                _this.ensureCurrentMugIsSaved(form.undo.bind(form));
+            });
+            $('.fd-undo-container').on('click', '.close', function() {
+                form.undomanager.resetUndo();
+            });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
             var currentMug = _this.getCurrentlySelectedMug();
@@ -1284,6 +1337,10 @@ define([
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
         return mug;
+    };
+
+    fn.adjustToWindow = function() {
+        this.data.windowManager.adjustToWindow();
     };
 
     /**
@@ -1439,7 +1496,7 @@ define([
             section.properties = _(section.properties)
                 .map(_getWidgetClassAndOptions)
                 .filter(_.identity);
-           
+
             if (section.properties.length) {
                 this.getSectionDisplay(mug, section).appendTo($content);
             }
@@ -1458,7 +1515,7 @@ define([
         refreshMessages();
 
         $props.show();
-        this.data.windowManager.adjustToWindow();
+        this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
         this.toggleConstraintItext(mug);
@@ -1568,7 +1625,7 @@ define([
             buttons.push({title: "OK", defaultButton: true});
         }
 
-        var $modal = this.generateNewModal(title, buttons, false, "icon-warning-sign");
+        var $modal = this.generateNewModal(title, buttons, false, "fa fa-warning");
 
         // store a reference to $modal on this so modal button actions can
         // reference it in order to hide it at the right point in time.  This is
@@ -1584,7 +1641,7 @@ define([
         }
         $modal
             .modal('show')
-            .on('hide', function () {
+            .on('hide.bs.modal', function () {
                 _this.data.core.isAlertVisible = false;
             });
     };
@@ -1595,8 +1652,8 @@ define([
             var errors = mug.getErrors();
             if (errors.length) {
                 var msg = errors.join("\n").replace(/"/g, "'");
-                node.data.errors = '<div class="fd-tree-valid-alert-icon ' +
-                    'icon-exclamation-triangle" title="' + msg + '"></div>';
+                node.data.errors = '<i class="fd-tree-valid-alert-icon ' +
+                    'fa fa-warning" title="' + msg + '"></i>';
             } else {
                 node.data.errors = null;
             }
@@ -1662,7 +1719,7 @@ define([
         });
         return $sec;
     };
-        
+
     fn.getMugToolbar = function (mug, multiselect) {
         var _this = this,
             form = this.data.core.form,
@@ -1670,32 +1727,14 @@ define([
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
-                    return _this.isMugRemoveable(mug, form.getAbsolutePath(mug));
+                    return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
-                isCopyable: !multiselect && mug.options.isCopyable
+                isCopyable: !multiselect && mug.options.isCopyable,
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
-            var mugs = _this.getCurrentlySelectedMug(true);
-            if (mugs.length > 1 || (mugs.length && form.getChildren(mugs[0]).length)) {
-                _this.alert(
-                    "Delete Questions?",
-                    "This cannot be undone.",
-                    [{
-                        title: "Cancel",
-                    }, {
-                        title: "Delete",
-                        cssClasses: "btn-primary",
-                        defaultButton: true,
-                        action: function () {
-                            form.removeMugsFromForm(mugs);
-                            _this.selectSomethingOrHideProperties(true);
-                            _this.data.core.$modal.modal('hide');
-                        }
-                    }]
-                );
-            } else {
-                form.removeMugsFromForm(mugs);
-            }
+            var mugs = _this.getCurrentlySelectedMug(true, true);
+            form.removeMugsFromForm(mugs);
+            _this.refreshCurrentMug();
         });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
@@ -1729,8 +1768,7 @@ define([
             }
             return ret;
         };
-        var form = this.data.core.form,
-            changeable = this.isMugTypeChangeable(mug, form.getAbsolutePath(mug));
+        var changeable = this.isMugTypeChangeable(mug, mug.hashtagPath);
 
         var $questionTypeChanger = $(question_type_changer({
             currentQuestionIcon: mug.getIcon(),
@@ -1821,12 +1859,13 @@ define([
                 },
                 {
                     title: 'Save anyway',
+                    cssClasses: "btn-default",
                     action: function() {
                         _this.closeModal();
                         _this.send(formText, forceFullSave ? 'full' : null);
                     },
                 },
-            ], false, "icon-warning-sign");
+            ], false, "fa fa-warning");
             $modal.find(".modal-body").html(theScaryWarning);
             $modal.modal('show');
             return;
@@ -1867,6 +1906,8 @@ define([
         } else {
             data = {xform: formText};
         }
+
+        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
 
         this.data.core.saveButton.ajax({
             type: "POST",
@@ -1991,7 +2032,8 @@ define([
             "requiredAttr",
             "relevantAttr",
             "constraintAttr",
-            "repeat_count"
+            "repeat_count",
+            'defaultValue',
         ];
     };
 
@@ -1999,7 +2041,6 @@ define([
         return [
             "dataSource",
             "dataValue",
-            'defaultValue',
             "xmlnsAttr",
             "label",
             "hintLabel",
@@ -2106,9 +2147,11 @@ define([
      */
     fn.updateControlNodeAdaptorMap = function (map) {};
 
-    fn.contributeToModelXML = function (xmlWriter) {};
+    fn.contributeToModelXML = function (xmlWriter, form) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
+
+    fn.addAutocomplete = function (input, form, options) {};
 
     fn.initWidget = function (widget) {};
 

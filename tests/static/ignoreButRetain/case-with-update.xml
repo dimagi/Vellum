@@ -14,7 +14,7 @@
 					</case>
 				</data>
 			</instance>
-			<bind nodeset="/data/question" type="xsd:string"/>
+			<bind vellum:nodeset="#form/question" nodeset="/data/question" type="xsd:string"/>
 			<itext>
 				<translation lang="en" default="">
 					<text id="question-label">
@@ -25,7 +25,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/question">
+		<input vellum:ref="#form/question" ref="/data/question">
 			<label ref="jr:itext('question-label')"/>
 		</input>
 	</h:body>

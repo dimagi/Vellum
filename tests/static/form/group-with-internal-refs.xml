@@ -12,10 +12,10 @@
 					</group>
 				</data>
 			</instance>
-			<bind nodeset="/data/red" type="xsd:string" />
-			<bind nodeset="/data/group" />
-			<bind nodeset="/data/group/blue" type="xsd:string" />
-			<bind nodeset="/data/group/green" type="xsd:string" relevant="/data/group/blue = 'red' and /data/red = 'blue'" />
+			<bind vellum:nodeset="#form/red" nodeset="/data/red" type="xsd:string" />
+			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
+			<bind vellum:nodeset="#form/group/blue" nodeset="/data/group/blue" type="xsd:string" />
+			<bind vellum:nodeset="#form/group/green" nodeset="/data/group/green" type="xsd:string" vellum:relevant="#form/group/blue = 'red' and #form/red = 'blue'" relevant="/data/group/blue = 'red' and /data/red = 'blue'" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="red-label">
@@ -35,15 +35,15 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/red">
+		<input vellum:ref="#form/red" ref="/data/red">
 			<label ref="jr:itext('red-label')" />
 		</input>
-		<group ref="/data/group">
+		<group vellum:ref="#form/group" ref="/data/group">
 			<label ref="jr:itext('group-label')" />
-			<input ref="/data/group/blue">
+			<input vellum:ref="#form/group/blue" ref="/data/group/blue">
 				<label ref="jr:itext('group/blue-label')" />
 			</input>
-			<input ref="/data/group/green">
+			<input vellum:ref="#form/group/green" ref="/data/group/green">
 				<label ref="jr:itext('group/green-label')" />
 			</input>
 		</group>

@@ -4,16 +4,12 @@ define([
     'vellum/xml',
     'jquery',
     'underscore',
-    'xpath',
-    'xpathmodels'
 ], function (
     form_,
     util,
     xml,
     $,
-    _,
-    xpath,
-    xpathmodels
+    _
 ) {
     var DEFAULT_FORM_ID = 'data';
 
@@ -24,13 +20,12 @@ define([
     }
 
     function getAttributes (element) {
-        var attributes = $(element)[0].attributes,
-            attrMap = {};
+        var attributes = _.chain($(element)[0].attributes)
+                .map(function (value) {
+                    return [value.nodeName, value.nodeValue];
+                }) .object().value();
 
-        for (var i = 0; i < attributes.length; i++) {
-            attrMap[attributes[i].nodeName] = attributes[i].nodeValue;
-        }
-        return attrMap;
+        return attributes;
     }
 
     function parseXForm(xmlString, formOpts, vellum, warnings) {
@@ -155,8 +150,8 @@ define([
         form.formVersion = root.attr("version");
         form.formName = root.attr("name");
 
-        if (!form.formUuid) {
-            form.parseWarnings.push('Form does not have a unique xform XMLNS (in data block). Will be added automatically');
+        if (!form.formUuid || form.formUuid === "undefined") {
+            form.formUuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
         }
         if (!form.formJRM) {
             form.parseWarnings.push('Form JRM namespace attribute was not found in data block. One will be added automatically');
@@ -189,7 +184,7 @@ define([
 
         var mug = form.mugTypes.make(role, form);
         mug.p.nodeID = nodeID;
-        mug.p.dataValue = nodeVal;
+        mug.p.dataValue = nodeVal || undefined;
 
         if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
             mug.p.xmlnsAttr = extraXMLNS;
@@ -208,15 +203,15 @@ define([
         setValues.each(function () {
             var $el = $(this);
             form.vellum.parseSetValue(
-                form, $el, processPath($el.attr('ref'), rootNodeName));
+                form, $el, processPath(parseVellumAttrs(form, $el, 'ref', true), rootNodeName, form));
         });
     }
 
     function parseSetValue(form, el, path) {
         var mug = form.getMugByPath(path),
             event = el.attr('event'),
-            ref = el.attr('ref'),
-            value = el.attr('value');
+            ref = parseVellumAttrs(form, el, 'ref', true),
+            value = parseVellumAttrs(form, el, 'value', true);
 
         // HACK: hardcoding these as that's what setValue will support for now
         if (!mug || (event !== 'xforms-ready' && event !== 'jr-insert')) {
@@ -264,7 +259,9 @@ define([
             // HACK fix abstraction broken by direct tree insert
             form.mugMap[mug.ufid] = mug;
         } else if (node.parent.value !== parentMug) {
-            mug.p.dataParent = node.parent.getAbsolutePath();
+            var dataParentNode = node.parent,
+                dataParentMug = node.parent.value;
+            mug.p.dataParent = dataParentNode.isRootNode ? '#form' : dataParentMug.hashtagPath;
             node = form.tree.insertMug(mug, 'into', parentMug);
         }
         if (appearance) {
@@ -428,7 +425,7 @@ define([
                     if (repeat.length === 1) {
                         var adapt = function (mug, form) {
                             mug = makeMugAdaptor('Repeat')(mug, form);
-                            mug.p.repeat_count = repeat.popAttr('jr:count') || null;
+                            mug.p.repeat_count = repeat.popAttr('vellum:jr__count') || repeat.popAttr('jr:count') || null;
                             mug.p.rawRepeatAttributes = getAttributes(repeat);
                             return mug;
                         };
@@ -497,16 +494,17 @@ define([
         if(!el){
             return null;
         }
-        var path = noPop ? el.attr('ref') : el.popAttr('ref'),
+        var path = parseVellumAttrs(form, el, 'ref', noPop),
+            rootNodeName = form.tree.getRootNode().getID(),
             nodeId, pathToTry;
         if(!path){
-            path = noPop ? el.attr('nodeset') : el.popAttr('nodeset');
+            path = parseVellumAttrs(form, el, 'nodeset', noPop);
         }
         if (!path) {
             // attempt to support sloppy hand-written forms
-            nodeId = noPop ? el.attr('bind') : el.popAttr('bind');
+            nodeId = parseVellumAttrs(form, el, 'bind', noPop);
             if (nodeId) {
-                pathToTry = processPath(nodeId);
+                pathToTry = processPath(nodeId, rootNodeName, form);
                 if (!form.getMugByPath(pathToTry)) {
                     form.parseWarnings.push("Ambiguous bind: " + nodeId);
                 } else {
@@ -515,10 +513,10 @@ define([
             }
         }
         path = path || nodeId || null;
-        if (path && path[0] !== "/") {
+        if (path && path[0] !== "/" && path[0] !== "#" && path[0] !== "`") {
             // make path absolute
             if (parentMug) {
-                var parentPath = parentMug.absolutePath;
+                var parentPath = parentMug.hashtagPath;
                 if (parentPath) {
                     path = parentPath + "/" + path;
                 }
@@ -594,20 +592,19 @@ define([
      * @param rootNodeName - the name of the model root (used to create the absolute path)
      * @return absolute nodeset path.
      */
-    function processPath (path, rootNodeName) {
+    function processPath (path, rootNodeName, form) {
         var newPath;
-        var parsed = xpath.parse(path);
-        if (!(parsed instanceof xpathmodels.XPathPathExpr)) {
+        var parsed = form.xpath.parse(path);
+        if (!(parsed instanceof form.xpath.models.XPathPathExpr ||
+              parsed instanceof form.xpath.models.HashtagExpr)) {
             return null;
         }
 
-        if (parsed.initial_context === xpathmodels.XPathInitialContextEnum.RELATIVE) {
-            parsed.steps.splice(0, 0, xpathmodels.XPathStep({axis: "child", test: rootNodeName}));
-            parsed.initial_context = xpathmodels.XPathInitialContextEnum.ROOT;
-        } else {
-            return path;
+        if (parsed.initial_context === form.xpath.models.XPathInitialContextEnum.RELATIVE) {
+            parsed.steps.splice(0, 0, form.xpath.models.XPathStep({axis: "child", test: rootNodeName}));
+            parsed.initial_context = form.xpath.models.XPathInitialContextEnum.ROOT;
         }
-        newPath = parsed.toXPath();
+        newPath = parsed.toHashtag();
         return newPath;
     }
 
@@ -616,10 +613,10 @@ define([
 
         bindList.each(function () {
             var el = $(this),
-                path = el.popAttr('nodeset') || el.popAttr('ref');
+                path = parseVellumAttrs(form, el, 'nodeset') || parseVellumAttrs(form, el, 'ref');
 
             form.vellum.parseBindElement(
-                form, el, processPath(path, rootNodeName));
+                form, el, processPath(path, rootNodeName, form));
         });
     }
 
@@ -634,9 +631,9 @@ define([
         }
 
         var attrs = {
-            relevantAttr: el.popAttr('relevant'),
-            calculateAttr: el.popAttr('calculate'),
-            constraintAttr: el.popAttr('constraint'),
+            relevantAttr: parseVellumAttrs(form, el, 'relevant'),
+            calculateAttr: parseVellumAttrs(form, el, 'calculate'),
+            constraintAttr: parseVellumAttrs(form, el, 'constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
         };
@@ -649,6 +646,13 @@ define([
         }
       
         mug.p.setAttrs(attrs);
+    }
+
+    function parseVellumAttrs(form, el, key, noPop) {
+        var method = (noPop ? el.attr : el.popAttr).bind(el),
+            vellumAttr = method('vellum:' + key),
+            xmlAttr = method(key);
+        return form.normalizeEscapedHashtag(vellumAttr ? vellumAttr : xmlAttr);
     }
 
     var _getInstances = function (xml) {

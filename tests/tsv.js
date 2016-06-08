@@ -1,5 +1,5 @@
 /*jshint multistr: true */
-require([
+define([
     'chai',
     'vellum/tsv'
 ], function (
@@ -8,12 +8,24 @@ require([
 ) {
     var assert = chai.assert;
 
+    function parseRows(value, limit) {
+        var rows = [],
+            next = tsv.makeRowParser(value),
+            row = next();
+        while (row) {
+            rows.push(row);
+            if (limit && rows.length >= limit) { break; }
+            row = next();
+        }
+        return rows;
+    }
+
     function eq(value, parsed, roundTrip) {
         var repr = value
                     .replace(/\r/g, "\\r")
                     .replace(/\n/g, "\\n")
                     .replace(/\t/g, "\\t");
-        assert.deepEqual(tsv.parseRows(value, parsed.length + 5), parsed,
+        assert.deepEqual(parseRows(value, parsed.length + 5), parsed,
                          "parsed '" + repr + "'");
         if (roundTrip) {
             assert.strictEqual(tsv.tabDelimit(parsed), value);

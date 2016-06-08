@@ -9,7 +9,7 @@
 					<hidden />
 				</data>
 			</instance>
-			<bind nodeset="/data/itemset" />
+			<bind vellum:nodeset="#form/itemset" nodeset="/data/itemset" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="itemset-label">
@@ -20,7 +20,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<select1 ref="/data/itemset">
+		<select1 vellum:ref="#form/itemset" ref="/data/itemset">
 			<label ref="jr:itext('itemset-label')" />
 			<itemset nodeset="/data/hidden[final_age &gt; 16][sex = 'F']">
 				<label ref="label" />

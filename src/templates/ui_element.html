@@ -1,0 +1,18 @@
+<div class="widget">
+    <div class="form-group">
+        <div class="control-label col-sm-3">
+            <label><%= labelText %></label>
+            <% if (help) { %>
+                <div class="fd-help">
+                    <a href="#" tabindex="-1"
+                        data-title="<%- labelText %>"
+                        data-content="<%- help.text %><% if (help.url) { %><p><a href='<%- help.url %>' target='_blank'>See more</a></p><% } %>"></a>
+                </div>
+            <% } %>
+        </div>
+        <div class="col-sm-9 controls">
+            <!-- input will go here -->
+            <div class="messages"></div>
+        </div>
+    </div>
+</div>

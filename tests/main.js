@@ -1,5 +1,4 @@
-/* global console, mocha, mochaPhantomJS */
-mocha.setup('bdd');
+/* global console, mocha */
 mocha.reporter('html');
 
 // PhantomJS doesn't support bind yet
@@ -29,8 +28,9 @@ console.log("loading Vellum from " + baseUrl);
 // comment these to use built versions
 define("jquery", [testBase + 'bower_components/jquery/dist/jquery'], function () { return window.jQuery; });
 define("jquery.bootstrap", ["jquery", testBase + 'lib/bootstrap'], function () {});
+define("underscore", [testBase + 'bower_components/underscore/underscore'], function () { return window._; });
 
-require.config({
+requirejs.config({
     baseUrl: baseUrl,
     paths: {
         "jquery.vellum": "main",
@@ -41,11 +41,11 @@ require.config({
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
-require(['jquery', 'jquery.vellum'], function ($) {
+requirejs(['jquery', 'jquery.vellum'], function ($) {
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
-    require.config({
+    requirejs.config({
         // handle potential slow free heroku dynos
         waitSeconds: 60,
         paths: {
@@ -62,7 +62,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
     });
 
     if (useBuilt) {
-        require.config({
+        requirejs.config({
             paths: {
                 'text': '../bower_components/requirejs-text',
                 // for some reason this is necessary in firefox only for built
@@ -77,7 +77,7 @@ require(['jquery', 'jquery.vellum'], function ($) {
         $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
     }
 
-    require([
+    requirejs([
         'tests/options',
 
         // tests for profiling load times
@@ -115,6 +115,9 @@ require(['jquery', 'jquery.vellum'], function ($) {
         'tests/setvalue',
         'tests/richText',
         'tests/comments',
+        'tests/atwho',
+        'tests/escapedHashtags',
+        'tests/undomanager',
     ], function (
         options
     ) {
@@ -122,36 +125,31 @@ require(['jquery', 'jquery.vellum'], function ($) {
 
         function runTests() {
             function showTestResults() {
-                $(".sidebar .nav #resultsTab a").click();
+                $("#resultsTab").click();
                 return false;
             }
-            if (window.mochaPhantomJS) {
-                mochaPhantomJS.run();
-            } else {
-                $(".sidebar #mocha-stats").remove();
-                mocha.run();
-                // move progress indicator into sidebar
-                $("#mocha-stats").css({
-                    "margin-top": "3em",
-                    position: "relative",
-                    left: 0,
-                    top: 0
-                }).appendTo(".sidebar");
-                $("#mocha-stats li").css({display: "block"});
-                $("#mocha-stats li.progress").css({height: "40px"});
-                $("#mocha-stats li.passes a").click(showTestResults);
-                $("#mocha-stats li.failures a").click(showTestResults);
-            }
+            $(".sidebar #mocha-stats").remove();
+            mocha.run();
+            // move progress indicator into sidebar
+            $("#mocha-stats").css({
+                "margin-top": "3em",
+                position: "relative",
+                left: 0,
+                top: 0
+            }).appendTo(".sidebar");
+            $("#mocha-stats li").css({display: "block"});
+            $("#mocha-stats li.progress").css({height: "40px"});
+            $("#mocha-stats li.passes a").click(showTestResults);
+            $("#mocha-stats li.failures a").click(showTestResults);
         }
         $('#run-tests').click(runTests);
 
-        // ensure the normal first test instance is fully loaded before
-        // destroying it for tests
-        setTimeout(function () {
-            if (window.mochaPhantomJS) {
-                runTests();
-            }
-        }, 1000);
+        // mocha.env is an object when invoked by mocha-phantomjs
+        if (mocha.env) {
+            // ensure the normal first test instance is fully loaded before
+            // destroying it for tests
+            setTimeout(runTests, 0);
+        }
 
         function load(form) {
             $('#vellum').empty().vellum($.extend(true, {}, options.options, {

@@ -1,18 +1,22 @@
 define([
     'require',
     'underscore',
-    'xpath',
+    'jquery',
     'vellum/tree',
     'vellum/logic',
-    'vellum/widgets',
+    'vellum/escapedHashtags',
+    'vellum/fuse',
+    'vellum/undomanager',
     'vellum/util'
 ], function (
     require,
     _,
-    xpath,
+    $,
     Tree,
     logic,
-    widgets,
+    escapedHashtags,
+    Fuse,
+    undomanager,
     util
 ) {
     // Load these dependencies in the background after all other run-time
@@ -42,92 +46,7 @@ define([
         
         return that;
     };
-    
-    function processInstance(instance) {
-        instance.id = instance.id || convertToId(instance.uri);
-        _.each(instance.levels, function (level) {
-            var i = 1,
-                mappedSubsets = {};
-            _.each(level.subsets, function (subset) {
-                subset.id = i++;
-                subset.selector = normalizeXPathExpr(subset.selector);
-                mappedSubsets[subset.id] = subset;
-            });
-            level.subsets = mappedSubsets;
-        });
-        return instance;
-    }
-    
-    // Parsing the instance selectors using the XPath models and comparing the
-    // parsed expressions might be a better approach that these hacky functions.
-    function normalizeXPathExpr(str) {
-        return normalizeToSingleQuotes(removeSpaces(str));
-    }
 
-    // remove spaces around = and []
-    function removeSpaces(str) {
-        return str.replace(/\s*([=\[\]])\s*/g, function (match, p1) {
-            return p1;
-        });
-    }
-
-    // Change any top-level double quotes to single quotes. (Assumes no
-    // top-level escaped double quotes).  This may not correctly handle escaped
-    // quotes within a quote.  Moving on.
-    function normalizeToSingleQuotes(str) {
-        var ret = '';
-        eachCharByQuotedStatus(str,
-            function (c) {
-                ret += c;
-            },
-            function (c) {
-                if (c === '"') {
-                    c = "'";
-                }
-                ret += c;
-            });
-        return ret;
-    }
-
-    // abstracted this because I was using it for two things before
-    function eachCharByQuotedStatus(str, quoted, unquoted) {
-        var prevIsBackslash = false,
-            inSingleQuote = false,
-            inDoubleQuote = false;
-
-        for (var i=0, l=str.length; i < l; i++) {
-            var c = str[i],
-                inQuote = inSingleQuote || inDoubleQuote;
-          
-            if (!prevIsBackslash && ((inSingleQuote && c === "'") ||
-                                     (inDoubleQuote && c === '"'))) {
-                inQuote = false;
-            }
-            (inQuote ? quoted : unquoted)(c);
-
-            if (!prevIsBackslash) {
-                if (c === "'" && !inDoubleQuote) {
-                    inSingleQuote = !inSingleQuote;
-                } else if (c === '"' && !inSingleQuote) {
-                    inDoubleQuote = !inDoubleQuote;
-                }
-            }
-
-            if (c === '\\') {
-                prevIsBackslash = !prevIsBackslash;
-            } else {
-                prevIsBackslash = false;
-            }
-        }
-    }
-    
-    function convertToId(str) {
-        return str
-            .toLowerCase()
-            .replace(/ /g,'_')
-            .replace(/[^\w-]+/g,'');
-    }
-    
     var InstanceMetadata = function (attributes, children, mug, property) {
         var that = {},
             refs = {};
@@ -206,21 +125,85 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
+        this.hashtagDictionary = {};
         this.tree = new Tree('data', 'control');
+        this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
         this.instanceMetadata = [InstanceMetadata({})];
-        this.knownInstances = {}; // {<instance id>: <instance src>}
+        // {<instance id>: { src or children: <instance src or children>}
+        this.knownInstances = {};
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        
+        this.xpath = escapedHashtags.parser(this.hashtagDictionary);
+        this.undomanager = new undomanager();
+
+        this.undomanager.on('reset', function(e) {
+            _this.vellum.adjustToWindow();
+        });
+
         //make the object event aware
         util.eventuality(this);
+        this.on('form-load-finished', function() {
+            _this.fuse = new Fuse(_this);
+        });
     }
 
     Form.prototype = {
+        isValidHashtag: function(tag) {
+            return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
+        },
+        addHashtag: function(hashtag, xpath) {
+            this.hashtagDictionary[hashtag] = xpath;
+        },
+        initHashtag: function(hashtag, xpath) {
+            if (!this.hashtagDictionary[hashtag]) {
+                this.hashtagDictionary[hashtag] = xpath;
+            }
+        },
+        removeHashtag: function(hashtag) {
+            delete this.hashtagDictionary[hashtag];
+        },
+        transform: function(input, transformFn) {
+            input = this.normalizeEscapedHashtag(input);
+            return escapedHashtags.transform(input, transformFn);
+        },
+        normalize: function (methodName, xpath) {
+            // try catch is needed as workaround for having an itemset without
+            // the itemset plugin enabled and invalid xpaths
+            try {
+                return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
+            } catch (err) {
+                return xpath.startsWith('#invalid/xpath ') ? xpath.slice(15) : xpath;
+            }
+         },
+        normalizeEscapedHashtag: function (xpath_) {
+            return this.normalize('toEscapedHashtag', xpath_);
+        },
+        normalizeHashtag: function (xpath_) {
+            return this.normalize('toHashtag', xpath_);
+        },
+        normalizeXPath: function (xpath_) {
+            return this.normalize('toXPath', xpath_);
+        },
+        getHashtagsInXPath: function (xpath_) {
+            try {
+                return new logic.LogicExpression(xpath_, this.xpath).getHashtags();
+            } catch (err) {
+                return [];
+            }
+        },
+        referencedHashtags: function () {
+            return this._logicManager.referencedHashtags();
+        },
+        referenceHashtag: function(hashtag, mug, property) {
+            if (/^#case\//.test(hashtag.toHashtag())) {
+                this.referenceInstance('casedb', mug, property);
+                this.referenceInstance('commcaresession', mug, property);
+            }
+        },
         dataTree: function() {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
@@ -244,7 +227,7 @@ define([
                 processChildren();
             });
             _.each(diffDataParents, function (mugs, dataParent) {
-                var dataParentMug = _this.mugMap[dataParent];
+                var dataParentMug = _this.mugMap[_this.normalizeHashtag(dataParent)];
                 for (var i = 0, len = mugs.length; i < len; i++) {
                     dataTree.insertMug(mugs[i], 'into', dataParentMug);
                 }
@@ -292,10 +275,9 @@ define([
                 });
                 if (!meta) {
                     // attrs.src not found, try to find by id
-                    var ids = _.chain(this.instanceMetadata)
-                        .map(function (m) { return [m.attributes.id, m]; })
-                        .object()
-                        .value();
+                    var ids = _.indexBy(this.instanceMetadata, function (m) {
+                            return m.attributes.id;
+                        });
                     meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
                     if (meta && meta.internal) {
                         // assign new src to internal instance
@@ -307,7 +289,7 @@ define([
                         attrs.id = getUniqueId(attrs.id, ids);
                         meta = null;
                     }
-                    this.knownInstances[attrs.id] = attrs.src;
+                    this.knownInstances[attrs.id] = { src: attrs.src };
                 }
             } else if (attrs.id) {
                 // attrs has no src, find by id
@@ -317,10 +299,10 @@ define([
                 if (meta) {
                     if (meta.internal && this.knownInstances.hasOwnProperty(attrs.id)) {
                         meta.internal = false;
-                        meta.attributes.src = this.knownInstances[attrs.id];
+                        meta.attributes.src = this.knownInstances[attrs.id].src;
                     }
                 } else if (this.knownInstances.hasOwnProperty(attrs.id)) {
-                    attrs.src = this.knownInstances[attrs.id];
+                    _.defaults(attrs, this.knownInstances[attrs.id]);
                 }
             } else {
                 throw new Error("unsupported: non-primary instance without id or src");
@@ -329,8 +311,8 @@ define([
                 meta = InstanceMetadata({
                     src: attrs.src,
                     id: attrs.id
-                }, null, mug || null, property);
-                if (!attrs.src) {
+                }, attrs.children, mug || null, property);
+                if (!attrs.src && !attrs.children) {
                     meta.internal = true;
                 }
                 this.instanceMetadata.push(meta);
@@ -375,13 +357,16 @@ define([
          * @reutrns - {<id>: <src>, ...}
          */
         parseInstanceRefs: function (query, mug, property) {
-            var expr = new logic.LogicExpression(query),
+            var expr = new logic.LogicExpression(query, this.xpath),
                 knownInstances = this.knownInstances,
                 instances = {};
             expr.analyze();
             _.each(expr.instanceRefs, function (ignore, id) {
                 if (knownInstances.hasOwnProperty(id) && knownInstances[id]) {
-                    instances[id] = knownInstances[id];
+                    instances[id] = util.extend(knownInstances[id]);
+                    if (instances[id].children) {
+                        instances[id].children = $('<div>').append(instances[id].children).html();
+                    }
                 }
             });
             return instances;
@@ -426,24 +411,36 @@ define([
         updateKnownInstances: function (map) {
             var instances = this.knownInstances;
             if (map) {
-                var metas = _.chain(this.instanceMetadata)
-                    .map(function (m) { return [m.attributes.id, m]; })
-                    .object()
-                    .value();
-                _.each(map, function (src, id) {
-                    if (src && !instances.hasOwnProperty(id)) {
-                        instances[id] = src;
+                var metas = _.indexBy(this.instanceMetadata, function (m) {
+                        return m.attributes.id;
+                    });
+                _.each(map, function (instance, id) {
+                    if (instance && !instances.hasOwnProperty(id)) {
+                        if (instance.children) {
+                            instances[id] = { children: $(instance.children)};
+                        } else if (_.isString(instance)){
+                            // assume a string is the src
+                            instances[id] = { src: instance };
+                        } else {
+                            // assume we are fed a correct instance dict
+                            instances[id] = instance;
+                        }
                         var meta = metas[id];
                         if (meta && meta.internal) {
                             meta.internal = false;
-                            meta.attributes.src = src;
+                            meta.attributes.src = instances[id].src;
                         }
                     }
                 });
             } else {
                 _.each(this.instanceMetadata, function (meta) {
-                    if (meta.attributes.id && meta.attributes.src) {
-                        instances[meta.attributes.id] = meta.attributes.src;
+                    if (!meta.attributes.id) {
+                        return;
+                    }
+                    if (meta.attributes.src) {
+                        instances[meta.attributes.id] = { src: meta.attributes.src };
+                    } else if (meta.children) {
+                        instances[meta.attributes.id] = { children: meta.children };
                     }
                 });
             }
@@ -506,6 +503,7 @@ define([
         },
         setFormID: function (id) {
             this.tree.setRootID(id);
+            this.addHashtag('#form', '/' + id);
         },
         setAttr: function (slug, val) {
             this[slug] = val;
@@ -625,11 +623,11 @@ define([
                     return;
                 }
                 oldId = mug.p.nodeID;
-                oldPath = this.tree.getAbsolutePath(mug);
+                oldPath = mug.hashtagPath;
                 oldParent = conflictParent = mug.parentMug;
             } else {
                 oldId = mug.p.nodeID;
-                oldPath = this.tree.getAbsolutePath(mug);
+                oldPath = mug.hashtagPath;
                 oldParent = mug.parentMug;
                 this.insertMug(refMug, mug, position);
                 var spec = mug.spec.dataParent;
@@ -654,7 +652,7 @@ define([
                 }
             }
 
-            var newPath = this.tree.getAbsolutePath(mug);
+            var newPath = mug.hashtagPath;
             this.vellum.handleMugRename(
                 this, mug, newId, oldId, newPath, oldPath, oldParent);
 
@@ -695,14 +693,13 @@ define([
                 return postPath.replace(postRegExp, oldPath + "/");
             }
             this._logicManager.updatePath(mug.ufid, oldPath, newPath);
-            var tree = this.tree;
             if (!newPath) {
                 // Items don't have an absolute path. I wonder if it would
                 // matter if they had one?
                 return;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
-                postMovePaths = _(mugs).map(function(mug) { return tree.getAbsolutePath(mug); }),
+                postMovePaths = _(mugs).map(function(mug) { return mug.hashtagPath; }),
                 postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
                 updates = {},
                 preMovePath;
@@ -745,8 +742,7 @@ define([
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];
-                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, 
-                    this.getAbsolutePath(duplicate));
+                this._logicManager.updatePath(pr.mugId, pr.from, pr.to, duplicate.hashtagPath);
             }
             return duplicate;
         },
@@ -789,8 +785,8 @@ define([
 
             pathReplacements.push({
                 mugId: mug.ufid,
-                from: this.getAbsolutePath(mug),
-                to: this.getAbsolutePath(duplicate)
+                from: mug.hashtagPath,
+                to: duplicate.hashtagPath,
             });
 
             return [duplicate, pathReplacements];
@@ -850,16 +846,6 @@ define([
             //if (!mug.options.isControlOnly && !this.isLoadingXForm) {
             //    this.fixBrokenReferences(mug);
             //}
-            if (mug.options.isODKOnly) {
-                // is this a good candidate for "info" message level?
-                mug.addMessage(null, {
-                    key: 'form-odk-only-warning',
-                    level: mug.WARNING,
-                    message: mug.options.typeName + ' works on Android devices ' +
-                        'and some feature phones; please test your specific ' +
-                        'model to ensure that this question type is supported'
-                });
-            }
             return mug;
         },
         insertQuestion: function (mug, refMug, position, isInternal) {
@@ -880,22 +866,36 @@ define([
                 mug.options.afterInsert(this, mug);
             }
         },
-        _updateMugPath: function (mug, oldPath, newPath) {
-            var map = this.mugMap;
-            delete map[oldPath];
-            if (_.isUndefined(newPath)) {
-                newPath = this.getAbsolutePath(mug);
+        _updateMugPath: function (mug, oldHashtag, newHashtag) {
+            var map = this.mugMap, newPath;
+            delete map[this.normalizeHashtag(oldHashtag)];
+            if (oldHashtag) {
+                this.removeHashtag(oldHashtag);
             }
-            if (newPath) {
-                map[newPath] = mug;
+            if (_.isUndefined(newHashtag)) {
+                newPath = mug.absolutePath;
+                newHashtag = mug.hashtagPath;
+            } else {
+                newPath = newHashtag.replace(/^#form/, this.getBasePath(true));
+                if (newPath === newHashtag) {
+                    // this happens if _updateMugPath is commtrack (#supply one day)
+                    newPath = null;
+                }
+            }
+            if (newHashtag) {
+                if (newPath) {
+                    this.addHashtag(newHashtag, newPath);
+                }
+                map[this.normalizeHashtag(newHashtag)] = mug;
             }
         },
         _fixMugState: function (mug) {
             // parser needs this because it inserts directly into the tree
             this.mugMap[mug.ufid] = mug;
-            var path = this.tree.getAbsolutePath(mug);
+            var path = mug.absolutePath;
             if (path) {
-                this.mugMap[path] = mug;
+                this.addHashtag(mug.hashtagPath, path);
+                this.mugMap[this.normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },
         fixBrokenReferences: function (mug) {
@@ -929,7 +929,11 @@ define([
             if(!path) { //no path specified
                 return null;
             }
-            return this.mugMap[path];
+            return this.mugMap[this.normalizeHashtag(path)];
+        },
+        getIconByPath: function (path) {
+            var mug = this.getMugByPath(path);
+            return mug ? mug.getIcon() : null;
         },
         removeMugsFromForm: function (mugs) {
             function breakReferences(mug) {
@@ -940,11 +944,35 @@ define([
             }
             var _this = this,
                 seen = {},
-                ufids = {};
+                ufids = {},
+                undoUfids = {};
+            this.undomanager.resetUndo();
+            _.each(mugs, function (mug) {
+                _this._addToUndoManager(mug, undoUfids);
+            });
             _.each(mugs, function (mug) {
                 _this._removeMugFromForm(mug, ufids, false);
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
+        },
+        _addToUndoManager: function(mug, ufids) {
+            if (ufids.hasOwnProperty(mug.ufid)) {
+                return; // already removed
+            }
+            ufids[mug.ufid] = null;
+            var node = this.tree.getNodeFromMug(mug),
+                parentMug = mug.parentMug,
+                hasChildren = false,
+                previousSibling = mug.previousSibling,
+                position = previousSibling === parentMug ? 'first' : 'after';
+            this.undomanager.appendMug(mug, previousSibling, position);
+            if (node) {
+                var children = node.getChildrenMugs();
+                hasChildren = children.length > 0;
+                for (var i = 0; i < children.length; i++) {
+                    this._addToUndoManager(children[i], ufids);
+                }
+            }
         },
         _removeMugFromForm: function(mug, ufids, isInternal) {
             if (ufids.hasOwnProperty(mug.ufid)) {
@@ -957,7 +985,7 @@ define([
                 for (var i = 0; i < children.length; i++) {
                     this._removeMugFromForm(children[i], ufids, true);
                 }
-                delete this.mugMap[this.tree.getAbsolutePath(mug)];
+                delete this.mugMap[this.normalizeHashtag(mug.hashtagPath)];
                 this.tree.removeMug(mug);
             }
             if (this.enableInstanceRefCounting) {
@@ -969,7 +997,7 @@ define([
             this.fire({
                 type: 'question-remove',
                 mug: mug,
-                isInternal: isInternal
+                isInternal: isInternal,
             });
         },
         isUniqueQuestionId: function (qId, mug) {
@@ -1038,13 +1066,18 @@ define([
             var value = exporter.generateExportTSV(this);
             this.vellum.afterSerialize();
             return value;
+        },
+        undo: function() {
+            this.undomanager.undo();
+            this.vellum.selectSomethingOrHideProperties();
+        },
+        isCaseReference: function (path) {
+            return /^#case/.test(path);
         }
     };
 
     return {
         Form: Form,
-        processInstance: processInstance,
-        normalizeXPathExpr: normalizeXPathExpr,
         InstanceMetadata: InstanceMetadata
     };
 });

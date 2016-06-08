@@ -97,10 +97,14 @@ define([
     };
 
     function writeXML(xmlWriter, properties) {
+        var intentTemplate = findIntentTemplate(properties.androidIntentAppId);
         xmlWriter.writeStartElement('odkx:intent');
         xmlWriter.writeAttributeString("xmlns:odkx", properties.intentXmlns);
         xmlWriter.writeAttributeString("id", properties.nodeID);
         xmlWriter.writeAttributeString("class", properties.androidIntentAppId);
+        if (intentTemplate && intentTemplate.type) {
+            xmlWriter.writeAttributeString("type", intentTemplate.type);
+        }
         _.each(properties.unknownAttributes, function (value, name) {
             xmlWriter.writeAttributeString(name, value);
         });
@@ -214,8 +218,7 @@ define([
         typeName: 'Android App Callout',
         dataType: 'intent',
         tagName: 'input',
-        icon: 'icon-vellum-android-intent',
-        isODKOnly: true,
+        icon: 'fcc fcc-fd-android-intent',
         isTypeChangeable: false,
         init: function (mug, form) {
             mug.p.intentXmlns = mug.p.intentXmlns || DEFAULT_XMLNS;
@@ -305,7 +308,7 @@ define([
 
     var PrintIntent = util.extend(AndroidIntent, {
         typeName: 'Print',
-        icon: 'icon-print',
+        icon: 'fa fa-print',
         init: function (mug, form) {
             AndroidIntent.init(mug, form);
             mug.p.androidIntentAppId = "org.commcare.dalvik.action.PRINT";
@@ -317,7 +320,6 @@ define([
                 widget: widgets.media,
             },
             androidIntentAppId: { visibility: 'hidden' },
-            androidIntentResponse: { visibility: 'hidden' },
         }
     });
 
@@ -333,11 +335,17 @@ define([
         return !noIntents(features);
     }
 
+    function findIntentTemplate(intentId) {
+        return _.find(intentTemplates, function (intent) {
+            return intent.value === intentId;
+        });
+    }
+
     $.vellum.plugin("intents", {}, {
         init: function() {
             var opts = this.opts().intents;
             intentTemplates = _.map(opts && opts.templates, function (temp) {
-                return {value: temp.id, text: temp.name};
+                return {value: temp.id, text: temp.name, type: temp.mime};
             });
         },
         loadXML: function (xml) {

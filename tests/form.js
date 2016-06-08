@@ -13,7 +13,8 @@ define([
     'text!static/form/select-questions.xml',
     'text!static/form/mismatch-tree-order.xml',
     'text!static/form/hidden-value-tree-order.xml',
-    'text!static/form/instance-reference.xml'
+    'text!static/form/instance-reference.xml',
+    'text!static/form/manual-instance-reference.xml'
 ], function (
     util,
     chai,
@@ -29,7 +30,8 @@ define([
     SELECT_QUESTIONS,
     MISMATCH_TREE_ORDER_XML,
     HIDDEN_VALUE_TREE_ORDER,
-    INSTANCE_REFERENCE_XML
+    INSTANCE_REFERENCE_XML,
+    MANUAL_INSTANCE_REFERENCE_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -39,7 +41,6 @@ define([
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {rich_text: false},
             });
         });
         it("should get and fix serialization errors for mugs with matching paths", function () {
@@ -62,14 +63,14 @@ define([
             var blue = util.addQuestion("Text", "blue"),
                 green = util.addQuestion("Text", "green"),
                 black = util.addQuestion("DataBindOnly", "black");
-            black.p.calculateAttr = "/data/blue + /data/green";
+            black.p.calculateAttr = "#form/blue + #form/green";
             green.p.nodeID = "blue";
             assert.notEqual(green.p.nodeID, "blue");
             assert(!util.isTreeNodeValid(green), "expected validation error");
 
             blue.p.nodeID = "orange";
             assert.equal(green.p.nodeID, "blue");
-            assert.equal(black.p.calculateAttr, "/data/orange + /data/blue");
+            assert.equal(black.p.calculateAttr, "`#form/orange` + `#form/blue`");
             assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
             assert(util.isTreeNodeValid(green), green.getErrors().join("\n"));
             assert(util.isTreeNodeValid(black), black.getErrors().join("\n"));
@@ -81,15 +82,15 @@ define([
                 text = util.addQuestion("Text", "text"),
                 group = util.addQuestion("Group", "group");
             util.addQuestion("Text", "text");
-            hid.p.calculateAttr = "/data/text + /data/group/text";
+            hid.p.calculateAttr = "#form/text + #form/group/text";
             form.moveMug(text, "into", group);
-            assert.notEqual(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert.notEqual(hid.p.calculateAttr, "#form/text + #form/group/text");
             assert.notEqual(text.p.nodeID, "text");
-            assert(!util.isTreeNodeValid(text), "expected /data/text error");
+            assert(!util.isTreeNodeValid(text), "expected #form/text error");
 
             form.moveMug(text, "into", null);
             assert.equal(text.p.nodeID, "text");
-            assert.equal(hid.p.calculateAttr, "/data/text + /data/group/text");
+            assert.equal(hid.p.calculateAttr, "`#form/text` + `#form/group/text`");
             assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
         });
 
@@ -123,7 +124,7 @@ define([
                 messages = text.messages.get("nodeID");
             assert.equal(messages.length, 1, messages.join("\n"));
             // UI dependent, possibly fragile
-            var div = $("[name=property-nodeID]").closest(".control-group"),
+            var div = $("[name=property-nodeID]").closest(".widget"),
                 msg = div.find(".messages").children();
             assert.equal(msg.length, messages.length, msg.text());
             assert.equal(msg[0].text, messages[0].message);
@@ -145,13 +146,6 @@ define([
             assert.equal(util.getMessages(mug), "");
         });
 
-        it("should add ODK warning to mug on create Audio question", function () {
-            util.loadXML("");
-            var mug = util.addQuestion("Audio"),
-                messages = util.getMessages(mug);
-            chai.expect(messages).to.include("Android");
-        });
-
         it("should preserve internal references in copied group", function () {
             util.loadXML(GROUP_WITH_INTERNAL_REFS_XML);
             var form = call("getData").core.form,
@@ -159,7 +153,7 @@ define([
             form.duplicateMug(group);
             var green2 = util.getMug("copy-1-of-group/green");
             assert.equal(green2.p.relevantAttr,
-                "/data/copy-1-of-group/blue = 'red' and /data/red = 'blue'");
+                "`#form/copy-1-of-group/blue` = 'red' and `#form/red` = 'blue'");
         });
 
         it("should set non-standard form root node", function () {
@@ -185,12 +179,12 @@ define([
                 label = call("getMugByPath", "/data/group/label"),
                 hidden = call("getMugByPath", "/data/group/hidden");
 
-            chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/group/hidden");
             group.p.nodeID = "x";
             assert.equal(group.absolutePath, "/data/x");
             assert.equal(label.absolutePath, "/data/x/label");
             assert.equal(hidden.absolutePath, "/data/x/hidden");
-            chai.expect(label.p.relevantAttr).to.include("/data/x/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/x/hidden");
         });
 
         it("should update reference to moved hidden value in output tag", function () {
@@ -199,22 +193,22 @@ define([
                 label = call("getMugByPath", "/data/group/label"),
                 hidden = call("getMugByPath", "/data/group/hidden");
 
-            chai.expect(label.p.relevantAttr).to.include("/data/group/hidden");
-            chai.expect(label.p.labelItext.defaultValue()).to.include("/data/group/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/group/hidden");
+            chai.expect(label.p.labelItext.defaultValue()).to.include("#form/group/hidden");
             form.moveMug(hidden, "first", null);
             assert.equal(hidden.absolutePath, "/data/hidden");
-            chai.expect(label.p.relevantAttr).to.include("/data/hidden");
-            chai.expect(label.p.labelItext.defaultValue()).to.include("/data/hidden");
+            chai.expect(label.p.relevantAttr).to.include("#form/hidden");
+            chai.expect(label.p.labelItext.defaultValue()).to.include("#form/hidden");
         });
 
         it("should update repeat group reference", function () {
             util.loadXML("");
             var text = util.addQuestion("Text", 'text'),
                 repeat = util.addQuestion("Repeat", 'repeat');
-            repeat.p.repeat_count = '/data/text';
-            assert.equal(repeat.p.repeat_count, '/data/text');
+            repeat.p.repeat_count = '#form/text';
+            assert.equal(repeat.p.repeat_count, '#form/text');
             text.p.nodeID = 'text2';
-            assert.equal(repeat.p.repeat_count, '/data/text2');
+            assert.equal(repeat.p.repeat_count, '`#form/text2`');
         });
 
         it ("should show warnings for duplicate choice value", function() {
@@ -331,6 +325,13 @@ define([
                 "groups instance not found");
         });
 
+        it("should not delete manual instances when it's reference is updated", function() {
+            util.loadXML(MANUAL_INSTANCE_REFERENCE_XML);
+            util.clickQuestion('output');
+            $('[name=property-calculateAttr]').change();
+            util.assertXmlEqual(call('createXML'), MANUAL_INSTANCE_REFERENCE_XML);
+        });
+
         describe("instance tracker", function () {
             var form, mug, prop = "calculateAttr";
             before(function () {
@@ -352,7 +353,7 @@ define([
                 [{id: "old", src: "new://3"}, "old-1", "src"],
                 [{id: "old", src: "old://"}, "old", "src"],
                 [{id: "any", src: "old://"}, "old", "src"],
-                [{id: "known", src: null}, "known", "known://"],
+                [{id: "known", src: undefined}, "known", "known://"],
                 [{id: "blank", src: "blank://"}, "blank", "src"],
                 [{id: null, src: "new://5"}, "data-1", "src"],
                 //[{id: null, src: null}, "data-1", "src"],     Error!

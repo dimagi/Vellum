@@ -1,132 +1,97 @@
+// Styling for trees (question tree and external data tree)
 @import "lib/main";
 
-.fd-tree {
-  .fd-scrollable {
-    overflow-x: auto;
-  }
-}
+// Vellum wrappers
+.formdesigner .fd-ui-container {
 
-.fd-question-tree.jstree {
-  margin: 5px 0;
-  background: @white;
-}
+    // Styles shared by both trees
+    .jstree {
 
-.fd-tree-valid-alert-icon {
-  // todo, investigate usage
-  display: inline-block;
-  width: 1.25em;
-  text-align: center;
-  color: lighten(@red, 15);
-}
+        // Items in tree (type icon + name)
+        .jstree-anchor {
+            color: darken(@blueDark, 10);
 
-.icon-exclamation-triangle:before {
-  content: "\f071";
-}
+            &.jstree-hovered,
+            &.jstree-clicked {
+                border: none;
+                background: desaturate(lighten(@blue, 58), 40);
+            }
 
-.fd-lang-display-selector {
-  padding: @gridGutterWidth/2;
-  background-color: @navbarBackground;
-  text-align: center;
-}
+            &.jstree-clicked {
+                .box-shadow(0px 0px 4px fade(@blue, 60%));
+            }
 
-.fd-display-item i.icon-ok {
-  display: none;
-}
+            > .jstree-icon {
+                background: none;
+                font-size: .85em;
+                color: @blueLight;
+            }
 
-.fd-display-item.selected i.icon-ok {
-  display: inline-block;
-}
-
-.fd-search-box {
-  position: relative;
-  padding: @gridGutterWidth/2 @gridGutterWidth;
-  background-color: @navbarBackground;
-  > input {
-    border-radius: 1em;
-    text-indent: 1.5em;
-    width: 100%;
-    height: 2em;
-    box-sizing : border-box;
-  }
-  > .icon-search {
-    position: absolute;
-    top: @gridGutterWidth/2+6px;
-    left: @gridGutterWidth+7px;
-    color: #777;
-  }
-}
-
-.fd-search-icon {
-  font-size: 1.2em;
-}
-
-.fd-question-tree-actions {
-  text-align: center;
-  > div { padding-top: @gridGutterWidth/2; }
-}
-
-.fd-messages {
-  position: fixed;
-  bottom: 40px;
-  left: 0;
-  width: 100%;
-}
-
-.jstree-default .jstree-anchor {
-  color: darken(@blueDark, 10);
-  &.jstree-hovered,
-  &.jstree-clicked {
-    border: none;
-    background: desaturate(lighten(@blue, 58), 40);
-  }
-  &.jstree-clicked {
-    .box-shadow(0px 0px 4px fade(@blue, 60%));
-  }
-  > .jstree-icon {
-    background: none;
-    font-size: .85em;
-    color: @blueLight;
-  }
-}
-
-#jstree-marker {
-  z-index:10000000
-}
-
-.fd-external-resource-search {
-  background-color: @cc-bg;
-  margin-bottom: 5px;
-  > form {
-    position: relative;
-    padding: 0px @contentPaddingVellum;
-    margin: 0;
-    i {
-      line-height: 36px;
+            .fd-tree-valid-alert-icon {
+                color: lighten(@red, 15);
+                margin-right: 3px;
+                margin-left: -3px;
+            }
+        } 
     }
-  }
-}
 
-.fd-search-control {
-  position: absolute;
-  top: 5px;
-  margin-left: 18px;
-  width: 100%;
-}
+    // Panel for question tree, including header
+    .fd-tree {
+        .fd-scrollable {
+            overflow-x: auto;
 
-.fd-head-external-sources {
-  background-color: @cc-neutral-low;
-  z-index: 0;
-  cursor: pointer;
-}
+            // Separate tree from header
+            .jstree {
+                margin: 5px 0;
+            }
+        }
 
-.fd-external-sources-tree .jstree-anchor {
-  color: @cc-neutral-low;
-  &.jstree-clicked {
-    background-color: @cc-bg;
-    .box-shadow(0px 0px 4px fade(@cc-neutral-mid, 80%));
-  }
+        .fd-undo-delete {
+            margin-bottom: 0px;
+        }
+    }
 
-  > .jstree-icon {
-    color: @cc-neutral-mid;
-  }
+    // Panel for external data sources tree, including header
+    .fd-external-sources-container {
+
+        // Header for panel
+        .fd-head.fd-head-external-sources {
+            background-color: @cc-neutral-low;
+            cursor: pointer;
+        }
+
+        // Area for search
+        .fd-external-resource-search {
+            background-color: @cc-bg;
+            margin-bottom: 5px;
+            > form {
+                position: relative;
+                padding: 0px @contentPaddingVellum;
+                i {
+                    line-height: 42px;
+                }
+            }
+
+            // Icon and search box
+            .fd-search-control {
+                position: absolute;
+                top: 5px;
+                margin-left: 18px;
+                width: 100%;
+            }
+        }
+
+        // Data tree itemsuse a different color scheme
+        .fd-external-sources-tree .jstree-anchor {
+            color: @cc-neutral-low;
+            &.jstree-clicked {
+                background-color: @cc-bg;
+                .box-shadow(0px 0px 4px fade(@cc-neutral-mid, 80%));
+            }
+
+            > .jstree-icon {
+                color: @cc-neutral-mid;
+            }
+        }
+    }
 }

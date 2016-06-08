@@ -1,4 +1,4 @@
-require([
+define([
     'chai',
     'jquery',
     'underscore',
@@ -24,7 +24,6 @@ require([
     describe("Control elements with different data parents", function() {
         before(function (done) {
             util.init({
-                features: {rich_text: false},
                 javaRosa: {langs: ['en']},
                 core: {onReady: done}
             });
@@ -36,7 +35,7 @@ require([
                 text1 = util.addQuestion.bind({prevId: repeat.p.nodeID})("Text", 'text1'),
                 text2 = util.addQuestion.bind({prevId: repeat.p.nodeID})("Text", 'text2');
 
-            text2.p.dataParent = '/data';
+            text2.p.dataParent = '#form';
             assert(util.isTreeNodeValid(text1), "text1 should be valid");
             assert(!util.isTreeNodeValid(text2), "text2 should not be valid");
         });
@@ -46,7 +45,7 @@ require([
             var text1 = util.addQuestion("Text", 'text1'),
                 text2 = util.addQuestion("Text", 'text2');
 
-            text2.p.dataParent = '/data/text1';
+            text2.p.dataParent = '#form/text1';
             assert(util.isTreeNodeValid(text1), "text1 should be valid");
             assert(!util.isTreeNodeValid(text2), "text2 should not be valid");
         });
@@ -58,11 +57,11 @@ require([
                 form = call("getData").core.form;
 
             util.addQuestion("Group", 'group1');
-            text2.p.dataParent = '/data/group1';
+            text2.p.dataParent = '`#form/group1`';
 
             form.moveMug(text2, 'before', text1);
 
-            assert.equal(text2.p.dataParent, '/data/group1');
+            assert.equal(text2.p.dataParent, '`#form/group1`');
         });
 
         it("should update data tree after a change to data parent", function() {
@@ -72,10 +71,10 @@ require([
                 group2 = util.addQuestion.bind({prevId: text1.p.nodeID})("Group", 'group2'),
                 form = call("getData").core.form;
 
-            text1.p.dataParent = '/data/group1';
-            assert.equal(text1.p.dataParent, "/data/group1");
+            text1.p.dataParent = '#form/group1';
+            assert.equal(text1.p.dataParent, "#form/group1");
             form.moveMug(group1, 'into', group2);
-            assert.equal(text1.p.dataParent, "/data/group2/group1");
+            assert.equal(text1.p.dataParent, "`#form/group2/group1`");
         });
 
         it("should clear the data parent when moving to a repeat group", function() {
@@ -84,7 +83,7 @@ require([
             util.addQuestion("Group", 'group1');
             var repeat1= util.addQuestion.bind({prevId: text1.p.nodeID})("Repeat", 'repeat1'),
                 form = call("getData").core.form;
-            text1.p.dataParent = '/data/group1';
+            text1.p.dataParent = '#form/group1';
             form.moveMug(text1, 'into', repeat1);
             assert(util.isTreeNodeValid(text1), text1.getErrors().join("\n"));
             assert.isUndefined(text1.p.dataParent);
@@ -97,9 +96,9 @@ require([
 
             util.addQuestion("Group", 'group1');
 
-            text1.p.dataParent = '/data/group1';
+            text1.p.dataParent = '#form/group1';
             util.loadXML(call("createXML"));
-            assert.equal(text1.p.dataParent, '/data/group1');
+            assert.equal(text1.p.dataParent, '#form/group1');
             util.assertTreeState(form.dataTree(),
                 "group1",
                 "  text1"
@@ -110,7 +109,7 @@ require([
             var form = util.loadXML(""),
                 text = util.addQuestion("Text", 'text');
             util.addQuestion("Group", 'group');
-            text.p.dataParent = '/data/group';
+            text.p.dataParent = '#form/group';
             var map = JSON.stringify(_.object(_.map(form.mugMap, function (mug, path) {
                 if (path.startsWith("/")) {
                     return [path, mug.__className];
@@ -118,7 +117,7 @@ require([
                 return ["", undefined];
             })));
             assert(util.getMug('/data/group/text'),
-                   'cannot find "/data/group/text" in ' + map);
+                   'cannot find "#form/group/text" in ' + map);
         });
 
         it("should parse and write XML to have the same order", function() {
@@ -129,7 +128,7 @@ require([
         it("should have proper data parent after being loaded from xml", function() {
             util.loadXML(PARSE_XML);
             var diffChild = util.getMug("/data/parent/different-child");
-            assert.equal(diffChild.p.dataParent, "/data/parent");
+            assert.equal(diffChild.p.dataParent, "#form/parent");
             util.assertJSTreeState(
                 "different-child",
                 "parent",
@@ -144,7 +143,7 @@ require([
             util.addQuestion("Group", 'group');
             util.addQuestion("Text", 'text2');
 
-            text1.p.dataParent = '/data/group';
+            text1.p.dataParent = '#form/group';
             util.addQuestion.bind({prevId: text1.absolutePath})("Text", 'text3');
             // questions with alternate dataParent always come last in the data tree
             util.assertTreeState(form.dataTree(),
@@ -164,7 +163,7 @@ require([
         it("should properly load group before sibling/child", function() {
             util.loadXML(SIBLING_AS_CHILD);
             var text = util.getMug("/data/text");
-            assert.equal(text.p.dataParent, "/data");
+            assert.equal(text.p.dataParent, "#form");
             util.assertJSTreeState(
                 "group",
                 "  text"
@@ -175,7 +174,7 @@ require([
         it("should properly load mug after other mugs", function() {
             util.loadXML(DATA_PARENT_MUG_AFTER);
             var child = util.getMug("/data/parent/child");
-            assert.equal(child.p.dataParent, "/data/parent");
+            assert.equal(child.p.dataParent, "#form/parent");
             util.assertJSTreeState(
                 "before-child",
                 "child",
@@ -187,7 +186,7 @@ require([
         it("should properly load mug before other mugs", function() {
             util.loadXML(DATA_PARENT_MUG_BEFORE);
             var child = util.getMug("/data/parent/child");
-            assert.equal(child.p.dataParent, "/data/parent");
+            assert.equal(child.p.dataParent, "#form/parent");
             util.assertJSTreeState(
                 "child",
                 "after-child",
@@ -199,7 +198,7 @@ require([
         it("should properly load mug in between other mugs", function() {
             util.loadXML(DATA_PARENT_MUG_IN_BETWEEN);
             var child = util.getMug("/data/parent/child");
-            assert.equal(child.p.dataParent, "/data/parent");
+            assert.equal(child.p.dataParent, "#form/parent");
             util.assertJSTreeState(
                 "before-child",
                 "child",

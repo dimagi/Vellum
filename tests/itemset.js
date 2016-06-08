@@ -1,4 +1,4 @@
-require([
+define([
     'tests/options',
     'tests/utils',
     'chai',
@@ -12,7 +12,8 @@ require([
     'text!static/itemset/test1-with-appearance.xml',
     'text!static/itemset/inner-filters.xml',
     'text!static/itemset/dropdown-fixture.xml',
-    'text!static/itemset/data-itemset.xml'
+    'text!static/itemset/data-itemset.xml',
+    'text!static/itemset/itemset-with-question-ref.xml',
 ], function (
     options,
     util,
@@ -27,7 +28,8 @@ require([
     TEST_XML_1_WITH_APPEARANCE,
     INNER_FILTERS_XML,
     DROPDOWN_FIXTURE_XML,
-    DATA_ITEMSET_XML
+    DATA_ITEMSET_XML,
+    ITEMSET_WITH_QUESTION_REF_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -43,7 +45,6 @@ require([
                 features: {
                     lookup_tables: true,
                     advanced_itemsets: false,
-                    rich_text: false
                 },
             });
         }
@@ -118,6 +119,18 @@ require([
             assert.equal(util.getMessages(mug), "");
         });
 
+        it("should populate itemset nodeset and refs on add single select", function () {
+            util.loadXML("");
+            util.addQuestion("SelectDynamic", "select");
+            var xml = call('createXML'),
+                $xml = $(xml),
+                itemset = $xml.find("itemset");
+            assert.equal(itemset.attr("nodeset"),
+                "instance('some-fixture')/some-fixture_list/some-fixture");
+            assert(itemset.find("label").attr("ref"), "name");
+            assert(itemset.find("value").attr("ref"), "@id");
+        });
+
         it("should load dynamic select without errors", function () {
             util.loadXML(TEST_XML_1);
             var mug = util.getMug('question1/itemset');
@@ -130,6 +143,22 @@ require([
             util.saveButtonEnabled(false);
             clickQuestion('question1/itemset');
             assert(!util.saveButtonEnabled(), "save button should not be enabled");
+        });
+
+        it("should save the hashtag format correctly", function() {
+            util.loadXML("");
+            util.addQuestion("Text", 'state');
+            util.addQuestion("SelectDynamic", 'district');
+            util.clickQuestion('district/itemset');
+            var itemset = util.getMug("district/itemset");
+            itemset.p.itemsetData = {
+                instance: itemset.p.itemsetData.instance,
+                nodeset:  itemset.p.itemsetData.nodeset + '[name = /data/state]',
+                labelRef: "name",
+                valueRef: "@id",
+            };
+
+            util.assertXmlEqual(call('createXML'), ITEMSET_WITH_QUESTION_REF_XML, {normalize_xmlns: true});
         });
 
         describe("without access to lookup tables", function() {
@@ -254,6 +283,28 @@ require([
                     assert.strictEqual(mug.spec.labelRef.validationFunc(mug), 'pass');
                 });
             });
+        });
+    });
+
+    describe("The Dynamic Itemset plugin with no fixtures", function () {
+        var DATA_SOURCES = [{id: "ignored", uri: "jr://not-a-fixture"}];
+        before(function (done) {
+            util.init({
+                plugins: plugins,
+                javaRosa: {langs: ['en']},
+                core: {
+                    dataSourcesEndpoint: function (callback) { callback(DATA_SOURCES); },
+                    onReady: done,
+                },
+                features: {lookup_tables: true},
+            });
+        });
+        beforeEach(datasources.reset);
+
+        it("should be able to configure Lookup Table Data", function() {
+            util.addQuestion("SelectDynamic", "select");
+            util.clickQuestion("select/itemset");  // should not throw exception
+            assert.equal($("[name=property-itemsetData]").length, 1);
         });
     });
 });

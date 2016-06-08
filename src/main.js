@@ -42,16 +42,11 @@ requirejs.config({
         'jquery': '../bower_components/jquery/dist/jquery',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
         'jquery.bootstrap': '../lib/bootstrap',
-        'jquery.bootstrap-popout': '../lib/bootstrap-popout',
-        'jquery.bootstrap-stickyover': '../lib/bootstrap-stickyover',
         'underscore': '../bower_components/underscore/underscore',
         'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
         // todo: should convert xpath submodule to AMD
         'xpath': '../bower_components/xpath/xpath',
-        'xpathmodels': '../bower_components/xpath/models',
-        'scheme-number': '../bower_components/xpath/lib/schemeNumber',
-        'biginteger': '../bower_components/xpath/lib/biginteger',
 
         'langCodes': '../bower_components/langcodes/langs.json',
 
@@ -62,7 +57,6 @@ requirejs.config({
         'yui-loader': '../bower_components/MediaUploader/yui-loader',
         'yui-uploader': '../bower_components/MediaUploader/yui-uploader',
 
-        'swfobject': '../bower_components/MediaUploader/swfobject',
         'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
         'jsdiff': '../bower_components/jsdiff/diff',
         'markdown-it': '../bower_components/markdown-it/dist/markdown-it',
@@ -95,14 +89,6 @@ requirejs.config({
             deps: ['jquery'],
             exports: '$.fn.popover'
         },
-        'jquery.bootstrap-popout': {
-            deps: ['jquery.bootstrap'],
-            exports: '$.fn.popout'
-        },
-        'jquery.bootstrap-stickyover': {
-            deps: ['jquery.bootstrap'],
-            exports: '$.fn.stickyover'
-        },
         'underscore': {
             exports: '_'
         },
@@ -126,28 +112,13 @@ requirejs.config({
             deps: ['yui-base', 'yui-loader', 'css!yui-combo'],
             exports: 'YUI'
         },
-        'swfobject': {
-            exports: 'swfobject'
-        },
         'file-uploader': {
-            deps: ['yui-uploader', 'swfobject', 'underscore', 'jquery'],
+            deps: ['yui-uploader', 'underscore', 'jquery'],
             exports: 'HQMediaFileUploadController'
         },
 
         'xpath': {
-            deps: ['xpathmodels'],
             exports: 'xpath'
-        },
-        'xpathmodels': {
-            deps: ['scheme-number'],
-            exports: 'xpathmodels'
-        },
-        'scheme-number': {
-            deps: ['biginteger'],
-            exports: 'SchemeNumber'
-        },
-        'biginteger': {
-            exports: 'BigInteger'
         },
         'jsdiff': {
             exports: 'JsDiff'
@@ -185,12 +156,6 @@ if (window.jQuery) {
     define('jquery', [], function() {
         return window.jQuery;
     });
-    if (window.jQuery.fn.popout) {
-        define('jquery.bootstrap-popout', [], function () {});
-    }
-    if (window.jQuery.fn.stickyover) {
-        define('jquery.bootstrap-stickyover', [], function () {});
-    }
 }
 
 define([
@@ -199,7 +164,7 @@ define([
     'vellum/ignoreButRetain',
     'vellum/intentManager',
     'vellum/itemset',
-    'vellum/javaRosa',
+    'vellum/javaRosa/plugin',
     'vellum/datasources',
     'vellum/lock',
     'vellum/databrowser',

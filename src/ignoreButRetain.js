@@ -20,16 +20,12 @@
 define([
     'underscore',
     'jquery',
-    'vellum/mugs',
     'vellum/parser',
-    'vellum/util',
     'vellum/core'
 ], function (
     _,
     $,
-    mugs,
-    parser,
-    util
+    parser
 ) {
     var xmls = new XMLSerializer(),
         MUG = "mug",
@@ -163,6 +159,7 @@ define([
         },
         parseBindElement: function (form, el, path) {
             if (this.data.ignore.active) {
+                path = form.normalizeXPath(path);
                 var mug = form.getMugByPath(path);
                 if (!mug) {
                     mug = findParent(path, form);
@@ -200,6 +197,7 @@ define([
         },
         parseSetValue: function (form, el, path) {
             if (this.data.ignore.active) {
+                path = form.normalizeXPath(path);
                 var mug = form.getMugByPath(path);
                 if (!mug) {
                     mug = findParent(path, form);
@@ -287,14 +285,18 @@ define([
         },
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             this.__callOld();
+            var _this = this;
             if (this.data.ignore.active && oldPath) {
+                // does not use normalizeXPath for oldPath as old XPath is invalid
+                oldPath = oldPath.replace(/^#form\//, form.getBasePath(true) + "/");
+                newPath = form.normalizeXPath(newPath);
                 var oldEscaped = RegExp.escape(oldPath),
                     pathRegex = new RegExp(oldEscaped + '(\\W|$)', 'g'),
                     newPattern = newPath + "$1";
-                _.each(this.data.ignore.ignoredNodes, function (node) {
+                _.each(_this.data.ignore.ignoredNodes, function (node) {
                     node.nodeXML = node.nodeXML.replace(pathRegex, newPattern);
                 });
-                _.each(this.data.ignore.ignoredMugs, function (mug) {
+                _.each(_this.data.ignore.ignoredMugs, function (mug) {
                     if (mug.p.controlNode) {
                         mug.p.controlNode =
                             mug.p.controlNode.replace(pathRegex, newPattern);
@@ -311,10 +313,12 @@ define([
 
     var IgnoredQuestion = {
             typeName: "Ignored XML",
-            icon: 'icon-question-sign',
+            icon: 'fa fa-question-circle',
             isTypeChangeable: false,
             isRemoveable: false,
             isCopyable: false,
+            ignoreHashtags: true,
+            isHashtaggable: false,
             init: function (mug) {
                 mug.p.binds = [];
                 mug.p.setValues = [];

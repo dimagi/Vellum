@@ -8,7 +8,7 @@
 					<text />
 				</data>
 			</instance>
-			<bind nodeset="/data/text" type="xsd:string" />
+			<bind vellum:nodeset="#form/text" nodeset="/data/text" type="xsd:string" />
 			<setvalue event="special-snowflake" ref="/data/text" value="blah" />
 			<itext>
 				<translation lang="en" default="">
@@ -20,7 +20,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/text">
+		<input vellum:ref="#form/text" ref="/data/text">
 			<label ref="jr:itext('text-label')" />
 		</input>
 	</h:body>

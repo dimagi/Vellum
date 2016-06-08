@@ -5,8 +5,9 @@ define([
     'jsdiff',
     'underscore',
     'jquery',
-    'vellum/tsv',
     'vellum/copy-paste',
+    'vellum/tsv',
+    'vellum/widgets',
     'jquery.jstree',
     'jquery.vellum'
 ], function (
@@ -16,8 +17,9 @@ define([
     jsdiff,
     _,
     $,
+    copypaste,
     tsv,
-    copypaste
+    widgets
 ) {
     var assert = chai.assert,
         savedForm = null,
@@ -35,7 +37,10 @@ define([
     }
 
     function assertXmlEqual(actual, expected, opts) {
-        opts = opts || {};
+        opts = _.defaults(opts || {}, {
+            normalize_xmlns: false,
+            not: false,
+        });
         if (opts.normalize_xmlns) {
             var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
             actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
@@ -140,6 +145,12 @@ define([
         return call("getCurrentMugInput", property);
     }
 
+    function getWidget(name) {
+        var vellum = $("#vellum").vellum("get"),
+            target = $("[name=" + name + "]");
+        return widgets.util.getWidget(target, vellum);
+    }
+
     function assertInputCount(nameOrInputs, num, name) {
         if (_.isString(nameOrInputs)) {
             name = " for " + (name ? name + " " : "") + nameOrInputs;
@@ -158,8 +169,13 @@ define([
         if (opts.javaRosa && opts.javaRosa.langs) {
             vellum_options.javaRosa.langs = opts.javaRosa.langs;
         }
+        vellum_options.plugins = _.without(vellum_options.plugins, "atwho");
         if (opts.plugins) {
             vellum_options.plugins = opts.plugins;
+        }
+        if (vellum_options && vellum_options.features &&
+            _.isUndefined(vellum_options.features.disable_popovers)) {
+            vellum_options.features.disable_popovers = true;
         }
         vellum_options.core = vellum_options.core || {};
         var originalSaveUrl = vellum_options.core.saveUrl || function () {};
@@ -344,8 +360,48 @@ define([
         return find(node || tree.get_node("#"));
     }
 
+    /**
+     * Report full stack trace on async callback error
+     *
+     * Wrap async callback functions with this function to report the
+     * full stack trace if they fail. It is recommended to only use this
+     * temporarily while debugging a test that is throwing a hard-to-
+     * trace error. It destroys pretty assertion diff output. Also,
+     * assertion errors thrown from within an async callback do include
+     * full stack trace information.
+     *
+     * Fixes the problem described in
+     * https://github.com/mochajs/mocha/issues/815
+     *
+     * Usage:
+     *
+     *  it("will always fail", function (done) {
+     *      someAsyncFunction(asyncatch(function (arg) {
+     *          doSomethingThatThrowsAnError();
+     *          done();
+     *      }));
+     *  });
+     */
+    function asyncatch(fn) {
+        return function () {
+            try {
+                var args = Array.prototype.slice.call(arguments);
+                return fn.apply(this, args);
+            } catch (err) {
+                throw err && err.stack ? new Error(err.stack) : err;
+            }
+        };
+    }
+
+    function markdownVisible() {
+        return $('.itext-block-label-group-default')
+            .find('.markdown-output')
+            .is(':visible');
+    }
+
     return {
         options: options,
+        asyncatch: asyncatch,
         init: init,
         call: call,
         loadXML: loadXML,
@@ -354,6 +410,7 @@ define([
         },
         getMug: getMug,
         getInput: getInput,
+        getWidget: getWidget,
         assertEqual: assertEqual,
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,
@@ -403,6 +460,7 @@ define([
             }
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
             return $node.children(".fd-tree-valid-alert-icon").length === 0;
-        }
+        },
+        markdownVisible: markdownVisible,
     };
 });

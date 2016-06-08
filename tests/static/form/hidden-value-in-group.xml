@@ -11,25 +11,25 @@
 					</group>
 				</data>
 			</instance>
-			<bind nodeset="/data/group" />
-			<bind nodeset="/data/group/label" relevant="/data/group/hidden = 'abc'" />
-			<bind nodeset="/data/group/hidden" calculate="1" />
+			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
+			<bind vellum:nodeset="#form/group/label" nodeset="/data/group/label" vellum:relevant="#form/group/hidden = 'abc'" relevant="/data/group/hidden = 'abc'" />
+			<bind vellum:nodeset="#form/group/hidden" nodeset="/data/group/hidden" calculate="1" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="group-label">
 						<value>group</value>
 					</text>
 					<text id="group/label-label">
-						<value>label <output value="/data/group/hidden"></output></value>
+						<value>label <output vellum:value="#form/group/hidden" value="/data/group/hidden"></output></value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<group ref="/data/group">
+		<group vellum:ref="#form/group" ref="/data/group">
 			<label ref="jr:itext('group-label')" />
-			<trigger ref="/data/group/label" appearance="minimal">
+			<trigger vellum:ref="#form/group/label" ref="/data/group/label" appearance="minimal">
 				<label ref="jr:itext('group/label-label')" />
 			</trigger>
 		</group>

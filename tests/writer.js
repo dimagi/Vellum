@@ -1,11 +1,12 @@
-require([
+define([
     'chai',
     'jquery',
     'tests/utils',
     'text!static/writer/repeat-without-count.xml',
     'text!static/writer/repeat-noAddRemove-false.xml',
     'text!static/writer/repeat-with-count.xml',
-    'text!static/writer/repeat-with-count-noAddRemove-false.xml'
+    'text!static/writer/repeat-with-count-noAddRemove-false.xml',
+    'text!static/writer/repeat-with-count-as-question.xml',
 ], function (
     chai,
     $,
@@ -13,7 +14,8 @@ require([
     REPEAT_WITHOUT_COUNT_XML,
     REPEAT_NO_ADD_REMOVE_FALSE_XML,
     REPEAT_WITH_COUNT_XML,
-    REPEAT_WITH_COUNT_NO_ADD_REMOVE_FALSE_XML
+    REPEAT_WITH_COUNT_NO_ADD_REMOVE_FALSE_XML,
+    REPEAT_WITH_COUNT_AS_QUESTION_XML
 ) {
     //var assert = chai.assert;
 
@@ -25,7 +27,6 @@ require([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -71,6 +72,19 @@ require([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITH_COUNT_XML,
+                {normalize_xmlns: true}
+            );
+        });
+
+        it("should add hashtag reference to jr:count", function () {
+            util.loadXML("");
+            util.addQuestion("Int");
+            var mug = util.addQuestion("Repeat");
+            util.addQuestion("Text");
+            mug.p.repeat_count = "`#form/question1`";
+            util.assertXmlEqual(
+                util.call("createXML"),
+                REPEAT_WITH_COUNT_AS_QUESTION_XML,
                 {normalize_xmlns: true}
             );
         });

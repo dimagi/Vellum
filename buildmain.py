@@ -51,7 +51,7 @@ def clean_json(js):
     return "\n".join(lines)
 
 MAIN_JS_TEMPLATE = """
-require.config({
+requirejs.config({
     paths: {
         vellum: "."
     },

@@ -1,5 +1,5 @@
 /*jshint multistr: true */
-require([
+define([
     'chai',
     'jquery',
     'underscore',
@@ -7,7 +7,14 @@ require([
     'vellum/parser',
     'text!static/parser/other_item.xml',
     'text!static/parser/label-without-itext.xml',
-    'text!static/parser/missing-bind.xml'
+    'text!static/parser/missing-bind.xml',
+    'text!static/parser/test-xml-1.xml',
+    'text!static/parser/test-xml-2.xml',
+    'text!static/parser/override.xml',
+    'text!static/parser/overridden.xml',
+    'text!static/parser/first-time-hashtag.xml',
+    'text!static/parser/repeat-with-count-as-question-only-form.xml',
+    'text!static/writer/repeat-with-count-as-question.xml',
 ], function (
     chai,
     $,
@@ -16,7 +23,14 @@ require([
     parser,
     OTHER_ITEM_XML,
     LABEL_WITHOUT_ITEXT_XML,
-    MISSING_BIND_XML
+    MISSING_BIND_XML,
+    TEST_XML_1,
+    TEST_XML_2,
+    OVERRIDE_XML,
+    OVERRIDDEN_XML,
+    FIRST_TIME_HASHTAG_XML,
+    REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML,
+    REPEAT_WITH_COUNT_AS_QUESTION_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -35,7 +49,6 @@ require([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -49,7 +62,6 @@ require([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
@@ -69,14 +81,13 @@ require([
                         done();
                     }
                 },
-                features: {rich_text: false},
             });
         });
 
         it("should not drop newlines in calculate conditions", function () {
             util.loadXML(TEST_XML_2);
             var mug = call("getMugByPath", "/data/question1");
-            assert.equal(mug.p.calculateAttr, 'concat("Line 1","\nLine 2")');
+            assert.equal(mug.p.calculateAttr, 'concat("Line 1", "\nLine 2")');
         });
 
         var ignoreWarnings = /Form (JRM namespace|does not have a (Name|(UI)?Version))/;
@@ -105,60 +116,63 @@ require([
         it("should load question without bind element", function () {
             util.loadXML(MISSING_BIND_XML);
         });
+
+        it("should set undefined for data value", function () {
+            util.loadXML(MISSING_BIND_XML);
+            util.clickQuestion("text");
+            assert(!$('[name=property-dataValue]').length);
+        });
+
+        describe("override", function() {
+            before(function(done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        onReady: done
+                    }
+                });
+            });
+
+            var properties = {
+                'relevantAttr': 'question2',
+                'constraintAttr': 'question2',
+                'calculateAttr': 'question3',
+            };
+
+            _.each(properties, function(question, prop) {
+                it("should override " + prop + " in question " + question, function() {
+                    util.loadXML(OVERRIDE_XML);
+                    var mug = util.getMug(question);
+                    assert.strictEqual(mug.p[prop], "`#form/question1`");
+                });
+            });
+
+            it("should override correctly", function() {
+                util.loadXML(OVERRIDE_XML);
+                util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
+            });
+
+            it("should generate hashtags correctly on first load", function() {
+                util.loadXML(FIRST_TIME_HASHTAG_XML);
+                util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
+            });
+
+            describe("with two languages", function () {
+                before(function(done) {
+                    util.init({
+                        plugins: plugins,
+                        javaRosa: {langs: ['en', 'hin']},
+                        core: {
+                            onReady: done
+                        }
+                    });
+                });
+                it("should load jr__count as jr:count", function() {
+                    util.loadXML(REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML);
+                    util.assertXmlEqual(util.call('createXML'), REPEAT_WITH_COUNT_AS_QUESTION_XML);
+                });
+            });
+        });
     });
-
-    var TEST_XML_1 = '' + 
-    '<?xml version="1.0" encoding="UTF-8" ?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Vellum testing</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"\
-                          xmlns="http://openrosa.org/formdesigner/FFD00941-A932-471A-AEC8-87F6EFEF767F"\
-                          uiVersion="1" version="1" name="Vellum testing">\
-                        <state />\
-                    </data>\
-                </instance>\
-                <instance id="states" src="jr://fixture/item-list:state"></instance>\
-                <bind nodeset="/data/state" />\
-                <itext>\
-                    <translation lang="en" default="">\
-                        <text id="state-label">\
-                            <value>State</value>\
-                        </text>\
-                    </translation>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body>\
-            <select1 ref="/data/state">\
-                <label ref="jr:itext(\'state-label\')" />\
-                <itemset nodeset="instance(\'states\')/state_list/state">\
-                  <label ref="name"></label>\
-                  <value ref="id"></value>\
-                </itemset>\
-            </select1>\
-        </h:body>\
-    </h:html>';
-
-    var TEST_XML_2 = util.xmlines('' +
-    '<?xml version="1.0" encoding="UTF-8"?>\
-    <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">\
-        <h:head>\
-            <h:title>Untitled Form</h:title>\
-            <model>\
-                <instance>\
-                    <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/398C9010-61DC-42D3-8A85-B857AC3A9CA0" uiVersion="1" version="1" name="Untitled Form">\
-                        <question1 />\
-                    </data>\
-                </instance>\
-                <bind nodeset="/data/question1" calculate="concat(&quot;Line 1&quot;,&quot;&#10;Line 2&quot;)" />\
-                <itext>\
-                    <translation lang="en" default=""/>\
-                </itext>\
-            </model>\
-        </h:head>\
-        <h:body></h:body>\
-    </h:html>');
 });

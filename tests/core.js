@@ -1,5 +1,5 @@
 /*jshint multistr: true */
-require([
+define([
     'chai',
     'jquery',
     'underscore',
@@ -87,8 +87,8 @@ require([
                 q2 = call("getMugByPath", "/data/question2");
             group.p.nodeID = "g8";
             assert.equal(q1.form.getAbsolutePath(q1), "/data/g8/question1");
-            assert.equal(q2.p.relevantAttr,
-                "/data/g8/question1 = 'valley girl' and /data/g8/question2 = 'dude'");
+            assert.strictEqual(q2.p.relevantAttr,
+                "`#form/g8/question1` = 'valley girl' and `#form/g8/question2` = 'dude'");
         });
 
         it("should show warning icons on invalid questions", function () {
@@ -183,7 +183,7 @@ require([
             );
         });
 
-        it("should select group of selected child question on collapse group", function () {
+        it("should not change mugs on collapse", function () {
             util.loadXML("");
             var group1 = util.addQuestion("Group", "group"),
                 text, selected;
@@ -197,7 +197,7 @@ require([
             util.collapseGroup(group1);
 
             selected = call("getCurrentlySelectedMug");
-            assert.equal(selected, group1,
+            assert.equal(selected, text,
                 "wrong selected mug: " + (selected && selected.p.nodeID));
         });
 
@@ -350,6 +350,84 @@ require([
             assert($(".fd-question-changer").is(":visible"));
             util.deleteQuestion("/data/text2");
             assert($(".fd-default-panel").is(":visible"));
+        });
+
+        it("should use single quotes on drag/drop choice", function() {
+            util.loadXML("");
+            util.addQuestion("Select", "select");
+            var mug = util.addQuestion("DataBindOnly", "mug"),
+                calc = $("[name=property-calculateAttr]"),
+                tree = $(".fd-question-tree").jstree(true);
+            assert.equal(calc.length, 1);
+            util.findNode(tree, "choice1").data.handleDrop(calc);
+            assert.equal(mug.p.calculateAttr, "'choice1'");
+        });
+
+        it("should drop /data/ reference when rich_text is false", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.addQuestion("DataBindOnly", "mug");
+            var calc = $("[name=property-calculateAttr]"),
+                tree = $(".fd-question-tree").jstree(true);
+            assert.equal(calc.length, 1);
+            util.findNode(tree, "text").data.handleDrop(calc);
+            assert.equal(calc.val(), "/data/text");
+        });
+
+        it("should notify activity url on form change", function(done) {
+            var vellum, activityUrlCalled = false;
+            // defaults: do not notify, 5 minute timeout
+            assert.equal(util.options.options.core.activityUrl, null);
+            assert.equal(util.options.options.core.activityTimeout, 5 * 60 * 1000);
+
+            util.init({
+                core: {
+                    activityTimeout: -1,  // immediate timeout
+                    activityUrl: function () {
+                        activityUrlCalled = true;
+                    },
+                    onReady: function () {
+                        // first change initializes timeout
+                        var start = Date.now(), later;
+                        vellum = this;
+                        vellum.onFormChange();
+                        assert.isAtLeast(this.data.core.activityTimestamp, start);
+
+                        // second change notifies on activity (if timed out)
+                        later = Date.now();
+                        vellum.onFormChange();
+                        assert(activityUrlCalled);
+                        assert.isAtLeast(vellum.data.core.activityTimestamp, later);
+
+                        assert.isNotNull(vellum.opts().core.activityUrl);
+                        // reset to prevent calls in other tests
+                        vellum.opts().core.activityUrl = null;
+
+                        done();
+                    }
+                }
+            });
+        });
+
+        describe("with rich text disabled", function() {
+            var vellum;
+            before(function (done) {
+                util.init({
+                    core: {onReady: function () {
+                        vellum = this;
+                        done();
+                    }},
+                    features: {rich_text: false},
+                });
+            });
+
+            it("should display /data/ in the question tree", function () {
+                util.addQuestion('Text', 'text1');
+                var mug = util.addQuestion('Text', 'text2');
+                assert.strictEqual(vellum.getMugDisplayName(mug), 'text2');
+                $('[name=itext-en-label]').val('text2 <output value="#form/text2" />').change();
+                assert.strictEqual(vellum.getMugDisplayName(mug), 'text2 &lt;output value="/data/text2" /&gt;');
+            });
         });
 
         describe("should", function () {
@@ -643,8 +721,6 @@ require([
                            [refPos, refMug, "->", posStr, mugStr].join(" "));
                 });
             });
-
         });
-
     });
 });

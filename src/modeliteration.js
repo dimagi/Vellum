@@ -1,18 +1,16 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
-    'vellum/datasources',
+    'vellum/dataSourceWidgets',
     'vellum/mugs',
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
-    datasources,
+    datasourceWidgets,
     mugs,
     parser,
     Tree,
@@ -41,7 +39,7 @@ define([
                 key: "id",
                 event: "jr-insert",
                 path: "/item",
-                query: "selected-at({}/@ids,../@index)"
+                query: "selected-at({}/@ids, ../@index)"
             }
         ],
         joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
@@ -74,15 +72,15 @@ define([
                 })];
             },
             controlChildFilter: function (children, mug) {
-                var nodeset = mug.form.getAbsolutePath(mug),
+                var nodeset = mug.hashtagPath,
                     r_count = mug.p.repeat_count;
                 children = oldRepeat.controlChildFilter(children, mug);
                 children[0].getValue().options.writeCustomXML = function (xmlWriter, mug) {
                     if (r_count) {
-                        xmlWriter.writeAttributeString("jr:count", String(r_count));
+                        util.writeHashtags(xmlWriter, 'jr:count', String(r_count), mug);
                         xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                     }
-                    xmlWriter.writeAttributeString("nodeset", nodeset);
+                    util.writeHashtags(xmlWriter, 'nodeset', nodeset, mug);
                 };
                 return children;
             },
@@ -100,7 +98,7 @@ define([
                 };
             },
             getBindList: function (mug) {
-                var path = mug.form.getAbsolutePath(mug),
+                var path = mug.absolutePath,
                     binds = oldRepeat.getBindList(mug);
                 if (mug.p.dataSource.idsQuery) {
                     binds.splice(0, 0, {
@@ -223,7 +221,7 @@ define([
             if (mug.__className !== "Repeat") {
                 return;
             }
-            var path = mug.form.getAbsolutePath(mug),
+            var path = mug.absolutePath,
                 container = null;
             if (mug.p.dataSource.idsQuery) {
                 container = path.replace(/\/item$/, "");
@@ -286,7 +284,7 @@ define([
     }
 
     function idsQueryDataSourceWidget(mug, options) {
-        var widget = datasources.advancedDataSourceWidget(
+        var widget = datasourceWidgets.advancedDataSourceWidget(
                                     mug, options, "Model Iteration ID Query"),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
@@ -335,24 +333,24 @@ define([
         }
         if (Boolean(value && value.idsQuery) !== Boolean(previous && previous.idsQuery)) {
             var nodeID = mug.p.nodeID,
-                currentPath = mug.form.getAbsolutePath(mug),
+                hashPath = mug.hashtagPath,
                 oldParent = mug.parentMug,
-                oldPath;
+                oldHash;
             if (value && value.idsQuery) {
-                oldPath = currentPath.replace(/\/item$/, "");
+                oldHash = hashPath.replace(/\/item$/, "");
             } else {
-                oldPath = currentPath + "/item";
+                oldHash = hashPath + "/item";
                 if (/\/@count$/.test(mug.p.repeat_count)) {
                     mug.p.repeat_count = "";
                 }
             }
             mug.form.vellum.handleMugRename(
-                mug.form, mug, nodeID, nodeID, currentPath, oldPath, oldParent);
+                mug.form, mug, nodeID, nodeID, hashPath, oldHash, oldParent);
         }
     }
 
     function prepareForWrite(mug) {
-        var path = mug.form.getAbsolutePath(mug);
+        var path = mug.absolutePath;
         if (!mug.p.dataSourceChanged && mug.p.originalPath === path) {
             return;
         }

@@ -13,11 +13,11 @@
 					<likes />
 				</data>
 			</instance>
-			<bind nodeset="/data/label" />
-			<bind nodeset="/data/group" />
-			<bind nodeset="/data/group/text" type="xsd:string" />
-			<bind nodeset="/data/group/choice" />
-			<bind nodeset="/data/likes" calculate="if(/data/group/choice = 'true', 1, 0)" />
+			<bind vellum:nodeset="#form/label" nodeset="/data/label" />
+			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
+			<bind vellum:nodeset="#form/group/text" nodeset="/data/group/text" type="xsd:string" />
+			<bind vellum:nodeset="#form/group/choice" nodeset="/data/group/choice" />
+			<bind vellum:nodeset="#form/likes" nodeset="/data/likes" vellum:calculate="if(#form/group/choice = 'true', 1, 0)" calculate="if(/data/group/choice = 'true', 1, 0)" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="label-label">
@@ -65,15 +65,15 @@
 		</model>
 	</h:head>
 	<h:body>
-		<trigger ref="/data/label" appearance="minimal">
+		<trigger vellum:ref="#form/label" ref="/data/label" appearance="minimal">
 			<label ref="jr:itext('label-label')" />
 		</trigger>
-		<group ref="/data/group">
+		<group vellum:ref="#form/group" ref="/data/group">
 			<label ref="jr:itext('group-label')" />
-			<input ref="/data/group/text">
+			<input vellum:ref="#form/group/text" ref="/data/group/text">
 				<label ref="jr:itext('text-label')" />
 			</input>
-			<select1 ref="/data/group/choice">
+			<select1 vellum:ref="#form/group/choice" ref="/data/group/choice">
 				<label ref="jr:itext('group/choice-label')" />
 				<item>
 					<label ref="jr:itext('group/choice-true-label')" />

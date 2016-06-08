@@ -17,6 +17,7 @@ define([
     external_sources_tree
 ) {
     var fn = {},
+        DATABROWSER_HEIGHT = 0.33,
         panelHeight;
 
     // plugin adds an item to the Tools menu when enabled
@@ -31,7 +32,7 @@ define([
             head = pane.find(".fd-head-external-sources");
             headHeight = head.outerHeight(true) || 0;
             pane.data("min-size", headHeight)
-                .height(tree.height() * 0.45)
+                .height(Math.min(tree.height() * DATABROWSER_HEIGHT, headHeight * 12))
                 .resize(function () {
                     if (pane.height() > headHeight + 100) {
                         panelHeight = pane.height();
@@ -54,6 +55,7 @@ define([
                     return false;
                 }
             });
+            vellum.data.core.databrowser = { dataHashtags: {} };
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             datasources.getDataSources(function () {});
@@ -61,8 +63,42 @@ define([
             pane.parent().find(".fd-external-sources-divider")
                 .clickExceptAfterDrag(toggle);
             head.click(toggle);
-        }
+        },
+        loadXML: function(xml) {
+            this.__callOld();
+            var _this = this, hashtags;
+            if (!_.isEmpty(this.data.core.databrowser.dataHashtags)) {
+                hashtags = this.data.core.databrowser.dataHashtags;
+            } else {
+                hashtags = parsePreloadedHashtags(
+                    $(xml).find('h\\:head, head').children('vellum\\:hashtags, hashtags')
+                );
+            }
+            _.each(hashtags, function (path, hash) {
+                addHashtag(hash, path, _this);
+            });
+
+            fixFormReferences(this.data.core.form);
+            this.refreshVisibleData();
+        },
+        contributeToHeadXML: function (xmlWriter, form) {
+            var hashtags = this.data.core.form.referencedHashtags();
+            if (!_.isEmpty(hashtags)) {
+                xmlWriter.writeStartElement('vellum:hashtags');
+                xmlWriter.writeString(JSON.stringify(hashtags));
+                xmlWriter.writeEndElement();
+            }
+            this.__callOld();
+        },
     });
+
+    function parsePreloadedHashtags(hashtags) {
+        try {
+            return JSON.parse($.trim(hashtags.text()));
+        } catch (err) {
+            return {};
+        }
+    }
 
     function _initDataBrowser(vellum) {
         // display spinner and begin loading...
@@ -102,15 +138,26 @@ define([
     }
 
     function dataTreeJson(data, vellum) {
-        function node(parentPath, info) {
+        var invalidCaseProperties = vellum.opts().core.invalidCaseProperties;
+
+        function node(source, parentPath, info) {
             return function (item, id) {
+                if (_.contains(invalidCaseProperties, id)) {
+                    return null;
+                }
+
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
+                if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
+                    var hashtagPath = '#case/' + source.id + '/' + id;
+                    addHashtag(hashtagPath, path, vellum);
+                    path = hashtagPath;
+                }
                 return {
                     text: tree.name,
                     icon: tree.nodes === true || tree.nodes.length ?
                             "fcc fcc-fd-external-case" :
-                            "fcc fcc-fd-external-case-data",
+                            "fcc fcc-fd-case-property",
                     state: {opened: tree.nodes !== true &&
                                     tree.nodes.length <= MAX_OPEN_NODE},
                     children: tree.nodes,
@@ -130,7 +177,7 @@ define([
                 if (source) {
                     info = _.extend(_.omit(source, "structure"), {_parent: info});
                     path = "instance('" + source.id + "')" + source.path +
-                           "[" + ref.key + "=" + path + "]";
+                           "[" + ref.key + " = " + path + "]";
                     if (source.subsets && ref.subset) {
                         // magic: match key: "@case_type"
                         source = _.findWhere(
@@ -156,7 +203,8 @@ define([
         }
         function getNodes(source, path, info) {
             var nodes = _.chain(source && source.structure)
-                .map(node(path, info))
+                .map(node(source, path, info))
+                .compact()
                 .sortBy("text")
                 .value();
             if (source && source.related) {
@@ -165,7 +213,7 @@ define([
                         // magic: reference key: @case_id
                         var item = {reference: {subset: subset, key: "@case_id"}};
                         // magic: append "/index" to path
-                        return node(path + "/index", info)(item, relation);
+                        return node(source, path + "/index", info)(item, relation);
                     })
                     .sortBy("text")
                     .value()
@@ -185,10 +233,7 @@ define([
             vellum.handleDropFinish(target, path);
         }
         var MAX_OPEN_NODE = 50,
-            sources = _.chain(data)
-                .map(function (src) { return [src.id, src]; })
-                .object()
-                .value(),
+            sources = _.indexBy(data, "id"),
             nodes = [],
             seen = {};
         if (sources.commcaresession) {
@@ -196,7 +241,7 @@ define([
                 info = _.omit(source, "structure"),
                 path = "instance('" + source.id + "')" + source.path;
             // do not show Session node for now
-            nodes = node(null, info)(source, path).children;
+            nodes = node(source, null, info)(source, path).children;
         }
 
         // move the parent data sources up one level to be equal to their child
@@ -210,6 +255,9 @@ define([
             });
         });
 
+        // done here for performance reasons. would be nice to be done after
+        // every new hashtag, but only for the mugs that reference that hashtag
+        fixFormReferences(vellum.data.core.form);
         return nodes.concat(siblings);
     }
 
@@ -219,18 +267,39 @@ define([
         if (pane.height() > headHeight) {
             pane.css("height", headHeight + "px");
             pane.find('.fd-head-external-sources .fd-head-max-indicator i')
-                .removeClass('icon-circle-arrow-down')
-                .addClass('icon-circle-arrow-up');
+                .removeClass('fa-arrow-circle-o-down')
+                .addClass('fa-arrow-circle-o-up');
             $(window).resize();
         } else {
             var tree = vellum.$f.find(".fd-tree"),
-                height = panelHeight || tree.height() * 0.45;
+                height = panelHeight || tree.height() * DATABROWSER_HEIGHT;
             pane.css("height", height + "px");
             pane.find('.fd-head-external-sources .fd-head-max-indicator i')
-                .removeClass('icon-circle-arrow-up')
-                .addClass('icon-circle-arrow-down');
+                .removeClass('fa-arrow-circle-o-up')
+                .addClass('fa-arrow-circle-o-down');
             $(window).resize();
             fn.initDataBrowser(vellum);
+        }
+    }
+
+    function addHashtag(hashtag, fullPath, vellum) {
+        var form = vellum.data.core.form,
+            dataHashtags = vellum.data.core.databrowser.dataHashtags;
+
+        // if we get the same hashtag it will be due to recursive references
+        if (!dataHashtags.hasOwnProperty(hashtag)) {
+            dataHashtags[hashtag] = fullPath;
+        }
+        if (form && form.addHashtag) {
+            form.initHashtag(hashtag, fullPath);
+        }
+    }
+    
+    function fixFormReferences(form) {
+        if (form) {
+            _.each(form.getMugList(), function(mug) {
+                form.fixBrokenReferences(mug);
+            });
         }
     }
 

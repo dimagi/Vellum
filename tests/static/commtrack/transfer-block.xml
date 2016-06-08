@@ -15,13 +15,13 @@
 			<instance id="commcaresession" src="jr://instance/session" />
 			<instance id="casedb" src="jr://instance/casedb" />
 			<instance id="products" src="jr://fixture/commtrack:products" />
-			<bind nodeset="/data/amount_received" type="xsd:int" />
+			<bind vellum:nodeset="#form/amount_received" nodeset="/data/amount_received" type="xsd:int" />
 			<bind nodeset="/data/transfer[@type='trans-1']" relevant="true()" />
-			<bind nodeset="/data/transfer[@type='trans-1']/entry/@quantity" calculate="/data/amount_received" />
+			<bind nodeset="/data/transfer[@type='trans-1']/entry/@quantity" vellum:calculate="#form/amount_received" calculate="/data/amount_received" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/entry/@id" value="instance('commcaresession')/session/data/product_id" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@src" value="instance('commcaresession')/session/data/case_id" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
-			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@date" value="/data/meta/timeEnd" />
+			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@date" value="now()" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="amount_received-label">
@@ -32,7 +32,7 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input ref="/data/amount_received">
+		<input vellum:ref="#form/amount_received" ref="/data/amount_received">
 			<label ref="jr:itext('amount_received-label')" />
 		</input>
 	</h:body>

@@ -3,7 +3,6 @@ define([
     'module',
     'underscore',
     'jquery',
-    'vellum/util',
     'tpl!vellum/templates/multimedia_modal',
     'tpl!vellum/templates/multimedia_upload_trigger',
     'text!vellum/templates/multimedia_queue.html',
@@ -20,7 +19,6 @@ define([
     module,
     _,
     $,
-    util,
     multimedia_modal,
     multimedia_upload_trigger,
     multimedia_queue,
@@ -53,6 +51,12 @@ define([
                 'extensions': '*.3gp;*.mp4'
             }
         ],
+        'video-inline': [
+            {
+                'description': 'Inline Video',
+                'extensions': '*.3gp;*.mp4'
+            }
+        ],
         text: [
             {
                 'description': 'HTML',
@@ -64,18 +68,21 @@ define([
         image: multimedia_existing_image,
         audio: multimedia_existing_audio,
         video: multimedia_existing_video,
+        'video-inline': multimedia_existing_video,
         text:  multimedia_existing_text,
     },
         SLUG_TO_CLASS = {
         image: 'CommCareImage',
         audio: 'CommCareAudio',
         video: 'CommCareVideo',
+        'video-inline': 'CommCareVideo',
         text:  'CommCareMultimedia',
     },
         SLUG_TO_UPLOADER_SLUG = {
         image: 'fd_hqimage',
         audio: 'fd_hqaudio',
         video: 'fd_hqvideo',
+        'video-inline': 'fd_hqInlineVideo',
         text:  'fd_hqtext',
     };
 
@@ -132,7 +139,7 @@ define([
 
         widget.getUIElement = function () {
             $uiElem = _getParentUIElement();
-            var $controlBlock = $uiElem.find('.controls').not(".messages"),
+            var $controlBlock = $uiElem.find('.controls'),
                 $uploadContainer = $('<div />')
                     .addClass('fd-mm-upload-container');
             $controlBlock.empty()
@@ -243,10 +250,6 @@ define([
         return $uploadBtn;
     };
 
-    // get absolute path to current file, suitable to be loaded by swfobject.
-    var pieces = module.uri.split('/'),
-        base = pieces.slice(0, pieces.length - 1).join('/') + '/';
-   
     $.vellum.plugin("uploader", {
         objectMap: false,
         sessionid: false,
@@ -254,6 +257,7 @@ define([
             image: false,
             audio: false,
             video: false,
+            'video-inline': false,
             text: false
         },
     }, {
@@ -262,8 +266,7 @@ define([
                 uploadUrls = opts.uploadUrls,
                 uploadEnabled = opts.objectMap && opts.uploadUrls && 
                     opts.uploadUrls.image,
-                sessionid = opts.sessionid,
-                swfUrl = base + "../bower_components/MediaUploader/flashuploader.swf";
+                sessionid = opts.sessionid;
 
             this.data.uploader.uploadEnabled = uploadEnabled;
             this.data.uploader.objectMap = opts.objectMap;
@@ -278,28 +281,30 @@ define([
                         mediaType: 'image',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.image,
-                        swfUrl: swfUrl
                     }),
                     'audio': this.initUploadController({
                         uploaderSlug: 'fd_hqaudio',
                         mediaType: 'audio',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.audio,
-                        swfUrl: swfUrl
                     }),
                     'video': this.initUploadController({
                         uploaderSlug: 'fd_hqvideo',
                         mediaType: 'video',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
-                        swfUrl: swfUrl
+                    }),
+                    'video-inline': this.initUploadController({
+                        uploaderSlug: 'fd_hqInlineVideo',
+                        mediaType: 'video-inline',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.video,
                     }),
                     'text': this.initUploadController({
                         uploaderSlug: 'fd_hqtext',
                         mediaType: 'text',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.text,
-                        swfUrl: swfUrl
                     })
                 };
             };
@@ -347,7 +352,6 @@ define([
                     {
                         fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
                         uploadURL: options.uploadUrl,
-                        swfURL: options.swfUrl,
                         isMultiFileUpload: false,
                         queueTemplate: multimedia_queue,
                         errorsTemplate: multimedia_errors,
@@ -371,6 +375,7 @@ define([
                 }
                 delete control.value;
             });
+            this.__callOld();
         }
     });
 });

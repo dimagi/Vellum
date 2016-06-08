@@ -25,7 +25,7 @@ define([
         call = util.call,
         templates =  [
             {
-                icon: "icon-map-marker",
+                icon: "fa fa-map-marker",
                 name: "Area Mapper",
                 id: "com.richard.lu.areamapper",
                 extra: {ext: "value"},
@@ -37,7 +37,7 @@ define([
                 },
             },
             {
-                icon: "icon-barcode",
+                icon: "fa fa-barcode",
                 name: "Barcode Scanner",
                 id: "com.google.zxing.client.android.SCAN",
                 extra: {},
@@ -48,6 +48,12 @@ define([
                 name: "Breath Counter",
                 id: "org.commcare.respiratory.BREATHCOUNT",
             },
+            {
+                icon: "icon-vellum-android-intent",
+                name: "Fingerprint Scanner",
+                id: "com.simprints.id.REGISTER",
+                mime: "text/plain",
+            },
         ];
 
     describe("The intent manager plugin", function() {
@@ -56,7 +62,6 @@ define([
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
                 features: {
-                    rich_text: false,
                     custom_intents: true,
                     templated_intents: true,
                 },
@@ -139,7 +144,6 @@ define([
                 util.init({
                     intents: {templates: templates},
                     features: {
-                        rich_text: false,
                         custom_intents: false,
                     },
                     core: {onReady: function () {
@@ -157,6 +161,14 @@ define([
 
             it("should not show validation error on question add", function() {
                 assert.strictEqual(mug.spec.androidIntentAppId.validationFunc(mug), 'pass');
+            });
+
+            it("should write the mime/type if supplied", function() {
+                $("[name=property-androidIntentAppId]").val("com.simprints.id.REGISTER").change();
+                var xml = util.call("createXML"),
+                    $xml = $($.parseXML(xml)),
+                    type = $xml.find('h\\:head, head').children("odkx\\:intent, intent").attr('type');
+                assert.strictEqual(type, 'text/plain');
             });
 
             _.each(templates, function (temp) {
@@ -203,7 +215,6 @@ define([
                 util.init({
                     intents: {templates: templates},
                     features: {
-                        rich_text: false,
                         templated_intents: true,
                         custom_intents: true,
                     },
@@ -274,7 +285,6 @@ define([
                 util.init({
                     intents: {templates: templates},
                     features: {
-                        rich_text: false,
                         custom_intents: false,
                         templated_intents: false,
                     },

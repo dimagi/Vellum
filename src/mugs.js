@@ -1,25 +1,51 @@
+/**
+ * A mug is a question, containing data, bind, and control elements.
+ *
+ * Main Properties
+ *  nodeID
+ *  label
+ *  readOnlyControl
+ *  imageSize: Images only. Options to reduce image size before sending form.
+ *
+ * Data Source Properties
+ *
+ * Media Properties
+ *  mediaItext: Multimedia (image, audio, video, inline video) attached to the question.
+ *
+ * Logic Properties
+ *  calculateAttr: Hidden questions only. The calculation that generates the question's value.
+ *  requiredAttr: Boolean. Whether or not user must enter a value for the question.
+ *  relevantAttr: Boolean expression that determines whether or not to display a question to the end user.
+ *  constraintAttr: Boolean expression that, if false, will prevent the user from proceeding past the question.
+ *  repeat_count: Repeat groups only. An integer expression that determines the number of groups to generate.
+ *
+ * Advanced Properties
+ *  dataSource
+ *  dataValue: Deprecated.
+ *  defaultValue: An expression that will be assigned to a question before/until a user changes the value.
+ *  xmlnsAttr
+ *  label
+ *  hintLabel
+ *  constraintMsgAttr: Message to display if question fails validation (constraintAttr evaluates to false).
+ *  dataParent
+ *  appearance
+ *  comment: User-entered comment to help other users understand the purpose or implementation of the question.
+ */
 define([
     'jquery',
     'underscore',
-    'xpathmodels',
     'vellum/tree',
-    'vellum/javaRosa', // TODO move all Itext stuff to javaRosa and remove this
     'vellum/widgets',
+    'vellum/logic',
     'vellum/util',
-    'vellum/logic'
 ], function (
     $,
     _,
-    xpathmodels,
     Tree,
-    jr,
     widgets,
-    util,
-    logic
+    logic,
+    util
 ) {
-    /**
-     * A question, containing data, bind, and control elements.
-     */
     function Mug(options, form, baseSpec, attrs) {
         var properties = null;
         util.eventuality(this);
@@ -356,7 +382,8 @@ define([
                 .replace("$2", property)
                 .replace("$3", String(vis)));
         },
-        getDisplayName: function (lang) {
+        getDisplayName: function (lang, escape) {
+            if (escape === undefined) { escape = true; }
             var itextItem = this.p.labelItext,
                 Itext = this.form.vellum.data.javaRosa.Itext,
                 defaultLang = Itext.getDefaultLanguage(),
@@ -387,7 +414,7 @@ define([
                 if (lang !== defaultLang && disp === defaultDisp) {
                     disp += " [" + defaultLang + "]";
                 }
-                return $('<div>').text(disp).html();
+                return escape ? $('<div>').text(disp).html() : disp;
             }
 
             return nodeID;
@@ -463,6 +490,22 @@ define([
         }
     });
 
+    Object.defineProperty(Mug.prototype, "absolutePathNoRoot", {
+        get: function () {
+            return this.form.getAbsolutePath(this, true);
+        }
+    });
+
+    Object.defineProperty(Mug.prototype, "hashtagPath", {
+        get: function () {
+            // commtrack isn't hashtaggable (ex. /data/trans[type=trans1])
+            if (this.options.isHashtaggable && this.absolutePathNoRoot) {
+                return '#form' + this.absolutePathNoRoot;
+            }
+            return this.absolutePath;
+        }
+    });
+
     Object.defineProperty(Mug.prototype, "parentMug", {
         get: function () {
             var node = this.form.tree.getNodeFromMug(this);
@@ -471,6 +514,12 @@ define([
             } else {
                 return null;
             }
+        }
+    });
+
+    Object.defineProperty(Mug.prototype, "previousSibling", {
+        get: function () {
+            return this.form.tree.getPreviousSibling(this);
         }
     });
 
@@ -706,6 +755,15 @@ define([
             data.instances = _.extend(data.instances || {},
                                       mug.form.parseInstanceRefs(value));
         }
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
         return value || undefined;
     }
 
@@ -713,7 +771,17 @@ define([
         if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
             mug.form.updateKnownInstances(data.instances);
         }
-        return data[key];
+        var value = data[key];
+        try {
+            if (value) {
+                value = mug.form.xpath.parse(value.toString()).toHashtag();
+            }
+        } catch (err) {
+            if (_.isString(value) && !value.startsWith('#invalid/')) {
+                value = '#invalid/xpath ' + value;
+            }
+        }
+        return value;
     }
 
     function resolveConflictedNodeId(mug) {
@@ -765,7 +833,7 @@ define([
                     }
                 },
                 serialize: function (value, key, mug, data) {
-                    data.id = mug.form.getAbsolutePath(mug, true);
+                    data.id = mug.absolutePathNoRoot;
                 },
                 deserialize: function (data, key, mug) {
                     if (data.id && data.id !== mug.p.nodeID) {
@@ -882,7 +950,7 @@ define([
             requiredAttr: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Is this Question Required?",
+                lstring: "Required",
                 widget: widgets.checkbox
             },
             nodeset: {
@@ -903,13 +971,14 @@ define([
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
-                    var paths = new logic.LogicExpression(mug.p.defaultValue).getPaths();
-                    paths = _.filter(paths, function (path) {
-                        return path.initial_context !== xpathmodels.XPathInitialContextEnum.EXPR;
-                    });
-                    if (paths.length) {
-                        return "You are referencing a node in this form. " +
-                               "This can cause errors in the form";
+                    var form = mug.form;
+                    if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
+                        var paths = mug.form.getHashtagsInXPath(mug.p.defaultValue);
+                        paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
+                        if (paths.length) {
+                            return "You are referencing a node in this form. " +
+                                   "This can cause errors in the form";
+                        }
                     }
                     return 'pass';
                 }
@@ -968,7 +1037,7 @@ define([
                 },
                 presence: 'optional',
                 setter: function (mug, attr, value) {
-                    var oldPath = mug.absolutePath;
+                    var oldPath = mug.hashtagPath;
                     mug.p.set(attr, value);
                     mug.form._updateMugPath(mug, oldPath);
                 },
@@ -985,7 +1054,7 @@ define([
                            form.getBasePath().slice(0, -1) !== dataParent) {
                             return "Must be valid path";
                         } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
-                            return dataParentMug.absolutePath + " is not a valid data parent";
+                            return dataParentMug.hashtagPath + " is not a valid data parent";
                         } else if (!mug.spec.dataParent.visibility(mug)) {
                             return "Children of repeat groups cannot have a different data parent";
                         }
@@ -1021,11 +1090,13 @@ define([
         typeChangeError: function (mug, typeName) {
             return '';
         },
+        changeTypeTransform: function (mug) {
+            return;
+        },
         // controls whether delete button shows up - you can still delete a
         // mug's ancestor even if it's not removeable
         isRemoveable: true,
         isCopyable: true,
-        isODKOnly: false,
         canOutputValue: true,
         maxChildren: -1,
         icon: null,
@@ -1088,7 +1159,7 @@ define([
                 constraintMsg = mug.p.constraintMsgAttr;
             }
             var attrs = {
-                nodeset: mug.form.getAbsolutePath(mug),
+                nodeset: mug.hashtagPath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
@@ -1111,7 +1182,7 @@ define([
                 ret = [{
                     value: mug.p.defaultValue,
                     event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
-                    ref: mug.absolutePath
+                    ref: mug.hashtagPath
                 }];
             }
 
@@ -1135,6 +1206,7 @@ define([
         getIcon: function (mug) {
             return mug.options.icon;
         },
+        isHashtaggable: true,
         init: function (mug, form) {},
         spec: {}
     };
@@ -1175,18 +1247,21 @@ define([
 
     var PhoneNumber = util.extend(Text, {
         typeName: 'Phone Number or Numeric ID',
-        icon: 'icon-signal',
+        icon: 'fa fa-signal',
         init: function (mug, form) {
             Text.init(mug, form);
             mug.p.appearance = "numeric";
-        }
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
+        },
     });
 
     var Secret = util.extend(defaultOptions, {
         typeName: 'Password',
         dataType: 'xsd:string',
         tagName: 'secret',
-        icon: 'icon-key',
+        icon: 'fa fa-key',
         canOutputValue: false,
         init: function (mug, form) {
         }
@@ -1205,7 +1280,6 @@ define([
         dataType: 'binary',
         tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
-        isODKOnly: true,
         mediaType: "audio/*", /* */
         canOutputValue: false,
         writeCustomXML: function (xmlWriter, mug) {
@@ -1215,7 +1289,7 @@ define([
 
     var Image = util.extend(Audio, {
         typeName: 'Image Capture',
-        icon: 'icon-camera',
+        icon: 'fa fa-camera',
         mediaType: "image/*", /* */
         spec: {
             imageSize: {
@@ -1253,7 +1327,7 @@ define([
 
     var Video = util.extend(Audio, {
         typeName: 'Video Capture',
-        icon: 'icon-facetime-video',
+        icon: 'fa fa-video-camera',
         mediaType: "video/*", /* */
     });
 
@@ -1268,14 +1342,16 @@ define([
         init: function (mug, form) {
             Image.init(mug, form);
             mug.p.appearance = "signature";
-        }
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
+        },
     });
 
     var Geopoint = util.extend(defaultOptions, {
         typeName: 'GPS',
         dataType: 'geopoint',
-        icon: 'icon-map-marker',
-        isODKOnly: true,
+        icon: 'fa fa-map-marker',
         init: function (mug, form) {
         }
     });
@@ -1283,8 +1359,7 @@ define([
     var Barcode = util.extend(defaultOptions, {
         typeName: 'Barcode Scan',
         dataType: 'barcode',
-        icon: 'icon-barcode',
-        isODKOnly: true,
+        icon: 'fa fa-barcode',
         init: function (mug, form) {
         }
     });
@@ -1292,7 +1367,7 @@ define([
     var Date = util.extend(defaultOptions, {
         typeName: 'Date',
         dataType: 'xsd:date',
-        icon: 'icon-calendar',
+        icon: 'fa fa-calendar',
         init: function (mug, form) {
         }
     });
@@ -1308,7 +1383,7 @@ define([
     var Time = util.extend(defaultOptions, {
         typeName: 'Time',
         dataType: 'xsd:time',
-        icon: 'icon-time',
+        icon: 'fa fa-clock-o',
         init: function (mug, form) {
         }
     });
@@ -1382,7 +1457,7 @@ define([
                     return "pass";
                 },
                 serialize: function (value, key, mug, data) {
-                    var path = mug.form.getAbsolutePath(mug.parentMug, true);
+                    var path = mug.parentMug.absolutePathNoRoot;
                     data.id = path + "/" + value;
                 },
                 deserialize: function (data) {
@@ -1400,9 +1475,12 @@ define([
     var Trigger = util.extend(defaultOptions, {
         typeName: 'Label',
         tagName: 'trigger',
-        icon: 'icon-tag',
+        icon: 'fa fa-tag',
         init: function (mug, form) {
             mug.p.appearance = "minimal";
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
         },
         spec: {
             dataValue: { presence: 'optional' },
@@ -1439,14 +1517,14 @@ define([
     });
 
     var MSelect = util.extend(BaseSelect, {
-        typeName: 'Multiple Answer',
+        typeName: 'Checkbox',
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
         defaultOperator: "selected"
     });
 
     var Select = util.extend(BaseSelect, {
-        typeName: 'Single Answer',
+        typeName: 'Multiple Choice',
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
         defaultOperator: null
@@ -1455,7 +1533,7 @@ define([
     var Group = util.extend(defaultOptions, {
         typeName: 'Group',
         tagName: 'group',
-        icon: 'icon-folder-open',
+        icon: 'fa fa-folder-open',
         isSpecialGroup: true,
         isNestableGroup: true,
         isTypeChangeable: false,
@@ -1484,16 +1562,19 @@ define([
     // nest other group types and it has a very different end-user functionality
     var FieldList = util.extend(Group, {
         typeName: 'Question List',
-        icon: 'icon-reorder',
+        icon: 'fa fa-reorder',
         init: function (mug, form) {
             Group.init(mug, form);
             mug.p.appearance = 'field-list';
+        },
+        changeTypeTransform: function (mug) {
+            mug.p.appearance = undefined;
         },
     });
 
     var Repeat = util.extend(Group, {
         typeName: 'Repeat Group',
-        icon: 'icon-retweet',
+        icon: 'fa fa-retweet',
         possibleDataParent: false,
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
@@ -1502,7 +1583,7 @@ define([
             return {"jr:template": ""};
         },
         controlChildFilter: function (children, mug) {
-            var absPath = mug.form.getAbsolutePath(mug),
+            var hashtag = mug.hashtagPath,
                 r_count = mug.p.repeat_count,
                 attrs = _.object(_.filter(_.map(mug.p.rawRepeatAttributes, function (val, key) {
                     return key.toLowerCase() !== "jr:noaddremove" ? [key, val] : null;
@@ -1510,6 +1591,7 @@ define([
             return [new Tree.Node(children, {
                 getNodeID: function () {},
                 getAppearanceAttribute: function () {},
+                form: mug.form,
                 p: {
                     rawControlAttributes: attrs
                 },
@@ -1522,10 +1604,10 @@ define([
                     writeControlRefAttr: null,
                     writeCustomXML: function (xmlWriter, mug) {
                         if (r_count) {
-                            xmlWriter.writeAttributeString("jr:count", String(r_count));
+                            util.writeHashtags(xmlWriter, 'jr:count', String(r_count));
                             xmlWriter.writeAttributeString("jr:noAddRemove", "true()");
                         }
-                        xmlWriter.writeAttributeString("nodeset", absPath);
+                        util.writeHashtags(xmlWriter, 'nodeset', hashtag, mug);
                     },
                 }
             })];
@@ -1641,6 +1723,7 @@ define([
             if (message) {
                 throw new Error(message);
             }
+            this.allTypes[mug.__className].changeTypeTransform(mug);
 
             mug.setOptionsAndProperties(this.allTypes[typeName]);
 

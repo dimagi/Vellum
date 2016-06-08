@@ -1,9 +1,7 @@
 define([
-    'vellum/form',
     'jquery',
     'underscore',
     'vellum/mugs',
-    'vellum/parser',
     'vellum/tree',
     'vellum/util',
     'vellum/atwho',
@@ -14,11 +12,9 @@ define([
     'tpl!vellum/templates/widget_save_to_case',
     'vellum/core'
 ], function (
-    form_,
     $,
     _,
     mugs,
-    parser,
     Tree,
     util,
     atwho,
@@ -65,6 +61,7 @@ define([
             var widget = widgets.normal(mug, options),
                 id = options.id,
                 internal_template = options.template;
+            options.noRichText = true;
 
             widget.input = $('<div class="control-row" />').attr('name', id);
 
@@ -181,14 +178,14 @@ define([
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
-            icon: 'icon-save',
+            icon: 'fa fa-save',
             init: function (mug, form) {
                 mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
                 "date_modified": {
-                    lstring: "Date modified",
+                    lstring: "Date Modified",
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,

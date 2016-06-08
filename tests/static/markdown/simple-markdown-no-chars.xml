@@ -13,7 +13,7 @@
 				<translation lang="en" default="">
 					<text id="markdown_question-label">
 						<value>some markdown</value>
-							<value form="markdown">some markdown</value>
+						<value form="markdown">some markdown</value>
 					</text>
 				</translation>
 				<translation lang="hin">

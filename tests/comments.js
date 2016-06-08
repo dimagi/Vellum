@@ -1,4 +1,4 @@
-require([
+define([
     'tests/utils',
     'chai',
     'jquery',
@@ -21,7 +21,6 @@ require([
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: done},
-                features: {rich_text: false},
             });
         });
 
@@ -33,7 +32,7 @@ require([
 
         it("should display the comment", function() {
             util.loadXML(COMMENT_TEST_XML);
-            assert($('.fd-panel-toolbar > .alert-info'));
+            assert($('.fd-props-toolbar > .alert-info'));
         });
 
         it("should write the comment", function() {

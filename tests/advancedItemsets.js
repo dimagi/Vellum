@@ -1,4 +1,4 @@
-require([
+define([
     'tests/options',
     'tests/utils',
     'chai',
@@ -33,7 +33,6 @@ require([
                 core: {onReady: done},
                 features: {
                     advanced_itemsets: true,
-                    rich_text: false,
                 }
             });
         }
@@ -127,7 +126,7 @@ require([
                 $('[name=query]').val(query.replace(/question2/, "no_question")).change();
                 $('.fd-data-source-save-button').click();
 
-                assert.strictEqual($('[name=property-filter]').val(),
+                assert.strictEqual(mug.p.filter,
                                    "'blah' = /data/no_question");
             });
         });

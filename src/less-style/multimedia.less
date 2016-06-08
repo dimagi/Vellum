@@ -1,0 +1,48 @@
+// Styles for multimedia attached to questions
+@import "lib/main";
+
+// Vellum wrapper
+.formdesigner .fd-ui-container {
+
+    // Area displaying small version of image
+    .fd-mm-preview-container {
+        text-align: center;
+        width: 115px;
+        float: left;
+
+        img, .fd-mm-no-ref {
+            border: 1px solid @grayLighter;
+        }
+
+        img {
+            padding: .5em;
+            background-color: @white;
+            margin-bottom: @gridGutterWidth/2;
+        }
+
+        .fd-mm-no-ref {
+            color: @grayLight;
+            background-color: @white;
+            padding: @gridGutterWidth/2;
+
+            i {
+                display: block;
+                font-size: @baseFontSize*4;
+            }
+        }
+    }
+
+    // Container for buttons (upload & show path)
+    .fd-mm-upload-container {
+        margin-left: 125px;
+
+        > .control-row {
+            margin: 0px 0px 10px 0;
+            &:first-child { height: 25px; }
+        }
+
+        .fd-mm-path-input {
+            margin-right: 92px;
+        }
+    }
+}

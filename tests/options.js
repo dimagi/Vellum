@@ -115,8 +115,11 @@ define(["underscore"], function (_) {
                 "meta/location",
             ],
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
+            invalidCaseProperties: ['name'],
             saveType: "patch",
             saveUrl: function (data) {},
+            activityUrl: null,               // may be function or URL string
+            activityTimeout: 5 * 60 * 1000,  // 5 minutes in milliseconds
             externalLinks: {
                 changeSubscription: "#",
             },
@@ -128,7 +131,7 @@ define(["underscore"], function (_) {
         intents: {
             templates: [
                 {
-                    icon: "icon-map-marker",
+                    icon: "fa fa-map-marker",
                     name: "Area Mapper",
                     id: "com.richard.lu.areamapper",
                     extra: {ext: "value"},
@@ -140,7 +143,7 @@ define(["underscore"], function (_) {
                     },
                 },
                 {
-                    icon: "icon-barcode",
+                    icon: "fa fa-barcode",
                     name: "Barcode Scanner",
                     id: "com.google.zxing.client.android.SCAN",
                     extra: {},
@@ -150,6 +153,12 @@ define(["underscore"], function (_) {
                     icon: "icon-vellum-android-intent",
                     name: "Breath Counter",
                     id: "org.commcare.respiratory.BREATHCOUNT",
+                },
+                {
+                    icon: "icon-vellum-android-intent",
+                    name: "Fingerprint Scanner",
+                    id: "com.simprints.id.REGISTER",
+                    mime: "text/plain",
                 },
             ],
         },
@@ -174,8 +183,10 @@ define(["underscore"], function (_) {
             'modeliteration',
             'commtrack',
             'saveToCase',
+            'atwho',
         ],
         features: {
+            // 'remove_popvers': false, // disabled for most tests
             'lookup_tables': true,
             'group_in_field_list': true,
             'rich_text': true,
@@ -186,6 +197,7 @@ define(["underscore"], function (_) {
             'custom_intents': true,
             'image_resize': true,
             'markdown_in_groups': true,
+            'allow_data_reference_in_setvalue': true,
         }
     };
 
