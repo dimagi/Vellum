@@ -315,7 +315,7 @@ define([
     var formats = {
             'dateFormat': {
                 serialize: function(currentValue, dataAttrs) {
-                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')", {
+                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')")({
                         xpath: currentValue,
                         dateFormat: dataAttrs.dateFormat
                     });
@@ -323,7 +323,7 @@ define([
             },
             'outputValue': {
                 serialize: function(currentValue) {
-                    return _.template('&lt;output value="<%=xpath%>" /&gt;', {
+                    return _.template('&lt;output value="<%=xpath%>" /&gt;')({
                         xpath: currentValue
                     });
                 },
