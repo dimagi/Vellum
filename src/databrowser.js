@@ -292,7 +292,7 @@ define([
             dataHashtags = vellum.data.core.databrowser.dataHashtags;
 
         // if we get the same hashtag it will be due to recursive references
-        if (!dataHashtags.hasOwnProperty(hashtag) && _.isString(fullPath)) {
+        if (!dataHashtags.hasOwnProperty(hashtag)) {
             dataHashtags[hashtag] = fullPath;
         }
         if (form && form.addHashtag) {

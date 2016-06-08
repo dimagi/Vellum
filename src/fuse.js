@@ -82,9 +82,8 @@ define([
     function generateNewFuseData (form) {
         var caseData = [];
         if (form.vellum.data.core.databrowser && form.useRichText) {
-            caseData = _.chain(_.omit(form.vellum.data.core.databrowser.dataHashtags, function(value, key) {
-                return _.isFunction(value);
-            })).map(function(absolutePath, hashtag) {
+            caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
+             .map(function(absolutePath, hashtag) {
                  return {
                      name: hashtag,
                      hashtagPath: hashtag,
