@@ -138,8 +138,14 @@ define([
     }
 
     function dataTreeJson(data, vellum) {
+        var invalidCaseProperties = vellum.opts().core.invalidCaseProperties;
+
         function node(source, parentPath, info) {
             return function (item, id) {
+                if (_.contains(invalidCaseProperties, id)) {
+                    return null;
+                }
+
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
@@ -203,6 +209,7 @@ define([
         function getNodes(source, path, info) {
             var nodes = _.chain(source && source.structure)
                 .map(node(source, path, info))
+                .compact()
                 .sortBy("text")
                 .value();
             if (source && source.related) {

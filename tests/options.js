@@ -115,6 +115,7 @@ define(["underscore"], function (_) {
                 "meta/location",
             ],
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
+            invalidCaseProperties: ['name'],
             saveType: "patch",
             saveUrl: function (data) {},
             activityUrl: null,               // may be function or URL string

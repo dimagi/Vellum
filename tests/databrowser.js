@@ -69,6 +69,7 @@ define([
                 key: "@case_type",
                 structure: {
                     dob: {},
+                    invalid: {}
                 },
                 related: {
                     parent: "mother",
@@ -95,6 +96,7 @@ define([
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
+                        invalidCaseProperties: ['invalid'],
                         onReady: function () {
                             var _this = this;
                             datasources.getDataSources(function () {
@@ -351,6 +353,10 @@ define([
                 });
             });
 
+            it("shouldn't show invalid properties", function() {
+                assert.isNull(util.findNode(dataTree, "invalid"), "invalid shouldn't be in case tree");
+            });
+
             // TODO should remove instances when expression ref is removed
         });
 
@@ -432,7 +438,6 @@ define([
                     done();
                 });
             });
-
         });
     });
 });
