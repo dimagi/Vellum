@@ -131,7 +131,16 @@ define([
                                                        options.property);
                             }
                             return value;
-                        }
+                        },
+                        afterMatchFailed: function(at, $el) {
+                            if (options.useRichText) {
+                                var content = $el.html().trim();
+                                if (richText.CASE_REF_REGEX.test(content) || form.isValidHashtag(content)) {
+                                    options.functionOverrides.insert.call(this, content);
+                                }
+                            }
+                            return false;   // allow user to keep typing
+                        },
                     },
                     functionOverrides: options.functionOverrides,
                 };
