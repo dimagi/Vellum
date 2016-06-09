@@ -134,8 +134,9 @@ define([
                         },
                         afterMatchFailed: function(at, $el) {
                             if (options.useRichText) {
-                                var content = $el.html().trim();
-                                if (richText.CASE_REF_REGEX.test(content) || form.isValidHashtag(content)) {
+                                var content = $el.html().trim().replace(/^.*\s/, "");
+                                var isUnknownCaseHashtag = richText.CASE_REF_REGEX.test(content) && content.replace(richText.CASE_REF_REGEX, "");
+                                if (isUnknownCaseHashtag || form.isValidHashtag(content)) {
                                     options.functionOverrides.insert.call(this, content);
                                 }
                             }
