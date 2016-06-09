@@ -629,6 +629,7 @@ define([
 
     return {
         CASE_REF_REGEX: CASE_REF_REGEX,
+        applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: initEditor,
         fromRichText: fromRichText,
