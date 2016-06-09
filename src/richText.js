@@ -628,6 +628,7 @@ define([
     }
 
     return {
+        applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: initEditor,
         fromRichText: fromRichText,
