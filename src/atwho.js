@@ -79,6 +79,7 @@ define([
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();
+
                 richText.editor($input).insertExpression(content);
                 if (!this.$inputor.is(':focus')) {
                     this.$inputor.focus();
@@ -140,7 +141,13 @@ define([
                                     options.functionOverrides.insert.call(this, content);
                                 }
                             }
-                            return false;   // allow user to keep typing
+
+                            var $inputor = this.$inputor;
+                            _.delay(function() {
+                                $inputor.focus();
+                            }, 100);
+
+                            return false;   // clear query
                         },
                     },
                     functionOverrides: options.functionOverrides,
