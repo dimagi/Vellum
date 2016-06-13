@@ -309,6 +309,23 @@ define([
                 });
             });
         });
+
+        describe("serialize formats correctly", function () {
+            it("should handle output refs", function() {
+                assert.equal(richText.applyFormats({
+                    outputValue: 1,
+                    value: "`#case/child/f_2685`",
+                }), '&lt;output value="`#case/child/f_2685`" /&gt;');
+            });
+
+            it("should handle dates", function() {
+                assert.equal(richText.applyFormats({
+                    dateFormat: "%d/%n/%y",
+                    outputValue: 1,
+                    value: "`#form/question1`",
+                }), '&lt;output value="format-date(date(`#form/question1`), \'%d/%n/%y\')" /&gt;');
+            });
+        });
     });
 
     describe("The rich text editor", function () {
