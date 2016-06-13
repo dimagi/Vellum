@@ -135,21 +135,27 @@ define([
                         },
                         afterMatchFailed: function(at, $el) {
                             if (options.useRichText) {
-                                var content = $el.html().trim().replace(/^.*\s/, "");
-                                var isUnknownCaseHashtag = richText.CASE_REF_REGEX.test(content) && content.replace(richText.CASE_REF_REGEX, "");
-                                if (isUnknownCaseHashtag || form.isValidHashtag(content)) {
+                                // If user typed out a full legitimate hashtag, or something that isn't
+                                // legit but looks vaguely like a case property, turn it into a bubble.
+                                var content = $el.html().trim().replace(/^.*\s/, ""),
+                                    isUnknownCaseHashtag = richText.CASE_REF_REGEX.test(content) && content.replace(richText.CASE_REF_REGEX, ""),
+                                    shouldBubble = isUnknownCaseHashtag || form.isValidHashtag(content);
+
+                                if (shouldBubble) {
                                     options.functionOverrides.insert.call(this, content);
+                                }
+
+                                // After this callback, atwho will attempt to remove the query string and
+                                // properly set cursor position. However, its logic breaks if we've already
+                                // replaced the query with a bubble. Handle the removal and cursor logic
+                                // ourselves, and return false from this function so the atwho logic doesn't run.
+                                var node = this._unwrap($el.text($el.text()).contents().first());
+                                if (!shouldBubble) {
+                                    this._setRange("after", node);
                                 }
                             }
 
-                            // Gracelessly force focus back to input...otherwise, later code steals
-                            // the focus, or, occasionally, gives focus to a different input.
-                            var $inputor = this.$inputor;
-                            _.defer(function() {
-                                $inputor.focus();
-                            });
-
-                            return false;   // clear query
+                            return false;
                         },
                     },
                     functionOverrides: options.functionOverrides,
