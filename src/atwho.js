@@ -145,9 +145,9 @@ define([
                             // Gracelessly force focus back to input...otherwise, later code steals
                             // the focus, or, occasionally, gives focus to a different input.
                             var $inputor = this.$inputor;
-                            _.delay(function() {
+                            _.defer(function() {
                                 $inputor.focus();
-                            }, 100);
+                            });
 
                             return false;   // clear query
                         },
