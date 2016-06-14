@@ -95,13 +95,13 @@ define([
      *      have been loaded. This function should accept one argument,
      *      a list of data source objects.
      */
-    function getDataSources(callback) {
+    function getDataSources(successCallback, errorCallback) {
         if (dataCache) {
-            callback(dataCache);
+            successCallback(dataCache);
             return;
         }
         if (dataCallbacks) {
-            dataCallbacks.push(callback);
+            dataCallbacks.push(successCallback);
             return;
         }
 
@@ -118,7 +118,7 @@ define([
             });
             dataCallbacks = null;
         }
-        dataCallbacks = [callback];
+        dataCallbacks = [successCallback];
         if (dataSourcesEndpoint) {
             if (_.isString(dataSourcesEndpoint)) {
                 $.ajax({
@@ -128,7 +128,11 @@ define([
                     success: finish,
                     error: function (jqXHR, errorType, exc) {
                         finish([]);
-                        window.console.log(util.formatExc(exc || errorType));
+                        if (errorCallback) {
+                            errorCallback(jqXHR, errorType, exc);
+                        } else {
+                            window.console.log(util.formatExc(exc || errorType));
+                        }
                     },
                     data: {}
                 });
