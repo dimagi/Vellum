@@ -79,6 +79,7 @@ define([
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();
+
                 richText.editor($input).insertExpression(content);
                 if (!this.$inputor.is(':focus')) {
                     this.$inputor.focus();
@@ -131,7 +132,31 @@ define([
                                                        options.property);
                             }
                             return value;
-                        }
+                        },
+                        afterMatchFailed: function(at, $el) {
+                            if (options.useRichText) {
+                                // If user typed out a full legitimate hashtag, or something that isn't
+                                // legit but looks vaguely like a case property, turn it into a bubble.
+                                var content = $el.html().trim().replace(/^.*\s/, ""),
+                                    isUnknownCaseHashtag = richText.CASE_REF_REGEX.test(content) && content.replace(richText.CASE_REF_REGEX, ""),
+                                    shouldBubble = isUnknownCaseHashtag || form.isValidHashtag(content);
+
+                                if (shouldBubble) {
+                                    options.functionOverrides.insert.call(this, content);
+                                }
+
+                                // After this callback, atwho will attempt to remove the query string and
+                                // properly set cursor position. However, its logic breaks if we've already
+                                // replaced the query with a bubble. Handle the removal and cursor logic
+                                // ourselves, and return false from this function so the atwho logic doesn't run.
+                                var node = this._unwrap($el.text($el.text()).contents().first());
+                                if (!shouldBubble) {
+                                    this._setRange("after", node);
+                                }
+                            }
+
+                            return false;
+                        },
                     },
                     functionOverrides: options.functionOverrides,
                 };
