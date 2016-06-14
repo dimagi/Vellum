@@ -75,7 +75,7 @@ define([
     _,
     util
 ) {
-    var dataSourcesEndpoint, dataCache, dataCallbacks;
+    var dataSourcesEndpoint, dataCache, dataCallbacks, errorCallbacks;
 
     // called during core init
     function init(instance) {
@@ -86,14 +86,18 @@ define([
     function reset() {
         dataCache = null;
         dataCallbacks = null;
+        errorCallbacks = null;
     }
 
     /**
      * Asynchronously load data sources
      *
-     * @param callback - A function to be called when the data sources
+     * @param successCallback - A function to be called when the data sources
      *      have been loaded. This function should accept one argument,
      *      a list of data source objects.
+     * @param errorCallback - A function to be called if the data sources call
+     *      fails. This function's parameters are passed directly from jQuery's
+     *      error callback: the XHR, a status string, and an error string.
      */
     function getDataSources(successCallback, errorCallback) {
         if (dataCache) {
@@ -102,6 +106,7 @@ define([
         }
         if (dataCallbacks) {
             dataCallbacks.push(successCallback);
+            errorCallbacks.push(errorCallback);
             return;
         }
 
@@ -119,6 +124,7 @@ define([
             dataCallbacks = null;
         }
         dataCallbacks = [successCallback];
+        errorCallbacks = [errorCallback];
         if (dataSourcesEndpoint) {
             if (_.isString(dataSourcesEndpoint)) {
                 $.ajax({
@@ -128,11 +134,13 @@ define([
                     success: finish,
                     error: function (jqXHR, errorType, exc) {
                         finish([]);
-                        if (errorCallback) {
+                        _.each(errorCallbacks, function(callback) {
                             errorCallback(jqXHR, errorType, exc);
-                        } else {
+                        });
+                        if (!errorCallbacks) {
                             window.console.log(util.formatExc(exc || errorType));
                         }
+                        errorCallbacks = null;
                     },
                     data: {}
                 });
