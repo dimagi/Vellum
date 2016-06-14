@@ -233,6 +233,7 @@ define([
         if (_.isFunction(options.createPopover)) {
             editor.addCommand('createPopover', {
                 exec: options.createPopover,
+                editorFocus: false,
             });
         }
 
