@@ -85,8 +85,8 @@ define([
 
     function reset() {
         dataCache = null;
-        dataCallbacks = null;
-        errorCallbacks = null;
+        dataCallbacks = [];
+        errorCallbacks = [];
     }
 
     /**
@@ -104,7 +104,7 @@ define([
             successCallback(dataCache);
             return;
         }
-        if (dataCallbacks) {
+        if (dataCallbacks.length) {
             dataCallbacks.push(successCallback);
             errorCallbacks.push(errorCallback);
             return;
@@ -118,13 +118,13 @@ define([
                 name: "Not Found",
                 structure: {}
             }];
-            _.each(dataCallbacks, function (callback) {
+            _.each(_.compact(dataCallbacks), function (callback) {
                 callback(dataCache);
             });
-            dataCallbacks = null;
+            dataCallbacks = [];
         }
-        dataCallbacks = [successCallback];
-        errorCallbacks = [errorCallback];
+        dataCallbacks.push(successCallback);
+        errorCallbacks.push(errorCallback);
         if (dataSourcesEndpoint) {
             if (_.isString(dataSourcesEndpoint)) {
                 $.ajax({
@@ -134,13 +134,14 @@ define([
                     success: finish,
                     error: function (jqXHR, errorType, exc) {
                         finish([]);
+                        errorCallbacks = _.compact(errorCallbacks);
                         _.each(errorCallbacks, function(callback) {
-                            errorCallback(jqXHR, errorType, exc);
+                            callback(jqXHR, errorType, exc);
                         });
-                        if (!errorCallbacks) {
+                        if (!errorCallbacks.length) {
                             window.console.log(util.formatExc(exc || errorType));
                         }
-                        errorCallbacks = null;
+                        errorCallbacks = [];
                     },
                     data: {}
                 });
