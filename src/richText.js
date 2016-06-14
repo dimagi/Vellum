@@ -605,17 +605,25 @@ define([
                         labelText.find('output').replaceWith(function () {
                             return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
                         });
+
                         // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                         $imgs.removeAttr("title");
+
+                        var helpBlock = "";
+                        if ($this.hasClass("label-datanode-unknown") || $this.hasClass("label-datanode-external-unknown")) {
+                            helpBlock = '<div class="help-block">Unknown question</div>';
+                        }
+
                         $imgs.popover({
                             trigger: 'hover',
                             container: 'body',
                             placement: 'bottom',
                             title: '<h3>' + util.escape(displayId) + '</h3>' +
-                                   '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
+                                   '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>'
+                                   + helpBlock,
                             html: true,
                             content: '<p>' + labelText.text() + '</p>',
-                            template: '<div contenteditable="false" class="popover rich-text-popover">' +
+                            template: '<div contenteditable="false" class="popover rich-text-popover has-error">' +
                                 '<div class="popover-inner">' +
                                 '<div class="popover-title"></div>' +
                                 (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
