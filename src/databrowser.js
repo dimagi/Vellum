@@ -5,6 +5,7 @@ define([
     'jquery',
     'underscore',
     'vellum/datasources',
+    'vellum/util',
     'vellum/widgets',
     'vellum/window',
     'tpl!vellum/templates/external_sources_tree',
@@ -12,13 +13,23 @@ define([
     $,
     _,
     datasources,
+    util,
     widgets,
     window_,
     external_sources_tree
 ) {
     var fn = {},
         DATABROWSER_HEIGHT = 0.33,
-        panelHeight;
+        panelHeight,
+        handleError = function($container) {
+            return function(jqXHR, textStatus, errorThrown) {
+                if ($container && jqXHR.responseText) {
+                    $container.find(".fd-external-sources-error").removeClass("hide").text(jqXHR.responseText);
+                } else {
+                    window.console.log(util.formatExc(textStatus || errorThrown));
+                }
+            };
+        };
 
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('databrowser', {}, {
@@ -58,7 +69,7 @@ define([
             vellum.data.core.databrowser = { dataHashtags: {} };
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
-            datasources.getDataSources(function () {});
+            datasources.getDataSources(function () {}, handleError(pane));
             var toggle = _.partial(toggleExternalDataTree, vellum);
             pane.parent().find(".fd-external-sources-divider")
                 .clickExceptAfterDrag(toggle);
@@ -115,7 +126,7 @@ define([
                         var _this = this;
                         datasources.getDataSources(function (data) {
                             callback.call(_this, dataTreeJson(data, vellum));
-                        });
+                        }, handleError($container));
                     }
                 },
                 worker: false,

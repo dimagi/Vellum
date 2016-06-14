@@ -233,6 +233,7 @@ define([
         if (_.isFunction(options.createPopover)) {
             editor.addCommand('createPopover', {
                 exec: options.createPopover,
+                editorFocus: false,
             });
         }
 
@@ -315,7 +316,7 @@ define([
     var formats = {
             'dateFormat': {
                 serialize: function(currentValue, dataAttrs) {
-                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')", {
+                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')")({
                         xpath: currentValue,
                         dateFormat: dataAttrs.dateFormat
                     });
@@ -323,7 +324,7 @@ define([
             },
             'outputValue': {
                 serialize: function(currentValue) {
-                    return _.template('&lt;output value="<%=xpath%>" /&gt;', {
+                    return _.template('&lt;output value="<%=xpath%>" /&gt;')({
                         xpath: currentValue
                     });
                 },
@@ -636,6 +637,8 @@ define([
     }
 
     return {
+        CASE_REF_REGEX: CASE_REF_REGEX,
+        applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: initEditor,
         fromRichText: fromRichText,
