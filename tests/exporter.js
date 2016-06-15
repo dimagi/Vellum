@@ -8,7 +8,9 @@ define([
     'text!static/all_question_types.tsv',
     'text!static/exporter/item-id.xml',
     'text!static/exporter/item-id.tsv',
-    'text!static/javaRosa/multi-lang-trans.xml'
+    'text!static/javaRosa/multi-lang-trans.xml',
+    'text!static/exporter/vid-ref.xml',
+    'text!static/exporter/vid-ref.tsv'
 ], function (
     chai,
     $,
@@ -18,7 +20,9 @@ define([
     ALL_QUESTIONS_TSV,
     ITEM_ID_XML,
     ITEM_ID_TSV,
-    MULTI_LANG_TRANS_XML
+    MULTI_LANG_TRANS_XML,
+    VID_REF_XML,
+    VID_REF_TSV
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -45,13 +49,19 @@ define([
             assert.equal(call("getData").core.form.getExportTSV(), ITEM_ID_TSV);
         });
 
+        it("should include video references in TSV", function () {
+            util.loadXML(VID_REF_XML);
+            assert.equal(call("getData").core.form.getExportTSV(), VID_REF_TSV);
+        });
+
         it("should properly escape special characters", function () {
             util.loadXML(MULTI_LANG_TRANS_XML);
             assert.equal(call("getData").core.form.getExportTSV(),
                 'Question\tType\tText (en)\tText (hin)\tAudio (en)\t' +
-                'Audio (hin)\tImage (en)\tImage (hin)\tDisplay Condition\t' +
+                'Audio (hin)\tImage (en)\tImage (hin)\tVideo (en)\t' +
+                'Video (hin)\tVideo Inline (en)\tVideo Inline (hin)\tDisplay Condition\t' +
                 'Validation Condition\tValidation Message\tCalculate Condition\tRequired\n' +
-                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\tno'
+                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t\t\t\tno'
             );
         });
     });
