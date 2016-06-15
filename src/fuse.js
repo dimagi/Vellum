@@ -83,6 +83,11 @@ define([
         var caseData = [];
         if (form.vellum.data.core.databrowser && form.useRichText) {
             caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
+             // dataHashtags values are a mix of strings (for full hashtags) and functions
+             // (for hashtag prefixes); ignore the prefixes/functions
+             .omit(_.filter(_.keys(form.vellum.data.core.databrowser.dataHashtags), function(key) {
+                return _.isFunction(form.vellum.data.core.databrowser.dataHashtags[key]);
+             }))
              .map(function(absolutePath, hashtag) {
                  return {
                      name: hashtag,
