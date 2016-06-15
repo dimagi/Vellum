@@ -77,6 +77,12 @@ define([
 
             if (editor.commands.createPopover) {
                 var _this = this;
+
+                // Look for deleted bubbles
+                editor.on('change', function(e) {
+                    editor.widgets.checkWidgets({ initOnlyNew: 1 });
+                });
+
                 // if the editor is still being initialized then this command
                 // won't be enabled until it is ready
                 if (editor.status === "ready") {
