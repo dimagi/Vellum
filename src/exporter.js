@@ -10,7 +10,9 @@ define([
         var itextColumns = {
             "default": "Text",
             "audio": "Audio",
-            "image": "Image"
+            "image": "Image",
+            "video": "Video",
+            "video-inline": "Video Inline",
         };
         
         var columnOrder = [
