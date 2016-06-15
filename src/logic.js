@@ -250,22 +250,18 @@ define([
             } else if (this.errors[mug.ufid]) {
                 delete this.errors[mug.ufid][property];
             }
-            if (!this.form.vellum.opts().features.rich_text) {
-                // With rich text on, bad path warnings are caught
-                // and displayed by bubble popovers
-                messages.push({
-                    key: "logic-bad-path-warning",
-                    level: mug.WARNING,
-                    message: (function () {
-                        if (!unknowns.length) {
-                            return "";
-                        } else if (unknowns.length === 1) {
-                            return "Unknown question: " + unknowns[0];
-                        }
-                        return "Unknown questions:\n- " + unknowns.join("\n- ");
-                    })()
-                });
-            }
+            messages.push({
+                key: "logic-bad-path-warning",
+                level: mug.WARNING,
+                message: (function () {
+                    if (!unknowns.length) {
+                        return "";
+                    } else if (unknowns.length === 1) {
+                        return "Unknown question: " + unknowns[0];
+                    }
+                    return "Unknown questions:\n- " + unknowns.join("\n- ");
+                })()
+            });
             return messages;
         },
         addReferences: function (mug, property, value) {
