@@ -395,7 +395,7 @@ define([
                     return {
                         classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                     };
-                } else if (form.isValidHashtagPrefix(xpath)) {
+                } else if (form.hasValidHashtagPrefix(xpath)) {
                     return {
                         classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
                     };

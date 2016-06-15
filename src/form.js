@@ -153,12 +153,19 @@ define([
 
     Form.prototype = {
         isValidHashtag: function(tag) {
-            return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
+            tag = this.normalizeHashtag(tag);
+            return this.hashtagDictionary.hasOwnProperty(tag) && _.isString(this.hashtagDictionary[tag]);
         },
-        isValidHashtagPrefix: function(prefix) {
-            prefix = this.normalizeHashtag(prefix);
-            var lastSlashIndex = prefix.lastIndexOf("/");
-            return lastSlashIndex !== -1 && this.hashtagDictionary.hasOwnProperty(prefix.substring(0, lastSlashIndex + 1));
+        isValidHashtagPrefix: function(tag) {
+            tag = this.normalizeHashtag(tag);
+            return this.hashtagDictionary.hasOwnProperty(tag) && _.isFunction(this.hashtagDictionary[tag]);
+        },
+        hasValidHashtagPrefix: function(tag) {
+            tag = this.normalizeHashtag(tag);
+            var lastSlashIndex = tag.lastIndexOf("/");
+            return lastSlashIndex !== -1
+                && this.hashtagDictionary.hasOwnProperty(tag.substring(0, lastSlashIndex + 1))
+                && tag.substring(lastSlashIndex + 1) !== "";
         },
         addHashtag: function(hashtag, xpath) {
             this.hashtagDictionary[hashtag] = xpath;
