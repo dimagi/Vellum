@@ -155,6 +155,11 @@ define([
         isValidHashtag: function(tag) {
             return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
         },
+        isValidHashtagPrefix: function(prefix) {
+            prefix = this.normalizeHashtag(prefix);
+            var lastSlashIndex = prefix.lastIndexOf("/");
+            return lastSlashIndex !== -1 && this.hashtagDictionary.hasOwnProperty(prefix.substring(0, lastSlashIndex + 1));
+        },
         addHashtag: function(hashtag, xpath) {
             this.hashtagDictionary[hashtag] = xpath;
         },

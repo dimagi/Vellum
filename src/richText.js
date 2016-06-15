@@ -389,12 +389,10 @@ define([
                     return {
                         classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                     };
-                } else {
-                    if (form.isValidHashtag(form.normalizeHashtag(xpath).replace(/\/[^\/]*$/, "/"))) {
-                        return {
-                            classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
-                        };
-                    }
+                } else if (form.isValidHashtagPrefix(xpath)) {
+                    return {
+                        classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
+                    };
                 }
             }
 
@@ -609,21 +607,23 @@ define([
                         // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                         $imgs.removeAttr("title");
 
-                        var helpBlock = "";
-                        if ($this.hasClass("label-datanode-unknown") || $this.hasClass("label-datanode-external-unknown")) {
-                            helpBlock = '<div class="help-block">Unknown question</div>';
+                        // Add any errors or warnings to popover
+                        var messageBlock = "";
+                        if ($this.hasClass("label-datanode-unknown")) {
+                            messageBlock = '<div class="alert alert-danger">Unknown question</div>';
+                        } else if ($this.hasClass("label-datanode-external-unknown")) {
+                            messageBlock = '<div class="alert alert-warning">Unknown case property</div>';
                         }
 
                         $imgs.popover({
                             trigger: 'hover',
                             container: 'body',
                             placement: 'bottom',
-                            title: '<h3>' + util.escape(displayId) + '</h3>' +
-                                   '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>'
-                                   + helpBlock,
+                            title: messageBlock + '<h3>' + util.escape(displayId) + '</h3>' +
+                                   '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
                             html: true,
                             content: '<p>' + labelText.text() + '</p>',
-                            template: '<div contenteditable="false" class="popover rich-text-popover has-error">' +
+                            template: '<div contenteditable="false" class="popover rich-text-popover">' +
                                 '<div class="popover-inner">' +
                                 '<div class="popover-title"></div>' +
                                 (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +

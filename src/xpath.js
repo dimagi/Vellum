@@ -13,9 +13,16 @@ define([
                     if (hashtagToXPath.hasOwnProperty(hashtagExpr)) {
                         return hashtagToXPath[hashtagExpr];
                     }
-                    var p = hashtagExpr.replace(/\/[^\/]*$/, "/");
-                    if (hashtagToXPath.hasOwnProperty(p)) {
-                        return hashtagToXPath[p](hashtagExpr.replace(/.*\//, ""));
+
+                    // If full hashtag isn't recognized, remove the property name and check
+                    // if this is a recognizable type, just with a property we haven't heard of
+                    var lastSlashIndex = hashtagExpr.lastIndexOf("/");
+                    if (lastSlashIndex !== -1) {
+                        var prefix = hashtagExpr.substring(0, lastSlashIndex + 1),
+                            property = hashtagExpr.substring(lastSlashIndex + 1);
+                        if (hashtagToXPath.hasOwnProperty(prefix)) {
+                            return hashtagToXPath[prefix](property);
+                        }
                     }
                     return hashtagExpr;
                 },
