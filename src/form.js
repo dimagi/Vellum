@@ -154,11 +154,11 @@ define([
     Form.prototype = {
         isValidHashtag: function(tag) {
             tag = this.normalizeHashtag(tag);
-            return this.hashtagDictionary.hasOwnProperty(tag) && _.isString(this.hashtagDictionary[tag]);
+            return this.hashtagDictionary.hasOwnProperty(tag) && !_.isFunction(this.hashtagDictionary[tag]);
         },
         isValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
-            return this.hashtagDictionary.hasOwnProperty(tag) && _.isFunction(this.hashtagDictionary[tag]);
+            return this.hashtagDictionary.hasOwnProperty(tag) && !_.isFunction(this.hashtagDictionary[tag]);
         },
         hasValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
