@@ -62,6 +62,19 @@ define([
                     '#case/child/f_1065',
                 ], this.normalizeHashtag(path));
             },
+            isValidHashtagPrefix: function (path) {
+                return _.contains([
+                    '#case/mother/',
+                    '#case/child/',
+                ], this.normalizeHashtag(path));
+            },
+            hasValidHashtagPrefix: function (path) {
+                return _.contains([
+                    '#case/mother/edd',
+                    '#case/child/case',
+                    '#case/child/f_1065',
+                ], this.normalizeHashtag(path));
+            },
             normalizeEscapedHashtag: function (path) {
                  return path;
             },
