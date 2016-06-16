@@ -500,6 +500,21 @@ define([
                     util.loadXML(OUTPUT_REF_XML);
                     util.assertXmlEqual(call('createXML'), OUTPUT_VALUE_XML);
                 });
+
+                it("should bubble various case properties", function () {
+                    util.loadXML("");
+                    var widget = util.getWidget('itext-en-label'),
+                        $widget = $(".fd-textarea[name='itext-en-label']");
+                    widget.input.promise.then(function () {
+                        widget.setValue('<output value="#case/child/not_a_child" />' +
+                            '<output value="#case/not_a_thing" />' +
+                            '<output value="#case/child/dob" />'
+                        );
+                        assert.strictEqual($widget.find(".label-datanode-external-unknown").length, 1);
+                        assert.strictEqual($widget.find(".label-datanode-external").length, 1);
+                        assert.strictEqual($widget.find(".label-datanode-unknown").length, 1);
+                    });
+                });
             });
 
             describe("popovers", function () {
