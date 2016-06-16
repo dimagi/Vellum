@@ -163,9 +163,9 @@ define([
         hasValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
             var lastSlashIndex = tag.lastIndexOf("/");
-            return lastSlashIndex !== -1
-                && this.hashtagDictionary.hasOwnProperty(tag.substring(0, lastSlashIndex + 1))
-                && tag.substring(lastSlashIndex + 1) !== "";
+            return lastSlashIndex !== -1 &&
+                this.hashtagDictionary.hasOwnProperty(tag.substring(0, lastSlashIndex + 1)) &&
+                tag.substring(lastSlashIndex + 1) !== "";
         },
         addHashtag: function(hashtag, xpath) {
             this.hashtagDictionary[hashtag] = xpath;
