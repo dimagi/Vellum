@@ -651,7 +651,7 @@ define([
     }
 
     return {
-        CASE_REF_REGEX: CASE_REF_REGEX,
+        REF_REGEX: REF_REGEX,
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: initEditor,
