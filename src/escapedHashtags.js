@@ -32,7 +32,7 @@ define([
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
         DELIMITER = "`",
-        defaultParser = xpath.createParser(xpath.makeXPathModels({}));
+        defaultParser = xpath.createParser(xpath.makeXPathModels({}, {}));
 
     function toXPath(input, xpathParser) {
         xpathParser = xpathParser || defaultParser;
@@ -189,8 +189,8 @@ define([
     /*
      * extends xpath parser to be aware of escaped hashtags
      */
-    function parser(hashtagDictionary) {
-        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary));
+    function parser(hashtagDictionary, hashtagTransformations) {
+        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagDictionary, hashtagTransformations));
         return {
             parse: function (input) {
                 if (input.startsWith("#invalid/xpath ")) {

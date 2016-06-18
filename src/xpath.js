@@ -4,7 +4,7 @@ define([
     xpath
 ) {
     return {
-        makeXPathModels: function (hashtagToXPath) {
+        makeXPathModels: function (hashtagToXPath, hashtagToTransformation) {
             return xpath.makeXPathModels({
                 isValidNamespace: function (namespace) {
                     return namespace === 'form' || namespace === 'case';
@@ -20,8 +20,8 @@ define([
                     if (lastSlashIndex !== -1) {
                         var prefix = hashtagExpr.substring(0, lastSlashIndex + 1),
                             property = hashtagExpr.substring(lastSlashIndex + 1);
-                        if (hashtagToXPath.hasOwnProperty(prefix)) {
-                            return hashtagToXPath[prefix](property);
+                        if (hashtagToTransformation.hasOwnProperty(prefix)) {
+                            return hashtagToTransformation[prefix](property);
                         }
                     }
                     return hashtagExpr;
