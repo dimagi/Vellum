@@ -752,10 +752,6 @@ define([
             seen = {},
             usesRichText = mug.form.vellum.opts().features.rich_text;
         mug.messages.each(path, function (msg) {
-            if (usesRichText && msg.key === "logic-bad-path-warning") {
-                // With rich text on, bad path warnings are displayed by bubble popovers
-                seen[msg.message] = true;
-            }
             if (seen.hasOwnProperty(msg.message)) { return; }
             seen[msg.message] = true;
             var html = $(widget_control_message({

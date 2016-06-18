@@ -613,19 +613,11 @@ define([
                         // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                         $imgs.removeAttr("title");
 
-                        // Add any errors or warnings to popover
-                        var messageBlock = "";
-                        if ($this.hasClass("label-datanode-unknown")) {
-                            messageBlock = '<div class="alert alert-danger">Unknown question</div>';
-                        } else if ($this.hasClass("label-datanode-external-unknown")) {
-                            messageBlock = '<div class="alert alert-warning">Unknown case property</div>';
-                        }
-
                         $imgs.popover({
                             trigger: 'hover',
                             container: 'body',
                             placement: 'bottom',
-                            title: messageBlock + '<h3>' + util.escape(displayId) + '</h3>' +
+                            title: '<h3>' + util.escape(displayId) + '</h3>' +
                                    '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
                             html: true,
                             content: '<p>' + labelText.text() + '</p>',

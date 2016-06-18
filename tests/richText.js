@@ -544,25 +544,6 @@ define([
                     });
                 });
 
-                it("should show warnings and errors in popovers", function (done) {
-                    util.loadXML("");
-                    util.addQuestion("Text", "question1");
-                    var widget = util.getWidget('itext-en-label');
-                    widget.input.promise.then(function () {
-                        widget.setValue('<output value="#case/child/not_a_child" />' +
-                            '<output value="#case/not_a_thing" />'
-                        );
-                        var alertClasses = ['alert-warning', 'alert-danger'];
-                        _.each($('.cke_widget_drag_handler_container'), function(container, i) {
-                            $bubble = $(container).children('img').first();
-                            $bubble.mouseenter();
-                            assert.strictEqual($('.popover-title .' + alertClasses[i]).length, 1);
-                            $bubble.mouseout();
-                        });
-                        done();
-                    });
-                });
-
                 it("should destroy popover after destroy", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");
