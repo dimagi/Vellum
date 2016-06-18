@@ -749,8 +749,7 @@ define([
 
     function getMessages(mug, path) {
         var $messages = $(),
-            seen = {},
-            usesRichText = mug.form.vellum.opts().features.rich_text;
+            seen = {};
         mug.messages.each(path, function (msg) {
             if (seen.hasOwnProperty(msg.message)) { return; }
             seen[msg.message] = true;
