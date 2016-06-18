@@ -158,7 +158,7 @@ define([
         },
         isValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
-            return this.hashtagDictionary.hasOwnProperty(tag) && !_.isFunction(this.hashtagDictionary[tag]);
+            return this.hashtagDictionary.hasOwnProperty(tag) && _.isFunction(this.hashtagDictionary[tag]);
         },
         hasValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
