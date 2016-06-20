@@ -497,6 +497,8 @@ define([
         var el = $('<div>').html(text),
             outputMapping = {},
             ret;
+        // replaces each bubble with a guid to be replaced later with the
+        // actual output value. needed so that < and > aren't escaped
         el.find('.label-datanode').replaceWith(function(index, output) {
             var uuid = util.get_guid();
             while (outputMapping.hasOwnProperty(uuid)) {
