@@ -5,7 +5,13 @@
  * Itext handles text that may be displayed in multiple languages. An IText block contains a translation for
  * each required language. Each translation contains a set of text elements, each with an id and containing
  * one or more values. Each value represents a different form of the text appropriate for that language.
- * (e.g., plain text versus multimedia equivalent). See https://bitbucket.org/javarosa/javarosa/wiki/ITextAPI
+ * (e.g., plain text versus multimedia equivalent).
+ * 
+ * An IText item may contain multiple forms and also contains an IText model, which tracks the languages
+ * available and knows which of those languages is the default. On the UI side, an IText block contains
+ * one or more IText widgets, each of which goes with a single language.
+ *
+ * See https://bitbucket.org/javarosa/javarosa/wiki/ITextAPI
  *
  * Mugs have the following Itext properties:
  *  labelItext: for the question label itself
