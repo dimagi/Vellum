@@ -60,7 +60,6 @@ define([
         },
         downcast: function(element) {
             element.setHtml(applyFormats($(element.getOuterHtml()).data()));
-            element.replaceWithChildren();
         },
         init: function() {
             // TODO: PR to ckeditor to make changing drag ui supported
@@ -103,7 +102,18 @@ define([
         }
     });
 
-    CKEDITOR.config.allowedContent = true;
+    CKEDITOR.config.allowedContent = {
+        span: {
+            classes: 'label,label-*',
+            attributes: 'data-output-value,data-value,data-date-format',
+        },
+        i: {
+            classes: 'fcc,fcc-*,fa,fa-*',
+        },
+        output: {
+            attributes: 'value',
+        },
+    };
     CKEDITOR.config.customConfig = '';
     CKEDITOR.config.title = false;
     CKEDITOR.config.extraPlugins = 'bubbles';
@@ -484,9 +494,24 @@ define([
     }
 
     function unwrapBubbles(text) {
-        var el = $('<div>').html(text);
-        el.find('.label-datanode').children().unwrap();
-        return el.text();
+        var el = $('<div>').html(text),
+            outputMapping = {},
+            ret;
+        // replaces each bubble with a guid to be replaced later with the
+        // actual output value. needed so that < and > aren't escaped
+        el.find('.label-datanode').replaceWith(function(index, output) {
+            var uuid = util.get_guid();
+            while (outputMapping.hasOwnProperty(uuid)) {
+                uuid = util.get_guid();
+            }
+            outputMapping[uuid] = $('<span>').append(output).text();
+            return "{{{ " + uuid + " }}}";
+        });
+        ret = el.html();
+        _.each(outputMapping, function(output, uuid) {
+            ret = ret.replace("{{{ " + uuid + " }}}", output);
+        });
+        return ret;
     }
 
     /**
