@@ -187,9 +187,12 @@ define([
             setValue: function (value, callback) {
                 newval = value;
                 value = toRichText(value, form, options);
-                editor.setData(value, function () {
-                    newval = NOTSET;
-                    if (callback) { callback(); }
+                editor.setData(value, {
+                    callback: function () {
+                        newval = NOTSET;
+                        if (callback) { callback(); }
+                    },
+                    noSnapshot: true,
                 });
             },
             insertExpression: function (xpath) {

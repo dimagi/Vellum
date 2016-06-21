@@ -430,6 +430,7 @@ define([
 
             it("should error for unknown properties", function(done) {
                 widget.setValue(escapedDobProp);
+                widget.handleChange();
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
                 event.fire("loadCaseData");

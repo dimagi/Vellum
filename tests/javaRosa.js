@@ -94,11 +94,13 @@ define([
                 util.addQuestion("Text", "question2");
                 var widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () {
-                    widget.setValue('<output value="/data/question1" /> a ' +
+                    var itext = '<output value="/data/question1" /> a ' +
                     '<output value="/data/question1"/> b ' +
                     '<output value="/data/question1"></output> c ' +
                     '<output value="/data/question1" ></output> d ' +
-                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />');
+                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />';
+                    widget.setItextValue(itext);
+                    widget.setValue(itext);
                     var widget2 = util.getWidget('itext-hin-label');
                     widget2.input.promise.then(function () {
                         widget2.setValue('<output value="/data/question1"></output>');
@@ -106,7 +108,7 @@ define([
                         $("[name=property-nodeID]").val('first_question').change();
                         util.assertXmlEqual(
                             call('createXML'),
-                            util.xmlines(TEST_XML_4),
+                            TEST_XML_4,
                             {normalize_xmlns: true}
                         );
                         done();
@@ -120,10 +122,12 @@ define([
                 util.addQuestion("Text", "question2");
                 var widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () {
-                    widget.setValue('<output value="/data/question1" /> ' +
+                    var itext = '<output value="/data/question1" /> ' +
                         '<output value="/data/question11" /> ' +
                         '<output value="/data/question1/b" /> ' +
-                        '<output value="/data/question1b" /> ');
+                        '<output value="/data/question1b" /> ';
+                    widget.setItextValue(itext);
+                    widget.setValue(itext);
                     var widget2 = util.getWidget('itext-hin-label');
                     widget2.input.promise.then(function () {
                         widget2.setValue('question2');
@@ -243,7 +247,7 @@ define([
 
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
@@ -252,7 +256,7 @@ define([
             util.loadXML(TEST_XML_2_WITH_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
@@ -261,7 +265,7 @@ define([
             util.loadXML(TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
