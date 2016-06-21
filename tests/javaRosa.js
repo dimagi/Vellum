@@ -106,7 +106,7 @@ define([
                         $("[name=property-nodeID]").val('first_question').change();
                         util.assertXmlEqual(
                             call('createXML'),
-                            util.xmlines(TEST_XML_4),
+                            TEST_XML_4,
                             {normalize_xmlns: true}
                         );
                         done();
@@ -243,7 +243,7 @@ define([
 
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
@@ -252,7 +252,7 @@ define([
             util.loadXML(TEST_XML_2_WITH_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
@@ -261,7 +261,7 @@ define([
             util.loadXML(TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });

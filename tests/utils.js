@@ -417,9 +417,6 @@ define([
         assertXmlNotEqual: assertXmlNotEqual,
         assertJSTreeState: assertJSTreeState,
         assertTreeState: assertTreeState,
-        xmlines: function(xml) {
-            return xml.replace(/>(\s\s+)</g, ">\n$1<");
-        },
         addQuestion: function (qType, nodeId, attrs) {
             attrs = attrs || {};
             if (this.prevId) {
