@@ -305,6 +305,7 @@ define([
                 if (e.form === widget.form && e.itextType === widget.itextType) {
                     if (widget.getItextValue() === e.prevValue) {
                         // Make sure all the defaults keep in sync.
+                        // why doesn't setValue set the itext value?
                         widget.setItextValue(e.value);
                         widget.setValue(e.value);
                     }
