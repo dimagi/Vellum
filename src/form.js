@@ -126,6 +126,7 @@ define([
         this.formName = 'New Form';
         this.mugMap = {};
         this.hashtagDictionary = {};
+        this.hashtagTransformations = {};
         this.tree = new Tree('data', 'control');
         this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
@@ -137,7 +138,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = escapedHashtags.parser(this.hashtagDictionary);
+        this.xpath = escapedHashtags.parser(this.hashtagDictionary, this.hashtagTransformations);
         this.richText = !!vellum.opts().features.rich_text;
         this.undomanager = new undomanager();
 
@@ -154,7 +155,19 @@ define([
 
     Form.prototype = {
         isValidHashtag: function(tag) {
-            return this.hashtagDictionary.hasOwnProperty(this.normalizeHashtag(tag));
+            tag = this.normalizeHashtag(tag);
+            return this.hashtagDictionary.hasOwnProperty(tag);
+        },
+        isValidHashtagPrefix: function(tag) {
+            tag = this.normalizeHashtag(tag);
+            return this.hashtagTransformations.hasOwnProperty(tag);
+        },
+        hasValidHashtagPrefix: function(tag) {
+            tag = this.normalizeHashtag(tag);
+            var lastSlashIndex = tag.lastIndexOf("/");
+            return lastSlashIndex !== -1 &&
+                this.hashtagTransformations.hasOwnProperty(tag.substring(0, lastSlashIndex + 1)) &&
+                tag.substring(lastSlashIndex + 1) !== "";
         },
         addHashtag: function(hashtag, xpath) {
             this.hashtagDictionary[hashtag] = xpath;
@@ -162,6 +175,11 @@ define([
         initHashtag: function(hashtag, xpath) {
             if (!this.hashtagDictionary[hashtag]) {
                 this.hashtagDictionary[hashtag] = xpath;
+            }
+        },
+        initHashtagTransformation: function(prefix, transformation) {
+            if (!this.hashtagTransformations[prefix]) {
+                this.hashtagTransformations[prefix] = transformation;
             }
         },
         removeHashtag: function(hashtag) {

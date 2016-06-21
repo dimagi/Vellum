@@ -79,6 +79,7 @@ define([
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();
+
                 richText.editor($input).insertExpression(content);
                 if (!this.$inputor.is(':focus')) {
                     this.$inputor.focus();
@@ -100,7 +101,9 @@ define([
                     callbacks: {
                         matcher: function(flag, subtext) {
                             var match, regexp;
-                            regexp = new RegExp('(\\s+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
+                            // Match text that starts with the flag and then looks like a path.
+                            // CKEditor reserves the right to insert arbitrary zero-width spaces, so watch for those.
+                            regexp = new RegExp('([\\s\u200b]+|^)' + RegExp.escape(flag) + '([\\w_/]*)$', 'gi');
                             match = regexp.exec(subtext);
                             return match ? match[2] : null;
                         },
@@ -131,7 +134,31 @@ define([
                                                        options.property);
                             }
                             return value;
-                        }
+                        },
+                        afterMatchFailed: function(at, $el) {
+                            if (options.useRichText) {
+                                // If user typed out a full legitimate hashtag, or something that isn't
+                                // legit but looks vaguely like a case property, turn it into a bubble.
+                                var content = $el.html().trim().replace(/^.*\s/, ""),
+                                    isUnknownHashtag = richText.REF_REGEX.test(content) && !form.isValidHashtagPrefix(content),
+                                    shouldBubble = form.isValidHashtag(content) || isUnknownHashtag;
+
+                                if (shouldBubble) {
+                                    options.functionOverrides.insert.call(this, content);
+                                }
+
+                                // After this callback, atwho will attempt to remove the query string and
+                                // properly set cursor position. However, its logic breaks if we've already
+                                // replaced the query with a bubble. Handle the removal and cursor logic
+                                // ourselves, and return false from this function so the atwho logic doesn't run.
+                                var node = this._unwrap($el.text($el.text()).contents().first());
+                                if (!shouldBubble) {
+                                    this._setRange("after", node);
+                                }
+                            }
+
+                            return false;
+                        },
                     },
                     functionOverrides: options.functionOverrides,
                 };

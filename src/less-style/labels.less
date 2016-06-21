@@ -65,6 +65,21 @@
     }
 }
 
+.label-datanode-external-unknown {
+    color: @cc-light-warm-accent-low;
+    border-color:darken(@cc-light-warm-accent-hi, 20%);
+    background-color: darken(@cc-light-warm-accent-hi, 5%);
+    .close {
+        color: @cc-light-warm-accent-low;
+    }
+    &:hover {
+        background-color: @cc-light-warm-accent-mid;
+        .close {
+            color: @cc-light-warm-accent-hi;
+        }
+    }
+}
+
 .label-datanode-unknown {
     color: @cc-att-neg-low;
     border-color:darken(desaturate(@cc-att-neg-hi, 20%), 20%);

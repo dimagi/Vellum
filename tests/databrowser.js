@@ -69,6 +69,7 @@ define([
                 key: "@case_type",
                 structure: {
                     dob: {},
+                    invalid: {}
                 },
                 related: {
                     parent: "mother",
@@ -95,6 +96,7 @@ define([
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
+                        invalidCaseProperties: ['invalid'],
                         onReady: function () {
                             var _this = this;
                             datasources.getDataSources(function () {
@@ -351,6 +353,10 @@ define([
                 });
             });
 
+            it("shouldn't show invalid properties", function() {
+                assert.isNull(util.findNode(dataTree, "invalid"), "invalid shouldn't be in case tree");
+            });
+
             // TODO should remove instances when expression ref is removed
         });
 
@@ -432,7 +438,44 @@ define([
                     done();
                 });
             });
+        });
 
+        describe("without rich text", function () {
+            before(function (done) {
+                util.init({
+                    features: {rich_text: false},
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
+                        invalidCaseProperties: ['invalid'],
+                        onReady: function () {
+                            var _this = this;
+                            datasources.getDataSources(function () {
+                                databrowser.initDataBrowser(_this);
+                                dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
+                                done();
+                            });
+                        }
+                    }
+                });
+            });
+
+            it("should add ref on drag/drop", function() {
+                util.loadXML("");
+                var mug = util.addQuestion("Text", "mug"),
+                    text = $("[name=itext-en-label]"),
+                    sessionUri = CASE_DATA[0].uri,
+                    casedbUri = CASE_DATA[1].uri;
+                assert.equal(getInstanceId(mug.form, sessionUri), null);
+                assert.equal(getInstanceId(mug.form, casedbUri), null);
+                assert.equal(text.length, 1);
+                util.findNode(dataTree, "dob").data.handleDrop(text);
+                assert.equal(mug.p.labelItext.get(),
+                             "<output value=\"instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob\" />question1");
+                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+            });
         });
     });
 });

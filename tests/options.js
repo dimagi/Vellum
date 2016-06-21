@@ -115,6 +115,7 @@ define(["underscore"], function (_) {
                 "meta/location",
             ],
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
+            invalidCaseProperties: ['name'],
             saveType: "patch",
             saveUrl: function (data) {},
             activityUrl: null,               // may be function or URL string
@@ -152,6 +153,12 @@ define(["underscore"], function (_) {
                     icon: "icon-vellum-android-intent",
                     name: "Breath Counter",
                     id: "org.commcare.respiratory.BREATHCOUNT",
+                },
+                {
+                    icon: "icon-vellum-android-intent",
+                    name: "Fingerprint Scanner",
+                    id: "com.simprints.id.REGISTER",
+                    mime: "text/plain",
                 },
             ],
         },
