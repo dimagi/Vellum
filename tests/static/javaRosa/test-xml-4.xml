@@ -25,7 +25,7 @@
 						<value>first_question</value>
 					</text>
 					<text id="question2-label">
-						<value><output vellum:value="#form/first_question" value="/data/first_question" /></value>
+						<value><output vellum:value="#form/first_question" value="/data/first_question" /> a <output vellum:value="#form/first_question" value="/data/first_question" /> b <output vellum:value="#form/first_question" value="/data/first_question" /> c <output vellum:value="#form/first_question" value="/data/first_question" /> d <output vellum:value="if(#form/first_question = '', '', format-date(date(#form/first_question), '%a%b%c'))" value="if(/data/first_question = '', '', format-date(date(/data/first_question), '%a%b%c'))" /></value>
 					</text>
 				</translation>
 			</itext>

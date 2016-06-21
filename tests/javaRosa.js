@@ -94,6 +94,11 @@ define([
                 util.addQuestion("Text", "question2");
                 var widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () {
+                    widget.setItextValue('<output value="/data/question1" /> a ' +
+                    '<output value="/data/question1"/> b ' +
+                    '<output value="/data/question1"></output> c ' +
+                    '<output value="/data/question1" ></output> d ' +
+                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />');
                     widget.setValue('<output value="/data/question1" /> a ' +
                     '<output value="/data/question1"/> b ' +
                     '<output value="/data/question1"></output> c ' +
@@ -120,6 +125,10 @@ define([
                 util.addQuestion("Text", "question2");
                 var widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () {
+                    widget.setItextValue('<output value="/data/question1" /> ' +
+                        '<output value="/data/question11" /> ' +
+                        '<output value="/data/question1/b" /> ' +
+                        '<output value="/data/question1b" /> ');
                     widget.setValue('<output value="/data/question1" /> ' +
                         '<output value="/data/question11" /> ' +
                         '<output value="/data/question1/b" /> ' +
