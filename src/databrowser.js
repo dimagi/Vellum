@@ -66,7 +66,7 @@ define([
                     return false;
                 }
             });
-            vellum.data.core.databrowser = { dataHashtags: {} };
+            vellum.data.core.databrowser = { dataHashtags: {}, dataHashtagTransformations: {} };
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             datasources.getDataSources(function () {}, handleError(pane));
@@ -87,6 +87,9 @@ define([
             }
             _.each(hashtags, function (path, hash) {
                 addHashtag(hash, path, _this);
+            });
+            _.each(this.data.core.databrowser.dataHashtagTransformations, function(trans, hash) {
+                addHashtagTransformation(hash, trans, _this);
             });
 
             fixFormReferences(this.data.core.form);
@@ -163,6 +166,11 @@ define([
                     var hashtagPath = '#case/' + source.id + '/' + id;
                     addHashtag(hashtagPath, path, vellum);
                     path = hashtagPath;
+                    if (parentPath) {
+                        addHashtagTransformation('#case/' + source.id + '/', function(prop) {
+                            return parentPath + "/" + prop;
+                        }, vellum);
+                    }
                 }
                 return {
                     text: tree.name,
@@ -303,6 +311,18 @@ define([
         }
         if (form && form.addHashtag) {
             form.initHashtag(hashtag, fullPath);
+        }
+    }
+
+    function addHashtagTransformation(prefix, transformation, vellum) {
+        var form = vellum.data.core.form,
+            dataHashtagTransformations = vellum.data.core.databrowser.dataHashtagTransformations;
+
+        if (!dataHashtagTransformations.hasOwnProperty(prefix)) {
+            dataHashtagTransformations[prefix] = transformation;
+        }
+        if (form && form.initHashtagTransformation) {
+            form.initHashtagTransformation(prefix, transformation);
         }
     }
     

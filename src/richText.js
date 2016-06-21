@@ -400,10 +400,16 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (CASE_REF_REGEX.test(xpath) && form.isValidHashtag(xpath)) {
-                return {
-                    classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
-                };
+            if (CASE_REF_REGEX.test(xpath)) {
+                if (form.isValidHashtag(xpath)) {
+                    return {
+                        classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
+                    };
+                } else if (form.hasValidHashtagPrefix(xpath)) {
+                    return {
+                        classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
+                    };
+                }
             }
 
             var icon = form.getIconByPath(xpath);
@@ -628,8 +634,10 @@ define([
                         labelText.find('output').replaceWith(function () {
                             return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
                         });
+
                         // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                         $imgs.removeAttr("title");
+
                         $imgs.popover({
                             trigger: 'hover',
                             container: 'body',
@@ -660,7 +668,7 @@ define([
     }
 
     return {
-        CASE_REF_REGEX: CASE_REF_REGEX,
+        REF_REGEX: REF_REGEX,
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: initEditor,
