@@ -404,16 +404,6 @@ define([
                 });
             });
 
-            it("should escape html tags", function (done) {
-                editor.setValue('one two', function () {
-                    assert.equal(editor.getValue(), 'one two');
-                    editor.select(4);
-                    input.editor.insertText("<b>");
-                    assert.equal(editor.getValue(), "one &lt;b&gt;two");
-                    done();
-                });
-            });
-
             function applyArgs(func) {
                 return function (args) {
                     return func.apply(this, args);
