@@ -9,7 +9,7 @@ define(["underscore"], function (_) {
                 "case_id": {
                     reference: {
                         source: "casedb",
-                        subset: "child",
+                        subset: "case",
                         key: "@case_id",
                     },
                 },
@@ -23,16 +23,25 @@ define(["underscore"], function (_) {
                 name: {},
             },
             subsets: [{
-                id: "mother",
+                id: "grandparent",
+                name: "grandparent (household)",
+                key: "@case_type",
+                structure: {
+                    address: {},
+                }
+            }, {
+                id: "parent",
+                name: "parent (mother)",
                 key: "@case_type",
                 structure: {
                     edd: {},
                 },
                 related: {
-                    "first-child": "child",
+                    parent: "grandparent",
                 }
             }, {
-                id: "child",
+                id: "case",
+                name: "case (child)",
                 key: "@case_type",
                 structure: {
                     dob: {},
@@ -61,7 +70,7 @@ define(["underscore"], function (_) {
                     f_9814: {},
                 },
                 related: {
-                    parent: "mother",
+                    parent: "parent",
                 },
             }]
         }, {

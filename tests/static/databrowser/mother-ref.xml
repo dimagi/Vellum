@@ -10,14 +10,14 @@
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb" />
 			<instance id="commcaresession" src="jr://instance/session" />
-			<bind vellum:nodeset="#form/mug" nodeset="/data/mug" vellum:calculate="#case/mother/edd" calculate="instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd" />
+			<bind vellum:nodeset="#form/mug" nodeset="/data/mug" vellum:calculate="#case/parent/edd" calculate="instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd" />
 			<itext>
 				<translation lang="en" default="">
 				</translation>
 			</itext>
 		</model>
 		<vellum:hashtags>
-			{&quot;#case/mother/edd&quot;:null}
+			{&quot;#case/parent/edd&quot;:null}
 		</vellum:hashtags>
 	</h:head>
 	<h:body>

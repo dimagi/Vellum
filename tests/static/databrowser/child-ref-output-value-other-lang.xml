@@ -19,12 +19,12 @@
 				</translation>
 				<translation lang="hin">
 					<text id="mug-label">
-						<value>mug<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" vellum:value="#case/child/dob" /></value>
+						<value>mug<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" vellum:value="#case/dob" /></value>
 					</text>
 				</translation>
 			</itext>
 		</model>
-		<vellum:hashtags>{&quot;#case/child/dob&quot;:null}</vellum:hashtags>
+		<vellum:hashtags>{&quot;#case/dob&quot;:null}</vellum:hashtags>
 	</h:head>
 	<h:body>
 		<input vellum:ref="#form/mug" ref="/data/mug">

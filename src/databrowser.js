@@ -163,11 +163,12 @@ define([
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
-                    var hashtagPath = '#case/' + source.id + '/' + id;
+                    var hashtagPrefix = '#case/' + (source.id !== 'case' ? source.id + '/' : ''),
+                        hashtagPath = hashtagPrefix + id;
                     addHashtag(hashtagPath, path, vellum);
                     path = hashtagPath;
                     if (parentPath) {
-                        addHashtagTransformation('#case/' + source.id + '/', function(prop) {
+                        addHashtagTransformation(hashtagPrefix, function(prop) {
                             return parentPath + "/" + prop;
                         }, vellum);
                     }
