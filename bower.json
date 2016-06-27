@@ -31,7 +31,7 @@
         "requirejs-plugins": "~1.0.2",
         "At.js": "emord/At.js#override-insert",
         "Caret.js": "0.2.2",
-        "fuse.js": "~2.0.0",
+        "fuse.js": "emord/Fuse#token-option",
 
         "jstree": "~3.2.1",
         "langcodes": "dimagi/langcodes",
