@@ -163,6 +163,7 @@ define([
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
+                    // magic: case as the id means that this is the base case
                     var hashtagPrefix = '#case/' + (source.id !== 'case' ? source.id + '/' : ''),
                         hashtagPath = hashtagPrefix + id;
                     addHashtag(hashtagPath, path, vellum);
