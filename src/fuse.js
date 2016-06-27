@@ -12,7 +12,7 @@ define([
     var FUSE_CONFIG = {
         keys: ['displayPath'],
         tokenize: true,
-        tokenSeparator: /[ \/]+/g,
+        tokenSeparator: /\/+/g,
         threshold: 0.4,
     };
 
