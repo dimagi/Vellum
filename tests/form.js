@@ -139,10 +139,13 @@ define([
             assert.equal(util.getMessages(mug), "");
         });
 
-        it("should not warn about question named 'case' in group", function () {
+        it("should warn about question named 'Case' in group", function () {
             util.loadXML("");
             util.addQuestion("Group", "group");
-            var mug = util.addQuestion("Text", "case");
+            var mug = util.addQuestion("Text", "Case");
+            assert(mug.messages.get("nodeID", "mug-nodeID-case-warning"),
+                "mug-nodeID-case-warning was expected but not present");
+            mug.p.nodeID = "the-case";
             assert.equal(util.getMessages(mug), "");
         });
 

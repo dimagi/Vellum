@@ -814,7 +814,7 @@ define([
                             key: "mug-nodeID-case-warning",
                             level: mug.WARNING,
                         };
-                    if (!mug.parentMug && mug.p.nodeID === "case") {
+                    if (mug.p.nodeID.toLowerCase() === "case") {
                         caseWarning.message = "The ID 'case' may cause " +
                             "problems with case management. It is " +
                             "recommended to pick a different Question ID.";
