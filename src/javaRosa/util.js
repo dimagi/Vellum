@@ -3,12 +3,14 @@ define([
     'jquery',
     'vellum/tsv',
     'vellum/richText',
+    'vellum/xml',
     'vellum/util'
 ], function (
     _,
     $,
     tsv,
     richText,
+    xml,
     util
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
@@ -250,7 +252,8 @@ define([
     var insertOutputRef = function(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
-        if ((!mug && vellum.opts().features.rich_text) || (mug && mug.supportsRichText())) {
+        if ((!mug && form.useRichText !== false) ||
+            (mug && mug.supportsRichText())) {
             richText.editor(target).insertOutput(output);
         } else {
             util.insertTextAtCursor(target, output, true);
@@ -260,6 +263,23 @@ define([
             warnOnNonOutputableValue(form, mug, path);
         }
     };
+
+    function _outputToXPathOrHashtag (functionName) {
+        return function (text, xpathParser) {
+            if (text) {
+                text = $("<div />").append(text);
+                text.find('output').replaceWith(function() {
+                    var $this = $(this),
+                        value = xpathParser.parse($this.attr('value') || $this.attr('ref'));
+                    $this.attr('value', value[functionName]());
+                    return $this[0].outerHTML;
+                });
+                text = xml.normalize(text.html());
+            }
+            return text;
+        };
+    }
+
 
     return {
         ITEXT_PROPERTIES: ITEXT_PROPERTIES,
@@ -273,5 +293,7 @@ define([
         insertOutputRef: insertOutputRef,
         looksLikeMarkdown: looksLikeMarkdown,
         parseXLSItext: parseXLSItext,
+        outputToXPath: _outputToXPathOrHashtag('toXPath'),
+        outputToHashtag: _outputToXPathOrHashtag('toHashtag'),
     };
 });

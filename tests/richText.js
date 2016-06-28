@@ -62,6 +62,19 @@ define([
                     '#case/child/f_1065',
                 ], this.normalizeHashtag(path));
             },
+            isValidHashtagPrefix: function (path) {
+                return _.contains([
+                    '#case/mother/',
+                    '#case/child/',
+                ], this.normalizeHashtag(path));
+            },
+            hasValidHashtagPrefix: function (path) {
+                return _.contains([
+                    '#case/mother/edd',
+                    '#case/child/case',
+                    '#case/child/f_1065',
+                ], this.normalizeHashtag(path));
+            },
             normalizeEscapedHashtag: function (path) {
                  return path;
             },
@@ -309,6 +322,23 @@ define([
                 });
             });
         });
+
+        describe("serialize formats correctly", function () {
+            it("should handle output refs", function() {
+                assert.equal(richText.applyFormats({
+                    outputValue: 1,
+                    value: "`#case/child/f_2685`",
+                }), '&lt;output value="`#case/child/f_2685`" /&gt;');
+            });
+
+            it("should handle dates", function() {
+                assert.equal(richText.applyFormats({
+                    dateFormat: "%d/%n/%y",
+                    outputValue: 1,
+                    value: "`#form/question1`",
+                }), '&lt;output value="format-date(date(`#form/question1`), \'%d/%n/%y\')" /&gt;');
+            });
+        });
     });
 
     describe("The rich text editor", function () {
@@ -469,6 +499,21 @@ define([
                 it("should change output ref to output value", function () {
                     util.loadXML(OUTPUT_REF_XML);
                     util.assertXmlEqual(call('createXML'), OUTPUT_VALUE_XML);
+                });
+
+                it("should bubble various case properties", function () {
+                    util.loadXML("");
+                    var widget = util.getWidget('itext-en-label'),
+                        $widget = $(".fd-textarea[name='itext-en-label']");
+                    widget.input.promise.then(function () {
+                        widget.setValue('<output value="#case/child/not_a_child" />' +
+                            '<output value="#case/not_a_thing" />' +
+                            '<output value="#case/child/dob" />'
+                        );
+                        assert.strictEqual($widget.find(".label-datanode-external-unknown").length, 1);
+                        assert.strictEqual($widget.find(".label-datanode-external").length, 1);
+                        assert.strictEqual($widget.find(".label-datanode-unknown").length, 1);
+                    });
                 });
             });
 

@@ -23,6 +23,7 @@ define([
     'vellum/parser',
     'vellum/datasources',
     'vellum/util',
+    'vellum/javaRosa/util',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -54,6 +55,7 @@ define([
     parser,
     datasources,
     util,
+    jrUtil,
     debug
 ) {
     
@@ -455,7 +457,7 @@ define([
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
-            val = util.escape(val);
+            val = util.escape(jrUtil.outputToXPath(val, mug.form.xpath));
         }
         return val;
     };

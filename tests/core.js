@@ -409,6 +409,27 @@ define([
             });
         });
 
+        describe("with rich text disabled", function() {
+            var vellum;
+            before(function (done) {
+                util.init({
+                    core: {onReady: function () {
+                        vellum = this;
+                        done();
+                    }},
+                    features: {rich_text: false},
+                });
+            });
+
+            it("should display /data/ in the question tree", function () {
+                util.addQuestion('Text', 'text1');
+                var mug = util.addQuestion('Text', 'text2');
+                assert.strictEqual(vellum.getMugDisplayName(mug), 'text2');
+                $('[name=itext-en-label]').val('text2 <output value="#form/text2" />').change();
+                assert.strictEqual(vellum.getMugDisplayName(mug), 'text2 &lt;output value="/data/text2" /&gt;');
+            });
+        });
+
         describe("should", function () {
             var form, dup;
             before(function () {

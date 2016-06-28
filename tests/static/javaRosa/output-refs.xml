@@ -25,7 +25,7 @@
 						<value>first_question</value>
 					</text>
 					<text id="question2-label">
-						<value>question2</value>
+						<value><output value="/data/first_question" vellum:value="#form/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" /></value>
 					</text>
 				</translation>
 			</itext>

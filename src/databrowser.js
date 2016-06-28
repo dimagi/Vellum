@@ -5,6 +5,7 @@ define([
     'jquery',
     'underscore',
     'vellum/datasources',
+    'vellum/util',
     'vellum/widgets',
     'vellum/window',
     'tpl!vellum/templates/external_sources_tree',
@@ -12,13 +13,23 @@ define([
     $,
     _,
     datasources,
+    util,
     widgets,
     window_,
     external_sources_tree
 ) {
     var fn = {},
         DATABROWSER_HEIGHT = 0.33,
-        panelHeight;
+        panelHeight,
+        handleError = function($container) {
+            return function(jqXHR, textStatus, errorThrown) {
+                if ($container && jqXHR.responseText) {
+                    $container.find(".fd-external-sources-error").removeClass("hide").text(jqXHR.responseText);
+                } else {
+                    window.console.log(util.formatExc(textStatus || errorThrown));
+                }
+            };
+        };
 
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('databrowser', {}, {
@@ -55,10 +66,10 @@ define([
                     return false;
                 }
             });
-            vellum.data.core.databrowser = { dataHashtags: {} };
+            vellum.data.core.databrowser = { dataHashtags: {}, dataHashtagTransformations: {} };
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
-            datasources.getDataSources(function () {});
+            datasources.getDataSources(function () {}, handleError(pane));
             var toggle = _.partial(toggleExternalDataTree, vellum);
             pane.parent().find(".fd-external-sources-divider")
                 .clickExceptAfterDrag(toggle);
@@ -76,6 +87,9 @@ define([
             }
             _.each(hashtags, function (path, hash) {
                 addHashtag(hash, path, _this);
+            });
+            _.each(this.data.core.databrowser.dataHashtagTransformations, function(trans, hash) {
+                addHashtagTransformation(hash, trans, _this);
             });
 
             fixFormReferences(this.data.core.form);
@@ -115,7 +129,7 @@ define([
                         var _this = this;
                         datasources.getDataSources(function (data) {
                             callback.call(_this, dataTreeJson(data, vellum));
-                        });
+                        }, handleError($container));
                     }
                 },
                 worker: false,
@@ -138,14 +152,25 @@ define([
     }
 
     function dataTreeJson(data, vellum) {
+        var invalidCaseProperties = vellum.opts().core.invalidCaseProperties;
+
         function node(source, parentPath, info) {
             return function (item, id) {
+                if (_.contains(invalidCaseProperties, id)) {
+                    return null;
+                }
+
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
                     var hashtagPath = '#case/' + source.id + '/' + id;
                     addHashtag(hashtagPath, path, vellum);
                     path = hashtagPath;
+                    if (parentPath) {
+                        addHashtagTransformation('#case/' + source.id + '/', function(prop) {
+                            return parentPath + "/" + prop;
+                        }, vellum);
+                    }
                 }
                 return {
                     text: tree.name,
@@ -198,6 +223,7 @@ define([
         function getNodes(source, path, info) {
             var nodes = _.chain(source && source.structure)
                 .map(node(source, path, info))
+                .compact()
                 .sortBy("text")
                 .value();
             if (source && source.related) {
@@ -285,6 +311,18 @@ define([
         }
         if (form && form.addHashtag) {
             form.initHashtag(hashtag, fullPath);
+        }
+    }
+
+    function addHashtagTransformation(prefix, transformation, vellum) {
+        var form = vellum.data.core.form,
+            dataHashtagTransformations = vellum.data.core.databrowser.dataHashtagTransformations;
+
+        if (!dataHashtagTransformations.hasOwnProperty(prefix)) {
+            dataHashtagTransformations[prefix] = transformation;
+        }
+        if (form && form.initHashtagTransformation) {
+            form.initHashtagTransformation(prefix, transformation);
         }
     }
     

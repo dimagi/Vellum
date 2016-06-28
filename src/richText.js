@@ -77,6 +77,12 @@ define([
 
             if (editor.commands.createPopover) {
                 var _this = this;
+
+                // Look for deleted bubbles
+                editor.on('change', function(e) {
+                    editor.widgets.checkWidgets({ initOnlyNew: 1 });
+                });
+
                 // if the editor is still being initialized then this command
                 // won't be enabled until it is ready
                 if (editor.status === "ready") {
@@ -171,9 +177,12 @@ define([
             setValue: function (value, callback) {
                 newval = value;
                 value = toRichText(value, form, options);
-                editor.setData(value, function () {
-                    newval = NOTSET;
-                    if (callback) { callback(); }
+                editor.setData(value, {
+                    callback: function () {
+                        newval = NOTSET;
+                        if (callback) { callback(); }
+                    },
+                    noSnapshot: true,
                 });
             },
             insertExpression: function (xpath) {
@@ -233,6 +242,7 @@ define([
         if (_.isFunction(options.createPopover)) {
             editor.addCommand('createPopover', {
                 exec: options.createPopover,
+                editorFocus: false,
             });
         }
 
@@ -315,7 +325,7 @@ define([
     var formats = {
             'dateFormat': {
                 serialize: function(currentValue, dataAttrs) {
-                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')", {
+                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')")({
                         xpath: currentValue,
                         dateFormat: dataAttrs.dateFormat
                     });
@@ -323,7 +333,7 @@ define([
             },
             'outputValue': {
                 serialize: function(currentValue) {
-                    return _.template('&lt;output value="<%=xpath%>" /&gt;', {
+                    return _.template('&lt;output value="<%=xpath%>" /&gt;')({
                         xpath: currentValue
                     });
                 },
@@ -383,10 +393,16 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (CASE_REF_REGEX.test(xpath) && form.isValidHashtag(xpath)) {
-                return {
-                    classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
-                };
+            if (CASE_REF_REGEX.test(xpath)) {
+                if (form.isValidHashtag(xpath)) {
+                    return {
+                        classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
+                    };
+                } else if (form.hasValidHashtagPrefix(xpath)) {
+                    return {
+                        classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
+                    };
+                }
             }
 
             var icon = form.getIconByPath(xpath);
@@ -596,8 +612,10 @@ define([
                         labelText.find('output').replaceWith(function () {
                             return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
                         });
+
                         // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                         $imgs.removeAttr("title");
+
                         $imgs.popover({
                             trigger: 'hover',
                             container: 'body',
@@ -628,6 +646,8 @@ define([
     }
 
     return {
+        REF_REGEX: REF_REGEX,
+        applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: initEditor,
         fromRichText: fromRichText,

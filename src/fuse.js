@@ -10,7 +10,10 @@ define([
     util
 ) {
     var FUSE_CONFIG = {
-        keys: ['label', 'name', 'absolutePath', 'hashtagPath'],
+        keys: ['displayPath'],
+        tokenize: true,
+        tokenSeparator: /\/+/g,
+        threshold: 0.4,
     };
 
     function Fuse(form) {
