@@ -108,6 +108,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/tsv',
         'tests/xml',
         'tests/saveToCase',
+        'tests/urlHash',
         'tests/markdown',
         'tests/datasources',
         'tests/databrowser',
