@@ -171,7 +171,9 @@ define([
                     }
                 });
             }
+        }
 
+        if (_.contains(jrUtil.ITEXT_PROPERTIES, options.path)) {
             atwho.questionAutocomplete($input, mug, {
                 category: "Output Value",
                 insertTpl: '<output value="${name}" />',
