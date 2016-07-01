@@ -163,11 +163,13 @@ define([
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
-                    var hashtagPath = '#case/' + source.id + '/' + id;
+                    // magic: case as the id means that this is the base case
+                    var hashtagPrefix = '#case/' + (source.id !== 'case' ? source.id + '/' : ''),
+                        hashtagPath = hashtagPrefix + id;
                     addHashtag(hashtagPath, path, vellum);
                     path = hashtagPath;
                     if (parentPath) {
-                        addHashtagTransformation('#case/' + source.id + '/', function(prop) {
+                        addHashtagTransformation(hashtagPrefix, function(prop) {
                             return parentPath + "/" + prop;
                         }, vellum);
                     }
@@ -263,21 +265,23 @@ define([
             nodes = node(source, null, info)(source, path).children;
         }
 
-        // move the parent data sources up one level to be equal to their child
-        var siblings = [];
-        _.each(nodes, function (node) {
-            siblings = siblings.concat(_.filter(node.children, function(child) {
+        function flattenNode(node) {
+            var subCases = _.filter(node.children, function(child) {
                 return child.children.length;
-            }));
+            });
             node.children = _.filter(node.children, function(child) {
                 return child.children.length === 0;
             });
-        });
+            subCases = _.flatten(_.map(subCases, flattenNode));
+            return [node].concat(subCases);
+        }
+        // data sources should be in a flat list instead of hierarchy
+        nodes = _.flatten(_.map(nodes, flattenNode));
 
         // done here for performance reasons. would be nice to be done after
         // every new hashtag, but only for the mugs that reference that hashtag
         fixFormReferences(vellum.data.core.form);
-        return nodes.concat(siblings);
+        return nodes;
     }
 
     function toggleExternalDataTree(vellum) {
