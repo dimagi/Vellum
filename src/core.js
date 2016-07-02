@@ -866,7 +866,6 @@ define([
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
                 _this.activateQuestionTypeGroup(mug);
-                window.history.replaceState(null, null, mug.hashtagPath);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -1162,7 +1161,7 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
-        var form, _this = this, qId = window.location.hash;
+        var form, _this = this;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
@@ -1183,7 +1182,7 @@ define([
         form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
-            _this._populateTree(qId);
+            _this._populateTree();
         }
         datasources.getDataSources(function (data) {
             form.updateKnownInstances(
@@ -1275,7 +1274,7 @@ define([
         }
     };
 
-    fn._populateTree = function (qId) {
+    fn._populateTree = function () {
         // NOTE: this performs the final step in the mug parsing process.
         // It should only be called once after a new XForm is loaded.
         var _this = this,
@@ -1291,27 +1290,18 @@ define([
                 }
             }
         });
-
-        var mug = qId && _this.getMugByPath(qId) || undefined;
-        _this.selectSomethingOrHideProperties(true, mug && mug.ufid);
+        this.selectSomethingOrHideProperties(true);
     };
 
-    fn.selectSomethingOrHideProperties = function (forceDeselect, ufid) {
+    fn.selectSomethingOrHideProperties = function (forceDeselect) {
         if (forceDeselect) {
             this.jstree('deselect_all');
         }
         // ensure something is selected if possible
         if (!this.jstree('get_selected').length) {
             // if there's any nodes in the tree, just select the first
-            var all_nodes = this.data.core.$tree.find("li"),
-                selected;
-            if (ufid) {
-                selected = all_nodes.filter('[id= ' + ufid + ']');
-            }
-            if (selected && selected.length > 0) {
-                this.jstree('select_node', selected[0]);
-                return true;
-            } else if (all_nodes.length > 0) {
+            var all_nodes = this.data.core.$tree.find("li");
+            if (all_nodes.length > 0) {
                 this.jstree('select_node', all_nodes[0]);
                 return true;
             } else {
@@ -2094,7 +2084,6 @@ define([
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
         form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
-        window.history.replaceState(null, null, mug.hashtagPath);
     };
 
     fn.duplicateMugProperties = function(mug) {};
