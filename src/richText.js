@@ -144,12 +144,12 @@ define([
             throw new Error("input should reference exactly one element, " +
                             "got " + input.length);
         }
+        options = options || {};
         var NOTSET = {},
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
             }).editor;
-        options = options || {};
         wrapper = {
             getValue: function (callback) {
                 if (callback) {

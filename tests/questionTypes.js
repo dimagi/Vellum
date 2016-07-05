@@ -250,7 +250,7 @@ define([
                 core: {
                     form: null,
                     onReady: function () {
-                        this.data.core.form.useRichText = false;
+                        this.data.core.form.richText = false;
                         _.each(questionTypes, function (q, i) {
                             var prev = (i > 0 ? questionTypes[i - 1] : {}),
                                 prevId = q.clickBeforeAdd ||

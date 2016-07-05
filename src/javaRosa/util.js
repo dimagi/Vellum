@@ -252,7 +252,7 @@ define([
     var insertOutputRef = function(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
-        if ((!mug && form.useRichText !== false) ||
+        if ((!mug && form.richText) ||
             (mug && mug.supportsRichText())) {
             richText.editor(target).insertOutput(output);
         } else {

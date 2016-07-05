@@ -61,7 +61,7 @@ define([
             var widget = widgets.normal(mug, options),
                 id = options.id,
                 internal_template = options.template;
-            options.noRichText = true;
+            options.richText = false;
 
             widget.input = $('<div class="control-row" />').attr('name', id);
 

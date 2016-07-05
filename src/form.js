@@ -139,6 +139,7 @@ define([
         this.errors = [];
         this.question_counter = 1;
         this.xpath = escapedHashtags.parser(this.hashtagDictionary, this.hashtagTransformations);
+        this.richText = !!vellum.opts().features.rich_text;
         this.undomanager = new undomanager();
 
         this.undomanager.on('reset', function(e) {
