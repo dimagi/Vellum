@@ -1,0 +1,48 @@
+debug
+
+drought: <output value="/data/save/shocks/drought" vellum:value="#form/save/shocks/drought"/>
+flood: <output value="/data/save/shocks/flood_water_logging" vellum:value="#form/save/shocks/flood_water_logging"/>
+crop: <output value="/data/save/shocks/crop_disease_pests" vellum:value="#form/save/shocks/crop_disease_pests"/>
+livestock: <output value="/data/save/shocks/livestock_disease_deaths" vellum:value="#form/save/shocks/livestock_disease_deaths"/>
+business: <output value="/data/save/shocks/business_failure" vellum:value="#form/save/shocks/business_failure"/>
+job: <output value="/data/save/shocks/lost_job_no_salary" vellum:value="#form/save/shocks/lost_job_no_salary"/>
+assistance <output value="/data/save/shocks/end_assistance" vellum:value="#form/save/shocks/end_assistance"/>
+crop prices <output value="/data/save/shocks/fall_crop_prices" vellum:value="#form/save/shocks/fall_crop_prices"/>
+food prices <output value="/data/save/shocks/rise_food_prices" vellum:value="#form/save/shocks/rise_food_prices"/>
+hh breakup <output value="/data/save/shocks/hh_breakup" vellum:value="#form/save/shocks/hh_breakup"/>
+hh death <output value="/data/save/shocks/hh_death" vellum:value="#form/save/shocks/hh_death"/>
+illness <output value="/data/save/shocks/illness_cholera" vellum:value="#form/save/shocks/illness_cholera"/>
+theft <output value="/data/save/shocks/theft" vellum:value="#form/save/shocks/theft"/>
+fire <output value="/data/save/shocks/fire_damage" vellum:value="#form/save/shocks/fire_damage"/>
+wind <output value="/data/save/shocks/strong_wind" vellum:value="#form/save/shocks/strong_wind"/>
+drought: <output value="/data/save/shocks/drought" vellum:value="#form/save/shocks/drought"/>
+flood: <output value="/data/save/shocks/flood_water_logging" vellum:value="#form/save/shocks/flood_water_logging"/>
+crop: <output value="/data/save/shocks/crop_disease_pests" vellum:value="#form/save/shocks/crop_disease_pests"/>
+livestock: <output value="/data/save/shocks/livestock_disease_deaths" vellum:value="#form/save/shocks/livestock_disease_deaths"/>
+business: <output value="/data/save/shocks/business_failure" vellum:value="#form/save/shocks/business_failure"/>
+job: <output value="/data/save/shocks/lost_job_no_salary" vellum:value="#form/save/shocks/lost_job_no_salary"/>
+assistance <output value="/data/save/shocks/end_assistance" vellum:value="#form/save/shocks/end_assistance"/>
+crop prices <output value="/data/save/shocks/fall_crop_prices" vellum:value="#form/save/shocks/fall_crop_prices"/>
+food prices <output value="/data/save/shocks/rise_food_prices" vellum:value="#form/save/shocks/rise_food_prices"/>
+hh breakup <output value="/data/save/shocks/hh_breakup" vellum:value="#form/save/shocks/hh_breakup"/>
+hh death <output value="/data/save/shocks/hh_death" vellum:value="#form/save/shocks/hh_death"/>
+illness <output value="/data/save/shocks/illness_cholera" vellum:value="#form/save/shocks/illness_cholera"/>
+theft <output value="/data/save/shocks/theft" vellum:value="#form/save/shocks/theft"/>
+fire <output value="/data/save/shocks/fire_damage" vellum:value="#form/save/shocks/fire_damage"/>
+wind <output value="/data/save/shocks/strong_wind" vellum:value="#form/save/shocks/strong_wind"/>
+drought: <output value="/data/save/shocks/drought" vellum:value="#form/save/shocks/drought"/>
+flood: <output value="/data/save/shocks/flood_water_logging" vellum:value="#form/save/shocks/flood_water_logging"/>
+crop: <output value="/data/save/shocks/crop_disease_pests" vellum:value="#form/save/shocks/crop_disease_pests"/>
+livestock: <output value="/data/save/shocks/livestock_disease_deaths" vellum:value="#form/save/shocks/livestock_disease_deaths"/>
+business: <output value="/data/save/shocks/business_failure" vellum:value="#form/save/shocks/business_failure"/>
+job: <output value="/data/save/shocks/lost_job_no_salary" vellum:value="#form/save/shocks/lost_job_no_salary"/>
+assistance <output value="/data/save/shocks/end_assistance" vellum:value="#form/save/shocks/end_assistance"/>
+crop prices <output value="/data/save/shocks/fall_crop_prices" vellum:value="#form/save/shocks/fall_crop_prices"/>
+food prices <output value="/data/save/shocks/rise_food_prices" vellum:value="#form/save/shocks/rise_food_prices"/>
+hh breakup <output value="/data/save/shocks/hh_breakup" vellum:value="#form/save/shocks/hh_breakup"/>
+hh death <output value="/data/save/shocks/hh_death" vellum:value="#form/save/shocks/hh_death"/>
+illness <output value="/data/save/shocks/illness_cholera" vellum:value="#form/save/shocks/illness_cholera"/>
+theft <output value="/data/save/shocks/theft" vellum:value="#form/save/shocks/theft"/>
+fire <output value="/data/save/shocks/fire_damage" vellum:value="#form/save/shocks/fire_damage"/>
+wind <output value="/data/save/shocks/strong_wind" vellum:value="#form/save/shocks/strong_wind"/>
+other: <output value="/data/save/shocks/other" vellum:value="#form/save/shocks/other"/>
