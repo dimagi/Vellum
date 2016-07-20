@@ -646,7 +646,7 @@ define([
 
         if (this.opts().features.rich_text) {
             formProperties.push({
-                label: "Use Raw References",
+                label: "Use Easy References",
                 slug: "richText",
                 type: "checkbox",
                 value: function(jq, val) {
