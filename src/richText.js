@@ -243,6 +243,7 @@ define([
             editor.addCommand('createPopover', {
                 exec: options.createPopover,
                 editorFocus: false,
+                canUndo: false,
             });
         }
 

@@ -567,6 +567,17 @@ define([
                         done();
                     });
                 });
+
+                it("should not change saved state", function (done) {
+                    util.loadXML(BURPEE_XML);
+                    assert(!util.saveButtonEnabled(), "Save button should not be enabled");
+                    util.clickQuestion("total_num_burpees");
+                    widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        assert(!util.saveButtonEnabled(), "Save button should not be enabled");
+                        done();
+                    });
+                });
             });
         });
     });
