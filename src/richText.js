@@ -49,6 +49,8 @@ define([
     var CASE_REF_REGEX = /^\`?#case\//,
         FORM_REF_REGEX = /^\`?#form\//,
         REF_REGEX = /^\`?#(form|case)\//,
+        // not sure where this comes from... just grabbed from inspect element
+        CKEDITOR_WHITESPACE_CONSTANT = '​​​​​​​',
         bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
@@ -186,19 +188,21 @@ define([
                 });
             },
             insertExpression: function (xpath) {
+                var expression;
                 if (options.isExpression) {
-                    editor.insertHtml(bubbleExpression(xpath, form) + ' ');
+                    expression = bubbleExpression(xpath, form);
                 } else {
                     var attrs = {'data-output-value': true},
                         output = makeBubble(form, xpath, attrs);
-                    editor.insertHtml($('<p>').append(output).html() + ' ');
+                    expression = $('<p>').append(output).html();
                 }
+                editor.insertHtml(expression + ' ' + CKEDITOR_WHITESPACE_CONSTANT);
             },
             insertOutput: function (xpath) {
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
-                editor.insertHtml(bubbleOutputs(xpath, form) + ' ');
+                editor.insertHtml(bubbleOutputs(xpath, form) + ' ' + CKEDITOR_WHITESPACE_CONSTANT);
             },
             select: function (index) {
                 ckSelect.call(null, editor, index);
