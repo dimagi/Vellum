@@ -178,6 +178,10 @@ define([
     });
 
     function afterDynamicSelectInsert(form, mug) {
+        var children = mug.form.getChildren(mug);
+        if (children.length) {
+            return children[0];
+        }
         var sources = getDataSources(),
             newMug = form.createQuestion(mug, 'into', "Itemset", true);
         if (sources.length) {

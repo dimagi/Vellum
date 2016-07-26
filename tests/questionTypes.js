@@ -362,6 +362,8 @@ define([
                     ["Select", "MSelectDynamic"],
                     ["MSelect", "SelectDynamic"],
                     ["MSelect", "MSelectDynamic"],
+                    ["SelectDynamic", "MSelectDynamic"],
+                    ["MSelectDynamic", "SelectDynamic"],
                     ["Select", "MSelect"],
                     ["MSelect", "Select"],
                     ["Select + Choices", "MSelect"],
@@ -416,7 +418,7 @@ define([
                 from = (choices ? from.replace(" + Choices", "") : from);
                 var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to),
                     mug = addQuestion(from, nodeId);
-                if (!choices && from.indexOf("Select") > -1) {
+                if (!choices && from.indexOf("Select") > -1 && from.indexOf("Dynamic") === -1) {
                     util.deleteQuestion(nodeId + "/choice1");
                     util.deleteQuestion(nodeId + "/choice2");
                 }
@@ -501,6 +503,20 @@ define([
                         tearDown(from, to);
                     });
                 });
+            });
+
+            it("should change back and forth between dynamic types without side effects", function () {
+                var from = 'MSelectDynamic',
+                    to = 'SelectDynamic',
+                    mug = setup(from, to);
+                var original = call('createXML');
+                call("changeMugType", mug, to);
+                var afterChange = call('createXML');
+                call("changeMugType", mug, from);
+                util.assertXmlEqual(call('createXML'), original, { normalize_xmlns: true });
+                call("changeMugType", mug, to);
+                util.assertXmlEqual(call('createXML'), afterChange, { normalize_xmlns: true });
+                tearDown(from, to);
             });
         });
 
