@@ -730,7 +730,7 @@ define([
                 }
             }
             this._logicManager.updatePaths(updates);
-            this.fixBrokenReferences(mug);
+            this.fixBrokenReferences();
             // TODO make Item not a special case
             if (oldId && mug.__className !== "Choice") {
                 // update first child of old parent with matching conflicted nodeID
@@ -863,7 +863,7 @@ define([
             this.insertQuestion(mug, refMug, position, isInternal);
             // should we fix broken references when nodeID is auto-generated?
             //if (!mug.options.isControlOnly && !this.isLoadingXForm) {
-            //    this.fixBrokenReferences(mug);
+            //    this.fixBrokenReferences();
             //}
             return mug;
         },
@@ -917,7 +917,7 @@ define([
                 this.mugMap[this.normalizeHashtag(mug.hashtagPath)] = mug;
             }
         },
-        fixBrokenReferences: function (mug) {
+        fixBrokenReferences: function () {
             function updateReferences(mug) {
                 _this.updateLogicReferences(mug);
             }
