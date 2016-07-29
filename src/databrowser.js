@@ -332,9 +332,7 @@ define([
     
     function fixFormReferences(form) {
         if (form) {
-            _.each(form.getMugList(), function(mug) {
-                form.fixBrokenReferences(mug);
-            });
+            form.fixBrokenReferences();
         }
     }
 

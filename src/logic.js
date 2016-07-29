@@ -14,7 +14,8 @@ define([
             "filter",
             "defaultValue"
         ],
-        NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr');
+        NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr'),
+        CASE_REF_ID = "#case/";
 
     function LogicExpression (exprText, xpathParser) {
         this._text = exprText || "";
@@ -174,16 +175,36 @@ define([
 
         this.opts = opts;
         this.form = form;
-        this.all = [];
+        // see this._addReferences for ref structure
+        // refid is either refMug.ufid or CASE_REF_ID
+        this.forward = {};  // {mug.ufid: {property: [ref, ...], ...}, ...}
+        this.reverse = {};  // {refid: {mug.ufid: [ref, ...], ...}, ...}
         this.errors = {};
     }
 
     LogicManager.prototype = {
         clearReferences: function (mug, property) {
+            var reverse = this.reverse;
             mug.form.dropAllInstanceReferences(mug, property, true);
-            this.all = this.all.filter(function (elem) { 
-                return elem.mug !== mug.ufid || elem.property !== property;
-            });
+            if (this.forward.hasOwnProperty(mug.ufid)) {
+                if (this.forward[mug.ufid].hasOwnProperty(property)) {
+                    _.each(this.forward[mug.ufid][property], function (ref) {
+                        if (ref.ref) {
+                            // assert ref.mug === mug.ufid
+                            if (ref.mug !== mug.ufid) {
+                                throw new Error([mug, ref]);
+                            }
+                            reverse[ref.ref][ref.mug] = _.filter(
+                                reverse[ref.ref][ref.mug],
+                                function (r) { return r.property !== property; }
+                            );
+                        }
+                    });
+                }
+                this.forward[mug.ufid][property] = [];
+            } else {
+                this.forward[mug.ufid] = {};
+            }
         },
         _addReferences: function (mug, property, value) {
             var _this = this,
@@ -192,7 +213,9 @@ define([
                 unknowns = [],
                 messages = [],
                 warning = "",
-                propertyName = mug.spec[property] ? mug.spec[property].lstring : property;
+                propertyName = mug.spec[property] ? mug.spec[property].lstring : property,
+                reverse = this.reverse,
+                refs;
 
             expr.analyze();
             if (expr.referencesSelf && _.contains(NO_SELF_REFERENCES, property)) {
@@ -210,13 +233,14 @@ define([
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
-            this.all = this.all.concat(expr.absolutePaths.concat(expr.hashtags).map(function (path) {
+            refs = expr.absolutePaths.concat(expr.hashtags).map(function (path) {
                 var isHashtag = path.toHashtag().startsWith('#'),
                     pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
                     xpath = path.toHashtag(),
-                    knownHashtag = isCaseReference(pathString) && form.isValidHashtag(xpath);
+                    isCaseRef = isCaseReference(pathString),
+                    knownHashtag = isCaseRef && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
                 if ((!refMug && !knownHashtag) &&
@@ -225,17 +249,29 @@ define([
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
                     unknowns.push(xpath);
-                } else if (!refMug && isCaseReference(pathString) && !knownHashtag) {
+                } else if (!refMug && isCaseRef && !knownHashtag) {
                     unknowns.push(xpath);
                 }
-                return {
-                    mug: mug.ufid, // mug with property value referencing refMug
-                    ref: refMug ? refMug.ufid : "", // referenced Mug
-                    property: property,
-                    path: xpath, // path to refMug
-                    sourcePath: mug.hashtagPath
-                };      
-            }));
+                var refid = refMug ? refMug.ufid : (isCaseRef ? CASE_REF_ID : ""),
+                    ref = {
+                        mug: mug.ufid, // mug with property value referencing refMug
+                        ref: refid, // referenced Mug or CASE_REF_ID or ""
+                        property: property,
+                        path: xpath, // path to refMug
+                        sourcePath: mug.hashtagPath
+                    };
+                if (refid) {
+                    if (!reverse.hasOwnProperty(refid)) {
+                        reverse[refid] = {};
+                        reverse[refid][mug.ufid] = [];
+                    } else if (!reverse[refid].hasOwnProperty(mug.ufid)) {
+                        reverse[refid][mug.ufid] = [];
+                    }
+                    reverse[refid][mug.ufid].push(ref);
+                }
+                return ref;
+            });
+            this.forward[mug.ufid][property] = refs;
             _.each(expr.instanceRefs, function (ignore, id) {
                 form.referenceInstance(id, mug, property);
             });
@@ -266,6 +302,7 @@ define([
         },
         addReferences: function (mug, property, value) {
             // get absolute paths from mug property's value
+            this.clearReferences(mug, property);
             if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
                 return mug.p[property].forEachLogicExpression(_.bind(this._addReferences, this, mug, property));
             } else {
@@ -274,7 +311,6 @@ define([
         },
         updateReferences: function (mug, property, value) {
             function update(property) {
-                _this.clearReferences(mug, property);
                 messages[property] = _this.addReferences(mug, property, value);
             }
             var _this = this,
@@ -353,32 +389,39 @@ define([
          * identified by one of the given ufids
          *
          * @param ufids - a mapping (object) keyed by mug ufids.
-         *        Example: {"mug-ufid": <someValue>, ...}
+         *        Example: {"mug-ufid": <mapValue>, ...}
          * @param func - a function to be called for each expression property that
          *        references one of the mugs. The function is called with
          *        three arguments: (mug, property, mapValue)
-         *        - mug: the mug with an expression property referencing the mug
-         *          identified one of the given ufids ("mug-ufid").
+         *        - mug: the mug with an expression property referencing a mug
+         *          identified by one of the given ufids ("mug-ufid").
          *        - property: the name of the expression property.
-         *        - mapValue: the value from ufids (<someValue>).
+         *        - mapValue: the value from ufids (<mapValue>).
          * @param subtree - (optional) only visit references from nodes
          *        beginning with this path (no trailing /)
          */
         forEachReferencingProperty: function(ufids, func, subtree) {
-            var _this = this;
-            _(this.all).each(function (elem) {
-                if (ufids.hasOwnProperty(elem.ref) &&
-                    (!subtree ||
-                     elem.sourcePath === subtree ||
-                     elem.sourcePath.indexOf(subtree + '/') === 0))
-                {
-                    var mug = _this.form.getMugByUFID(elem.mug);
-                    func(mug, elem.property, ufids[elem.ref]);
+            var form = this.form,
+                reverse = this.reverse;
+            _.each(ufids, function (mapValue, ufid) {
+                if (reverse.hasOwnProperty(ufid)) {
+                    _.each(reverse[ufid], function (refs, mugUfid) {
+                        var mug = form.getMugByUFID(mugUfid);
+                        _.each(refs, function (ref) {
+                            if (!subtree ||
+                                ref.sourcePath === subtree ||
+                                ref.sourcePath.indexOf(subtree + '/') === 0)
+                            {
+                                func(mug, ref.property, mapValue);
+                            }
+                        });
+                    });
                 }
             });
         },
         reset: function () {
-            this.all = [];
+            this.forward = {};
+            this.reverse = {};
         },
         // This is to tell HQ's case summary what is referenced
         caseReferences: function () {
@@ -392,10 +435,9 @@ define([
                 }
             }, _this = this;
 
-            ret.preload = _.chain(this.all)
-                .filter(function(ref) {
-                    return isCaseReference(ref.path);
-                })
+            ret.preload = _.chain(this.reverse[CASE_REF_ID] || {})
+                .values()
+                .flatten(true)
                 .map(function(ref) {
                     var info = ref.path.split('/'),
                         prop = info[2];
@@ -408,12 +450,11 @@ define([
             return ret;
         },
         // returns object of hashtags. used for writing to xml
-        // format {hashtag: xpath} (null is used fmr cases as they will be loaded later)
+        // format {hashtag: xpath} (null is used for cases as they will be loaded later)
         referencedHashtags: function () {
-            return _.chain(this.all)
-                .filter(function(ref) {
-                    return isCaseReference(ref.path);
-                })
+            return _.chain(this.reverse[CASE_REF_ID] || {})
+                .values()
+                .flatten(true)
                 .map(function(ref) {
                     return [ref.path, null];
                 }).object().value();
