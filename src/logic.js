@@ -439,11 +439,7 @@ define([
                 .values()
                 .flatten(true)
                 .map(function(ref) {
-                    var info = ref.path.split('/'),
-                        prop = info[2];
-                    if (prop === 'case_name') {
-                        prop = 'name';
-                    }
+                    var prop = ref.path.slice(CASE_REF_ID.length);
                     return [_this.form.normalizeXPath(ref.sourcePath), prop];
                 }).object().value();
 
