@@ -7,6 +7,7 @@ define([
     'vellum/logic',
     'vellum/xpath',
     'text!tests/static/logic/test-xml-1.xml',
+    'text!tests/static/databrowser/mother-ref.xml',
 ], function (
     chai,
     $,
@@ -14,7 +15,8 @@ define([
     util,
     logic,
     xpath,
-    TEST_XML_1
+    TEST_XML_1,
+    MOTHER_REF_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -135,6 +137,16 @@ define([
                     var mug = util.addQuestion("Text", "text");
                     mug.p.calculateAttr = "/data/" + ref;
                     assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                });
+            });
+        });
+
+        describe("sends case references to HQ", function () {
+            it("should be the correct format", function() {
+                var form = util.loadXML(MOTHER_REF_XML),
+                    manager = form._logicManager;
+                assert.deepEqual(manager.caseReferences().preload, {
+                    "/data/mug":"parent/edd"
                 });
             });
         });
