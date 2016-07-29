@@ -219,6 +219,18 @@ define([
             },
         };
 
+        $('body').on('keyup', function (e) {
+            if (e.which === 9 && $(e.target).hasClass("fd-textarea")) {
+                var selection = editor.getSelection();
+                if (selection.getRanges().length) {
+                    var range = editor.createRange();
+                    range.selectNodeContents( editor.editable() );
+                    selection.selectRanges( [ range ] );
+                    console.log("highlighted everything");
+                }
+            }
+        });
+
         editor.on('focus', function (e) {
             // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
             editor.setReadOnly(false);
@@ -228,12 +240,14 @@ define([
                 editable.removeClass('placeholder');
                 editable.setHtml('');
             }
-            // highlight text
+            // set the cursor to the end of text
             var selection = editor.getSelection();
-            if (selection.getRanges().length) {
-                var range = editor.createRange();
-                range.selectNodeContents( editor.editable() );
-                selection.selectRanges( [ range ] );
+            var range = selection.getRanges()[0];
+            if (range) {
+                var pCon = range.startContainer.getAscendant({p:2},true);
+                var newRange = new CKEDITOR.dom.range(range.document);
+                newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
+                newRange.select();
             }
         });
 
