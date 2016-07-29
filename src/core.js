@@ -205,6 +205,7 @@ define([
         }
         this.$f.addClass('formdesigner');
         this.$f.empty().append(main_template({ctrl: ctrl, alt: alt}));
+
         $(document).on("keydown", function (e) {
             var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
                 metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
@@ -213,6 +214,12 @@ define([
                       (e.shiftKey ? "Shift+" : "") +
                       (metaKey ? "Meta+" : "") + e.keyCode;
             (hotkeys[key] || _.identity).call(_this, e);
+        });
+
+        $(document).on('keyup', function (e) {
+            if (e.which === 9 && $(e.target).hasClass("fd-textarea")) {
+                richText.editor($(e.target)).highlightContents();
+            }
         });
 
         this._init_toolbar();

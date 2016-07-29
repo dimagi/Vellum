@@ -185,6 +185,14 @@ define([
                     noSnapshot: true,
                 });
             },
+            highlight: function() {
+                var selection = editor.getSelection();
+                if (selection.getRanges().length) {
+                    var range = editor.createRange();
+                    range.selectNodeContents( editor.editable() );
+                    selection.selectRanges( [ range ] );
+                }
+            },
             insertExpression: function (xpath) {
                 if (options.isExpression) {
                     editor.insertHtml(bubbleExpression(xpath, form) + ' ');
@@ -218,18 +226,6 @@ define([
                 }
             },
         };
-
-        $('body').on('keyup', function (e) {
-            if (e.which === 9 && $(e.target).hasClass("fd-textarea")) {
-                var selection = editor.getSelection();
-                if (selection.getRanges().length) {
-                    var range = editor.createRange();
-                    range.selectNodeContents( editor.editable() );
-                    selection.selectRanges( [ range ] );
-                    console.log("highlighted everything");
-                }
-            }
-        });
 
         editor.on('focus', function (e) {
             // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
