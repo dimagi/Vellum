@@ -218,7 +218,7 @@ define([
 
         $(document).on('keyup', function (e) {
             if (e.which === 9 && $(e.target).hasClass("fd-textarea")) {
-                richText.editor($(e.target)).highlightContents();
+                richText.editor($(e.target)).highlight();
             }
         });
 
