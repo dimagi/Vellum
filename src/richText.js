@@ -228,14 +228,12 @@ define([
                 editable.removeClass('placeholder');
                 editable.setHtml('');
             }
-            // set the cursor to the end of text
+            // highlight text
             var selection = editor.getSelection();
-            var range = selection.getRanges()[0];
-            if (range) {
-                var pCon = range.startContainer.getAscendant({p:2},true);
-                var newRange = new CKEDITOR.dom.range(range.document);
-                newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-                newRange.select();
+            if (selection.getRanges().length) {
+                var range = editor.createRange();
+                range.selectNodeContents( editor.editable() );
+                selection.selectRanges( [ range ] );
             }
         });
 
