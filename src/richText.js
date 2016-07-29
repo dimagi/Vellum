@@ -241,9 +241,11 @@ define([
             var range = selection.getRanges()[0];
             if (range) {
                 var pCon = range.startContainer.getAscendant({p:2},true);
-                var newRange = new CKEDITOR.dom.range(range.document);
-                newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-                newRange.select();
+                if (pCon) {
+                    var newRange = new CKEDITOR.dom.range(range.document);
+                    newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
+                    newRange.select();
+                }
             }
         });
 
