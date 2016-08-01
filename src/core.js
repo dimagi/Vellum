@@ -205,6 +205,8 @@ define([
         }
         this.$f.addClass('formdesigner');
         this.$f.empty().append(main_template({ctrl: ctrl, alt: alt}));
+
+        // Global keyboard shortcuts
         $(document).on("keydown", function (e) {
             var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
                 metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
@@ -213,6 +215,16 @@ define([
                       (e.shiftKey ? "Shift+" : "") +
                       (metaKey ? "Meta+" : "") + e.keyCode;
             (hotkeys[key] || _.identity).call(_this, e);
+        });
+
+        // Highlight contents of rich text inputs when tabbing in
+        $(document).on('keyup', function (e) {
+            if (e.which === 9) {
+                var $target = $(e.target);
+                if ($target.hasClass("fd-input") || $target.hasClass("fd-textarea")) {
+                    richText.editor($(e.target)).highlight();
+                }
+            }
         });
 
         this._init_toolbar();
