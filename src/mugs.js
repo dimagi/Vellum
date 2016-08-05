@@ -288,7 +288,7 @@ define([
          * Gets a default label, auto-generating if necessary
          */
         getDefaultLabelValue: function () {
-            return this.p.label || "";
+            return this.p.label || (this.__className === "Choice" ? this.p.nodeID : "");
         },
 
         /*
