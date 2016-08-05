@@ -188,7 +188,7 @@ define([
                     widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () { 
                     editor.on('change', function() {
-                        assert.equal(mug.p.labelItext.get(), 'question1<output value="#case/dob" />');
+                        assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" />');
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_XML,
@@ -424,7 +424,7 @@ define([
                 assert.equal(text.length, 1);
                 util.findNode(dataTree, "dob").data.handleDrop(text);
                 assert.equal(mug.p.labelItext.get(),
-                             "<output value=\"instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob\" />question1");
+                             "<output value=\"instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob\" />");
                 assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                 assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
             });
