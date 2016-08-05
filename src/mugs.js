@@ -1464,6 +1464,22 @@ define([
                     return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
             },
+            labelItext: {
+                presence: 'required',
+                validationFunc: function(mug) {
+                    var languages = mug.p.labelItext.itextModel.languages;
+                    if (_.find(languages, function(lang) {
+                        return !mug.p.labelItext.get('default', lang);
+                    })) {
+                        if (languages.length === 1) {
+                            return "Label is required.";
+                        } else {
+                            return "Label is required for all languages.";
+                        }
+                    }
+                    return "pass";
+                },
+            },
             conflictedNodeId: { presence: 'notallowed' },
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
@@ -1506,8 +1522,8 @@ define([
         },
         afterInsert: function (form, mug) {
             var choice = "Choice";
-            form.createQuestion(mug, 'into', choice, true);
-            form.createQuestion(mug, 'into', choice, true);
+            form.createQuestion(mug, 'into', choice, true).validate();
+            form.createQuestion(mug, 'into', choice, true).validate();
         },
         spec: {
             appearance: {
