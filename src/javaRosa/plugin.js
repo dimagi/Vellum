@@ -567,9 +567,26 @@ define([
             function itextValidator(property, name) {
                 return function (mug) {
                     var itext = mug.p[property],
-                        hasItext = itext && itext.hasHumanReadableItext();
+                        hasItext = false,
+                        languages = itext.itextModel.languages;
+                    if (itext) {
+                        _.each(['default', 'long', 'short'], function(form) {
+                            if (itext.hasForm(form)) {
+                                hasItext = true;
+                                if (_.find(languages, function(lang) {
+                                    return !itext.get('default', lang);
+                                })) {
+                                    hasItext = false;
+                                }
+                            }
+                        });
+                    }
                     if (!hasItext && mug.getPresence(property) === 'required') {
-                        return name + ' is required';
+                        if (languages.length === 1) {
+                            return name + " is required.";
+                        } else {
+                            return name + " is required for all languages.";
+                        }
                     }
                     if (itext && !itext.autoId && !itext.isEmpty()) {
                         // Itext ID validation

@@ -131,11 +131,6 @@ define([
             }
             return true;
         },
-        hasHumanReadableItext: function() {
-            return Boolean(this.hasForm('default') || 
-                           this.hasForm('long')    || 
-                           this.hasForm('short'));
-        },
         forEachLogicExpression: function (fn) {
             var forms = this.getForms(),
                 ret = _.map(forms, function(form) {

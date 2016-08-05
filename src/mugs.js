@@ -1464,22 +1464,7 @@ define([
                     return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
             },
-            labelItext: {
-                presence: 'required',
-                validationFunc: function(mug) {
-                    var languages = mug.p.labelItext.itextModel.languages;
-                    if (_.find(languages, function(lang) {
-                        return !mug.p.labelItext.get('default', lang);
-                    })) {
-                        if (languages.length === 1) {
-                            return "Label is required.";
-                        } else {
-                            return "Label is required for all languages.";
-                        }
-                    }
-                    return "pass";
-                },
-            },
+            labelItext: { presence: 'required' },
             conflictedNodeId: { presence: 'notallowed' },
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
