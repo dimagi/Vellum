@@ -103,6 +103,7 @@ define([
         }
     });
 
+
     CKEDITOR.config.allowedContent = true;
     CKEDITOR.config.customConfig = '';
     CKEDITOR.config.title = false;
@@ -149,6 +150,7 @@ define([
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
+                placeholder: options.placeholder,
             }).editor;
         wrapper = {
             getValue: function (callback) {
