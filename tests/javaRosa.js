@@ -900,6 +900,22 @@ define([
                 mug.dropMessage(property, "core-circular-reference-warning");
                 assert.deepEqual(mug.messages.get(property), []);
         });
+
+        it("should show a validation error for choices without labels", function() {
+            util.loadXML("");
+            var select = util.addQuestion("Select", "question1"),
+                item = select.form.getChildren(select)[0];
+            util.clickQuestion("question1/choice1");
+
+            var messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+
+            $("[name='itext-en-label']").val('').change();
+
+            messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 1);
+            assert(messages[0].match(/required/i));
+        });
     });
 
     describe("The javaRosa markdown detector", function() {
