@@ -103,7 +103,6 @@ define([
         }
     });
 
-
     CKEDITOR.config.allowedContent = true;
     CKEDITOR.config.customConfig = '';
     CKEDITOR.config.title = false;
