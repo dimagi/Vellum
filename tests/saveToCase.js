@@ -108,27 +108,84 @@ define([
             util.assertXmlEqual(call("createXML"), ATTACHMENT_PROPERTY_XML);
         });
 
-        _.each({
-            "inline attachments": {
-                inline_prop: {
-                    calculate: "/data/question1",
-                    from: "inline",
+        describe("should not allow", function () {
+            var mug, spec;
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        onReady: function() {
+                            mug = util.addQuestion("SaveToCase", "mug");
+                            spec = mug.spec.attachmentProperty;
+                            done();
+                        }
+                    },
+                });
+            });
+
+            _.each({
+                "inline attachments with no name": {
+                    inline_prop: {
+                        calculate: "/data/question1",
+                        from: "inline",
+                    }
+                },
+                "invalid from strings": {
+                    from_strings: {
+                        calculate: "/data/question1",
+                        from: "blah"
+                    }
+                },
+            }, function(v, k) {
+                it("should validate " + k, function() {
+                    mug.p.useAttachment = true;
+                    mug.p.attachmentProperty = v;
+                    assert.notEqual(spec.validationFunc(mug), "pass");
+                });
+            });
+        });
+
+        describe("should allow", function() {
+            var mug, spec;
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        onReady: function() {
+                            mug = util.addQuestion("SaveToCase", "mug");
+                            spec = mug.spec.attachmentProperty;
+                            done();
+                        }
+                    },
+                });
+            });
+
+            _.each({
+                "inline attachments": {
+                    inline_prop: {
+                        calculate: "/data/question1",
+                        from: "inline",
+                        name: "test",
+                    }
+                },
+                "from strings": {
+                    from_strings: {
+                        calculate: "/data/question1",
+                        from: "local"
+                    }
+                },
+                "hyphenated properties": {
+                    "hyphen-props": {
+                        calculate: "/data/question1",
+                        from: "local"
+                    }
                 }
-            },
-            "from strings": {
-                from_strings: {
-                    calculate: "/data/question1",
-                    from: "blah"
-                }
-            }
-        }, function(v, k) {
-            it("should validate " + k, function() {
-                util.loadXML("");
-                var save = util.addQuestion("SaveToCase", "save"),
-                    spec = save.spec.attachmentProperty;
-                save.p.useAttachment = true;
-                save.p.attachmentProperty = v;
-                assert.notEqual(spec.validationFunc(save), "pass");
+            }, function(v, k) {
+                it("should validate " + k, function() {
+                    mug.p.useAttachment = true;
+                    mug.p.attachmentProperty = v;
+                    assert.equal(spec.validationFunc(mug), "pass");
+                });
             });
         });
 
