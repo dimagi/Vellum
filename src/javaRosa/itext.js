@@ -132,19 +132,12 @@ define([
             return true;
         },
         hasHumanReadableItext: function() {
-            var self = this,
-                exists = false;
-            _.each(['default', 'long', 'short'], function(form) {
-                if (self.hasForm(form)) {
-                    exists = true;
-                    if (_.find(self.itextModel.languages, function(lang) {
-                            return !self.get('default', lang);
-                    })) {
-                        exists = false;
-                    }
-                }
+            var self = this;
+            return _.some(['default', 'long', 'short'], function(form) {
+                return self.hasForm(form) && _.every(self.itextModel.languages, function(lang) {
+                    return self.get(form, lang);
+                });
             });
-            return exists;
         },
         forEachLogicExpression: function (fn) {
             var forms = this.getForms(),
