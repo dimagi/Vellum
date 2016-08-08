@@ -131,6 +131,21 @@ define([
             }
             return true;
         },
+        hasHumanReadableItext: function() {
+            var self = this,
+                exists = false;
+            _.each(['default', 'long', 'short'], function(form) {
+                if (self.hasForm(form)) {
+                    exists = true;
+                    if (_.find(self.itextModel.languages, function(lang) {
+                            return !self.get('default', lang);
+                    })) {
+                        exists = false;
+                    }
+                }
+            });
+            return exists;
+        },
         forEachLogicExpression: function (fn) {
             var forms = this.getForms(),
                 ret = _.map(forms, function(form) {

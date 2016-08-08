@@ -567,22 +567,9 @@ define([
             function itextValidator(property, name) {
                 return function (mug) {
                     var itext = mug.p[property],
-                        hasItext = false,
-                        languages = itext.itextModel.languages;
-                    if (itext) {
-                        _.each(['default', 'long', 'short'], function(form) {
-                            if (itext.hasForm(form)) {
-                                hasItext = true;
-                                if (_.find(languages, function(lang) {
-                                    return !itext.get('default', lang);
-                                })) {
-                                    hasItext = false;
-                                }
-                            }
-                        });
-                    }
+                        hasItext = itext && itext.hasHumanReadableItext();
                     if (!hasItext && mug.getPresence(property) === 'required') {
-                        if (languages.length === 1) {
+                        if (itext.itextModel.languages.length === 1) {
                             return name + " is required.";
                         } else {
                             return name + " is required for all languages.";
