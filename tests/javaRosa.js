@@ -4,6 +4,7 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
+    'vellum/javaRosa/itext',
     'vellum/javaRosa/util',
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
@@ -31,6 +32,7 @@ define([
     $,
     _,
     util,
+    jrItext,
     jr,
     vellumUtil,
     OUTPUTREF_GROUP_RENAME_XML,
@@ -750,6 +752,22 @@ define([
             });
         });
         var mug;
+
+        it ("should detect whether or not readable itext labels are present", function() {
+            var model = new jrItext.model(),
+                item = new jrItext.item({
+                    itextModel: model,
+                });
+            assert(!item.hasHumanReadableItext(), "No recognized forms");
+            item.addForm('short');
+            assert(item.hasHumanReadableItext(), "Recognized form");
+            model.addLanguage('en');
+            assert(!item.hasHumanReadableItext(), "No English text");
+            item.getForm('short').setValue('en', 'thing');
+            assert(item.hasHumanReadableItext(), "Has English text");
+            model.addLanguage('hin');
+            assert(!item.hasHumanReadableItext(), "No Hindi text");
+        });
 
         function testItextIdValidation(property) {
             it("should not display " + property + " validation error for autoId itext", function() {
