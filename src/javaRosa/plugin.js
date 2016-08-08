@@ -569,7 +569,11 @@ define([
                     var itext = mug.p[property],
                         hasItext = itext && itext.hasHumanReadableItext();
                     if (!hasItext && mug.getPresence(property) === 'required') {
-                        return name + ' is required';
+                        if (itext.itextModel.languages.length === 1) {
+                            return name + " is required.";
+                        } else {
+                            return name + " is required for all languages.";
+                        }
                     }
                     if (itext && !itext.autoId && !itext.isEmpty()) {
                         // Itext ID validation

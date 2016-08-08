@@ -1464,6 +1464,7 @@ define([
                     return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
             },
+            labelItext: { presence: 'required' },
             conflictedNodeId: { presence: 'notallowed' },
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
@@ -1506,8 +1507,8 @@ define([
         },
         afterInsert: function (form, mug) {
             var choice = "Choice";
-            form.createQuestion(mug, 'into', choice, true);
-            form.createQuestion(mug, 'into', choice, true);
+            form.createQuestion(mug, 'into', choice, true).validate();
+            form.createQuestion(mug, 'into', choice, true).validate();
         },
         spec: {
             appearance: {
