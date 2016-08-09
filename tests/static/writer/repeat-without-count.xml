@@ -10,22 +10,13 @@
 			</instance>
 			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="group-label">
-						<value>group</value>
-					</text>
-				</translation>
-				<translation lang="hin">
-					<text id="group-label">
-						<value>group</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
+				<translation lang="hin"/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('group-label')" />
 			<repeat vellum:nodeset="#form/group" nodeset="/data/group" />
 		</group>
 	</h:body>

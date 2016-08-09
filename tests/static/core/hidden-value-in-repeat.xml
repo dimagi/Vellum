@@ -15,32 +15,15 @@
 			<bind nodeset="/data/repeat/text" type="xsd:string" />
 			<bind nodeset="/data/repeat/hidden" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="repeat-label">
-						<value>repeat</value>
-					</text>
-					<text id="repeat/text-label">
-						<value>text</value>
-					</text>
-				</translation>
-				<translation lang="hin">
-					<text id="repeat-label">
-						<value>repeat</value>
-					</text>
-					<text id="repeat/text-label">
-						<value>text</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
+				<translation lang="hin"/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('repeat-label')" />
 			<repeat nodeset="/data/repeat">
-				<input ref="/data/repeat/text">
-					<label ref="jr:itext('repeat/text-label')" />
-				</input>
+				<input ref="/data/repeat/text"/>
 			</repeat>
 		</group>
 	</h:body>

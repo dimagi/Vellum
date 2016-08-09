@@ -23,17 +23,11 @@
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@dest" value="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
 			<setvalue event="xforms-ready" ref="/data/transfer[@type='trans-1']/@date" value="now()" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="amount_received-label">
-						<value>amount_received</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/amount_received" ref="/data/amount_received">
-			<label ref="jr:itext('amount_received-label')" />
-		</input>
+		<input vellum:ref="#form/amount_received" ref="/data/amount_received"/>
 	</h:body>
 </h:html>

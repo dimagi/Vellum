@@ -10,17 +10,12 @@
 			</instance>
 			<bind vellum:nodeset="#form/product" nodeset="/data/product" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="product-label">
-						<value>product</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('product-label')" />
 			<repeat vellum:nodeset="#form/product" nodeset="/data/product" />
 		</group>
 	</h:body>

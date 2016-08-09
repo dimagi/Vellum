@@ -13,23 +13,13 @@
 			<bind vellum:nodeset="#form/state" nodeset="/data/state" type="xsd:string" />
 			<bind vellum:nodeset="#form/district" nodeset="/data/district" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="state-label">
-						<value>state</value>
-					</text>
-					<text id="district-label">
-						<value>district</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/state" ref="/data/state">
-			<label ref="jr:itext('state-label')" />
-		</input>
+		<input vellum:ref="#form/state" ref="/data/state"/>
 		<select1 vellum:ref="#form/district" ref="/data/district">
-			<label ref="jr:itext('district-label')" />
 			<itemset vellum:nodeset="instance('some-fixture')/some-fixture_list/some-fixture[name = #form/state]" nodeset="instance('some-fixture')/some-fixture_list/some-fixture[name = /data/state]">
 				<label ref="name" />
 				<value ref="@id" />
