@@ -233,8 +233,8 @@ define([
                         widget = util.getWidget('itext-hin-label');
                     widget.input.promise.then(function () { 
                         editor.on('change', function() {
-                            assert.equal(mug.p.labelItext.get(), 'mug');
-                            assert.equal(mug.p.labelItext.get(null, 'hin'), 'mug<output value="#case/dob" />');
+                            assert.equal(mug.p.labelItext.get(), '');
+                            assert.equal(mug.p.labelItext.get(null, 'hin'), '<output value="#case/dob" />');
                             assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                             assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                             util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
