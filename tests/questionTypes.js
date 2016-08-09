@@ -627,6 +627,14 @@ define([
     });
 
     describe("Select questions", function () {
+        before(function (done) {
+            util.init({
+                core: {
+                    onReady: done,
+                },
+            });
+        });
+
         it("should not write the type", function () {
             util.loadXML(SELECT1_HELP_WITH_TYPE_XML);
             util.assertXmlEqual(util.call('createXML'), SELECT1_HELP_XML);
