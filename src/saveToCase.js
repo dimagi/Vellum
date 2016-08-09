@@ -631,6 +631,9 @@ define([
             _.each(values, function(value) {
                 if (caseIdRegex.test(value.ref)) {
                     mug.p.case_id = value.value;
+                    mug.form.dropSetValues(function(inner) {
+                        return value.value === inner.value;
+                    });
                 }
             });
         },
