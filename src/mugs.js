@@ -1515,6 +1515,7 @@ define([
                 deleteOnCopy: false,
             }
         },
+        dataType: "",
     });
 
     var MSelect = util.extend(BaseSelect, {

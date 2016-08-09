@@ -4,14 +4,18 @@ define([
     'underscore',
     'tests/utils',
     'text!static/all_question_types.xml',
-    'text!static/questionTypes/image-capture.xml'
+    'text!static/questionTypes/image-capture.xml',
+    'text!static/javaRosa/select1-help.xml',
+    'text!static/questionTypes/select1-help-with-type.xml',
 ], function (
     chai,
     $,
     _,
     util,
     TEST_XML,
-    IMAGE_CAPTURE_XML
+    IMAGE_CAPTURE_XML,
+    SELECT1_HELP_XML,
+    SELECT1_HELP_WITH_TYPE_XML
 ) {
     var call = util.call,
         clickQuestion = util.clickQuestion,
@@ -619,6 +623,13 @@ define([
             util.loadXML(IMAGE_CAPTURE_XML);
             var image = call("getMugByPath", "/data/image");
             assert.strictEqual(image.p.imageSize, '');
+        });
+    });
+
+    describe("Select questions", function () {
+        it("should not write the type", function () {
+            util.loadXML(SELECT1_HELP_WITH_TYPE_XML);
+            util.assertXmlEqual(util.call('createXML'), SELECT1_HELP_XML);
         });
     });
 });
