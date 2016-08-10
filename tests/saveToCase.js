@@ -222,5 +222,12 @@ define([
                 calculate: 'uuid()'
             });
         });
+
+        it("should remove case_id setvalue when removing create property", function () {
+            util.loadXML(CREATE_PROPERTY_XML);
+            util.deleteQuestion('/data/save_to_case');
+            var deletedXML = call("createXML");
+            assert.equal($(deletedXML).find('setvalue').length, 0);
+        });
     });
 });
