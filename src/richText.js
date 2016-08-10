@@ -49,6 +49,8 @@ define([
     var CASE_REF_REGEX = /^\`?#case\//,
         FORM_REF_REGEX = /^\`?#form\//,
         REF_REGEX = /^\`?#(form|case)\//,
+        // http://stackoverflow.com/a/16459606/10840
+        isWebkit = 'WebkitAppearance' in document.documentElement.style,
         bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
@@ -132,6 +134,14 @@ define([
      *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
+        var TRAILING_SPACE = " ";
+        if (isWebkit) {
+            // HACK use ZWS to fix cursor movement/hiding near bubble
+            TRAILING_SPACE = "\u200b ";
+        }
+        function insertHtmlWithSpace(content) {
+            editor.insertHtml(content + TRAILING_SPACE);
+        }
         var wrapper = input.data("ckwrapper");
         if (wrapper) {
             return wrapper;
@@ -188,18 +198,18 @@ define([
             },
             insertExpression: function (xpath) {
                 if (options.isExpression) {
-                    editor.insertHtml(bubbleExpression(xpath, form) + ' ');
+                    insertHtmlWithSpace(bubbleExpression(xpath, form));
                 } else {
                     var attrs = {'data-output-value': true},
                         output = makeBubble(form, xpath, attrs);
-                    editor.insertHtml($('<p>').append(output).html() + ' ');
+                    insertHtmlWithSpace($('<p>').append(output).html());
                 }
             },
             insertOutput: function (xpath) {
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
-                editor.insertHtml(bubbleOutputs(xpath, form) + ' ');
+                insertHtmlWithSpace(bubbleOutputs(xpath, form));
             },
             select: function (index) {
                 ckSelect.call(null, editor, index);
@@ -522,7 +532,7 @@ define([
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
-                   .replace(/(&nbsp;|\xa0)/ig, " ")
+                   .replace(/(&nbsp;|\xa0|\u200b | \u200b|\u200b)/ig, " ")
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }
