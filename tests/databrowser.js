@@ -187,14 +187,14 @@ define([
                     editor = label.ckeditor().editor,
                     widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () { 
-                    editor.on('change', function() {
+                    editor.on('change', _.debounce(function() {
                         assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" />');
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_XML,
                                             {normalize_xmlns: true});
                         done();
-                    });
+                    }, 20));
                     assert.equal(getInstanceId(mug.form, sessionUri), null);
                     assert.equal(getInstanceId(mug.form, casedbUri), null);
                     assert.equal(label.length, 1);
@@ -232,7 +232,7 @@ define([
                         editor = label.ckeditor().editor,
                         widget = util.getWidget('itext-hin-label');
                     widget.input.promise.then(function () { 
-                        editor.on('change', function() {
+                        editor.on('change', _.debounce(function() {
                             assert.equal(mug.p.labelItext.get(), '');
                             assert.equal(mug.p.labelItext.get(null, 'hin'), '<output value="#case/dob" />');
                             assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
@@ -240,7 +240,7 @@ define([
                             util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
                                                 {normalize_xmlns: true});
                             done();
-                        });
+                        }, 20));
                         assert.equal(getInstanceId(mug.form, sessionUri), null);
                         assert.equal(getInstanceId(mug.form, casedbUri), null);
                         assert.equal(label.length, 1);
