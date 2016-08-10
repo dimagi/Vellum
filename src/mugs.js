@@ -288,13 +288,7 @@ define([
          * Gets a default label, auto-generating if necessary
          */
         getDefaultLabelValue: function () {
-            var label = this.p.label,
-                nodeID = this.p.nodeID;
-            if (label) {
-                return label;
-            } else if (nodeID) {
-                return nodeID;
-            }
+            return this.p.label || (this.__className === "Choice" ? this.p.nodeID : "");
         },
 
         /*

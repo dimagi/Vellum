@@ -803,6 +803,7 @@ define([
                         displayName: "Label"
                     }));
                 },
+                widgetPlaceholder: "Display Text",
                 validationFunc: itextValidator("labelItext", "Label")
             });
             // virtual property used to define a widget

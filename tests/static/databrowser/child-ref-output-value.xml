@@ -14,7 +14,7 @@
 			<itext>
 				<translation lang="en" default="">
 					<text id="mug-label">
-						<value>question1<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" vellum:value="#case/dob" /></value>
+						<value><output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" vellum:value="#case/dob" /></value>
 					</text>
 				</translation>
 			</itext>

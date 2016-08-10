@@ -13,32 +13,15 @@
 			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
 			<bind vellum:nodeset="#form/group/question2" nodeset="/data/group/question2" type="xsd:string" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="group-label">
-						<value>group</value>
-					</text>
-					<text id="group/question2-label">
-						<value>question2</value>
-					</text>
-				</translation>
-				<translation lang="hin">
-					<text id="group-label">
-						<value>group</value>
-					</text>
-					<text id="group/question2-label">
-						<value>question2</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
+				<translation lang="hin"/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('group-label')" />
 			<repeat vellum:nodeset="#form/group" nodeset="/data/group" jr:count="3" jr:noAddRemove="false()">
-				<input vellum:ref="#form/group/question2" ref="/data/group/question2">
-					<label ref="jr:itext('group/question2-label')" />
-				</input>
+				<input vellum:ref="#form/group/question2" ref="/data/group/question2"/>
 			</repeat>
 		</group>
 	</h:body>

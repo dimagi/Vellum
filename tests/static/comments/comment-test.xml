@@ -10,17 +10,11 @@
 			</instance>
 			<bind vellum:nodeset="#form/mug" nodeset="/data/mug" type="xsd:string" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="mug-label">
-						<value>mug</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/mug" ref="/data/mug">
-			<label ref="jr:itext('mug-label')" />
-		</input>
+		<input vellum:ref="#form/mug" ref="/data/mug"/>
 	</h:body>
 </h:html>
