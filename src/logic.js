@@ -12,7 +12,13 @@ define([
             "dataParent",
             "repeat_count",
             "filter",
-            "defaultValue"
+            "defaultValue",
+        ],
+        LABEL_REFERENCES = [
+            "helpItext",
+            "constraintMsgItext",
+            "labelItext",
+            "hintItext",
         ],
         NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr'),
         CASE_REF_ID = "#case/";
@@ -319,6 +325,7 @@ define([
                 update(property);
             } else {
                 _.each(XPATH_REFERENCES, update);
+                _.each(LABEL_REFERENCES, update);
             }
             mug.addMessages(messages);
         },

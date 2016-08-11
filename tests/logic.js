@@ -51,6 +51,18 @@ define([
             assert(util.isTreeNodeValid(repeat), "repeat should be valid");
         });
 
+        it("should remove references for labels after removal", function () {
+            var form = util.loadXML(""),
+                logicManager = form._logicManager,
+                text;
+            util.addQuestion('Text', 'mug');
+            text = util.addQuestion('Text', 'text');
+            $('[name=itext-en-label]').val('<output value="/data/mug" />').change();
+            assert.equal(logicManager.forward[text.ufid].labelItext.length, 1);
+            util.deleteQuestion('/data/text');
+            assert.equal(logicManager.forward[text.ufid].labelItext.length, 0);
+        });
+
         describe("should add validation error for", function () {
             var properties = [
                     "relevantAttr",
