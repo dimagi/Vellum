@@ -413,8 +413,8 @@ define([
             _.each([
                 ["one two", 3, "one/data/text two"],
                 ["one two", 4, "one /data/text two"],
-                ["one\n\ntwo", 3, "one/data/text\n\ntwo"],
-                ["one\n\ntwo", 4, "one\n/data/text\ntwo"],
+                ["one\n\ntwo", 3, "one/data/text \n\ntwo"],
+                ["one\n\ntwo", 4, "one\n/data/text \ntwo"],
                 /* TODO make these tests pass
                 ["one\n\ntwo", 5, "one\n\n/data/text two"],
                 ["11\n\n22\n\n33", 5, "11\n\n2/data/text 2\n\n33"],
