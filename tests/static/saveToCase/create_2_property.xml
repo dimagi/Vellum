@@ -38,7 +38,7 @@
 			<bind nodeset="/data/create2/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/create2/case/@user_id" calculate="/data/meta/userID" />
 			<setvalue event="xforms-ready" ref="/data/create1/case/@case_id" value="1" />
-			<setvalue event="xforms-ready" ref="/data/create2/case/@case_id" value="2" />
+			<setvalue event="xforms-ready" ref="/data/create2/case/@case_id" value="1" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">

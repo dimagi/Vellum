@@ -194,7 +194,7 @@ define([
             var create1 = util.getMug("create1"),
                 create2 = util.getMug("create2");
             assert.equal(create1.p.case_id, "1");
-            assert.equal(create2.p.case_id, "2");
+            assert.equal(create2.p.case_id, "1");
             util.assertXmlEqual(call("createXML"), CREATE_2_PROPERTY_XML);
         });
 
