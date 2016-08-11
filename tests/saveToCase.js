@@ -66,7 +66,10 @@ define([
                 name: {
                     relevant: "/data/name != ''",
                     calculate: "/data/name"
-                }
+                },
+                "dash-dash": {
+                    calculate: "'-'",
+                },
             }));
             assert.equal(update.p.date_modified, '/data/meta/timeEnd');
             assert.equal(update.p.user_id, "/data/meta/userID");

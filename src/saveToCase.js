@@ -658,7 +658,7 @@ define([
         parseBindElement: function (form, el, path) {
             var mug = form.getMugByPath(path);
             if (!mug) {
-                var casePathRegex = /\/case\/(?:(create|update|index)\/(\w+)|(close|@date_modified|@user_id|@case_id))$/,
+                var casePathRegex = /\/case\/(?:(create|update|index)\/([\w-]+)|(close|@date_modified|@user_id|@case_id))$/,
                     matchRet = path.match(casePathRegex),
                     basePath;
                 if (matchRet && matchRet.length > 0) {
