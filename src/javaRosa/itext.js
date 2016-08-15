@@ -1,12 +1,14 @@
 define([
     'underscore',
     'jquery',
+    'vellum/javaRosa/util',
     'vellum/util',
     'vellum/xml',
     'vellum/core'
 ], function (
     _,
     $,
+    jrUtil,
     util,
     xml
 ) {
@@ -133,7 +135,7 @@ define([
         },
         hasHumanReadableItext: function() {
             var self = this;
-            return _.some(['default', 'long', 'short'], function(form) {
+            return _.some(['default', 'long', 'short'].concat(jrUtil.SUPPORTED_MEDIA_TYPES), function(form) {
                 return self.hasForm(form) && _.every(self.itextModel.languages, function(lang) {
                     return self.get(form, lang);
                 });
