@@ -34,8 +34,8 @@ define([
                 ["`🍠", "`🍠", "`🍠"], // u1f360 conflicts with ` (u0060)
                 ["`#case/type/prop` = `", "#case/type/prop = `",  "prop = `"],
                 ["`#case/type/prop` = ``", "#case/type/prop = `", "prop = `"],
-                ["`#case/type/``prop` = ``", "#case/type/`prop = `", "`prop = `"],
-                ["``#case/type/``prop` = ``", "`#case/type/`prop` = `", "`#case/type/`prop` = `"],
+                ["`#case/prop1``#case/prop2` = ``", "#case/prop1#case/prop2 = `", "prop1prop2 = `"],
+                ["``#case/type/``prop` = ``", "`#case/type/`prop = `", "`#case/type/`prop = `"],
             ];
 
             testCases.forEach(function (testCase) {
