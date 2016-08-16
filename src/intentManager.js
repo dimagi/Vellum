@@ -81,14 +81,18 @@ define([
         return store;
     };
 
-    var writeInnerTagXML = function(xmlWriter, innerTag, store) {
+    var writeInnerTagXML = function(xmlWriter, innerTag, store, mug) {
         if (store) {
             _.each(store, function (ref, key) {
                 if (key) {
                     _.each(_.isArray(ref) ? ref : [ref], function (ref) {
                         xmlWriter.writeStartElement(innerTag);
                         xmlWriter.writeAttributeString("key", key);
-                        xmlWriter.writeAttributeString("ref", ref);
+                        if (mug) {
+                            util.writeHashtags(xmlWriter, "ref", ref, mug);
+                        } else {
+                            xmlWriter.writeAttributeString("ref", ref);
+                        }
                         xmlWriter.writeEndElement();
                     });
                 }
@@ -96,7 +100,7 @@ define([
         }
     };
 
-    function writeXML(xmlWriter, properties) {
+    function writeXML(xmlWriter, properties, mug) {
         var intentTemplate = findIntentTemplate(properties.androidIntentAppId);
         xmlWriter.writeStartElement('odkx:intent');
         xmlWriter.writeAttributeString("xmlns:odkx", properties.intentXmlns);
@@ -108,13 +112,13 @@ define([
         _.each(properties.unknownAttributes, function (value, name) {
             xmlWriter.writeAttributeString(name, value);
         });
-        writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra);
+        writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra, mug);
         if (properties.docTemplate) {
             writeInnerTagXML(xmlWriter, 'extra', {
                 'cc:print_template_reference': "'" + properties.docTemplate + "'"
             });
         }
-        writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse);
+        writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse, mug);
         xmlWriter.writeEndElement('odkx:intent');
     }
 
@@ -187,7 +191,7 @@ define([
         tree.treeMap(function(node) {
             var mug = node.getValue();
             if (mug && mug.options.dataType === 'intent') {
-                writeXML(xmlWriter, mug.p);
+                writeXML(xmlWriter, mug.p, mug);
             }
         });
     }

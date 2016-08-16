@@ -18,18 +18,12 @@
 			<setvalue event="jr-insert" ref="/data/product/item/@index" value="int(/data/product/@current_index)" />
 			<setvalue event="jr-insert" ref="/data/product/item/@id" value="selected-at(/data/product/@ids, ../@index)" />
 			<itext>
-				<translation lang="en" default="">
-					<text id="product/item-label">
-						<!--output value="instance('products')/products/product[position()=current()/@index]/name"/-->
-						<value>product</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""/>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<label ref="jr:itext('product/item-label')" />
 			<repeat vellum:nodeset="#form/product/item" nodeset="/data/product/item" jr:count="/data/product/@count" jr:noAddRemove="true()" />
 		</group>
 	</h:body>

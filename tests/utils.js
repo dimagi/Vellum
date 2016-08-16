@@ -417,9 +417,6 @@ define([
         assertXmlNotEqual: assertXmlNotEqual,
         assertJSTreeState: assertJSTreeState,
         assertTreeState: assertTreeState,
-        xmlines: function(xml) {
-            return xml.replace(/>(\s\s+)</g, ">\n$1<");
-        },
         addQuestion: function (qType, nodeId, attrs) {
             attrs = attrs || {};
             if (this.prevId) {
@@ -430,7 +427,7 @@ define([
                 assert(_.isUndefined(attrs.nodeID),
                        "unexpected attribute for " + qType + "[" + nodeId + "]");
                 if (mug.p.labelItext) {
-                    mug.p.labelItext.set(nodeId);
+                    mug.p.labelItext.set(mug.getDefaultLabelValue());
                 }
                 // HACK set nodeID after label itext so tree node gets renamed
                 mug.p.nodeID = nodeId;

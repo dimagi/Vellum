@@ -313,7 +313,7 @@ define([
             xpath_ = expr.toXPath();
             hashtag = expr.toHashtag();
         } catch (err) {
-            if (form.useRichText ) {
+            if (form.richText ) {
                 xmlWriter.writeAttributeString('vellum:' + vellumKey, "#invalid/xpath " + hashtagOrXPath);
             }
             xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
@@ -323,8 +323,8 @@ define([
         }
 
         if (hashtag !== xpath_) {
-            if (form.useRichText ) {
-                    xmlWriter.writeAttributeString('vellum:' + vellumKey, hashtag);
+            if (form.richText ) {
+                xmlWriter.writeAttributeString('vellum:' + vellumKey, hashtag);
             }
             xmlWriter.writeAttributeString(key, xpath_);
         } else {

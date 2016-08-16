@@ -4,14 +4,18 @@ define([
     'underscore',
     'tests/utils',
     'text!static/all_question_types.xml',
-    'text!static/questionTypes/image-capture.xml'
+    'text!static/questionTypes/image-capture.xml',
+    'text!static/javaRosa/select1-help.xml',
+    'text!static/questionTypes/select1-help-with-type.xml',
 ], function (
     chai,
     $,
     _,
     util,
     TEST_XML,
-    IMAGE_CAPTURE_XML
+    IMAGE_CAPTURE_XML,
+    SELECT1_HELP_XML,
+    SELECT1_HELP_WITH_TYPE_XML
 ) {
     var call = util.call,
         clickQuestion = util.clickQuestion,
@@ -250,7 +254,7 @@ define([
                 core: {
                     form: null,
                     onReady: function () {
-                        this.data.core.form.useRichText = false;
+                        this.data.core.form.richText = false;
                         _.each(questionTypes, function (q, i) {
                             var prev = (i > 0 ? questionTypes[i - 1] : {}),
                                 prevId = q.clickBeforeAdd ||
@@ -362,6 +366,8 @@ define([
                     ["Select", "MSelectDynamic"],
                     ["MSelect", "SelectDynamic"],
                     ["MSelect", "MSelectDynamic"],
+                    ["SelectDynamic", "MSelectDynamic"],
+                    ["MSelectDynamic", "SelectDynamic"],
                     ["Select", "MSelect"],
                     ["MSelect", "Select"],
                     ["Select + Choices", "MSelect"],
@@ -416,7 +422,7 @@ define([
                 from = (choices ? from.replace(" + Choices", "") : from);
                 var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to),
                     mug = addQuestion(from, nodeId);
-                if (!choices && from.indexOf("Select") > -1) {
+                if (!choices && from.indexOf("Select") > -1 && from.indexOf("Dynamic") === -1) {
                     util.deleteQuestion(nodeId + "/choice1");
                     util.deleteQuestion(nodeId + "/choice2");
                 }
@@ -501,6 +507,20 @@ define([
                         tearDown(from, to);
                     });
                 });
+            });
+
+            it("should change back and forth between dynamic types without side effects", function () {
+                var from = 'MSelectDynamic',
+                    to = 'SelectDynamic',
+                    mug = setup(from, to);
+                var original = call('createXML');
+                call("changeMugType", mug, to);
+                var afterChange = call('createXML');
+                call("changeMugType", mug, from);
+                util.assertXmlEqual(call('createXML'), original, { normalize_xmlns: true });
+                call("changeMugType", mug, to);
+                util.assertXmlEqual(call('createXML'), afterChange, { normalize_xmlns: true });
+                tearDown(from, to);
             });
         });
 
@@ -603,6 +623,21 @@ define([
             util.loadXML(IMAGE_CAPTURE_XML);
             var image = call("getMugByPath", "/data/image");
             assert.strictEqual(image.p.imageSize, '');
+        });
+    });
+
+    describe("Select questions", function () {
+        before(function (done) {
+            util.init({
+                core: {
+                    onReady: done,
+                },
+            });
+        });
+
+        it("should not write the type", function () {
+            util.loadXML(SELECT1_HELP_WITH_TYPE_XML);
+            util.assertXmlEqual(util.call('createXML'), SELECT1_HELP_XML);
         });
     });
 });

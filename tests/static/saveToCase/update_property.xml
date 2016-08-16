@@ -10,6 +10,7 @@
 						<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
 							<update>
 								<name />
+								<dash-dash />
 							</update>
 						</case>
 					</save_to_case>
@@ -17,6 +18,7 @@
 			</instance>
 			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
 			<bind nodeset="/data/save_to_case/case/update/name" vellum:relevant="#form/name != ''" vellum:calculate="#form/name" relevant="/data/name != ''" calculate="/data/name" />
+			<bind nodeset="/data/save_to_case/case/update/dash-dash" calculate="'-'" />
 			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/save_to_case/case/@user_id" calculate="/data/meta/userID" />
 			<bind nodeset="/data/save_to_case/case/@case_id" calculate="/data/meta/caseID" />

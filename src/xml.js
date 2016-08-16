@@ -32,14 +32,16 @@ define([
             value = inner ? $(value) : $("<div />").append(fixGTBug(value));
         }
         var xml = new XMLSerializer(),
+            xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ \/>])/g,
             wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
-            emptytag = /<(([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\3)*\s*)><\/\2>/g;
+            // emptytag does not match <tag attr="a > b"></tag>
+            emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g;
         return xml.serializeToString(value[0]) // pure magic
             .replace(wrapper, "$3")         // remove outer tag
-            .replace(emptytag, "<$1 />")    // <tag></tag> to <tag />
+            .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
             .replace(/&nbsp;|\xa0/g, " ")   // &nbsp; is not a valid XML entity
-            // when normalizing output values alone it will include the namespace
-            .replace('xmlns:vellum="http://commcarehq.org/xforms/vellum"', "");
+            // HACK xmlns could match and remove text that is not XML (unlikely)
+            .replace(xmlns, "$1");          // remove vellum namespace
     }
 
     /**

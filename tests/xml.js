@@ -2,12 +2,16 @@ define([
     'jquery',
     'underscore',
     'chai',
-    'vellum/xml'
+    'vellum/xml',
+    'text!static/xml/regexp-crashing-debug-itext.xml',
+    'text!static/xml/regexp-crashing-debug-itext-parsed.xml'
 ], function (
     $,
     _,
     chai,
-    xml
+    xml,
+    REGEXP_CRASHING_DEBUG_ITEXT,
+    REGEXP_CRASHING_DEBUG_ITEXT_PARSED
 ) {
     var assert = chai.assert;
 
@@ -160,6 +164,30 @@ define([
         it("should replace &nbsp; with space", function () {
             eq('a &nbsp; b', 'a   b', false);
         });
+
+        it("should not cause regexp engine to hang on many output values in jquery object", function () {
+            // This is a pretty arcane test. The XML in this test caused
+            // an exponential performance degredation (more tags made
+            // normalization slower) in Chrome and Firefox.
+            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+                value = parsedXml.find("value");
+            eq(value, REGEXP_CRASHING_DEBUG_ITEXT_PARSED, false);
+        });
+
+        it("should not cause regexp engine to hang on many output values in string", function () {
+            // similar to above test, but also tests fixGTBug, which uses a similar regexp
+            // NOTE this test fails on Firefox because attribute order is changed
+            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+                serializer = new XMLSerializer(),
+                wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
+                value = serializer.serializeToString(parsedXml.find("value")[0])
+                    .replace(/(value="[^"]+)"/g, '$1 > 2"')
+                    .replace(wrapper, "$3"),
+                parsed = REGEXP_CRASHING_DEBUG_ITEXT_PARSED
+                    .replace(/(value="[^"]+)"/g, '$1 &gt; 2"')
+                    .replace(/"\/>/g, '" />');
+            eq(value, parsed, false);
+        });
     });
 
     describe("The XML humanizer", function () {
@@ -212,6 +240,12 @@ define([
 
         it("should newline child node", function () {
             eq($("<value>\n</value>"), "\n");
+        });
+
+        it("should not cause regexp engine to hang on many output values", function () {
+            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+                value = parsedXml.find("value");
+            eq(value, REGEXP_CRASHING_DEBUG_ITEXT_PARSED, false);
         });
     });
 });

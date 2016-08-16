@@ -20,6 +20,7 @@ define([
     var base = function(mug, options) {
         // set properties shared by all widgets
         var widget = {};
+        options.richText = true;
         widget.options = options;
         widget.mug = mug;
         widget.id = options.id;
@@ -136,6 +137,7 @@ define([
         widget.input = $("<input />")
             .attr("name", inputID)
             .attr("id", inputID)
+            .attr("placeholder", options.widgetPlaceholder)
             .prop('disabled', disabled);
 
         widget.getControl = function () {
@@ -235,6 +237,7 @@ define([
         widget.input = $("<textarea></textarea>")
             .attr("name", widget.id)
             .attr("id", widget.id)
+            .attr("placeholder", options.widgetPlaceholder)
             .attr("rows", "2")
             .addClass('form-control')
             .on('change input', function (e) { widget.handleChange(); })
@@ -276,6 +279,7 @@ define([
         var opts = {
                 isExpression: options.widget === xPath || options.widget === droppableText,
                 rtl: util.isRightToLeftLanguage(options.language),
+                placeholder: options.widgetPlaceholder,
             },
             editor = richTextUtils.editor(widget.input, mug.form, opts);
 
@@ -445,7 +449,7 @@ define([
             path = options.widgetValuePath || options.path,
             id = options.id || 'property-' + path;
         widget.definition = mug.p.getDefinition(options.path);
-        options.noRichText = true;
+        options.richText = false;
 
         widget.mugValue = options.mugValue || function (mug, value) {
             if (arguments.length === 1) {

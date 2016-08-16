@@ -98,15 +98,6 @@
 						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/constraintMsg/data/question1.3gp</value>
 					</text>
-					<text id="question2-label">
-						<value>question2</value>
-					</text>
-					<text id="question30-label">
-						<value>question30</value>
-					</text>
-					<text id="question3-label">
-						<value>question3</value>
-					</text>
 					<text id="question3-choice1-label">
 						<value>choice1</value>
 						<value form="image">jr://file/commcare/image/data/question3-choice1.png</value>
@@ -120,74 +111,11 @@
 					<text id="question3-choice2-label">
 						<value>choice2</value>
 					</text>
-					<text id="question6-label">
-						<value>question6</value>
-					</text>
 					<text id="question6-choice1-label">
 						<value>choice1</value>
 					</text>
 					<text id="question6-choice2-label">
 						<value>choice2</value>
-					</text>
-					<text id="question13-label">
-						<value>question13</value>
-					</text>
-					<text id="question14-label">
-						<value>question14</value>
-					</text>
-					<text id="question15-label">
-						<value>question15</value>
-					</text>
-					<text id="question16-label">
-						<value>question16</value>
-					</text>
-					<text id="question17-label">
-						<value>question17</value>
-					</text>
-					<text id="question18-label">
-						<value>question18</value>
-					</text>
-					<text id="question19-label">
-						<value>question19</value>
-					</text>
-					<text id="question21-label">
-						<value>question21</value>
-					</text>
-					<text id="question21/question31-label">
-						<value>question31</value>
-					</text>
-					<text id="question22-label">
-						<value>question22</value>
-					</text>
-					<text id="question22/question23-label">
-						<value>question23</value>
-					</text>
-					<text id="question22/question23/question40-label">
-						<value>question40</value>
-					</text>
-					<text id="question22/question23/question41-label">
-						<value>question41</value>
-					</text>
-					<text id="question22/question23/question24-label">
-						<value>question24</value>
-					</text>
-					<text id="question22/question23/question25-label">
-						<value>question25</value>
-					</text>
-					<text id="question22/question23/question26-label">
-						<value>question26</value>
-					</text>
-					<text id="question22/question23/question27-label">
-						<value>question27</value>
-					</text>
-					<text id="question22/question23/question28-label">
-						<value>question28</value>
-					</text>
-					<text id="question22/question23/question29-label">
-						<value>question29</value>
-					</text>
-					<text id="question22/question23/question7-label">
-						<value>question7</value>
 					</text>
 				</translation>
 				<translation lang="hin">
@@ -218,15 +146,6 @@
 						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/constraintMsg/data/question1.3gp</value>
 					</text>
-					<text id="question2-label">
-						<value>question2</value>
-					</text>
-					<text id="question30-label">
-						<value>question30</value>
-					</text>
-					<text id="question3-label">
-						<value>question3</value>
-					</text>
 					<text id="question3-choice1-label">
 						<value>choice1</value>
 						<value form="image">jr://file/commcare/image/data/question3-choice1.png</value>
@@ -240,74 +159,11 @@
 					<text id="question3-choice2-label">
 						<value>choice2</value>
 					</text>
-					<text id="question6-label">
-						<value>question6</value>
-					</text>
 					<text id="question6-choice1-label">
 						<value>choice1</value>
 					</text>
 					<text id="question6-choice2-label">
 						<value>choice2</value>
-					</text>
-					<text id="question13-label">
-						<value>question13</value>
-					</text>
-					<text id="question14-label">
-						<value>question14</value>
-					</text>
-					<text id="question15-label">
-						<value>question15</value>
-					</text>
-					<text id="question16-label">
-						<value>question16</value>
-					</text>
-					<text id="question17-label">
-						<value>question17</value>
-					</text>
-					<text id="question18-label">
-						<value>question18</value>
-					</text>
-					<text id="question19-label">
-						<value>question19</value>
-					</text>
-					<text id="question21-label">
-						<value>question21</value>
-					</text>
-					<text id="question21/question31-label">
-						<value>question31</value>
-					</text>
-					<text id="question22-label">
-						<value>question22</value>
-					</text>
-					<text id="question22/question23-label">
-						<value>question23</value>
-					</text>
-					<text id="question22/question23/question40-label">
-						<value>question40</value>
-					</text>
-					<text id="question22/question23/question41-label">
-						<value>question41</value>
-					</text>
-					<text id="question22/question23/question24-label">
-						<value>question24</value>
-					</text>
-					<text id="question22/question23/question25-label">
-						<value>question25</value>
-					</text>
-					<text id="question22/question23/question26-label">
-						<value>question26</value>
-					</text>
-					<text id="question22/question23/question27-label">
-						<value>question27</value>
-					</text>
-					<text id="question22/question23/question28-label">
-						<value>question28</value>
-					</text>
-					<text id="question22/question23/question29-label">
-						<value>question29</value>
-					</text>
-					<text id="question22/question23/question7-label">
-						<value>question7</value>
 					</text>
 				</translation>
 			</itext>
@@ -324,14 +180,9 @@
 			<help ref="jr:itext('question1-help')" />
 			<alert ref="jr:itext('question1-constraintMsg')" />
 		</input>
-		<trigger ref="/data/question2" appearance="minimal">
-			<label ref="jr:itext('question2-label')" />
-		</trigger>
-		<trigger ref="/data/question30">
-			<label ref="jr:itext('question30-label')" />
-		</trigger>
+		<trigger ref="/data/question2" appearance="minimal"/>
+		<trigger ref="/data/question30"/>
 		<select1 ref="/data/question3">
-			<label ref="jr:itext('question3-label')" />
 			<item>
 				<label ref="jr:itext('question3-choice1-label')" />
 				<value>choice1</value>
@@ -343,7 +194,6 @@
 		</select1>
 		<!-- arbitrary control attributes -->
 		<select ref="/data/question6" foo="baz">
-			<label ref="jr:itext('question6-label')" />
 			<item>
 				<label ref="jr:itext('question6-choice1-label')" />
 				<value>choice1</value>
@@ -353,67 +203,32 @@
 				<value>choice2</value>
 			</item>
 		</select>
-		<input ref="/data/question13">
-			<label ref="jr:itext('question13-label')" />
-		</input>
-		<input ref="/data/question14" appearance="numeric">
-			<label ref="jr:itext('question14-label')" />
-		</input>
-		<input ref="/data/question15">
-			<label ref="jr:itext('question15-label')" />
-		</input>
-		<input ref="/data/question16">
-			<label ref="jr:itext('question16-label')" />
-		</input>
-		<input ref="/data/question17">
-			<label ref="jr:itext('question17-label')" />
-		</input>
-		<input ref="/data/question18">
-			<label ref="jr:itext('question18-label')" />
-		</input>
-		<input ref="/data/question19">
-			<label ref="jr:itext('question19-label')" />
-		</input>
+		<input ref="/data/question13"/>
+		<input ref="/data/question14" appearance="numeric"/>
+		<input ref="/data/question15"/>
+		<input ref="/data/question16"/>
+		<input ref="/data/question17"/>
+		<input ref="/data/question18"/>
+		<input ref="/data/question19"/>
 		<group ref="/data/question21">
-			<label ref="jr:itext('question21-label')" />
 			<group>
-				<label ref="jr:itext('question21/question31-label')" />
 				<repeat jr:noAddRemove="true()"  nodeset="/data/question21/question31" jr:count="2" />
 			</group>
 		</group>
 		<group>
-			<label ref="jr:itext('question22-label')" />
 			<repeat nodeset="/data/question22">
 				<group ref="/data/question22/question23" appearance="field-list">
-					<label ref="jr:itext('question22/question23-label')" />
-					<group ref="/data/question22/question23/question40">
-						<label ref="jr:itext('question22/question23/question40-label')" />
-					</group>
+					<group ref="/data/question22/question23/question40"/>
 					<group>
-						<label ref="jr:itext('question22/question23/question41-label')" />
 						<repeat nodeset="/data/question22/question23/question41" />
 					</group>
-					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px">
-						<label ref="jr:itext('question22/question23/question24-label')" />
-					</upload>
-					<upload ref="/data/question22/question23/question25" mediatype="audio/*">
-						<label ref="jr:itext('question22/question23/question25-label')" />
-					</upload>
-					<upload ref="/data/question22/question23/question26" mediatype="video/*">
-						<label ref="jr:itext('question22/question23/question26-label')" />
-					</upload>
-					<input ref="/data/question22/question23/question27">
-						<label ref="jr:itext('question22/question23/question27-label')" />
-					</input>
-					<secret ref="/data/question22/question23/question28">
-						<label ref="jr:itext('question22/question23/question28-label')" />
-					</secret>
-					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature">
-						<label ref="jr:itext('question22/question23/question29-label')" />
-					</upload>
-					<input ref="/data/question22/question23/question7" appearance="intent:question7">
-						<label ref="jr:itext('question22/question23/question7-label')" />
-					</input>
+					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px"/>
+					<upload ref="/data/question22/question23/question25" mediatype="audio/*"/>
+					<upload ref="/data/question22/question23/question26" mediatype="video/*"/>
+					<input ref="/data/question22/question23/question27"/>
+					<secret ref="/data/question22/question23/question28"/>
+					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature"/>
+					<input ref="/data/question22/question23/question7" appearance="intent:question7"/>
 				</group>
 			</repeat>
 		</group>

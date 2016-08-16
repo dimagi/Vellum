@@ -10,7 +10,10 @@ define([
     util
 ) {
     var FUSE_CONFIG = {
-        keys: ['label', 'name', 'absolutePath', 'hashtagPath'],
+        keys: ['displayPath'],
+        tokenize: true,
+        tokenSeparator: /\/+/g,
+        threshold: 0.4,
     };
 
     function Fuse(form) {
@@ -68,7 +71,7 @@ define([
                 name: mug.absolutePath,
                 hashtagPath: mug.hashtagPath,
                 absolutePath: mug.absolutePath,
-                displayPath: mug.form.useRichText ? mug.hashtagPath : mug.absolutePath,
+                displayPath: mug.form.richText ? mug.hashtagPath : mug.absolutePath,
                 icon: mug.options.icon,
                 questionId: mug.p.nodeID,
                 displayLabel: util.truncate(defaultLabel),
@@ -81,7 +84,7 @@ define([
 
     function generateNewFuseData (form) {
         var caseData = [];
-        if (form.vellum.data.core.databrowser && form.useRichText) {
+        if (form.vellum.data.core.databrowser && form.richText) {
             caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
              .map(function(absolutePath, hashtag) {
                  return {

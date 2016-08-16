@@ -5,6 +5,7 @@ define([
     'jquery',
     'underscore',
     'vellum/datasources',
+    'vellum/util',
     'vellum/widgets',
     'vellum/window',
     'tpl!vellum/templates/external_sources_tree',
@@ -12,13 +13,23 @@ define([
     $,
     _,
     datasources,
+    util,
     widgets,
     window_,
     external_sources_tree
 ) {
     var fn = {},
         DATABROWSER_HEIGHT = 0.33,
-        panelHeight;
+        panelHeight,
+        handleError = function($container) {
+            return function(jqXHR, textStatus, errorThrown) {
+                if ($container && jqXHR.responseText) {
+                    $container.find(".fd-external-sources-error").removeClass("hide").text(jqXHR.responseText);
+                } else {
+                    window.console.log(util.formatExc(textStatus || errorThrown));
+                }
+            };
+        };
 
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('databrowser', {}, {
@@ -55,10 +66,10 @@ define([
                     return false;
                 }
             });
-            vellum.data.core.databrowser = { dataHashtags: {} };
+            vellum.data.core.databrowser = { dataHashtags: {}, dataHashtagTransformations: {} };
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
-            datasources.getDataSources(function () {});
+            datasources.getDataSources(function () {}, handleError(pane));
             var toggle = _.partial(toggleExternalDataTree, vellum);
             pane.parent().find(".fd-external-sources-divider")
                 .clickExceptAfterDrag(toggle);
@@ -76,6 +87,9 @@ define([
             }
             _.each(hashtags, function (path, hash) {
                 addHashtag(hash, path, _this);
+            });
+            _.each(this.data.core.databrowser.dataHashtagTransformations, function(trans, hash) {
+                addHashtagTransformation(hash, trans, _this);
             });
 
             fixFormReferences(this.data.core.form);
@@ -115,7 +129,7 @@ define([
                         var _this = this;
                         datasources.getDataSources(function (data) {
                             callback.call(_this, dataTreeJson(data, vellum));
-                        });
+                        }, handleError($container));
                     }
                 },
                 worker: false,
@@ -149,9 +163,16 @@ define([
                 var path = parentPath ? (parentPath + "/" + id) : id,
                     tree = getTree(item, id, path, info);
                 if (vellum.opts().features.rich_text && source && source.id !== "commcaresession") {
-                    var hashtagPath = '#case/' + source.id + '/' + id;
+                    // magic: case as the id means that this is the base case
+                    var hashtagPrefix = '#case/' + (source.id !== 'case' ? source.id + '/' : ''),
+                        hashtagPath = hashtagPrefix + id;
                     addHashtag(hashtagPath, path, vellum);
                     path = hashtagPath;
+                    if (parentPath) {
+                        addHashtagTransformation(hashtagPrefix, function(prop) {
+                            return parentPath + "/" + prop;
+                        }, vellum);
+                    }
                 }
                 return {
                     text: tree.name,
@@ -244,21 +265,23 @@ define([
             nodes = node(source, null, info)(source, path).children;
         }
 
-        // move the parent data sources up one level to be equal to their child
-        var siblings = [];
-        _.each(nodes, function (node) {
-            siblings = siblings.concat(_.filter(node.children, function(child) {
+        function flattenNode(node) {
+            var subCases = _.filter(node.children, function(child) {
                 return child.children.length;
-            }));
+            });
             node.children = _.filter(node.children, function(child) {
                 return child.children.length === 0;
             });
-        });
+            subCases = _.flatten(_.map(subCases, flattenNode));
+            return [node].concat(subCases);
+        }
+        // data sources should be in a flat list instead of hierarchy
+        nodes = _.flatten(_.map(nodes, flattenNode));
 
         // done here for performance reasons. would be nice to be done after
         // every new hashtag, but only for the mugs that reference that hashtag
         fixFormReferences(vellum.data.core.form);
-        return nodes.concat(siblings);
+        return nodes;
     }
 
     function toggleExternalDataTree(vellum) {
@@ -294,12 +317,22 @@ define([
             form.initHashtag(hashtag, fullPath);
         }
     }
+
+    function addHashtagTransformation(prefix, transformation, vellum) {
+        var form = vellum.data.core.form,
+            dataHashtagTransformations = vellum.data.core.databrowser.dataHashtagTransformations;
+
+        if (!dataHashtagTransformations.hasOwnProperty(prefix)) {
+            dataHashtagTransformations[prefix] = transformation;
+        }
+        if (form && form.initHashtagTransformation) {
+            form.initHashtagTransformation(prefix, transformation);
+        }
+    }
     
     function fixFormReferences(form) {
         if (form) {
-            _.each(form.getMugList(), function(mug) {
-                form.fixBrokenReferences(mug);
-            });
+            form.fixBrokenReferences();
         }
     }
 
