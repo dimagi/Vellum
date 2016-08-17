@@ -142,10 +142,7 @@ define([
                     text += current;
                 }
             } else if (state === INSIDE_HASHTAG) {
-                if (current === DELIMITER && next === DELIMITER) {
-                    currentReference += DELIMITER;
-                    i++;
-                } else if (current === DELIMITER) {
+                if (current === DELIMITER) {
                     state = OUTSIDE_HASHTAG;
                     text += transformFn(currentReference);
                     currentReference = "";
