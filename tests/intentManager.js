@@ -179,36 +179,6 @@ define([
             });
         });
 
-        describe("field parsing", function() {
-            var tests = [
-                ['{{ } }}', {}],
-                ['{{field1}}', { field1: 'field1' }],
-                ['{{ field1 }}', { field1: 'field1' }],
-                ['field1 }}', {}],
-                ['{{ field1', {}],
-                ['field1', {}],
-                ['{{ field1 }} {{ field2 }}', {
-                    field1: 'field1',
-                    field2: 'field2',
-                }],
-                ['{{ field1 }}\n{{ field2 }}', {
-                    field1: 'field1',
-                    field2: 'field2',
-                }],
-                ['{{ field1 }}\n{{ field2 }} {{ field3 }}', {
-                    field1: 'field1',
-                    field2: 'field2',
-                    field3: 'field3',
-                }],
-            ];
-
-            _.each(tests, function(testcase) {
-                it(testcase[0] + " should be parsed as " + JSON.stringify(testcase[1]), function() {
-                    assert.deepEqual(intentManager.test.parseFields(testcase[0]), testcase[1]);
-                });
-            });
-        });
-
         describe("custom intents", function() {
             var vellum, mug, customIndex;
             before(function(done) {
