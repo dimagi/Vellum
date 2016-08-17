@@ -161,6 +161,13 @@ define([
                     "/data/mug":"parent/edd"
                 });
             });
+
+            it("should not send deleted references", function() {
+                var form = util.loadXML(MOTHER_REF_XML),
+                    manager = form._logicManager;
+                util.deleteQuestion('/data/mug');
+                assert.deepEqual(manager.caseReferences().preload, { });
+            });
         });
     });
 

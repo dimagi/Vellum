@@ -214,6 +214,11 @@ define([
                         _.each(forward[mug.ufid][property], removeMugFromReverse);
                     }
                     forward[mug.ufid][property] = [];
+                } else {
+                    _.each(forward[mug.ufid], function(refs, property) {
+                        removeMugFromReverse = _.partial(_removeMugFromReverse, property);
+                        _.each(refs, removeMugFromReverse);
+                    });
                 }
             } else {
                 forward[mug.ufid] = {};
