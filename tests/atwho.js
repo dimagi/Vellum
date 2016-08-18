@@ -78,6 +78,7 @@ define([
                 var mug = util.clickQuestion('one')[0];
                 // TODO: This shouldn't rely on relevantAttr
                 var input = $('[name=property-relevantAttr]');
+                input.focus();
                 input.val('/data/').keyup();
                 assert.strictEqual(getDisplayedAtwhoViews().length, 1);
                 try {

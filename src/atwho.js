@@ -164,10 +164,12 @@ define([
                 };
             };
 
-            $input.atwho(_atWhoOptions('/data/'));
-            if (options.useRichText) {
-                $input.atwho(_atWhoOptions('#'));
-            }
+            $input.on('focus', function () {
+                $input.atwho(_atWhoOptions('/data/'));
+                if (options.useRichText) {
+                    $input.atwho(_atWhoOptions('#'));
+                }
+            });
         }
 
         addAtWhoToInput();
@@ -177,12 +179,16 @@ define([
         });
 
         mug.on("teardown-mug-properties", function () {
-            $input.atwho('destroy');
+            if ($input.data('atwho')) {
+                $input.atwho('destroy');
+            }
         }, null, "teardown-mug-properties");
 
         mug.on("change-display-language", function() {
-            $input.atwho('destroy');
-            addAtWhoToInput();
+            if ($input.data('atwho')) {
+                $input.atwho('destroy');
+                addAtWhoToInput();
+            }
         });
     };
 
