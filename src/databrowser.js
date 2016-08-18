@@ -96,7 +96,7 @@ define([
             this.refreshVisibleData();
         },
         contributeToHeadXML: function (xmlWriter, form) {
-            var hashtags = this.data.core.form.referencedHashtags();
+            var hashtags = this.data.core.form.knownExternalReferences();
             if (!_.isEmpty(hashtags)) {
                 xmlWriter.writeStartElement('vellum:hashtags');
                 xmlWriter.writeString(JSON.stringify(hashtags));
@@ -107,6 +107,9 @@ define([
     });
 
     function parsePreloadedHashtags(hashtags) {
+        // known external properties that are referenced in the form
+        // used so that those references don't show up as unknown on next form
+        // load before data browser is fully loaded
         try {
             return JSON.parse($.trim(hashtags.text()));
         } catch (err) {

@@ -174,7 +174,7 @@ define([
                     manager = form._logicManager,
                     mug = util.addQuestion('Text', 'text');
                 mug.p.defaultValue = '#case/not-here';
-                assert.deepEqual(manager.referencedHashtags(), { });
+                assert.deepEqual(manager.knownExternalReferences(), { });
             });
         });
     });

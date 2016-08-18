@@ -220,8 +220,8 @@ define([
                 return [];
             }
         },
-        referencedHashtags: function () {
-            return this._logicManager.referencedHashtags();
+        knownExternalReferences: function () {
+            return this._logicManager.knownExternalReferences();
         },
         referenceHashtag: function(hashtag, mug, property) {
             if (/^#case\//.test(hashtag.toHashtag())) {

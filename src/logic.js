@@ -464,9 +464,8 @@ define([
 
             return ret;
         },
-        // returns object of hashtags. used for writing to xml
-        // format {hashtag: xpath} (null is used for cases as they will be loaded later)
-        referencedHashtags: function () {
+        // returns object of external references that are known to be valid
+        knownExternalReferences: function () {
             var _this = this;
             return _.chain(this.reverse[CASE_REF_ID] || {})
                 .values()
