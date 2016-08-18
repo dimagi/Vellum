@@ -278,6 +278,11 @@ define([
         // data sources should be in a flat list instead of hierarchy
         nodes = _.flatten(_.map(nodes, flattenNode));
 
+        if (vellum.data.core.form) {
+            // remove renamed case properties
+            vellum.data.core.form.clearNullHashtags();
+        }
+
         // done here for performance reasons. would be nice to be done after
         // every new hashtag, but only for the mugs that reference that hashtag
         fixFormReferences(vellum.data.core.form);
@@ -329,7 +334,7 @@ define([
             form.initHashtagTransformation(prefix, transformation);
         }
     }
-    
+
     function fixFormReferences(form) {
         if (form) {
             form.fixBrokenReferences();

@@ -14,6 +14,7 @@ define([
     'text!static/databrowser/child-ref-output-value.xml',
     'text!static/databrowser/child-ref-output-value-other-lang.xml',
     'text!static/databrowser/preloaded-hashtags.xml',
+    'text!static/databrowser/unknown-property-preloaded-hashtags.xml',
 ], function (
     options,
     util,
@@ -28,7 +29,8 @@ define([
     MOTHER_REF_XML,
     CHILD_REF_OUTPUT_VALUE_XML,
     CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
-    PRELOADED_HASHTAGS_XML
+    PRELOADED_HASHTAGS_XML,
+    UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -175,6 +177,11 @@ define([
 
             it("should write externally referenced hashtags to form", function() {
                 util.loadXML(PRELOADED_HASHTAGS_XML);
+                util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
+            });
+
+            it("should not write unknown referenced hashtags to form", function() {
+                util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
                 util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
             });
 
@@ -376,6 +383,12 @@ define([
                     event.fire("loadCaseData");
                     assert(form.isValidHashtag(dobProp));
                     assert.notStrictEqual(form.hashtagDictionary[dobProp], null);
+                });
+
+                it("should not write unknown referenced hashtags to form", function() {
+                    util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
+                    event.fire("loadCaseData");
+                    util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
                 });
             });
 
