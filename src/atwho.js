@@ -164,12 +164,10 @@ define([
                 };
             };
 
-            $input.on('focus', function () {
-                if (!$input.data('atwho')) {
-                    $input.atwho(_atWhoOptions('/data/'));
-                    if (options.useRichText) {
-                        $input.atwho(_atWhoOptions('#'));
-                    }
+            $input.one('focus', function () {
+                $input.atwho(_atWhoOptions('/data/'));
+                if (options.useRichText) {
+                    $input.atwho(_atWhoOptions('#'));
                 }
             });
         }
