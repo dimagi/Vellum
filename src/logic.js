@@ -467,9 +467,13 @@ define([
         // returns object of hashtags. used for writing to xml
         // format {hashtag: xpath} (null is used for cases as they will be loaded later)
         referencedHashtags: function () {
+            var _this = this;
             return _.chain(this.reverse[CASE_REF_ID] || {})
                 .values()
                 .flatten(true)
+                .filter(function(ref) {
+                    return _this.form.isValidHashtag(ref.path);
+                })
                 .map(function(ref) {
                     return [ref.path, null];
                 }).object().value();
