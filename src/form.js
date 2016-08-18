@@ -1012,6 +1012,7 @@ define([
                     return !meta.dropReference(mug);
                 });
             }
+            this._logicManager.clearReferences(mug);
             delete this.mugMap[mug.ufid];
             this.fire({
                 type: 'question-remove',
