@@ -182,7 +182,10 @@ define([
 
             it("should not write unknown referenced hashtags to form", function() {
                 util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
-                util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
+                var xml = $(call("createXML")),
+                    hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
+                    test = JSON.parse($.trim(hashtags.text()));
+                assert.strictEqual(test, {"#case/dob":null});
             });
 
             it("should add the casedb instance when referencing a case in a label", function(done) {
@@ -388,7 +391,10 @@ define([
                 it("should not write unknown referenced hashtags to form", function() {
                     util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
                     event.fire("loadCaseData");
-                    util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
+                    var xml = $(call("createXML")),
+                        hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
+                        test = JSON.parse($.trim(hashtags.text()));
+                    assert.strictEqual(test, {"#case/dob":null});
                 });
             });
 
