@@ -185,7 +185,7 @@ define([
                 var xml = $(call("createXML")),
                     hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
                     test = JSON.parse($.trim(hashtags.text()));
-                assert.strictEqual(test, {"#case/dob":null});
+                assert.deepEqual(test, {"#case/dob":null});
             });
 
             it("should add the casedb instance when referencing a case in a label", function(done) {
@@ -394,7 +394,7 @@ define([
                     var xml = $(call("createXML")),
                         hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
                         test = JSON.parse($.trim(hashtags.text()));
-                    assert.strictEqual(test, {"#case/dob":null});
+                    assert.deepEqual(test, {"#case/dob":null});
                 });
             });
 
