@@ -190,26 +190,38 @@ define([
 
     LogicManager.prototype = {
         clearReferences: function (mug, property) {
-            var reverse = this.reverse;
+            function _removeMugFromReverse(property, ref) {
+                if (ref.ref) {
+                    // assert ref.mug === mug.ufid
+                    if (ref.mug !== mug.ufid) {
+                        throw new Error([mug, ref]);
+                    }
+                    reverse[ref.ref][ref.mug] = _.filter(
+                        reverse[ref.ref][ref.mug],
+                        function (r) { return r.property !== property; }
+                    );
+                }
+            }
+
+            var reverse = this.reverse,
+                forward = this.forward,
+                removeMugFromReverse;
             mug.form.dropAllInstanceReferences(mug, property, true);
-            if (this.forward.hasOwnProperty(mug.ufid)) {
-                if (this.forward[mug.ufid].hasOwnProperty(property)) {
-                    _.each(this.forward[mug.ufid][property], function (ref) {
-                        if (ref.ref) {
-                            // assert ref.mug === mug.ufid
-                            if (ref.mug !== mug.ufid) {
-                                throw new Error([mug, ref]);
-                            }
-                            reverse[ref.ref][ref.mug] = _.filter(
-                                reverse[ref.ref][ref.mug],
-                                function (r) { return r.property !== property; }
-                            );
-                        }
+            if (forward.hasOwnProperty(mug.ufid)) {
+                if (property) {
+                    if (forward[mug.ufid].hasOwnProperty(property)) {
+                        removeMugFromReverse = _.partial(_removeMugFromReverse, property);
+                        _.each(forward[mug.ufid][property], removeMugFromReverse);
+                    }
+                    forward[mug.ufid][property] = [];
+                } else {
+                    _.each(forward[mug.ufid], function(refs, property) {
+                        removeMugFromReverse = _.partial(_removeMugFromReverse, property);
+                        _.each(refs, removeMugFromReverse);
                     });
                 }
-                this.forward[mug.ufid][property] = [];
             } else {
-                this.forward[mug.ufid] = {};
+                forward[mug.ufid] = {};
             }
         },
         _addReferences: function (mug, property, value) {
@@ -452,12 +464,15 @@ define([
 
             return ret;
         },
-        // returns object of hashtags. used for writing to xml
-        // format {hashtag: xpath} (null is used for cases as they will be loaded later)
-        referencedHashtags: function () {
+        // returns object of external references that are known to be valid
+        knownExternalReferences: function () {
+            var _this = this;
             return _.chain(this.reverse[CASE_REF_ID] || {})
                 .values()
                 .flatten(true)
+                .filter(function(ref) {
+                    return _this.form.isValidHashtag(ref.path);
+                })
                 .map(function(ref) {
                     return [ref.path, null];
                 }).object().value();

@@ -203,21 +203,6 @@ define([
         }
     }
 
-    function parseFields (html) {
-        var field_regex = /{{\s*([^}\s]+)\s*}}/gm,
-            match = field_regex.exec(html),
-            fields = {};
-
-        while (match) {
-            _.each(match.splice(1), function(field) {
-                fields[field] = field;
-            });
-            match = field_regex.exec(html);
-        }
-
-        return fields;
-    }
-
     var AndroidIntent = util.extend(mugs.defaultOptions, {
         typeName: 'Android App Callout',
         dataType: 'intent',
@@ -395,10 +380,4 @@ define([
             return ret;
         },
     });
-
-    return {
-        test: {
-            parseFields: parseFields,
-        }
-    };
 });

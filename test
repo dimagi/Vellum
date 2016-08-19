@@ -10,7 +10,7 @@ fi
 
 qs=""
 if [[ "$1" != "" && "$1" != -* ]]; then
-    qs="?grep=$1"
+    qs="$1"
     shift
 fi
 
@@ -23,7 +23,7 @@ fi
 temp="/tmp/test-$$.tmp"
 
 # run the tests
-mocha-phantomjs -s loadImages=false "index.html$qs" "$@" | tee $temp
+phantomjs node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js 'index.html' spec "{\"grep\":\"$qs\",\"useColors\":true}" | tee $temp
 
 RESULT="${PIPESTATUS[0]}"
 if grep -q "Parse error" $temp; then

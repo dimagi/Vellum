@@ -96,7 +96,7 @@ define([
             this.refreshVisibleData();
         },
         contributeToHeadXML: function (xmlWriter, form) {
-            var hashtags = this.data.core.form.referencedHashtags();
+            var hashtags = this.data.core.form.knownExternalReferences();
             if (!_.isEmpty(hashtags)) {
                 xmlWriter.writeStartElement('vellum:hashtags');
                 xmlWriter.writeString(JSON.stringify(hashtags));
@@ -107,6 +107,9 @@ define([
     });
 
     function parsePreloadedHashtags(hashtags) {
+        // known external properties that are referenced in the form
+        // used so that those references don't show up as unknown on next form
+        // load before data browser is fully loaded
         try {
             return JSON.parse($.trim(hashtags.text()));
         } catch (err) {
@@ -278,6 +281,11 @@ define([
         // data sources should be in a flat list instead of hierarchy
         nodes = _.flatten(_.map(nodes, flattenNode));
 
+        if (vellum.data.core.form) {
+            // remove renamed case properties
+            vellum.data.core.form.clearNullHashtags();
+        }
+
         // done here for performance reasons. would be nice to be done after
         // every new hashtag, but only for the mugs that reference that hashtag
         fixFormReferences(vellum.data.core.form);
@@ -329,7 +337,7 @@ define([
             form.initHashtagTransformation(prefix, transformation);
         }
     }
-    
+
     function fixFormReferences(form) {
         if (form) {
             form.fixBrokenReferences();
