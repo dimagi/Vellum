@@ -252,7 +252,8 @@ define([
     var insertOutputRef = function(vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
-        if ((!mug && vellum.opts().features.rich_text) || (mug && mug.supportsRichText())) {
+        if ((!mug && form.richText) ||
+            (mug && mug.supportsRichText())) {
             richText.editor(target).insertOutput(output);
         } else {
             util.insertTextAtCursor(target, output, true);

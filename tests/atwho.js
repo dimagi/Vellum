@@ -144,6 +144,7 @@ define([
                         form: "",
                         dataSourcesEndpoint: function (callback) { callback(dataSources); },
                         onReady: function() {
+                            util.addQuestion("Text", 'dash-dash');
                             util.addQuestion("Text", 'text');
                             util.addQuestion("Text", 'text2');
                             util.addQuestion("Text", 'text3');
@@ -180,7 +181,18 @@ define([
                         var text = $.trim($(li).text());
                         assert(text.startsWith('#form'));
                     });
-                    assert.strictEqual(atwhoEntries.length, 2);
+                    assert.strictEqual(atwhoEntries.length, 3);
+                });
+            });
+
+            it("should show questions after a dash", function () {
+                displayAtwho('#dash-dash', function(mug) {
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
+                    _.map(atwhoEntries, function(li) {
+                        var text = $.trim($(li).text());
+                        assert(text.startsWith('#form'));
+                    });
+                    assert.strictEqual(atwhoEntries.length, 1);
                 });
             });
 
@@ -202,7 +214,7 @@ define([
                         var text = $.trim($(li).text());
                         assert(text.startsWith('#case') || text.startsWith('#form'));
                     });
-                    assert.strictEqual(atwhoEntries.length, 3);
+                    assert.strictEqual(atwhoEntries.length, 4);
                 });
             });
         });

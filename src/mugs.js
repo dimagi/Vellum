@@ -288,13 +288,7 @@ define([
          * Gets a default label, auto-generating if necessary
          */
         getDefaultLabelValue: function () {
-            var label = this.p.label,
-                nodeID = this.p.nodeID;
-            if (label) {
-                return label;
-            } else if (nodeID) {
-                return nodeID;
-            }
+            return this.p.label || (this.__className === "Choice" ? this.p.nodeID : "");
         },
 
         /*
@@ -480,7 +474,7 @@ define([
             return this.parentMug && this.parentMug.isInRepeat();
         },
         supportsRichText: function() {
-            return this.options.richText && this.form.useRichText !== false;
+            return this.options.richText && this.form.richText;
         }
     };
 
@@ -814,7 +808,7 @@ define([
                             key: "mug-nodeID-case-warning",
                             level: mug.WARNING,
                         };
-                    if (!mug.parentMug && mug.p.nodeID === "case") {
+                    if (mug.p.nodeID.toLowerCase() === "case") {
                         caseWarning.message = "The ID 'case' may cause " +
                             "problems with case management. It is " +
                             "recommended to pick a different Question ID.";
@@ -1464,6 +1458,7 @@ define([
                     return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
                 }
             },
+            labelItext: { presence: 'required' },
             conflictedNodeId: { presence: 'notallowed' },
             hintLabel: { presence: 'notallowed' },
             hintItext: { presence: 'notallowed' },
@@ -1506,14 +1501,15 @@ define([
         },
         afterInsert: function (form, mug) {
             var choice = "Choice";
-            form.createQuestion(mug, 'into', choice, true);
-            form.createQuestion(mug, 'into', choice, true);
+            form.createQuestion(mug, 'into', choice, true).validate();
+            form.createQuestion(mug, 'into', choice, true).validate();
         },
         spec: {
             appearance: {
                 deleteOnCopy: false,
             }
         },
+        dataType: "",
     });
 
     var MSelect = util.extend(BaseSelect, {

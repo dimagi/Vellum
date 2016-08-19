@@ -144,16 +144,10 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         }
         $('#run-tests').click(runTests);
 
-        // mocha.env is an object when invoked by mocha-phantomjs
-        if (mocha.env) {
-            // ensure the normal first test instance is fully loaded before
-            // destroying it for tests
-            setTimeout(runTests, 0);
-        }
-
-        function load(form) {
+        function load(form, ready) {
             $('#vellum').empty().vellum($.extend(true, {}, options.options, {
                 core: {
+                    onReady: ready,
                     saveUrl: function (data) {
                         session.setItem("vellum.tests.main.lastSavedForm", data.xform);
                     },
@@ -174,7 +168,15 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         $('#load-saved').click(function () {
             load(session.getItem("vellum.tests.main.lastSavedForm") || "");
         });
-        load(""); // load empty form on initial page load
+
+
+        // mocha.env is an object when invoked by mocha-phantomjs
+        if (mocha.env) {
+            // ensure the first instance is fully loaded before running tests
+            load("", function () { mocha.run(); });
+        } else {
+            load(""); // load empty form on initial page load
+        }
 
         function handleFileSelect(evt) {
             var file = evt.target.files[0],

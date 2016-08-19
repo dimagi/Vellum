@@ -5,7 +5,13 @@
  * Itext handles text that may be displayed in multiple languages. An IText block contains a translation for
  * each required language. Each translation contains a set of text elements, each with an id and containing
  * one or more values. Each value represents a different form of the text appropriate for that language.
- * (e.g., plain text versus multimedia equivalent). See https://bitbucket.org/javarosa/javarosa/wiki/ITextAPI
+ * (e.g., plain text versus multimedia equivalent).
+ * 
+ * An IText item may contain multiple forms and also contains an IText model, which tracks the languages
+ * available and knows which of those languages is the default. On the UI side, an IText block contains
+ * one or more IText widgets, each of which goes with a single language.
+ *
+ * See https://bitbucket.org/javarosa/javarosa/wiki/ITextAPI
  *
  * Mugs have the following Itext properties:
  *  labelItext: for the question label itself
@@ -464,7 +470,7 @@ define([
                     hashtag = parsed.toHashtag(),
                     xpath_ = parsed.toXPath(),
                     ret = $("<output>");
-                if (!form_.useRichText || xpath_ === hashtag) {
+                if (!form_.richText || xpath_ === hashtag) {
                     return ret.attr(key, xpath_)[0].outerHTML;
                 } else {
                     return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
@@ -563,7 +569,12 @@ define([
                     var itext = mug.p[property],
                         hasItext = itext && itext.hasHumanReadableItext();
                     if (!hasItext && mug.getPresence(property) === 'required') {
-                        return name + ' is required';
+                        name += " (or multimedia)";
+                        if (itext.itextModel.languages.length === 1) {
+                            return name + " is required.";
+                        } else {
+                            return name + " is required for all languages.";
+                        }
                     }
                     if (itext && !itext.autoId && !itext.isEmpty()) {
                         // Itext ID validation
@@ -793,6 +804,7 @@ define([
                         displayName: "Label"
                     }));
                 },
+                widgetPlaceholder: "Display Text",
                 validationFunc: itextValidator("labelItext", "Label")
             });
             // virtual property used to define a widget

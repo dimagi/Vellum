@@ -7,6 +7,7 @@ define([
     'vellum/logic',
     'vellum/xpath',
     'text!tests/static/logic/test-xml-1.xml',
+    'text!tests/static/databrowser/mother-ref.xml',
 ], function (
     chai,
     $,
@@ -14,7 +15,8 @@ define([
     util,
     logic,
     xpath,
-    TEST_XML_1
+    TEST_XML_1,
+    MOTHER_REF_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -47,6 +49,18 @@ define([
             };
             call("createXML");
             assert(util.isTreeNodeValid(repeat), "repeat should be valid");
+        });
+
+        it("should remove references for labels after removal", function () {
+            var form = util.loadXML(""),
+                logicManager = form._logicManager,
+                text;
+            util.addQuestion('Text', 'mug');
+            text = util.addQuestion('Text', 'text');
+            $('[name=itext-en-label]').val('<output value="/data/mug" />').change();
+            assert.equal(logicManager.forward[text.ufid].labelItext.length, 1);
+            util.deleteQuestion('/data/text');
+            assert.equal(logicManager.forward[text.ufid].labelItext.length, 0);
         });
 
         describe("should add validation error for", function () {
@@ -135,6 +149,16 @@ define([
                     var mug = util.addQuestion("Text", "text");
                     mug.p.calculateAttr = "/data/" + ref;
                     assert(util.isTreeNodeValid(mug), util.getMessages(mug));
+                });
+            });
+        });
+
+        describe("sends case references to HQ", function () {
+            it("should be the correct format", function() {
+                var form = util.loadXML(MOTHER_REF_XML),
+                    manager = form._logicManager;
+                assert.deepEqual(manager.caseReferences().preload, {
+                    "/data/mug":"parent/edd"
                 });
             });
         });

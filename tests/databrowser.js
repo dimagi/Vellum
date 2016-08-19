@@ -42,7 +42,7 @@ define([
                 "case_id": {
                     reference: {
                         source: "casedb",
-                        subset: "child",
+                        subset: "case",
                         key: "@case_id",
                     },
                 },
@@ -56,30 +56,29 @@ define([
                 name: {},
             },
             subsets: [{
-                id: "mother",
+                id: "parent",
+                name: "parent (mother)",
                 key: "@case_type",
                 structure: {
                     edd: {},
-                },
-                related: {
-                    "first-child": "child",
                 }
             }, {
-                id: "child",
+                id: "case",
+                name: "child",
                 key: "@case_type",
                 structure: {
                     dob: {},
                     invalid: {}
                 },
                 related: {
-                    parent: "mother",
+                    parent: "parent",
                 },
             }],
         }];
 
     describe("The data browser", function () {
-        var escapedDobProp = '`#case/child/dob`',
-            dobProp = '#case/child/dob',
+        var escapedDobProp = '`#case/dob`',
+            dobProp = '#case/dob',
             dataTree;
 
         function getInstanceId(form, src) {
@@ -143,7 +142,7 @@ define([
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () { 
                     editor.on('change', function() {
-                        assert.equal(mug.p.calculateAttr, "`#case/mother/edd`");
+                        assert.equal(mug.p.calculateAttr, "`#case/parent/edd`");
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
@@ -157,40 +156,13 @@ define([
                 });
             });
 
-            it("should add recursive ref on drag/drop", function(done) {
-                util.loadXML("");
-                var mug = util.addQuestion("DataBindOnly", "mug"),
-                    calc = $("[name=property-calculateAttr]"),
-                    sessionUri = CASE_DATA[0].uri,
-                    casedbUri = CASE_DATA[1].uri,
-                    editor = calc.ckeditor().editor,
-                    widget = util.getWidget('property-calculateAttr');
-                widget.input.promise.then(function () { 
-                    editor.on('change', function() {
-                        assert.equal(mug.p.calculateAttr, escapedDobProp);
-                        assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-                        assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-                        util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
-                                            {normalize_xmlns: true});
-                        done();
-                    });
-                    assert.equal(getInstanceId(mug.form, sessionUri), null);
-                    assert.equal(getInstanceId(mug.form, casedbUri), null);
-                    assert.equal(calc.length, 1);
-                    var motherNode = util.findNode(dataTree, "mother"),
-                        node = util.findNode(dataTree, "child", motherNode);
-                    dataTree.open_node(node);
-                    util.findNode(dataTree, "dob", node).data.handleDrop(calc);
-                });
-            });
-
             it("should hashtagify refs when written", function() {
                 // this won't write the hashtags as the logic manager won't
                 // have the #case reference but it will properly hashtagify
                 // once the databrowser is loaded
                 util.loadXML(CHILD_REF_NO_HASHTAG_XML);
                 util.assertXmlEqual(call("createXML"), CHILD_REF_XML.replace(
-                    "<vellum:hashtags>{&quot;#case/child/dob&quot;:null}</vellum:hashtags>", ''
+                    "<vellum:hashtags>{&quot;#case/dob&quot;:null}</vellum:hashtags>", ''
                 ));
             });
 
@@ -215,14 +187,14 @@ define([
                     editor = label.ckeditor().editor,
                     widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () { 
-                    editor.on('change', function() {
-                        assert.equal(mug.p.labelItext.get(), 'question1<output value="#case/child/dob" />');
+                    editor.on('change', _.debounce(function() {
+                        assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" /> ');
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_XML,
                                             {normalize_xmlns: true});
                         done();
-                    });
+                    }, 20));
                     assert.equal(getInstanceId(mug.form, sessionUri), null);
                     assert.equal(getInstanceId(mug.form, casedbUri), null);
                     assert.equal(label.length, 1);
@@ -260,15 +232,15 @@ define([
                         editor = label.ckeditor().editor,
                         widget = util.getWidget('itext-hin-label');
                     widget.input.promise.then(function () { 
-                        editor.on('change', function() {
-                            assert.equal(mug.p.labelItext.get(), 'mug');
-                            assert.equal(mug.p.labelItext.get(null, 'hin'), 'mug<output value="#case/child/dob" />');
+                        editor.on('change', _.debounce(function() {
+                            assert.equal(mug.p.labelItext.get(), '');
+                            assert.equal(mug.p.labelItext.get(null, 'hin'), '<output value="#case/dob" /> ');
                             assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                             assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                             util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
                                                 {normalize_xmlns: true});
                             done();
-                        });
+                        }, 20));
                         assert.equal(getInstanceId(mug.form, sessionUri), null);
                         assert.equal(getInstanceId(mug.form, casedbUri), null);
                         assert.equal(label.length, 1);
@@ -327,27 +299,6 @@ define([
                     assert.equal(calc.length, 1);
                     util.findNode(dataTree, "edd").data.handleDrop(calc);
                     assert.equal(mug.p.calculateAttr, "instance('casedb')/cases/case[" + whereParent + "]/edd");
-                    assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
-                    assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
-                });
-
-                it("should add recursive ref on drag/drop", function() {
-                    util.loadXML("");
-                    var mug = util.addQuestion("DataBindOnly", "mug"),
-                        calc = $("[name=property-calculateAttr]"),
-                        sessionUri = CASE_DATA[0].uri,
-                        casedbUri = CASE_DATA[1].uri,
-                        whereSession = "@case_id = instance('commcaresession')/session/data/case_id",
-                        whereParent = "@case_id = instance('casedb')/cases/case[" + whereSession + "]/index/parent",
-                        whereChild = "@case_id = instance('casedb')/cases/case[" + whereParent + "]/index/first-child";
-                    assert.equal(getInstanceId(mug.form, sessionUri), null);
-                    assert.equal(getInstanceId(mug.form, casedbUri), null);
-                    assert.equal(calc.length, 1);
-                    var motherNode = util.findNode(dataTree, "mother"),
-                        node = util.findNode(dataTree, "child", motherNode);
-                        dataTree.open_node(node);
-                        util.findNode(dataTree, "dob", node).data.handleDrop(calc);
-                    assert.equal(mug.p.calculateAttr, "instance('casedb')/cases/case[" + whereChild + "]/dob");
                     assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                     assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                 });
@@ -430,6 +381,7 @@ define([
 
             it("should error for unknown properties", function(done) {
                 widget.setValue(escapedDobProp);
+                widget.handleChange();
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
                 event.fire("loadCaseData");
@@ -437,6 +389,44 @@ define([
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
                     done();
                 });
+            });
+        });
+
+        describe("without rich text", function () {
+            before(function (done) {
+                util.init({
+                    features: {rich_text: false},
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
+                        invalidCaseProperties: ['invalid'],
+                        onReady: function () {
+                            var _this = this;
+                            datasources.getDataSources(function () {
+                                databrowser.initDataBrowser(_this);
+                                dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
+                                done();
+                            });
+                        }
+                    }
+                });
+            });
+
+            it("should add ref on drag/drop", function() {
+                util.loadXML("");
+                var mug = util.addQuestion("Text", "mug"),
+                    text = $("[name=itext-en-label]"),
+                    sessionUri = CASE_DATA[0].uri,
+                    casedbUri = CASE_DATA[1].uri;
+                assert.equal(getInstanceId(mug.form, sessionUri), null);
+                assert.equal(getInstanceId(mug.form, casedbUri), null);
+                assert.equal(text.length, 1);
+                util.findNode(dataTree, "dob").data.handleDrop(text);
+                assert.equal(mug.p.labelItext.get(),
+                             "<output value=\"instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob\" />");
+                assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
+                assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
             });
         });
     });

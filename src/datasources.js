@@ -75,7 +75,7 @@ define([
     _,
     util
 ) {
-    var dataSourcesEndpoint, dataCache, dataCallbacks;
+    var dataSourcesEndpoint, dataCache, dataCallbacks, errorCallbacks;
 
     // called during core init
     function init(instance) {
@@ -85,23 +85,28 @@ define([
 
     function reset() {
         dataCache = null;
-        dataCallbacks = null;
+        dataCallbacks = [];
+        errorCallbacks = [];
     }
 
     /**
      * Asynchronously load data sources
      *
-     * @param callback - A function to be called when the data sources
+     * @param successCallback - A function to be called when the data sources
      *      have been loaded. This function should accept one argument,
      *      a list of data source objects.
+     * @param errorCallback - A function to be called if the data sources call
+     *      fails. This function's parameters are passed directly from jQuery's
+     *      error callback: the XHR, a status string, and an error string.
      */
-    function getDataSources(callback) {
+    function getDataSources(successCallback, errorCallback) {
         if (dataCache) {
-            callback(dataCache);
+            successCallback(dataCache);
             return;
         }
-        if (dataCallbacks) {
-            dataCallbacks.push(callback);
+        if (dataCallbacks.length) {
+            dataCallbacks.push(successCallback);
+            errorCallbacks.push(errorCallback);
             return;
         }
 
@@ -113,12 +118,13 @@ define([
                 name: "Not Found",
                 structure: {}
             }];
-            _.each(dataCallbacks, function (callback) {
+            _.each(_.compact(dataCallbacks), function (callback) {
                 callback(dataCache);
             });
-            dataCallbacks = null;
+            dataCallbacks = [];
         }
-        dataCallbacks = [callback];
+        dataCallbacks.push(successCallback);
+        errorCallbacks.push(errorCallback);
         if (dataSourcesEndpoint) {
             if (_.isString(dataSourcesEndpoint)) {
                 $.ajax({
@@ -128,7 +134,14 @@ define([
                     success: finish,
                     error: function (jqXHR, errorType, exc) {
                         finish([]);
-                        window.console.log(util.formatExc(exc || errorType));
+                        errorCallbacks = _.compact(errorCallbacks);
+                        _.each(errorCallbacks, function(callback) {
+                            callback(jqXHR, errorType, exc);
+                        });
+                        if (!errorCallbacks.length) {
+                            window.console.log(util.formatExc(exc || errorType));
+                        }
+                        errorCallbacks = [];
                     },
                     data: {}
                 });

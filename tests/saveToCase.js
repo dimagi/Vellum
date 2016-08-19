@@ -66,7 +66,10 @@ define([
                 name: {
                     relevant: "/data/name != ''",
                     calculate: "/data/name"
-                }
+                },
+                "dash-dash": {
+                    calculate: "'-'",
+                },
             }));
             assert.equal(update.p.date_modified, '/data/meta/timeEnd');
             assert.equal(update.p.user_id, "/data/meta/userID");
@@ -108,27 +111,84 @@ define([
             util.assertXmlEqual(call("createXML"), ATTACHMENT_PROPERTY_XML);
         });
 
-        _.each({
-            "inline attachments": {
-                inline_prop: {
-                    calculate: "/data/question1",
-                    from: "inline",
+        describe("should not allow", function () {
+            var mug, spec;
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        onReady: function() {
+                            mug = util.addQuestion("SaveToCase", "mug");
+                            spec = mug.spec.attachmentProperty;
+                            done();
+                        }
+                    },
+                });
+            });
+
+            _.each({
+                "inline attachments with no name": {
+                    inline_prop: {
+                        calculate: "/data/question1",
+                        from: "inline",
+                    }
+                },
+                "invalid from strings": {
+                    from_strings: {
+                        calculate: "/data/question1",
+                        from: "blah"
+                    }
+                },
+            }, function(v, k) {
+                it("should validate " + k, function() {
+                    mug.p.useAttachment = true;
+                    mug.p.attachmentProperty = v;
+                    assert.notEqual(spec.validationFunc(mug), "pass");
+                });
+            });
+        });
+
+        describe("should allow", function() {
+            var mug, spec;
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        onReady: function() {
+                            mug = util.addQuestion("SaveToCase", "mug");
+                            spec = mug.spec.attachmentProperty;
+                            done();
+                        }
+                    },
+                });
+            });
+
+            _.each({
+                "inline attachments": {
+                    inline_prop: {
+                        calculate: "/data/question1",
+                        from: "inline",
+                        name: "test",
+                    }
+                },
+                "from strings": {
+                    from_strings: {
+                        calculate: "/data/question1",
+                        from: "local"
+                    }
+                },
+                "hyphenated properties": {
+                    "hyphen-props": {
+                        calculate: "/data/question1",
+                        from: "local"
+                    }
                 }
-            },
-            "from strings": {
-                from_strings: {
-                    calculate: "/data/question1",
-                    from: "blah"
-                }
-            }
-        }, function(v, k) {
-            it("should validate " + k, function() {
-                util.loadXML("");
-                var save = util.addQuestion("SaveToCase", "save"),
-                    spec = save.spec.attachmentProperty;
-                save.p.useAttachment = true;
-                save.p.attachmentProperty = v;
-                assert.notEqual(spec.validationFunc(save), "pass");
+            }, function(v, k) {
+                it("should validate " + k, function() {
+                    mug.p.useAttachment = true;
+                    mug.p.attachmentProperty = v;
+                    assert.equal(spec.validationFunc(mug), "pass");
+                });
             });
         });
 
@@ -137,7 +197,7 @@ define([
             var create1 = util.getMug("create1"),
                 create2 = util.getMug("create2");
             assert.equal(create1.p.case_id, "1");
-            assert.equal(create2.p.case_id, "2");
+            assert.equal(create2.p.case_id, "1");
             util.assertXmlEqual(call("createXML"), CREATE_2_PROPERTY_XML);
         });
 
@@ -164,6 +224,13 @@ define([
                 nodeset: mug.absolutePath + "/case/@case_id",
                 calculate: 'uuid()'
             });
+        });
+
+        it("should remove case_id setvalue when removing create property", function () {
+            util.loadXML(CREATE_PROPERTY_XML);
+            util.deleteQuestion('/data/save_to_case');
+            var deletedXML = call("createXML");
+            assert.equal($(deletedXML).find('setvalue').length, 0);
         });
     });
 });

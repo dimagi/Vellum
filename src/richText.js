@@ -49,6 +49,8 @@ define([
     var CASE_REF_REGEX = /^\`?#case\//,
         FORM_REF_REGEX = /^\`?#form\//,
         REF_REGEX = /^\`?#(form|case)\//,
+        // http://stackoverflow.com/a/16459606/10840
+        isWebkit = 'WebkitAppearance' in document.documentElement.style,
         bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
@@ -77,6 +79,12 @@ define([
 
             if (editor.commands.createPopover) {
                 var _this = this;
+
+                // Look for deleted bubbles
+                editor.on('change', function(e) {
+                    editor.widgets.checkWidgets({ initOnlyNew: 1 });
+                });
+
                 // if the editor is still being initialized then this command
                 // won't be enabled until it is ready
                 if (editor.status === "ready") {
@@ -126,6 +134,14 @@ define([
      *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
+        var TRAILING_SPACE = " ";
+        if (isWebkit) {
+            // HACK use ZWS to fix cursor movement/hiding near bubble
+            TRAILING_SPACE = "\u200b ";
+        }
+        function insertHtmlWithSpace(content) {
+            editor.insertHtml(content + TRAILING_SPACE);
+        }
         var wrapper = input.data("ckwrapper");
         if (wrapper) {
             return wrapper;
@@ -138,12 +154,13 @@ define([
             throw new Error("input should reference exactly one element, " +
                             "got " + input.length);
         }
+        options = options || {};
         var NOTSET = {},
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
+                placeholder: options.placeholder,
             }).editor;
-        options = options || {};
         wrapper = {
             getValue: function (callback) {
                 if (callback) {
@@ -171,25 +188,28 @@ define([
             setValue: function (value, callback) {
                 newval = value;
                 value = toRichText(value, form, options);
-                editor.setData(value, function () {
-                    newval = NOTSET;
-                    if (callback) { callback(); }
+                editor.setData(value, {
+                    callback: function () {
+                        newval = NOTSET;
+                        if (callback) { callback(); }
+                    },
+                    noSnapshot: true,
                 });
             },
             insertExpression: function (xpath) {
                 if (options.isExpression) {
-                    editor.insertHtml(bubbleExpression(xpath, form) + ' ');
+                    insertHtmlWithSpace(bubbleExpression(xpath, form));
                 } else {
                     var attrs = {'data-output-value': true},
                         output = makeBubble(form, xpath, attrs);
-                    editor.insertHtml($('<p>').append(output).html() + ' ');
+                    insertHtmlWithSpace($('<p>').append(output).html());
                 }
             },
             insertOutput: function (xpath) {
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
-                editor.insertHtml(bubbleOutputs(xpath, form) + ' ');
+                insertHtmlWithSpace(bubbleOutputs(xpath, form));
             },
             select: function (index) {
                 ckSelect.call(null, editor, index);
@@ -224,15 +244,19 @@ define([
             var range = selection.getRanges()[0];
             if (range) {
                 var pCon = range.startContainer.getAscendant({p:2},true);
-                var newRange = new CKEDITOR.dom.range(range.document);
-                newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-                newRange.select();
+                if (pCon) {
+                    var newRange = new CKEDITOR.dom.range(range.document);
+                    newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
+                    newRange.select();
+                }
             }
         });
 
         if (_.isFunction(options.createPopover)) {
             editor.addCommand('createPopover', {
                 exec: options.createPopover,
+                editorFocus: false,
+                canUndo: false,
             });
         }
 
@@ -315,7 +339,7 @@ define([
     var formats = {
             'dateFormat': {
                 serialize: function(currentValue, dataAttrs) {
-                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')", {
+                    return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')")({
                         xpath: currentValue,
                         dateFormat: dataAttrs.dateFormat
                     });
@@ -323,7 +347,7 @@ define([
             },
             'outputValue': {
                 serialize: function(currentValue) {
-                    return _.template('&lt;output value="<%=xpath%>" /&gt;', {
+                    return _.template('&lt;output value="<%=xpath%>" /&gt;')({
                         xpath: currentValue
                     });
                 },
@@ -383,10 +407,16 @@ define([
      */
     function makeBubble(form, xpath, extraAttrs) {
         function _parseXPath(xpath, form) {
-            if (CASE_REF_REGEX.test(xpath) && form.isValidHashtag(xpath)) {
-                return {
-                    classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
-                };
+            if (CASE_REF_REGEX.test(xpath)) {
+                if (form.isValidHashtag(xpath)) {
+                    return {
+                        classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
+                    };
+                } else if (form.hasValidHashtagPrefix(xpath)) {
+                    return {
+                        classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
+                    };
+                }
             }
 
             var icon = form.getIconByPath(xpath);
@@ -502,7 +532,7 @@ define([
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
-                   .replace(/(&nbsp;|\xa0)/ig, " ")
+                   .replace(/(&nbsp;|\xa0|\u200b | \u200b|\u200b)/ig, " ")
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }
@@ -596,8 +626,10 @@ define([
                         labelText.find('output').replaceWith(function () {
                             return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
                         });
+
                         // Remove ckeditor-supplied title attributes, which will otherwise override popover title
                         $imgs.removeAttr("title");
+
                         $imgs.popover({
                             trigger: 'hover',
                             container: 'body',
@@ -628,6 +660,8 @@ define([
     }
 
     return {
+        REF_REGEX: REF_REGEX,
+        applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: initEditor,
         fromRichText: fromRichText,

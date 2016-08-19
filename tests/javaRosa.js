@@ -4,6 +4,7 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
+    'vellum/javaRosa/itext',
     'vellum/javaRosa/util',
     'vellum/util',
     'text!static/javaRosa/outputref-group-rename.xml',
@@ -31,6 +32,7 @@ define([
     $,
     _,
     util,
+    jrItext,
     jr,
     vellumUtil,
     OUTPUTREF_GROUP_RENAME_XML,
@@ -94,11 +96,13 @@ define([
                 util.addQuestion("Text", "question2");
                 var widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () {
-                    widget.setValue('<output value="/data/question1" /> a ' +
+                    var itext = '<output value="/data/question1" /> a ' +
                     '<output value="/data/question1"/> b ' +
                     '<output value="/data/question1"></output> c ' +
                     '<output value="/data/question1" ></output> d ' +
-                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />');
+                    '<output value="if(/data/question1 = \'\', \'\', format-date(date(/data/question1), \'%a%b%c\'))" />';
+                    widget.setItextValue(itext);
+                    widget.setValue(itext);
                     var widget2 = util.getWidget('itext-hin-label');
                     widget2.input.promise.then(function () {
                         widget2.setValue('<output value="/data/question1"></output>');
@@ -106,7 +110,7 @@ define([
                         $("[name=property-nodeID]").val('first_question').change();
                         util.assertXmlEqual(
                             call('createXML'),
-                            util.xmlines(TEST_XML_4),
+                            TEST_XML_4,
                             {normalize_xmlns: true}
                         );
                         done();
@@ -120,10 +124,12 @@ define([
                 util.addQuestion("Text", "question2");
                 var widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () {
-                    widget.setValue('<output value="/data/question1" /> ' +
+                    var itext = '<output value="/data/question1" /> ' +
                         '<output value="/data/question11" /> ' +
                         '<output value="/data/question1/b" /> ' +
-                        '<output value="/data/question1b" /> ');
+                        '<output value="/data/question1b" /> ';
+                    widget.setItextValue(itext);
+                    widget.setValue(itext);
                     var widget2 = util.getWidget('itext-hin-label');
                     widget2.input.promise.then(function () {
                         widget2.setValue('question2');
@@ -243,7 +249,7 @@ define([
 
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
@@ -252,7 +258,7 @@ define([
             util.loadXML(TEST_XML_2_WITH_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
@@ -261,7 +267,7 @@ define([
             util.loadXML(TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
-                util.xmlines(TEST_XML_2),
+                TEST_XML_2,
                 {normalize_xmlns: true}
             );
         });
@@ -747,6 +753,22 @@ define([
         });
         var mug;
 
+        it ("should detect whether or not readable itext labels are present", function() {
+            var model = new jrItext.model(),
+                item = new jrItext.item({
+                    itextModel: model,
+                });
+            assert(!item.hasHumanReadableItext(), "No recognized forms");
+            item.addForm('short');
+            assert(item.hasHumanReadableItext(), "Recognized form");
+            model.addLanguage('en');
+            assert(!item.hasHumanReadableItext(), "No English text");
+            item.getForm('short').setValue('en', 'thing');
+            assert(item.hasHumanReadableItext(), "Has English text");
+            model.addLanguage('hin');
+            assert(!item.hasHumanReadableItext(), "No Hindi text");
+        });
+
         function testItextIdValidation(property) {
             it("should not display " + property + " validation error for autoId itext", function() {
                 var itext = mug.p[property],
@@ -895,6 +917,22 @@ define([
 
                 mug.dropMessage(property, "core-circular-reference-warning");
                 assert.deepEqual(mug.messages.get(property), []);
+        });
+
+        it("should show a validation error for choices without labels", function() {
+            util.loadXML("");
+            var select = util.addQuestion("Select", "question1"),
+                item = select.form.getChildren(select)[0];
+            util.clickQuestion("question1/choice1");
+
+            var messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+
+            $("[name='itext-en-label']").val('').change();
+
+            messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 1);
+            assert(messages[0].match(/required/i));
         });
     });
 
