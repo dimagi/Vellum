@@ -185,6 +185,12 @@ define([
         removeHashtag: function(hashtag) {
             delete this.hashtagDictionary[hashtag];
         },
+        clearNullHashtags: function () {
+            this.hashtagDictionary = _.chain(this.hashtagDictionary)
+              .map(function(v, k) { return [k, v]; })
+              .filter(function (v) { return !_.isNull(v[1]); })
+              .object().value();
+        },
         transform: function(input, transformFn) {
             input = this.normalizeEscapedHashtag(input);
             return escapedHashtags.transform(input, transformFn);
@@ -214,8 +220,8 @@ define([
                 return [];
             }
         },
-        referencedHashtags: function () {
-            return this._logicManager.referencedHashtags();
+        knownExternalReferences: function () {
+            return this._logicManager.knownExternalReferences();
         },
         referenceHashtag: function(hashtag, mug, property) {
             if (/^#case\//.test(hashtag.toHashtag())) {

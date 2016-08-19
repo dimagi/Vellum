@@ -162,11 +162,19 @@ define([
                 });
             });
 
-            it("should not send deleted references", function() {
+            it("should not send deleted references", function () {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
                 util.deleteQuestion('/data/mug');
                 assert.deepEqual(manager.caseReferences().preload, { });
+            });
+
+            it("should not write unknown case properties to xml", function () {
+                var form = util.loadXML(""),
+                    manager = form._logicManager,
+                    mug = util.addQuestion('Text', 'text');
+                mug.p.defaultValue = '#case/not-here';
+                assert.deepEqual(manager.knownExternalReferences(), { });
             });
         });
     });
