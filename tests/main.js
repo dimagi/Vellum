@@ -11,10 +11,7 @@ Function.prototype.bind = Function.prototype.bind || function (thisp) {
 
 (function () { // begin local scope
 
-var useBuilt, baseUrl, testBase, search = window.location.search;
-
-// use built version if query string contains "built" parameter
-useBuilt = !!search.match(/[?&]?built(=[^&]*)?(&|$)/);
+var useBuilt = window.useBuilt, baseUrl, testBase;
 
 if (useBuilt) {
     baseUrl = '_build/src';
