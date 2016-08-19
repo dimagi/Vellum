@@ -85,7 +85,7 @@ define([
                 if (path.endsWith("`")) {
                     path = path.slice(0, -1);
                 }
-                 return path;
+                return path;
             },
             transform: function (path) {
                 return escapedHashtags.transform(path, function (path) {
