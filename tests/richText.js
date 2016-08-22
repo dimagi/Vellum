@@ -530,6 +530,17 @@ define([
                     });
                 });
 
+                it("should not change saved state", function (done) {
+                    util.loadXML(BURPEE_XML);
+                    assert(!util.saveButtonEnabled(), "Save button should not be enabled");
+                    util.clickQuestion("total_num_burpees");
+                    widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        assert(!util.saveButtonEnabled(), "Save button should not be enabled");
+                        done();
+                    });
+                });
+
                 it("should show xpath on popover", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");
@@ -564,17 +575,6 @@ define([
                         // popover destroy just fades the popover
                         assert.strictEqual($('.popover:not(.fade)').length, 0);
 
-                        done();
-                    });
-                });
-
-                it("should not change saved state", function (done) {
-                    util.loadXML(BURPEE_XML);
-                    assert(!util.saveButtonEnabled(), "Save button should not be enabled");
-                    util.clickQuestion("total_num_burpees");
-                    widget = util.getWidget('property-calculateAttr');
-                    widget.input.promise.then(function () {
-                        assert(!util.saveButtonEnabled(), "Save button should not be enabled");
                         done();
                     });
                 });
