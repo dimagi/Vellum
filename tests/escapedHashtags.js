@@ -63,7 +63,7 @@ define([
                     "#form/text1": "/data/text1",
                     "#form/text2": "/data/text2",
                 },
-                xpathParser = xpath.createParser(xpath.makeXPathModels(translationDict));
+                xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
@@ -80,7 +80,7 @@ define([
                     "#form/text1": "/data/text1",
                     "#form/text2": "/data/text2",
                 },
-                xpathParser = xpath.createParser(xpath.makeXPathModels(translationDict));
+                xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
