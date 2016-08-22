@@ -36,7 +36,7 @@ requirejs.config({
         'vellum': '.',
 
         'codemirror': '../lib/codemirror/xml',
-        'codemirrorBase': '../lib/codemirror/codemirror',
+        'codemirrorBase': '../bower_components/codemirror/lib/codemirror',
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
@@ -68,7 +68,7 @@ requirejs.config({
     },
     shim: {
         'codemirror': {
-            deps: ['codemirrorBase', 'css!../lib/codemirror/codemirror'],
+            deps: ['codemirrorBase', 'css!../bower_components/codemirror/lib/codemirror'],
             exports: 'CodeMirror',
         },
         'codemirrorBase': {
