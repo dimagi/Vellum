@@ -41,7 +41,7 @@ requirejs.config({
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
-        'jquery.bootstrap': '../lib/bootstrap',
+        'jquery.bootstrap': '../bower_components/bootstrap/dist/js/bootstrap',
         'underscore': '../bower_components/underscore/underscore',
         'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
 
