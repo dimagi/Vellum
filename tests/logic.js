@@ -276,7 +276,7 @@ define([
                 "#form/text1": "/data/text1",
                 "#form/text2": "/data/text2",
             },
-            xpathParser = xpath.createParser(xpath.makeXPathModels(translationDict));
+            xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
 
             function compareHashtags(expr, expected) {
                 var tags = _.map(expr.getHashtags(), getHashtags);

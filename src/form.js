@@ -138,7 +138,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = escapedHashtags.parser(this.hashtagDictionary, this.hashtagTransformations);
+        this.xpath = escapedHashtags.parser(_this);
         this.richText = !!vellum.opts().features.rich_text;
         this.undomanager = new undomanager();
 
