@@ -33,6 +33,7 @@
         "Caret.js": "0.2.2",
         "fuse.js": "~2.3.0",
 
+        "bootstrap": "3.3.6",
         "jstree": "~3.2.1",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
