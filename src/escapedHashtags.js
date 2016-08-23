@@ -186,8 +186,8 @@ define([
     /*
      * extends xpath parser to be aware of escaped hashtags
      */
-    function parser(form) {
-        var xpathParser = xpath.createParser(xpath.makeXPathModels(form));
+    function parser(hashtagConfig) {
+        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagConfig));
         return {
             parse: function (input) {
                 if (input.startsWith("#invalid/xpath ")) {
