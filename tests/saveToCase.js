@@ -232,5 +232,26 @@ define([
             var deletedXML = call("createXML");
             assert.equal($(deletedXML).find('setvalue').length, 0);
         });
+
+        it("should remove case_id setvalue when removing newly created mug", function () {
+            util.loadXML("");
+            assert.equal($(call("createXML")).find('setvalue').length, 0);
+            var mug = util.addQuestion("SaveToCase", 'case', {
+                case_id: 'uuid()',
+                user_id: 'uuid()',
+                useCreate: true,
+            });
+            mug.p.createProperty = {
+                'case_type': {
+                    'calculate': 'type'
+                },
+                'case_name': {
+                    'calculate': 'name',
+                },
+            };
+            assert.equal($(call("createXML")).find('setvalue').length, 1);
+            util.deleteQuestion('/data/case');
+            assert.equal($(call("createXML")).find('setvalue').length, 0);
+        });
     });
 });

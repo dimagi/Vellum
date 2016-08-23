@@ -49,14 +49,6 @@ define([
             indexesCase(mug) || attachmentCase(mug);
     }
 
-    function addSetValue(mug) {
-        var path = mug.absolutePath;
-
-        if (createsCase(mug) && !mug.isInRepeat()) {
-            mug.form.addSetValue('xforms-ready', path + "/case/@case_id", mug.p.case_id);
-        }
-    }
-
     var propertyWidget = function (mug, options) {
             var widget = widgets.normal(mug, options),
                 id = options.id,
@@ -364,7 +356,6 @@ define([
                 }
             },
             getExtraDataAttributes: function (mug) {
-                addSetValue(mug);
                 return {
                     "vellum:role": "SaveToCase"
                 };
@@ -541,7 +532,17 @@ define([
                     });
                 }
                 return $([]);
-            }
+            },
+            getSetValues: function(mug) {
+                if (createsCase(mug) && !mug.isInRepeat()) {
+                    return [{
+                        event: 'xforms-ready',
+                        ref: mug.absolutePath + '/case/@case_id',
+                        value: mug.p.case_id,
+                    }];
+                }
+                return [];
+            },
         },
         sectionData = {
             SaveToCase: [
