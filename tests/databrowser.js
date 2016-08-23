@@ -396,6 +396,29 @@ define([
                         test = JSON.parse($.trim(hashtags.text()));
                     assert.deepEqual(test, {"#case/dob":null});
                 });
+
+                it("the parser and form should point to same hashtag dictionary", function (done) {
+                    // this test probably knows a little too much about the form's inner workings...
+                    var form = call('getData').core.form,
+                        origFormDict = form.hashtagDictionary,
+                        parser = form.xpath;
+                    event.fire('loadCaseData');
+                    loadDataTree(function() {
+                        var newForm = call('getData').core.form,
+                            newFormDict = newForm.hashtagDictionary,
+                            newParser = newForm.xpath;
+
+                        // expect that the translation dictionary will change after loading case
+                        // properties, but the parser should not
+                        assert.notStrictEqual(newFormDict, origFormDict);
+                        assert.strictEqual(newParser, parser);
+
+                        util.addQuestion('Text', 'text');
+                        var parsedResult = parser.parse('#form/text').toXPath();
+                        assert.strictEqual(parsedResult, '/data/text');
+                        done();
+                    });
+                });
             });
 
             it("should error for unknown properties", function(done) {
