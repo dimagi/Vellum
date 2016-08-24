@@ -176,6 +176,18 @@ define([
                 mug.p.defaultValue = '#case/not-here';
                 assert.deepEqual(manager.knownExternalReferences(), { });
             });
+
+            it("should send parent path for choice", function () {
+                var form = util.loadXML(""),
+                    manager = form._logicManager;
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/select", "Select", "select"],
+                    ["/select/choice", "Choice", '<output value="#case/dob" />'],
+                ]);
+                assert.deepEqual(manager.caseReferences().preload,
+                                 {"/data/select": "dob"});
+            });
         });
     });
 
