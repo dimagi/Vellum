@@ -458,8 +458,21 @@ define([
                 .values()
                 .flatten(true)
                 .map(function(ref) {
-                    var prop = ref.path.slice(CASE_REF_ID.length);
-                    return [_this.form.normalizeXPath(ref.sourcePath), prop];
+                    var prop = ref.path.slice(CASE_REF_ID.length),
+                        path = _this.form.normalizeXPath(ref.sourcePath);
+                    if (path === null) {
+                        // Choices have null path, use parent path.
+                        // This is a little fragile. Currently all mug types
+                        // that have a null path also have a parent that does
+                        // not have a null path. If that ever changes this will
+                        // likely need to change.
+                        var parent = _this.form.getMugByUFID(ref.mug).parentMug;
+                        if (parent) {
+                            path = parent.absolutePath;
+                        }
+                    }
+                    // FIXME path may not be unique, last pair wins on -> object
+                    return [path, prop];
                 }).object().value();
 
             return ret;
