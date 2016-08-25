@@ -1904,7 +1904,7 @@ define([
             data = {xform: formText};
         }
 
-        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+        data.case_references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
 
         this.data.core.saveButton.ajax({
             type: "POST",
