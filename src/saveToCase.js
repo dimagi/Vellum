@@ -295,11 +295,19 @@ define([
                             var props = _.without(_.keys(mug.p.indexProperty), ""),
                                 invalidProps = _.filter(props, function(p) {
                                     return !VALID_PROP_REGEX.test(p);
+                                }),
+                                relationships = _.map(mug.p.indexProperty, function (v, k) {
+                                    return v.relationship;
+                                }),
+                                invalidRelationships = _.filter(relationships, function (r) {
+                                    return !_.contains(['child', 'extension'], r);
                                 });
 
                             if (invalidProps.length > 0) {
                                 return invalidProps.join(", ") + 
                                     " are invalid properties";
+                            } else if (invalidRelationships.length > 0) {
+                                return "Relationship must be child or extension";
                             }
                         }
                         return 'pass';
