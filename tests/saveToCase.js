@@ -253,5 +253,19 @@ define([
             util.deleteQuestion('/data/case');
             assert.equal($(call("createXML")).find('setvalue').length, 0);
         });
+
+        it("should only allow extension and child as relationship", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useIndex = true;
+            mug.p.indexProperty = {
+                "casename": {
+                    calculate: "/data/question1",
+                    caseType: "type",
+                    relationship: "notchildorextension",
+                }
+            };
+            assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "Relationship must be child or extension");
+        });
     });
 });
