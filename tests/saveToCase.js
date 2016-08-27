@@ -267,5 +267,25 @@ define([
             };
             assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "Relationship must be child or extension");
         });
+
+        it("should only not error on empty extension ref", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useIndex = true;
+            mug.p.indexProperty = {
+                "casename": {
+                    calculate: "/data/question1",
+                    caseType: "type",
+                    relationship: "child",
+                },
+                "": {
+                    calculate: "",
+                    caseType: "",
+                    relationship: "",
+                },
+
+            };
+            assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "pass");
+        });
     });
 });

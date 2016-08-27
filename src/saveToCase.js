@@ -296,9 +296,9 @@ define([
                                 invalidProps = _.filter(props, function(p) {
                                     return !VALID_PROP_REGEX.test(p);
                                 }),
-                                relationships = _.map(mug.p.indexProperty, function (v, k) {
+                                relationships = _.without(_.map(mug.p.indexProperty, function (v, k) {
                                     return v.relationship;
-                                }),
+                                }), ""),
                                 invalidRelationships = _.filter(relationships, function (r) {
                                     return !_.contains(['child', 'extension'], r);
                                 });
