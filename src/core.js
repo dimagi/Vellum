@@ -1694,7 +1694,7 @@ define([
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
                 isCollapsed: !!options.isCollapsed,
-                help: options.help || {}
+                help: options.help
             })),
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
