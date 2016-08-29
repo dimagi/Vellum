@@ -94,7 +94,7 @@ define([
                         }
                     } else if (node instanceof this._xpathParser.models.XPathFuncExpr) {
                         if (!this._addInstanceRef(node)) {
-                            this.functionRefs[node.id] = null;
+                            this.functionRefs[node.id] = node;
                         }
                     } else if (node instanceof this._xpathParser.models.HashtagExpr) {
                         hashtags.push(node);
@@ -236,7 +236,6 @@ define([
                 form = _this.form,
                 expr = new LogicExpression(value || mug.p[property], form.xpath),
                 unknowns = [],
-                unknownFunctions = [],
                 messages = [],
                 warning = "",
                 propertyName = mug.spec[property] ? mug.spec[property].lstring : property,
@@ -304,9 +303,15 @@ define([
             _.each(expr.hashtags, function (hashtag) {
                 form.referenceHashtag(hashtag, mug, property);
             });
-            _.each(expr.functionRefs, function (ignore, name) {
-                if (!_.contains(_this.opts.allowedFunctionNames, name)) {
-                    unknownFunctions.push(name);
+            var fnErrors = [];
+            _.each(expr.functionRefs, function (node, name) {
+                if (_.isFunction(_this.opts.allowedFunctionNames[name])) {
+                    var result = _this.opts.allowedFunctionNames[name](node);
+                    if (result !== 'pass') {
+                        fnErrors.push(result);
+                    }
+                } else {
+                    fnErrors.push("Unknown function (" + name + ")");
                 }
             });
             if (unknowns.length > 0) {
@@ -329,10 +334,10 @@ define([
                     } else if (unknowns.length > 1) {
                         questionErrorString = "Unknown questions:\n- " + unknowns.join("\n- ");
                     }
-                    if (unknownFunctions.length === 1) {
-                        functionErrorString += "Unknown function: " + unknownFunctions[0];
-                    } else if (unknownFunctions.length > 1) {
-                        functionErrorString += "Unknown functions:\n- " + unknownFunctions.join("\n- ");
+                    if (fnErrors.length === 1) {
+                        functionErrorString += "Function error: " + fnErrors[0];
+                    } else if (fnErrors.length > 1) {
+                        functionErrorString += "Function errors:\n- " + fnErrors.join("\n- ");
                     }
 
                     if (questionErrorString) {

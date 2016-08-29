@@ -123,9 +123,24 @@ define(["underscore"], function (_) {
                 "meta/timeEnd",
                 "meta/location",
             ],
-            allowedFunctionNames: [
-                'blah',
-            ],
+            allowedFunctionNames: {
+                div: function (node) {
+                    return 'pass';
+                },
+                not: function (node) {
+                    return 'pass';
+                },
+                mod: function (node) {
+                    return 'pass';
+                },
+                if: function (node) {
+                    if (node.args.length !== 3) {
+                        return "if takes three arguments";
+                    }
+                    return 'pass';
+                },
+            },
+
             dataSourcesEndpoint: function (callback) { callback(dataSources); },
             invalidCaseProperties: ['name'],
             saveType: "patch",
