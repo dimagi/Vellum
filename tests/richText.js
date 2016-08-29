@@ -515,6 +515,14 @@ define([
                         assert.strictEqual($widget.find(".label-datanode-unknown").length, 1);
                     });
                 });
+
+                it("should have native spellchecking on labels", function () {
+                    assert.strictEqual($('[name=itext-en-label]').attr('spellcheck'), 'true');
+                });
+
+                it("should not have native spellchecking on xpaths", function () {
+                    assert.strictEqual($('[name=property-relevantAttr]').attr('spellcheck'), 'false');
+                });
             });
 
             describe("popovers", function () {
