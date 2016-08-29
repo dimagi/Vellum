@@ -86,7 +86,6 @@ define([
             },
             getExtraDataAttributes: function (mug) {
                 // HACK must happen before <setvalue> and "other" <instance> elements are written
-                prepareForWrite(mug);
                 if (!mug.p.dataSource.idsQuery) {
                     return oldRepeat.getExtraDataAttributes(mug);
                 }
@@ -163,9 +162,41 @@ define([
                     }
                 }
             },
-            ignoreReferenceWarning: function(mug) {
+            ignoreReferenceWarning: function (mug) {
                 return isModelRepeat(mug);
-            }
+            },
+            getSetValues: function (mug) {
+                var path = mug.absolutePath,
+                    query = mug.p.dataSource.idsQuery,
+                    ret = [];
+
+                if (query) {
+                    path = path.replace(/\/item$/, "");
+                    mug.p.repeat_count = path + "/@count";
+
+                    // add/update <setvalue> elements
+                    var isNested = mug.parentMug && mug.parentMug.isInRepeat(),
+                        setvalues = mug.p.setvalues;
+                    _.each(setvalueData, function (data) {
+                        var event = isNested ? "jr-insert": data.event,
+                            value = setvalues[data.key];
+                        if (!value) {
+                            value = {};
+                        }
+                        value.ref = path + data.path + "/@" + data.key;
+                        value.value = data.query.replace("{}", data.key === "ids" ? query : path);
+                        if (!value.event) {
+                            value.event = event;
+                        }
+                        ret.push({
+                            event: event,
+                            ref: value.ref,
+                            value: value.value
+                        });
+                    });
+                }
+                return ret;
+            },
         };
 
     $.vellum.plugin("modeliteration", {}, {
@@ -264,6 +295,7 @@ define([
             }
             mug.p.rawDataAttributes = _.omit(
                 mug.p.rawDataAttributes, ["ids", "count", "current_index"]);
+            dropSetValues(mug);
         },
         loadXML: function () {
             this.__callOld();
@@ -273,8 +305,6 @@ define([
                     mug.p.dataSourceChanged = true;
                     updateDataSource(mug, event.val, event.previous);
                 }
-            }).on("question-remove", function (event) {
-                dropSetValues(event.mug);
             });
         }
     });
@@ -346,45 +376,6 @@ define([
             }
             mug.form.vellum.handleMugRename(
                 mug.form, mug, nodeID, nodeID, hashPath, oldHash, oldParent);
-        }
-    }
-
-    function prepareForWrite(mug) {
-        var path = mug.absolutePath;
-        if (!mug.p.dataSourceChanged && mug.p.originalPath === path) {
-            return;
-        }
-
-        var query = mug.p.dataSource.idsQuery;
-
-        if (query) {
-            path = path.replace(/\/item$/, "");
-            mug.p.repeat_count = path + "/@count";
-
-            // add/update <setvalue> elements
-            var isNested = mug.parentMug && mug.parentMug.isInRepeat(),
-                setvalues = mug.p.setvalues,
-                setvaluesById = _.groupBy(mug.form.getSetValues(), "_id");
-            _.each(setvalueData, function (data) {
-                var event = isNested ? "jr-insert": data.event,
-                    value = setvalues[data.key],
-                    setvalue = null;
-                if (value) {
-                    setvalue = setvaluesById[value._id] || {};
-                } else {
-                    value = {};
-                }
-                value.ref = path + data.path + "/@" + data.key;
-                value.value = data.query.replace("{}", data.key === "ids" ? query : path);
-                if (!value.event) {
-                    setvalues[data.key] = mug.form.addSetValue(
-                        event, value.ref, value.value);
-                } else {
-                    value.event = event;
-                }
-            });
-        } else {
-            dropSetValues(mug);
         }
     }
 
