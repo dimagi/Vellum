@@ -85,7 +85,6 @@ define([
                 return children;
             },
             getExtraDataAttributes: function (mug) {
-                // HACK must happen before <setvalue> and "other" <instance> elements are written
                 if (!mug.p.dataSource.idsQuery) {
                     return oldRepeat.getExtraDataAttributes(mug);
                 }
