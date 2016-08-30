@@ -435,7 +435,7 @@ define([
             });
 
             var done = function (val) {
-                $div.find('.fd-xpath-editor').hide();
+                $div.find('.fd-xpath-editor').addClass("hide");
                 options.done(val);
             };
 

@@ -1478,7 +1478,7 @@ define([
         $props.animate({}, 200);
 
         this.showContentRight();
-        $props.hide();
+        $props.addClass("hide");
 
         this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),
@@ -1511,7 +1511,7 @@ define([
         mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
         refreshMessages();
 
-        $props.show();
+        $props.removeClass("hide");
         this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
@@ -1549,11 +1549,11 @@ define([
     };
 
     fn.showQuestionProperties = function () {
-        this.$f.find('.fd-question-properties').show();
+        this.$f.find('.fd-question-properties').removeClass("hide");
     };
 
     fn.hideQuestionProperties = function () {
-        this.$f.find('.fd-question-properties').hide();
+        this.$f.find('.fd-question-properties').addClass("hide");
     };
 
     /**
@@ -1582,10 +1582,10 @@ define([
             done(val);
             if (_this.data.core.hasXPathEditorChanged) {
                 _this.data.core.hasXPathEditorChanged = false;
-                $editor.hide();
+                $editor.addClass("hide");
                 _this.refreshCurrentMug();
             } else {
-                $editor.hide();
+                $editor.addClass("hide");
                 _this.showQuestionProperties();
             }
         };
