@@ -1475,7 +1475,6 @@ define([
         this.$f.find('.fd-default-panel').addClass('hide');
 
         /* update display */
-        $props.animate({}, 200);
 
         this.showContentRight();
         $props.addClass("hide");
