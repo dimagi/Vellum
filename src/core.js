@@ -1130,6 +1130,7 @@ define([
                         _this.data.core.saveButton.fire('change');
                     }
                 } else {
+                    _this.$f.find('.fd-content-right .fd-column').addClass('hide');
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
                 hidePageSpinner();
@@ -1305,6 +1306,7 @@ define([
                 // otherwise clear the Question Edit UI pane
                 this.jstree('deselect_all');
                 this.hideQuestionProperties();
+                this.$f.find('.fd-content-right .fd-column').addClass('hide');
                 this.$f.find('.fd-default-panel').removeClass('hide');
                 return false;
             }
@@ -1510,6 +1512,7 @@ define([
         mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
         refreshMessages();
 
+        this.$f.find('.fd-content-right .fd-column').addClass("hide");
         $props.removeClass("hide");
         this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
@@ -1548,6 +1551,7 @@ define([
     };
 
     fn.showQuestionProperties = function () {
+        this.$f.find('.fd-content-right .fd-column').addClass("hide");
         this.$f.find('.fd-question-properties').removeClass("hide");
     };
 
@@ -1595,7 +1599,8 @@ define([
                 change(val);
             }
         };
-        $editor.show();
+        _this.$f.find('.fd-content-right .fd-column').addClass('hide');
+        $editor.removeClass("hide");
         options.loadEditor(_this.$f.find('.fd-xpath-editor-content'), options);
     };
 
