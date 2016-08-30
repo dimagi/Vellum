@@ -159,6 +159,7 @@ define([
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
+                disableNativeSpellChecker: options.disableNativeSpellChecker,
                 placeholder: options.placeholder,
             }).editor;
         wrapper = {

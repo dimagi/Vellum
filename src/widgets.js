@@ -278,6 +278,7 @@ define([
 
         var opts = {
                 isExpression: options.widget === xPath || options.widget === droppableText,
+                disableNativeSpellChecker: options.disableNativeSpellChecker,
                 rtl: util.isRightToLeftLanguage(options.language),
                 placeholder: options.widgetPlaceholder,
             },
@@ -386,6 +387,7 @@ define([
     };
 
     var xPath = function (mug, options) {
+        options.disableNativeSpellChecker = true;
         var widget = richInput(mug, options),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
