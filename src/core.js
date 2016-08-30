@@ -1476,8 +1476,6 @@ define([
             };
         this.$f.find('.fd-default-panel').addClass('hide');
 
-        /* update display */
-
         this.showContentRight();
         $props.addClass("hide");
 
