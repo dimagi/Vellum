@@ -157,16 +157,15 @@ define([
             it("should be the correct format", function() {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
-                assert.deepEqual(manager.caseReferences().preload, {
-                    "/data/mug":"parent/edd"
-                });
+                assert.deepEqual(manager.caseReferences(),
+                    {load: {"/data/mug": ["parent/edd"]}});
             });
 
             it("should not send deleted references", function () {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
                 util.deleteQuestion('/data/mug');
-                assert.deepEqual(manager.caseReferences().preload, { });
+                assert.deepEqual(manager.caseReferences(), {load: {}});
             });
 
             it("should not write unknown case properties to xml", function () {
@@ -185,8 +184,20 @@ define([
                     ["/select", "Select", "select"],
                     ["/select/choice", "Choice", '<output value="#case/dob" />'],
                 ]);
-                assert.deepEqual(manager.caseReferences().preload,
-                                 {"/data/select": "dob"});
+                assert.deepEqual(manager.caseReferences(),
+                                 {load: {"/data/select": ["dob"]}});
+            });
+
+            it("should send all properties referenced by a question", function () {
+                var form = util.loadXML(""),
+                    manager = form._logicManager;
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/select", "Select", '<output value="#case/name" />'],
+                    ["/select/choice", "Choice", '<output value="#case/dob" />'],
+                ]);
+                assert.deepEqual(manager.caseReferences(),
+                                 {load: {"/data/select": ["name", "dob"]}});
             });
         });
     });

@@ -444,38 +444,32 @@ define([
         },
         // This is to tell HQ's case summary what is referenced
         caseReferences: function () {
-            // hq implementation details
-            var ret = {
-                condition: {
-                    answer: null,
-                    question: null,
-                    type: 'always',
-                    operator: null
-                }
-            }, _this = this;
-
-            ret.preload = _.chain(this.reverse[CASE_REF_ID] || {})
-                .values()
-                .flatten(true)
-                .map(function(ref) {
-                    var prop = ref.path.slice(CASE_REF_ID.length),
-                        path = _this.form.normalizeXPath(ref.sourcePath);
-                    if (path === null) {
-                        // Choices have null path, use parent path.
-                        // This is a little fragile. Currently all mug types
-                        // that have a null path also have a parent that does
-                        // not have a null path. If that ever changes this will
-                        // likely need to change.
-                        var parent = _this.form.getMugByUFID(ref.mug).parentMug;
-                        if (parent) {
-                            path = parent.absolutePath;
-                        }
+            var _this = this,
+                load = {};
+            _.each(_.flatten(_.values(this.reverse[CASE_REF_ID] || {})), function(ref) {
+                var prop = ref.path.slice(CASE_REF_ID.length),
+                    path = _this.form.normalizeXPath(ref.sourcePath);
+                if (path === null) {
+                    // Choices have null path, use parent path.
+                    // This is a little fragile. Currently all mug types
+                    // that have a null path also have a parent that does
+                    // not have a null path. If that ever changes this will
+                    // likely need to change.
+                    var parent = _this.form.getMugByUFID(ref.mug).parentMug;
+                    if (parent) {
+                        path = parent.absolutePath;
                     }
-                    // FIXME path may not be unique, last pair wins on -> object
-                    return [path, prop];
-                }).object().value();
+                }
+                if (load.hasOwnProperty(path)) {
+                    if (!_.contains(load[path], prop)) {
+                        load[path].push(prop);
+                    }
+                } else {
+                    load[path] = [prop];
+                }
+            });
 
-            return ret;
+            return {load: load};
         },
         // returns object of external references that are known to be valid
         knownExternalReferences: function () {
