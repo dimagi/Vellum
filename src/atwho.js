@@ -97,6 +97,7 @@ define([
                     insertTpl: options.insertTpl,
                     limit: 10,
                     maxLen: 30,
+                    startWithSpace: false,
                     tabSelectsMatch: false,
                     callbacks: {
                         matcher: function(flag, subtext) {
@@ -136,7 +137,7 @@ define([
                             return value;
                         },
                         afterMatchFailed: function(at, $el) {
-                            if (options.useRichText) {
+                            if (options.useRichText && $el.html()) {
                                 // If user typed out a full legitimate hashtag, or something that isn't
                                 // legit but looks vaguely like a case property, turn it into a bubble.
                                 var content = $el.html().trim().replace(/^.*\s/, ""),
