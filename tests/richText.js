@@ -305,6 +305,7 @@ define([
                      '{text} &lt;tag /&gt; {othertext}'],
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
+                    ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
                 ],
                 ico = icon('fcc-fd-text');
 
