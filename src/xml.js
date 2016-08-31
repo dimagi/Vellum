@@ -29,7 +29,12 @@ define([
             if (!/[<>&]/.test(value)) {
                 return value; // value contains no XML tags
             }
+            var t0 = window.performance.now();
             value = inner ? $(value) : $("<div />").append(fixGTBug(value));
+            var t1 = window.performance.now();
+            if (t1 - t0 > 1000) {
+                window.console.log("fixing greater than bug took " + (t1 - t0))
+            }
         }
         var xml = new XMLSerializer(),
             xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ \/>])/g,
