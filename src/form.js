@@ -125,7 +125,7 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
-        this.hashtagDictionary = {};
+        this.hashtagMap = {};
         this.hashtagTransformations = {};
         this.tree = new Tree('data', 'control');
         this.addHashtag('#form', '/data');
@@ -156,7 +156,7 @@ define([
     Form.prototype = {
         isValidHashtag: function(tag) {
             tag = this.normalizeHashtag(tag);
-            return this.hashtagDictionary.hasOwnProperty(tag);
+            return this.hashtagMap.hasOwnProperty(tag);
         },
         isValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
@@ -170,11 +170,11 @@ define([
                 tag.substring(lastSlashIndex + 1) !== "";
         },
         addHashtag: function(hashtag, xpath) {
-            this.hashtagDictionary[hashtag] = xpath;
+            this.hashtagMap[hashtag] = xpath;
         },
         initHashtag: function(hashtag, xpath) {
-            if (!this.hashtagDictionary[hashtag]) {
-                this.hashtagDictionary[hashtag] = xpath;
+            if (!this.hashtagMap[hashtag]) {
+                this.addHashtag(hashtag, xpath);
             }
         },
         initHashtagTransformation: function(prefix, transformation) {
@@ -183,10 +183,10 @@ define([
             }
         },
         removeHashtag: function(hashtag) {
-            delete this.hashtagDictionary[hashtag];
+            delete this.hashtagMap[hashtag];
         },
         clearNullHashtags: function () {
-            this.hashtagDictionary = _.chain(this.hashtagDictionary)
+            this.hashtagMap = _.chain(this.hashtagMap)
               .map(function(v, k) { return [k, v]; })
               .filter(function (v) { return !_.isNull(v[1]); })
               .object().value();

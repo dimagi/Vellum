@@ -1,10 +1,12 @@
 define([
+    'underscore',
     'chai',
     'vellum/escapedHashtags',
     'vellum/xpath',
     'tests/utils',
     'text!static/escapedHashtags/invalid-xpath.xml',
 ], function (
+    _,
     chai,
     escapedHashtags,
     xpath,
@@ -18,6 +20,14 @@ define([
             var ret = input.split('/');
             return ret[ret.length-1];
         }
+
+        var hashtagMap = {
+                "#form/text1": "/data/text1",
+                "#form/text2": "/data/text2",
+            },
+            hashtagInfo = {
+                hashtagMap: hashtagMap,
+            };
 
         describe("#transform()", function() {
             var testCases = [
@@ -63,11 +73,7 @@ define([
                     // ideally no change, but too hard right now (to much extra parsing going on)
                     ["`#form/text1`-1", "`#form/text1` - 1"],
                 ],
-                translationDict = {
-                    "#form/text1": "/data/text1",
-                    "#form/text2": "/data/text2",
-                },
-                xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
+                xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
@@ -80,11 +86,7 @@ define([
             var testCases = [
                     ["`#form/text1`", "/data/text1"],
                 ],
-                translationDict = {
-                    "#form/text1": "/data/text1",
-                    "#form/text2": "/data/text2",
-                },
-                xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
+                xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
