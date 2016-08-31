@@ -22,6 +22,7 @@ define([
         describe("#transform()", function() {
             var testCases = [
                 ["`#case/type/prop`", "#case/type/prop", "prop"],
+                ["`#case/type/prop`- 1", "#case/type/prop - 1", "prop - 1"],
                 ["(`#case/type/prop`)", "(#case/type/prop)", "(prop)"],
                 ["(`#case/type/prop`", "(#case/type/prop", "(prop"],
                 [
@@ -58,6 +59,9 @@ define([
                     ["#form/text1", "`#form/text1`"],
                     ["/data/text1", "`#form/text1`"],
                     ["`#form/text1`", "`#form/text1`"],
+
+                    // ideally no change, but too hard right now (to much extra parsing going on)
+                    ["`#form/text1`-1", "`#form/text1` - 1"],
                 ],
                 translationDict = {
                     "#form/text1": "/data/text1",

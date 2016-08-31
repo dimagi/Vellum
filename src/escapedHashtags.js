@@ -32,6 +32,7 @@ define([
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
         DELIMITER = "`",
+        ID_CHAR = /^[\w.-]/,
         defaultParser = xpath.createParser(xpath.makeXPathModels({}, {}));
 
     function toXPath(input, xpathParser) {
@@ -145,6 +146,9 @@ define([
                 if (current === DELIMITER) {
                     state = OUTSIDE_HASHTAG;
                     text += transformFn(currentReference);
+                    if (next && ID_CHAR.test(next)) {
+                        text += " ";
+                    }
                     currentReference = "";
                 } else if (next !== undefined){
                     currentReference += current;
