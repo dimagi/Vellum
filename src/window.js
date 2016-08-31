@@ -37,9 +37,7 @@ define([
             // start with accessory pane collapsed
             $(window).resize(adjustToWindow);
             $(document).scroll(adjustToWindow);
-            $(function() {
-                _this.adjustToWindow();
-            });
+            $(adjustToWindow);
             _this.adjustToWindow();
         },
         adjustToWindow: function() {
