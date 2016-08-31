@@ -126,6 +126,7 @@ define([
         this.formName = 'New Form';
         this.mugMap = {};
         this.hashtagMap = {};
+        this.invertedHashtagMap = {};
         this.hashtagTransformations = {};
         this.tree = new Tree('data', 'control');
         this.addHashtag('#form', '/data');
@@ -171,6 +172,7 @@ define([
         },
         addHashtag: function(hashtag, xpath) {
             this.hashtagMap[hashtag] = xpath;
+            this.invertedHashtagMap[xpath] = hashtag;
         },
         initHashtag: function(hashtag, xpath) {
             if (!this.hashtagMap[hashtag]) {
@@ -183,13 +185,21 @@ define([
             }
         },
         removeHashtag: function(hashtag) {
-            delete this.hashtagMap[hashtag];
+            if (this.hashtagMap.hasOwnProperty(hashtag)) {
+                delete this.invertedHashtagMap[this.hashtagMap[hashtag]];
+                delete this.hashtagMap[hashtag];
+            }
         },
         clearNullHashtags: function () {
-            this.hashtagMap = _.chain(this.hashtagMap)
-              .map(function(v, k) { return [k, v]; })
-              .filter(function (v) { return !_.isNull(v[1]); })
-              .object().value();
+            var map = {}, inv = {};
+            _.each(this.hashtagMap, function (xpath, hashtag) {
+                if (xpath !== null) {
+                    map[hashtag] = xpath;
+                    inv[xpath] = hashtag;
+                }
+            });
+            this.hashtagMap = map;
+            this.invertedHashtagMap = inv;
         },
         transform: function(input, transformFn) {
             input = this.normalizeEscapedHashtag(input);

@@ -27,6 +27,8 @@ define([
             },
             hashtagInfo = {
                 hashtagMap: hashtagMap,
+                invertedHashtagMap: _.object(_.map(
+                    hashtagMap, function (v, k) { return [v, k]; }))
             };
 
         describe("#transform()", function() {

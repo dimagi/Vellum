@@ -8,6 +8,7 @@ define([
     return {
         // hashtagInfo properties:
         //   hashtagMap: {hashtag expression: XPath expression}
+        //   invertedHashtagMap: {XPath expression: hashtag expression}
         //   hashtagTransformations: {hashtag prefix: function to return property}
         // NOTE hashtagInfo is not the same as hashtagConfig passed to
         // `xpath.makeXPathModels(hashtagConfig)`
@@ -34,17 +35,11 @@ define([
                     return hashtagExpr;
                 },
                 toHashtag: function (xpath_) {
-                    function toHashtag(xpathExpr) {
-                        for (var key in hashtagInfo.hashtagMap) {
-                            if (hashtagInfo.hashtagMap.hasOwnProperty(key)) {
-                                if (hashtagInfo.hashtagMap[key] === xpathExpr)
-                                    return key;
-                            }
-                        }
-                        return null;
+                    var expr = xpath_.toXPath();
+                    if (hashtagInfo.invertedHashtagMap.hasOwnProperty(expr)) {
+                        return hashtagInfo.invertedHashtagMap[expr];
                     }
-
-                    return toHashtag(xpath_.toXPath());
+                    return null;
                 }
             });
         },
