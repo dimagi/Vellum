@@ -32,18 +32,15 @@ define([
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
         DELIMITER = "`",
-        ID_CHAR = /^[\w.-]/,
-        defaultParser = xpath.createParser(xpath.makeXPathModels({}, {}));
+        ID_CHAR = /^[\w.-]/;
 
     function toXPath(input, xpathParser) {
-        xpathParser = xpathParser || defaultParser;
         return transform(input, function(input) {
             return xpathParser.parse(input).toXPath();
         });
     }
 
     function toHashtag(input, xpathParser) {
-        xpathParser = xpathParser || defaultParser;
         return transform(input, function(input) {
             return xpathParser.parse(input).toHashtag();
         });
@@ -55,7 +52,6 @@ define([
      */
     function toEscapedHashtag(input, xpathParser) {
         if (!input) { return input; }
-        xpathParser = xpathParser || defaultParser;
 
         var hashtag = transform(input);
 
