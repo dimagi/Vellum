@@ -34,7 +34,7 @@ define([
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
         DELIMITER = "`",
-        ID_CHAR = /^[\w.-]/;
+        ID_CHAR = /^[\w.\-]/;
 
     /*
      * transforms escaped hashtags based on transformFn
