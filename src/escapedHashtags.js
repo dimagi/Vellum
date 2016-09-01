@@ -25,90 +25,16 @@
  * TODO: only use escaped hashtag form internally for invalid xpaths
  */
 define([
+    'underscore',
     'vellum/xpath',
 ], function(
+    _,
     xpath
 ) {
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
         DELIMITER = "`",
-        defaultParser = xpath.createParser(xpath.makeXPathModels({}, {}));
-
-    function toXPath(input, xpathParser) {
-        xpathParser = xpathParser || defaultParser;
-        return transform(input, function(input) {
-            return xpathParser.parse(input).toXPath();
-        });
-    }
-
-    function toHashtag(input, xpathParser) {
-        xpathParser = xpathParser || defaultParser;
-        return transform(input, function(input) {
-            return xpathParser.parse(input).toHashtag();
-        });
-    }
-
-    /*
-     * hopefully robust parser that transforms any input (whether hashtag,
-     * xpath, or escaped hashtag) into escaped hashtag used by internal structures
-     */
-    function toEscapedHashtag(input, xpathParser) {
-        if (!input) { return input; }
-        xpathParser = xpathParser || defaultParser;
-
-        var hashtag = transform(input);
-
-        try {
-            var parsed = xpathParser.parse(hashtag);
-            parsed = xpathParser.parse(parsed.toHashtag());
-            return transformHashtags(parsed, xpathParser.models, function(input) {
-                return DELIMITER + input + DELIMITER;
-            });
-        } catch (err) {
-            // a bad xpath. let's just return the given input
-            return input;
-        }
-    }
-
-    /*
-     * This takes in a parsed object (from xpathParser.parse) and transforms
-     * each hashtag into whatever is defined by transformFn
-     */
-    function transformHashtags(parsed, models, transformFn) {
-        var queue = [parsed],
-            EXPR = models.XPathInitialContextEnum.EXPR,
-            node, i, children, j, predicates;
-        while (queue.length > 0) {
-            node = queue.shift();
-            if (node instanceof models.XPathPathExpr) {
-                if (node.initial_context === EXPR) {
-                    queue.push(node.filter.expr);
-                    predicates = node.filter.predicates;
-                    for (i = 0; i < predicates.length; i++) {
-                        queue.push(predicates[i]);
-                    }
-                }
-            } else if (node instanceof models.HashtagExpr) {
-                (function() {
-                    var oldToHashtag = node.toHashtag;
-                    node.toHashtag = function() {
-                        return transformFn(oldToHashtag());
-                    };
-                })();
-            }
-            children = node.getChildren();
-            for (i = 0; i < children.length; i++) {
-                queue.push(children[i]);
-                if (children[i].predicates && children[i].predicates.length) {
-                    predicates = children[i].predicates;
-                    for (j = 0; j < predicates.length; j++) {
-                        queue.push(predicates[j]);
-                    }
-                }
-            }
-        }
-        return parsed.toHashtag();
-    }
+        ID_CHAR = /^[\w.\-]/;
 
     /*
      * transforms escaped hashtags based on transformFn
@@ -145,6 +71,9 @@ define([
                 if (current === DELIMITER) {
                     state = OUTSIDE_HASHTAG;
                     text += transformFn(currentReference);
+                    if (next && ID_CHAR.test(next)) {
+                        text += " ";
+                    }
                     currentReference = "";
                 } else if (next !== undefined){
                     currentReference += current;
@@ -186,16 +115,47 @@ define([
     /*
      * extends xpath parser to be aware of escaped hashtags
      */
-    function parser(hashtagConfig) {
-        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagConfig));
+    function parser(hashtagInfo) {
+        function decorateHashtagger(tagger) {
+            var super_toHashtag = tagger.toHashtag;
+            tagger.toHashtag = function (xpath_) {
+                var expr = super_toHashtag(xpath_);
+                if (expr !== null) {
+                    expr = DELIMITER + expr + DELIMITER;
+                }
+                return expr;
+            };
+            return tagger;
+        }
+        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo)),
+            escapingModels = xpath.makeXPathModels(hashtagInfo, decorateHashtagger),
+            escapingParser = xpath.createParser(escapingModels),
+            baseHashtagExpr = escapingModels.HashtagExpr;
+
+        escapingModels.HashtagExpr = function (definition) {
+            baseHashtagExpr.call(this, definition);
+            decorateHashtagger(this);
+            return this;
+        };
+
         return {
             parse: function (input) {
                 if (input.startsWith("#invalid/xpath ")) {
                     throw new Error("Invalid XPath");
                 }
-                var parsed = xpathParser.parse(toHashtag(input, xpathParser));
+                // TODO eliminate transform(input) here; should not be needed.
+                // transform should only be applied to data that is known to be
+                // escaped instead of every expression before parsing.
+                var parsed = xpathParser.parse(transform(input));
                 parsed.toEscapedHashtag = function() {
-                    return toEscapedHashtag(this.toHashtag(), xpathParser);
+                    var expr = this.toHashtag();
+                    if (!expr) { return expr; }
+                    try {
+                        return escapingParser.parse(expr).toHashtag();
+                    } catch (err) {
+                        // a bad xpath. let's just return the given expr
+                        return expr;
+                    }
                 };
                 return parsed;
             },
@@ -204,8 +164,6 @@ define([
     }
 
     return {
-        toEscapedHashtag: toEscapedHashtag,
-        toXPath: toXPath,
         transform: transform,
         parser: parser,
     };

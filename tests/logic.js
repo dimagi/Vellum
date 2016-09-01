@@ -295,11 +295,16 @@ define([
                     hashtags: [],
                 },
             ],
-            translationDict = {
+            hashtagMap = {
                 "#form/text1": "/data/text1",
                 "#form/text2": "/data/text2",
             },
-            xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
+            hashtagInfo = {
+                hashtagMap: hashtagMap,
+                invertedHashtagMap: _.object(_.map(
+                    hashtagMap, function (v, k) { return [v, k]; }))
+            },
+            xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
 
             function compareHashtags(expr, expected) {
                 var tags = _.map(expr.getHashtags(), getHashtags);
