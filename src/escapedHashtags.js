@@ -25,8 +25,10 @@
  * TODO: only use escaped hashtag form internally for invalid xpaths
  */
 define([
+    'underscore',
     'vellum/xpath',
 ], function(
+    _,
     xpath
 ) {
     var OUTSIDE_HASHTAG = 0,
@@ -50,61 +52,22 @@ define([
      * hopefully robust parser that transforms any input (whether hashtag,
      * xpath, or escaped hashtag) into escaped hashtag used by internal structures
      */
-    function toEscapedHashtag(input, xpathParser) {
+    function toEscapedHashtag(escaper, input) {
         if (!input) { return input; }
 
+        // TODO eliminate transform(input). We should always know whether the
+        // thing we're passing in is escaped or not (and we should only escape
+        // unescaped values). As is, this will normalize an expression that has
+        // both escaped and unescaped hashtags, which is invalid syntax,
+        // probably a bug, and should not be supported.
         var hashtag = transform(input);
 
         try {
-            var parsed = xpathParser.parse(hashtag);
-            parsed = xpathParser.parse(parsed.toHashtag());
-            return transformHashtags(parsed, xpathParser.models, function(input) {
-                return DELIMITER + input + DELIMITER;
-            });
+            return escaper.parse(hashtag).toHashtag();
         } catch (err) {
             // a bad xpath. let's just return the given input
             return input;
         }
-    }
-
-    /*
-     * This takes in a parsed object (from xpathParser.parse) and transforms
-     * each hashtag into whatever is defined by transformFn
-     */
-    function transformHashtags(parsed, models, transformFn) {
-        var queue = [parsed],
-            EXPR = models.XPathInitialContextEnum.EXPR,
-            node, i, children, j, predicates;
-        while (queue.length > 0) {
-            node = queue.shift();
-            if (node instanceof models.XPathPathExpr) {
-                if (node.initial_context === EXPR) {
-                    queue.push(node.filter.expr);
-                    predicates = node.filter.predicates;
-                    for (i = 0; i < predicates.length; i++) {
-                        queue.push(predicates[i]);
-                    }
-                }
-            } else if (node instanceof models.HashtagExpr) {
-                (function() {
-                    var oldToHashtag = node.toHashtag;
-                    node.toHashtag = function() {
-                        return transformFn(oldToHashtag());
-                    };
-                })();
-            }
-            children = node.getChildren();
-            for (i = 0; i < children.length; i++) {
-                queue.push(children[i]);
-                if (children[i].predicates && children[i].predicates.length) {
-                    predicates = children[i].predicates;
-                    for (j = 0; j < predicates.length; j++) {
-                        queue.push(predicates[j]);
-                    }
-                }
-            }
-        }
-        return parsed.toHashtag();
     }
 
     /*
@@ -187,7 +150,29 @@ define([
      * extends xpath parser to be aware of escaped hashtags
      */
     function parser(hashtagInfo) {
-        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
+        function decorateHashtagger(tagger) {
+            var super_toHashtag = tagger.toHashtag;
+            tagger.toHashtag = function (xpath_) {
+                var expr = super_toHashtag(xpath_);
+                if (expr !== null) {
+                    expr = DELIMITER + expr + DELIMITER;
+                }
+                return expr;
+            };
+            return tagger;
+        }
+        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo)),
+            escapingModels = xpath.makeXPathModels(hashtagInfo, decorateHashtagger),
+            escapingParser = xpath.createParser(escapingModels),
+            baseHashtagExpr = escapingModels.HashtagExpr,
+            escapeHashtags = _.partial(toEscapedHashtag, escapingParser);
+
+        escapingModels.HashtagExpr = function (definition) {
+            baseHashtagExpr.call(this, definition);
+            decorateHashtagger(this);
+            return this;
+        };
+
         return {
             parse: function (input) {
                 if (input.startsWith("#invalid/xpath ")) {
@@ -195,16 +180,16 @@ define([
                 }
                 var parsed = xpathParser.parse(toHashtag(input, xpathParser));
                 parsed.toEscapedHashtag = function() {
-                    return toEscapedHashtag(this.toHashtag(), xpathParser);
+                    return escapeHashtags(this.toHashtag());
                 };
                 return parsed;
             },
+            toEscapedHashtag: escapeHashtags,
             models: xpathParser.models,
         };
     }
 
     return {
-        toEscapedHashtag: toEscapedHashtag,
         toXPath: toXPath,
         transform: transform,
         parser: parser,

@@ -2,14 +2,12 @@ define([
     'underscore',
     'chai',
     'vellum/escapedHashtags',
-    'vellum/xpath',
     'tests/utils',
     'text!static/escapedHashtags/invalid-xpath.xml',
 ], function (
     _,
     chai,
     escapedHashtags,
-    xpath,
     util,
     INVALID_XPATH_XML
 ) {
@@ -72,14 +70,16 @@ define([
                     ["/data/text1", "`#form/text1`"],
                     ["`#form/text1`", "`#form/text1`"],
 
+                    ["#form/text1 -1", "`#form/text1` - 1"],
+                    ["/data/text1 -1", "`#form/text1` - 1"],
                     // ideally no change, but too hard right now (to much extra parsing going on)
                     ["`#form/text1`-1", "`#form/text1` - 1"],
                 ],
-                xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
+                xpathParser = escapedHashtags.parser(hashtagInfo);
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(escapedHashtags.toEscapedHashtag(testCase[0], xpathParser), testCase[1]);
+                    assert.strictEqual(xpathParser.toEscapedHashtag(testCase[0]), testCase[1]);
                 });
             });
         });
@@ -88,7 +88,7 @@ define([
             var testCases = [
                     ["`#form/text1`", "/data/text1"],
                 ],
-                xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
+                xpathParser = escapedHashtags.parser(hashtagInfo);
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {

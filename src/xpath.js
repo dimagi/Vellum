@@ -12,8 +12,9 @@ define([
         //   hashtagTransformations: {hashtag prefix: function to return property}
         // NOTE hashtagInfo is not the same as hashtagConfig passed to
         // `xpath.makeXPathModels(hashtagConfig)`
-        makeXPathModels: function (hashtagInfo) {
-            return xpath.makeXPathModels({
+        makeXPathModels: function (hashtagInfo, configDecorator) {
+            configDecorator = configDecorator || function (v) { return v; };
+            return xpath.makeXPathModels(configDecorator({
                 isValidNamespace: function (namespace) {
                     return namespace === 'form' || namespace === 'case';
                 },
@@ -41,7 +42,7 @@ define([
                     }
                     return null;
                 }
-            });
+            }));
         },
         createParser: function (xpathmodels) {
             var ret = new xpath.Parser();
