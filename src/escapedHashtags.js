@@ -36,40 +36,6 @@ define([
         DELIMITER = "`",
         ID_CHAR = /^[\w.-]/;
 
-    function toXPath(input, xpathParser) {
-        return transform(input, function(input) {
-            return xpathParser.parse(input).toXPath();
-        });
-    }
-
-    function toHashtag(input, xpathParser) {
-        return transform(input, function(input) {
-            return xpathParser.parse(input).toHashtag();
-        });
-    }
-
-    /*
-     * hopefully robust parser that transforms any input (whether hashtag,
-     * xpath, or escaped hashtag) into escaped hashtag used by internal structures
-     */
-    function toEscapedHashtag(escaper, input) {
-        if (!input) { return input; }
-
-        // TODO eliminate transform(input). We should always know whether the
-        // thing we're passing in is escaped or not (and we should only escape
-        // unescaped values). As is, this will normalize an expression that has
-        // both escaped and unescaped hashtags, which is invalid syntax,
-        // probably a bug, and should not be supported.
-        var hashtag = transform(input);
-
-        try {
-            return escaper.parse(hashtag).toHashtag();
-        } catch (err) {
-            // a bad xpath. let's just return the given input
-            return input;
-        }
-    }
-
     /*
      * transforms escaped hashtags based on transformFn
      * 
@@ -164,8 +130,7 @@ define([
         var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo)),
             escapingModels = xpath.makeXPathModels(hashtagInfo, decorateHashtagger),
             escapingParser = xpath.createParser(escapingModels),
-            baseHashtagExpr = escapingModels.HashtagExpr,
-            escapeHashtags = _.partial(toEscapedHashtag, escapingParser);
+            baseHashtagExpr = escapingModels.HashtagExpr;
 
         escapingModels.HashtagExpr = function (definition) {
             baseHashtagExpr.call(this, definition);
@@ -178,19 +143,27 @@ define([
                 if (input.startsWith("#invalid/xpath ")) {
                     throw new Error("Invalid XPath");
                 }
-                var parsed = xpathParser.parse(toHashtag(input, xpathParser));
+                // TODO eliminate transform(input) here; should not be needed.
+                // transform should only be applied to data that is known to be
+                // escaped instead of every expression before parsing.
+                var parsed = xpathParser.parse(transform(input));
                 parsed.toEscapedHashtag = function() {
-                    return escapeHashtags(this.toHashtag());
+                    var expr = this.toHashtag();
+                    if (!expr) { return expr; }
+                    try {
+                        return escapingParser.parse(expr).toHashtag();
+                    } catch (err) {
+                        // a bad xpath. let's just return the given expr
+                        return expr;
+                    }
                 };
                 return parsed;
             },
-            toEscapedHashtag: escapeHashtags,
             models: xpathParser.models,
         };
     }
 
     return {
-        toXPath: toXPath,
         transform: transform,
         parser: parser,
     };

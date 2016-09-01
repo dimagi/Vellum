@@ -75,24 +75,26 @@ define([
                     // ideally no change, but too hard right now (to much extra parsing going on)
                     ["`#form/text1`-1", "`#form/text1` - 1"],
                 ],
-                xpathParser = escapedHashtags.parser(hashtagInfo);
+                parser = escapedHashtags.parser(hashtagInfo);
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(xpathParser.toEscapedHashtag(testCase[0]), testCase[1]);
+                    assert.strictEqual(parser.parse(testCase[0]).toEscapedHashtag(), testCase[1]);
                 });
             });
         });
 
         describe("#toXPath()", function() {
             var testCases = [
+                    ["`/data/text1`", "/data/text1"],
                     ["`#form/text1`", "/data/text1"],
+                    ["`#form/text1`-1", "/data/text1 - 1"],
                 ],
-                xpathParser = escapedHashtags.parser(hashtagInfo);
+                parser = escapedHashtags.parser(hashtagInfo);
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(escapedHashtags.toXPath(testCase[0], xpathParser), testCase[1]);
+                    assert.strictEqual(parser.parse(testCase[0]).toXPath(), testCase[1]);
                 });
             });
         });
