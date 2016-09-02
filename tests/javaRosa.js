@@ -934,6 +934,18 @@ define([
             assert.equal(messages.length, 1);
             assert(messages[0].match(/required/i));
         });
+
+        it('should replace output values with $ on mug rename', function () {
+            util.loadXML("");
+            util.addQuestion('Text', 'text');
+            util.addQuestion('Text', 'text2');
+            util.clickQuestion('text');
+            $('[name=itext-en-label]').val('<output value="regex(/data/text2, \'[0-9]+\.[0-9]$\')" />').change();
+            util.clickQuestion('text2');
+            $('[name=property-nodeID]').val('text3').change();
+            util.clickQuestion('text');
+            assert.strictEqual($('[name=itext-en-label]').val(), '<output value="regex(/data/text3, \'[0-9]+\.[0-9]$\')" />');
+        });
     });
 
     describe("The javaRosa markdown detector", function() {

@@ -396,7 +396,8 @@ define([
                     expression = RegExp.escape(expression);
                     return '<output\\s*(ref|value)="' + expression + '"\\s*(\/|><\/output)>';
                 } else {
-                    return '<output value="' + expression + '" />';
+                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_string_as_a_parameter
+                    return '<output value="' + expression.replace('$', '$$$$') + '" />';
                 }
             }
 
