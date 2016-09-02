@@ -397,7 +397,7 @@ define([
                     return '<output\\s*(ref|value)="' + expression + '"\\s*(\/|><\/output)>';
                 } else {
                     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_string_as_a_parameter
-                    return '<output value="' + expression.replace('$', '$$$$') + '" />';
+                    return '<output value="' + expression.replace(/\$/g, '$$$$') + '" />';
                 }
             }
 
