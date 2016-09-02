@@ -1,0 +1,26 @@
+edd:<output value="/data/edd" vellum:value="#form/edd"></output>
+visit #:<output value="/data/calendario/visita_numero" vellum:value="#form/calendario/visita_numero"></output>
+close to edd?: <output value="/data/calendario/visita_perto_do_edd" vellum:value="#form/calendario/visita_perto_do_edd"></output>
+final visit?: <output value="/data/calendario/e_visita_final" vellum:value="#form/calendario/e_visita_final"></output><output value="/data/calendario/atualiza_vp_datos/atualiza_vp9" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp9"></output>
+
+New values:
+vp1:<output value="/data/calendario/atualiza_vp_datos/atualiza_vp1" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp1"></output>
+vp2:<output value="/data/calendario/atualiza_vp_datos/atualiza_vp2" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp2"></output>
+vp3:
+vp4:<output value="/data/calendario/atualiza_vp_datos/atualiza_vp4" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp4"></output>
+vp5:<output value="/data/calendario/atualiza_vp_datos/atualiza_vp5" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp5"></output>  
+vp6:<output value="/data/calendario/atualiza_vp_datos/atualiza_vp6" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp6"></output>
+vp7:<output value="/data/calendario/atualiza_vp_datos/atualiza_vp7" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp7"></output>
+vp8:<output value="/data/calendario/atualiza_vp_datos/atualiza_vp8" vellum:value="#form/calendario/atualiza_vp_datos/atualiza_vp8"></output>
+vp9:
+
+Existing data:
+vp1:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp1_data" vellum:value="#case/vp1_data"></output>
+vp2:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp2_data" vellum:value="#case/vp2_data"></output>
+vp3:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp3_data" vellum:value="#case/vp3_data"></output>  
+vp4:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp4_data" vellum:value="#case/vp4_data"></output>
+vp5:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp5_data" vellum:value="#case/vp5_data"></output>  
+vp6:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp6_data" vellum:value="#case/vp6_data"></output>
+vp7:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp7_data" vellum:value="#case/vp7_data"></output>
+vp8:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp8_data" vellum:value="#case/vp8_data"></output>
+vp9:<output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/vp9_data" vellum:value="#case/vp9_data"></output>
