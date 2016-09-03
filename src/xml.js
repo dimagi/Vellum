@@ -81,10 +81,13 @@ define([
      *
      * NOTE: there are still edge cases (mainly malformed XML) that will not be
      * fixed by this. For example:
-     *      <tag attr=a>b />
+     *      <tag attr=a<b />
+     *
+     * Will mangle some (probably invalid) attribute values:
+     * '<tag attr="../>.." />' => '<tag attr="..></attr>.." />'
      */
     function fixGTBug(value) {
-        var empty = /<(([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\3)*\s*)\/>/g;
+        var empty = /<(([\w:.-]+)(?:\s[^<]*?|))\/>/g;
         return value.replace(empty, "<$1></$2>");
     }
 

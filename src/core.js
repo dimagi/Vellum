@@ -454,11 +454,18 @@ define([
         var lang = this.data.core.currentItextDisplayLanguage ||
                    this.data.javaRosa.Itext.getDefaultLanguage(),
             val = mug.getDisplayName(lang, false);
+        if (val && mug._core_cachedDisplayNameKey === val) {
+            // avoid calling richText.bubbleOutputs ~5 times per display mug.
+            // bubbleOutputs with many bubbles is slow
+            return mug._core_cachedDisplayNameValue;
+        }
+        mug._core_cachedDisplayNameKey = val;
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
             val = util.escape(jrUtil.outputToXPath(val, mug.form.xpath));
         }
+        mug._core_cachedDisplayNameValue = val;
         return val;
     };
 

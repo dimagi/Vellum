@@ -1,13 +1,13 @@
 define([
+    'underscore',
     'chai',
     'vellum/escapedHashtags',
-    'vellum/xpath',
     'tests/utils',
     'text!static/escapedHashtags/invalid-xpath.xml',
 ], function (
+    _,
     chai,
     escapedHashtags,
-    xpath,
     util,
     INVALID_XPATH_XML
 ) {
@@ -19,9 +19,20 @@ define([
             return ret[ret.length-1];
         }
 
+        var hashtagMap = {
+                "#form/text1": "/data/text1",
+                "#form/text2": "/data/text2",
+            },
+            hashtagInfo = {
+                hashtagMap: hashtagMap,
+                invertedHashtagMap: _.object(_.map(
+                    hashtagMap, function (v, k) { return [v, k]; }))
+            };
+
         describe("#transform()", function() {
             var testCases = [
                 ["`#case/type/prop`", "#case/type/prop", "prop"],
+                ["`#case/type/prop`- 1", "#case/type/prop - 1", "prop - 1"],
                 ["(`#case/type/prop`)", "(#case/type/prop)", "(prop)"],
                 ["(`#case/type/prop`", "(#case/type/prop", "(prop"],
                 [
@@ -58,33 +69,32 @@ define([
                     ["#form/text1", "`#form/text1`"],
                     ["/data/text1", "`#form/text1`"],
                     ["`#form/text1`", "`#form/text1`"],
+
+                    ["#form/text1 -1", "`#form/text1` - 1"],
+                    ["/data/text1 -1", "`#form/text1` - 1"],
+                    // ideally no change, but too hard right now (to much extra parsing going on)
+                    ["`#form/text1`-1", "`#form/text1` - 1"],
                 ],
-                translationDict = {
-                    "#form/text1": "/data/text1",
-                    "#form/text2": "/data/text2",
-                },
-                xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
+                parser = escapedHashtags.parser(hashtagInfo);
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(escapedHashtags.toEscapedHashtag(testCase[0], xpathParser), testCase[1]);
+                    assert.strictEqual(parser.parse(testCase[0]).toEscapedHashtag(), testCase[1]);
                 });
             });
         });
 
         describe("#toXPath()", function() {
             var testCases = [
+                    ["`/data/text1`", "/data/text1"],
                     ["`#form/text1`", "/data/text1"],
+                    ["`#form/text1`-1", "/data/text1 - 1"],
                 ],
-                translationDict = {
-                    "#form/text1": "/data/text1",
-                    "#form/text2": "/data/text2",
-                },
-                xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
+                parser = escapedHashtags.parser(hashtagInfo);
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(escapedHashtags.toXPath(testCase[0], xpathParser), testCase[1]);
+                    assert.strictEqual(parser.parse(testCase[0]).toXPath(), testCase[1]);
                 });
             });
         });
