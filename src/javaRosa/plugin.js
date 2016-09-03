@@ -569,11 +569,10 @@ define([
                     var itext = mug.p[property],
                         hasItext = itext && itext.hasHumanReadableItext();
                     if (!hasItext && mug.getPresence(property) === 'required') {
-                        name += " (or multimedia)";
                         if (itext.itextModel.languages.length === 1) {
-                            return name + " is required.";
+                            return name + " (or multimedia) is required.";
                         } else {
-                            return name + " is required for all languages.";
+                            return name + " (or multimedia) is required for all languages.";
                         }
                     }
                     if (itext && !itext.autoId && !itext.isEmpty()) {
