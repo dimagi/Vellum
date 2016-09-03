@@ -934,6 +934,22 @@ define([
             assert.equal(messages.length, 1);
             assert(messages[0].match(/required/i));
         });
+
+        it("should not show a validation error for manually added choices", function() {
+            util.loadXML("");
+            var select = util.addQuestion("Select", "question1"),
+                item = select.form.getChildren(select)[0];
+
+            util.clickQuestion("question1/choice1");
+
+            var messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+
+            util.clickQuestion("question1");
+            util.addQuestion("Choice", "choice3");
+            messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+        });
     });
 
     describe("The javaRosa markdown detector", function() {
