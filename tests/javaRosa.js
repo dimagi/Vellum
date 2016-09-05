@@ -935,6 +935,22 @@ define([
             assert(messages[0].match(/required/i));
         });
 
+        it("should not show a validation error for manually added choices", function() {
+            util.loadXML("");
+            var select = util.addQuestion("Select", "question1"),
+                item = select.form.getChildren(select)[0];
+
+            util.clickQuestion("question1/choice1");
+
+            var messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+
+            util.clickQuestion("question1");
+            util.addQuestion("Choice", "choice3");
+            messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+        });
+
         it('should replace output values with $ on mug rename', function () {
             util.loadXML("");
             util.addQuestion('Text', 'text');

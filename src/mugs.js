@@ -1501,8 +1501,8 @@ define([
         },
         afterInsert: function (form, mug) {
             var choice = "Choice";
-            form.createQuestion(mug, 'into', choice, true).validate();
-            form.createQuestion(mug, 'into', choice, true).validate();
+            form.createQuestion(mug, 'into', choice, true);
+            form.createQuestion(mug, 'into', choice, true);
         },
         spec: {
             appearance: {
