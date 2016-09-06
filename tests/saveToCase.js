@@ -261,7 +261,7 @@ define([
             mug.p.indexProperty = {
                 "casename": {
                     calculate: "/data/question1",
-                    caseType: "type",
+                    case_type: "type",
                     relationship: "notchildorextension",
                 }
             };
@@ -275,12 +275,12 @@ define([
             mug.p.indexProperty = {
                 "casename": {
                     calculate: "/data/question1",
-                    caseType: "type",
+                    case_type: "type",
                     relationship: "child",
                 },
                 "": {
                     calculate: "",
-                    caseType: "",
+                    case_type: "",
                     relationship: "",
                 },
 
