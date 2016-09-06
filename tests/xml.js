@@ -153,12 +153,16 @@ define([
         });
 
         it("should fail on escape unquoted attribute value with <", function () {
+            // known failure; output is semantically correct:
+            //   <output value="2&lt;3"><!--3--></output>
             chai.expect(function () {
                 eq('<output value=2<3 />', '<output value="2&lt;3" />', false);
             }).to.throw(Error);
         });
 
         it("should fail on escape attribute value with />", function () {
+            // known failure; mangled output:
+            //   <output value="..&gt;&lt;/output&gt;.." />
             chai.expect(function () {
                 eq('<output value="../>.." />', '<output value="..&gt;.." />', false);
             }).to.throw(Error);
