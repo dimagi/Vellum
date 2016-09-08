@@ -971,10 +971,10 @@ define([
             return mug ? mug.getIcon() : null;
         },
         removeMugsFromForm: function (mugs) {
-            function breakReferences(mug) {
-                if (mug && !seen.hasOwnProperty(mug.ufid)) {
-                    seen[mug.ufid] = null;
-                    _this.updateLogicReferences(mug);
+            function breakReferences(mug, property) {
+                if (mug && !seen.hasOwnProperty(mug.ufid + " " + property)) {
+                    seen[mug.ufid + " " + property] = null;
+                    _this.updateLogicReferences(mug, property);
                 }
             }
             var _this = this,

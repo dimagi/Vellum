@@ -219,6 +219,7 @@ define([
                         removeMugFromReverse = _.partial(_removeMugFromReverse, property);
                         _.each(refs, removeMugFromReverse);
                     });
+                    forward[mug.ufid] = {};
                 }
             } else {
                 forward[mug.ufid] = {};

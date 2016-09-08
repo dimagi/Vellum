@@ -60,7 +60,7 @@ define([
             $('[name=itext-en-label]').val('<output value="/data/mug" />').change();
             assert.equal(logicManager.forward[text.ufid].labelItext.length, 1);
             util.deleteQuestion('/data/text');
-            assert.equal(logicManager.forward[text.ufid].labelItext.length, 0);
+            assert.deepEqual(logicManager.forward[text.ufid], {});
         });
 
         describe("should add validation error for", function () {
