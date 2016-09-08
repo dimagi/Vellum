@@ -21,7 +21,8 @@ define([
     function showXPathEditor($div, options) {
         var editorContent = $div,
             richTextOptions = {isExpression: true},
-            form = options.mug.form;
+            form = options.mug.form,
+            saveButton;
         options = _.defaults(options, {
             leftPlaceholder: "Drag question here",
             rightPlaceholder: "Drag question here",
@@ -213,6 +214,7 @@ define([
                 };
 
                 var validateExpression = function(item) {
+                    saveButton.removeClass("btn-default disabled").addClass("btn-success");
                     options.change();
                     var le = getExpression(getLeftQuestionInput()),
                         re = getExpression(getRightQuestionInput());
@@ -410,7 +412,8 @@ define([
                 tag: tag,
                 tagArgs: tagArgs,
             }));
-            editorContent.empty().append($xpathUI);
+            editorContent.html($xpathUI);
+            saveButton = $xpathUI.find('.fd-xpath-save-button');
 
             $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
                 if (window.analytics) {
@@ -430,16 +433,17 @@ define([
                 tryAddExpression();
             });
 
-            $xpathUI.find('.fd-xpath-editor-text').on('change keyup', function (){
+            $xpathUI.find('.fd-xpath-editor-text').on('change keyup', function () {
+                saveButton.removeClass("btn-default disabled").addClass("btn-success");
                 options.change();
             });
 
             var done = function (val) {
-                $div.find('.fd-xpath-editor').addClass("hide");
                 options.done(val);
+                editorContent.empty();
             };
 
-            $xpathUI.find('.fd-xpath-save-button').click(function() {
+            saveButton.addClass("disabled").click(function() {
                 var uiExpression  = getExpressionFromUI();
                 setExpression(getExpressionInput(), uiExpression);
                 var results = validate(uiExpression);
