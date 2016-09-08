@@ -1210,6 +1210,11 @@ define([
         }).on('question-remove', function (e) {
             if (e.mug) {
                 e.mug.unbind(_this.data.core);
+                if (e.mug === _this._propertiesMug) {
+                    // prevent e.mug.validate() on deleted mug
+                    _this._propertiesMug.teardownProperties();
+                    _this._propertiesMug = null;
+                }
             }
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
