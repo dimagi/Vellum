@@ -320,9 +320,24 @@ define([
         },
         addReferences: function (mug, property, value) {
             // get absolute paths from mug property's value
+            var _this = this,
+                returned = {};
             this.clearReferences(mug, property);
             if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
-                return mug.p[property].forEachLogicExpression(_.bind(this._addReferences, this, mug, property));
+                return mug.p[property].forEachLogicExpression(function (expr) {
+                    var messages = _this._addReferences(mug, property, expr);
+                    return _.filter(messages, function (msg) {
+                        if (!returned.hasOwnProperty(msg.key)) {
+                            returned[msg.key] = msg;
+                        } else if (!returned[msg.key].message || !msg.message) {
+                            if (msg.message) {
+                                _.extend(returned[msg.key], msg);
+                            }
+                            return false;
+                        }
+                        return true;
+                    });
+                });
             } else {
                 return this._addReferences(mug, property, value);
             }
