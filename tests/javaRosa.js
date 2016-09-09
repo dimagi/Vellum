@@ -26,7 +26,8 @@ define([
     'text!static/javaRosa/test-xml-2-with-only-bind-constraint.xml',
     'text!static/javaRosa/test-xml-3.xml',
     'text!static/javaRosa/test-xml-4.xml',
-    'text!static/javaRosa/non-default-lang-first.xml'
+    'text!static/javaRosa/non-default-lang-first.xml',
+    'text!static/javaRosa/invalid-output-ref.xml'
 ], function (
     chai,
     $,
@@ -54,7 +55,8 @@ define([
     TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT,
     TEST_XML_3,
     TEST_XML_4,
-    NON_DEFAULT_LANG_FIRST_XML
+    NON_DEFAULT_LANG_FIRST_XML,
+    INVALID_OUTPUT_REF_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -167,6 +169,26 @@ define([
                 util.assertXmlEqual(util.call("createXML"),
                                     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
                                     {normalize_xmlns: true});
+            });
+
+            it("should not erase invalid outputs", function (done) {
+                util.loadXML("");
+                util.addQuestion("Text", "question1");
+                var widget = util.getWidget('itext-en-label');
+                widget.input.promise.then(function () {
+                    var itext = '<output value="concat(1, 2" />';
+                    widget.setItextValue(itext);
+                    widget.setValue(itext);
+                    util.clickQuestion('question1');
+                    widget = util.getWidget('itext-en-label');
+                    widget.input.promise.then(function () {
+                        assert.strictEqual(widget.getValue(), itext);
+                        util.assertXmlEqual(call('createXML'),
+                                            INVALID_OUTPUT_REF_XML,
+                                            {normalize_xmlns: true});
+                        done();
+                    });
+                });
             });
         });
 
