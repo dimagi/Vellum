@@ -270,8 +270,14 @@ define([
                 text = $("<div />").append(text);
                 text.find('output').replaceWith(function() {
                     var $this = $(this),
-                        value = xpathParser.parse($this.attr('value') || $this.attr('ref'));
-                    $this.attr('value', value[functionName]());
+                        value = $this.attr('value') || $this.attr('ref'),
+                        parsedValue;
+                    try {
+                        parsedValue = xpathParser.parse(value);
+                        $this.attr('value', parsedValue[functionName]());
+                    } catch (e) {
+                        $this.attr('value', value);
+                    }
                     return $this[0].outerHTML;
                 });
                 text = xml.normalize(text.html());

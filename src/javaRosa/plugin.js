@@ -467,14 +467,22 @@ define([
             function hashtags(outputRef) {
                 var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
                     key = $(outputRef).attr('value') ? 'value' : 'ref',
-                    parsed = xpathParser.parse(value),
-                    hashtag = parsed.toHashtag(),
-                    xpath_ = parsed.toXPath(),
-                    ret = $("<output>");
-                if (!form_.richText || xpath_ === hashtag) {
-                    return ret.attr(key, xpath_)[0].outerHTML;
+                    ret = $("<output>"),
+                    parsed, hashtag, xpath;
+                try {
+                    parsed = xpathParser.parse(value);
+                    hashtag = parsed.toHashtag();
+                    xpath = parsed.toXPath();
+                } catch (e) {
+                    // if outputs are invalid, then the user did something
+                    // manually, so just write the original value to the xml
+                    hashtag = value;
+                    xpath = value;
+                }
+                if (!form_.richText || xpath === hashtag) {
+                    return ret.attr(key, xpath)[0].outerHTML;
                 } else {
-                    return ret.attr(key, xpath_).attr('vellum:' + key, hashtag)[0].outerHTML;
+                    return ret.attr(key, xpath).attr('vellum:' + key, hashtag)[0].outerHTML;
                 }
             }
 

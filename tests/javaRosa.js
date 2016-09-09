@@ -168,6 +168,25 @@ define([
                                     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
                                     {normalize_xmlns: true});
             });
+
+            it("should not erase invalid outputs", function (done) {
+                util.loadXML("");
+                util.addQuestion("Text", "question1");
+                var widget = util.getWidget('itext-en-label');
+                widget.input.promise.then(function () {
+                    var itext = '<output value="concat(1, 2" />';
+                    widget.setItextValue(itext);
+                    widget.setValue(itext);
+                    util.clickQuestion('question1');
+                    widget = util.getWidget('itext-en-label');
+                    widget.input.promise.then(function () {
+                        assert.strictEqual(widget.getValue(), itext);
+                        // ensure createXML can be called without error
+                        call('createXML');
+                        done();
+                    });
+                });
+            });
         });
 
         describe("and one has is right to left", function () {
