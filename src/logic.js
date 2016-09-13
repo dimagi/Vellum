@@ -1,9 +1,11 @@
 define([
     'jquery',
-    'underscore'
+    'underscore',
+    'vellum/util',
 ], function (
     $,
-    _
+    _,
+    util
 ) {
     var XPATH_REFERENCES = [
             "relevantAttr",
@@ -258,7 +260,7 @@ define([
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
                     xpath = path.toHashtag(),
-                    isCaseRef = isCaseReference(pathString),
+                    isCaseRef = util.isCaseReference(pathString),
                     knownHashtag = isCaseRef && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
@@ -501,10 +503,6 @@ define([
                 }).object().value();
         }
     };
-
-    function isCaseReference(hashtag) {
-        return hashtag.startsWith('#case/');
-    }
 
     return {
         LogicManager: LogicManager,

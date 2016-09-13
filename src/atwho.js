@@ -54,7 +54,6 @@ define([
      * @param $input - jQuery object, the input to modify
      * @param mug - current mug
      * @param options - Hash of options for autocomplete behavior:
-     *                  category: sent to analytics
      *                  insertTpl: string to add to input when question is selected
      *                  property: sent to analytics
      *                  useRichText: use rich text editor insert method
@@ -66,7 +65,6 @@ define([
 
     that._questionAutocomplete = function ($input, mug, options) {
         options = _.defaults(options || {}, {
-            category: 'Question Reference',
             insertTpl: '${name}',
             property: '',
             outputValue: false,
@@ -130,7 +128,13 @@ define([
                         },
                         beforeInsert: function(value, $li) {
                             if (window.analytics) {
-                                window.analytics.usage(options.category,
+                                var category;
+                                if (util.isCaseReference(value)) {
+                                    category = "Case Reference";
+                                } else {
+                                    category = "Question Reference";
+                                }
+                                window.analytics.usage(category,
                                                        "Autocomplete",
                                                        options.property);
                             }
