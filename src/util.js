@@ -338,6 +338,10 @@ define([
         ], lang);
     };
 
+    that.isCaseReference = function (value) {
+        return value.startsWith('#case/');
+    };
+
     return that;
 });
 

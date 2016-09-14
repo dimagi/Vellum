@@ -125,7 +125,8 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
-        this.hashtagDictionary = {};
+        this.hashtagMap = {};
+        this.invertedHashtagMap = {};
         this.hashtagTransformations = {};
         this.tree = new Tree('data', 'control');
         this.addHashtag('#form', '/data');
@@ -156,7 +157,7 @@ define([
     Form.prototype = {
         isValidHashtag: function(tag) {
             tag = this.normalizeHashtag(tag);
-            return this.hashtagDictionary.hasOwnProperty(tag);
+            return this.hashtagMap.hasOwnProperty(tag);
         },
         isValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
@@ -170,11 +171,12 @@ define([
                 tag.substring(lastSlashIndex + 1) !== "";
         },
         addHashtag: function(hashtag, xpath) {
-            this.hashtagDictionary[hashtag] = xpath;
+            this.hashtagMap[hashtag] = xpath;
+            this.invertedHashtagMap[xpath] = hashtag;
         },
         initHashtag: function(hashtag, xpath) {
-            if (!this.hashtagDictionary[hashtag]) {
-                this.hashtagDictionary[hashtag] = xpath;
+            if (!this.hashtagMap[hashtag]) {
+                this.addHashtag(hashtag, xpath);
             }
         },
         initHashtagTransformation: function(prefix, transformation) {
@@ -183,13 +185,21 @@ define([
             }
         },
         removeHashtag: function(hashtag) {
-            delete this.hashtagDictionary[hashtag];
+            if (this.hashtagMap.hasOwnProperty(hashtag)) {
+                delete this.invertedHashtagMap[this.hashtagMap[hashtag]];
+                delete this.hashtagMap[hashtag];
+            }
         },
         clearNullHashtags: function () {
-            this.hashtagDictionary = _.chain(this.hashtagDictionary)
-              .map(function(v, k) { return [k, v]; })
-              .filter(function (v) { return !_.isNull(v[1]); })
-              .object().value();
+            var map = {}, inv = {};
+            _.each(this.hashtagMap, function (xpath, hashtag) {
+                if (xpath !== null) {
+                    map[hashtag] = xpath;
+                    inv[xpath] = hashtag;
+                }
+            });
+            this.hashtagMap = map;
+            this.invertedHashtagMap = inv;
         },
         transform: function(input, transformFn) {
             input = this.normalizeEscapedHashtag(input);
@@ -961,10 +971,10 @@ define([
             return mug ? mug.getIcon() : null;
         },
         removeMugsFromForm: function (mugs) {
-            function breakReferences(mug) {
-                if (mug && !seen.hasOwnProperty(mug.ufid)) {
-                    seen[mug.ufid] = null;
-                    _this.updateLogicReferences(mug);
+            function breakReferences(mug, property) {
+                if (mug && !seen.hasOwnProperty(mug.ufid + " " + property)) {
+                    seen[mug.ufid + " " + property] = null;
+                    _this.updateLogicReferences(mug, property);
                 }
             }
             var _this = this,

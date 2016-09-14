@@ -172,7 +172,7 @@ define([
                 util.loadXML(PRELOADED_HASHTAGS_XML);
                 var form = call('getData').core.form;
                 assert(form.isValidHashtag(dobProp));
-                assert.notStrictEqual(form.hashtagDictionary[dobProp], null);
+                assert.notStrictEqual(form.hashtagMap[dobProp], null);
             });
 
             it("should write externally referenced hashtags to form", function() {
@@ -382,10 +382,10 @@ define([
                 it("overwrites the forms preloaded tags", function() {
                     var form = call('getData').core.form;
                     assert(form.isValidHashtag(dobProp));
-                    assert.strictEqual(form.hashtagDictionary[dobProp], null);
+                    assert.strictEqual(form.hashtagMap[dobProp], null);
                     event.fire("loadCaseData");
                     assert(form.isValidHashtag(dobProp));
-                    assert.notStrictEqual(form.hashtagDictionary[dobProp], null);
+                    assert.notStrictEqual(form.hashtagMap[dobProp], null);
                 });
 
                 it("should not write unknown referenced hashtags to form", function() {
@@ -400,12 +400,12 @@ define([
                 it("the parser and form should point to same hashtag dictionary", function (done) {
                     // this test probably knows a little too much about the form's inner workings...
                     var form = call('getData').core.form,
-                        origFormDict = form.hashtagDictionary,
+                        origFormDict = form.hashtagMap,
                         parser = form.xpath;
                     event.fire('loadCaseData');
                     loadDataTree(function() {
                         var newForm = call('getData').core.form,
-                            newFormDict = newForm.hashtagDictionary,
+                            newFormDict = newForm.hashtagMap,
                             newParser = newForm.xpath;
 
                         // expect that the translation dictionary will change after loading case

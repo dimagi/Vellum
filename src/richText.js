@@ -159,6 +159,7 @@ define([
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
+                disableNativeSpellChecker: options.disableNativeSpellChecker,
                 placeholder: options.placeholder,
             }).editor;
         wrapper = {
@@ -450,9 +451,11 @@ define([
     function replacePathWithBubble(form, value) {
         var info = extractXPathInfoFromOutputValue(value),
             xpath = form.normalizeEscapedHashtag(info.reference),
-            extraAttrs = _.omit(info, 'reference');
+            extraAttrs = _.omit(info, 'reference'),
+            startsWithRef = REF_REGEX.test(xpath),
+            containsWhitespace = /\s/.test(xpath);
 
-        if (!REF_REGEX.test(xpath)) {
+        if (!startsWithRef || (startsWithRef && containsWhitespace)) {
             return $('<span>').text(xml.normalize(value)).html();
         }
 

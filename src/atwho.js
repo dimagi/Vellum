@@ -54,7 +54,6 @@ define([
      * @param $input - jQuery object, the input to modify
      * @param mug - current mug
      * @param options - Hash of options for autocomplete behavior:
-     *                  category: sent to analytics
      *                  insertTpl: string to add to input when question is selected
      *                  property: sent to analytics
      *                  useRichText: use rich text editor insert method
@@ -66,7 +65,6 @@ define([
 
     that._questionAutocomplete = function ($input, mug, options) {
         options = _.defaults(options || {}, {
-            category: 'Question Reference',
             insertTpl: '${name}',
             property: '',
             outputValue: false,
@@ -97,6 +95,7 @@ define([
                     insertTpl: options.insertTpl,
                     limit: 10,
                     maxLen: 30,
+                    startWithSpace: false,
                     tabSelectsMatch: false,
                     callbacks: {
                         matcher: function(flag, subtext) {
@@ -129,14 +128,20 @@ define([
                         },
                         beforeInsert: function(value, $li) {
                             if (window.analytics) {
-                                window.analytics.usage(options.category,
+                                var category;
+                                if (util.isCaseReference(value)) {
+                                    category = "Case Reference";
+                                } else {
+                                    category = "Question Reference";
+                                }
+                                window.analytics.usage(category,
                                                        "Autocomplete",
                                                        options.property);
                             }
                             return value;
                         },
                         afterMatchFailed: function(at, $el) {
-                            if (options.useRichText) {
+                            if (options.useRichText && $el.html()) {
                                 // If user typed out a full legitimate hashtag, or something that isn't
                                 // legit but looks vaguely like a case property, turn it into a bubble.
                                 var content = $el.html().trim().replace(/^.*\s/, ""),

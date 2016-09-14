@@ -1,9 +1,11 @@
 define([
     'jquery',
-    'underscore'
+    'underscore',
+    'vellum/util',
 ], function (
     $,
-    _
+    _,
+    util
 ) {
     var XPATH_REFERENCES = [
             "relevantAttr",
@@ -219,6 +221,7 @@ define([
                         removeMugFromReverse = _.partial(_removeMugFromReverse, property);
                         _.each(refs, removeMugFromReverse);
                     });
+                    forward[mug.ufid] = {};
                 }
             } else {
                 forward[mug.ufid] = {};
@@ -257,7 +260,7 @@ define([
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
                     xpath = path.toHashtag(),
-                    isCaseRef = isCaseReference(pathString),
+                    isCaseRef = util.isCaseReference(pathString),
                     knownHashtag = isCaseRef && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
@@ -320,9 +323,24 @@ define([
         },
         addReferences: function (mug, property, value) {
             // get absolute paths from mug property's value
+            var _this = this,
+                returned = {};
             this.clearReferences(mug, property);
             if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
-                return mug.p[property].forEachLogicExpression(_.bind(this._addReferences, this, mug, property));
+                return mug.p[property].forEachLogicExpression(function (expr) {
+                    var messages = _this._addReferences(mug, property, expr);
+                    return _.filter(messages, function (msg) {
+                        if (!returned.hasOwnProperty(msg.key)) {
+                            returned[msg.key] = msg;
+                        } else if (!returned[msg.key].message || !msg.message) {
+                            if (msg.message) {
+                                _.extend(returned[msg.key], msg);
+                            }
+                            return false;
+                        }
+                        return true;
+                    });
+                });
             } else {
                 return this._addReferences(mug, property, value);
             }
@@ -444,38 +462,32 @@ define([
         },
         // This is to tell HQ's case summary what is referenced
         caseReferences: function () {
-            // hq implementation details
-            var ret = {
-                condition: {
-                    answer: null,
-                    question: null,
-                    type: 'always',
-                    operator: null
-                }
-            }, _this = this;
-
-            ret.preload = _.chain(this.reverse[CASE_REF_ID] || {})
-                .values()
-                .flatten(true)
-                .map(function(ref) {
-                    var prop = ref.path.slice(CASE_REF_ID.length),
-                        path = _this.form.normalizeXPath(ref.sourcePath);
-                    if (path === null) {
-                        // Choices have null path, use parent path.
-                        // This is a little fragile. Currently all mug types
-                        // that have a null path also have a parent that does
-                        // not have a null path. If that ever changes this will
-                        // likely need to change.
-                        var parent = _this.form.getMugByUFID(ref.mug).parentMug;
-                        if (parent) {
-                            path = parent.absolutePath;
-                        }
+            var _this = this,
+                load = {};
+            _.each(_.flatten(_.values(this.reverse[CASE_REF_ID] || {})), function(ref) {
+                var prop = ref.path.slice(CASE_REF_ID.length),
+                    path = _this.form.normalizeXPath(ref.sourcePath);
+                if (path === null) {
+                    // Choices have null path, use parent path.
+                    // This is a little fragile. Currently all mug types
+                    // that have a null path also have a parent that does
+                    // not have a null path. If that ever changes this will
+                    // likely need to change.
+                    var parent = _this.form.getMugByUFID(ref.mug).parentMug;
+                    if (parent) {
+                        path = parent.absolutePath;
                     }
-                    // FIXME path may not be unique, last pair wins on -> object
-                    return [path, prop];
-                }).object().value();
+                }
+                if (load.hasOwnProperty(path)) {
+                    if (!_.contains(load[path], prop)) {
+                        load[path].push(prop);
+                    }
+                } else {
+                    load[path] = [prop];
+                }
+            });
 
-            return ret;
+            return {load: load};
         },
         // returns object of external references that are known to be valid
         knownExternalReferences: function () {
@@ -491,10 +503,6 @@ define([
                 }).object().value();
         }
     };
-
-    function isCaseReference(hashtag) {
-        return hashtag.startsWith('#case/');
-    }
 
     return {
         LogicManager: LogicManager,

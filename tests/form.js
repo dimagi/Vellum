@@ -335,6 +335,20 @@ define([
             util.assertXmlEqual(call('createXML'), MANUAL_INSTANCE_REFERENCE_XML);
         });
 
+        it ("should warn on delete question", function() {
+            util.loadXML("");
+            util.paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/q1", "Text", '<output value="#form/q2" /> <output value="#form/q3" />'],
+                ["/q2", "DataBindOnly", "null"],
+                ["/q3", "DataBindOnly", "null"],
+            ]);
+            var q1 = util.getMug("q1");
+            assert(util.isTreeNodeValid(q1), q1.getErrors().join("\n"));
+            util.deleteQuestion("q2");
+            assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
+        });
+
         describe("instance tracker", function () {
             var form, mug, prop = "calculateAttr";
             before(function () {

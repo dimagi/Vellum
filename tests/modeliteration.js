@@ -5,6 +5,7 @@ define([
     'tests/utils',
     'text!static/modeliteration/case-list-iteration.xml',
     'text!static/modeliteration/case-list-iteration-with-questions.xml',
+    'text!static/modeliteration/case-list-iteration-with-questions-and-hidden-value.xml',
     'text!static/modeliteration/fixture-iteration.xml',
     'text!static/modeliteration/regular-repeat.xml',
     'tests/modeliteration'
@@ -15,6 +16,7 @@ define([
     util,
     CASE_LIST_REPEAT_XML,
     CASE_LIST_REPEAT_WITH_QUESTIONS_XML,
+    CASE_LIST_REPEAT_WITH_QUESTIONS_AND_HIDDEN_XML,
     FIXTURE_REPEAT_XML,
     REGULAR_REPEAT_XML
 ) {
@@ -65,6 +67,18 @@ define([
             assert.equal(phone.__className, "PhoneNumber");
             assert.equal(hidden.p.calculateAttr, "`#form/group/item/phone` = '12345'");
             util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_WITH_QUESTIONS_XML);
+        });
+
+
+        it("should write setvalues in order of question tree", function () {
+            util.loadXML(CASE_LIST_REPEAT_WITH_QUESTIONS_AND_HIDDEN_XML);
+            util.assertJSTreeState(
+                "hidden",
+                "group",
+                "  phone",
+                "  hidden"
+            );
+            util.assertXmlEqual(call("createXML"), CASE_LIST_REPEAT_WITH_QUESTIONS_AND_HIDDEN_XML);
         });
 
         it("should create a case list repeat", function () {

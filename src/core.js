@@ -454,11 +454,18 @@ define([
         var lang = this.data.core.currentItextDisplayLanguage ||
                    this.data.javaRosa.Itext.getDefaultLanguage(),
             val = mug.getDisplayName(lang, false);
+        if (val && mug._core_cachedDisplayNameKey === val) {
+            // avoid calling richText.bubbleOutputs ~5 times per display mug.
+            // bubbleOutputs with many bubbles is slow
+            return mug._core_cachedDisplayNameValue;
+        }
+        mug._core_cachedDisplayNameKey = val;
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
             val = util.escape(jrUtil.outputToXPath(val, mug.form.xpath));
         }
+        mug._core_cachedDisplayNameValue = val;
         return val;
     };
 
@@ -1130,6 +1137,7 @@ define([
                         _this.data.core.saveButton.fire('change');
                     }
                 } else {
+                    _this.$f.find('.fd-content-right .fd-column').addClass('hide');
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
                 hidePageSpinner();
@@ -1202,6 +1210,11 @@ define([
         }).on('question-remove', function (e) {
             if (e.mug) {
                 e.mug.unbind(_this.data.core);
+                if (e.mug === _this._propertiesMug) {
+                    // prevent e.mug.validate() on deleted mug
+                    _this._propertiesMug.teardownProperties();
+                    _this._propertiesMug = null;
+                }
             }
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
@@ -1305,6 +1318,7 @@ define([
                 // otherwise clear the Question Edit UI pane
                 this.jstree('deselect_all');
                 this.hideQuestionProperties();
+                this.$f.find('.fd-content-right .fd-column').addClass('hide');
                 this.$f.find('.fd-default-panel').removeClass('hide');
                 return false;
             }
@@ -1474,11 +1488,8 @@ define([
             };
         this.$f.find('.fd-default-panel').addClass('hide');
 
-        /* update display */
-        $props.animate({}, 200);
-
         this.showContentRight();
-        $props.hide();
+        $props.addClass("hide");
 
         this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),
@@ -1511,7 +1522,8 @@ define([
         mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
         refreshMessages();
 
-        $props.show();
+        this.$f.find('.fd-content-right .fd-column').addClass("hide");
+        $props.removeClass("hide");
         this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
@@ -1549,11 +1561,12 @@ define([
     };
 
     fn.showQuestionProperties = function () {
-        this.$f.find('.fd-question-properties').show();
+        this.$f.find('.fd-content-right .fd-column').addClass("hide");
+        this.$f.find('.fd-question-properties').removeClass("hide");
     };
 
     fn.hideQuestionProperties = function () {
-        this.$f.find('.fd-question-properties').hide();
+        this.$f.find('.fd-question-properties').addClass("hide");
     };
 
     /**
@@ -1582,10 +1595,10 @@ define([
             done(val);
             if (_this.data.core.hasXPathEditorChanged) {
                 _this.data.core.hasXPathEditorChanged = false;
-                $editor.hide();
+                $editor.addClass("hide");
                 _this.refreshCurrentMug();
             } else {
-                $editor.hide();
+                $editor.addClass("hide");
                 _this.showQuestionProperties();
             }
         };
@@ -1596,7 +1609,8 @@ define([
                 change(val);
             }
         };
-        $editor.show();
+        _this.$f.find('.fd-content-right .fd-column').addClass('hide');
+        $editor.removeClass("hide");
         options.loadEditor(_this.$f.find('.fd-xpath-editor-content'), options);
     };
 
@@ -1694,7 +1708,7 @@ define([
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
                 isCollapsed: !!options.isCollapsed,
-                help: options.help || {}
+                help: options.help
             })),
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
@@ -1904,7 +1918,7 @@ define([
             data = {xform: formText};
         }
 
-        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+        data.case_references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
 
         this.data.core.saveButton.ajax({
             type: "POST",

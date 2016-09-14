@@ -88,6 +88,8 @@ define([
                     relationship: "extension",
                 }
             }));
+            util.clickQuestion('save_to_case');
+            assert.strictEqual(index.spec.indexProperty.validationFunc(index), "pass");
             assert.equal(index.p.date_modified, '/data/meta/timeEnd');
             assert.equal(index.p.user_id, "/data/meta/userID");
             assert.equal(index.p.case_id, "/data/meta/caseID");
@@ -261,7 +263,7 @@ define([
             mug.p.indexProperty = {
                 "casename": {
                     calculate: "/data/question1",
-                    caseType: "type",
+                    case_type: "type",
                     relationship: "notchildorextension",
                 }
             };
@@ -275,12 +277,12 @@ define([
             mug.p.indexProperty = {
                 "casename": {
                     calculate: "/data/question1",
-                    caseType: "type",
+                    case_type: "type",
                     relationship: "child",
                 },
                 "": {
                     calculate: "",
-                    caseType: "",
+                    case_type: "",
                     relationship: "",
                 },
 

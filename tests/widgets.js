@@ -111,6 +111,27 @@ define([
                 done();
             }, null, "showXPathEditor");
         });
+
+        it("xPath widget should genuinely hide editor whenever it's exited", function (done) {
+            util.loadXML("");
+            util.addQuestion("Text", "text1");
+            util.addQuestion("Text", "text2");
+
+            var $right = $(".fd-content-right"),
+                $props = $right.find(".fd-question-properties"),
+                $editor = $right.find(".fd-xpath-editor");
+            $props.find(".fd-edit-button:first").click();
+
+            events.on("showXPathEditor", function () {
+                assert($editor.is(":visible"), "Editor shown when clicked");
+                assert(!$props.is(":visible"), "Properties hidden when entering editor");
+
+                util.clickQuestion("/data/text1");
+                assert($props.is(":visible"), "Properties shown as requested");
+                assert(!$editor.is(":visible"), "Editor hidden when properties shown");
+                done();
+            }, null, "showXPathEditor");
+        });
     });
 
     describe("The rich text widget", function () {

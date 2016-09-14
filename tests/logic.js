@@ -60,7 +60,7 @@ define([
             $('[name=itext-en-label]').val('<output value="/data/mug" />').change();
             assert.equal(logicManager.forward[text.ufid].labelItext.length, 1);
             util.deleteQuestion('/data/text');
-            assert.equal(logicManager.forward[text.ufid].labelItext.length, 0);
+            assert.deepEqual(logicManager.forward[text.ufid], {});
         });
 
         describe("should add validation error for", function () {
@@ -157,16 +157,15 @@ define([
             it("should be the correct format", function() {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
-                assert.deepEqual(manager.caseReferences().preload, {
-                    "/data/mug":"parent/edd"
-                });
+                assert.deepEqual(manager.caseReferences(),
+                    {load: {"/data/mug": ["parent/edd"]}});
             });
 
             it("should not send deleted references", function () {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
                 util.deleteQuestion('/data/mug');
-                assert.deepEqual(manager.caseReferences().preload, { });
+                assert.deepEqual(manager.caseReferences(), {load: {}});
             });
 
             it("should not write unknown case properties to xml", function () {
@@ -185,8 +184,20 @@ define([
                     ["/select", "Select", "select"],
                     ["/select/choice", "Choice", '<output value="#case/dob" />'],
                 ]);
-                assert.deepEqual(manager.caseReferences().preload,
-                                 {"/data/select": "dob"});
+                assert.deepEqual(manager.caseReferences(),
+                                 {load: {"/data/select": ["dob"]}});
+            });
+
+            it("should send all properties referenced by a question", function () {
+                var form = util.loadXML(""),
+                    manager = form._logicManager;
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/select", "Select", '<output value="#case/name" />'],
+                    ["/select/choice", "Choice", '<output value="#case/dob" />'],
+                ]);
+                assert.deepEqual(manager.caseReferences(),
+                                 {load: {"/data/select": ["name", "dob"]}});
             });
         });
     });
@@ -284,11 +295,16 @@ define([
                     hashtags: [],
                 },
             ],
-            translationDict = {
+            hashtagMap = {
                 "#form/text1": "/data/text1",
                 "#form/text2": "/data/text2",
             },
-            xpathParser = xpath.createParser(xpath.makeXPathModels({hashtagDictionary: translationDict}));
+            hashtagInfo = {
+                hashtagMap: hashtagMap,
+                invertedHashtagMap: _.object(_.map(
+                    hashtagMap, function (v, k) { return [v, k]; }))
+            },
+            xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
 
             function compareHashtags(expr, expected) {
                 var tags = _.map(expr.getHashtags(), getHashtags);

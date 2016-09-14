@@ -1,4 +1,4 @@
-<% props[""] = {calculate: "", relevant: ""}; %>
+<% props[""] = {calculate: "", relevant: "", case_type: "", relationship: ""}; %>
 
 <% _.each(props, function (v, k) { %>
   <div class="fd-index-property">
@@ -22,7 +22,7 @@
     <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-case-type form-control"
-               value="<%-v['caseType']%>" type="text" placeholder="Case Type"/>
+               value="<%-v['case_type']%>" type="text" placeholder="Case Type"/>
       </div>
     </div>
     <div class="form-group">
