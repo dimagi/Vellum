@@ -59,7 +59,8 @@ define([
                 "dest",
                 "sectionId",
                 "entryId",
-                "quantity"
+                "quantity",
+                "date",
             ],
             help: {
                 title: "Basic",
@@ -136,7 +137,9 @@ define([
             isHashtaggable: false,
             spec: {
                 date: {
-                    visibility: 'hidden',
+                    lstring: 'Date',
+                    help: 'The date of the action',
+                    visibility: 'visible',
                     presence: 'optional',
                     serialize: function () {},
                     deserialize: function () {},
