@@ -138,7 +138,9 @@ define([
             spec: {
                 date: {
                     lstring: 'Date',
-                    help: 'The date of the action',
+                    widget: widgets.xPath,
+                    help: 'The date and time of the action, e.g., now() or today()',
+                    xpathType: 'generic',
                     visibility: 'visible',
                     presence: 'optional',
                     serialize: function () {},
