@@ -288,7 +288,7 @@ define([
                 }
                 return attrs;
             },
-            icon: 'icon-exchange',
+            icon: 'fa fa-exchange',
             init: function (mug, form) {
                 mug.p.src = "";
                 mug.p.dest = "";
@@ -336,7 +336,7 @@ define([
         }),
         dispenseMugOptions = util.extend(transferMugOptions, {
             typeName: 'Dispense',
-            icon: 'icon-signout',
+            icon: 'fa fa-sign-out',
             spec: {
                 src: {
                     validationFunc: function (mug) {
@@ -351,7 +351,7 @@ define([
         }),
         receiveMugOptions = util.extend(transferMugOptions, {
             typeName: 'Receive',
-            icon: 'icon-signin',
+            icon: 'fa fa-sign-in',
             spec: {
                 src: { presence: "notallowed" },
                 dest: {
