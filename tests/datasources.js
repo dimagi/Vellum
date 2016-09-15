@@ -7,6 +7,7 @@ define([
     'underscore',
     'vellum/datasources',
     'vellum/itemset',
+    'text!static/datasources/case-property.xml',
 ], function (
     options,
     util,
@@ -14,7 +15,8 @@ define([
     $,
     _,
     datasources,
-    itemset
+    itemset,
+    CASE_PROPERTY_XML
 ) {
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
@@ -40,7 +42,7 @@ define([
             }
         }];
 
-    describe("The data source widget", function () {
+    describe("The data sources loader", function () {
         function beforeFn(done) {
             util.init({
                 plugins: plugins,
@@ -84,7 +86,6 @@ define([
                 util.loadXML("");
                 util.addQuestion("SelectDynamic", "select1");
                 clickQuestion('select1/itemset');
-                assert(true);
             });
         });
 
@@ -199,6 +200,14 @@ define([
                 assert.equal(data.val(),
                     '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')root/inner"}');
                 assert.equal(data.find("option:selected").text(), "outer - inner");
+            });
+
+            it("should not cause null xpath", function () {
+                // bug only appears on load XML with vellum:attr="value" attributes
+                util.loadXML(CASE_PROPERTY_XML);
+                callback(options.dataSources);
+                util.assertXmlEqual(util.call("createXML"),
+                    CASE_PROPERTY_XML.replace(/ vellum:\w+=".*?"/g, ""));
             });
         });
     });

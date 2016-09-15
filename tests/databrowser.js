@@ -15,6 +15,7 @@ define([
     'text!static/databrowser/child-ref-output-value-other-lang.xml',
     'text!static/databrowser/preloaded-hashtags.xml',
     'text!static/databrowser/unknown-property-preloaded-hashtags.xml',
+    'text!static/datasources/case-property.xml',
 ], function (
     options,
     util,
@@ -30,7 +31,8 @@ define([
     CHILD_REF_OUTPUT_VALUE_XML,
     CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
     PRELOADED_HASHTAGS_XML,
-    UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML
+    UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML,
+    CASE_PROPERTY_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -331,6 +333,7 @@ define([
                 });
             }
             before(function (done) {
+                datasources.reset();
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
@@ -348,6 +351,28 @@ define([
                             widget.input.promise.then(done);
                         }
                     }
+                });
+            });
+
+            it("should not cause null xpath", function () {
+                util.loadXML(CASE_PROPERTY_XML);
+                //databrowser.initDataBrowser(_this);
+                event.fire("loadCaseData");
+                util.loadXML(CASE_PROPERTY_XML);
+                util.assertXmlEqual(util.call("createXML"), CASE_PROPERTY_XML);
+                    //CASE_PROPERTY_XML.replace(/ vellum:\w+=".*?"/g, ""));
+                assert(false);
+            });
+
+            it("should error for unknown properties", function(done) {
+                widget.setValue(escapedDobProp);
+                widget.handleChange();
+                assert(!util.isTreeNodeValid(blue), "expected validation error");
+                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
+                event.fire("loadCaseData");
+                loadDataTree(function() {
+                    assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
+                    done();
                 });
             });
 
@@ -418,18 +443,6 @@ define([
                         assert.strictEqual(parsedResult, '/data/text');
                         done();
                     });
-                });
-            });
-
-            it("should error for unknown properties", function(done) {
-                widget.setValue(escapedDobProp);
-                widget.handleChange();
-                assert(!util.isTreeNodeValid(blue), "expected validation error");
-                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
-                event.fire("loadCaseData");
-                loadDataTree(function() {
-                    assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
-                    done();
                 });
             });
         });
