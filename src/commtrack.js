@@ -138,13 +138,13 @@ define([
             spec: {
                 date: {
                     lstring: 'Date',
-                    widget: widgets.xPath,
-                    help: 'The date and time of the action, e.g., now() or today()',
-                    xpathType: 'generic',
                     visibility: 'visible',
                     presence: 'optional',
-                    serialize: function () {},
-                    deserialize: function () {},
+                    widget: widgets.xPath,
+                    xpathType: 'generic',
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: 'The date and time of the action, e.g., now() or today()',
                 },
                 sectionId: {
                     lstring: 'Balance ID',
