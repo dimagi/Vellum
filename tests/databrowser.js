@@ -7,7 +7,6 @@ define([
     'jquery',
     'underscore',
     'vellum/databrowser',
-    'vellum/datasources',
     'text!static/databrowser/child-ref.xml',
     'text!static/databrowser/child-ref-no-hashtag.xml',
     'text!static/databrowser/mother-ref.xml',
@@ -24,7 +23,6 @@ define([
     $,
     _,
     databrowser,
-    datasources,
     CHILD_REF_XML,
     CHILD_REF_NO_HASHTAG_XML,
     MOTHER_REF_XML,
@@ -101,12 +99,9 @@ define([
                         dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
                         invalidCaseProperties: ['invalid'],
                         onReady: function () {
-                            var _this = this;
-                            datasources.getDataSources(function () {
-                                databrowser.initDataBrowser(_this);
-                                dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
-                                done();
-                            });
+                            databrowser.initDataBrowser(this);
+                            dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
+                            done();
                         }
                     }
                 });
@@ -222,12 +217,9 @@ define([
                         core: {
                             dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
                             onReady: function () {
-                                var _this = this;
-                                datasources.getDataSources(function () {
-                                    databrowser.initDataBrowser(_this);
-                                    dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
-                                    done();
-                                });
+                                databrowser.initDataBrowser(this);
+                                dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
+                                done();
                             }
                         }
                     });
@@ -269,12 +261,9 @@ define([
                         core: {
                             dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
                             onReady: function () {
-                                var _this = this;
-                                datasources.getDataSources(function () {
-                                    databrowser.initDataBrowser(_this);
-                                    dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
-                                    done();
-                                });
+                                databrowser.initDataBrowser(this);
+                                dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
+                                done();
                             }
                         },
                         features: { rich_text: false },
@@ -324,16 +313,13 @@ define([
         });
 
         describe("when loaded after the form", function () {
-            var _this, widget, blue, event = {};
+            var vellum, widget, blue, event = {};
             vellumUtil.eventuality(event);
             function loadDataTree(done) {
-                datasources.getDataSources(function () {
-                    databrowser.initDataBrowser(_this);
-                    done();
-                });
+                databrowser.initDataBrowser(vellum);
+                done();
             }
             before(function (done) {
-                datasources.reset();
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
@@ -345,23 +331,13 @@ define([
                         },
                         form: "",
                         onReady: function () {
-                            _this = this;
+                            vellum = this;
                             blue = util.addQuestion("DataBindOnly", "blue");
                             widget = util.getWidget('property-calculateAttr');
                             widget.input.promise.then(done);
                         }
                     }
                 });
-            });
-
-            it("should not cause null xpath", function () {
-                util.loadXML(CASE_PROPERTY_XML);
-                //databrowser.initDataBrowser(_this);
-                event.fire("loadCaseData");
-                util.loadXML(CASE_PROPERTY_XML);
-                util.assertXmlEqual(util.call("createXML"), CASE_PROPERTY_XML);
-                    //CASE_PROPERTY_XML.replace(/ vellum:\w+=".*?"/g, ""));
-                assert(false);
             });
 
             it("should error for unknown properties", function(done) {
@@ -375,75 +351,92 @@ define([
                     done();
                 });
             });
+        });
 
-            describe("with loaded xml", function () {
-                beforeEach(function (done) {
-                    util.init({
-                        plugins: plugins,
-                        javaRosa: {langs: ['en']},
-                        core: {
-                            dataSourcesEndpoint: function (callback) {
-                                event.on("loadCaseData", function() {
-                                    callback(CASE_DATA);
-                                });
-                            },
-                            form: PRELOADED_HASHTAGS_XML,
-                            onReady: function () {
-                                widget = util.getWidget('property-calculateAttr');
-                                widget.input.promise.then(done);
-                            }
+        describe("when loaded after the form with loaded xml", function () {
+            var vellum, widget, event = {};
+            vellumUtil.eventuality(event);
+            function loadDataTree(done) {
+                databrowser.initDataBrowser(vellum);
+                done();
+            }
+            beforeEach(function (done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (callback) {
+                            event.on("loadCaseData", function() {
+                                callback(CASE_DATA);
+                            });
+                        },
+                        form: PRELOADED_HASHTAGS_XML,
+                        onReady: function () {
+                            vellum = this;
+                            widget = util.getWidget('property-calculateAttr');
+                            widget.input.promise.then(done);
                         }
-                    });
+                    }
                 });
+            });
 
-                it("should not error for known properties", function() {
-                    assert.strictEqual(widget.getValue(), escapedDobProp);
-                    assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
-                    event.fire("loadCaseData");
-                    assert.strictEqual(widget.getValue(), escapedDobProp);
-                    assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
+            it("should not error for known properties", function() {
+                assert.strictEqual(widget.getValue(), escapedDobProp);
+                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
+                event.fire("loadCaseData");
+                assert.strictEqual(widget.getValue(), escapedDobProp);
+                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
+            });
+
+            it("overwrites the forms preloaded tags", function() {
+                var form = call('getData').core.form;
+                assert(form.isValidHashtag(dobProp));
+                assert.strictEqual(form.hashtagMap[dobProp], null);
+                event.fire("loadCaseData");
+                assert(form.isValidHashtag(dobProp));
+                assert.notStrictEqual(form.hashtagMap[dobProp], null);
+            });
+
+            it("should not write unknown referenced hashtags to form", function() {
+                util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
+                event.fire("loadCaseData");
+                var xml = $(call("createXML")),
+                    hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
+                    test = JSON.parse($.trim(hashtags.text()));
+                assert.deepEqual(test, {"#case/dob":null});
+            });
+
+            it("the parser and form should point to same hashtag dictionary", function (done) {
+                // this test probably knows a little too much about the form's inner workings...
+                var form = call('getData').core.form,
+                    origFormDict = form.hashtagMap,
+                    parser = form.xpath;
+                event.fire('loadCaseData');
+                loadDataTree(function() {
+                    var newForm = call('getData').core.form,
+                        newFormDict = newForm.hashtagMap,
+                        newParser = newForm.xpath;
+
+                    // expect that the translation dictionary will change after loading case
+                    // properties, but the parser should not
+                    assert.notStrictEqual(newFormDict, origFormDict);
+                    assert.strictEqual(newParser, parser);
+
+                    util.addQuestion('Text', 'text');
+                    var parsedResult = parser.parse('#form/text').toXPath();
+                    assert.strictEqual(parsedResult, '/data/text');
+                    done();
                 });
+            });
 
-                it("overwrites the forms preloaded tags", function() {
-                    var form = call('getData').core.form;
-                    assert(form.isValidHashtag(dobProp));
-                    assert.strictEqual(form.hashtagMap[dobProp], null);
-                    event.fire("loadCaseData");
-                    assert(form.isValidHashtag(dobProp));
-                    assert.notStrictEqual(form.hashtagMap[dobProp], null);
-                });
-
-                it("should not write unknown referenced hashtags to form", function() {
-                    util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
-                    event.fire("loadCaseData");
-                    var xml = $(call("createXML")),
-                        hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
-                        test = JSON.parse($.trim(hashtags.text()));
-                    assert.deepEqual(test, {"#case/dob":null});
-                });
-
-                it("the parser and form should point to same hashtag dictionary", function (done) {
-                    // this test probably knows a little too much about the form's inner workings...
-                    var form = call('getData').core.form,
-                        origFormDict = form.hashtagMap,
-                        parser = form.xpath;
-                    event.fire('loadCaseData');
-                    loadDataTree(function() {
-                        var newForm = call('getData').core.form,
-                            newFormDict = newForm.hashtagMap,
-                            newParser = newForm.xpath;
-
-                        // expect that the translation dictionary will change after loading case
-                        // properties, but the parser should not
-                        assert.notStrictEqual(newFormDict, origFormDict);
-                        assert.strictEqual(newParser, parser);
-
-                        util.addQuestion('Text', 'text');
-                        var parsedResult = parser.parse('#form/text').toXPath();
-                        assert.strictEqual(parsedResult, '/data/text');
-                        done();
-                    });
-                });
+            it("should not cause null xpath", function () {
+                util.loadXML(CASE_PROPERTY_XML);
+                //databrowser.initDataBrowser(vellum);
+                event.fire("loadCaseData");
+                util.loadXML(CASE_PROPERTY_XML);
+                util.assertXmlEqual(util.call("createXML"), CASE_PROPERTY_XML);
+                    //CASE_PROPERTY_XML.replace(/ vellum:\w+=".*?"/g, ""));
+                assert(false);
             });
         });
 
@@ -457,12 +450,9 @@ define([
                         dataSourcesEndpoint: function (callback) { callback(CASE_DATA); },
                         invalidCaseProperties: ['invalid'],
                         onReady: function () {
-                            var _this = this;
-                            datasources.getDataSources(function () {
-                                databrowser.initDataBrowser(_this);
-                                dataTree = _this.$f.find(".fd-external-sources-tree").jstree(true);
-                                done();
-                            });
+                            databrowser.initDataBrowser(this);
+                            dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
+                            done();
                         }
                     }
                 });

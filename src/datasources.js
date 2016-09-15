@@ -1,6 +1,5 @@
 /**
- * Asynchronously loads data sources from vellum.opts().core.dataSourcesEndpoint
- * Currently only supports fixtures
+ * Asynchronously loads data sources
  *
  * Format in opts:
  * dataSourcesEndpoint: function(callback) or string (URL)
@@ -75,87 +74,126 @@ define([
     _,
     util
 ) {
-    var dataSourcesEndpoint, dataCache, dataCallbacks, errorCallbacks;
+    var builders = {};
 
-    // called during core init
-    function init(instance) {
-        dataSourcesEndpoint = instance.opts().core.dataSourcesEndpoint;
-        reset();
-    }
+    /**
+     * Initialize and return a datasources loader
+     *
+     * This function is called during core init.
+     *
+     * The returned "eventuality" object fires one of two events:
+     *
+     *  - change - fired when data sources changed. Currently this only
+     *      happens once when data sources are first loaded.
+     *  - error - fired when data sources could not be loaded.
+     */
+    function init(endpoint) {
+        var that = util.eventuality({endpoint: endpoint});
 
-    function reset() {
-        dataCache = null;
-        dataCallbacks = [];
-        errorCallbacks = [];
+        that.reset = function (retryTimeout) {
+            that.retryTimeout = retryTimeout || 1000;
+            that.cache = {};
+        };
+
+        that.getDataSources = function (defaultValue) {
+            return getBuilt(that, "sources", defaultValue);
+        };
+
+        /**
+         * Add callback to be called immediately if ready and also on change.
+         *
+         * @return a function that unbinds the callback.
+         */
+        that.onChangeReady = function (callback) {
+            var sources = that.getDataSources(),
+                context = {};
+            if (sources) {
+                callback();
+            }
+            that.on("change", callback, null, null, context);
+            return function () { that.unbind(context, "change"); };
+        };
+
+        that.reset();
+        if (endpoint && _.isString(endpoint)) {
+            loadDataSources(that);
+        }
+
+        return that;
     }
 
     /**
      * Asynchronously load data sources
-     *
-     * @param successCallback - A function to be called when the data sources
-     *      have been loaded. This function should accept one argument,
-     *      a list of data source objects.
-     * @param errorCallback - A function to be called if the data sources call
-     *      fails. This function's parameters are passed directly from jQuery's
-     *      error callback: the XHR, a status string, and an error string.
      */
-    function getDataSources(successCallback, errorCallback) {
-        if (dataCache) {
-            successCallback(dataCache);
-            return;
-        }
-        if (dataCallbacks.length) {
-            dataCallbacks.push(successCallback);
-            errorCallbacks.push(errorCallback);
-            return;
-        }
-
+    function loadDataSources(that) {
         function finish(data) {
-            dataCache = data.length ? data : [{
+            that.cache = {sources: data.length ? data : [{
                 id: "",
                 uri: "",
                 path: "",
                 name: "Not Found",
                 structure: {}
-            }];
-            _.each(_.compact(dataCallbacks), function (callback) {
-                callback(dataCache);
-            });
-            dataCallbacks = [];
+            }]};
+            that.loading = false;
+            that.fire("change");
         }
-        dataCallbacks.push(successCallback);
-        errorCallbacks.push(errorCallback);
-        if (dataSourcesEndpoint) {
-            if (_.isString(dataSourcesEndpoint)) {
+
+        function onError(jqXHR, errorType, error) {
+            that.fire({
+                type: "error",
+                xhr: jqXHR,
+                errorType: errorType,
+                error: error,
+            });
+            window.console.log(util.formatExc(error || errorType));
+            if (that.retryTimeout < 8001) {  // 8000 = 4 retries
+                // exponential backoff retry
+                setTimeout(function () {
+                    loadDataSources(that);
+                }, that.retryTimeout);
+                that.retryTimeout = that.retryTimeout * 2;
+            }
+        }
+
+        if (that.endpoint) {
+            if (_.isString(that.endpoint)) {
+                that.loading = true;
                 $.ajax({
                     type: 'GET',
-                    url: dataSourcesEndpoint,
+                    url: that.endpoint,
                     dataType: 'json',
                     success: finish,
-                    error: function (jqXHR, errorType, exc) {
-                        finish([]);
-                        errorCallbacks = _.compact(errorCallbacks);
-                        _.each(errorCallbacks, function(callback) {
-                            callback(jqXHR, errorType, exc);
-                        });
-                        if (!errorCallbacks.length) {
-                            window.console.log(util.formatExc(exc || errorType));
-                        }
-                        errorCallbacks = [];
-                    },
+                    error: onError,
                     data: {}
                 });
             } else {
-                dataSourcesEndpoint(finish);
+                that.endpoint(finish);
             }
         } else {
             finish([]);
         }
     }
 
-    return {
-        init: init,
-        reset: reset,
-        getDataSources: getDataSources,
+    function getBuilt(that, name, defaultValue) {
+        var cache = that.cache,
+            value;
+        if (cache.hasOwnProperty(name)) {
+            value = cache[name];
+        } else {
+            value = builders[name](that);
+            if (value) {
+                cache[name] = value;
+            }
+        }
+        return value || defaultValue;
+    }
+
+    builders.sources = function (that) {
+        if (!that.cache.hasOwnProperty("sources") && !that.loading) {
+            loadDataSources(that);
+        }
+        return that.cache.sources;
     };
+
+    return {init: init};
 });

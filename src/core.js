@@ -217,7 +217,7 @@ define([
 
         this._init_toolbar();
         this._createJSTree();
-        datasources.init(this);
+        this.datasources = datasources.init(this.opts().core.dataSourcesEndpoint);
     };
 
     fn.postInit = function () {
@@ -1175,6 +1175,9 @@ define([
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
             enableInstanceRefCounting: true
         }, options);
+        if (this.data.core.form) {
+            this.data.core.form.disconnectDataSources();
+        }
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
@@ -1189,9 +1192,9 @@ define([
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
         }
-        datasources.getDataSources(function (data) {
+        form.disconnectDataSources = this.datasources.onChangeReady(function () {
             form.updateKnownInstances(
-                _.chain(data)
+                _.chain(_this.datasources.getDataSources([]))
                  .map(function (source) { return [source.id, source.uri]; })
                  .object()
                  .value()

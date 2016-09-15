@@ -5,7 +5,6 @@ define([
     'chai',
     'jquery',
     'underscore',
-    'vellum/datasources',
     'vellum/itemset',
     'text!static/datasources/case-property.xml',
 ], function (
@@ -14,7 +13,6 @@ define([
     chai,
     $,
     _,
-    datasources,
     itemset,
     CASE_PROPERTY_XML
 ) {
@@ -90,20 +88,23 @@ define([
         });
 
         describe("async options loader", function() {
-            var callback;
+            var vellum, callback;
             before(function (done) {
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (cb) { callback = cb; },
-                        onReady: done
+                        onReady: function () {
+                            vellum = this;
+                            done();
+                        },
                     },
                     features: {rich_text: false},
                 });
             });
             beforeEach(function () {
-                datasources.reset();
+                vellum.datasources.reset();
                 callback = null;
             });
 

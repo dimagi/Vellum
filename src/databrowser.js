@@ -4,7 +4,6 @@
 define([
     'jquery',
     'underscore',
-    'vellum/datasources',
     'vellum/util',
     'vellum/widgets',
     'vellum/window',
@@ -12,24 +11,13 @@ define([
 ], function (
     $,
     _,
-    datasources,
     util,
     widgets,
     window_,
     external_sources_tree
 ) {
     var fn = {},
-        DATABROWSER_HEIGHT = 0.33,
-        panelHeight,
-        handleError = function($container) {
-            return function(jqXHR, textStatus, errorThrown) {
-                if ($container && jqXHR.responseText) {
-                    $container.find(".fd-external-sources-error").removeClass("hide").text(jqXHR.responseText);
-                } else {
-                    window.console.log(util.formatExc(textStatus || errorThrown));
-                }
-            };
-        };
+        DATABROWSER_HEIGHT = 0.33;
 
     // plugin adds an item to the Tools menu when enabled
     $.vellum.plugin('databrowser', {}, {
@@ -38,6 +26,12 @@ define([
                 tree = this.$f.find(".fd-tree"),
                 pane = this.$f.find(".fd-accessory-pane"),
                 head, headHeight, searchBar, paneRatio;
+            vellum.data.core.databrowser = {
+                dataHashtags: {},
+                dataHashtagTransformations: {},
+                errorContainer: pane,
+                panelHeight: null,
+            };
             fn.initDataBrowser = _.once(_initDataBrowser);
             pane.append($(external_sources_tree()));
             head = pane.find(".fd-head-external-sources");
@@ -46,7 +40,7 @@ define([
                 .height(Math.min(tree.height() * DATABROWSER_HEIGHT, headHeight * 12))
                 .resize(function () {
                     if (pane.height() > headHeight + 100) {
-                        panelHeight = pane.height();
+                        vellum.data.core.databrowser.panelHeight = pane.height();
                         paneRatio = pane.height() / $('.fd-content-left').height();
                     }
                 });
@@ -54,7 +48,7 @@ define([
             $(window).scroll(function() {
                 if (pane.height() > headHeight) {
                     pane.height($('.fd-content-left').height() * paneRatio);
-                    panelHeight = pane.height();
+                    vellum.data.core.databrowser.panelHeight = pane.height();
                 }
             });
             searchBar = pane.find('#fdExternalSearch');
@@ -66,10 +60,16 @@ define([
                     return false;
                 }
             });
-            vellum.data.core.databrowser = { dataHashtags: {}, dataHashtagTransformations: {} };
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
-            datasources.getDataSources(function () {}, handleError(pane));
+            vellum.datasources.on("error", function(event) {
+                var container = vellum.data.core.databrowser.errorContainer;
+                if (container && event.xhr.responseText) {
+                    container.find(".fd-external-sources-error")
+                        .removeClass("hide")
+                        .text(event.xhr.responseText);
+                }
+            });
             var toggle = _.partial(toggleExternalDataTree, vellum);
             pane.parent().find(".fd-external-sources-divider")
                 .clickExceptAfterDrag(toggle);
@@ -122,6 +122,7 @@ define([
         var $container = vellum.$f.find(".fd-external-sources-container"),
             $search = $container.find(".fd-external-resource-search input"),
             $tree = $container.find(".fd-external-sources-tree");
+        vellum.data.core.databrowser.errorContainer = $container;
         $tree.jstree({
             core: {
                 data: function (node, callback) {
@@ -130,9 +131,10 @@ define([
                         callback.call(this, node.data.getNodes());
                     } else {
                         var _this = this;
-                        datasources.getDataSources(function (data) {
-                            callback.call(_this, dataTreeJson(data, vellum));
-                        }, handleError($container));
+                        vellum.datasources.onChangeReady(function () {
+                            var sources = vellum.datasources.getDataSources();
+                            callback.call(_this, dataTreeJson(sources, vellum));
+                        });
                     }
                 },
                 worker: false,
@@ -303,6 +305,7 @@ define([
             $(window).resize();
         } else {
             var tree = vellum.$f.find(".fd-tree"),
+                panelHeight = vellum.data.core.databrowser.panelHeight,
                 height = panelHeight || tree.height() * DATABROWSER_HEIGHT;
             pane.css("height", height + "px");
             pane.find('.fd-head-external-sources .fd-head-max-indicator i')
