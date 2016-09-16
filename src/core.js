@@ -862,7 +862,7 @@ define([
             // plugin needs to stay enabled because it adds CSS selectors to
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
-        }).bind("select_node.jstree deselect_node.jstree", function (e, data) {
+        }).on("select_node.jstree deselect_node.jstree", function (e, data) {
             var selected = _this.jstree('get_selected');
             if (!selected.length) {
                 _this.hideQuestionProperties();
@@ -873,7 +873,7 @@ define([
             } else {
                 _this.displayMultipleSelectionView();
             }
-        }).bind("open_node.jstree", function (e, data) {
+        }).on("open_node.jstree", function (e, data) {
             if (window.event && window.event.altKey) {
                 _this.jstree("open_all", data.node);
             }
@@ -882,11 +882,11 @@ define([
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
-        }).bind("close_node.jstree", function (e, data) {
+        }).on("close_node.jstree", function (e, data) {
             if (window.event && window.event.altKey) {
                 _this.jstree("close_all", data.node);
             }
-        }).bind("move_node.jstree", function (e, data) {
+        }).on("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
                 refMug = data.parent !== "#" ? form.getMugByUFID(data.parent) : null,
@@ -894,9 +894,9 @@ define([
             form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
-        }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
+        }).on("deselect_all.jstree deselect_node.jstree", function (e, data) {
             _this.resetQuestionTypeGroups();
-        }).bind('model.jstree', function (e, data) {
+        }).on('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for
             // most nodes, but some (items in select questions) have a
             // different icon depending on their parent type.
@@ -2180,7 +2180,7 @@ define([
         onReady: function () {},
         onFormSave: function (data) {},
         bindBeforeUnload: function (handler) {
-            $(window).bind('beforeunload', handler);
+            $(window).on('beforeunload', handler);
         }
     }, fn);
 });
