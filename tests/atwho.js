@@ -177,45 +177,50 @@ define([
 
             it("should show questions with #form", function() {
                 displayAtwho('#form', function(mug) {
-                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
-                    _.map(atwhoEntries, function(li) {
-                        var text = $.trim($(li).text());
-                        assert(text.startsWith('#form'));
-                    });
-                    assert.strictEqual(atwhoEntries.length, 3);
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li'),
+                        tags = _.map(atwhoEntries, function(li) {
+                            return $.trim($(li).text()).replace(/\n[^]*$/, "");
+                        });
+                    assert.deepEqual(tags, [
+                        "#form/dash-dash",
+                        "#form/text",
+                        "#form/text2",
+                    ]);
                 });
             });
 
             it("should show questions after a dash", function () {
                 displayAtwho('#dash-dash', function(mug) {
-                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
-                    _.map(atwhoEntries, function(li) {
-                        var text = $.trim($(li).text());
-                        assert(text.startsWith('#form'));
-                    });
-                    assert.strictEqual(atwhoEntries.length, 1);
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li'),
+                        tags = _.map(atwhoEntries, function(li) {
+                            return $.trim($(li).text()).replace(/\n[^]*$/, "");
+                        });
+                    assert.deepEqual(tags, ["#form/dash-dash"]);
                 });
             });
 
             it("should show case properties with #case", function() {
                 displayAtwho('#case', function(mug) {
-                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
-                    _.map(atwhoEntries, function(li) {
-                        var text = $.trim($(li).text());
-                        assert(text.startsWith('#case'));
-                    });
-                    assert.strictEqual(atwhoEntries.length, 1);
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li'),
+                        tags = _.map(atwhoEntries, function(li) {
+                            return $.trim($(li).text()).replace(/\n[^]*$/, "");
+                        });
+                    assert.deepEqual(tags, ["#case/child/dob"]);
                 });
             });
 
             it("should show case properties and form questions with #", function() {
                 displayAtwho('#', function(mug) {
-                    var atwhoEntries = getDisplayedAtwhoViews().find('li');
-                    _.map(atwhoEntries, function(li) {
-                        var text = $.trim($(li).text());
-                        assert(text.startsWith('#case') || text.startsWith('#form'));
-                    });
-                    assert.strictEqual(atwhoEntries.length, 4);
+                    var atwhoEntries = getDisplayedAtwhoViews().find('li'),
+                        tags = _.map(atwhoEntries, function(li) {
+                            return $.trim($(li).text()).replace(/\n[^]*$/, "");
+                        });
+                    assert.deepEqual(tags, [
+                        "#case/child/dob",
+                        "#form/dash-dash",
+                        "#form/text",
+                        "#form/text2",
+                    ]);
                 });
             });
         });
