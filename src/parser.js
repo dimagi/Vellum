@@ -74,7 +74,23 @@ define([
             ); 
         });
         form.updateKnownInstances();
-        
+
+        // TODO do not parse hashtags if form.richText is true
+        if (!form.vellum.datasources.getDataSources()) {
+            // load hashtags from form to prevent unknown hashtag warnings
+            // WARNING hashtag values will not be written correctly (on save
+            // or edit XML) unil after data sources are loaded.
+            var hashtags = head.children('vellum\\:hashtags, hashtags');
+            try {
+                hashtags = JSON.parse($.trim(hashtags.text()));
+            } catch (err) {
+                hashtags = {};
+            }
+            _.each(hashtags, function (xpath, hash) {
+                form.initHashtag(hash, xpath);
+            });
+        }
+
         // TODO! adapt
         if(data.length === 0) {
             form.parseErrors.push(

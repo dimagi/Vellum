@@ -204,7 +204,7 @@ define([
             });
 
             it("should not cause null xpath", function () {
-                // bug only appears on load XML with vellum:attr="value" attributes
+                // bug only appeared on load XML with vellum:attr="value" attributes
                 util.loadXML(CASE_PROPERTY_XML);
                 callback(options.dataSources);
                 util.assertXmlEqual(util.call("createXML"),

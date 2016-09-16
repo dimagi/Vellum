@@ -19,8 +19,8 @@ define([
         this.form = form;
 
         form.vellum.datasources.on("change", function() {
-            _this.dataset = generateNewFuseData(_this.form);
-        });
+            _this.dataset = generateNewFuseData(form);
+        }, null, null, form);  // context=form for form.disconnectDataSources()
 
         if (!this.dataset) {
             this.dataset = generateNewFuseData(form);
@@ -82,8 +82,8 @@ define([
 
     function generateNewFuseData(form) {
         var caseData = [];
-        if (form.vellum.data.core.databrowser && form.richText) {
-            caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
+        if (form.richText) {
+            caseData = _.chain(form.vellum.datasources.getHashtagMap({}))
              .map(function(absolutePath, hashtag) {
                  return {
                      name: hashtag,

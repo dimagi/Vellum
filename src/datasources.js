@@ -87,8 +87,11 @@ define([
      *      happens once when data sources are first loaded.
      *  - error - fired when data sources could not be loaded.
      */
-    function init(endpoint) {
-        var that = util.eventuality({endpoint: endpoint});
+    function init(endpoint, invalidCaseProperties) {
+        var that = util.eventuality({
+            endpoint: endpoint,
+            invalidCaseProperties: invalidCaseProperties,
+        });
 
         that.reset = function (retryTimeout) {
             that.retryTimeout = retryTimeout || 1000;
@@ -96,7 +99,19 @@ define([
         };
 
         that.getDataSources = function (defaultValue) {
-            return getBuilt(that, "sources", defaultValue);
+            return getValue(that, "sources", defaultValue);
+        };
+
+        that.getDataNodes = function (defaultValue) {
+            return getValue(that, "dataNodes", defaultValue);
+        };
+
+        that.getHashtagMap = function (defaultValue) {
+            return getValue(that, "hashtagMap", defaultValue);
+        };
+
+        that.getHashtagTransforms = function (defaultValue) {
+            return getValue(that, "hashtagTransforms", defaultValue);
         };
 
         /**
@@ -174,25 +189,186 @@ define([
         }
     }
 
-    function getBuilt(that, name, defaultValue) {
-        var cache = that.cache,
-            value;
+    /**
+     * Get value derived from loaded data sources
+     *
+     * This function delegates to a "builder" function. Each "builder"
+     * function must return either the built object (not `undefined`)
+     * or `undefined` to indicate that the value is not available yet.
+     *
+     * @param that - datasources instance.
+     * @param name - the name of the value to get.
+     * @param defaultValue - the value to return if the requested value
+     *      cannot be built (because data sources are not yet loaded).
+     * @returns the requested value
+     */
+    function getValue(that, name, defaultValue) {
+        var cache = that.cache;
         if (cache.hasOwnProperty(name)) {
-            value = cache[name];
-        } else {
-            value = builders[name](that);
-            if (value) {
-                cache[name] = value;
-            }
+            return cache[name];
         }
-        return value || defaultValue;
+        var value = builders[name](that);
+        if (value !== undefined) {
+            cache[name] = value;
+            return value;
+        }
+        return defaultValue;
     }
 
     builders.sources = function (that) {
-        if (!that.cache.hasOwnProperty("sources") && !that.loading) {
+        if (!that.loading) {
             loadDataSources(that);
         }
         return that.cache.sources;
+    };
+
+    /**
+     * Build a list of data nodes
+     *
+     * Each node represents a known entity that can be referenced by
+     * hashtag and/or xpath expression.
+     */
+    builders.dataNodes = function (that) {
+        function node(source, parentPath, info) {
+            return function (item, id) {
+                if (_.contains(that.invalidCaseProperties, id)) {
+                    return null;
+                }
+
+                var path = parentPath ? (parentPath + "/" + id) : id,
+                    tree = getTree(item, id, path, info),
+                    hashtagPrefix = null,
+                    hashtag = null;
+                if (source && source.id !== "commcaresession") {
+                    // magic: case as the id means that this is the base case
+                    hashtagPrefix = '#case/' + (source.id !== 'case' ? source.id + '/' : '');
+                    hashtag = hashtagPrefix + id;
+                }
+                return {
+                    name: tree.name,
+                    hashtag: hashtag,
+                    hashtagPrefix: hashtagPrefix,
+                    parentPath: parentPath,
+                    xpath: path,
+                    sourceInfo: info,
+                    getNodes: tree.getNodes,
+                    recursive: tree.recursive,
+                };
+            };
+        }
+        function getTree(item, id, path, info) {
+            var tree = {name: item.name || id, recursive: false},
+                source = item,
+                children = null;
+            if (!item.structure && item.reference) {
+                var ref = item.reference;
+                source = sources[ref.source || info.id];
+                if (source) {
+                    info = _.extend(_.omit(source, "structure"), {_parent: info});
+                    path = "instance('" + source.id + "')" + source.path +
+                           "[" + ref.key + " = " + path + "]";
+                    if (source.subsets && ref.subset) {
+                        // magic: match key: "@case_type"
+                        source = _.findWhere(
+                            source.subsets,
+                            {id: ref.subset, key: "@case_type"}
+                        ) || source;
+                    }
+                    var name = source.name || source.id;
+                    if (name) {
+                        tree.name = name;
+                    }
+                    if (seen.hasOwnProperty(source.id)) {
+                        // defer to prevent infinite loop
+                        tree.recursive = true;
+                    } else {
+                        seen[source.id] = true;
+                    }
+                }
+            }
+            tree.getNodes = function () {
+                if (children === null) {
+                    children = getNodes(source, path, info);
+                }
+                return children;
+            };
+            return tree;
+        }
+        function getNodes(source, path, info) {
+            var nodes = _.chain(source && source.structure)
+                .map(node(source, path, info))
+                .compact() // TODO remove with invalidCaseProperties
+                .sortBy("text")
+                .value();
+            if (source && source.related) {
+                nodes = _.chain(source.related)
+                    .map(function (subset, relation) {
+                        // magic: reference key: @case_id
+                        var item = {reference: {subset: subset, key: "@case_id"}};
+                        // magic: append "/index" to path
+                        return node(source, path + "/index", info)(item, relation);
+                    })
+                    .sortBy("text")
+                    .value()
+                    .concat(nodes);
+            }
+            return nodes;
+        }
+
+        var sources = getValue(that, "sources"),
+            seen = {},
+            nodes;
+        if (sources) {
+            sources = sources = _.indexBy(sources, "id");
+            if (sources.commcaresession) {
+                var source = sources.commcaresession,
+                    info = _.omit(source, "structure"),
+                    path = "instance('" + source.id + "')" + source.path;
+                // do not show Session node for now
+                nodes = node(source, null, info)(source, path).getNodes();
+            }
+        }
+        return nodes;
+    };
+
+    /**
+     * Intermediate builder; extracts hashtags and transforms from data nodes.
+     */
+    builders.hashtags = function (that) {
+        function walk(nodes, hashtags) {
+            _.each(nodes, function (node) {
+                if (node.hashtag) {
+                    hashtags.map[node.hashtag] = node.xpath;
+                    hashtags.transforms[node.hashtagPrefix] = function (prop) {
+                        return node.parentPath + "/" + prop;
+                    };
+                }
+                if (!node.recursive) {
+                    walk(node.getNodes(), hashtags);
+                }
+            });
+            return hashtags;
+        }
+        var nodes = getValue(that, "dataNodes");
+        return nodes ? walk(nodes, {map: {}, transforms: {}}) : undefined;
+    };
+
+    /**
+     * Build an object containing hashtags mapped to XPath expressions.
+     */
+    builders.hashtagMap = function (that) {
+        var hashtags = getValue(that, "hashtags");
+        return hashtags && hashtags.map;
+    };
+
+    /**
+     * Build an object containing hashtag transformations.
+     *
+     * {"#case/": function (prop) { return "#case/" + prop; }}
+     */
+    builders.hashtagTransforms = function (that) {
+        var hashtags = getValue(that, "hashtags");
+        return hashtags && hashtags.transforms;
     };
 
     return {init: init};

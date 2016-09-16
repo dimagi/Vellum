@@ -217,7 +217,10 @@ define([
 
         this._init_toolbar();
         this._createJSTree();
-        this.datasources = datasources.init(this.opts().core.dataSourcesEndpoint);
+        this.datasources = datasources.init(
+            this.opts().core.dataSourcesEndpoint,
+            this.opts().core.invalidCaseProperties
+        );
     };
 
     fn.postInit = function () {
@@ -1192,14 +1195,6 @@ define([
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
         }
-        form.disconnectDataSources = this.datasources.onChangeReady(function () {
-            form.updateKnownInstances(
-                _.chain(_this.datasources.getDataSources([]))
-                 .map(function (source) { return [source.id, source.uri]; })
-                 .object()
-                 .value()
-            );
-        });
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.mug.ufid, e.qType);

@@ -156,13 +156,8 @@ define([
             });
 
             it("should hashtagify refs when written", function() {
-                // this won't write the hashtags as the logic manager won't
-                // have the #case reference but it will properly hashtagify
-                // once the databrowser is loaded
                 util.loadXML(CHILD_REF_NO_HASHTAG_XML);
-                util.assertXmlEqual(call("createXML"), CHILD_REF_XML.replace(
-                    "<vellum:hashtags>{&quot;#case/dob&quot;:null}</vellum:hashtags>", ''
-                ));
+                util.assertXmlEqual(call("createXML"), CHILD_REF_XML);
             });
 
             it("is not overwritten by the forms preloaded tags", function() {

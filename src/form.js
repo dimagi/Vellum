@@ -125,22 +125,23 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
-        this.hashtagMap = {};
-        this.invertedHashtagMap = {};
-        this.hashtagTransformations = {};
+        this.instanceMetadata = [InstanceMetadata({})];
+        // {<instance id>: { src or children: <instance src or children>}
+        this.knownInstances = {};
+        this.richText = !!vellum.opts().features.rich_text;
+
+        vellum.datasources.on("change", this._updateHashtags.bind(this), null, null, this);
+        this._updateHashtags();
+
         this.tree = new Tree('data', 'control');
         this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
-        this.instanceMetadata = [InstanceMetadata({})];
-        // {<instance id>: { src or children: <instance src or children>}
-        this.knownInstances = {};
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = escapedHashtags.parser(_this);
-        this.richText = !!vellum.opts().features.rich_text;
+        this.xpath = escapedHashtags.parser(this);
         this.undomanager = new undomanager();
 
         this.undomanager.on('reset', function(e) {
@@ -152,9 +153,43 @@ define([
         this.on('form-load-finished', function() {
             _this.fuse = new Fuse(_this);
         });
+        this.disconnectDataSources = function () {
+            vellum.datasources.unbind(_this, "change");
+        };
     }
 
     Form.prototype = {
+        _updateHashtags: function () {
+            var form = this,
+                vellum = form.vellum,
+                oldHashtags = form.hashtagMap;
+            // TODO add support for hashtags when rich text is disabled.
+            if (form.richText) {
+                form.hashtagMap = _.clone(vellum.datasources.getHashtagMap({}));
+                form.invertedHashtagMap = _.invert(form.hashtagMap);
+                form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
+            } else {
+                form.hashtagMap = {};
+                form.invertedHashtagMap = {};
+                form.hashtagTransformations = {};
+            }
+            form.updateKnownInstances(
+                _.chain(vellum.datasources.getDataSources([]))
+                 .map(function (source) { return [source.id, source.uri]; })
+                 .object()
+                 .value()
+            );
+            if (oldHashtags) {
+                _.each(oldHashtags, function (xpath, tag) {
+                    if (tag.startsWith("#form/")) {
+                        form.addHashtag(tag, xpath);
+                    }
+                });
+            }
+            // done here for performance reasons. would be nice to be done after
+            // every new hashtag, but only for the mugs that reference that hashtag
+            form.fixBrokenReferences();
+        },
         isValidHashtag: function(tag) {
             tag = this.normalizeHashtag(tag);
             return this.hashtagMap.hasOwnProperty(tag);
@@ -179,27 +214,11 @@ define([
                 this.addHashtag(hashtag, xpath);
             }
         },
-        initHashtagTransformation: function(prefix, transformation) {
-            if (!this.hashtagTransformations[prefix]) {
-                this.hashtagTransformations[prefix] = transformation;
-            }
-        },
         removeHashtag: function(hashtag) {
             if (this.hashtagMap.hasOwnProperty(hashtag)) {
                 delete this.invertedHashtagMap[this.hashtagMap[hashtag]];
                 delete this.hashtagMap[hashtag];
             }
-        },
-        clearNullHashtags: function () {
-            var map = {}, inv = {};
-            _.each(this.hashtagMap, function (xpath, hashtag) {
-                if (xpath !== null) {
-                    map[hashtag] = xpath;
-                    inv[xpath] = hashtag;
-                }
-            });
-            this.hashtagMap = map;
-            this.invertedHashtagMap = inv;
         },
         transform: function(input, transformFn) {
             input = this.normalizeEscapedHashtag(input);
