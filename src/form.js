@@ -163,8 +163,8 @@ define([
             var form = this,
                 vellum = form.vellum,
                 oldHashtags = form.hashtagMap;
-            // TODO add support for hashtags when rich text is disabled.
             if (form.richText) {
+                // TODO always load hashtags, even when rich text is disabled
                 form.hashtagMap = _.clone(vellum.datasources.getHashtagMap({}));
                 form.invertedHashtagMap = _.invert(form.hashtagMap);
                 form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});

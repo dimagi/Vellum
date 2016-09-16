@@ -431,7 +431,6 @@ define([
                 util.loadXML(CASE_PROPERTY_XML);
                 util.assertXmlEqual(util.call("createXML"), CASE_PROPERTY_XML);
                     //CASE_PROPERTY_XML.replace(/ vellum:\w+=".*?"/g, ""));
-                assert(false);
             });
         });
 

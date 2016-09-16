@@ -58,6 +58,7 @@ define([
             form.formName = $(title).text();
         }
 
+        // TODO set this to vellum.opts().features.rich_text ??
         form.richText = true;
         if(xml.find('[vellum\\:ignore=richText]').length > 0) {
             form.richText = false;
@@ -75,8 +76,7 @@ define([
         });
         form.updateKnownInstances();
 
-        // TODO do not parse hashtags if form.richText is true
-        if (!form.vellum.datasources.isReady()) {
+        if (vellum.opts().features.rich_text && !form.vellum.datasources.isReady()) {
             // load hashtags from form to prevent unknown hashtag warnings
             // WARNING hashtag values will not be written correctly (on save
             // or edit XML) unil after data sources are loaded.

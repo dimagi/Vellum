@@ -76,9 +76,8 @@ define([
             head.click(toggle);
         },
         contributeToHeadXML: function (xmlWriter, form) {
-            var hashtags = this.data.core.form.knownExternalReferences();
-            //var hashtags = form.knownExternalReferences();
-            if (!_.isEmpty(hashtags)) {
+            var hashtags = form.knownExternalReferences();
+            if (!_.isEmpty(hashtags) && form.richText) {
                 xmlWriter.writeStartElement('vellum:hashtags');
                 xmlWriter.writeString(JSON.stringify(hashtags));
                 xmlWriter.writeEndElement();

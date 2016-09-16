@@ -219,6 +219,7 @@ define([
             var ret = input.val().replace(/&#10;/g, '\n');
 
             if (ret && widget.hasLogicReferences) {
+                // TODO should not be using hashtags when rich text is off
                 return mug.form.normalizeEscapedHashtag(ret);
             } else {
                 return ret;
