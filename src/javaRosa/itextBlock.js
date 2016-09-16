@@ -202,7 +202,7 @@ define([
                         $addButton
                             .removeClass('disabled')
                             .addClass('btn-primary')
-                            .removeAttr('disabled');
+                            .prop('disabled', false);
                     }
                 });
 

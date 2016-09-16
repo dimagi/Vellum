@@ -225,7 +225,7 @@ define([
             }
         };
 
-        input.bind("change input", function () {
+        input.on("change input", function () {
             widget.handleChange();
         });
         return widget;
@@ -476,7 +476,7 @@ define([
             widget.kvInput.html(widget_control_keyvalue({
                 pairs: _.clone(value)
             }));
-            widget.kvInput.find('input').bind('change keyup', function () {
+            widget.kvInput.find('input').on('change keyup', function () {
                 widget.handleChange();
             });
             widget.kvInput.find('.fd-kv-add-pair').click(function (e) {

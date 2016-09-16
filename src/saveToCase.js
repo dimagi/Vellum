@@ -67,7 +67,7 @@ define([
                     internal_template: internal_template,
                     props: value
                 }));
-                widget.input.find('input').bind('change keyup', function () {
+                widget.input.find('input').on('change keyup', function () {
                     widget.handleChange();
                 });
                 widget.input.find('.fd-add-property').click(widget.addProperty);
