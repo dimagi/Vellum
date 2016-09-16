@@ -76,7 +76,7 @@ define([
         form.updateKnownInstances();
 
         // TODO do not parse hashtags if form.richText is true
-        if (!form.vellum.datasources.getDataSources()) {
+        if (!form.vellum.datasources.isReady()) {
             // load hashtags from form to prevent unknown hashtag warnings
             // WARNING hashtag values will not be written correctly (on save
             // or edit XML) unil after data sources are loaded.

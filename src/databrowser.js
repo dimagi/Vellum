@@ -105,7 +105,7 @@ define([
                         // load children of recursive node
                         callback.call(this, node.data.getNodes());
                     } else {
-                        if (vellum.datasources.getDataSources()) {
+                        if (vellum.datasources.isReady()) {
                             fillTree();
                         } else {
                             vellum.datasources.on("change", fillTree, null, "change");

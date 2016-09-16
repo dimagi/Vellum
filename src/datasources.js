@@ -98,6 +98,10 @@ define([
             that.cache = {};
         };
 
+        that.isReady = function () {
+            return getValue(that, "sources") !== undefined;
+        };
+
         that.getDataSources = function (defaultValue) {
             return getValue(that, "sources", defaultValue);
         };
