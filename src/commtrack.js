@@ -59,7 +59,8 @@ define([
                 "dest",
                 "sectionId",
                 "entryId",
-                "quantity"
+                "quantity",
+                "date",
             ],
             help: {
                 title: "Basic",
@@ -136,10 +137,14 @@ define([
             isHashtaggable: false,
             spec: {
                 date: {
-                    visibility: 'hidden',
+                    lstring: 'Date',
+                    visibility: 'visible',
                     presence: 'optional',
-                    serialize: function () {},
-                    deserialize: function () {},
+                    widget: widgets.xPath,
+                    xpathType: 'generic',
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: 'The date and time of the action, e.g., now() or today()',
                 },
                 sectionId: {
                     lstring: 'Balance ID',
