@@ -210,6 +210,7 @@ define(["underscore"], function (_) {
     };
 
     return {
-        options: OPTIONS
+        options: OPTIONS,
+        dataSources: dataSources,
     };
 });

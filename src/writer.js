@@ -43,6 +43,13 @@ define([
         
         xmlWriter.writeEndElement(); //CLOSE MODEL
 
+        var hashtags = form.knownExternalReferences();
+        if (form.richText && !_.isEmpty(hashtags)) {
+            xmlWriter.writeStartElement('vellum:hashtags');
+            xmlWriter.writeString(JSON.stringify(hashtags));
+            xmlWriter.writeEndElement();
+        }
+
         form.vellum.contributeToHeadXML(xmlWriter, form);
 
         xmlWriter.writeEndElement(); //CLOSE HEAD

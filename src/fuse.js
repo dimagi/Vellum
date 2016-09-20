@@ -1,12 +1,10 @@
 define([
     'underscore',
     'fusejs',
-    'vellum/datasources',
     'vellum/util',
 ], function (
     _,
     fusejs,
-    datasources,
     util
 ) {
     var FUSE_CONFIG = {
@@ -20,9 +18,9 @@ define([
         var _this = this;
         this.form = form;
 
-        datasources.getDataSources(function() {
-            _this.dataset = generateNewFuseData(_this.form);
-        });
+        form.vellum.datasources.on("change", function() {
+            _this.dataset = generateNewFuseData(form);
+        }, null, null, form);  // context=form for form.disconnectDataSources()
 
         if (!this.dataset) {
             this.dataset = generateNewFuseData(form);
@@ -82,10 +80,10 @@ define([
         return null;
     }
 
-    function generateNewFuseData (form) {
+    function generateNewFuseData(form) {
         var caseData = [];
-        if (form.vellum.data.core.databrowser && form.richText) {
-            caseData = _.chain(form.vellum.data.core.databrowser.dataHashtags)
+        if (form.richText) {
+            caseData = _.chain(form.vellum.datasources.getHashtagMap({}))
              .map(function(absolutePath, hashtag) {
                  return {
                      name: hashtag,

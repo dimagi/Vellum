@@ -16,7 +16,6 @@ define([
     'underscore',
     'jquery',
     'vellum/widgets',
-    'vellum/datasources',
     'vellum/dataSourceWidgets',
     'vellum/mugs',
     'vellum/parser',
@@ -27,7 +26,6 @@ define([
     _,
     $,
     widgets,
-    datasources,
     datasourceWidgets,
     mugs,
     parser,
@@ -167,7 +165,7 @@ define([
                 visibility: 'visible',
                 leftPlaceholder: '',
                 autocompleteChoices: function(mug) {
-                    var sources = getDataSources(),
+                    var sources = getDataSources(mug),
                         src = mug.p.itemsetData.instance.src;
                     return datasourceWidgets.autocompleteChoices(sources, src);
                 },
@@ -182,7 +180,7 @@ define([
         if (children.length) {
             return children[0];
         }
-        var sources = getDataSources(),
+        var sources = getDataSources(mug),
             newMug = form.createQuestion(mug, 'into', "Itemset", true);
         if (sources.length) {
             var src = sources[0].uri,
@@ -375,16 +373,12 @@ define([
         return {value: nodeset, filter: ''};
     }
 
-    function getDataSources() {
-        // HACK synchronously get asynchronously loaded data (if available)
-        var sources = [];
-        datasources.getDataSources(function (data) {
-            // will execute synchronously if data sources have been loaded
-            if (opts.dataSourcesFilter) {
-                data = opts.dataSourcesFilter(data);
-            }
-            sources = data;
-        });
+    function getDataSources(mug) {
+        // get asynchronously loaded data if available
+        var sources = mug.form.vellum.datasources.getDataSources([]);
+        if (opts.dataSourcesFilter) {
+            sources = opts.dataSourcesFilter(sources);
+        }
         return sources;
     }
 
@@ -518,7 +512,7 @@ define([
         var value = mug.p.itemsetData,
             instance = value ? value.instance : null,
             src = instance ? instance.src : "",
-            choices = datasourceWidgets.autocompleteChoices(getDataSources(), src);
+            choices = datasourceWidgets.autocompleteChoices(getDataSources(mug), src);
 
         atwho.questionAutocomplete(widget.input, mug, {choices: choices});
 
@@ -531,7 +525,7 @@ define([
                 mugAttr = mug.p[attr],
                 instance = itemsetData.instance,
                 instanceSrc = instance ? instance.src : '',
-                sources = getDataSources(),
+                sources = getDataSources(mug),
                 fixtures = datasourceWidgets.getPossibleFixtures(sources),
                 notCustom = _.some(fixtures, function (fixture) {
                     return fixture.src === instanceSrc;

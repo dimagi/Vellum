@@ -41,15 +41,19 @@ define([
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
-                core: {onReady: done},
+                core: {onReady: function () {
+                    vellum = this;
+                    done();
+                }},
                 features: {
                     lookup_tables: true,
                     advanced_itemsets: false,
                 },
             });
         }
+        var vellum;
         before(beforeFn);
-        beforeEach(datasources.reset);
+        beforeEach(function () { vellum.datasources.reset(); });
 
         it("adds a new instance to the form", function () {
             util.loadXML(TEST_XML_1);
@@ -287,19 +291,23 @@ define([
     });
 
     describe("The Dynamic Itemset plugin with no fixtures", function () {
-        var DATA_SOURCES = [{id: "ignored", uri: "jr://not-a-fixture"}];
+        var DATA_SOURCES = [{id: "ignored", uri: "jr://not-a-fixture"}],
+            vellum;
         before(function (done) {
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {
                     dataSourcesEndpoint: function (callback) { callback(DATA_SOURCES); },
-                    onReady: done,
+                    onReady: function () {
+                        vellum = this;
+                        done();
+                    },
                 },
                 features: {lookup_tables: true},
             });
         });
-        beforeEach(datasources.reset);
+        beforeEach(function () { vellum.datasources.reset(); });
 
         it("should be able to configure Lookup Table Data", function() {
             util.addQuestion("SelectDynamic", "select");
