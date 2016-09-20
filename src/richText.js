@@ -492,7 +492,7 @@ define([
         el.find('output').replaceWith(replacer);
         result = el.html();
         if (escape) {
-            result = $('<div />').text(xml.normalize(result)).html();
+            result = $('<div />').text(xml.humanize(result)).html();
             result = result.replace(/{(.+?)}/g, function (match, id) {
                 return places.hasOwnProperty(id) ?
                         $("<div>").append(places[id]).html() : match;
