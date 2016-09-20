@@ -75,15 +75,6 @@ define([
                 .clickExceptAfterDrag(toggle);
             head.click(toggle);
         },
-        contributeToHeadXML: function (xmlWriter, form) {
-            var hashtags = form.knownExternalReferences();
-            if (!_.isEmpty(hashtags) && form.richText) {
-                xmlWriter.writeStartElement('vellum:hashtags');
-                xmlWriter.writeString(JSON.stringify(hashtags));
-                xmlWriter.writeEndElement();
-            }
-            this.__callOld();
-        },
     });
 
     function _initDataBrowser(vellum) {
