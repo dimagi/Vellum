@@ -93,8 +93,8 @@ define([
             invalidCaseProperties: invalidCaseProperties,
         });
 
-        that.reset = function (retryTimeout) {
-            that.retryTimeout = retryTimeout || 1000;
+        that.reset = function () {
+            that.retryTimeout = 1000;
             that.cache = {};
         };
 
@@ -124,9 +124,8 @@ define([
          * @return a function that unbinds the callback.
          */
         that.onChangeReady = function (callback) {
-            var sources = that.getDataSources(),
-                context = {};
-            if (sources) {
+            var context = {};
+            if (that.isReady()) {
                 callback();
             }
             that.on("change", callback, null, null, context);

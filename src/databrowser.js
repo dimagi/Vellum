@@ -27,8 +27,6 @@ define([
                 pane = this.$f.find(".fd-accessory-pane"),
                 head, headHeight, searchBar, paneRatio;
             vellum.data.core.databrowser = {
-                dataHashtags: {},
-                dataHashtagTransformations: {},
                 errorContainer: pane,
                 panelHeight: null,
             };

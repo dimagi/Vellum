@@ -426,11 +426,9 @@ define([
 
             it("should not cause null xpath", function () {
                 util.loadXML(CASE_PROPERTY_XML);
-                //databrowser.initDataBrowser(vellum);
                 event.fire("loadCaseData");
                 util.loadXML(CASE_PROPERTY_XML);
                 util.assertXmlEqual(util.call("createXML"), CASE_PROPERTY_XML);
-                    //CASE_PROPERTY_XML.replace(/ vellum:\w+=".*?"/g, ""));
             });
         });
 
