@@ -4,6 +4,7 @@ define([
     'underscore',
     'tests/utils',
     'vellum/expressionEditor',
+    'vellum/mugs',
     'vellum/util'
 ], function (
     chai,
@@ -11,6 +12,7 @@ define([
     _,
     util,
     expressionEditor,
+    mugs,
     vellumUtil
 ) {
     var assert = chai.assert,
@@ -25,7 +27,7 @@ define([
         events.fire("showXPathEditor");
     };
 
-    describe("The widgets module", function () {
+    describe("The widgets module with rich text disabled", function () {
         before(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
@@ -38,6 +40,19 @@ define([
                 },
                 features: {rich_text: false},
             });
+        });
+
+        it("xPath widget should allow drag/drop", function () {
+            var spec = mugs.baseSpecs.databind;
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.clickQuestion("text");
+            assert.equal(spec.defaultValue.xpathType, "generic");
+            assert($("[name=property-defaultValue]").hasClass("jstree-drop"),
+                "defaultValue does not have jstree-drop class");
+            assert.equal(spec.relevantAttr.xpathType, "bool");
+            assert($("[name=property-relevantAttr]").hasClass("jstree-drop"),
+                "relevantAttr does not have jstree-drop class");
         });
 
         it("xPath widget should show newlines in advanced mode", function (done) {

@@ -406,9 +406,7 @@ define([
                     widget.getHelp()
                 ),
                 autocompleteChoices;
-            if (widget.definition.xpathType === "generic") {
-                control.addClass('jstree-drop');
-            }
+            control.addClass('jstree-drop');
             if (options.autocompleteChoices) {
                 autocompleteChoices = function () {
                     return options.autocompleteChoices(mug);
