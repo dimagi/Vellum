@@ -265,7 +265,7 @@ define([
     };
 
     function _outputToXPathOrHashtag (functionName) {
-        return function (text, xpathParser) {
+        return function (text, xpathParser, escape) {
             if (text) {
                 text = $("<div />").append(text);
                 text.find('output').replaceWith(function() {
@@ -281,6 +281,11 @@ define([
                     return $this[0].outerHTML;
                 });
                 text = xml.normalize(text.html());
+                if (escape) {
+                    text = text.replace(/(<)|>/g, function (match, lt) {
+                        return lt ? "&lt;" : "&gt;";
+                    });
+                }
             }
             return text;
         };

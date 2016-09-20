@@ -466,7 +466,7 @@ define([
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
-            val = util.escape(jrUtil.outputToXPath(val, mug.form.xpath));
+            val = jrUtil.outputToXPath(val, mug.form.xpath, true);
         }
         mug._core_cachedDisplayNameValue = val;
         return val;

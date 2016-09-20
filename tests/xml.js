@@ -242,6 +242,10 @@ define([
                '<output value="1 & 2 < 3" />', true);
         });
 
+        it("should convert empty tag", function () {
+            eq('<tag attr="value"></tag>', '<tag attr="value" />');
+        });
+
         it("should convert child nodes", function () {
             var value = "<value>1 &amp; 2 &lt; 3 <output value='/path' /></value>";
             eq($(value), '1 & 2 < 3 <output value="/path" />');
