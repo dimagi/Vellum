@@ -614,7 +614,7 @@ define([
                         .html($overwriteForm);
                     _this._resizeFullScreenModal($modal);
 
-                    $modal.find('.btn-info').attr('disabled', 'disabled');
+                    $modal.find('.btn-info').prop('disabled', true);
                 }
             }
         ], "Cancel", "fa fa-warning");
