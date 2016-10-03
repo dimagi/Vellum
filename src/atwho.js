@@ -170,7 +170,7 @@ define([
             };
 
             $input.one('focus', function () {
-                $input.atwho(_atWhoOptions('/data/'));
+                $input.atwho(_atWhoOptions(mug.form.getBasePath()));
                 if (options.useRichText) {
                     $input.atwho(_atWhoOptions('#'));
                 }

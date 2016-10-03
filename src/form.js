@@ -134,6 +134,8 @@ define([
         this._updateHashtags();
 
         this.tree = new Tree('data', 'control');
+        // initalize #form as /data
+        // if data is not root node, it will be changed later
         this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
