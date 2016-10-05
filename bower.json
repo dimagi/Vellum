@@ -40,7 +40,7 @@
         "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath#v0.0.3",
         "jsdiff": ">=1",
-        "markdown-it": "~7.0.0",
+        "markdown-it": "~8.0.0",
         "codemirror": "3.24.0"
     },
     "devDependencies": {
