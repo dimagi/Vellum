@@ -165,6 +165,7 @@ define([
                 blue = call("getMugByPath", "/other/blue");
             assert.equal(form.getBasePath(), "/other/");
             assert(blue !== null, "mug not found: /other/blue");
+            assert.equal(form.hashtagMap['#form'], '/other');
         });
 
         it("should be able to move item from Select to MSelect", function () {
