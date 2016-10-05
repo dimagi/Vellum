@@ -154,6 +154,8 @@ define([
         util.eventuality(this);
         this.on('form-load-finished', function() {
             _this.fuse = new Fuse(_this);
+        }).on('question-create', function () {
+            _this.undomanager.resetUndo();
         });
         this.disconnectDataSources = function () {
             vellum.datasources.unbind(_this, "change");
