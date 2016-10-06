@@ -132,7 +132,7 @@ define([
                                 if (util.isCaseReference(value)) {
                                     category = "Case Reference";
                                 } else {
-                                    category = "Question Reference";
+                                    category = "Form Reference";
                                 }
                                 window.analytics.usage(category,
                                                        "Autocomplete",
