@@ -51,6 +51,8 @@ define([
      * Alter a given input so that when a user enters the string "/data/",
      * they get an autocomplete of all questions in the form.
      *
+     * Does nothing if the atwho plugin is not enabled.
+     *
      * @param $input - jQuery object, the input to modify
      * @param mug - current mug
      * @param options - Hash of options for autocomplete behavior:
@@ -60,7 +62,15 @@ define([
      *                  outputValue: use output value in the template
      */
     that.questionAutocomplete = function ($input, mug, options) {
-        mug.form.vellum.addAutocomplete($input, mug, options) ;
+        if (!mug.form.vellum.data.atwho) {
+            // do nothing if plugin is not enabled
+            return;
+        }
+        if (options && options.choices) {
+           that._dropdownAutocomplete($input, options.choices);
+        } else {
+            that._questionAutocomplete($input, mug, options);
+        }
     };
 
     that._questionAutocomplete = function ($input, mug, options) {
@@ -197,17 +207,7 @@ define([
         });
     };
 
-    $.vellum.plugin("atwho", {},
-        {
-            addAutocomplete: function ($input, mug, options) {
-                if (options && options.choices) {
-                   that._dropdownAutocomplete($input, options.choices);
-                } else {
-                    that._questionAutocomplete($input, mug, options);
-                }
-            }
-        }
-    );
+    $.vellum.plugin("atwho", {}, {});
 
     return that;
 });
