@@ -106,8 +106,7 @@ define([
                     choices = choices();
                 }
                 atwho.questionAutocomplete(input, options.mug, {choices: choices});
-            }
-            else {
+            } else {
                 atwho.questionAutocomplete(input, options.mug, {
                     property: options.path,
                     useRichText: options.mug.supportsRichText(),
