@@ -54,6 +54,7 @@ define([
                 $fdc.parent().css({height: null, width: null});
                 $fdc.css({height: null, width: null});
                 $fdc.addClass("full-screen");
+                $('body').addClass("vellum-full-screen");
                 $fdc.parent().css({
                     top: 0,
                     bottom: 0,
@@ -63,6 +64,7 @@ define([
                 });
                 $fdc.css('width', $(window).width());
             } else {
+                $('body').removeClass("vellum-full-screen");
                 $fdc.parent().css({
                     top: '',
                     bottom: '',
