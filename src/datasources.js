@@ -232,7 +232,7 @@ define([
      * hashtag and/or xpath expression.
      */
     builders.dataNodes = function (that) {
-        function node(source, parentPath, info) {
+        function node(source, parentPath, info, index) {
             return function (item, id) {
                 if (_.contains(that.invalidCaseProperties, id)) {
                     return null;
@@ -253,6 +253,7 @@ define([
                     hashtagPrefix: hashtagPrefix,
                     parentPath: parentPath,
                     xpath: path,
+                    index: index || false,
                     sourceInfo: info,
                     getNodes: tree.getNodes,
                     recursive: tree.recursive,
@@ -309,7 +310,7 @@ define([
                         // magic: reference key: @case_id
                         var item = {reference: {subset: subset, key: "@case_id"}};
                         // magic: append "/index" to path
-                        return node(source, path + "/index", info)(item, relation);
+                        return node(source, path + "/index", info, true)(item, relation);
                     })
                     .sortBy("text")
                     .value()
@@ -340,7 +341,7 @@ define([
     builders.hashtags = function (that) {
         function walk(nodes, hashtags) {
             _.each(nodes, function (node) {
-                if (node.hashtag) {
+                if (node.hashtag && !node.index) {
                     hashtags.map[node.hashtag] = node.xpath;
                     hashtags.transforms[node.hashtagPrefix] = function (prop) {
                         return node.parentPath + "/" + prop;

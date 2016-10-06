@@ -400,7 +400,7 @@ define([
             steps, dispValue;
 
         if (topLevelPaths.length) {
-            steps = parsed.getTopLevelPaths()[0].steps;
+            steps = topLevelPaths[0].steps;
             dispValue = steps[steps.length-1].name;
         } else {
             steps = hashtags[0].toHashtag().split('/');
