@@ -614,77 +614,77 @@ define([
         };
     }
 
+    function createPopover(editor, ckwidget) {
+        var $this = $(ckwidget.element.$),
+            dragContainer = ckwidget.dragHandlerContainer;
+        // Setup popover
+        var datavalue = $this.attr('data-value'),
+            // WARNING does the wrong thing for value like "/data/q + 3"
+            xpath = extractXPathInfoFromOutputValue(datavalue).reference,
+            getWidget = require('vellum/widgets').util.getWidget,
+            // TODO find out why widget is sometimes null (tests only?)
+            widget = getWidget($this);
+        if (widget) {
+            var isFormRef = FORM_REF_REGEX.test(xpath),
+                isText = function () { return this.nodeType === 3; },
+                displayId = $this.contents().filter(isText)[0].nodeValue,
+                labelMug = widget.mug.form.getMugByPath(xpath),
+                labelText = labelMug && labelMug.p.labelItext ?
+                            labelMug.p.labelItext.get() : "",
+                $dragContainer = $(dragContainer.$),
+                $imgs = $dragContainer.children("img");
+            labelText = $('<div>').append(labelText);
+            labelText.find('output').replaceWith(function () {
+                return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
+            });
+
+            // Remove ckeditor-supplied title attributes, which will otherwise override popover title
+            $imgs.removeAttr("title");
+
+            $imgs.popover({
+                trigger: 'hover',
+                container: 'body',
+                placement: 'bottom',
+                title: '<h3>' + util.escape(displayId) + '</h3>' +
+                       '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
+                html: true,
+                content: easy_reference_popover({
+                    text: labelText.text(),
+                    ufid: isFormRef ? labelMug.ufid : "",
+                }),
+                template: '<div contenteditable="false" class="popover rich-text-popover">' +
+                    '<div class="popover-inner">' +
+                    '<div class="popover-title"></div>' +
+                    (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
+                    '</div></div>',
+                delay: {
+                    show: 0,
+                    hide: 200,
+                },
+            }).on('shown.bs.popover', function() {
+                if (window.analytics) {
+                    if (isFormRef) {
+                        window.analytics.usage("Form Builder", "Hovered over easy form reference");
+                    } else {
+                        window.analytics.usage("Form Builder", "Hovered over easy case reference");
+                    }
+                    window.analytics.workflow("Hovered over easy reference");
+                }
+            });
+
+            ckwidget.on('destroy', function (e)  {
+                try {
+                    $imgs.popover('destroy');
+                } catch(err) {
+                    // sometimes these are already destroyed
+                }
+            });
+        }
+    }
+
     function initEditor(input, form, options) {
         if (options && form.vellum && !form.vellum.opts().features.disable_popovers) {
-            options = _.extend(options, {
-                createPopover: function( editor, ckwidget ) {
-                    var $this = $(ckwidget.element.$),
-                        dragContainer = ckwidget.dragHandlerContainer;
-                    // Setup popover
-                    var datavalue = $this.attr('data-value'),
-                        // WARNING does the wrong thing for value like "/data/q + 3"
-                        xpath = extractXPathInfoFromOutputValue(datavalue).reference,
-                        getWidget = require('vellum/widgets').util.getWidget,
-                        // TODO find out why widget is sometimes null (tests only?)
-                        widget = getWidget($this);
-                    if (widget) {
-                        var isFormRef = FORM_REF_REGEX.test(xpath),
-                            isText = function () { return this.nodeType === 3; },
-                            displayId = $this.contents().filter(isText)[0].nodeValue,
-                            labelMug = widget.mug.form.getMugByPath(xpath),
-                            labelText = labelMug && labelMug.p.labelItext ?
-                                        labelMug.p.labelItext.get() : "",
-                            $dragContainer = $(dragContainer.$),
-                            $imgs = $dragContainer.children("img");
-                        labelText = $('<div>').append(labelText);
-                        labelText.find('output').replaceWith(function () {
-                            return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
-                        });
-
-                        // Remove ckeditor-supplied title attributes, which will otherwise override popover title
-                        $imgs.removeAttr("title");
-
-                        $imgs.popover({
-                            trigger: 'hover',
-                            container: 'body',
-                            placement: 'bottom',
-                            title: '<h3>' + util.escape(displayId) + '</h3>' +
-                                   '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
-                            html: true,
-                            content: easy_reference_popover({
-                                text: labelText.text(),
-                                ufid: isFormRef ? labelMug.ufid : "",
-                            }),
-                            template: '<div contenteditable="false" class="popover rich-text-popover">' +
-                                '<div class="popover-inner">' +
-                                '<div class="popover-title"></div>' +
-                                (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
-                                '</div></div>',
-                            delay: {
-                                show: 0,
-                                hide: 200,
-                            },
-                        }).on('shown.bs.popover', function() {
-                            if (window.analytics) {
-                                if (isFormRef) {
-                                    window.analytics.usage("Form Builder", "Hovered over easy form reference");
-                                } else {
-                                    window.analytics.usage("Form Builder", "Hovered over easy case reference");
-                                }
-                                window.analytics.workflow("Hovered over easy reference");
-                            }
-                        });
-
-                        ckwidget.on('destroy', function (e)  {
-                            try {
-                                $imgs.popover('destroy');
-                            } catch(err) {
-                                // sometimes these are already destroyed
-                            }
-                        });
-                    }
-                },
-            });
+            options = _.extend(options, {createPopover: createPopover});
         }
         return editor(input, form, options);
     }
