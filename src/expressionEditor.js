@@ -241,6 +241,7 @@ define([
                 } else {
                     $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);
                 }
+                $expUI.find('.op-select').on('change', validateExpression);
 
                 $expUI.find('.xpath-delete-expression').click(function() {
                     $expUI.remove();
