@@ -35,7 +35,7 @@ requirejs.config({
     paths: {
         'vellum': '.',
 
-        'codemirror': '../lib/codemirror/xml',
+        'codemirror': '../bower_components/codemirror/mode/xml/xml',
         'codemirrorBase': '../bower_components/codemirror/lib/codemirror',
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
