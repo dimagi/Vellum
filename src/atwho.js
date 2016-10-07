@@ -74,7 +74,13 @@ define([
         $input.one('focus', function () {
             $input.atwho(options).on("inserted.atwho", function(event, $li, otherEvent) {
                 $(this).find('.atwho-inserted').children().unwrap();
-                $input.val($input.data("selected-value")).change();
+                if ($input.attr("contenteditable")) {
+                    richText.editor($input)
+                        .setValue($input.data("selected-value"))
+                        .change();
+                } else {
+                    $input.val($input.data("selected-value")).change();
+                }
             });
         });
     };
