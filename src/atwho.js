@@ -35,6 +35,11 @@ define([
         } else {
             that._questionAutocomplete($input, mug, options);
         }
+        mug.on("teardown-mug-properties", function () {
+            if ($input.data('atwho')) {
+                $input.atwho('destroy');
+            }
+        }, null, "teardown-mug-properties");
     };
 
     /**
@@ -65,10 +70,12 @@ define([
                 },
             }
         };
-        
-        $input.atwho(options).on("inserted.atwho", function(event, $li, otherEvent) {
-            $(this).find('.atwho-inserted').children().unwrap();
-            $input.val($input.data("selected-value")).change();
+
+        $input.one('focus', function () {
+            $input.atwho(options).on("inserted.atwho", function(event, $li, otherEvent) {
+                $(this).find('.atwho-inserted').children().unwrap();
+                $input.val($input.data("selected-value")).change();
+            });
         });
     };
 
@@ -120,12 +127,6 @@ define([
         $input.on("inserted.atwho", function(event, $li, otherEvent) {
             $(this).find('.atwho-inserted').children().unwrap();
         });
-
-        mug.on("teardown-mug-properties", function () {
-            if ($input.data('atwho')) {
-                $input.atwho('destroy');
-            }
-        }, null, "teardown-mug-properties");
 
         mug.on("change-display-language", function() {
             if ($input.data('atwho')) {
