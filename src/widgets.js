@@ -434,7 +434,7 @@ define([
             }, !!widget.isDisabled());
         };
 
-        atwho.questionAutocomplete(widget.input, mug, {
+        atwho.autocomplete(widget.input, mug, {
             property: options.path,
             useRichText: mug.supportsRichText()
         });

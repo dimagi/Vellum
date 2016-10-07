@@ -15,20 +15,17 @@ define([
     var that = {};
 
     /**
-     * Alter a given input so that when a user enters the string "/data/",
-     * they get an autocomplete of all questions in the form.
+     * Add autocomplete to the given input.
      *
      * Does nothing if the atwho plugin is not enabled.
      *
      * @param $input - jQuery object, the input to modify
      * @param mug - current mug
-     * @param options - Hash of options for autocomplete behavior:
-     *                  insertTpl: string to add to input when question is selected
-     *                  property: sent to analytics
-     *                  useRichText: use rich text editor insert method
-     *                  outputValue: use output value in the template
+     * @param options - Options object. If "choices" are present add a
+     *      "dropdown" autocmoplete with the given choices. Otherwise
+     *      add "question" autocomplete.
      */
-    that.questionAutocomplete = function ($input, mug, options) {
+    that.autocomplete = function ($input, mug, options) {
         if (!mug.form.vellum.data.atwho) {
             // do nothing if plugin is not enabled
             return;
@@ -75,6 +72,18 @@ define([
         });
     };
 
+    /**
+     * Alter a given input so that when a user enters the string "/data/",
+     * they get an autocomplete of all questions in the form.
+     *
+     * @param $input - jQuery object, the input to modify
+     * @param mug - current mug
+     * @param options - Hash of options for autocomplete behavior:
+     *                  insertTpl: string to add to input when question is selected
+     *                  property: sent to analytics
+     *                  useRichText: use rich text editor insert method
+     *                  outputValue: use output value in the template
+     */
     that._questionAutocomplete = function ($input, mug, options) {
         options = _.defaults(options || {}, {
             insertTpl: '${name}',

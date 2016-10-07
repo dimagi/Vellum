@@ -408,8 +408,8 @@ define([
         function updateAutocomplete(data) {
             var value = super_getValue(),
                 choices = datasourceWidgets.autocompleteChoices(data, value ? value.src : "");
-            atwho.questionAutocomplete(valueRef(), mug, {choices: choices});
-            atwho.questionAutocomplete(labelRef(), mug, {choices: choices});
+            atwho.autocomplete(valueRef(), mug, {choices: choices});
+            atwho.autocomplete(labelRef(), mug, {choices: choices});
             return choices;
         }
 
@@ -514,7 +514,7 @@ define([
             src = instance ? instance.src : "",
             choices = datasourceWidgets.autocompleteChoices(getDataSources(mug), src);
 
-        atwho.questionAutocomplete(widget.input, mug, {choices: choices});
+        atwho.autocomplete(widget.input, mug, {choices: choices});
 
         return widget;
     }
