@@ -147,6 +147,23 @@ define([
                 done();
             }, null, "showXPathEditor");
         });
+
+        it("xPath widget should change save button when dropdown is changed", function (done) {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.clickQuestion("text");
+
+            var $right = $(".fd-content-right"),
+                $props = $right.find(".fd-question-properties");
+            $props.find(".fd-edit-button:first").click();
+
+            events.on("showXPathEditor", function () {
+                assert(!$('.fd-xpath-save-button').hasClass('btn-success'));
+                $('.op-select').change();
+                assert($('.fd-xpath-save-button').hasClass('btn-success'));
+                done();
+            }, null, "showXPathEditor");
+        });
     });
 
     describe("The rich text widget", function () {
