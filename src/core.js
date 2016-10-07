@@ -26,6 +26,7 @@ define([
     'vellum/util',
     'vellum/javaRosa/util',
     'vellum/analytics',
+    'codemirror',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -33,6 +34,8 @@ define([
     'jquery.jstree',
     'jquery.bootstrap',
     'caretjs',
+    'codemirror/mode/xml/xml',
+    'css!codemirror/lib/codemirror',
     'atjs'
 ], function (
     require,
@@ -60,6 +63,7 @@ define([
     util,
     jrUtil,
     analytics,
+    codemirror,
     debug
 ) {
     
@@ -67,7 +71,6 @@ define([
     // been resolved, since they're not needed initially.
     setTimeout(function () {
         require([
-            'codemirror',
             'diff-match-patch',
             'CryptoJS',
             'vellum/expressionEditor',
@@ -580,9 +583,10 @@ define([
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        codeMirror = require('codemirror').fromTextArea($textarea.get(0));
+        codeMirror = codemirror.fromTextArea($textarea.get(0));
         codeMirror.setOption('viewportMargin', Infinity);
         codeMirror.setOption('lineNumbers', true);
+        codeMirror.setOption('mode', 'xml');
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
