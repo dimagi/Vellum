@@ -41,7 +41,7 @@
         "xpath": "dimagi/js-xpath#v0.0.3",
         "jsdiff": ">=1",
         "markdown-it": "~7.0.0",
-        "codemirror": "4.13.0"
+        "codemirror": "5.19.0"
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
