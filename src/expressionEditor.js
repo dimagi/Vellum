@@ -105,10 +105,9 @@ define([
                 if (_.isFunction(choices)) {
                     choices = choices();
                 }
-                atwho.questionAutocomplete(input, options.mug, {choices: choices});
-            }
-            else {
-                atwho.questionAutocomplete(input, options.mug, {
+                atwho.autocomplete(input, options.mug, {choices: choices});
+            } else {
+                atwho.autocomplete(input, options.mug, {
                     property: options.path,
                     useRichText: options.mug.supportsRichText(),
                 });
