@@ -756,13 +756,7 @@ define([
                 }
             });
             var super_constraintAttr_validate = databind.constraintAttr.validationFunc;
-            databind.constraintAttr.validationFunc = function (mug) {
-                var result = super_constraintAttr_validate(mug);
-                if (result === "pass") {
-                    result = validateConstraintMsgAttr(mug);
-                }
-                return result;
-            };
+            databind.constraintAttr.validationFunc = validateConstraintMsgAttr;
             // virtual property used to define a widget
             databind.constraintMsgItextID = {
                 visibility: 'constraintMsgItext',
