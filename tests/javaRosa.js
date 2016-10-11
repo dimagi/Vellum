@@ -917,6 +917,18 @@ define([
             }
         });
 
+        it("should not display constraintMsgItext validation error after removing validation message and condition", function() {
+            util.loadXML("");
+            util.paste([
+                ["id", "type", "constraintMsgItext:en-default", "constraintAttr", "constraintMsgAttr"],
+                ["/text", "Text", "message!", ". = 'a'", "jr:itext('question1-constraintMsg')"],
+            ]);
+            $("[name='itext-en-constraintMsg']").val('').change();
+            $("[name='property-constraintAttr']").val('').change();
+            var message = $("[name='property-constraintAttr']").siblings(".messages").text();
+            assert(!message, "unexpected message: " + message);
+        });
+
         it("should show and hide the validation message as appropriate", function() {
             util.loadXML(GROUP_WITH_CONSTRAINT_XML);
             $("[name='property-constraintAttr']").val('true()').change();
