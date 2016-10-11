@@ -693,13 +693,17 @@ define([
         });
     };
 
-    fn.closeModal = function (done) {
+    fn.closeModal = function (done, immediate) {
         var _this = this,
             $modal = _this.$f.find('.fd-modal-generic-container .modal');
         if (done) {
             $modal.one('hidden.bs.modal', function() {
                 done.apply(_this);
             });
+        }
+        if (immediate) {
+            // skip animation
+            $modal.removeClass('fade');
         }
         $modal.modal('hide');
     };
@@ -718,7 +722,7 @@ define([
             $modalContainer = _this.$f.find('.fd-modal-generic-container');
 
         // Close any existing modal - multiple modals is a bad state
-        _this.closeModal();
+        _this.closeModal(undefined, true);
 
         var $modal = $(modal_content({
                 title: title,
