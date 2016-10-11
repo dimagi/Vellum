@@ -702,6 +702,7 @@ define([
             });
         }
         if (immediate) {
+            // skip animation
             $modal.removeClass('fade');
         }
         $modal.modal('hide');
