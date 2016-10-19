@@ -311,15 +311,15 @@ define([
         try {
             var expr = form.xpath.parse(hashtagOrXPath);
             xpath_ = expr.toXPath();
+            // TODO hashtag = hashtagOrXPath
+            // (do not convert hand-typed xpaths to hashtags)
             hashtag = expr.toHashtag();
         } catch (err) {
             if (form.richText) {
-                xmlWriter.writeAttributeString('vellum:' + vellumKey, "#invalid/xpath " + hashtagOrXPath);
+                // TODO hashtagOrXPath should already have this prefix
+                hashtag = "#invalid/xpath " + hashtagOrXPath;
             }
-            xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
-                return mug.form.normalizeXPath(hashtag);
-            }));
-            return;
+            xpath_ = escapedHashtags.unescapeXPath(hashtagOrXPath, form);
         }
 
         if (hashtag !== xpath_) {
@@ -344,5 +344,3 @@ define([
 
     return that;
 });
-
-

@@ -34,7 +34,8 @@ define([
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
         DELIMITER = "`",
-        ID_CHAR = /^[\w.\-]/;
+        ID_CHAR = /^[\w.\-]/,
+        INVALID_PREFIX = "#invalid/xpath ";
 
     /*
      * transforms escaped hashtags based on transformFn
@@ -112,6 +113,23 @@ define([
         return output;
     }
 
+    /**
+     * Check for escaped invalid (cannot be parsed) hashtag expression
+     */
+    function isInvalid(value) {
+        return value.startsWith(INVALID_PREFIX);
+    }
+
+    /**
+     * Convert (possibly invalid) escaped hashtag expression to xpath
+     */
+    function unescapeXPath(value, form) {
+        //if (isInvalid(value)) {
+        //    value = value.slice(INVALID_PREFIX.length);
+        //}
+        return transform(value, form.normalizeXPath.bind(form));
+    }
+
     /*
      * extends xpath parser to be aware of escaped hashtags
      */
@@ -140,7 +158,7 @@ define([
 
         return {
             parse: function (input) {
-                if (input.startsWith("#invalid/xpath ")) {
+                if (isInvalid(input)) {
                     throw new Error("Invalid XPath");
                 }
                 // TODO eliminate transform(input) here; should not be needed.
@@ -164,6 +182,8 @@ define([
     }
 
     return {
+        isInvalid: isInvalid,
+        unescapeXPath: unescapeXPath,
         transform: transform,
         parser: parser,
     };

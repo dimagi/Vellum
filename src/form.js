@@ -234,7 +234,7 @@ define([
             try {
                 return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
             } catch (err) {
-                return xpath.startsWith('#invalid/xpath ') ? xpath.slice(15) : xpath;
+                return escapedHashtags.isInvalid(xpath) ? xpath.slice(15) : xpath;
             }
          },
         normalizeEscapedHashtag: function (xpath_) {
