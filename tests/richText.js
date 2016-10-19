@@ -364,19 +364,26 @@ define([
         describe("", function() {
             var el = $("<div id='cktestparent'><div contenteditable /><div contenteditable /></div>"),
                 options = {isExpression: false},
-                input, editor;
+                input, editor, exprInput, exprEditor;
             before(function (done) {
                 $("body").append(el);
                 input = el.children().first();
                 editor = richText.editor(input, form, options);
+                exprInput = $(el.children()[1]);
+                exprEditor = richText.editor(exprInput, form, {isExpression: true});
                 // wait for editor to be ready; necessary to change selection
-                input.promise.then(function () { done(); });
+                input.promise.then(function () {
+                    exprInput.promise.then(function () { done(); });
+                });
             });
             beforeEach(function (done) {
-                editor.setValue("", function () { done(); });
+                editor.setValue("", function () {
+                    exprEditor.setValue("", function () { done(); });
+                });
             });
             after(function () {
                 editor.destroy();
+                exprEditor.destroy();
                 assert.equal($("#cktestparent").length, 1);
                 el.remove();
                 assert.equal($("#cktestparent").length, 0);
@@ -422,6 +429,32 @@ define([
                     editor.insertOutput(output);
                     assert.equal(editor.getValue(), "one" + output + " two");
                     done();
+                });
+            });
+
+            it("should not copy output value from label to expression editor", function (done) {
+                var output = '<output value="#form/text" />';
+                editor.setValue(output, function () {
+                    // TODO should not return escaped hashtag
+                    assert.equal(editor.getValue(), '<output value="`#form/text`" />');
+                    var copyVal = input.ckeditor().editor.getData();
+                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
+                    exprInput.ckeditor().editor.setData(copyVal, function () {
+                        assert.equal(exprEditor.getValue(), "#form/text");
+                        done();
+                    });
+                });
+            });
+
+            it("should copy output value from expression editor to label", function (done) {
+                exprEditor.setValue("#form/text", function () {
+                    assert.equal(exprEditor.getValue(), "`#form/text`");
+                    var copyVal = exprInput.ckeditor().editor.getData();
+                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
+                    input.ckeditor().editor.setData(copyVal, function () {
+                        assert.equal(editor.getValue(), '<output value="#form/text" />');
+                        done();
+                    });
                 });
             });
 
