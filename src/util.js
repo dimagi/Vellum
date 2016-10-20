@@ -35,7 +35,10 @@ define([
     });
 
     that.formatExc = function (error) {
-        return error && error.stack ? error.stack : String(error);
+        if (error && error.stack) {
+            return error + "\n" + error.stack;
+        }
+        return String(error);
     };
 
     that.validAttributeRegex = /^[^<&'">]*$/;
