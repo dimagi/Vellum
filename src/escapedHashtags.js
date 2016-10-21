@@ -1,28 +1,8 @@
 /**
- * This provides a robust parser for xpaths, hashtags, and escaped hashtags.
- *
- * XPaths are valid XPaths: /data/text = /data/text2
- * Hashtags are valid XPaths with hasthags: #form/text = #form/text2
- * Escaped hashtags are hashtags but any hashtags are escaped by `: `#form/text` = `#form/text`
- *
- * If an xpath is invalid it will be written as: #invalid/xpath (`#form/text`
- *
- * Reasoning for this split:
- * Hashtags without escaping are useful for showing to users and hand editing
- *
- * Escaped hashtags are used to ensure we do not lose a bubble when copy/pasting
- * or when an expression becomes invalid.
- *
- * All expressions are stored as escaped hashtags internally and are written to
- * XML in two forms.
- *   ex: <bind vellum:calculate="#form/text" calculate="/data/text .../>
- *   The vellum namespaced attribute is the hashtag form. The non namespaced
- *   attribute is the valid xform syntax.
- *
- * When a user saves an invalid xpath we save it as:
- *   <bind vellum:calculate="#invalid/xpath (`#form/text`" .../>
- *
- * TODO: only use escaped hashtag form internally for invalid xpaths
+ * This provides a robust parser for replacing hashtags with arbitrary derived
+ * expressions (bubbles) as well as a light-weight delimit/transform system for
+ * marking delimited ranges of text in a string that can later be transformed to
+ * arbitrary derived expressions (bubbles).
  */
 define([
     'underscore',
@@ -34,19 +14,54 @@ define([
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
         DELIMITER = "`",
-        ID_CHAR = /^[\w.\-]/,
-        INVALID_PREFIX = "#invalid/xpath ";
+        ID_CHAR = /^[\w.\-]/;
 
     /*
-     * transforms escaped hashtags based on transformFn
-     * 
-     * transformFn -> function(input) where input will be text inside delimiters
-     * and returns what you want that turned into without delimiters
+     * Escape delimiters in text
+     *
+     * Use to escape delimiters in an expression before escaping
+     * sub-expressions with `escape`. `transform` can be used to
+     * unescape the final result.
      *
      * example:
-     * transform("`#form/question`", makeBubble) -> "<bubble>#form</bubble>"
+     *  expr = "{a} + {b}";
+     *  subs = {a: "#form/a", b: "#form/b"};
+     *  escapeDelimiters(expr).replace(/{(.*?)}/g, function (match, id) {
+     *      return subs.hasOwnProperty(id) ? escape(subs[id]) : match;
+     *  });  // -> "`#form/a` + `#form/b`"
      */
-    function transform(input, transformFn) {
+    function escapeDelimiters(text) {
+        return text.replace(/`/g, "``");
+    }
+
+    /*
+     * Wrap text with delimiters
+     *
+     * The given text must not contain the delimiter character.
+     */
+    function delimit(text) {
+        if (text.indexOf(DELIMITER) !== -1) {
+            throw new Error("cannot delimit: " + text);
+        }
+        return DELIMITER + text + DELIMITER;
+    }
+
+    /*
+     * Transform delimited ranges based on transformFn
+     *
+     * Use to transform escaped (delimited) hashtags to bubbles in an
+     * invalid xpath expression.
+     *
+     * transformFn -> function(input) where input will be text inside delimiters
+     * and returns what you want that turned into without delimiters
+     * allowRunOn -> If true, do not add extra space after transformed range
+     * followed by identifier character. The default is false.
+     *
+     * example:
+     * transform("(`#form/question` + 1", makeBubble);
+     * // -> "(<bubble>question</bubble> + 1"
+     */
+    function transform(input, transformFn, allowRunOn) {
         if (!input) { return input; }
         var symbols = getSymbols(input);
         transformFn = transformFn || function (input) { return input; };
@@ -72,11 +87,11 @@ define([
                 if (current === DELIMITER) {
                     state = OUTSIDE_HASHTAG;
                     text += transformFn(currentReference);
-                    if (next && ID_CHAR.test(next)) {
+                    if (!allowRunOn && next && ID_CHAR.test(next)) {
                         text += " ";
                     }
                     currentReference = "";
-                } else if (next !== undefined){
+                } else if (next !== undefined) {
                     currentReference += current;
                 }
             }
@@ -113,42 +128,29 @@ define([
         return output;
     }
 
-    /**
-     * Check for escaped invalid (cannot be parsed) hashtag expression
-     */
-    function isInvalid(value) {
-        return value.startsWith(INVALID_PREFIX);
-    }
-
-    /**
-     * Convert (possibly invalid) escaped hashtag expression to xpath
-     */
-    function unescapeXPath(value, form) {
-        //if (isInvalid(value)) {
-        //    value = value.slice(INVALID_PREFIX.length);
-        //}
-        return transform(value, form.normalizeXPath.bind(form));
-    }
-
     /*
-     * extends xpath parser to be aware of escaped hashtags
+     * Get function to transform hashtags to arbitrary text
+     *
+     * Use to transform hashtags to bubbles in a valid xpath expression.
+     *
+     * example:
+     * transform = makeHashtagTransform(form);
+     * transform("#form/question + 1", makeBubble);
+     * // -> "<bubble>question</bubble> + 1"
      */
-    function parser(hashtagInfo) {
+    function makeHashtagTransform(hashtagInfo) {
         function decorateHashtagger(tagger) {
             var super_toHashtag = tagger.toHashtag;
             tagger.toHashtag = function (xpath_) {
                 var expr = super_toHashtag(xpath_);
-                if (expr !== null) {
-                    expr = DELIMITER + expr + DELIMITER;
-                }
-                return expr;
+                return expr === null ? null : decorateHashtag(expr);
             };
             return tagger;
         }
-        var xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo)),
-            escapingModels = xpath.makeXPathModels(hashtagInfo, decorateHashtagger),
+        var escapingModels = xpath.makeXPathModels(hashtagInfo, decorateHashtagger),
             escapingParser = xpath.createParser(escapingModels),
-            baseHashtagExpr = escapingModels.HashtagExpr;
+            baseHashtagExpr = escapingModels.HashtagExpr,
+            decorateHashtag = _.identity;
 
         escapingModels.HashtagExpr = function (definition) {
             baseHashtagExpr.call(this, definition);
@@ -156,35 +158,22 @@ define([
             return this;
         };
 
-        return {
-            parse: function (input) {
-                if (isInvalid(input)) {
-                    throw new Error("Invalid XPath");
-                }
-                // TODO eliminate transform(input) here; should not be needed.
-                // transform should only be applied to data that is known to be
-                // escaped instead of every expression before parsing.
-                var parsed = xpathParser.parse(transform(input));
-                parsed.toEscapedHashtag = function() {
-                    var expr = this.toHashtag();
-                    if (!expr) { return expr; }
-                    try {
-                        return escapingParser.parse(expr).toHashtag();
-                    } catch (err) {
-                        // a bad xpath. let's just return the given expr
-                        return expr;
-                    }
-                };
-                return parsed;
-            },
-            models: xpathParser.models,
+        return function (xpath, transformFn) {
+            decorateHashtag = transformFn;
+            try {
+                return escapingParser.parse(xpath).toHashtag();
+            } catch (err) {
+                return xpath;
+            } finally {
+                decorateHashtag = _.identity;
+            }
         };
     }
 
     return {
-        isInvalid: isInvalid,
-        unescapeXPath: unescapeXPath,
+        escapeDelimiters: escapeDelimiters,
+        delimit: delimit,
         transform: transform,
-        parser: parser,
+        makeHashtagTransform: makeHashtagTransform,
     };
 });

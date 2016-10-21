@@ -220,7 +220,7 @@ define([
 
             if (ret && widget.hasLogicReferences) {
                 // TODO should not be using hashtags when rich text is off
-                return mug.form.normalizeEscapedHashtag(ret);
+                return mug.form.normalizeHashtag(ret);
             } else {
                 return ret;
             }

@@ -108,7 +108,7 @@ define([
             util.loadXML("");
             util.addQuestion("Text", "text");
             var value = '/data/text',
-                escaped = '`#form/text`',
+                escaped = '#form/text',
                 hidden = util.addQuestion("DataBindOnly", "hidden", {
                     calculateAttr: escaped
                 });
@@ -228,7 +228,7 @@ define([
             disp.input.promise.then(function () { // wait for editor to be ready
                 util.findNode(tree, "hidden").data.handleDrop(disp.input);
                 disp.handleChange();
-                assert.equal(text.p.relevantAttr, '`#form/hidden`');
+                assert.equal(text.p.relevantAttr, '#form/hidden');
                 done();
             });
         });

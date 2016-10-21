@@ -4,7 +4,8 @@ define([
     'jquery',
     'vellum/tree',
     'vellum/logic',
-    'vellum/escapedHashtags',
+    'vellum/richText',
+    'vellum/xpath',
     'vellum/fuse',
     'vellum/undomanager',
     'vellum/util'
@@ -14,7 +15,8 @@ define([
     $,
     Tree,
     logic,
-    escapedHashtags,
+    richText,
+    xpath,
     Fuse,
     undomanager,
     util
@@ -143,7 +145,7 @@ define([
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = escapedHashtags.parser(this);
+        this.xpath = xpath.parser(this);
         this.undomanager = new undomanager();
 
         this.undomanager.on('reset', function(e) {
@@ -224,21 +226,17 @@ define([
                 delete this.hashtagMap[hashtag];
             }
         },
-        transform: function(input, transformFn) {
-            input = this.normalizeEscapedHashtag(input);
-            return escapedHashtags.transform(input, transformFn);
-        },
         normalize: function (methodName, xpath) {
-            // try catch is needed as workaround for having an itemset without
-            // the itemset plugin enabled and invalid xpaths
-            try {
-                return xpath ? this.xpath.parse(xpath)[methodName]() : xpath;
-            } catch (err) {
-                return escapedHashtags.isInvalid(xpath) ? xpath.slice(15) : xpath;
+            if (!xpath || (this.richText && richText.isInvalid(xpath))) {
+                return xpath;
             }
-         },
-        normalizeEscapedHashtag: function (xpath_) {
-            return this.normalize('toEscapedHashtag', xpath_);
+            // try catch is needed as workaround for having an itemset without
+            // the itemset plugin enabled
+            try {
+                return this.xpath.parse(xpath)[methodName]();
+            } catch (err) {
+                return xpath;
+            }
         },
         normalizeHashtag: function (xpath_) {
             return this.normalize('toHashtag', xpath_);

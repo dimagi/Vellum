@@ -994,7 +994,7 @@ define([
                 ["id", "type", "calculateAttr"],
                 ["/invalid", "DataBindOnly", "(42"],
                 ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
-                ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
+                ["/invalid3", "DataBindOnly", "#invalid/xpath (#form/invalid"],
             ]);
             util.clickQuestion('invalid');
             util.clickQuestion('invalid2');
@@ -1003,7 +1003,7 @@ define([
                 invalid3 = util.getMug('invalid3');
             assert.strictEqual(invalid.p.calculateAttr, '#invalid/xpath (42');
             assert.strictEqual(invalid2.p.calculateAttr, '#invalid/xpath (42');
-            assert.strictEqual(invalid3.p.calculateAttr, '#invalid/xpath (`#form/invalid`');
+            assert.strictEqual(invalid3.p.calculateAttr, '#invalid/xpath (#form/invalid');
             var widget = util.getWidget('property-calculateAttr');
             widget.input.promise.then(function () {
                 assert.strictEqual(widget.getValue(), '(42');
@@ -1012,7 +1012,7 @@ define([
                     ["id", "type", "calculateAttr"],
                     ["/invalid", "DataBindOnly", "#invalid/xpath (42"],
                     ["/invalid2", "DataBindOnly", "#invalid/xpath (42"],
-                    ["/invalid3", "DataBindOnly", "#invalid/xpath (`#form/invalid`"],
+                    ["/invalid3", "DataBindOnly", "#invalid/xpath (#form/invalid"],
                 ]);
                 done();
             });
@@ -1032,10 +1032,10 @@ define([
             assert.strictEqual(valid.p.calculateAttr, '#form/invalid');
             var widget = util.getWidget('property-calculateAttr');
             widget.input.promise.then(function () {
-                assert.strictEqual(widget.getValue(), '`#form/invalid`');
+                assert.strictEqual(widget.getValue(), '#form/invalid');
                 assert.strictEqual(
                     $('[name=property-calculateAttr]').find('span .label').data('value'),
-                    '`#form/invalid`'
+                    '#form/invalid'
                 );
                 util.selectAll();
                 eq(mod.copy(), [

@@ -64,43 +64,31 @@ define([
             });
         });
 
-        describe("#toEscapedHashtag()", function() {
+        describe("#makeHashtagTransform() with #delimit()", function() {
+            // Note: this combination is not currently used in production, but
+            // it's a good test for makeHashtagTransform
             var testCases = [
                     ["#form/text1", "`#form/text1`"],
                     ["/data/text1", "`#form/text1`"],
-                    ["`#form/text1`", "`#form/text1`"],
+                    ["`#form/text1`", "`#form/text1`"],  // invalid xpath
 
                     ["#form/text1 -1", "`#form/text1` - 1"],
                     ["/data/text1 -1", "`#form/text1` - 1"],
-                    // ideally no change, but too hard right now (to much extra parsing going on)
-                    ["`#form/text1`-1", "`#form/text1` - 1"],
+                    // invalid xpath, parse error -> no change
+                    ["`#form/text1`-1", "`#form/text1`-1"],
                 ],
-                parser = escapedHashtags.parser(hashtagInfo);
+                transform = escapedHashtags.makeHashtagTransform(hashtagInfo),
+                delimit = escapedHashtags.delimit;
 
             testCases.forEach(function(testCase) {
                 it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(parser.parse(testCase[0]).toEscapedHashtag(), testCase[1]);
-                });
-            });
-        });
-
-        describe("#toXPath()", function() {
-            var testCases = [
-                    ["`/data/text1`", "/data/text1"],
-                    ["`#form/text1`", "/data/text1"],
-                    ["`#form/text1`-1", "/data/text1 - 1"],
-                ],
-                parser = escapedHashtags.parser(hashtagInfo);
-
-            testCases.forEach(function(testCase) {
-                it("should parse " + testCase[0] + " into " + testCase[1], function() {
-                    assert.strictEqual(parser.parse(testCase[0]).toXPath(), testCase[1]);
+                    assert.strictEqual(transform(testCase[0], delimit), testCase[1]);
                 });
             });
         });
     });
 
-    describe("The form's escaped hashtag parser", function() {
+    describe("The form's escaped hashtag parser with rich_text disabled", function() {
         before(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
@@ -113,12 +101,13 @@ define([
             });
         });
 
-        it("writes invalid xml with #invalid", function () {
+        it("reads invalid xpath with #invalid", function () {
             util.loadXML(INVALID_XPATH_XML);
             var text = util.getMug('text'),
                 hidden = util.getMug('hidden');
-            assert.strictEqual(text.p.relevantAttr, '(`#form/hidden`');
-            assert.strictEqual(hidden.p.calculateAttr, '`#form/text`');
+            // TODO fix this - should read non-vellum: attrs when rich text is disabled
+            assert.strictEqual(text.p.relevantAttr, '#invalid/xpath (`#form/hidden`');
+            assert.strictEqual(hidden.p.calculateAttr, '#form/text');
         });
     });
 
@@ -134,12 +123,12 @@ define([
             });
         });
 
-        it("writes invalid xml with #invalid", function () {
+        it("writes invalid xpath with #invalid", function () {
             util.loadXML("");
             var text = util.addQuestion('Text', 'text'),
                 hidden = util.addQuestion('DataBindOnly', 'hidden');
-            text.p.relevantAttr = '(`#form/hidden`'; // invalid xml
-            hidden.p.calculateAttr = '`#form/text`';
+            text.p.relevantAttr = '#invalid/xpath (`#form/hidden`';
+            hidden.p.calculateAttr = '#form/text';
             util.assertXmlEqual(
                 util.call("createXML"),
                 INVALID_XPATH_XML,

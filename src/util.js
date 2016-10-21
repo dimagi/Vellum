@@ -1,9 +1,9 @@
+/* global require */
 define([
     'json!langCodes',
     'underscore',
     'jsdiff',
     'vellum/markdown',
-    'vellum/escapedHashtags',
     'jquery',
     'vellum/jquery-extensions'
 ], function (
@@ -11,7 +11,6 @@ define([
     _,
     jsdiff,
     markdown,
-    escapedHashtags,
     $
 ) {
     RegExp.escape = function(s) {
@@ -299,6 +298,27 @@ define([
         return label;
     };
 
+    /**
+     * Write xpath expression attribute(s)
+     *
+     * All expressions are stored as hashtag expressions internally and are
+     * written to XML in two forms when rich text is enabled:
+     *
+     *   <bind ... vellum:calculate="#form/text" calculate="/data/text" />
+     *
+     * The vellum namespaced attribute is the hashtag form and is only written
+     * when rich text is enabled and it is different from the XPath form. The
+     * non namespaced attribute is XPath syntax (no hashtags) and is always
+     * written.
+     *
+     * When rich text is enabled invalid XPaths are escaped in the vellum
+     * namespaced attribute and best-effort no-hashtag XPath in non namespaced
+     * attribute:
+     *
+     *   <bind ...
+     *      vellum:calculate="#invalid/xpath (`#form/text`"
+     *      calculate="(/data/text" />
+     */
     that.writeHashtags = function (xmlWriter, key, hashtagOrXPath, mug) {
         if (!_.isString(hashtagOrXPath)) {
             // don't try to parse a value that doesn't exist
@@ -319,14 +339,16 @@ define([
             hashtag = expr.toHashtag();
         } catch (err) {
             if (form.richText) {
-                // TODO hashtagOrXPath should already have this prefix
-                hashtag = "#invalid/xpath " + hashtagOrXPath;
+                var richText = require('vellum/richText');
+                hashtag = hashtagOrXPath;
+                xpath_ = richText.unescapeXPath(hashtagOrXPath, form);
+            } else {
+                hashtag = xpath_ = hashtagOrXPath;
             }
-            xpath_ = escapedHashtags.unescapeXPath(hashtagOrXPath, form);
         }
 
         if (hashtag !== xpath_) {
-            if (form.richText ) {
+            if (form.richText) {
                 xmlWriter.writeAttributeString('vellum:' + vellumKey, hashtag);
             }
             xmlWriter.writeAttributeString(key, xpath_);

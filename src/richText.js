@@ -19,7 +19,12 @@
  *     text to display inside bubble
  *   </span>
  *
- * Any other HTML has undefined behavior
+ * Any other HTML has undefined behavior.
+ *
+ * Expression editng mode returns invalid xpath expressions with a special
+ * "#invalid/xpath " prefix and bubbles are escaped with backticks. Example:
+ *
+ *   #invalid/xpath (`#form/text`
  */
 
 (function () {
@@ -33,6 +38,7 @@ define([
     'underscore',
     'jquery',
     'tpl!vellum/templates/easy_reference_popover',
+    'vellum/escapedHashtags',
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
@@ -43,14 +49,16 @@ define([
     _,
     $,
     easy_reference_popover,
+    escapedHashtags,
     logic,
     util,
     xml,
     CKEDITOR
 ){
-    var CASE_REF_REGEX = /^\`?#case\//,
-        FORM_REF_REGEX = /^\`?#form\//,
-        REF_REGEX = /^\`?#(form|case)\//,
+    var CASE_REF_REGEX = /^#case\//,
+        FORM_REF_REGEX = /^#form\//,
+        REF_REGEX = /^#(form|case)\//,
+        INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
         isWebkit = 'WebkitAppearance' in document.documentElement.style,
         bubbleWidgetDefinition = {
@@ -124,8 +132,7 @@ define([
      *
      * @param input - editor jQuery HTML element.
      * @param form - form object, functions used:
-     *    normalizeEscapedHashtag - transforms to escaped hashtag form
-     *    transform - transforms escaped hashtags
+     *    normalizeHashtag - get expression with normalized hashtags
      *    isValidHashtag - boolean if hashtag translation exists
      *    getIconByPath - only used for mug.options.icon
      *    xpath - xpath parser
@@ -185,7 +192,7 @@ define([
                         wrapper.select(0);
                         data = editor.getData();
                     }
-                    return fromRichText(data);
+                    return fromRichText(data, form, options.isExpression);
                 }
             },
             setValue: function (value, callback) {
@@ -455,13 +462,13 @@ define([
     }
 
     /**
-     * @param value - a single xpath expression
+     * @param value - string containing <output ...> tag or xpath expression
      *
-     * @returns - jquery object of xpath bubble
+     * @returns - jquery object of xpath bubble or string
      */
     function replacePathWithBubble(form, value) {
         var info = extractXPathInfoFromOutputValue(value),
-            xpath = form.normalizeEscapedHashtag(info.reference),
+            xpath = form.normalizeHashtag(info.reference),
             extraAttrs = _.omit(info, 'reference'),
             startsWithRef = REF_REGEX.test(xpath),
             containsWhitespace = /\s/.test(xpath);
@@ -516,14 +523,88 @@ define([
      * Wrap top-level expression nodes with bubble markup
      */
     function bubbleExpression(text, form) {
-        text = xml.normalize(form.normalizeEscapedHashtag(text));
-        return form.transform(text, _.partial(replacePathWithBubble, form));
+        var transform;
+        if (isInvalid(text)) {
+            text = text.slice(INVALID_PREFIX.length);
+            transform = escapedHashtags.transform;
+        } else {
+            if (form._richText_transform === undefined) {
+                form._richText_transform = escapedHashtags.makeHashtagTransform(form);
+            }
+            transform = form._richText_transform;
+        }
+        // HACK replacePathWithBubble should not call extractXPathInfoFromOutputValue
+        // (in this case the value is not an output tag). Do bubbles in
+        // expressions ever have date formatting applied? If not then
+        // replacePathWithBubble could be quite a bit simpler for this use case.
+        return transform(text, _.partial(replacePathWithBubble, form), true);
     }
 
-    function unwrapBubbles(text) {
-        var el = $('<div>').html(text);
-        el.find('.label-datanode').children().unwrap();
-        return el.text();
+    function unwrapBubbles(text, form, isExpression) {
+        var el = $('<div>').html(text),
+            places = {},
+            bubbles = el.find('.label-datanode'),
+            replacer, result, expr;
+        if (!bubbles.length) {
+            return el.text();
+        }
+        if (isExpression) {
+            replacer = function () {
+                var id = util.get_guid();
+                places[id] = $(this).text();
+                return "{" + id + "}";
+            };
+        } else {
+            replacer = function () {
+                return $(this).html();
+            };
+        }
+        bubbles.replaceWith(replacer);
+        result = el.text();
+        if (isExpression) {
+            expr = result.replace(/{(.+?)}([\w.\-]?)/g, function (match, id, after) {
+                // `after` is a character following {id} that would fuse with
+                // the bubble expression if we did not put a space between them
+                return places.hasOwnProperty(id) ?
+                    places[id] + (after ? " " : "") + after : match;
+            });
+            try {
+                form.xpath.parse(expr);
+            } catch (e) {
+                expr = INVALID_PREFIX + escapedHashtags.escapeDelimiters(result)
+                    .replace(/{(.+?)}/g, function (match, id) {
+                        return places.hasOwnProperty(id) ?
+                            escapedHashtags.delimit(places[id]) : match;
+                    });
+            }
+            result = expr;
+        }
+        return result;
+    }
+
+    /**
+     * Check for escaped invalid hashtag expression
+     */
+    function isInvalid(value) {
+        return value.startsWith(INVALID_PREFIX);
+    }
+
+    /**
+     * Convert escaped hashtag expression to xpath
+     *
+     * @return - unescaped expression with hashtags converted to
+     *      equivalent xpath if the given value is marked with the
+     *      invalid xpath prefix, otherwise the given value
+     */
+    function unescapeXPath(value, form) {
+        // TODO add whitespace to prevent run-on sub-expressions
+        if (isInvalid(value)) {
+            value = escapedHashtags.transform(
+                value.slice(INVALID_PREFIX.length),
+                form.normalizeXPath.bind(form)
+            );
+        }
+        return value;
     }
 
     /**
@@ -583,8 +664,8 @@ define([
      * @param html - HTML string that may or may not have bubble
      * @returns - string with bubbles deconstructed into plain text
      */
-    function fromRichText(html) {
-        return unwrapBubbles(fromHtml(html));
+    function fromRichText(html, form, isExpression) {
+        return unwrapBubbles(fromHtml(html), form, isExpression);
     }
 
     function extractXPathInfoFromOutputValue(value) {
@@ -696,5 +777,7 @@ define([
         editor: initEditor,
         fromRichText: fromRichText,
         toRichText: toRichText,
+        isInvalid: isInvalid,
+        unescapeXPath: unescapeXPath,
     };
 });
