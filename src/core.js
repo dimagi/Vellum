@@ -923,7 +923,7 @@ define([
      * for multiple Vellum instances on the same page.
      */
     $(document).on("dnd_move.vakata.jstree", function (e, data) {
-        var source = $(data.data.obj.context),
+        var source = $(data.data.obj),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
@@ -935,7 +935,7 @@ define([
             }
         }
     }).on("dnd_stop.vakata.jstree", function (e, data) {
-        var vellum = $(data.data.obj.context).vellum("get"),
+        var vellum = $(data.data.obj).vellum("get"),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
 
