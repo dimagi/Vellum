@@ -380,8 +380,10 @@ define([
             $div.find('.fd-xpath-actions').removeClass('form-actions-condensed');
             if (showNotice) {
                 $div.find(".xpath-advanced-notice").removeClass('hide');
+                $div.find(".fd-xpath-show-simple-button").addClass('hide');
             } else {
                 $div.find(".xpath-advanced-notice").addClass('hide');
+                $div.find(".fd-xpath-show-simple-button").removeClass('hide');
             }
         };
         var showSimpleMode = function (text) {
