@@ -650,8 +650,12 @@ define([
                                    '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
                             html: true,
                             content: '<p>' + labelText.text() + '</p>' +
-                                     '<p><a href="#" class="jstree-hover" data-ufid="' + labelMug.ufid + '">' +
-                                     'show in question list</a></p>',
+                                     (isFormRef ? 
+                                        '<p><a href="#" class="jstree-hover"' +
+                                        ' data-ufid="' + labelMug.ufid + '">' +
+                                        'show in question list</a></p>'
+                                        : ''
+                                     ),
                             template: '<div contenteditable="false" class="popover rich-text-popover">' +
                                 '<div class="popover-inner">' +
                                 '<div class="popover-title"></div>' +
