@@ -26,7 +26,8 @@ define([
     'text!static/javaRosa/test-xml-2-with-only-bind-constraint.xml',
     'text!static/javaRosa/test-xml-3.xml',
     'text!static/javaRosa/test-xml-4.xml',
-    'text!static/javaRosa/non-default-lang-first.xml'
+    'text!static/javaRosa/non-default-lang-first.xml',
+    'text!static/javaRosa/invalid-output-ref.xml'
 ], function (
     chai,
     $,
@@ -54,7 +55,8 @@ define([
     TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT,
     TEST_XML_3,
     TEST_XML_4,
-    NON_DEFAULT_LANG_FIRST_XML
+    NON_DEFAULT_LANG_FIRST_XML,
+    INVALID_OUTPUT_REF_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -167,6 +169,26 @@ define([
                 util.assertXmlEqual(util.call("createXML"),
                                     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
                                     {normalize_xmlns: true});
+            });
+
+            it("should not erase invalid outputs", function (done) {
+                util.loadXML("");
+                util.addQuestion("Text", "question1");
+                var widget = util.getWidget('itext-en-label');
+                widget.input.promise.then(function () {
+                    var itext = '<output value="concat(1, 2" />';
+                    widget.setItextValue(itext);
+                    widget.setValue(itext);
+                    util.clickQuestion('question1');
+                    widget = util.getWidget('itext-en-label');
+                    widget.input.promise.then(function () {
+                        assert.strictEqual(widget.getValue(), itext);
+                        util.assertXmlEqual(call('createXML'),
+                                            INVALID_OUTPUT_REF_XML,
+                                            {normalize_xmlns: true});
+                        done();
+                    });
+                });
             });
         });
 
@@ -460,6 +482,7 @@ define([
             vellumUtil.setCaretPosition(target[0], 4);
             call("handleDropFinish", target, mug1.absolutePath, mug1);
             var val = mug2.p.labelItext.get('default', 'en');
+            // wtf?? rich text is off
             assert.equal(val, 'test<output value="#form/question1" /> string');
             assert.equal(target.val(), 'test<output value="/data/question1" /> string');
         });
@@ -894,6 +917,18 @@ define([
             }
         });
 
+        it("should not display constraintMsgItext validation error after removing validation message and condition", function() {
+            util.loadXML("");
+            util.paste([
+                ["id", "type", "constraintMsgItext:en-default", "constraintAttr", "constraintMsgAttr"],
+                ["/text", "Text", "message!", ". = 'a'", "jr:itext('question1-constraintMsg')"],
+            ]);
+            $("[name='itext-en-constraintMsg']").val('').change();
+            $("[name='property-constraintAttr']").val('').change();
+            var message = $("[name='property-constraintAttr']").siblings(".messages").text();
+            assert(!message, "unexpected message: " + message);
+        });
+
         it("should show and hide the validation message as appropriate", function() {
             util.loadXML(GROUP_WITH_CONSTRAINT_XML);
             $("[name='property-constraintAttr']").val('true()').change();
@@ -933,6 +968,34 @@ define([
             messages = item.messages.get('labelItext');
             assert.equal(messages.length, 1);
             assert(messages[0].match(/required/i));
+        });
+
+        it("should not show a validation error for manually added choices", function() {
+            util.loadXML("");
+            var select = util.addQuestion("Select", "question1"),
+                item = select.form.getChildren(select)[0];
+
+            util.clickQuestion("question1/choice1");
+
+            var messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+
+            util.clickQuestion("question1");
+            util.addQuestion("Choice", "choice3");
+            messages = item.messages.get('labelItext');
+            assert.equal(messages.length, 0);
+        });
+
+        it('should replace output values with $ on mug rename', function () {
+            util.loadXML("");
+            util.addQuestion('Text', 'text');
+            util.addQuestion('Text', 'text2');
+            util.clickQuestion('text');
+            $('[name=itext-en-label]').val('<output value="regex(/data/text2, \'$[0-9]+\.[0-9]$\')" />').change();
+            util.clickQuestion('text2');
+            $('[name=property-nodeID]').val('text3').change();
+            util.clickQuestion('text');
+            assert.strictEqual($('[name=itext-en-label]').val(), '<output value="regex(/data/text3, \'$[0-9]+\.[0-9]$\')" />');
         });
     });
 

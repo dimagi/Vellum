@@ -5,16 +5,16 @@ define([
     'chai',
     'jquery',
     'underscore',
-    'vellum/datasources',
     'vellum/itemset',
+    'text!static/datasources/case-property.xml',
 ], function (
     options,
     util,
     chai,
     $,
     _,
-    datasources,
-    itemset
+    itemset,
+    CASE_PROPERTY_XML
 ) {
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
@@ -40,7 +40,7 @@ define([
             }
         }];
 
-    describe("The data source widget", function () {
+    describe("The data sources loader", function () {
         function beforeFn(done) {
             util.init({
                 plugins: plugins,
@@ -84,25 +84,27 @@ define([
                 util.loadXML("");
                 util.addQuestion("SelectDynamic", "select1");
                 clickQuestion('select1/itemset');
-                assert(true);
             });
         });
 
         describe("async options loader", function() {
-            var callback;
+            var vellum, callback;
             before(function (done) {
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (cb) { callback = cb; },
-                        onReady: done
+                        onReady: function () {
+                            vellum = this;
+                            done();
+                        },
                     },
                     features: {rich_text: false},
                 });
             });
             beforeEach(function () {
-                datasources.reset();
+                vellum.datasources.reset();
                 callback = null;
             });
 
@@ -200,6 +202,24 @@ define([
                     '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')root/inner"}');
                 assert.equal(data.find("option:selected").text(), "outer - inner");
             });
+
+            /*
+            TODO make this test pass
+            Should not lose xpath expression when rich text is off.
+            Changing this seems to be a whack-a-mo--hashtag game. Vellum
+            inconsistently writes hashtags in non-vellum: attributes, which
+            should only ever contain valid xpath expressions.
+
+            it("should not cause null xpath", function () {
+                // bug only appeared on load XML with vellum:attr="value" attributes
+                util.loadXML(CASE_PROPERTY_XML);
+                callback(options.dataSources);
+                util.assertXmlEqual(util.call("createXML"),
+                    CASE_PROPERTY_XML
+                        .replace(/ vellum:\w+=".*?"/g, "")
+                        .replace(/<vellum:hashtags.*>/, ""));
+            });
+            */
         });
     });
 });

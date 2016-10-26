@@ -47,7 +47,8 @@ define([
     /**
      * Make XML string more user-friendly
      *
-     * Un-escapes &, < and > when not used as tag delimiters.
+     * Un-escapes &, < and > when not used as tag delimiters and convert
+     * <tag attr="value"></tag> to <tag attr="value" />.
      * This does approximately the opposite of `normalize` for most sane cases.
      *
      * @param value - String or jQuery object.
@@ -55,10 +56,12 @@ define([
      * @returns - XML string ready for human editing.
      */
     function humanize(value, inner) {
+        // emptytag does not match <tag attr="a > b"></tag>
+        var emptytag = /<([\w:.-]+)(?:\s[^>]*|)><\/\1>/;
         if (!value) {
             return "";
-        } else if (_.isString(value) && value.indexOf("&") === -1) {
-            return value; // value contains no character entity references.
+        } else if (_.isString(value) && value.indexOf("&") === -1 && !emptytag.test(value)) {
+            return value; // value contains no character entity references or empty tags.
         }
         var xml = normalize(value, inner),
             refs = /(?:&lt;(=?\s)|(\s)&gt;|&amp;(\s))/g;
@@ -81,10 +84,13 @@ define([
      *
      * NOTE: there are still edge cases (mainly malformed XML) that will not be
      * fixed by this. For example:
-     *      <tag attr=a>b />
+     *      <tag attr=a<b />
+     *
+     * Will mangle some (probably invalid) attribute values:
+     * '<tag attr="../>.." />' => '<tag attr="..></attr>.." />'
      */
     function fixGTBug(value) {
-        var empty = /<(([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\3)*\s*)\/>/g;
+        var empty = /<(([\w:.-]+)(?:\s[^<]*?|))\/>/g;
         return value.replace(empty, "<$1></$2>");
     }
 

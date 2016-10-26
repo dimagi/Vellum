@@ -174,7 +174,7 @@ define([
         }
 
         if (_.contains(jrUtil.ITEXT_PROPERTIES, options.path)) {
-            atwho.questionAutocomplete($input, mug, {
+            atwho.autocomplete($input, mug, {
                 category: "Output Value",
                 insertTpl: '<output value="${name}" />',
                 property: "labelItext",
@@ -215,7 +215,10 @@ define([
 
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
+            // TODO should not be using hashtags when rich text is off
+            //if (mug.supportsRichText()) {
             value = jrUtil.outputToHashtag(value, widget.mug.form.xpath);
+            //}
             if (itextItem) {
                 if (widget.isDefaultLang) {
                     widget.mug.fire({

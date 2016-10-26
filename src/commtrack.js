@@ -59,7 +59,8 @@ define([
                 "dest",
                 "sectionId",
                 "entryId",
-                "quantity"
+                "quantity",
+                "date",
             ],
             help: {
                 title: "Basic",
@@ -136,10 +137,14 @@ define([
             isHashtaggable: false,
             spec: {
                 date: {
-                    visibility: 'hidden',
+                    lstring: 'Date',
+                    visibility: 'visible',
                     presence: 'optional',
-                    serialize: function () {},
-                    deserialize: function () {},
+                    widget: widgets.xPath,
+                    xpathType: 'generic',
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: 'The date and time of the action, e.g., now() or today()',
                 },
                 sectionId: {
                     lstring: 'Balance ID',
@@ -288,7 +293,7 @@ define([
                 }
                 return attrs;
             },
-            icon: 'icon-exchange',
+            icon: 'fa fa-exchange',
             init: function (mug, form) {
                 mug.p.src = "";
                 mug.p.dest = "";
@@ -336,7 +341,7 @@ define([
         }),
         dispenseMugOptions = util.extend(transferMugOptions, {
             typeName: 'Dispense',
-            icon: 'icon-signout',
+            icon: 'fa fa-sign-out',
             spec: {
                 src: {
                     validationFunc: function (mug) {
@@ -351,7 +356,7 @@ define([
         }),
         receiveMugOptions = util.extend(transferMugOptions, {
             typeName: 'Receive',
-            icon: 'icon-signin',
+            icon: 'fa fa-sign-in',
             spec: {
                 src: { presence: "notallowed" },
                 dest: {

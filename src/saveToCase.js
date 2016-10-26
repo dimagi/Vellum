@@ -49,14 +49,6 @@ define([
             indexesCase(mug) || attachmentCase(mug);
     }
 
-    function addSetValue(mug) {
-        var path = mug.absolutePath;
-
-        if (createsCase(mug) && !mug.isInRepeat()) {
-            mug.form.addSetValue('xforms-ready', path + "/case/@case_id", mug.p.case_id);
-        }
-    }
-
     var propertyWidget = function (mug, options) {
             var widget = widgets.normal(mug, options),
                 id = options.id,
@@ -75,14 +67,14 @@ define([
                     internal_template: internal_template,
                     props: value
                 }));
-                widget.input.find('input').bind('change keyup', function () {
+                widget.input.find('input').on('change keyup', function () {
                     widget.handleChange();
                 });
                 widget.input.find('.fd-add-property').click(widget.addProperty);
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
                 widget.input.find('input').addClass('jstree-drop');
                 widget.input.find('input').each(function() {
-                    atwho.questionAutocomplete($(this), mug);
+                    atwho.autocomplete($(this), mug);
                 });
             };
 
@@ -303,11 +295,19 @@ define([
                             var props = _.without(_.keys(mug.p.indexProperty), ""),
                                 invalidProps = _.filter(props, function(p) {
                                     return !VALID_PROP_REGEX.test(p);
+                                }),
+                                relationships = _.without(_.map(mug.p.indexProperty, function (v, k) {
+                                    return v.relationship;
+                                }), ""),
+                                invalidRelationships = _.filter(relationships, function (r) {
+                                    return !_.contains(['child', 'extension'], r);
                                 });
 
                             if (invalidProps.length > 0) {
                                 return invalidProps.join(", ") + 
                                     " are invalid properties";
+                            } else if (invalidRelationships.length > 0) {
+                                return "Relationship must be child or extension";
                             }
                         }
                         return 'pass';
@@ -364,7 +364,6 @@ define([
                 }
             },
             getExtraDataAttributes: function (mug) {
-                addSetValue(mug);
                 return {
                     "vellum:role": "SaveToCase"
                 };
@@ -541,7 +540,17 @@ define([
                     });
                 }
                 return $([]);
-            }
+            },
+            getSetValues: function(mug) {
+                if (createsCase(mug) && !mug.isInRepeat()) {
+                    return [{
+                        event: 'xforms-ready',
+                        ref: mug.absolutePath + '/case/@case_id',
+                        value: mug.p.case_id,
+                    }];
+                }
+                return [];
+            },
         },
         sectionData = {
             SaveToCase: [

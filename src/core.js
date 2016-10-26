@@ -217,7 +217,10 @@ define([
 
         this._init_toolbar();
         this._createJSTree();
-        datasources.init(this);
+        this.datasources = datasources.init(
+            this.opts().core.dataSourcesEndpoint,
+            this.opts().core.invalidCaseProperties
+        );
     };
 
     fn.postInit = function () {
@@ -454,11 +457,18 @@ define([
         var lang = this.data.core.currentItextDisplayLanguage ||
                    this.data.javaRosa.Itext.getDefaultLanguage(),
             val = mug.getDisplayName(lang, false);
+        if (val && mug._core_cachedDisplayNameKey === val) {
+            // avoid calling richText.bubbleOutputs ~5 times per display mug.
+            // bubbleOutputs with many bubbles is slow
+            return mug._core_cachedDisplayNameValue;
+        }
+        mug._core_cachedDisplayNameKey = val;
         if (mug.supportsRichText()) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
-            val = util.escape(jrUtil.outputToXPath(val, mug.form.xpath));
+            val = jrUtil.outputToXPath(val, mug.form.xpath, true);
         }
+        mug._core_cachedDisplayNameValue = val;
         return val;
     };
 
@@ -604,7 +614,7 @@ define([
                         .html($overwriteForm);
                     _this._resizeFullScreenModal($modal);
 
-                    $modal.find('.btn-info').attr('disabled', 'disabled');
+                    $modal.find('.btn-info').prop('disabled', true);
                 }
             }
         ], "Cancel", "fa fa-warning");
@@ -683,13 +693,17 @@ define([
         });
     };
 
-    fn.closeModal = function (done) {
+    fn.closeModal = function (done, immediate) {
         var _this = this,
             $modal = _this.$f.find('.fd-modal-generic-container .modal');
         if (done) {
             $modal.one('hidden.bs.modal', function() {
                 done.apply(_this);
             });
+        }
+        if (immediate) {
+            // skip animation
+            $modal.removeClass('fade');
         }
         $modal.modal('hide');
     };
@@ -708,7 +722,7 @@ define([
             $modalContainer = _this.$f.find('.fd-modal-generic-container');
 
         // Close any existing modal - multiple modals is a bad state
-        _this.closeModal();
+        _this.closeModal(undefined, true);
 
         var $modal = $(modal_content({
                 title: title,
@@ -855,7 +869,7 @@ define([
             // plugin needs to stay enabled because it adds CSS selectors to
             // themeable items, which it would be hard to adapt the existing
             // selectors to if they didn't exist.
-        }).bind("select_node.jstree deselect_node.jstree", function (e, data) {
+        }).on("select_node.jstree deselect_node.jstree", function (e, data) {
             var selected = _this.jstree('get_selected');
             if (!selected.length) {
                 _this.hideQuestionProperties();
@@ -866,7 +880,7 @@ define([
             } else {
                 _this.displayMultipleSelectionView();
             }
-        }).bind("open_node.jstree", function (e, data) {
+        }).on("open_node.jstree", function (e, data) {
             if (window.event && window.event.altKey) {
                 _this.jstree("open_all", data.node);
             }
@@ -875,11 +889,11 @@ define([
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
-        }).bind("close_node.jstree", function (e, data) {
+        }).on("close_node.jstree", function (e, data) {
             if (window.event && window.event.altKey) {
                 _this.jstree("close_all", data.node);
             }
-        }).bind("move_node.jstree", function (e, data) {
+        }).on("move_node.jstree", function (e, data) {
             var form = _this.data.core.form,
                 mug = form.getMugByUFID(data.node.id),
                 refMug = data.parent !== "#" ? form.getMugByUFID(data.parent) : null,
@@ -887,9 +901,9 @@ define([
             form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
-        }).bind("deselect_all.jstree deselect_node.jstree", function (e, data) {
+        }).on("deselect_all.jstree deselect_node.jstree", function (e, data) {
             _this.resetQuestionTypeGroups();
-        }).bind('model.jstree', function (e, data) {
+        }).on('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for
             // most nodes, but some (items in select questions) have a
             // different icon depending on their parent type.
@@ -909,7 +923,7 @@ define([
      * for multiple Vellum instances on the same page.
      */
     $(document).on("dnd_move.vakata.jstree", function (e, data) {
-        var source = $(data.data.obj.context),
+        var source = $(data.data.obj),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
@@ -921,7 +935,7 @@ define([
             }
         }
     }).on("dnd_stop.vakata.jstree", function (e, data) {
-        var vellum = $(data.data.obj.context).vellum("get"),
+        var vellum = $(data.data.obj).vellum("get"),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
 
@@ -1130,6 +1144,7 @@ define([
                         _this.data.core.saveButton.fire('change');
                     }
                 } else {
+                    _this.$f.find('.fd-content-right .fd-column').addClass('hide');
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
                 hidePageSpinner();
@@ -1167,6 +1182,9 @@ define([
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
             enableInstanceRefCounting: true
         }, options);
+        if (this.data.core.form) {
+            this.data.core.form.disconnectDataSources();
+        }
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
@@ -1181,14 +1199,6 @@ define([
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
         }
-        datasources.getDataSources(function (data) {
-            form.updateKnownInstances(
-                _.chain(data)
-                 .map(function (source) { return [source.id, source.uri]; })
-                 .object()
-                 .value()
-            );
-        });
 
         form.on('question-type-change', function (e) {
             _this.jstree("set_type", e.mug.ufid, e.qType);
@@ -1202,6 +1212,11 @@ define([
         }).on('question-remove', function (e) {
             if (e.mug) {
                 e.mug.unbind(_this.data.core);
+                if (e.mug === _this._propertiesMug) {
+                    // prevent e.mug.validate() on deleted mug
+                    _this._propertiesMug.teardownProperties();
+                    _this._propertiesMug = null;
+                }
             }
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
@@ -1305,6 +1320,7 @@ define([
                 // otherwise clear the Question Edit UI pane
                 this.jstree('deselect_all');
                 this.hideQuestionProperties();
+                this.$f.find('.fd-content-right .fd-column').addClass('hide');
                 this.$f.find('.fd-default-panel').removeClass('hide');
                 return false;
             }
@@ -1474,11 +1490,8 @@ define([
             };
         this.$f.find('.fd-default-panel').addClass('hide');
 
-        /* update display */
-        $props.animate({}, 200);
-
         this.showContentRight();
-        $props.hide();
+        $props.addClass("hide");
 
         this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),
@@ -1511,7 +1524,8 @@ define([
         mug.on("messages-changed", refreshMessages, null, "teardown-mug-properties");
         refreshMessages();
 
-        $props.show();
+        this.$f.find('.fd-content-right .fd-column').addClass("hide");
+        $props.removeClass("hide");
         this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
@@ -1549,11 +1563,12 @@ define([
     };
 
     fn.showQuestionProperties = function () {
-        this.$f.find('.fd-question-properties').show();
+        this.$f.find('.fd-content-right .fd-column').addClass("hide");
+        this.$f.find('.fd-question-properties').removeClass("hide");
     };
 
     fn.hideQuestionProperties = function () {
-        this.$f.find('.fd-question-properties').hide();
+        this.$f.find('.fd-question-properties').addClass("hide");
     };
 
     /**
@@ -1582,10 +1597,10 @@ define([
             done(val);
             if (_this.data.core.hasXPathEditorChanged) {
                 _this.data.core.hasXPathEditorChanged = false;
-                $editor.hide();
+                $editor.addClass("hide");
                 _this.refreshCurrentMug();
             } else {
-                $editor.hide();
+                $editor.addClass("hide");
                 _this.showQuestionProperties();
             }
         };
@@ -1596,7 +1611,8 @@ define([
                 change(val);
             }
         };
-        $editor.show();
+        _this.$f.find('.fd-content-right .fd-column').addClass('hide');
+        $editor.removeClass("hide");
         options.loadEditor(_this.$f.find('.fd-xpath-editor-content'), options);
     };
 
@@ -1694,7 +1710,7 @@ define([
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
                 isCollapsed: !!options.isCollapsed,
-                help: options.help || {}
+                help: options.help
             })),
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
@@ -1904,7 +1920,7 @@ define([
             data = {xform: formText};
         }
 
-        data.references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+        data.case_references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
 
         this.data.core.saveButton.ajax({
             type: "POST",
@@ -2148,8 +2164,6 @@ define([
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
 
-    fn.addAutocomplete = function (input, form, options) {};
-
     fn.initWidget = function (widget) {};
 
     fn.destroy = function () {};
@@ -2166,7 +2180,7 @@ define([
         onReady: function () {},
         onFormSave: function (data) {},
         bindBeforeUnload: function (handler) {
-            $(window).bind('beforeunload', handler);
+            $(window).on('beforeunload', handler);
         }
     }, fn);
 });

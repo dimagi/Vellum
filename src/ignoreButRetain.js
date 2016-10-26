@@ -59,7 +59,7 @@ define([
                 body = xml.find('h\\:html > h\\:body:first, h\\:html > body:first');
             _.each([model, instance, body], function (el) {
                 if (!el.length) {
-                    window.console.log("WARNING", el.selector, "not found");
+                    window.console.log("WARNING", el.tagName, "not found");
                 }
             });
             ignores = ignores.not(function (i, el) {

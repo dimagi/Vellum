@@ -125,21 +125,25 @@ define([
 
         this.formName = 'New Form';
         this.mugMap = {};
-        this.hashtagDictionary = {};
-        this.hashtagTransformations = {};
+        this.instanceMetadata = [InstanceMetadata({})];
+        // {<instance id>: { src or children: <instance src or children>}
+        this.knownInstances = {};
+        this.richText = !!vellum.opts().features.rich_text;
+
+        vellum.datasources.on("change", this._updateHashtags.bind(this), null, null, this);
+        this._updateHashtags();
+
         this.tree = new Tree('data', 'control');
+        // initalize #form as /data
+        // if data is not root node, it will be changed later
         this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
         });
-        this.instanceMetadata = [InstanceMetadata({})];
-        // {<instance id>: { src or children: <instance src or children>}
-        this.knownInstances = {};
         this.enableInstanceRefCounting = opts.enableInstanceRefCounting;
         this.errors = [];
         this.question_counter = 1;
-        this.xpath = escapedHashtags.parser(this.hashtagDictionary, this.hashtagTransformations);
-        this.richText = !!vellum.opts().features.rich_text;
+        this.xpath = escapedHashtags.parser(this);
         this.undomanager = new undomanager();
 
         this.undomanager.on('reset', function(e) {
@@ -150,13 +154,49 @@ define([
         util.eventuality(this);
         this.on('form-load-finished', function() {
             _this.fuse = new Fuse(_this);
+        }).on('question-create', function () {
+            _this.undomanager.resetUndo();
         });
+        this.disconnectDataSources = function () {
+            vellum.datasources.unbind(_this, "change");
+        };
     }
 
     Form.prototype = {
+        _updateHashtags: function () {
+            var form = this,
+                vellum = form.vellum,
+                oldHashtags = form.hashtagMap;
+            if (form.richText) {
+                // TODO always load hashtags, even when rich text is disabled
+                form.hashtagMap = _.clone(vellum.datasources.getHashtagMap({}));
+                form.invertedHashtagMap = _.invert(form.hashtagMap);
+                form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
+            } else {
+                form.hashtagMap = {};
+                form.invertedHashtagMap = {};
+                form.hashtagTransformations = {};
+            }
+            form.updateKnownInstances(
+                _.chain(vellum.datasources.getDataSources([]))
+                 .map(function (source) { return [source.id, source.uri]; })
+                 .object()
+                 .value()
+            );
+            if (oldHashtags) {
+                _.each(oldHashtags, function (xpath, tag) {
+                    if (tag.startsWith("#form/")) {
+                        form.addHashtag(tag, xpath);
+                    }
+                });
+            }
+            // done here for performance reasons. would be nice to be done after
+            // every new hashtag, but only for the mugs that reference that hashtag
+            form.fixBrokenReferences();
+        },
         isValidHashtag: function(tag) {
             tag = this.normalizeHashtag(tag);
-            return this.hashtagDictionary.hasOwnProperty(tag);
+            return this.hashtagMap.hasOwnProperty(tag);
         },
         isValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
@@ -170,26 +210,19 @@ define([
                 tag.substring(lastSlashIndex + 1) !== "";
         },
         addHashtag: function(hashtag, xpath) {
-            this.hashtagDictionary[hashtag] = xpath;
+            this.hashtagMap[hashtag] = xpath;
+            this.invertedHashtagMap[xpath] = hashtag;
         },
         initHashtag: function(hashtag, xpath) {
-            if (!this.hashtagDictionary[hashtag]) {
-                this.hashtagDictionary[hashtag] = xpath;
-            }
-        },
-        initHashtagTransformation: function(prefix, transformation) {
-            if (!this.hashtagTransformations[prefix]) {
-                this.hashtagTransformations[prefix] = transformation;
+            if (!this.hashtagMap[hashtag]) {
+                this.addHashtag(hashtag, xpath);
             }
         },
         removeHashtag: function(hashtag) {
-            delete this.hashtagDictionary[hashtag];
-        },
-        clearNullHashtags: function () {
-            this.hashtagDictionary = _.chain(this.hashtagDictionary)
-              .map(function(v, k) { return [k, v]; })
-              .filter(function (v) { return !_.isNull(v[1]); })
-              .object().value();
+            if (this.hashtagMap.hasOwnProperty(hashtag)) {
+                delete this.invertedHashtagMap[this.hashtagMap[hashtag]];
+                delete this.hashtagMap[hashtag];
+            }
         },
         transform: function(input, transformFn) {
             input = this.normalizeEscapedHashtag(input);
@@ -961,10 +994,10 @@ define([
             return mug ? mug.getIcon() : null;
         },
         removeMugsFromForm: function (mugs) {
-            function breakReferences(mug) {
-                if (mug && !seen.hasOwnProperty(mug.ufid)) {
-                    seen[mug.ufid] = null;
-                    _this.updateLogicReferences(mug);
+            function breakReferences(mug, property) {
+                if (mug && !seen.hasOwnProperty(mug.ufid + " " + property)) {
+                    seen[mug.ufid + " " + property] = null;
+                    _this.updateLogicReferences(mug, property);
                 }
             }
             var _this = this,

@@ -4,14 +4,16 @@ define([
     'chai',
     'vellum/xml',
     'text!static/xml/regexp-crashing-debug-itext.xml',
-    'text!static/xml/regexp-crashing-debug-itext-parsed.xml'
+    'text!static/xml/regexp-crashing-debug-itext-parsed.xml',
+    'text!static/xml/slow-regexp-itext.xml',
 ], function (
     $,
     _,
     chai,
     xml,
     REGEXP_CRASHING_DEBUG_ITEXT,
-    REGEXP_CRASHING_DEBUG_ITEXT_PARSED
+    REGEXP_CRASHING_DEBUG_ITEXT_PARSED,
+    SLOW_REGEXP_ITEXT
 ) {
     var assert = chai.assert;
 
@@ -150,6 +152,22 @@ define([
             eq('<output attr=value />', '<output attr="value" />', false);
         });
 
+        it("should fail on escape unquoted attribute value with <", function () {
+            // known failure; output is semantically correct:
+            //   <output value="2&lt;3"><!--3--></output>
+            chai.expect(function () {
+                eq('<output value=2<3 />', '<output value="2&lt;3" />', false);
+            }).to.throw(Error);
+        });
+
+        it("should fail on escape attribute value with />", function () {
+            // known failure; mangled output:
+            //   <output value="..&gt;&lt;/output&gt;.." />
+            chai.expect(function () {
+                eq('<output value="../>.." />', '<output value="..&gt;.." />', false);
+            }).to.throw(Error);
+        });
+
         it("should accept jquery node", function () {
             eq($('<value><output /></value>'), '<output />', false);
         });
@@ -188,6 +206,10 @@ define([
                     .replace(/"\/>/g, '" />');
             eq(value, parsed, false);
         });
+
+        it("should not cause regexp engine to hang on many output values in string #2", function () {
+            eq(SLOW_REGEXP_ITEXT, SLOW_REGEXP_ITEXT.replace(/><\/output>/g, " \/>"), false);
+        });
     });
 
     describe("The XML humanizer", function () {
@@ -218,6 +240,10 @@ define([
         it("should convert output tag", function () {
             eq('<output value="1 &amp; 2 &lt; 3" />',
                '<output value="1 & 2 < 3" />', true);
+        });
+
+        it("should convert empty tag", function () {
+            eq('<tag attr="value"></tag>', '<tag attr="value" />');
         });
 
         it("should convert child nodes", function () {

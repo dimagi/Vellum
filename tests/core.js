@@ -428,6 +428,41 @@ define([
                 $('[name=itext-en-label]').val('text2 <output value="#form/text2" />').change();
                 assert.strictEqual(vellum.getMugDisplayName(mug), 'text2 &lt;output value="/data/text2" /&gt;');
             });
+
+            it("should not double-escape > & < chars in the question tree", function () {
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/html-label", "Text", "<h1>a > & < b</h1>"],
+                ]);
+                var mug = util.getMug("html-label");
+                assert.equal(vellum.getMugDisplayName(mug),
+                    '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
+                assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
+            });
+        });
+
+        describe("with rich text enabled", function() {
+            var vellum;
+            before(function (done) {
+                util.init({
+                    core: {onReady: function () {
+                        vellum = this;
+                        done();
+                    }},
+                    features: {rich_text: true},
+                });
+            });
+
+            it("should not double-escape > & < chars in the question tree", function () {
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/html-label", "Text", "<h1>a > & < b</h1>"],
+                ]);
+                var mug = util.getMug("html-label");
+                assert.equal(vellum.getMugDisplayName(mug),
+                    '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
+                assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
+            });
         });
 
         describe("should", function () {

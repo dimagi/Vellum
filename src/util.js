@@ -313,7 +313,7 @@ define([
             xpath_ = expr.toXPath();
             hashtag = expr.toHashtag();
         } catch (err) {
-            if (form.richText ) {
+            if (form.richText) {
                 xmlWriter.writeAttributeString('vellum:' + vellumKey, "#invalid/xpath " + hashtagOrXPath);
             }
             xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
@@ -336,6 +336,10 @@ define([
         return _.contains([
             'ara', 'arc', 'div', 'fas', 'heb', 'pan', 'pus', 'snd', 'uig', 'urd', 'yid',
         ], lang);
+    };
+
+    that.isCaseReference = function (value) {
+        return value.startsWith('#case/');
     };
 
     return that;

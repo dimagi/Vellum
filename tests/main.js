@@ -175,20 +175,20 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
             load(""); // load empty form on initial page load
         }
 
-        function handleFileSelect(evt) {
+        $('#file').on('change', function (evt) {
             var file = evt.target.files[0],
                 reader = new FileReader();
 
-            // Closure to capture the file information.
-            reader.onload = (function(theFile) {
-                return function(e) {
-                    load(e.target.result);
-                };
-            })(file);
+            reader.onload = function(e) {
+                load(e.target.result);
+                // clear file input so the same file can be selected later
+                // http://stackoverflow.com/a/1043969/10840
+                var input = $('#file');
+                input.replaceWith(input.clone(true));
+            };
 
             reader.readAsText(file);
-        }
-        document.getElementById('file').addEventListener('change', handleFileSelect, false);
+        });
     });
 });
 

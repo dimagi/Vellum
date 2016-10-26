@@ -197,12 +197,12 @@ define([
                         $addButton
                             .addClass('disabled')
                             .removeClass('btn-primary')
-                            .attr('disabled', 'disabled');
+                            .prop('disabled', true);
                     } else {
                         $addButton
                             .removeClass('disabled')
                             .addClass('btn-primary')
-                            .removeAttr('disabled');
+                            .prop('disabled', false);
                     }
                 });
 

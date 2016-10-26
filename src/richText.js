@@ -159,6 +159,7 @@ define([
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
+                disableNativeSpellChecker: options.disableNativeSpellChecker,
                 placeholder: options.placeholder,
             }).editor;
         wrapper = {
@@ -195,6 +196,7 @@ define([
                     },
                     noSnapshot: true,
                 });
+                return wrapper;
             },
             insertExpression: function (xpath) {
                 if (options.isExpression) {
@@ -204,19 +206,27 @@ define([
                         output = makeBubble(form, xpath, attrs);
                     insertHtmlWithSpace($('<p>').append(output).html());
                 }
+                return wrapper;
             },
             insertOutput: function (xpath) {
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
                 insertHtmlWithSpace(bubbleOutputs(xpath, form));
+                return wrapper;
+            },
+            change: function () {
+                editor.fire("saveSnapshot");
+                return wrapper;
             },
             select: function (index) {
                 ckSelect.call(null, editor, index);
+                return wrapper;
             },
             on: function () {
                 var args = Array.prototype.slice.call(arguments);
                 editor.on.apply(editor, args);
+                return wrapper;
             },
             destroy: function () {
                 if (input !== null) {
@@ -450,9 +460,11 @@ define([
     function replacePathWithBubble(form, value) {
         var info = extractXPathInfoFromOutputValue(value),
             xpath = form.normalizeEscapedHashtag(info.reference),
-            extraAttrs = _.omit(info, 'reference');
+            extraAttrs = _.omit(info, 'reference'),
+            startsWithRef = REF_REGEX.test(xpath),
+            containsWhitespace = /\s/.test(xpath);
 
-        if (!REF_REGEX.test(xpath)) {
+        if (!startsWithRef || (startsWithRef && containsWhitespace)) {
             return $('<span>').text(xml.normalize(value)).html();
         }
 
@@ -489,7 +501,7 @@ define([
         el.find('output').replaceWith(replacer);
         result = el.html();
         if (escape) {
-            result = $('<div />').text(xml.normalize(result)).html();
+            result = $('<div />').text(xml.humanize(result)).html();
             result = result.replace(/{(.+?)}/g, function (match, id) {
                 return places.hasOwnProperty(id) ?
                         $("<div>").append(places[id]).html() : match;

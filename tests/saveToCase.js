@@ -88,6 +88,8 @@ define([
                     relationship: "extension",
                 }
             }));
+            util.clickQuestion('save_to_case');
+            assert.strictEqual(index.spec.indexProperty.validationFunc(index), "pass");
             assert.equal(index.p.date_modified, '/data/meta/timeEnd');
             assert.equal(index.p.user_id, "/data/meta/userID");
             assert.equal(index.p.case_id, "/data/meta/caseID");
@@ -231,6 +233,61 @@ define([
             util.deleteQuestion('/data/save_to_case');
             var deletedXML = call("createXML");
             assert.equal($(deletedXML).find('setvalue').length, 0);
+        });
+
+        it("should remove case_id setvalue when removing newly created mug", function () {
+            util.loadXML("");
+            assert.equal($(call("createXML")).find('setvalue').length, 0);
+            var mug = util.addQuestion("SaveToCase", 'case', {
+                case_id: 'uuid()',
+                user_id: 'uuid()',
+                useCreate: true,
+            });
+            mug.p.createProperty = {
+                'case_type': {
+                    'calculate': 'type'
+                },
+                'case_name': {
+                    'calculate': 'name',
+                },
+            };
+            assert.equal($(call("createXML")).find('setvalue').length, 1);
+            util.deleteQuestion('/data/case');
+            assert.equal($(call("createXML")).find('setvalue').length, 0);
+        });
+
+        it("should only allow extension and child as relationship", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useIndex = true;
+            mug.p.indexProperty = {
+                "casename": {
+                    calculate: "/data/question1",
+                    case_type: "type",
+                    relationship: "notchildorextension",
+                }
+            };
+            assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "Relationship must be child or extension");
+        });
+
+        it("should only not error on empty extension ref", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useIndex = true;
+            mug.p.indexProperty = {
+                "casename": {
+                    calculate: "/data/question1",
+                    case_type: "type",
+                    relationship: "child",
+                },
+                "": {
+                    calculate: "",
+                    case_type: "",
+                    relationship: "",
+                },
+
+            };
+            assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "pass");
         });
     });
 });

@@ -169,7 +169,7 @@ define([
                 $uploadContainer.find('.fd-mm-path-show').removeClass('hide');
                 e.preventDefault();
             });
-            $input.bind("change keyup", function () {
+            $input.on("change keyup", function () {
                 widget.updateMultimediaBlockUI(objectMap);
             });
             $uiElem.on('mediaUploadComplete', function (event, data) {
@@ -179,7 +179,7 @@ define([
             $controlBlock.append($uploadContainer);
 
             // reapply bindings because we removed the input from the UI
-            $input.bind("change keyup", widget.updateValue);
+            $input.on("change keyup", widget.updateValue);
 
             return $uiElem;
         };

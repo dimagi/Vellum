@@ -265,16 +265,27 @@ define([
     };
 
     function _outputToXPathOrHashtag (functionName) {
-        return function (text, xpathParser) {
+        return function (text, xpathParser, escape) {
             if (text) {
                 text = $("<div />").append(text);
                 text.find('output').replaceWith(function() {
                     var $this = $(this),
-                        value = xpathParser.parse($this.attr('value') || $this.attr('ref'));
-                    $this.attr('value', value[functionName]());
+                        value = $this.attr('value') || $this.attr('ref'),
+                        parsedValue;
+                    try {
+                        parsedValue = xpathParser.parse(value);
+                        $this.attr('value', parsedValue[functionName]());
+                    } catch (e) {
+                        $this.attr('value', value);
+                    }
                     return $this[0].outerHTML;
                 });
                 text = xml.normalize(text.html());
+                if (escape) {
+                    text = text.replace(/(<)|>/g, function (match, lt) {
+                        return lt ? "&lt;" : "&gt;";
+                    });
+                }
             }
             return text;
         };

@@ -37,7 +37,7 @@ define([
             // start with accessory pane collapsed
             $(window).resize(adjustToWindow);
             $(document).scroll(adjustToWindow);
-            $(document).ready(adjustToWindow);
+            $(adjustToWindow);
             _this.adjustToWindow();
         },
         adjustToWindow: function() {
@@ -54,6 +54,7 @@ define([
                 $fdc.parent().css({height: null, width: null});
                 $fdc.css({height: null, width: null});
                 $fdc.addClass("full-screen");
+                $('body').addClass("vellum-full-screen");
                 $fdc.parent().css({
                     top: 0,
                     bottom: 0,
@@ -63,6 +64,7 @@ define([
                 });
                 $fdc.css('width', $(window).width());
             } else {
+                $('body').removeClass("vellum-full-screen");
                 $fdc.parent().css({
                     top: '',
                     bottom: '',

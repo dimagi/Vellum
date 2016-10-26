@@ -305,6 +305,8 @@ define([
                      '{text} &lt;tag /&gt; {othertext}'],
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
+                    ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
+                    ['<output value="concat(1, 2" />', '&lt;output value="concat(1, 2" /&gt;']
                 ],
                 ico = icon('fcc-fd-text');
 
@@ -514,6 +516,14 @@ define([
                         assert.strictEqual($widget.find(".label-datanode-external").length, 1);
                         assert.strictEqual($widget.find(".label-datanode-unknown").length, 1);
                     });
+                });
+
+                it("should have native spellchecking on labels", function () {
+                    assert.strictEqual($('[name=itext-en-label]').attr('spellcheck'), 'true');
+                });
+
+                it("should not have native spellchecking on xpaths", function () {
+                    assert.strictEqual($('[name=property-relevantAttr]').attr('spellcheck'), 'false');
                 });
             });
 

@@ -4,6 +4,7 @@ define([
     'underscore',
     'tests/utils',
     'vellum/expressionEditor',
+    'vellum/mugs',
     'vellum/util'
 ], function (
     chai,
@@ -11,6 +12,7 @@ define([
     _,
     util,
     expressionEditor,
+    mugs,
     vellumUtil
 ) {
     var assert = chai.assert,
@@ -25,7 +27,7 @@ define([
         events.fire("showXPathEditor");
     };
 
-    describe("The widgets module", function () {
+    describe("The widgets module with rich text disabled", function () {
         before(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
@@ -38,6 +40,19 @@ define([
                 },
                 features: {rich_text: false},
             });
+        });
+
+        it("xPath widget should allow drag/drop", function () {
+            var spec = mugs.baseSpecs.databind;
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.clickQuestion("text");
+            assert.equal(spec.defaultValue.xpathType, "generic");
+            assert($("[name=property-defaultValue]").hasClass("jstree-drop"),
+                "defaultValue does not have jstree-drop class");
+            assert.equal(spec.relevantAttr.xpathType, "bool");
+            assert($("[name=property-relevantAttr]").hasClass("jstree-drop"),
+                "relevantAttr does not have jstree-drop class");
         });
 
         it("xPath widget should show newlines in advanced mode", function (done) {
@@ -108,6 +123,44 @@ define([
                 var textarea = $(".xpath-advanced").find("textarea");
                 assert.equal(textarea.val(), value, "input value showing #form");
                 assert.equal(hidden.p.calculateAttr, escaped, "value not in vellum internal form");
+                done();
+            }, null, "showXPathEditor");
+        });
+
+        it("xPath widget should genuinely hide editor whenever it's exited", function (done) {
+            util.loadXML("");
+            util.addQuestion("Text", "text1");
+            util.addQuestion("Text", "text2");
+
+            var $right = $(".fd-content-right"),
+                $props = $right.find(".fd-question-properties"),
+                $editor = $right.find(".fd-xpath-editor");
+            $props.find(".fd-edit-button:first").click();
+
+            events.on("showXPathEditor", function () {
+                assert($editor.is(":visible"), "Editor shown when clicked");
+                assert(!$props.is(":visible"), "Properties hidden when entering editor");
+
+                util.clickQuestion("/data/text1");
+                assert($props.is(":visible"), "Properties shown as requested");
+                assert(!$editor.is(":visible"), "Editor hidden when properties shown");
+                done();
+            }, null, "showXPathEditor");
+        });
+
+        it("xPath widget should change save button when dropdown is changed", function (done) {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.clickQuestion("text");
+
+            var $right = $(".fd-content-right"),
+                $props = $right.find(".fd-question-properties");
+            $props.find(".fd-edit-button:first").click();
+
+            events.on("showXPathEditor", function () {
+                assert(!$('.fd-xpath-save-button').hasClass('btn-success'));
+                $('.op-select').change();
+                assert($('.fd-xpath-save-button').hasClass('btn-success'));
                 done();
             }, null, "showXPathEditor");
         });

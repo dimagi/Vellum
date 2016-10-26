@@ -930,15 +930,15 @@ define([
         it("should paste and copy a Balance", function () {
             util.loadXML("");
             paste([
-                ["id", "type", "entityId", "entryId", "quantity", "sectionId"],
-                ["/bal", "Balance", "/case", "/product", "/qty", "/balance-id"],
+                ["id", "type", "date", "entityId", "entryId", "quantity", "sectionId"],
+                ["/bal", "Balance", "now()", "/case", "/product", "/qty", "/balance-id"],
             ]);
             util.loadXML(call("createXML"));
             util.selectAll();
             eq(mod.copy(), [
-                ["id", "type", "entityId", "entryId", "quantity",
+                ["id", "type", "date", "entityId", "entryId", "quantity",
                     "rawDataAttributes", "sectionId"],
-                ["/bal", "Balance", "/case", "/product", "/qty",
+                ["/bal", "Balance", "now()", "/case", "/product", "/qty",
                     '{"entity-id":"","date":""}', "/balance-id"],
             ]);
             var id = "balance[@type='bal']";
@@ -948,15 +948,15 @@ define([
         it("should paste and copy a Transfer", function () {
             util.loadXML("");
             paste([
-                ["id", "type", "dest", "entryId", "quantity", "sectionId", "src"],
-                ["/tx", "Transfer", "/dst", "/product", "/qty", "/balance", "/src"],
+                ["id", "type", "date", "dest", "entryId", "quantity", "sectionId", "src"],
+                ["/tx", "Transfer", "now()", "/dst", "/product", "/qty", "/balance", "/src"],
             ]);
             util.loadXML(call("createXML"));
             util.selectAll();
             eq(mod.copy(), [
-                ["id", "type", "dest", "entryId", "quantity",
+                ["id", "type", "date", "dest", "entryId", "quantity",
                     "rawDataAttributes", "sectionId", "src"],
-                ["/tx", "Transfer", "/dst", "/product", "/qty",
+                ["/tx", "Transfer", "now()", "/dst", "/product", "/qty",
                     '{"date":"","src":"","dest":""}', "/balance", "/src"],
             ]);
             var id = "transfer[@type='tx']";
@@ -1067,7 +1067,7 @@ define([
                 ['/output', 'DataBindOnly', 'null', 'null',
                     "instance('scores')/score[@high > #form/score][@low < #form/score]",
                     '{"scores":{"children":"<score low=\\"0.0\\" high=\\"500.0\\">You\'re really bad</score><score low=\\"500.0\\" high=\\"99999999.0\\">You\'re really good</score>"}}'],
-                ['/result', 'Trigger', '<output value="#form/output"></output>', 'minimal', 'null', 'null'],
+                ['/result', 'Trigger', '<output value="#form/output" />', 'minimal', 'null', 'null'],
             ];
 
             it("should properly paste", function() {

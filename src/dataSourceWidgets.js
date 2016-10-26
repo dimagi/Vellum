@@ -2,13 +2,11 @@ define([
     'jquery',
     'underscore',
     'vellum/widgets',
-    'vellum/datasources',
     'tpl!vellum/templates/data_source_editor'
 ], function (
     $,
     _,
     widgets,
-    datasources,
     edit_source
 ) {
     /**
@@ -169,8 +167,9 @@ define([
             hasValue = false;
 
         widget.addOption(EMPTY_VALUE, "Loading...");
-        datasources.getDataSources(function (data) {
-            var value;
+        var disconnect = mug.form.vellum.datasources.onChangeReady(function () {
+            var data = mug.form.vellum.datasources.getDataSources(),
+                value;
             if (options.dataSourcesFilter) {
                 data = options.dataSourcesFilter(data);
             }
@@ -190,6 +189,7 @@ define([
                 options.onOptionsLoaded(data);
             }
         });
+        mug.on('teardown-mug-properties', disconnect, null, "teardown-mug-properties");
 
         if (options.hasAdvancedEditor) {
             widget.getUIElement = function () {

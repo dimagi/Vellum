@@ -219,13 +219,14 @@ define([
             var ret = input.val().replace(/&#10;/g, '\n');
 
             if (ret && widget.hasLogicReferences) {
+                // TODO should not be using hashtags when rich text is off
                 return mug.form.normalizeEscapedHashtag(ret);
             } else {
                 return ret;
             }
         };
 
-        input.bind("change input", function () {
+        input.on("change input", function () {
             widget.handleChange();
         });
         return widget;
@@ -278,6 +279,7 @@ define([
 
         var opts = {
                 isExpression: options.widget === xPath || options.widget === droppableText,
+                disableNativeSpellChecker: options.disableNativeSpellChecker,
                 rtl: util.isRightToLeftLanguage(options.language),
                 placeholder: options.widgetPlaceholder,
             },
@@ -386,6 +388,7 @@ define([
     };
 
     var xPath = function (mug, options) {
+        options.disableNativeSpellChecker = true;
         var widget = richInput(mug, options),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
@@ -403,9 +406,7 @@ define([
                     widget.getHelp()
                 ),
                 autocompleteChoices;
-            if (widget.definition.xpathType === "generic") {
-                control.addClass('jstree-drop');
-            }
+            control.addClass('jstree-drop');
             if (options.autocompleteChoices) {
                 autocompleteChoices = function () {
                     return options.autocompleteChoices(mug);
@@ -433,7 +434,7 @@ define([
             }, !!widget.isDisabled());
         };
 
-        atwho.questionAutocomplete(widget.input, mug, {
+        atwho.autocomplete(widget.input, mug, {
             property: options.path,
             useRichText: mug.supportsRichText()
         });
@@ -474,7 +475,7 @@ define([
             widget.kvInput.html(widget_control_keyvalue({
                 pairs: _.clone(value)
             }));
-            widget.kvInput.find('input').bind('change keyup', function () {
+            widget.kvInput.find('input').on('change keyup', function () {
                 widget.handleChange();
             });
             widget.kvInput.find('.fd-kv-add-pair').click(function (e) {
