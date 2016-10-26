@@ -625,7 +625,7 @@ define([
                         .html($overwriteForm);
                     _this._resizeFullScreenModal($modal);
 
-                    $modal.find('.btn-info').attr('disabled', 'disabled');
+                    $modal.find('.btn-info').prop('disabled', true);
                 }
             }
         ], "Cancel", "fa fa-warning");
@@ -704,13 +704,17 @@ define([
         });
     };
 
-    fn.closeModal = function (done) {
+    fn.closeModal = function (done, immediate) {
         var _this = this,
             $modal = _this.$f.find('.fd-modal-generic-container .modal');
         if (done) {
             $modal.one('hidden.bs.modal', function() {
                 done.apply(_this);
             });
+        }
+        if (immediate) {
+            // skip animation
+            $modal.removeClass('fade');
         }
         $modal.modal('hide');
     };
@@ -729,7 +733,7 @@ define([
             $modalContainer = _this.$f.find('.fd-modal-generic-container');
 
         // Close any existing modal - multiple modals is a bad state
-        _this.closeModal();
+        _this.closeModal(undefined, true);
 
         var $modal = $(modal_content({
                 title: title,
@@ -930,7 +934,7 @@ define([
      * for multiple Vellum instances on the same page.
      */
     $(document).on("dnd_move.vakata.jstree", function (e, data) {
-        var source = $(data.data.obj.context),
+        var source = $(data.data.obj),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
@@ -942,7 +946,7 @@ define([
             }
         }
     }).on("dnd_stop.vakata.jstree", function (e, data) {
-        var vellum = $(data.data.obj.context).vellum("get"),
+        var vellum = $(data.data.obj).vellum("get"),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
 
@@ -2170,8 +2174,6 @@ define([
     fn.contributeToModelXML = function (xmlWriter, form) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
-
-    fn.addAutocomplete = function (input, form, options) {};
 
     fn.initWidget = function (widget) {};
 

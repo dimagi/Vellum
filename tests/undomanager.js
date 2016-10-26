@@ -184,6 +184,17 @@ define([
             util.assertJSTreeState('select', '  choice1', '  choice2');
         });
 
+        it("should reset the undo manager after adding a question", function () {
+            util.addQuestion('Text', 'text');
+            util.addQuestion('Select', 'select');
+            util.assertJSTreeState('text', 'select', '  choice1', '  choice2');
+            util.clickQuestion('text');
+            $('.fd-button-remove').click();
+            util.assertJSTreeState('select', '  choice1', '  choice2');
+            util.addQuestion('Text', 'text');
+            assert.strictEqual($('.fd-undo-delete').length, 0);
+        });
+
         it("should undelete a multiple choice question when selected with others", function() {
             util.addQuestion('Text', 'text');
             util.addQuestion('Select', 'select');

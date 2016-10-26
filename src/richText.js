@@ -196,6 +196,7 @@ define([
                     },
                     noSnapshot: true,
                 });
+                return wrapper;
             },
             insertExpression: function (xpath) {
                 if (options.isExpression) {
@@ -205,19 +206,27 @@ define([
                         output = makeBubble(form, xpath, attrs);
                     insertHtmlWithSpace($('<p>').append(output).html());
                 }
+                return wrapper;
             },
             insertOutput: function (xpath) {
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
                 insertHtmlWithSpace(bubbleOutputs(xpath, form));
+                return wrapper;
+            },
+            change: function () {
+                editor.fire("saveSnapshot");
+                return wrapper;
             },
             select: function (index) {
                 ckSelect.call(null, editor, index);
+                return wrapper;
             },
             on: function () {
                 var args = Array.prototype.slice.call(arguments);
                 editor.on.apply(editor, args);
+                return wrapper;
             },
             destroy: function () {
                 if (input !== null) {

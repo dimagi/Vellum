@@ -134,6 +134,8 @@ define([
         this._updateHashtags();
 
         this.tree = new Tree('data', 'control');
+        // initalize #form as /data
+        // if data is not root node, it will be changed later
         this.addHashtag('#form', '/data');
         this.tree.on('change', function (e) {
             _this.fireChange(e.mug);
@@ -152,6 +154,8 @@ define([
         util.eventuality(this);
         this.on('form-load-finished', function() {
             _this.fuse = new Fuse(_this);
+        }).on('question-create', function () {
+            _this.undomanager.resetUndo();
         });
         this.disconnectDataSources = function () {
             vellum.datasources.unbind(_this, "change");

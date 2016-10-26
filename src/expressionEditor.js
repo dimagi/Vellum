@@ -105,10 +105,9 @@ define([
                 if (_.isFunction(choices)) {
                     choices = choices();
                 }
-                atwho.questionAutocomplete(input, options.mug, {choices: choices});
-            }
-            else {
-                atwho.questionAutocomplete(input, options.mug, {
+                atwho.autocomplete(input, options.mug, {choices: choices});
+            } else {
+                atwho.autocomplete(input, options.mug, {
                     property: options.path,
                     useRichText: options.mug.supportsRichText(),
                 });
@@ -241,6 +240,7 @@ define([
                 } else {
                     $expUI.find('.xpath-edit-node').on('keyup change', validateExpression);
                 }
+                $expUI.find('.op-select').on('change', validateExpression);
 
                 $expUI.find('.xpath-delete-expression').click(function() {
                     $expUI.remove();
@@ -380,8 +380,10 @@ define([
             $div.find('.fd-xpath-actions').removeClass('form-actions-condensed');
             if (showNotice) {
                 $div.find(".xpath-advanced-notice").removeClass('hide');
+                $div.find(".fd-xpath-show-simple-button").addClass('hide');
             } else {
                 $div.find(".xpath-advanced-notice").addClass('hide');
+                $div.find(".fd-xpath-show-simple-button").removeClass('hide');
             }
         };
         var showSimpleMode = function (text) {
