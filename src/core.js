@@ -221,7 +221,6 @@ define([
             var $node = $(".jstree-hovered");
             if ($node.length) {
                 var $scrollable = $node.closest(".fd-scrollable");
-                var nodeTop = $node.position().top;
                 $scrollable.scrollTop($node.position().top - $scrollable.position().top);
             }
             if (window.analytics) {

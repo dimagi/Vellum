@@ -94,8 +94,9 @@ define([
     var popoverLeave = $.fn.popover.Constructor.prototype.leave;
     $.fn.popover.Constructor.prototype.leave = function(obj){
         var self = obj instanceof this.constructor ?
-            obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type)
-        var container, timeout;
+            obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type);
+        var container,
+            timeout;
 
         popoverLeave.call(this, obj);
 
@@ -106,10 +107,10 @@ define([
                 // Entered the actual popover
                 clearTimeout(timeout);
                 // Monitor popover content instead
-                container.one('mouseleave', function(){
+                container.one('mouseleave', function() {
                     $.fn.popover.Constructor.prototype.leave.call(self, self);
                 });
-            })
+            });
         }
     };
 });
