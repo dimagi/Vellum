@@ -643,7 +643,7 @@ define([
                         $imgs.removeAttr("title");
 
                         $imgs.popover({
-                            trigger: 'click',
+                            trigger: 'hover',
                             container: 'body',
                             placement: 'bottom',
                             title: '<h3>' + util.escape(displayId) + '</h3>' +
@@ -660,7 +660,11 @@ define([
                                 '<div class="popover-inner">' +
                                 '<div class="popover-title"></div>' +
                                 (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
-                                '</div></div>'
+                                '</div></div>',
+                            delay: {
+                                show: 50,
+                                hide: 200,
+                            },
                         });
 
                         ckwidget.on('destroy', function (e)  {
