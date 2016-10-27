@@ -32,6 +32,7 @@ define([
     'require',
     'underscore',
     'jquery',
+    'tpl!vellum/templates/easy_reference_popover',
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
@@ -41,6 +42,7 @@ define([
     require,
     _,
     $,
+    easy_reference_popover,
     logic,
     util,
     xml,
@@ -649,13 +651,10 @@ define([
                             title: '<h3>' + util.escape(displayId) + '</h3>' +
                                    '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
                             html: true,
-                            content: '<p>' + labelText.text() + '</p>' +
-                                     (isFormRef ? 
-                                        '<p><a href="#" class="jstree-hover"' +
-                                        ' data-ufid="' + labelMug.ufid + '">' +
-                                        'show in question list</a></p>'
-                                        : ''
-                                     ),
+                            content: easy_reference_popover({
+                                text: labelText.text(),
+                                ufid: isFormRef ? labelMug.ufid : "",
+                            }),
                             template: '<div contenteditable="false" class="popover rich-text-popover">' +
                                 '<div class="popover-inner">' +
                                 '<div class="popover-title"></div>' +
