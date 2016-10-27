@@ -666,9 +666,14 @@ define([
                                 hide: 200,
                             },
                         }).on('shown.bs.popover', function() {
-                            // window.analytics.usage for GA
-                            // window.analytics.workflow for Kiss
-                            console.log("fire hover events, include whether this is case or form bubble");
+                            if (window.analytics) {
+                                if (isFormRef) {
+                                    window.analytics.usage("Form Builder", "Hovered over easy form reference");
+                                } else {
+                                    window.analytics.usage("Form Builder", "Hovered over easy case reference");
+                                }
+                                window.analytics.workflow("Hovered over easy reference");
+                            }
                         });
 
                         ckwidget.on('destroy', function (e)  {

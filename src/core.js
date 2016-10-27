@@ -224,7 +224,10 @@ define([
                 var nodeTop = $node.position().top;
                 $scrollable.scrollTop($node.position().top - $scrollable.position().top);
             }
-            console.log("fire click events");
+            if (window.analytics) {
+                window.analytics.usage("Form Builder", "Clicked link to show in tree");
+                window.analytics.workflow("Clicked on easy reference popover's link to show in tree");
+            }
         });
 
         this._init_toolbar();
