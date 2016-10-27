@@ -662,7 +662,7 @@ define([
                                 (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
                                 '</div></div>',
                             delay: {
-                                show: 50,
+                                show: 0,
                                 hide: 200,
                             },
                         }).on('shown.bs.popover', function() {
