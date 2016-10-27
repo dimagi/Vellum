@@ -649,12 +649,31 @@ define([
                             title: '<h3>' + util.escape(displayId) + '</h3>' +
                                    '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
                             html: true,
-                            content: '<p>' + labelText.text() + '</p>',
+                            content: '<p>' + labelText.text() + '</p>' +
+                                     (isFormRef ? 
+                                        '<p><a href="#" class="jstree-hover"' +
+                                        ' data-ufid="' + labelMug.ufid + '">' +
+                                        'show in question list</a></p>'
+                                        : ''
+                                     ),
                             template: '<div contenteditable="false" class="popover rich-text-popover">' +
                                 '<div class="popover-inner">' +
                                 '<div class="popover-title"></div>' +
                                 (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
-                                '</div></div>'
+                                '</div></div>',
+                            delay: {
+                                show: 0,
+                                hide: 200,
+                            },
+                        }).on('shown.bs.popover', function() {
+                            if (window.analytics) {
+                                if (isFormRef) {
+                                    window.analytics.usage("Form Builder", "Hovered over easy form reference");
+                                } else {
+                                    window.analytics.usage("Form Builder", "Hovered over easy case reference");
+                                }
+                                window.analytics.workflow("Hovered over easy reference");
+                            }
                         });
 
                         ckwidget.on('destroy', function (e)  {
