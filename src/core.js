@@ -224,6 +224,7 @@ define([
                 var nodeTop = $node.position().top;
                 $scrollable.scrollTop($node.position().top - $scrollable.position().top);
             }
+            console.log("fire click events");
         });
 
         this._init_toolbar();

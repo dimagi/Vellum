@@ -665,6 +665,10 @@ define([
                                 show: 50,
                                 hide: 200,
                             },
+                        }).on('shown.bs.popover', function() {
+                            // window.analytics.usage for GA
+                            // window.analytics.workflow for Kiss
+                            console.log("fire hover events, include whether this is case or form bubble");
                         });
 
                         ckwidget.on('destroy', function (e)  {
