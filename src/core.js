@@ -168,29 +168,6 @@ define([
             unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!',
             csrftoken: _this.opts().csrftoken
         });
-        var setFullscreenIcon = function () {
-            var $i = $('i', _this.data.core.$fullscreenButton).addClass("fa");
-            if (_this.data.windowManager.fullscreen) {
-                $i.addClass('fa-compress').removeClass('fa-expand');
-            } else {
-                $i.removeClass('fa-compress').addClass('fa-expand');
-            }
-        };
-        setTimeout(setFullscreenIcon, 0);
-        this.data.core.$fullscreenButton = $('<button class="btn btn-default"><i/></button>').click(function (e) {
-            e.preventDefault();
-            if (window.analytics) {
-                window.analytics.usage('Form Builder', 'Full Screen Mode',
-                          _this.opts().core.formId);
-            }
-            if (_this.data.windowManager.fullscreen) {
-                _this.data.windowManager.fullscreen = false;
-            } else {
-                _this.data.windowManager.fullscreen = true;
-            }
-            setFullscreenIcon();
-            _this.adjustToWindow();
-        });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
@@ -300,8 +277,6 @@ define([
 
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
-        var $fullscerenButtonContainer = this.$f.find('.fd-fullscreen-button');
-        this.data.core.$fullscreenButton.appendTo($fullscerenButtonContainer);
     };
 
     fn._getQuestionGroups = function () {
@@ -428,6 +403,27 @@ define([
     fn.getToolsMenuItems = function () {
         var _this = this;
         return [
+            {
+                name: "Show in Full Screen",
+                action: function (done) {
+                    var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu a'), function(a) {
+                        return a.text.match(/full screen/i);
+                    }));
+                    var text = $fullScreenMenuItem.text();
+                    if (window.analytics) {
+                        window.analytics.usage('Form Builder', 'Full Screen Mode',
+                                  _this.opts().core.formId);
+                    }
+                    if (_this.data.windowManager.fullscreen) {
+                        _this.data.windowManager.fullscreen = false;
+                        $fullScreenMenuItem.text(text.replace(/Exit/, "Show in"));
+                    } else {
+                        _this.data.windowManager.fullscreen = true;
+                        $fullScreenMenuItem.text(text.replace(/Show in/, "Exit"));
+                    }
+                    _this.adjustToWindow();
+                }
+            },
             {
                 name: "Export Form Contents",
                 action: function (done) {
