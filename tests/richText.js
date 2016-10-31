@@ -104,10 +104,9 @@ define([
     function externalIcon () { return icon('fcc-fd-case-property'); }
     function externalUnknownIcon () { return icon('fa-exclamation-triangle'); }
 
-    function makeBubble(xpath, dispValue, icon, internal, output) {
+    function makeBubble(xpath, dispValue, icon, internal) {
         var span = $('<span>').addClass('label label-datanode').attr({
             'data-value': xpath,
-            'data-output-value': output || false,
         });
         if (internal && !_.isString(internal)) {
             span.addClass('label-datanode-internal');
@@ -122,10 +121,6 @@ define([
     }
     function outputValueTemplateFn(path) {
         return '<output value="' + path + '"></output>';
-    }
-
-    function makeOutputValue(xpath, dispValue, icon, internal) {
-        return makeBubble(xpath, dispValue, icon, internal, true);
     }
 
     function wrapWithDiv(el) { return $('<div>').append(el); }
@@ -171,7 +166,7 @@ define([
                 it("from text to html with output value: " + val[0], function() {
                     assert.strictEqual(
                         richText.toRichText(outputValueTemplateFn(val[0]), form),
-                        wrapWithDivP(makeOutputValue(val[0], val[1], val[2], val[3])).html()
+                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
                     );
                 });
             });
@@ -195,7 +190,7 @@ define([
                 it("from text to html with output value: " + val.xmlValue, function() {
                     assert.equal(
                         richText.toRichText(outputValueTemplateFn(val.xmlValue), form),
-                        wrapWithDivP(makeOutputValue(
+                        wrapWithDivP(makeBubble(
                             val.valueInBubble,
                             val.bubbleDispValue,
                             val.icon,
@@ -325,7 +320,7 @@ define([
                     var result = richText.bubbleOutputs(item[0], form, true),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
                             if (form.getIconByPath("#form/" + name)) {
-                                var output = makeOutputValue("#form/" + name, name, ico, true);
+                                var output = makeBubble("#form/" + name, name, ico, true);
                                 return output[0].outerHTML;
                             }
                             return m;
@@ -338,7 +333,6 @@ define([
         describe("serialize formats correctly", function () {
             it("should handle output refs", function() {
                 assert.equal(richText.applyFormats({
-                    outputValue: 1,
                     value: "#case/f_2685",
                 }), '&lt;output value="#case/f_2685" /&gt;');
             });
@@ -346,7 +340,6 @@ define([
             it("should handle dates", function() {
                 assert.equal(richText.applyFormats({
                     dateFormat: "%d/%n/%y",
-                    outputValue: 1,
                     value: "#form/question1",
                 }), '&lt;output value="format-date(date(#form/question1), \'%d/%n/%y\')" /&gt;');
             });

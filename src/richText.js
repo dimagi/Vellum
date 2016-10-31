@@ -14,7 +14,7 @@
  * newline: <br />
  *
  * rich text "bubble":
- *   <span data-value="xpath" data-output-value=boolean>
+ *   <span data-value="xpath">
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
  *   </span>
@@ -69,10 +69,6 @@ define([
             '</span>',
         upcast: function ( element ) {
             return element.name === 'span' && element.hasClass('label-datanode');
-        },
-        downcast: function(element) {
-            element.setHtml(applyFormats($(element.getOuterHtml()).data()));
-            element.replaceWithChildren();
         },
         init: function() {
             // TODO: PR to ckeditor to make changing drag ui supported
@@ -211,8 +207,7 @@ define([
                 if (options.isExpression) {
                     insertHtmlWithSpace(bubbleExpression(xpath, form));
                 } else {
-                    var attrs = {'data-output-value': true},
-                        output = makeBubble(form, xpath, attrs);
+                    var output = makeBubble(form, xpath);
                     insertHtmlWithSpace($('<p>').append(output).html());
                 }
                 return wrapper;
@@ -364,7 +359,7 @@ define([
                     });
                 },
             },
-            'outputValue': {
+            'value': {
                 serialize: function(currentValue) {
                     return _.template('&lt;output value="<%=xpath%>" /&gt;')({
                         xpath: currentValue
@@ -372,14 +367,14 @@ define([
                 },
             }
         },
-        formatOrdering = ['dateFormat', 'outputValue'];
+        formatOrdering = ['dateFormat', 'value'];
 
     /**
      * Takes in data attributes from a "bubble"
      *
      * Example
      *   serializing the rich text
-     *     <span data-value='/data/value' data-output-value='true' ... />
+     *     <span data-value='/data/value' ... />
      *   with
      *     applyFormats($bubble.data())
      *   would return
@@ -551,12 +546,12 @@ define([
         if (isExpression) {
             replacer = function () {
                 var id = util.get_guid();
-                places[id] = $(this).text();
+                places[id] = $(this).data("value");
                 return "{" + id + "}";
             };
         } else {
             replacer = function () {
-                return $(this).html();
+                return applyFormats($(this).data());
             };
         }
         bubbles.replaceWith(replacer);
@@ -566,7 +561,7 @@ define([
                 // `after` is a character following {id} that would fuse with
                 // the bubble expression if we did not put a space between them
                 return places.hasOwnProperty(id) ?
-                    places[id] + (after ? " " : "") + after : match;
+                    places[id] + (after ? " " + after : "") : match;
             });
             try {
                 form.xpath.parse(expr);
@@ -678,21 +673,13 @@ define([
 
         if (dateMatch) {
             return {
-                'data-output-value': !!outputValueMatch,
                 'data-date-format': dateMatch[2],
                 reference: dateMatch[1],
             };
         } else if (outputValueMatch){
-            return {
-                'data-output-value': true,
-                reference: outputValueMatch[2],
-            };
+            return {reference: outputValueMatch[2]};
         }
-
-        return {
-            'data-output-value': false,
-            reference: value,
-        };
+        return {reference: value};
     }
 
     function createPopover(editor, ckwidget) {
