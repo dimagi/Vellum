@@ -404,7 +404,7 @@ define([
         var _this = this;
         return [
             {
-                name: "Show in Full Screen",
+                name: "Enter Full Screen",
                 action: function (done) {
                     var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu a'), function(a) {
                         return a.text.match(/full screen/i);
@@ -416,10 +416,10 @@ define([
                     }
                     if (_this.data.windowManager.fullscreen) {
                         _this.data.windowManager.fullscreen = false;
-                        $fullScreenMenuItem.text(text.replace(/Exit/, "Show in"));
+                        $fullScreenMenuItem.text(text.replace(/Exit/, "Enter"));
                     } else {
                         _this.data.windowManager.fullscreen = true;
-                        $fullScreenMenuItem.text(text.replace(/Show in/, "Exit"));
+                        $fullScreenMenuItem.text(text.replace(/Enter/, "Exit"));
                     }
                     _this.adjustToWindow();
                 }
