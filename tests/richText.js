@@ -551,7 +551,7 @@ define([
                     });
                 });
 
-                it("should show xpath on popover", function (done) {
+                it("should show xpath and tree reference link on popover", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");
                     widget = util.getWidget('property-calculateAttr');
@@ -559,8 +559,13 @@ define([
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble, "No bubbles detected");
                         bubble.mouseenter();
-                        assert.strictEqual($('.popover-content:last').text(),
+                        var $popover = $('.popover-content:last');
+                        assert.strictEqual($popover.find('p:first').text(),
                                            "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+                        var $link = $popover.find("a");
+                        assert($link.length);
+                        $link.click();
+                        assert.strictEqual($(".jstree-hovered").length, 1);
                         done();
                     });
                 });
@@ -573,7 +578,7 @@ define([
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble, "No bubbles detected");
                         bubble.mouseenter();
-                        var $popover = $('.popover-content:last');
+                        var $popover = $('.popover-content:last p:first');
                         assert.strictEqual($popover.text(),
                                            "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                         var bubbles = widget.input.ckeditor().editor.widgets.instances;

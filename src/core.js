@@ -215,6 +215,20 @@ define([
             (hotkeys[key] || _.identity).call(_this, e);
         });
 
+        $(document).on('click', '.jstree-hover', function(e) {
+            e.preventDefault();
+            _this.jstree("hover_node", $(this).data("ufid"));
+            var $node = $(".jstree-hovered");
+            if ($node.length) {
+                var $scrollable = $node.closest(".fd-scrollable");
+                $scrollable.scrollTop($node.position().top - $scrollable.position().top);
+            }
+            if (window.analytics) {
+                window.analytics.usage("Form Builder", "Clicked link to show in tree");
+                window.analytics.workflow("Clicked on easy reference popover's link to show in tree");
+            }
+        });
+
         this._init_toolbar();
         this._createJSTree();
         this.datasources = datasources.init(
