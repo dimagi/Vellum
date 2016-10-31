@@ -1728,9 +1728,9 @@ define([
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
             collapseKey = "collapse-" + options.displayName,
-            isCollapsed = localStorage.hasOwnProperty(collapseKey)
-                ? localStorage.getItem(collapseKey)
-                : options.isCollapsed,
+            isCollapsed = localStorage.hasOwnProperty(collapseKey) ?
+                localStorage.getItem(collapseKey) :
+                options.isCollapsed,
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
