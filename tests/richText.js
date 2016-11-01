@@ -344,6 +344,21 @@ define([
                 }), '&lt;output value="format-date(date(#form/question1), \'%d/%n/%y\')" /&gt;');
             });
         });
+
+        describe("invalid xpath unescaper", function () {
+            it("should pass through xpath not marked as invalid", function() {
+                assert.equal(richText.unescapeXPath("/data/valid", form), "/data/valid");
+            });
+
+            _.each({
+                "#invalid/xpath `#form/text` xpath": "/data/text xpath",
+                "#invalid/xpath `#form/text`xpath": "/data/text xpath",
+            }, function (expect, expr) {
+                it("should unescape invalid xpath: " + expr + " -> " + expect, function() {
+                    assert.equal(richText.unescapeXPath(expr, form), expect);
+                });
+            });
+        });
     });
 
     describe("The rich text editor", function () {

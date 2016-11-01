@@ -576,7 +576,6 @@ define([
      *      invalid xpath prefix, otherwise the given value
      */
     function unescapeXPath(value, form) {
-        // TODO add whitespace to prevent run-on sub-expressions
         if (isInvalid(value)) {
             value = escapedHashtags.transform(
                 value.slice(INVALID_PREFIX.length),
