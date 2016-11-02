@@ -239,6 +239,10 @@ define([
             });
         call("jstree", "deselect_all", true);
         call("jstree", "select_node", ufids);
+
+        // Make all question properties visible
+        $(".collapse-toggle.collapsed").click();
+
         return mugs;
     }
 

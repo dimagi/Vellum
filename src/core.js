@@ -398,6 +398,13 @@ define([
                 }
             });
         });
+
+        this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
+            var $target = $(e.target),
+                section = $target.parent().find("legend").text().trim(),
+                shouldCollapse = $target.hasClass('in');
+            localStorage.setItem('collapse-' + section, shouldCollapse ? "1" : "");
+        });
     };
 
     fn.getToolsMenuItems = function () {
@@ -1717,10 +1724,14 @@ define([
 
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
+            collapseKey = "collapse-" + options.displayName,
+            isCollapsed = localStorage.hasOwnProperty(collapseKey) ?
+                localStorage.getItem(collapseKey) :
+                options.isCollapsed,
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
-                isCollapsed: !!options.isCollapsed,
+                isCollapsed: !!isCollapsed,
                 help: options.help
             })),
             $fieldsetContent = $sec.find('.fd-fieldset-content');
@@ -1984,6 +1995,7 @@ define([
                 slug: "data_source",
                 displayName: "Data Source",
                 properties: this.getDataSourceProperties(),
+                isCollapsed: true,
                 help: {
                     title: "Data Source",
                     text: "You can configure an external data source like a " +
@@ -1995,6 +2007,7 @@ define([
                 slug: "logic",
                 displayName: "Logic",
                 properties: this.getLogicProperties(),
+                isCollapsed: true,
                 help: {
                     title: "Logic",
                     text: "Use logic to control when questions are asked and what answers are valid. " +
@@ -2007,7 +2020,7 @@ define([
                 displayName: "Media",
                 slug: "content",
                 properties: this.getMediaProperties(),
-                isCollapsed: false,
+                isCollapsed: true,
                 help: {
                     title: "Media",
                     text: "This will allow you to add images, audio or video media to a question, or other custom content.",
