@@ -474,7 +474,7 @@ define([
             return this.parentMug && this.parentMug.isInRepeat();
         },
         supportsRichText: function() {
-            return this.options.richText && this.form.richText;
+            return this.form.richText;
         }
     };
 
@@ -1648,8 +1648,7 @@ define([
     function MugTypesManager(baseSpec, mugTypes, opts) {
         var _this = this,
             // Nestable Field List not supported in CommCare before v2.16
-            group_in_field_list = opts.features.group_in_field_list,
-            richText = opts.features.rich_text;
+            group_in_field_list = opts.features.group_in_field_list;
         Image.resize_enabled = opts.features.image_resize;
 
         this.auxiliaryTypes = mugTypes.auxiliary;
@@ -1699,7 +1698,6 @@ define([
 
         _.each(this.allTypes, function (Mug, name) {
             Mug.__className = name;
-            Mug.richText = richText;
 
             // set on this for easy access
             _this[name] = Mug;
