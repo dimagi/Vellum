@@ -94,7 +94,7 @@ define([
         xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
         xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
         var ignore = [];
-        if (form.writeIgnoreRichText && !form.richText) {
+        if (form.mayDisableRichText && !form.richText) {
             ignore.push('richText');
         }
         if (form.noMarkdown) {
