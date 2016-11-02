@@ -54,10 +54,6 @@ define([
         if($(xml).find('parsererror').length > 0) {
             throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
         }
-        
-        if(title.length > 0) {
-            form.formName = $(title).text();
-        }
 
         ignore = ignore ? ignore.split(" ") : [];
         if (_.contains(ignore, 'richText')) {
@@ -97,7 +93,7 @@ define([
                 'No Data block was found in the form.  Please check that your form is valid!');
         }
        
-        parseDataTree(form, data[0]);
+        parseDataTree(form, data[0], title.length ? title.text() : "");
         parseBindList(form, binds);
 
         parseSetValues(form, setValues);
@@ -130,7 +126,7 @@ define([
     }
 
     // DATA PARSING FUNCTIONS
-    function parseDataTree (form, dataEl) {
+    function parseDataTree (form, dataEl, titleText) {
         var root = $(dataEl),
             tree = form.tree,
             recFunc;
@@ -164,7 +160,14 @@ define([
         form.formJRM = root.attr("xmlns:jrm");
         form.formUIVersion = root.attr("uiVersion");
         form.formVersion = root.attr("version");
-        form.formName = root.attr("name") || form.formName;
+
+        var optionsName = form.vellum.opts().core.formName,
+            formName = optionsName || root.attr("name") || titleText;
+        if (formName) {
+            form.formName = formName;
+        } else {
+            form.parseWarnings.push('Form does not have a Name! The default form name will be used');
+        }
 
         if (!form.formUuid || form.formUuid === "undefined") {
             form.formUuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
@@ -177,9 +180,6 @@ define([
         }
         if (!form.formVersion) {
             form.parseWarnings.push('Form does not have a Version attribute (in the data block), one will be added automatically');
-        }
-        if (!form.formName) {
-            form.parseWarnings.push('Form does not have a Name! The default form name will be used');
         }
     }
 

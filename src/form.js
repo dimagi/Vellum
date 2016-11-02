@@ -125,7 +125,8 @@ define([
         this.vellum = vellum;
         this.mugTypes = mugTypes;
 
-        this.formName = 'New Form';
+        this.formName = vellum.opts().core.formName || "New Form";
+        this.noMarkdown = false;
         this.mugMap = {};
         this.instanceMetadata = [InstanceMetadata({})];
         // {<instance id>: { src or children: <instance src or children>}

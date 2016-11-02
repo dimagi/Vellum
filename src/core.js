@@ -1205,8 +1205,6 @@ define([
         }
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
-        form.formName = this.opts().core.formName || form.formName;
-        form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
