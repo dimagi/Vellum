@@ -970,6 +970,7 @@ define([
             return this.__callOld().concat([
                 {
                     name: "Edit Bulk Translations",
+                    icon: "fa fa-language",
                     action: function (done) {
                         _this.showItextModal(done);
                     }
