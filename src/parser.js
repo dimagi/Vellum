@@ -43,6 +43,7 @@ define([
 
         var xmlDoc = $.parseXML(xmlString),
             xml = $(xmlDoc),
+            ignore = xml.find('h\\:html, html').attr('vellum:ignore'),
             head = xml.find('h\\:head, head'),
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
@@ -60,10 +61,9 @@ define([
 
         // TODO set this to vellum.opts().features.rich_text ??
         form.richText = true;
-        if(xml.find('[vellum\\:ignore=richText]').length > 0) {
+        if (ignore === 'richText') {
             form.richText = false;
-        }
-        if(xml.find('[vellum\\:ignore=markdown]').length > 0) {
+        } else if (ignore === 'markdown') {
             form.noMarkdown = true;
         }
         
