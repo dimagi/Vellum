@@ -61,9 +61,11 @@ define([
 
         // TODO set this to vellum.opts().features.rich_text ??
         form.richText = true;
-        if (ignore === 'richText') {
+        ignore = ignore ? ignore.split(" ") : [];
+        if (_.contains(ignore, 'richText')) {
             form.richText = false;
-        } else if (ignore === 'markdown') {
+        }
+        if (_.contains(ignore, 'markdown')) {
             form.noMarkdown = true;
         }
         

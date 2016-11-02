@@ -93,16 +93,15 @@ define([
         xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
         xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
         xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
-        // TODO <html vellum:ignore="..."> is used to ignore both markdown
-        // and rich text, which means only one or the other can be ignored.
-        // Should it be changed so they can both be ignored at the same time?
-        // todo: remove writeIgnoreRichText once bubbles is released
-        // Here for future compatibility
+        var ignore = [];
         if (form.writeIgnoreRichText && !form.richText) {
-            xmlWriter.writeAttributeString("vellum:ignore", 'richText');
+            ignore.push('richText');
         }
         if (form.noMarkdown) {
-            xmlWriter.writeAttributeString("vellum:ignore", 'markdown');
+            ignore.push('markdown');
+        }
+        if (ignore.length) {
+            xmlWriter.writeAttributeString("vellum:ignore", ignore.join(" "));
         }
     }
 
