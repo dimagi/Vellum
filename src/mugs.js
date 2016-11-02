@@ -473,9 +473,6 @@ define([
             }
             return this.parentMug && this.parentMug.isInRepeat();
         },
-        supportsRichText: function() {
-            return this.form.richText;
-        }
     };
 
     Object.defineProperty(Mug.prototype, "absolutePath", {

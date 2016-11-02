@@ -305,7 +305,7 @@ define([
     };
 
     var richInput = function(mug, options) {
-        if (mug.supportsRichText()) {
+        if (mug.form.richText) {
             options.singleLine = true;
             return richText(mug, options);
         } else {
@@ -314,7 +314,7 @@ define([
     };
 
     var richTextarea = function(mug, options) {
-        if (mug.supportsRichText()) {
+        if (mug.form.richText) {
             options.singleLine = false;
             return richText(mug, options);
         } else {
@@ -436,7 +436,7 @@ define([
 
         atwho.autocomplete(widget.input, mug, {
             property: options.path,
-            useRichText: mug.supportsRichText()
+            useRichText: mug.form.richText,
         });
 
         widget.hasLogicReferences = true;
