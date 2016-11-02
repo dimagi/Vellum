@@ -105,8 +105,7 @@ define([
             util.loadXML(INVALID_XPATH_XML);
             var text = util.getMug('text'),
                 hidden = util.getMug('hidden');
-            // TODO fix this - should read non-vellum: attrs when rich text is disabled
-            assert.strictEqual(text.p.relevantAttr, '#invalid/xpath (`#form/hidden`');
+            assert.strictEqual(text.p.relevantAttr, '(/data/hidden');
             assert.strictEqual(hidden.p.calculateAttr, '#form/text');
         });
     });

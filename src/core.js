@@ -1206,11 +1206,6 @@ define([
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
         form.formName = this.opts().core.formName || form.formName;
-        if (this.opts().features.rich_text) {
-            form.richText = _.isBoolean(form.richText) ? form.richText : true;
-        } else {
-            form.richText = false;
-        }
         form.writeIgnoreRichText = this.opts().features.rich_text;
         form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
