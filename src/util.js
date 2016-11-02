@@ -1,9 +1,9 @@
+/* global require */
 define([
     'json!langCodes',
     'underscore',
     'jsdiff',
     'vellum/markdown',
-    'vellum/escapedHashtags',
     'jquery',
     'vellum/jquery-extensions'
 ], function (
@@ -11,7 +11,6 @@ define([
     _,
     jsdiff,
     markdown,
-    escapedHashtags,
     $
 ) {
     RegExp.escape = function(s) {
@@ -35,7 +34,10 @@ define([
     });
 
     that.formatExc = function (error) {
-        return error && error.stack ? error.stack : String(error);
+        if (error && error.stack) {
+            return error + "\n" + error.stack;
+        }
+        return String(error);
     };
 
     that.validAttributeRegex = /^[^<&'">]*$/;
@@ -296,6 +298,27 @@ define([
         return label;
     };
 
+    /**
+     * Write xpath expression attribute(s)
+     *
+     * All expressions are stored as hashtag expressions internally and are
+     * written to XML in two forms when rich text is enabled:
+     *
+     *   <bind ... vellum:calculate="#form/text" calculate="/data/text" />
+     *
+     * The vellum namespaced attribute is the hashtag form and is only written
+     * when rich text is enabled and it is different from the XPath form. The
+     * non namespaced attribute is XPath syntax (no hashtags) and is always
+     * written.
+     *
+     * When rich text is enabled invalid XPaths are escaped in the vellum
+     * namespaced attribute and best-effort no-hashtag XPath in non namespaced
+     * attribute:
+     *
+     *   <bind ...
+     *      vellum:calculate="#invalid/xpath (`#form/text`"
+     *      calculate="(/data/text" />
+     */
     that.writeHashtags = function (xmlWriter, key, hashtagOrXPath, mug) {
         if (!_.isString(hashtagOrXPath)) {
             // don't try to parse a value that doesn't exist
@@ -311,19 +334,21 @@ define([
         try {
             var expr = form.xpath.parse(hashtagOrXPath);
             xpath_ = expr.toXPath();
+            // TODO hashtag = hashtagOrXPath
+            // (do not convert hand-typed xpaths to hashtags)
             hashtag = expr.toHashtag();
         } catch (err) {
             if (form.richText) {
-                xmlWriter.writeAttributeString('vellum:' + vellumKey, "#invalid/xpath " + hashtagOrXPath);
+                var richText = require('vellum/richText');
+                hashtag = hashtagOrXPath;
+                xpath_ = richText.unescapeXPath(hashtagOrXPath, form);
+            } else {
+                hashtag = xpath_ = hashtagOrXPath;
             }
-            xmlWriter.writeAttributeString(key, escapedHashtags.transform(hashtagOrXPath, function(hashtag) {
-                return mug.form.normalizeXPath(hashtag);
-            }));
-            return;
         }
 
         if (hashtag !== xpath_) {
-            if (form.richText ) {
+            if (form.richText) {
                 xmlWriter.writeAttributeString('vellum:' + vellumKey, hashtag);
             }
             xmlWriter.writeAttributeString(key, xpath_);
@@ -344,5 +369,3 @@ define([
 
     return that;
 });
-
-

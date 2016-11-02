@@ -1159,6 +1159,7 @@ define([
                 }
                 hidePageSpinner();
             } catch (e) {
+                window.console.log(util.formatExc(e));
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
                 var msg = e.toString();

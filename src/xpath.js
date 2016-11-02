@@ -50,5 +50,9 @@ define([
             ret.models = ret.yy.xpathmodels;
             return ret;
         },
+        parser: function (hashtagInfo) {
+            var models = this.makeXPathModels(hashtagInfo);
+            return this.createParser(models);
+        },
     };
 });

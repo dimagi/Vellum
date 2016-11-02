@@ -37,7 +37,7 @@ define([
             util.loadXML(TEST_XML_1);
             util.getMug("question1").p.nodeID = 'question';
             var mug = util.getMug("/data/question2");
-            assert.equal(mug.p.relevantAttr, "`#form/question` = 1");
+            assert.equal(mug.p.relevantAttr, "#form/question = 1");
         });
 
         it("should not update expressions for model iteration", function () {

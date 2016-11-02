@@ -79,8 +79,7 @@ define([
         }];
 
     describe("The data browser", function () {
-        var escapedDobProp = '`#case/dob`',
-            dobProp = '#case/dob',
+        var dobProp = '#case/dob',
             dataTree;
 
         function getInstanceId(form, src) {
@@ -117,7 +116,7 @@ define([
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () { 
                     editor.on('change', function() {
-                        assert.equal(mug.p.calculateAttr, escapedDobProp);
+                        assert.equal(mug.p.calculateAttr, dobProp);
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
@@ -141,7 +140,7 @@ define([
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () { 
                     editor.on('change', function() {
-                        assert.equal(mug.p.calculateAttr, "`#case/parent/edd`");
+                        assert.equal(mug.p.calculateAttr, "#case/parent/edd");
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
@@ -336,7 +335,7 @@ define([
             });
 
             it("should error for unknown properties", function(done) {
-                widget.setValue(escapedDobProp);
+                widget.setValue(dobProp);
                 widget.handleChange();
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
@@ -376,10 +375,10 @@ define([
             });
 
             it("should not error for known properties", function() {
-                assert.strictEqual(widget.getValue(), escapedDobProp);
+                assert.strictEqual(widget.getValue(), dobProp);
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
                 event.fire("loadCaseData");
-                assert.strictEqual(widget.getValue(), escapedDobProp);
+                assert.strictEqual(widget.getValue(), dobProp);
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
             });
 

@@ -81,7 +81,7 @@ define([
             util.addQuestion("Int");
             var mug = util.addQuestion("Repeat");
             util.addQuestion("Text");
-            mug.p.repeat_count = "`#form/question1`";
+            mug.p.repeat_count = "#form/question1";
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITH_COUNT_AS_QUESTION_XML,

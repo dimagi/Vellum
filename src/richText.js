@@ -14,12 +14,17 @@
  * newline: <br />
  *
  * rich text "bubble":
- *   <span data-value="xpath" data-output-value=boolean>
+ *   <span data-value="xpath">
  *     <i class="icon">&nbsp;</i>
  *     text to display inside bubble
  *   </span>
  *
- * Any other HTML has undefined behavior
+ * Any other HTML has undefined behavior.
+ *
+ * Expression editng mode returns invalid xpath expressions with a special
+ * "#invalid/xpath " prefix and bubbles are escaped with backticks. Example:
+ *
+ *   #invalid/xpath (`#form/text`
  */
 
 (function () {
@@ -33,6 +38,7 @@ define([
     'underscore',
     'jquery',
     'tpl!vellum/templates/easy_reference_popover',
+    'vellum/escapedHashtags',
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
@@ -43,14 +49,16 @@ define([
     _,
     $,
     easy_reference_popover,
+    escapedHashtags,
     logic,
     util,
     xml,
     CKEDITOR
 ){
-    var CASE_REF_REGEX = /^\`?#case\//,
-        FORM_REF_REGEX = /^\`?#form\//,
-        REF_REGEX = /^\`?#(form|case)\//,
+    var CASE_REF_REGEX = /^#case\//,
+        FORM_REF_REGEX = /^#form\//,
+        REF_REGEX = /^#(form|case)\//,
+        INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
         isWebkit = 'WebkitAppearance' in document.documentElement.style,
         bubbleWidgetDefinition = {
@@ -61,10 +69,6 @@ define([
             '</span>',
         upcast: function ( element ) {
             return element.name === 'span' && element.hasClass('label-datanode');
-        },
-        downcast: function(element) {
-            element.setHtml(applyFormats($(element.getOuterHtml()).data()));
-            element.replaceWithChildren();
         },
         init: function() {
             // TODO: PR to ckeditor to make changing drag ui supported
@@ -124,8 +128,7 @@ define([
      *
      * @param input - editor jQuery HTML element.
      * @param form - form object, functions used:
-     *    normalizeEscapedHashtag - transforms to escaped hashtag form
-     *    transform - transforms escaped hashtags
+     *    normalizeHashtag - get expression with normalized hashtags
      *    isValidHashtag - boolean if hashtag translation exists
      *    getIconByPath - only used for mug.options.icon
      *    xpath - xpath parser
@@ -185,7 +188,7 @@ define([
                         wrapper.select(0);
                         data = editor.getData();
                     }
-                    return fromRichText(data);
+                    return fromRichText(data, form, options.isExpression);
                 }
             },
             setValue: function (value, callback) {
@@ -204,8 +207,7 @@ define([
                 if (options.isExpression) {
                     insertHtmlWithSpace(bubbleExpression(xpath, form));
                 } else {
-                    var attrs = {'data-output-value': true},
-                        output = makeBubble(form, xpath, attrs);
+                    var output = makeBubble(form, xpath);
                     insertHtmlWithSpace($('<p>').append(output).html());
                 }
                 return wrapper;
@@ -357,7 +359,7 @@ define([
                     });
                 },
             },
-            'outputValue': {
+            'value': {
                 serialize: function(currentValue) {
                     return _.template('&lt;output value="<%=xpath%>" /&gt;')({
                         xpath: currentValue
@@ -365,14 +367,14 @@ define([
                 },
             }
         },
-        formatOrdering = ['dateFormat', 'outputValue'];
+        formatOrdering = ['dateFormat', 'value'];
 
     /**
      * Takes in data attributes from a "bubble"
      *
      * Example
      *   serializing the rich text
-     *     <span data-value='/data/value' data-output-value='true' ... />
+     *     <span data-value='/data/value' ... />
      *   with
      *     applyFormats($bubble.data())
      *   would return
@@ -400,7 +402,7 @@ define([
             steps, dispValue;
 
         if (topLevelPaths.length) {
-            steps = parsed.getTopLevelPaths()[0].steps;
+            steps = topLevelPaths[0].steps;
             dispValue = steps[steps.length-1].name;
         } else {
             steps = hashtags[0].toHashtag().split('/');
@@ -412,12 +414,10 @@ define([
     /**
      * Make a xpath bubble
      *
-     * @param templateFn - function(xpath) returns what the bubble should be
-     *                     transcribed to in XML
-     *
+     * @param xpath - xpath expression to set as the bubble value.
      * @returns jquery object of the bubble
      */
-    function makeBubble(form, xpath, extraAttrs) {
+    function makeBubble(form, xpath) {
         function _parseXPath(xpath, form) {
             if (CASE_REF_REGEX.test(xpath)) {
                 if (form.isValidHashtag(xpath)) {
@@ -433,11 +433,8 @@ define([
 
             var icon = form.getIconByPath(xpath);
             if (icon) {
-                return {
-                    classes: ['label-datanode-internal', icon],
-                };
+                return {classes: ['label-datanode-internal', icon]};
             }
-
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
 
@@ -448,29 +445,26 @@ define([
             icon = $('<i>').addClass(iconClasses).html('&nbsp;');
         return $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
-            .attr({'data-value': xpath})
-            .attr(extraAttrs)
+            .attr('data-value', xpath)
             .append(icon)
             .append(dispValue);
     }
 
     /**
-     * @param value - a single xpath expression
-     *
-     * @returns - jquery object of xpath bubble
+     * @param output - <output ...> DOM element
+     * @returns - jquery object of xpath bubble or string
      */
-    function replacePathWithBubble(form, value) {
-        var info = extractXPathInfoFromOutputValue(value),
-            xpath = form.normalizeEscapedHashtag(info.reference),
-            extraAttrs = _.omit(info, 'reference'),
+    function outputToBubble(form, output) {
+        var info = extractXPathInfo($(output)),
+            xpath = form.normalizeHashtag(info.value),
+            attrs = _.omit(info, 'value'),
             startsWithRef = REF_REGEX.test(xpath),
             containsWhitespace = /\s/.test(xpath);
 
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
-            return $('<span>').text(xml.normalize(value)).html();
+            return $('<span>').text(xml.normalize(output.outerHTML)).html();
         }
-
-        return $('<div>').append(makeBubble(form, xpath, extraAttrs)).html();
+        return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
     }
 
     /**
@@ -479,25 +473,18 @@ define([
      * @param escape - If true, escape HTML except for bubble markup.
      */
     function bubbleOutputs(text, form, escape) {
-        function transformToOldOuptut(output) {
-            // this is to support vellum:value in extractXPathInfoFromOutputValue
-            // as it uses regex for now
-            var $output = $(output),
-                attribute = $output.attr('vellum:value') || $output.attr('value');
-            return $("<output>").attr('value', attribute)[0].outerHTML;
-        }
         var el = $('<div>').html(text),
             places = {},
             replacer, result;
         if (escape) {
             replacer = function () {
                 var id = util.get_guid();
-                places[id] = replacePathWithBubble(form, transformToOldOuptut(this.outerHTML));
+                places[id] = outputToBubble(form, this);
                 return "{" + id + "}";
             };
         } else {
             replacer = function() {
-                return replacePathWithBubble(form, transformToOldOuptut(this.outerHTML));
+                return outputToBubble(form, this);
             };
         }
         el.find('output').replaceWith(replacer);
@@ -516,14 +503,86 @@ define([
      * Wrap top-level expression nodes with bubble markup
      */
     function bubbleExpression(text, form) {
-        text = xml.normalize(form.normalizeEscapedHashtag(text));
-        return form.transform(text, _.partial(replacePathWithBubble, form));
+        var transform;
+        if (isInvalid(text)) {
+            text = text.slice(INVALID_PREFIX.length);
+            transform = escapedHashtags.transform;
+        } else {
+            if (form._richText_transform === undefined) {
+                form._richText_transform = escapedHashtags.makeHashtagTransform(form);
+            }
+            transform = form._richText_transform;
+        }
+        function bubble(hashtag) {
+            return makeBubble(form, hashtag).prop('outerHTML');
+        }
+        return transform(text, bubble, true);
     }
 
-    function unwrapBubbles(text) {
-        var el = $('<div>').html(text);
-        el.find('.label-datanode').children().unwrap();
-        return el.text();
+    function unwrapBubbles(text, form, isExpression) {
+        var el = $('<div>').html(text),
+            places = {},
+            bubbles = el.find('.label-datanode'),
+            replacer, result, expr;
+        if (!bubbles.length) {
+            return el.text();
+        }
+        if (isExpression) {
+            replacer = function () {
+                var id = util.get_guid();
+                places[id] = $(this).data("value");
+                return "{" + id + "}";
+            };
+        } else {
+            replacer = function () {
+                return applyFormats($(this).data());
+            };
+        }
+        bubbles.replaceWith(replacer);
+        result = el.text();
+        if (isExpression) {
+            expr = result.replace(/{(.+?)}([\w.\-]?)/g, function (match, id, after) {
+                // `after` is a character following {id} that would fuse with
+                // the bubble expression if we did not put a space between them
+                return places.hasOwnProperty(id) ?
+                    places[id] + (after ? " " + after : "") : match;
+            });
+            try {
+                form.xpath.parse(expr);
+            } catch (e) {
+                expr = INVALID_PREFIX + escapedHashtags.escapeDelimiters(result)
+                    .replace(/{(.+?)}/g, function (match, id) {
+                        return places.hasOwnProperty(id) ?
+                            escapedHashtags.delimit(places[id]) : match;
+                    });
+            }
+            result = expr;
+        }
+        return result;
+    }
+
+    /**
+     * Check for escaped invalid hashtag expression
+     */
+    function isInvalid(value) {
+        return value.startsWith(INVALID_PREFIX);
+    }
+
+    /**
+     * Convert escaped hashtag expression to xpath
+     *
+     * @return - unescaped expression with hashtags converted to
+     *      equivalent xpath if the given value is marked with the
+     *      invalid xpath prefix, otherwise the given value
+     */
+    function unescapeXPath(value, form) {
+        if (isInvalid(value)) {
+            value = escapedHashtags.transform(
+                value.slice(INVALID_PREFIX.length),
+                form.normalizeXPath.bind(form)
+            );
+        }
+        return value;
     }
 
     /**
@@ -583,108 +642,93 @@ define([
      * @param html - HTML string that may or may not have bubble
      * @returns - string with bubbles deconstructed into plain text
      */
-    function fromRichText(html) {
-        return unwrapBubbles(fromHtml(html));
+    function fromRichText(html, form, isExpression) {
+        return unwrapBubbles(fromHtml(html), form, isExpression);
     }
 
-    function extractXPathInfoFromOutputValue(value) {
-        // there's no differenc between ref and value, so just change them all
-        // to value
-        var outputValueRegex = /<output\s+(ref|value)="([^"]+)"/,
-            dateFormatRegex = /format-date\(date\(([^)]+)\),\s*'([^']+)'\)/,
-            dateMatch = dateFormatRegex.exec(value),
-            outputValueMatch = outputValueRegex.exec(value);
-
+    /**
+     * @param output - jQuery <output ...> element
+     * @returns - object with value and maybe data-date-format
+     */
+    function extractXPathInfo(output) {
+        var value = output.attr('vellum:value') || output.attr('value') || output.attr('ref'),
+            dateMatch = /^format-date\(date\(([^)]+)\),\s*'([^']+)'\)$/.exec(value);
         if (dateMatch) {
-            return {
-                'data-output-value': !!outputValueMatch,
-                'data-date-format': dateMatch[2],
-                reference: dateMatch[1],
-            };
-        } else if (outputValueMatch){
-            return {
-                'data-output-value': true,
-                reference: outputValueMatch[2],
-            };
+            return {value: dateMatch[1], 'data-date-format': dateMatch[2]};
         }
+        return {value: value};
+    }
 
-        return {
-            'data-output-value': false,
-            reference: value,
-        };
+    function createPopover(editor, ckwidget) {
+        var $this = $(ckwidget.element.$),
+            dragContainer = ckwidget.dragHandlerContainer;
+        // Setup popover
+        var xpath = $this.data('value'),
+            getWidget = require('vellum/widgets').util.getWidget,
+            // TODO find out why widget is sometimes null (tests only?)
+            widget = getWidget($this);
+        if (widget) {
+            var isFormRef = FORM_REF_REGEX.test(xpath),
+                isText = function () { return this.nodeType === 3; },
+                displayId = $this.contents().filter(isText)[0].nodeValue,
+                labelMug = widget.mug.form.getMugByPath(xpath),
+                labelText = labelMug && labelMug.p.labelItext ?
+                            labelMug.p.labelItext.get() : "",
+                $dragContainer = $(dragContainer.$),
+                $imgs = $dragContainer.children("img");
+            labelText = $('<div>').append(labelText);
+            labelText.find('output').replaceWith(function () {
+                var xpath = extractXPathInfo($(this)).value;
+                return widget.mug.form.normalizeHashtag(xpath);
+            });
+
+            // Remove ckeditor-supplied title attributes, which will otherwise override popover title
+            $imgs.removeAttr("title");
+
+            $imgs.popover({
+                trigger: 'hover',
+                container: 'body',
+                placement: 'bottom',
+                title: '<h3>' + util.escape(displayId) + '</h3>' +
+                       '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
+                html: true,
+                content: easy_reference_popover({
+                    text: labelText.text(),
+                    ufid: isFormRef ? labelMug.ufid : "",
+                }),
+                template: '<div contenteditable="false" class="popover rich-text-popover">' +
+                    '<div class="popover-inner">' +
+                    '<div class="popover-title"></div>' +
+                    (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
+                    '</div></div>',
+                delay: {
+                    show: 0,
+                    hide: 200,
+                },
+            }).on('shown.bs.popover', function() {
+                if (window.analytics) {
+                    if (isFormRef) {
+                        window.analytics.usage("Form Builder", "Hovered over easy form reference");
+                    } else {
+                        window.analytics.usage("Form Builder", "Hovered over easy case reference");
+                    }
+                    window.analytics.workflow("Hovered over easy reference");
+                }
+            });
+
+            ckwidget.on('destroy', function (e)  {
+                try {
+                    $imgs.popover('destroy');
+                } catch(err) {
+                    // sometimes these are already destroyed
+                }
+            });
+        }
     }
 
     function initEditor(input, form, options) {
         if (options && form.vellum && !form.vellum.opts().features.disable_popovers) {
-            options = _.extend(options, {
-                createPopover: function( editor, ckwidget ) {
-                    var $this = $(ckwidget.element.$),
-                        dragContainer = ckwidget.dragHandlerContainer;
-                    // Setup popover
-                    var datavalue = $this.attr('data-value'),
-                        // WARNING does the wrong thing for value like "/data/q + 3"
-                        xpath = extractXPathInfoFromOutputValue(datavalue).reference,
-                        getWidget = require('vellum/widgets').util.getWidget,
-                        // TODO find out why widget is sometimes null (tests only?)
-                        widget = getWidget($this);
-                    if (widget) {
-                        var isFormRef = FORM_REF_REGEX.test(xpath),
-                            isText = function () { return this.nodeType === 3; },
-                            displayId = $this.contents().filter(isText)[0].nodeValue,
-                            labelMug = widget.mug.form.getMugByPath(xpath),
-                            labelText = labelMug && labelMug.p.labelItext ?
-                                        labelMug.p.labelItext.get() : "",
-                            $dragContainer = $(dragContainer.$),
-                            $imgs = $dragContainer.children("img");
-                        labelText = $('<div>').append(labelText);
-                        labelText.find('output').replaceWith(function () {
-                            return widget.mug.form.normalizeHashtag(extractXPathInfoFromOutputValue($(this).attr('value')).reference);
-                        });
-
-                        // Remove ckeditor-supplied title attributes, which will otherwise override popover title
-                        $imgs.removeAttr("title");
-
-                        $imgs.popover({
-                            trigger: 'hover',
-                            container: 'body',
-                            placement: 'bottom',
-                            title: '<h3>' + util.escape(displayId) + '</h3>' +
-                                   '<div class="text-muted">' + util.escape(widget.mug.form.normalizeHashtag(xpath)) + '</div>',
-                            html: true,
-                            content: easy_reference_popover({
-                                text: labelText.text(),
-                                ufid: isFormRef ? labelMug.ufid : "",
-                            }),
-                            template: '<div contenteditable="false" class="popover rich-text-popover">' +
-                                '<div class="popover-inner">' +
-                                '<div class="popover-title"></div>' +
-                                (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
-                                '</div></div>',
-                            delay: {
-                                show: 0,
-                                hide: 200,
-                            },
-                        }).on('shown.bs.popover', function() {
-                            if (window.analytics) {
-                                if (isFormRef) {
-                                    window.analytics.usage("Form Builder", "Hovered over easy form reference");
-                                } else {
-                                    window.analytics.usage("Form Builder", "Hovered over easy case reference");
-                                }
-                                window.analytics.workflow("Hovered over easy reference");
-                            }
-                        });
-
-                        ckwidget.on('destroy', function (e)  {
-                            try {
-                                $imgs.popover('destroy');
-                            } catch(err) {
-                                // sometimes these are already destroyed
-                            }
-                        });
-                    }
-                },
-            });
+            options = _.extend(options, {createPopover: createPopover});
         }
         return editor(input, form, options);
     }
@@ -696,5 +740,7 @@ define([
         editor: initEditor,
         fromRichText: fromRichText,
         toRichText: toRichText,
+        isInvalid: isInvalid,
+        unescapeXPath: unescapeXPath,
     };
 });
