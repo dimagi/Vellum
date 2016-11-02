@@ -164,7 +164,7 @@ define([
         form.formJRM = root.attr("xmlns:jrm");
         form.formUIVersion = root.attr("uiVersion");
         form.formVersion = root.attr("version");
-        form.formName = root.attr("name");
+        form.formName = root.attr("name") || form.formName;
 
         if (!form.formUuid || form.formUuid === "undefined") {
             form.formUuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();

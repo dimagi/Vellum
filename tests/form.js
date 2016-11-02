@@ -9,6 +9,7 @@ define([
     'text!static/form/question-referencing-other.xml',
     'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
+    'text!static/form/name-template.xml',
     'text!static/form/nested-groups.xml',
     'text!static/form/select-questions.xml',
     'text!static/form/mismatch-tree-order.xml',
@@ -26,6 +27,7 @@ define([
     QUESTION_REFERENCING_OTHER_XML,
     GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
+    NAME_TEMPLATE,
     NESTED_GROUPS_XML,
     SELECT_QUESTIONS,
     MISMATCH_TREE_ORDER_XML,
@@ -348,6 +350,83 @@ define([
             assert(util.isTreeNodeValid(q1), q1.getErrors().join("\n"));
             util.deleteQuestion("q2");
             assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
+        });
+
+        describe("naming logic", function () {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        formName: null,
+                        onReady: done,
+                    },
+                });
+            });
+
+            it('should use default name for empty form', function() {
+                var form = util.loadXML(""),
+                    xml = $(call('createXML'));
+                assert.equal(form.formName, "New Form");
+                assert.equal(xml.find("h\\:title").text(), "New Form", "title");
+                assert.equal(xml.find("data").attr("name"), "New Form", "data");
+            });
+
+            it('should use default name when no other name is specified', function() {
+                var form = util.loadXML(
+                        _.template(NAME_TEMPLATE)({title: '', dataName: ''}),
+                        null,
+                        /^Form does not have a Name!/
+                    ),
+                    xml = $(call('createXML'));
+                assert.equal(form.formName, "New Form");
+                assert.equal(xml.find("h\\:title").text(), "New Form", "title");
+                assert.equal(xml.find("data").attr("name"), "New Form", "data");
+            });
+
+            it('should prefer <data name="..."> over <title>', function() {
+                var form = util.loadXML(_.template(NAME_TEMPLATE)({
+                        title: '<h:title>Title</h:title>',
+                        dataName: 'name="Data Name"',
+                    })),
+                    xml = $(call('createXML'));
+                assert.equal(form.formName, "Data Name");
+                assert.equal(xml.find("h\\:title").text(), "Data Name", "title");
+                assert.equal(xml.find("data").attr("name"), "Data Name", "data");
+            });
+
+            it('should use <title> if <data name="..."> is absent', function() {
+                var form = util.loadXML(_.template(NAME_TEMPLATE)({
+                        title: '<h:title>Title</h:title>',
+                        dataName: '',
+                    })),
+                    xml = $(call('createXML'));
+                assert.equal(form.formName, "Title");
+                assert.equal(xml.find("h\\:title").text(), "Title", "title");
+                assert.equal(xml.find("data").attr("name"), "Title", "data");
+            });
+
+            describe("with core.formName option", function () {
+                before(function (done) {
+                    util.init({
+                        javaRosa: {langs: ['en']},
+                        core: {
+                            formName: "Optional Name",
+                            onReady: done,
+                        },
+                    });
+                });
+
+                it('should override all other names', function() {
+                    var form = util.loadXML(_.template(NAME_TEMPLATE)({
+                            title: '<h:title>Title</h:title>',
+                            dataName: 'name="Data Name"',
+                        })),
+                        xml = $(call('createXML'));
+                    assert.equal(form.formName, "Optional Name");
+                    assert.equal(xml.find("h\\:title").text(), "Optional Name", "title");
+                    assert.equal(xml.find("data").attr("name"), "Optional Name", "data");
+                });
+            });
         });
 
         describe("instance tracker", function () {
