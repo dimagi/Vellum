@@ -448,7 +448,13 @@ define([
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
                 }
-            }
+            },
+            {
+                name: "Find Usages",
+                action: function (done) {
+                    _this.findUsages(done);
+                }
+            },
         ];
     };
 
@@ -703,6 +709,61 @@ define([
                 prop.value($propertyInput.find('input'), _this.data.core.form[prop.slug]);
             }
         });
+
+        $modal.modal('show');
+        $modal.one('shown.bs.modal', function () {
+            $modalBody.find("input:first").focus().select();
+        });
+    };
+
+    fn.findUsages = function () {
+        var _this = this,
+            $modal = this.generateNewModal("Use of each question", []),
+            $modalBody = $modal.find('.modal-body'),
+            form = _this.data.core.form,
+            logicManager = form._logicManager,
+            $table = $('<table>'),
+            $thead = $('<thead>'),
+            propertyToPerson = {
+                relevantAttr: 'Display Condition',
+                constraintAttr: 'Validation Condition',
+                labelItext: 'Label',
+                constraintMsgItext: 'Validation Message',
+                defaultValue: 'Default Value',
+                hintItext: 'Hint Message',
+                helpItext: 'Help Message',
+                dataParent: 'Data Parent',
+                calculateAttr: 'Calculation Condition',
+                repeat_count: 'Repeat Count',
+                filter: 'Filter',
+            };
+
+        $table.addClass('table table-condensed');
+        $thead.append('<th>Question</th>');
+        $thead.append('<th>Used by</th>');
+        $thead.append('<th>Used in</th>');
+        $table.append($thead);
+
+        _.each(logicManager.reverse, function (value, key) {
+            var row = $('<tr>'),
+                usedMug = form.getMugByUFID(key);
+            row.append($('<td>').text(usedMug.hashtagPath));
+            row.append($('<td>'));
+            row.append($('<td>'));
+            $table.append(row);
+            _.each(value, function (value, key) {
+                _.each(value, function (value) {
+                    var usedInMug = form.getMugByUFID(key),
+                        row = $('<tr>');
+                    row.append($('<td>'));
+                    row.append($('<td>').text(usedInMug.hashtagPath));
+                    row.append($('<td>').text(propertyToPerson[value['property']]));
+                    $table.append(row);
+                });
+            });
+        });
+
+        $modalBody.append($table);
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
