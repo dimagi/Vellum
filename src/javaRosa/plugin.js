@@ -24,6 +24,7 @@ define([
     'jquery',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/language_selector',
+    'vellum/dateformats',
     'vellum/util',
     'vellum/xml',
     'vellum/javaRosa/itext',
@@ -36,6 +37,7 @@ define([
     $,
     edit_source,
     language_selector,
+    dateformats,
     util,
     xml,
     itext,
@@ -69,27 +71,10 @@ define([
             if (inItext) {
                 var mugType = mug && mug.options.typeName;
                 if (mugType === 'Date') {
-                    var formatOptions = {
-                        "": "No Formatting",
-                        "%e/%n/%y": "d/m/yy e.g. 30/1/14",
-                        "%a, %b %e, %Y": "ddd, mmm d, yyyy e.g. Thu, Jan 30, 2014"
-                    };
-                    var menuHtml = '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">' +
-                        '<li><strong>Date Format Options</strong></li>';
-                    _(formatOptions).each(function(label, format) {
-                        menuHtml += '<li><a tabindex="-1" href="#" data-format="' + format + '">' + label + '</a></li>';
-                    });
-                    menuHtml += '</ul>';
-
-                    var menu = $(menuHtml);
-                    $('body').append(menu);
-                    menu.find('li a').click(function () {
-                        var dateFormat = $(this).data('format');
-                        jrUtil.insertOutputRef(_this, target, path, mug, dateFormat);
-                        menu.remove();
-                    });
                     var e = window.event;
-                    menu.css({'top': e.clientY, 'left': e.clientX}).show();
+                    dateformats.showMenu(e.clientX, e.clientY, function (format) {
+                        jrUtil.insertOutputRef(_this, target, path, mug, format);
+                    });
                 } else {
                     jrUtil.insertOutputRef(_this, target, path, mug);
                 }

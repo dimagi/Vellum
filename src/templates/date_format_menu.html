@@ -1,0 +1,6 @@
+<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+    <li style="padding-left: 10px;"><strong>Date Format Options</strong></li>
+    <% _.each(formats, function (label, format) { %>
+        <li><a tabindex="-1" href="#" data-format="<%= format %>"><%= label %></a></li>
+    <% }); %>
+</ul>

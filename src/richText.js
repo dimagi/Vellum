@@ -37,7 +37,9 @@ define([
     'require',
     'underscore',
     'jquery',
+    'tpl!vellum/templates/date_format_popover',
     'tpl!vellum/templates/easy_reference_popover',
+    'vellum/dateformats',
     'vellum/escapedHashtags',
     'vellum/logic',
     'vellum/util',
@@ -48,7 +50,9 @@ define([
     require,
     _,
     $,
+    date_format_popover,
     easy_reference_popover,
+    dateformats,
     escapedHashtags,
     logic,
     util,
@@ -678,8 +682,12 @@ define([
     };
 
     function getHumanReadableDateFormat(format) {
-        // %e/%n/%y         -> d/m/yy
-        // %a, %b %e, %Y    -> ddd, mmm d, yyyy
+        // ""               -> "no format"
+        // "%e/%n/%y"       -> "d/m/yy"
+        // "%a, %b %e, %Y"  -> "ddd, mmm d, yyyy"
+        if (!format) {
+            return "no formatting";
+        }
         return format.replace(/(%[YymnbdeHhMS3a])/g, function (match, fmt) {
             return DATE_FORMATS.hasOwnProperty(fmt[1]) ? DATE_FORMATS[fmt[1]] : fmt;
         });
@@ -690,7 +698,6 @@ define([
             dragContainer = ckwidget.dragHandlerContainer;
         // Setup popover
         var xpath = $this.data('value'),
-            dateFormat = $this.data('dateFormat'),
             getWidget = require('vellum/widgets').util.getWidget,
             // TODO find out why widget is sometimes null (tests only?)
             widget = getWidget($this);
@@ -698,15 +705,26 @@ define([
             var isFormRef = FORM_REF_REGEX.test(xpath),
                 isText = function () { return this.nodeType === 3; },
                 displayId = $this.contents().filter(isText)[0].nodeValue,
-                desc = widget.mug.form.normalizeHashtag(xpath),
+                desc = util.escape(widget.mug.form.normalizeHashtag(xpath)),
                 labelMug = widget.mug.form.getMugByPath(xpath),
                 labelText = labelMug && labelMug.p.labelItext ?
                             labelMug.p.labelItext.get() : "",
+                isDate = labelMug && labelMug.__className.indexOf("Date") === 0,
                 $dragContainer = $(dragContainer.$),
-                $imgs = $dragContainer.children("img");
-            if (dateFormat) {
-                desc += ' (' + getHumanReadableDateFormat(dateFormat) + ')';
-            }
+                $imgs = $dragContainer.children("img"),
+                dateFormatID = util.get_guid(),
+                getTitle = function () {
+                    var description = desc,
+                        format = $this.attr("data-date-format");
+                    if (isDate || format) {
+                        description += date_format_popover({
+                            guid: dateFormatID,
+                            text: util.escape(getHumanReadableDateFormat(format)),
+                        });
+                    }
+                    return '<h3>' + util.escape(displayId) + '</h3>' +
+                        '<div class="text-muted">' + description + '</div>';
+                };
             labelText = $('<div>').append(labelText);
             labelText.find('output').replaceWith(function () {
                 var xpath = extractXPathInfo($(this)).value;
@@ -720,8 +738,7 @@ define([
                 trigger: 'hover',
                 container: 'body',
                 placement: 'bottom',
-                title: '<h3>' + util.escape(displayId) + '</h3>' +
-                       '<div class="text-muted">' + util.escape(desc) + '</div>',
+                title: getTitle,
                 html: true,
                 content: easy_reference_popover({
                     text: labelText.text(),
@@ -744,6 +761,19 @@ define([
                         window.analytics.usage("Form Builder", "Hovered over easy case reference");
                     }
                     window.analytics.workflow("Hovered over easy reference");
+                }
+                if (isDate || $this.attr("data-date-format")) {
+                    var pos = $(this).offset(),
+                        x = pos.left,
+                        y = pos.top + $(this).height();
+                    $("#" + dateFormatID).click(function () {
+                        $imgs.popover('hide');
+                        dateformats.showMenu(x, y, function (format) {
+                            $this.attr("data-date-format", format);
+                            editor.fire("saveSnapshot");
+                        }, true);
+                        return false;
+                    });
                 }
             });
 

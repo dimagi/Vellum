@@ -673,7 +673,7 @@ define([
                     });
 
                     _.each({
-                        "#form/date": "#form/date",
+                        "#form/date": "#form/date (no formatting)",
 
                         "format-date(date(#form/date), '%e/%n/%y')":
                             "#form/date (d/m/yy)",
@@ -695,6 +695,9 @@ define([
                                     bubble.mouseenter();
                                     $desc = $('.popover-title .text-muted');
                                     assert.equal($desc.text(), desc);
+                                    // check for format selector link
+                                    assert.equal($desc.find('a').text(),
+                                                 /\((.*)\)/.exec(desc)[1]);
                                 } finally {
                                     $(".popover").remove();
                                 }
