@@ -723,20 +723,7 @@ define([
             form = _this.data.core.form,
             logicManager = form._logicManager,
             $table = $('<table>'),
-            $thead = $('<thead>'),
-            propertyToPerson = {
-                relevantAttr: 'Display Condition',
-                constraintAttr: 'Validation Condition',
-                labelItext: 'Label',
-                constraintMsgItext: 'Validation Message',
-                defaultValue: 'Default Value',
-                hintItext: 'Hint Message',
-                helpItext: 'Help Message',
-                dataParent: 'Data Parent',
-                calculateAttr: 'Calculation Condition',
-                repeat_count: 'Repeat Count',
-                filter: 'Filter',
-            };
+            $thead = $('<thead>');
 
         $table.addClass('table table-condensed');
         $thead.append('<th>Question</th>');
@@ -757,7 +744,7 @@ define([
                         row = $('<tr>');
                     row.append($('<td>'));
                     row.append($('<td>').text(usedInMug.hashtagPath));
-                    row.append($('<td>').text(propertyToPerson[value['property']]));
+                    row.append($('<td>').text(usedInMug.spec[value.property].lstring));
                     $table.append(row);
                 });
             });
