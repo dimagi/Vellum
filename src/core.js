@@ -364,7 +364,7 @@ define([
         var $toolsMenu = this.$f.find('.fd-tools-menu');
         $toolsMenu.empty();
         _(menuItems).each(function (menuItem) {
-            var $a = $("<a tabindex='-1' href='#'>" + menuItem.name + "</a>").click(
+            var $a = $("<a tabindex='-1' href='#'><i class='" + menuItem.icon + "'></i> " + menuItem.name + "</a>").click(
                 function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
@@ -412,39 +412,44 @@ define([
         return [
             {
                 name: "Enter Full Screen",
+                icon: "fa fa-expand",
                 action: function (done) {
                     var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu a'), function(a) {
                         return a.text.match(/full screen/i);
                     }));
-                    var text = $fullScreenMenuItem.text();
+                    var html = $fullScreenMenuItem.html();
                     if (window.analytics) {
                         window.analytics.usage('Form Builder', 'Full Screen Mode',
                                   _this.opts().core.formId);
                     }
                     if (_this.data.windowManager.fullscreen) {
                         _this.data.windowManager.fullscreen = false;
-                        $fullScreenMenuItem.text(text.replace(/Exit/, "Enter"));
+                        $fullScreenMenuItem.html(html.replace(/Exit/, "Enter"));
                     } else {
                         _this.data.windowManager.fullscreen = true;
-                        $fullScreenMenuItem.text(text.replace(/Enter/, "Exit"));
+                        $fullScreenMenuItem.html(html.replace(/Enter/, "Exit"));
                     }
+                    $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
                     _this.adjustToWindow();
                 }
             },
             {
                 name: "Export Form Contents",
+                icon: "fa fa-file-excel-o",
                 action: function (done) {
                     _this.showExportModal(done);
                 }
             },
             {
                 name: "Edit Source XML",
+                icon: "fa fa-edit",
                 action: function (done) {
                     _this.showSourceXMLModal(done);
                 }
             },
             {
                 name: "Form Properties",
+                icon: "fa fa-list-alt",
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
                 }
