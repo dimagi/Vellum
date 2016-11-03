@@ -463,7 +463,7 @@ define([
                 name: "Find Usages",
                 icon: "fa fa-search",
                 action: function (done) {
-                    _this.findUsages(done);
+                    _this.findUsages();
                 }
             },
         ];
@@ -2095,6 +2095,7 @@ define([
             "constraintAttr",
             "repeat_count",
             'defaultValue',
+            'findUsages',
         ];
     };
 

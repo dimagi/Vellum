@@ -900,6 +900,13 @@ define([
                 deserialize: deserializeXPath,
                 lstring: 'Display Condition'
             },
+            findUsages: {
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.findUsagesButton,
+                lstring: 'Find Usages',
+                buttonContent: '<i class="fa fa-search" /> Find Usages',
+            },
             calculateAttr: {
                 // only show calculate condition for non-data nodes if it already
                 // exists.  It's a highly discouraged use-case because the user will
