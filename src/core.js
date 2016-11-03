@@ -371,7 +371,7 @@ define([
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
                         if (window.analytics) {
-                            window.analytics.usage("Tools", menuItem.name);
+                            window.analytics.usage("Form Builder", "Tools", menuItem.name);
                         }
                         menuItem.action(function () {
                             _this.refreshVisibleData();
