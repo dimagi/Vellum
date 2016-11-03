@@ -458,6 +458,7 @@ define([
             },
             {
                 name: "Find Usages",
+                icon: "fa fa-search",
                 action: function (done) {
                     _this.findUsages(done);
                 }
