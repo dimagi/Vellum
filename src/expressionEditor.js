@@ -76,7 +76,7 @@ define([
         };
 
         var setExpression = function(input, val) {
-            if (options.mug.supportsRichText()) {
+            if (options.mug.form.richText) {
                 richText.editor(input, form, richTextOptions).setValue(val);
             } else {
                 input.val(val);
@@ -84,7 +84,7 @@ define([
         };
 
         var getExpression = function(input) {
-            if (options.mug.supportsRichText()) {
+            if (options.mug.form.richText) {
                 return richText.editor(input, form, richTextOptions).getValue();
             } else {
                 return input.val();
@@ -109,7 +109,7 @@ define([
             } else {
                 atwho.autocomplete(input, options.mug, {
                     property: options.path,
-                    useRichText: options.mug.supportsRichText(),
+                    useRichText: options.mug.form.richText,
                 });
             }
         };
@@ -185,7 +185,7 @@ define([
 
             var newExpressionUIElement = function (expOp) {
                 var tag = 'input', tagArgs = '';
-                if (options.mug.supportsRichText()) {
+                if (options.mug.form.richText) {
                     tag = 'div';
                     tagArgs = 'contenteditable="true"';
                 }
@@ -198,7 +198,7 @@ define([
                     tagArgs: tagArgs,
                 }));
 
-                if (options.mug.supportsRichText()) {
+                if (options.mug.form.richText) {
                     $expUI.find('.fd-input').each(function () {
                         richText.editor($(this), form, richTextOptions);
                     });
@@ -233,7 +233,7 @@ define([
                 };
 
                 // add event handlers to validate the inputs
-                if (options.mug.supportsRichText()) {
+                if (options.mug.form.richText) {
                     $expUI.find('.xpath-edit-node').each(function () {
                         richText.editor($(this), form, richTextOptions).on('change', validateExpression);
                     });
@@ -361,7 +361,7 @@ define([
                     $div.find('.fd-add-exp').click();
                 }
             } else {
-                if (options.mug.supportsRichText()) {
+                if (options.mug.form.richText) {
                     showAdvancedMode(options.value);
                 } else {
                     showAdvancedMode(form.normalizeXPath(options.value));
@@ -401,7 +401,7 @@ define([
 
         var initXPathEditor = function() {
             var tag = 'textarea', tagArgs = 'rows="5"';
-            if (options.mug.supportsRichText()) {
+            if (options.mug.form.richText) {
                 tag = 'div';
                 tagArgs = 'contenteditable="true"';
             }

@@ -125,12 +125,17 @@ define([
         this.vellum = vellum;
         this.mugTypes = mugTypes;
 
-        this.formName = 'New Form';
+        this.formName = vellum.opts().core.formName || "New Form";
+        this.noMarkdown = false;
         this.mugMap = {};
         this.instanceMetadata = [InstanceMetadata({})];
         // {<instance id>: { src or children: <instance src or children>}
         this.knownInstances = {};
         this.richText = !!vellum.opts().features.rich_text;
+        // TODO remove mayDisableRichText once the rich_text feature is enabled
+        // by default. Otherwise instances of vellum loaded without rich_text
+        // specified in features will always write vellum:ignore="richText"
+        this.mayDisableRichText = this.richText;
 
         vellum.datasources.on("change", this._updateHashtags.bind(this), null, null, this);
         this._updateHashtags();

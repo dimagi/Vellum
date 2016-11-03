@@ -93,13 +93,15 @@ define([
         xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
         xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
         xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
-        // todo: remove writeIgnoreRichText once bubbles is released
-        // Here for future compatibility
-        if (form.writeIgnoreRichText && !form.richText) {
-            xmlWriter.writeAttributeString("vellum:ignore", 'richText');
+        var ignore = [];
+        if (form.mayDisableRichText && !form.richText) {
+            ignore.push('richText');
         }
         if (form.noMarkdown) {
-            xmlWriter.writeAttributeString("vellum:ignore", 'markdown');
+            ignore.push('markdown');
+        }
+        if (ignore.length) {
+            xmlWriter.writeAttributeString("vellum:ignore", ignore.join(" "));
         }
     }
 

@@ -134,7 +134,7 @@ define([
         $input.addClass('jstree-drop');
 
         if (options.path === 'labelItext') {
-            if (!mug.supportsRichText()) {
+            if (!mug.form.richText) {
                 $input.keydown(function (e) {
                     // deletion of entire output ref in one go
                     if (e && e.which === 8 || e.which === 46) {
@@ -179,7 +179,7 @@ define([
                 insertTpl: '<output value="${name}" />',
                 property: "labelItext",
                 outputValue: true,
-                useRichText: mug.supportsRichText(),
+                useRichText: mug.form.richText,
             });
         }
 
@@ -206,7 +206,7 @@ define([
                 lang = widget.language;
             }
             value = itextItem && itextItem.get(widget.form, lang);
-            if (mug.supportsRichText()) {
+            if (mug.form.richText) {
                 return jrUtil.outputToHashtag(value, widget.mug.form.xpath);
             } else {
                 return jrUtil.outputToXPath(value, widget.mug.form.xpath);
@@ -216,7 +216,7 @@ define([
         widget.setItextValue = function (value) {
             var itextItem = widget.getItextItem();
             // TODO should not be using hashtags when rich text is off
-            //if (mug.supportsRichText()) {
+            //if (mug.form.richText) {
             value = jrUtil.outputToHashtag(value, widget.mug.form.xpath);
             //}
             if (itextItem) {

@@ -2,6 +2,7 @@ define([
     'chai',
     'jquery',
     'tests/utils',
+    'text!static/writer/ignore-richtext-and-markdown.xml',
     'text!static/writer/repeat-without-count.xml',
     'text!static/writer/repeat-noAddRemove-false.xml',
     'text!static/writer/repeat-with-count.xml',
@@ -11,13 +12,14 @@ define([
     chai,
     $,
     util,
+    INGORE_RICHTEXT_AND_MARKDWON,
     REPEAT_WITHOUT_COUNT_XML,
     REPEAT_NO_ADD_REMOVE_FALSE_XML,
     REPEAT_WITH_COUNT_XML,
     REPEAT_WITH_COUNT_NO_ADD_REMOVE_FALSE_XML,
     REPEAT_WITH_COUNT_AS_QUESTION_XML
 ) {
-    //var assert = chai.assert;
+    var assert = chai.assert;
 
     describe("The XML writer", function () {
         beforeEach(function (done) {
@@ -85,6 +87,17 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITH_COUNT_AS_QUESTION_XML,
+                {normalize_xmlns: true}
+            );
+        });
+
+        it("should be able to ignore both richText and markdown", function () {
+            var form = util.loadXML(INGORE_RICHTEXT_AND_MARKDWON);
+            assert(!form.richText, "richText should be disabled");
+            assert(form.noMarkdown, "markdown should be disabled");
+            util.assertXmlEqual(
+                util.call("createXML"),
+                INGORE_RICHTEXT_AND_MARKDWON,
                 {normalize_xmlns: true}
             );
         });
