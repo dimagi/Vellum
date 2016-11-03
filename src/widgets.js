@@ -409,6 +409,9 @@ define([
         var widget = button(mug, options);
 
         widget.input.click(function() {
+            if (window.analytics) {
+                window.analytics.usage('Form Builder', 'Logic', 'Find Usages');
+            }
             mug.form.vellum.findUsages(mug.hashtagPath);
         });
 
