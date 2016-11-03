@@ -17,6 +17,7 @@ define([
     'tpl!vellum/templates/alert_global',
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
+    'tpl!vellum/templates/find_usages',
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
@@ -49,6 +50,7 @@ define([
     alert_global,
     modal_content,
     modal_button,
+    find_usages,
     mugs,
     widgets,
     richText,
@@ -722,35 +724,22 @@ define([
             $modalBody = $modal.find('.modal-body'),
             form = _this.data.core.form,
             logicManager = form._logicManager,
-            $table = $('<table>'),
-            $thead = $('<thead>');
-
-        $table.addClass('table table-condensed');
-        $thead.append('<th>Question</th>');
-        $thead.append('<th>Used by</th>');
-        $thead.append('<th>Used in</th>');
-        $table.append($thead);
+            tableData = {};
 
         _.each(logicManager.reverse, function (value, key) {
-            var row = $('<tr>'),
-                usedMug = form.getMugByUFID(key);
-            row.append($('<td>').text(usedMug.hashtagPath));
-            row.append($('<td>'));
-            row.append($('<td>'));
-            $table.append(row);
+            var usedMug = form.getMugByUFID(key),
+                mugReferences = {};
             _.each(value, function (value, key) {
                 _.each(value, function (value) {
                     var usedInMug = form.getMugByUFID(key),
-                        row = $('<tr>');
-                    row.append($('<td>'));
-                    row.append($('<td>').text(usedInMug.hashtagPath));
-                    row.append($('<td>').text(usedInMug.spec[value.property].lstring));
-                    $table.append(row);
+                        readablePropName = usedInMug.spec[value.property].lstring;
+                    mugReferences[usedInMug.hashtagPath] = readablePropName;
                 });
             });
+            tableData[usedMug.hashtagPath] = mugReferences;
         });
 
-        $modalBody.append($table);
+        $modalBody.append($(find_usages({tableData: tableData})));
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
