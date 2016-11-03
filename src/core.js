@@ -370,6 +370,9 @@ define([
                 function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
+                        if (window.analytics) {
+                            window.analytics.usage("Tools", menuItem.name);
+                        }
                         menuItem.action(function () {
                             _this.refreshVisibleData();
                         });
