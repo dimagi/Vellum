@@ -727,12 +727,12 @@ define([
         });
     };
 
-    fn.findUsages = function () {
+    fn.findUsages = function (filterMugPath) {
         var _this = this,
             $modal = this.generateNewModal("Use of each question", []),
             $modalBody = $modal.find('.modal-body'),
             form = _this.data.core.form,
-            tableData = form.findUsages();
+            tableData = form.findUsages(filterMugPath);
 
         $modalBody.append($(find_usages({tableData: tableData})));
 
