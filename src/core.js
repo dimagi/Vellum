@@ -17,6 +17,7 @@ define([
     'tpl!vellum/templates/alert_global',
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
+    'tpl!vellum/templates/find_usages',
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
@@ -49,6 +50,7 @@ define([
     alert_global,
     modal_content,
     modal_button,
+    find_usages,
     mugs,
     widgets,
     richText,
@@ -368,6 +370,9 @@ define([
                 function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
+                        if (window.analytics) {
+                            window.analytics.usage("Form Builder", "Tools", menuItem.name);
+                        }
                         menuItem.action(function () {
                             _this.refreshVisibleData();
                         });
@@ -453,7 +458,14 @@ define([
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
                 }
-            }
+            },
+            {
+                name: "Find Usages",
+                icon: "fa fa-search",
+                action: function (done) {
+                    _this.findUsages(done);
+                }
+            },
         ];
     };
 
@@ -708,6 +720,35 @@ define([
                 prop.value($propertyInput.find('input'), _this.data.core.form[prop.slug]);
             }
         });
+
+        $modal.modal('show');
+        $modal.one('shown.bs.modal', function () {
+            $modalBody.find("input:first").focus().select();
+        });
+    };
+
+    fn.findUsages = function () {
+        var _this = this,
+            $modal = this.generateNewModal("Use of each question", []),
+            $modalBody = $modal.find('.modal-body'),
+            form = _this.data.core.form,
+            logicManager = form._logicManager,
+            tableData = {};
+
+        _.each(logicManager.reverse, function (value, key) {
+            var usedMug = form.getMugByUFID(key),
+                mugReferences = {};
+            _.each(value, function (value, key) {
+                _.each(value, function (value) {
+                    var usedInMug = form.getMugByUFID(key),
+                        readablePropName = usedInMug.spec[value.property].lstring;
+                    mugReferences[usedInMug.hashtagPath] = readablePropName;
+                });
+            });
+            tableData[usedMug.hashtagPath] = mugReferences;
+        });
+
+        $modalBody.append($(find_usages({tableData: tableData})));
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
