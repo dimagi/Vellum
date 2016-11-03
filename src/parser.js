@@ -43,6 +43,7 @@ define([
 
         var xmlDoc = $.parseXML(xmlString),
             xml = $(xmlDoc),
+            ignore = xml.find('h\\:html, html').attr('vellum:ignore'),
             head = xml.find('h\\:head, head'),
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
@@ -53,17 +54,12 @@ define([
         if($(xml).find('parsererror').length > 0) {
             throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
         }
-        
-        if(title.length > 0) {
-            form.formName = $(title).text();
-        }
 
-        // TODO set this to vellum.opts().features.rich_text ??
-        form.richText = true;
-        if(xml.find('[vellum\\:ignore=richText]').length > 0) {
+        ignore = ignore ? ignore.split(" ") : [];
+        if (_.contains(ignore, 'richText')) {
             form.richText = false;
         }
-        if(xml.find('[vellum\\:ignore=markdown]').length > 0) {
+        if (_.contains(ignore, 'markdown')) {
             form.noMarkdown = true;
         }
         
@@ -76,7 +72,7 @@ define([
         });
         form.updateKnownInstances();
 
-        if (vellum.opts().features.rich_text && !form.vellum.datasources.isReady()) {
+        if (form.richText && !form.vellum.datasources.isReady()) {
             // load hashtags from form to prevent unknown hashtag warnings
             // WARNING hashtag values will not be written correctly (on save
             // or edit XML) unil after data sources are loaded.
@@ -97,7 +93,7 @@ define([
                 'No Data block was found in the form.  Please check that your form is valid!');
         }
        
-        parseDataTree(form, data[0]);
+        parseDataTree(form, data[0], title.length ? title.text() : "");
         parseBindList(form, binds);
 
         parseSetValues(form, setValues);
@@ -130,7 +126,7 @@ define([
     }
 
     // DATA PARSING FUNCTIONS
-    function parseDataTree (form, dataEl) {
+    function parseDataTree (form, dataEl, titleText) {
         var root = $(dataEl),
             tree = form.tree,
             recFunc;
@@ -164,7 +160,14 @@ define([
         form.formJRM = root.attr("xmlns:jrm");
         form.formUIVersion = root.attr("uiVersion");
         form.formVersion = root.attr("version");
-        form.formName = root.attr("name");
+
+        var optionsName = form.vellum.opts().core.formName,
+            formName = optionsName || root.attr("name") || titleText;
+        if (formName) {
+            form.formName = formName;
+        } else {
+            form.parseWarnings.push('Form does not have a Name! The default form name will be used');
+        }
 
         if (!form.formUuid || form.formUuid === "undefined") {
             form.formUuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
@@ -177,9 +180,6 @@ define([
         }
         if (!form.formVersion) {
             form.parseWarnings.push('Form does not have a Version attribute (in the data block), one will be added automatically');
-        }
-        if (!form.formName) {
-            form.parseWarnings.push('Form does not have a Name! The default form name will be used');
         }
     }
 
@@ -441,7 +441,7 @@ define([
                     if (repeat.length === 1) {
                         var adapt = function (mug, form) {
                             mug = makeMugAdaptor('Repeat')(mug, form);
-                            mug.p.repeat_count = repeat.popAttr('vellum:jr__count') || repeat.popAttr('jr:count') || null;
+                            mug.p.repeat_count = parseVellumAttrs(form, repeat, 'jr:count') || null;
                             mug.p.rawRepeatAttributes = getAttributes(repeat);
                             return mug;
                         };
@@ -666,9 +666,9 @@ define([
 
     function parseVellumAttrs(form, el, key, noPop) {
         var method = (noPop ? el.attr : el.popAttr).bind(el),
-            vellumAttr = method('vellum:' + key),
+            vellumAttr = method('vellum:' + key.replace(/:/g, "__")),
             xmlAttr = method(key);
-        return form.normalizeHashtag(vellumAttr ? vellumAttr : xmlAttr);
+        return form.normalizeHashtag(form.richText && vellumAttr ? vellumAttr : xmlAttr);
     }
 
     var _getInstances = function (xml) {

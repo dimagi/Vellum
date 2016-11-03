@@ -154,6 +154,10 @@ define([
         });
 
         describe("sends case references to HQ", function () {
+            before(function (done) {
+                util.init({core: {onReady: function () { done(); }}});
+            });
+
             it("should be the correct format", function() {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;

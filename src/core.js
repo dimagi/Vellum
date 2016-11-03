@@ -480,7 +480,7 @@ define([
             return mug._core_cachedDisplayNameValue;
         }
         mug._core_cachedDisplayNameKey = val;
-        if (mug.supportsRichText()) {
+        if (mug.form.richText) {
             val = richText.bubbleOutputs(val, this.data.core.form, true);
         } else {
             val = jrUtil.outputToXPath(val, mug.form.xpath, true);
@@ -1095,7 +1095,7 @@ define([
         } else {
             // for the currently selected mug, return a "."
             return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
-                "." : (mug.supportsRichText() ? mug.hashtagPath : mug.absolutePath);
+                "." : (mug.form.richText ? mug.hashtagPath : mug.absolutePath);
         }
         // Instead of depending on the UI state (currently selected mug), it
         // would probably be better to have this be handled by the widget using
@@ -1205,14 +1205,6 @@ define([
         }
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
-        form.formName = this.opts().core.formName || form.formName;
-        if (this.opts().features.rich_text) {
-            form.richText = _.isBoolean(form.richText) ? form.richText : true;
-        } else {
-            form.richText = false;
-        }
-        form.writeIgnoreRichText = this.opts().features.rich_text;
-        form.noMarkdown = form.noMarkdown || false;
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
