@@ -1758,7 +1758,7 @@ define([
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
             }));
-        $baseToolbar.find('.fd-button-remove').click(function () {
+        $(document).one('click', '.fd-button-remove', function () {
             var mugs = _this.getCurrentlySelectedMug(true, true);
             form.removeMugsFromForm(mugs);
             _this.refreshCurrentMug();

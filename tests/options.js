@@ -134,7 +134,7 @@ define(["underscore"], function (_) {
             },
         },
         javaRosa: {
-            langs: ['en', 'hin'],
+            langs: ['en'],//, 'hin'],
             displayLanguage: 'en'
         },
         intents: {
