@@ -71,8 +71,8 @@ define([
                 if (mugType === 'Date') {
                     var formatOptions = {
                         "": "No Formatting",
-                        "%d/%n/%y": "DD/MM/YY e.g. 04/01/14",
-                        "%a, %b %e, %Y": "DDD, MMM DD, YYYY e.g. Sun, Jan 1, 2014"
+                        "%e/%n/%y": "d/m/yy e.g. 30/1/14",
+                        "%a, %b %e, %Y": "ddd, mmm d, yyyy e.g. Thu, Jan 30, 2014"
                     };
                     var menuHtml = '<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">' +
                         '<li><strong>Date Format Options</strong></li>';
