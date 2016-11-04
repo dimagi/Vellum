@@ -517,18 +517,18 @@ define([
             var _this = this,
                 form = _this.form,
                 tableData = {},
-                refs = _this.reverse;
+                formRefs = _this.reverse;
 
-            _.each(refs, function (value, key) {
-                var usedMug = form.getMugByUFID(key),
+            _.each(formRefs, function (refsToUsedMug, usedMugUfid) {
+                var usedMug = form.getMugByUFID(usedMugUfid),
                     mugReferences = {};
                 if (path && path !== usedMug.hashtagPath) {
                     return;
                 }
-                _.each(value, function (value, key) {
-                    _.each(value, function (value) {
-                        var usedInMug = form.getMugByUFID(key),
-                            readablePropName = usedInMug.spec[value.property].lstring;
+                _.each(refsToUsedMug, function (refs, usedInMugUfid) {
+                    _.each(refs, function (ref) {
+                        var usedInMug = form.getMugByUFID(usedInMugUfid),
+                            readablePropName = usedInMug.spec[ref.property].lstring;
                         mugReferences[usedInMug.hashtagPath] = readablePropName;
                     });
                 });
