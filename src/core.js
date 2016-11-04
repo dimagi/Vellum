@@ -1775,6 +1775,7 @@ define([
             }));
         var $container = _this.opts().features.app_manager_v2 ? _this.$f : $baseToolbar;
         $container.find(".fd-button-remove").off("click").on("click", function () {
+            var mugs = _this.getCurrentlySelectedMug(true, true);
             form.removeMugsFromForm(mugs);
             _this.refreshCurrentMug();
         });
