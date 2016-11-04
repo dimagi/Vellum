@@ -502,6 +502,15 @@ define([
                     return [ref.path, null];
                 }).object().value();
         },
+        /*
+         * Returns object describing references used in the logic manager
+         *
+         * {
+         *   /path/of/referenced/mug: {
+         *     /path/of/mug/referencing: property where ref occurs
+         *   }
+         * }
+         */
         findUsages: function () {
             var _this = this,
                 form = _this.form,

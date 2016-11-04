@@ -732,8 +732,7 @@ define([
             $modal = this.generateNewModal("Use of each question", []),
             $modalBody = $modal.find('.modal-body'),
             form = _this.data.core.form,
-            logicManager = form._logicManager,
-            tableData = logicManager.findUsages();
+            tableData = form.findUsages();
 
         $modalBody.append($(find_usages({tableData: tableData})));
 
