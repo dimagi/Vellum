@@ -223,7 +223,7 @@ define([
                 var expectedOutput = {
                         "#form/question1": {"#form/question2": "Display Condition"}
                     };
-                assert.deepEqual(form.findUsages("#form/question2"), expectedOutput);
+                assert.deepEqual(form.findUsages("#form/question1"), expectedOutput);
             });
 
             it("should return dictionary of usages when filtered by ufid", function () {
@@ -235,7 +235,7 @@ define([
             });
 
             it("should return empty dictionary when question not referenced", function () {
-                assert.deepEqual(form.findUsages("#form/question1"), {});
+                assert.deepEqual(form.findUsages("#form/question2"), {});
             });
         });
 

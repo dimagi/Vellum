@@ -526,7 +526,7 @@ define([
             _.each(refs, function (value, key) {
                 var usedMug = form.getMugByUFID(key),
                     mugReferences = {};
-                if (ufidOrPath && ufidOrPath === usedMug.hashtagPath) {
+                if (ufidOrPath && ufidOrPath !== usedMug.hashtagPath) {
                     return;
                 }
                 _.each(value, function (value, key) {
