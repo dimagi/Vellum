@@ -4,6 +4,7 @@ define([
     'vellum/debugutil',
     'vellum/atwho',
     'vellum/richText',
+    'vellum/analytics',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
@@ -14,6 +15,7 @@ define([
     debug,
     atwho,
     richText,
+    analytics,
     xpath_validation_errors,
     xpath_expression,
     xpath_tpl
@@ -418,11 +420,7 @@ define([
             saveButton = $xpathUI.find('.fd-xpath-save-button');
 
             $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
-                if (window.analytics) {
-                    window.analytics.usage('Form Builder', 'Edit Expression',
-                              'Show Advanced Mode');
-                }
-
+                analytics.advancedXPath();
                 showAdvancedMode(getExpressionFromSimpleMode());
 
             });

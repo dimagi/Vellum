@@ -4,13 +4,15 @@ define([
     'tpl!vellum/templates/copy_paste_help',
     'vellum/mugs',
     'vellum/tsv',
+    'vellum/analytics',
     'vellum/core'
 ], function (
     $,
     _,
     copy_paste_help,
     mugs,
-    tsv
+    tsv,
+    analytics
 ) {
     var PREAMBLE = ["Form Builder clip", "version 1"],
         vellum,
@@ -200,10 +202,7 @@ define([
     function cut() {
         var data = copy(true),
             mugs = vellum.getCurrentlySelectedMug(true);
-        if (window.analytics) {
-            window.analytics.usage("Copy Paste", "Cut", mugs.length);
-            window.analytics.workflow("Cut questions in form builder");
-        }
+        analytics.cut(mugs.length);
         mugs = _.filter(mugs, function (mug) { return mug.options.isCopyable; });
         if (mugs && mugs.length) {
             vellum.data.core.form.removeMugsFromForm(mugs);
@@ -214,9 +213,8 @@ define([
     function copy(skip_analytics) {
         var mugs = vellum.getCurrentlySelectedMug(true, true),
             seen = {};
-        if (window.analytics && !skip_analytics) {
-            window.analytics.usage("Copy Paste", "Copy", mugs.length);
-            window.analytics.workflow("Copy questions in form builder");
+        if (!skip_analytics) {
+            analytics.copy(mugs.length);
         }
         if (!mugs || !mugs.length) { return ""; }
 
@@ -260,9 +258,7 @@ define([
     }
 
     function paste(data) {
-        if (window.analytics) {
-            window.analytics.workflow("Paste questions in form builder");
-        }
+        analytics.beforePaste();
         var next = tsv.makeRowParser(data);
         if (!_.isEqual(next().slice(0, 2), PREAMBLE)) {
             return ["Unsupported paste format"];
@@ -318,9 +314,7 @@ define([
         if (mug && pos) {
             vellum.setCurrentMug(mug);
         }
-        if (window.analytics) {
-            window.analytics.usage("Copy Paste", "Paste", pasted);
-        }
+        analytics.afterPaste(pasted);
         return errors.get();
     }
 
