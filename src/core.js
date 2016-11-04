@@ -204,6 +204,9 @@ define([
             alt = "\u2325";
         }
         this.$f.addClass('formdesigner');
+        if (this.opts().features.app_manager_v2) {
+            this.$f.addClass('app_manager_v2');
+        }
         this.$f.empty().append(main_template({ctrl: ctrl, alt: alt}));
         $(document).on("keydown", function (e) {
             var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
@@ -298,6 +301,7 @@ define([
                 new QuestionTypeGroup(groupData, _this));
         });
 
+        // TODO: with feature flag off, save doesn't turn green
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
         var $fullscerenButtonContainer = this.$f.find('.fd-fullscreen-button');
@@ -305,15 +309,26 @@ define([
     };
 
     fn._getQuestionGroups = function () {
+        if (this.opts().features.app_manager_v2) {
+            return [
+                {
+                    group: ["Text", 'Text'],
+                    questions: [
+                        "Text",
+                    ]
+                },
+            ];
+        }
+
         return [
             {
                 group: ["Text", 'Text'],  // key in mugTypes, <title>
                 questions: [
                     "Text",
-                    //"Trigger"
+                    "Trigger"
                 ]
             },
-            /*{
+            {
                 group: ["Select", 'Multiple Choice'],
                 related: [
                     "Choice"
@@ -363,7 +378,7 @@ define([
                 group: ["Geopoint", 'Advanced', ''],
                 textOnly: true,
                 questions: this.getAdvancedQuestions()
-            }*/
+            }
         ];
     };
 
@@ -1758,7 +1773,8 @@ define([
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
             }));
-        $(document).one('click', '.fd-button-remove', function () {
+        _this.$f.one('click', '.fd-button-remove', function () {
+            // TODO: broke this
             var mugs = _this.getCurrentlySelectedMug(true, true);
             form.removeMugsFromForm(mugs);
             _this.refreshCurrentMug();

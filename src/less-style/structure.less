@@ -26,19 +26,11 @@ body.vellum-full-screen {
             &.fd-content-left {
                 width: 30%;
 
-                .fd-save-button .btn {
-                    width: 55px;    // stop "Save" vs "Saved" jumping
-                }
-
                 // Bottom half of left column: data tree
                 .fd-accessory-pane {
-                    display: none !important;
                     overflow-x: hidden;
                     overflow-y: auto;
                 }
-                 .fd-external-sources-divider {
-                    display: none !important;
-                 }
             }
 
             // Right column: question properties or expression editor
@@ -51,10 +43,6 @@ body.vellum-full-screen {
                     .col-sm-1 {
                         padding: 0;
                     }
-                }
-
-                fieldset:not(:first-child), legend {
-                    display: none !important;
                 }
             }
 
@@ -88,24 +76,16 @@ body.vellum-full-screen {
                 }
 
                 > h2 {
-                    font-size: @baseFontSize * 0.9;
-                    margin: 2px 0 0 6px;
+                    font-size: @baseFontSize * 0.8;
+                    padding: 1px @contentPaddingVellum 0;
+                    margin: 0;
                     font-weight: normal;
                     line-height: 23px;
-
-                }
-
-                .btn {
-                    padding: 5px 10px;
-                    font-size: 11px;
-                    border-radius: 3px;
-                    line-height: 1.5;
-                    margin-left: 5px;
+                    text-transform: uppercase;
                 }
 
                 // Question tree menu (language switcher, copy, paste, etc.)
                 .fd-questions-menu-container {
-                    display: none;
                     position: absolute;
                     right: 0px;
                     top: 0px;

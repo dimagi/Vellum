@@ -1,0 +1,88 @@
+.formdesigner:not(.app_manager_v2) {
+    .app_manager_v2_only {
+        display: none !important;
+    }
+}
+
+.formdesigner.app_manager_v2 {
+    .fd-ui-container {
+        .fd-toolbar {
+            display: none;
+        }
+
+        .fd-content {
+            .fd-head {
+                height: 35px;
+                padding: 3px;
+
+                > h2 {
+                    font-size: @baseFontSize * 0.9;
+                    margin: 2px 0 0 6px;
+                    text-transform: none;
+                }
+
+                .btn {
+                    padding: 5px 10px;
+                    font-size: 11px;
+                    border-radius: 3px;
+                    line-height: 1.5;
+                    margin-left: 5px;
+
+                    &.fd-question-type-default {
+                        .fcc {
+                            display: none;
+                        }
+                    }
+                }
+
+                .fd-questions-menu-container {
+                    display: none;
+                }
+            }
+
+            &.fd-content-left {
+                .fd-default-panel {
+                    display: none;
+                }
+
+                .fd-save-button .btn {
+                    width: 55px;    // stop "Save" vs "Saved" jumping
+                }
+
+                .jstree {
+                    .jstree-anchor {
+                        padding-left: 5px;
+
+                        > .jstree-icon {
+                            display: none;
+                        }
+                    }
+                }
+
+                .fd-accessory-pane {
+                    display: none !important;
+                }
+
+                .fd-external-sources-divider {
+                    display: none !important;
+                }
+            }
+
+            &.fd-content-right {
+                .fd-question-properties {
+                    .fd-props-toolbar {
+                        display: none;
+                    }
+
+                    .fd-props-content {
+                        margin-top: 20px;
+                    }
+
+                    fieldset:not(:first-child), legend {
+                        display: none !important;
+                    }
+                }
+            }
+        }
+    }
+}
