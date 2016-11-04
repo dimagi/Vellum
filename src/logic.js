@@ -510,15 +510,25 @@ define([
          *     /path/of/mug/referencing: property where ref occurs
          *   }
          * }
+         *
+         * Optionally can filter based on ufid or hashtag path
          */
-        findUsages: function () {
+        findUsages: function (ufidOrPath) {
             var _this = this,
                 form = _this.form,
-                tableData = {};
+                tableData = {},
+                refs = _this.reverse;
 
-            _.each(_this.reverse, function (value, key) {
+            if (ufidOrPath && refs[ufidOrPath]) {
+                refs = refs[ufidOrPath];
+            }
+
+            _.each(refs, function (value, key) {
                 var usedMug = form.getMugByUFID(key),
                     mugReferences = {};
+                if (ufidOrPath && ufidOrPath === usedMug.hashtagPath) {
+                    return;
+                }
                 _.each(value, function (value, key) {
                     _.each(value, function (value) {
                         var usedInMug = form.getMugByUFID(key),
