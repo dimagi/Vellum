@@ -204,6 +204,41 @@ define([
                                  {load: {"/data/select": ["name", "dob"]}});
             });
         });
+
+        describe("findUsages", function () {
+            var form;
+            before(function (done) {
+                form = util.loadXML(TEST_XML_1);
+                done();
+            });
+
+            it("should return dictionary of usages", function () {
+                var expectedOutput = {
+                        "#form/question1": {"#form/question2": "Display Condition"}
+                    };
+                assert.deepEqual(form.findUsages(), expectedOutput);
+            });
+
+            it("should return dictionary of usages when filtered by path", function () {
+                var expectedOutput = {
+                        "#form/question1": {"#form/question2": "Display Condition"}
+                    };
+                assert.deepEqual(form.findUsages("#form/question2"), expectedOutput);
+            });
+
+            it("should return dictionary of usages when filtered by ufid", function () {
+                var expectedOutput = {
+                        "#form/question1": {"#form/question2": "Display Condition"}
+                    },
+                    question = util.getMug('question2');
+                assert.deepEqual(form.findUsages(question.ufid), expectedOutput);
+            });
+
+            it("should return empty dictionary when question not referenced", function () {
+                assert.deepEqual(form.findUsages("#form/question1"), {});
+            });
+        });
+
     });
 
     describe("Logic expression", function() {
