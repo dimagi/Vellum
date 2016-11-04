@@ -511,22 +511,18 @@ define([
          *   }
          * }
          *
-         * Optionally can filter based on ufid or hashtag path
+         * Optionally can filter based on hashtag path
          */
-        findUsages: function (ufidOrPath) {
+        findUsages: function (path) {
             var _this = this,
                 form = _this.form,
                 tableData = {},
                 refs = _this.reverse;
 
-            if (ufidOrPath && refs[ufidOrPath]) {
-                refs = refs[ufidOrPath];
-            }
-
             _.each(refs, function (value, key) {
                 var usedMug = form.getMugByUFID(key),
                     mugReferences = {};
-                if (ufidOrPath && ufidOrPath !== usedMug.hashtagPath) {
+                if (path && path !== usedMug.hashtagPath) {
                     return;
                 }
                 _.each(value, function (value, key) {

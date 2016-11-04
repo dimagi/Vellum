@@ -226,14 +226,6 @@ define([
                 assert.deepEqual(form.findUsages("#form/question1"), expectedOutput);
             });
 
-            it("should return dictionary of usages when filtered by ufid", function () {
-                var expectedOutput = {
-                        "#form/question1": {"#form/question2": "Display Condition"}
-                    },
-                    question = util.getMug('question2');
-                assert.deepEqual(form.findUsages(question.ufid), expectedOutput);
-            });
-
             it("should return empty dictionary when question not referenced", function () {
                 assert.deepEqual(form.findUsages("#form/question2"), {});
             });

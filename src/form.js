@@ -1136,8 +1136,8 @@ define([
         isCaseReference: function (path) {
             return /^#case/.test(path);
         },
-        findUsages: function (ufidOrPath) {
-            return this._logicManager.findUsages(ufidOrPath);
+        findUsages: function (path) {
+            return this._logicManager.findUsages(path);
         },
     };
 
