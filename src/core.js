@@ -310,10 +310,10 @@ define([
                 group: ["Text", 'Text'],  // key in mugTypes, <title>
                 questions: [
                     "Text",
-                    "Trigger"
+                    //"Trigger"
                 ]
             },
-            {
+            /*{
                 group: ["Select", 'Multiple Choice'],
                 related: [
                     "Choice"
@@ -363,7 +363,7 @@ define([
                 group: ["Geopoint", 'Advanced', ''],
                 textOnly: true,
                 questions: this.getAdvancedQuestions()
-            }
+            }*/
         ];
     };
 

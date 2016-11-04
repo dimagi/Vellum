@@ -1234,7 +1234,6 @@ define([
     var Text = util.extend(defaultOptions, {
         typeName: "Text",
         dataType: "xsd:string",
-        icon: "fcc fcc-fd-text",
         init: function (mug, form) {
         }
     });
