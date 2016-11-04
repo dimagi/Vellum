@@ -750,8 +750,8 @@ define([
 
         $modalBody.append($(find_usages({tableData: tableData})));
 
-        $modalBody.find('.usage-row').click(function() {
-            var gotomug = $(this).find('.used-in-mug').text();
+        $modalBody.find('.link-to-question').click(function() {
+            var gotomug = $(this).text();
             $modal.modal('hide');
             _this.setCurrentMug(form.getMugByPath(gotomug));
         });
