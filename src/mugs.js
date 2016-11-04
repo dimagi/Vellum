@@ -903,9 +903,17 @@ define([
             findUsages: {
                 visibility: 'visible',
                 presence: 'optional',
-                widget: widgets.findUsagesButton,
+                widget: widgets.button,
                 lstring: 'Find Usages',
                 buttonContent: '<i class="fa fa-search" /> Find Usages',
+                buttonAction: function (mug) {
+                    return function() {
+                        if (window.analytics) {
+                            window.analytics.usage('Form Builder', 'Logic', 'Find Usages');
+                        }
+                        mug.form.vellum.findUsages(mug.hashtagPath);
+                    };
+                },
             },
             calculateAttr: {
                 // only show calculate condition for non-data nodes if it already

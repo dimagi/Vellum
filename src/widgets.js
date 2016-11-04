@@ -402,18 +402,7 @@ define([
 
         widget.getValue = function() { return null; };
 
-        return widget;
-    };
-
-    var findUsagesButton = function (mug, options) {
-        var widget = button(mug, options);
-
-        widget.input.click(function() {
-            if (window.analytics) {
-                window.analytics.usage('Form Builder', 'Logic', 'Find Usages');
-            }
-            mug.form.vellum.findUsages(mug.hashtagPath);
-        });
+        widget.input.click(options.buttonAction(mug));
 
         return widget;
     };
@@ -835,7 +824,7 @@ define([
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
         media: media,
-        findUsagesButton: findUsagesButton,
+        button: button,
         util: {
             getWidget: getWidget,
             setWidget: setWidget,
