@@ -501,7 +501,27 @@ define([
                 .map(function(ref) {
                     return [ref.path, null];
                 }).object().value();
-        }
+        },
+        findUsages: function () {
+            var _this = this,
+                form = _this.form,
+                tableData = {};
+
+            _.each(_this.reverse, function (value, key) {
+                var usedMug = form.getMugByUFID(key),
+                    mugReferences = {};
+                _.each(value, function (value, key) {
+                    _.each(value, function (value) {
+                        var usedInMug = form.getMugByUFID(key),
+                            readablePropName = usedInMug.spec[value.property].lstring;
+                        mugReferences[usedInMug.hashtagPath] = readablePropName;
+                    });
+                });
+                tableData[usedMug.hashtagPath] = mugReferences;
+            });
+
+            return tableData;
+        },
     };
 
     return {
