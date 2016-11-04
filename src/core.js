@@ -268,7 +268,8 @@ define([
         
     fn._init_toolbar = function () {
         var _this = this,
-            $questionGroupContainer = this.$f.find(
+            containerSelector = this.opts().features.app_manager_v2 ? ".fd-content-left" : ".fd-toolbar",
+            $questionGroupContainer = this.$f.find(containerSelector).find(
                 '.fd-container-question-type-group');
 
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
