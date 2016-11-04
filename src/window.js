@@ -101,7 +101,7 @@ define([
                 treeHeight -= $(child).outerHeight(false);
             });
     
-            if (accessoryPane.children().length) {
+            if (accessoryPane.children().length && !this.opts().features.app_manager_v2) {
                 // Decrement tree height by height of accessory pane
                 var accessoryHeight = accessoryPane.outerHeight(false),
                     accessoryScrollableHeight = accessoryHeight -
