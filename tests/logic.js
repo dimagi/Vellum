@@ -206,28 +206,36 @@ define([
         });
 
         describe("findUsages", function () {
-            var form;
+            var form,
+                expectedUsages = {
+                    "#form/question1": {
+                        "#form/question2": "Display Condition",
+                        "#form/question3": "Display Condition",
+                    },
+                    "#form/question2": {"#form/question3": "Display Condition"}
+                };
             before(function (done) {
                 form = util.loadXML(TEST_XML_1);
                 done();
             });
 
             it("should return dictionary of usages", function () {
-                var expectedOutput = {
-                        "#form/question1": {"#form/question2": "Display Condition"}
-                    };
-                assert.deepEqual(form.findUsages(), expectedOutput);
+                assert.deepEqual(form.findUsages(), expectedUsages);
             });
 
             it("should return dictionary of usages when filtered by path", function () {
-                var expectedOutput = {
-                        "#form/question1": {"#form/question2": "Display Condition"}
-                    };
-                assert.deepEqual(form.findUsages("#form/question1"), expectedOutput);
+                var q1 = "#form/question1",
+                    q2 = "#form/question2";
+                assert.deepEqual(form.findUsages(q1),
+                    {"#form/question1": expectedUsages[q1]}
+                );
+                assert.deepEqual(form.findUsages(q2),
+                    {"#form/question2": expectedUsages[q2]}
+                );
             });
 
             it("should return empty dictionary when question not referenced", function () {
-                assert.deepEqual(form.findUsages("#form/question2"), {});
+                assert.deepEqual(form.findUsages("#form/question3"), {});
             });
         });
 
