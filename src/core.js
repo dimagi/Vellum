@@ -302,9 +302,7 @@ define([
                 new QuestionTypeGroup(groupData, _this));
         });
 
-        // TODO: with feature flag off, save doesn't turn green
-        var containerSelector = _this.opts().features.app_manager_v2 ? ".fd-content-left" : ".fd-form-actions";
-            $saveButtonContainer = _this.$f.find(containerSelector).find('.fd-save-button');
+        var $saveButtonContainer = _this.$f.find(containerSelector).find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
         var $fullscerenButtonContainer = this.$f.find('.fd-fullscreen-button');
         this.data.core.$fullscreenButton.appendTo($fullscerenButtonContainer);
