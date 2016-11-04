@@ -34,7 +34,7 @@
         "fuse.js": "~2.5.0",
 
         "bootstrap": "3.3.7",
-        "jstree": "~3.3.2",
+        "jstree": "~3.3.3",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
