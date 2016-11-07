@@ -1135,7 +1135,10 @@ define([
         },
         isCaseReference: function (path) {
             return /^#case/.test(path);
-        }
+        },
+        findUsages: function (path) {
+            return this._logicManager.findUsages(path);
+        },
     };
 
     return {

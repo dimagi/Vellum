@@ -204,6 +204,41 @@ define([
                                  {load: {"/data/select": ["name", "dob"]}});
             });
         });
+
+        describe("findUsages", function () {
+            var form,
+                expectedUsages = {
+                    "#form/question1": {
+                        "#form/question2": "Display Condition",
+                        "#form/question3": "Display Condition",
+                    },
+                    "#form/question2": {"#form/question3": "Display Condition"}
+                };
+            before(function (done) {
+                form = util.loadXML(TEST_XML_1);
+                done();
+            });
+
+            it("should return dictionary of usages", function () {
+                assert.deepEqual(form.findUsages(), expectedUsages);
+            });
+
+            it("should return dictionary of usages when filtered by path", function () {
+                var q1 = "#form/question1",
+                    q2 = "#form/question2";
+                assert.deepEqual(form.findUsages(q1),
+                    {"#form/question1": expectedUsages[q1]}
+                );
+                assert.deepEqual(form.findUsages(q2),
+                    {"#form/question2": expectedUsages[q2]}
+                );
+            });
+
+            it("should return empty dictionary when question not referenced", function () {
+                assert.deepEqual(form.findUsages("#form/question3"), {});
+            });
+        });
+
     });
 
     describe("Logic expression", function() {

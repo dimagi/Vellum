@@ -732,21 +732,7 @@ define([
             $modal = this.generateNewModal("Use of each question", []),
             $modalBody = $modal.find('.modal-body'),
             form = _this.data.core.form,
-            logicManager = form._logicManager,
-            tableData = {};
-
-        _.each(logicManager.reverse, function (value, key) {
-            var usedMug = form.getMugByUFID(key),
-                mugReferences = {};
-            _.each(value, function (value, key) {
-                _.each(value, function (value) {
-                    var usedInMug = form.getMugByUFID(key),
-                        readablePropName = usedInMug.spec[value.property].lstring;
-                    mugReferences[usedInMug.hashtagPath] = readablePropName;
-                });
-            });
-            tableData[usedMug.hashtagPath] = mugReferences;
-        });
+            tableData = form.findUsages();
 
         $modalBody.append($(find_usages({tableData: tableData})));
 
