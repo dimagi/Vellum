@@ -160,6 +160,9 @@ define([
                             "got " + input.length);
         }
         options = options || {};
+        if (!options.createPopover && !form.vellum.opts().features.disable_popovers) {
+            options.createPopover = createPopover;
+        }
         var NOTSET = {},
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
@@ -726,18 +729,11 @@ define([
         }
     }
 
-    function initEditor(input, form, options) {
-        if (options && form.vellum && !form.vellum.opts().features.disable_popovers) {
-            options = _.extend(options, {createPopover: createPopover});
-        }
-        return editor(input, form, options);
-    }
-
     return {
         REF_REGEX: REF_REGEX,
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
-        editor: initEditor,
+        editor: editor,
         fromRichText: fromRichText,
         toRichText: toRichText,
         isInvalid: isInvalid,

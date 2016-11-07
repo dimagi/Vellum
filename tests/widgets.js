@@ -5,6 +5,7 @@ define([
     'tests/utils',
     'vellum/expressionEditor',
     'vellum/mugs',
+    'vellum/richText',
     'vellum/util'
 ], function (
     chai,
@@ -13,6 +14,7 @@ define([
     util,
     expressionEditor,
     mugs,
+    richText,
     vellumUtil
 ) {
     var assert = chai.assert,
@@ -202,10 +204,7 @@ define([
 
         it("should return just-set value on get value", function () {
             util.loadXML("");
-            util.paste([
-                ["id", "type", "labelItext:en-default"],
-                ["/text", "Text", ""],
-            ]);
+            util.addQuestion("Text", "text");
             util.clickQuestion('text');
             var widget = util.getWidget('itext-en-label'),
                 text = '<output value="/data/text" />';
@@ -231,6 +230,35 @@ define([
                 assert.equal(text.p.relevantAttr, '#form/hidden');
                 done();
             });
+        });
+
+        it("should change save button on drag/drop into advanced xpath editor", function (done) {
+            util.loadXML("");
+            util.paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/hidden", "DataBindOnly", "null"],
+                ["/text", "Text", "test"],
+            ]);
+            util.clickQuestion("text");
+
+            $(".fd-content-right .fd-question-properties [name=property-defaultValue]")
+                .closest(".form-group")
+                .find(".fd-edit-button").click();
+
+            events.on("showXPathEditor", function () {
+                var input = $('.fd-xpath-editor-text'),
+                    editor = richText.editor(input),
+                    tree = $(".fd-question-tree").jstree(true),
+                    saveButton = $('.fd-xpath-save-button');
+                editor.on("instanceReady", function () {
+                    assert(!saveButton.hasClass('btn-success'), "save button should not be green");
+                    editor.on("change", function () {
+                        assert(saveButton.hasClass('btn-success'), "save button not green");
+                        done();
+                    });
+                    util.findNode(tree, "hidden").data.handleDrop(input);
+                });
+            }, null, "showXPathEditor");
         });
     });
 });
