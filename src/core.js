@@ -18,6 +18,7 @@ define([
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
     'tpl!vellum/templates/find_usages',
+    'tpl!vellum/templates/mug_specific_find_usages',
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
@@ -51,6 +52,7 @@ define([
     modal_content,
     modal_button,
     find_usages,
+    mug_specific_find_usages,
     mugs,
     widgets,
     richText,
@@ -729,12 +731,22 @@ define([
 
     fn.findUsages = function (filterMugPath) {
         var _this = this,
-            $modal = this.generateNewModal("Use of each question", []),
+            header, template;
+
+        if (filterMugPath) {
+            header = "Use of " + filterMugPath;
+            template = mug_specific_find_usages;
+        } else {
+            header = "Use of each question";
+            template = find_usages;
+        }
+
+        var $modal = _this.generateNewModal(header, []),
             $modalBody = $modal.find('.modal-body'),
             form = _this.data.core.form,
             tableData = form.findUsages(filterMugPath);
 
-        $modalBody.append($(find_usages({tableData: tableData})));
+        $modalBody.append($(template({tableData: tableData})));
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
