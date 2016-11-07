@@ -435,10 +435,18 @@ define([
                 tryAddExpression();
             });
 
-            $xpathUI.find('.fd-xpath-editor-text').on('change keyup', function () {
-                saveButton.removeClass("btn-default disabled").addClass("btn-success");
-                options.change();
-            });
+            var advancedInput = $xpathUI.find('.fd-xpath-editor-text'),
+                advancedChange = function () {
+                    saveButton.removeClass("btn-default disabled")
+                              .addClass("btn-success");
+                    options.change();
+                };
+            if (options.mug.form.richText) {
+                richText.editor(advancedInput, form, richTextOptions)
+                        .on('change', advancedChange);
+            } else {
+                advancedInput.on('change keyup', advancedChange);
+            }
 
             var done = function (val) {
                 options.done(val);
