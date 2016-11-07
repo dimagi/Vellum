@@ -33,6 +33,7 @@ define([
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
+    'jstree-actions',
     'jquery.bootstrap',
     'caretjs',
     'atjs'
@@ -937,7 +938,7 @@ define([
                     return node;
                 }
             },
-            "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
+            "plugins" : [ "themes", "types", "dnd", "conditionalevents", "actions" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -987,6 +988,16 @@ define([
                     node.icon = node.data.mug.getIcon();
                 }
             });
+        });
+        $tree.jstree(true).add_action("all", {
+            "id": "action_remove",
+            "class": "fa fa-trash-o action_remove pull-right",
+            "after": true,
+            "selector": "a",
+            "event": "click",
+            "callback": function (node_id, node, action_id, action_el) {
+                _this.data.core.form.removeMugsFromForm([node.data.mug]);
+            }
         });
     };
 
