@@ -6,7 +6,7 @@
   <% _.each(tableData, function(refs, question) { %>
      <% _.each(refs, function(propName, path) {%>
        <tr>
-         <td><%- path %></td>
+         <td><a class="link-to-question" href="#"><%- path %></a></td>
          <td><%- propName %></td>
        </tr>
      <% }); %>
