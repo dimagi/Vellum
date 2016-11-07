@@ -202,7 +202,7 @@ define([
                 var $scrollable = $node.closest(".fd-scrollable");
                 $scrollable.scrollTop($node.position().top - $scrollable.position().top);
             }
-            analytics.fbUsage("Form Builder", "Clicked link to show in tree");
+            analytics.fbUsage("Clicked link to show in tree");
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
