@@ -1,4 +1,4 @@
-<table class="table table-condensed">
+<table class="table table-hover">
   <thead>
     <th>Question</th>
     <th>Used By</th>
@@ -6,14 +6,14 @@
   </thead>
   <% _.each(tableData, function(refs, question) { %>
      <tr>
-       <td><%- question %></td>
+       <td><a class="link-to-question" href="#"><%- question %></a></td>
        <td></td>
        <td></td>
      </tr>
      <% _.each(refs, function(propName, path) {%>
-       <tr>
+       <tr class="usage-row">
          <td></td>
-         <td><%- path %></td>
+         <td><a class="link-to-question" href="#"><%- path %></a></td>
          <td><%- propName %></td>
        </tr>
      <% }); %>

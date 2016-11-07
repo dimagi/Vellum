@@ -736,6 +736,13 @@ define([
 
         $modalBody.append($(find_usages({tableData: tableData})));
 
+        $modalBody.find('.link-to-question').click(function() {
+            var goToMug = $(this).text();
+            $modal.modal('hide');
+            _this.setCurrentMug(form.getMugByPath(goToMug));
+            return false;
+        });
+
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
             $modalBody.find("input:first").focus().select();
