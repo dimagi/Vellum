@@ -191,7 +191,7 @@ define([
                     } else {
                         category = "Form Reference";
                     }
-                    analytics.autocompleteReference(category, options.property);
+                    analytics.usage(category, "Autocomplete", options.property);
                     return value;
                 },
                 afterMatchFailed: function(at, $el) {

@@ -708,7 +708,9 @@ define([
                     hide: 200,
                 },
             }).on('shown.bs.popover', function() {
-                analytics.easyReferenceHover(isFormRef ? 'form' : 'case');
+                var type = isFormRef ? 'form' : 'case';
+                analytics.fbUsage("Hovered over easy " + type + " reference");
+                analytics.workflow("Hovered over easy reference");
             });
 
             ckwidget.on('destroy', function (e)  {

@@ -420,7 +420,7 @@ define([
             saveButton = $xpathUI.find('.fd-xpath-save-button');
 
             $xpathUI.find('.fd-xpath-show-advanced-button').click(function () {
-                analytics.advancedXPath();
+                analytics.fbUsage('Edit Expression', 'Show Advanced Mode');
                 showAdvancedMode(getExpressionFromSimpleMode());
 
             });

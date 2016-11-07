@@ -101,7 +101,7 @@ define([
                 } else {
                     category = "Form Reference";
                 }
-                analytics.dragAndDropRef(category, "Label");
+                analytics.usage(category, "Drag and Drop", "Label");
             } else {
                 _this.__callOld();
             }

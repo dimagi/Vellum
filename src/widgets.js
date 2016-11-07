@@ -430,7 +430,7 @@ define([
                     },
                     mug: mug,
                 });
-                analytics.editXPath(options.lstring);
+                analytics.fbUsage('Logic', options.lstring);
             }, !!widget.isDisabled());
         };
 

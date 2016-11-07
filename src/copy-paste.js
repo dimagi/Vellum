@@ -202,7 +202,8 @@ define([
     function cut() {
         var data = copy(true),
             mugs = vellum.getCurrentlySelectedMug(true);
-        analytics.cut(mugs.length);
+        analytics.usage("Copy Paste", "Cut", mugs.length);
+        analytics.workflow("Cut questions in form builder");
         mugs = _.filter(mugs, function (mug) { return mug.options.isCopyable; });
         if (mugs && mugs.length) {
             vellum.data.core.form.removeMugsFromForm(mugs);
@@ -214,7 +215,8 @@ define([
         var mugs = vellum.getCurrentlySelectedMug(true, true),
             seen = {};
         if (!skip_analytics) {
-            analytics.copy(mugs.length);
+            analytics.usage("Copy Paste", "Copy", mugs.length);
+            analytics.workflow("Copy questions in form builder");
         }
         if (!mugs || !mugs.length) { return ""; }
 
@@ -258,7 +260,7 @@ define([
     }
 
     function paste(data) {
-        analytics.beforePaste();
+        analytics.workflow("Paste questions in form builder");
         var next = tsv.makeRowParser(data);
         if (!_.isEqual(next().slice(0, 2), PREAMBLE)) {
             return ["Unsupported paste format"];
@@ -314,7 +316,7 @@ define([
         if (mug && pos) {
             vellum.setCurrentMug(mug);
         }
-        analytics.afterPaste(pasted);
+        analytics.usage("Copy Paste", "Paste", pasted);
         return errors.get();
     }
 

@@ -163,7 +163,7 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
-                    analytics.clickedSave();
+                    analytics.workflow("Clicked Save in the form builder");
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
@@ -202,7 +202,8 @@ define([
                 var $scrollable = $node.closest(".fd-scrollable");
                 $scrollable.scrollTop($node.position().top - $scrollable.position().top);
             }
-            analytics.clickedGoToQuestion();
+            analytics.fbUsage("Form Builder", "Clicked link to show in tree");
+            analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
         this._init_toolbar();
@@ -367,7 +368,7 @@ define([
                 function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
-                        analytics.clickedToolsMenu(menuItem.name);
+                        analytics.fbUsage("Tools", menuItem.name);
                         menuItem.action(function () {
                             _this.refreshVisibleData();
                         });
@@ -386,7 +387,8 @@ define([
         });
 
         this.$f.find('.fd-button-copy').click(function () {
-            analytics.clickedCopyPaste();
+            analytics.usage("Copy Paste", "Copy Button");
+            analytics.workflow("Clicked Copy Button in form builder");
             _this.ensureCurrentMugIsSaved(function () {
                 _this.displayMultipleSelectionView();
                 var selected = _this.jstree("get_selected");
@@ -415,7 +417,7 @@ define([
                         return a.text.match(/full screen/i);
                     }));
                     var html = $fullScreenMenuItem.html();
-                    analytics.fullScreenMode(_this.opts().core.formid);
+                    analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
                     if (_this.data.windowManager.fullscreen) {
                         _this.data.windowManager.fullscreen = false;
                         $fullScreenMenuItem.html(html.replace(/Exit/, "Enter"));
@@ -839,7 +841,7 @@ define([
             } else {
                 category = "Form Reference";
             }
-            analytics.dragAndDropRef(category, targetType);
+            analytics.usage(category, "Drag and Drop", targetType);
         }
 
         if (mug && ops && mug.options.defaultOperator) {
@@ -1378,7 +1380,7 @@ define([
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
             }
-            analytics.addQuestion();
+            analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
             if ($firstInput.length) {
