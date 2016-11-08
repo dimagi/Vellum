@@ -1,0 +1,14 @@
+<table class="table table-condensed">
+  <thead>
+    <th>Used By</th>
+    <th>In Property</th>
+  </thead>
+  <% _.each(tableData, function(refs, question) { %>
+     <% _.each(refs, function(propName, path) {%>
+       <tr>
+         <td><a class="link-to-question" href="#"><%- path %></a></td>
+         <td><%- propName %></td>
+       </tr>
+     <% }); %>
+   <% }); %>
+</table>

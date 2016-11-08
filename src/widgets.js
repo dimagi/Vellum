@@ -389,6 +389,26 @@ define([
         return widget;
     };
 
+    var button = function (mug, options) {
+        var widget = normal(mug, options),
+            disabled = options.disabled || false;
+        widget.input = $("<button />")
+            .addClass('btn btn-default')
+            .attr('type', 'button')
+            .attr("name", widget.id)
+            .attr("id", widget.id)
+            .prop('disabled', disabled)
+            .html(options.buttonContent);
+
+        widget.setValue = function (value) { };
+
+        widget.getValue = function() { return null; };
+
+        widget.input.click(options.buttonAction(mug));
+
+        return widget;
+    };
+
     var xPath = function (mug, options) {
         options.disableNativeSpellChecker = true;
         var widget = richInput(mug, options),
@@ -804,6 +824,7 @@ define([
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
         media: media,
+        button: button,
         util: {
             getWidget: getWidget,
             setWidget: setWidget,
