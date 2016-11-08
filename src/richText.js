@@ -42,6 +42,7 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
+    'vellum/analytics',
     'ckeditor',
     'ckeditor-jquery'
 ], function(
@@ -53,6 +54,7 @@ define([
     logic,
     util,
     xml,
+    analytics,
     CKEDITOR
 ){
     var CASE_REF_REGEX = /^#case\//,
@@ -709,14 +711,9 @@ define([
                     hide: 200,
                 },
             }).on('shown.bs.popover', function() {
-                if (window.analytics) {
-                    if (isFormRef) {
-                        window.analytics.usage("Form Builder", "Hovered over easy form reference");
-                    } else {
-                        window.analytics.usage("Form Builder", "Hovered over easy case reference");
-                    }
-                    window.analytics.workflow("Hovered over easy reference");
-                }
+                var type = isFormRef ? 'form' : 'case';
+                analytics.fbUsage("Hovered over easy " + type + " reference");
+                analytics.workflow("Hovered over easy reference");
             });
 
             ckwidget.on('destroy', function (e)  {

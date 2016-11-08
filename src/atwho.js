@@ -2,6 +2,7 @@ define([
     'underscore',
     'jquery',
     'vellum/richText',
+    'vellum/analytics',
     'vellum/util',
     'tpl!vellum/templates/atwho_display',
     'vellum/core',
@@ -9,6 +10,7 @@ define([
     _,
     $,
     richText,
+    analytics,
     util,
     atwhoDisplay
 ) {
@@ -183,17 +185,13 @@ define([
                     });
                 },
                 beforeInsert: function(value, $li) {
-                    if (window.analytics) {
-                        var category;
-                        if (util.isCaseReference(value)) {
-                            category = "Case Reference";
-                        } else {
-                            category = "Form Reference";
-                        }
-                        window.analytics.usage(category,
-                                               "Autocomplete",
-                                               options.property);
+                    var category;
+                    if (util.isCaseReference(value)) {
+                        category = "Case Reference";
+                    } else {
+                        category = "Form Reference";
                     }
+                    analytics.usage(category, "Autocomplete", options.property);
                     return value;
                 },
                 afterMatchFailed: function(at, $el) {

@@ -25,6 +25,7 @@ define([
     'vellum/datasources',
     'vellum/util',
     'vellum/javaRosa/util',
+    'vellum/analytics',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -58,6 +59,7 @@ define([
     datasources,
     util,
     jrUtil,
+    analytics,
     debug
 ) {
     
@@ -161,9 +163,7 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
-                    if (window.analytics) {
-                        window.analytics.workflow("Clicked Save in form builder");
-                    }
+                    analytics.workflow("Clicked Save in the form builder");
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
@@ -202,10 +202,8 @@ define([
                 var $scrollable = $node.closest(".fd-scrollable");
                 $scrollable.scrollTop($node.position().top - $scrollable.position().top);
             }
-            if (window.analytics) {
-                window.analytics.usage("Form Builder", "Clicked link to show in tree");
-                window.analytics.workflow("Clicked on easy reference popover's link to show in tree");
-            }
+            analytics.fbUsage("Clicked link to show in tree");
+            analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
         this._init_toolbar();
@@ -370,9 +368,7 @@ define([
                 function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
-                        if (window.analytics) {
-                            window.analytics.usage("Form Builder", "Tools", menuItem.name);
-                        }
+                        analytics.fbUsage("Tools", menuItem.name);
                         menuItem.action(function () {
                             _this.refreshVisibleData();
                         });
@@ -391,10 +387,8 @@ define([
         });
 
         this.$f.find('.fd-button-copy').click(function () {
-            if (window.analytics) {
-                window.analytics.usage("Copy Paste", "Copy Button");
-                window.analytics.workflow("Clicked Copy Button in form builder");
-            }
+            analytics.usage("Copy Paste", "Copy Button");
+            analytics.workflow("Clicked Copy Button in form builder");
             _this.ensureCurrentMugIsSaved(function () {
                 _this.displayMultipleSelectionView();
                 var selected = _this.jstree("get_selected");
@@ -423,10 +417,7 @@ define([
                         return a.text.match(/full screen/i);
                     }));
                     var html = $fullScreenMenuItem.html();
-                    if (window.analytics) {
-                        window.analytics.usage('Form Builder', 'Full Screen Mode',
-                                  _this.opts().core.formId);
-                    }
+                    analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
                     if (_this.data.windowManager.fullscreen) {
                         _this.data.windowManager.fullscreen = false;
                         $fullScreenMenuItem.html(html.replace(/Exit/, "Enter"));
@@ -823,32 +814,27 @@ define([
                 target.val(target.val() + path).change();
             }
 
-            if (window.analytics) {
-                var targetType;
-                switch (target[0].id) {
-                    case 'property-relevantAttr':
-                        targetType = "Display";
-                        break;
-                    case 'property-constraintAttr':
-                        targetType = "Validation";
-                        break;
-                    case 'property-calculateAttr':
-                        targetType = "Calculation";
-                        break;
-                    default:
-                        targetType = "Expression Editor";
-                        break;
-                }
-                if (_this.data.core.form.isCaseReference(path)) {
-                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
-                } else {
-                    window.analytics.usage(
-                        "Form Reference",
-                        "Drag and Drop",
-                        targetType
-                    );
-                }
+            var targetType, category;
+            switch (target[0].id) {
+                case 'property-relevantAttr':
+                    targetType = "Display";
+                    break;
+                case 'property-constraintAttr':
+                    targetType = "Validation";
+                    break;
+                case 'property-calculateAttr':
+                    targetType = "Calculation";
+                    break;
+                default:
+                    targetType = "Expression Editor";
+                    break;
             }
+            if (_this.data.core.form.isCaseReference(path)) {
+                category = "Case Reference";
+            } else {
+                category = "Form Reference";
+            }
+            analytics.usage(category, "Drag and Drop", targetType);
         }
 
         if (mug && ops && mug.options.defaultOperator) {
@@ -1387,9 +1373,7 @@ define([
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
             }
-            if (window.analytics) {
-                window.analytics.workflow("Added question in form builder");
-            }
+            analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
             if ($firstInput.length) {

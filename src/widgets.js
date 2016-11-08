@@ -7,6 +7,7 @@ define([
     'vellum/atwho',
     'vellum/util',
     'vellum/richText',
+    'vellum/analytics',
 ], function (
     ui_element,
     widget_control_keyvalue,
@@ -15,7 +16,8 @@ define([
     $,
     atwho,
     util,
-    richTextUtils
+    richTextUtils,
+    analytics
 ) {
     var base = function(mug, options) {
         // set properties shared by all widgets
@@ -428,9 +430,7 @@ define([
                     },
                     mug: mug,
                 });
-                if (window.analytics) {
-                    window.analytics.usage('Form Builder', 'Logic', options.lstring);
-                }
+                analytics.fbUsage('Logic', options.lstring);
             }, !!widget.isDisabled());
         };
 
