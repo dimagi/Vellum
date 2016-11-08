@@ -35,7 +35,6 @@ define([
     'jquery.bootstrap',
     'caretjs',
     'codemirror/mode/xml/xml',
-    'css!codemirror/lib/codemirror',
     'atjs'
 ], function (
     require,
@@ -583,10 +582,11 @@ define([
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        codeMirror = codemirror.fromTextArea($textarea.get(0));
-        codeMirror.setOption('viewportMargin', Infinity);
-        codeMirror.setOption('lineNumbers', true);
-        codeMirror.setOption('mode', 'xml');
+        codeMirror = codemirror.fromTextArea($textarea.get(0), {
+            mode: 'xml',
+            lineNumbers: true,
+            viewportMargin: Infinity,
+        });
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
