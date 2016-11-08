@@ -565,7 +565,7 @@ define([
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
 
-        $modal.addClass('fd-source-modal')
+        $modal.addClass('fd-source-modal fd-full-screen-modal')
             .find('.modal-body')
             .removeClass('form-horizontal').removeClass('form')
             .html($updateForm);
@@ -633,7 +633,7 @@ define([
                 action: function () {
                     $('#form-differences').show();
 
-                    $modal.addClass('fd-source-modal')
+                    $modal.addClass('fd-source-modal fd-full-screen-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
                         .html($overwriteForm);
@@ -725,6 +725,7 @@ define([
             form = _this.data.core.form,
             tableData = form.findUsages();
 
+        $modal.addClass('fd-find-usages-modal fd-full-screen-modal');
         $modalBody.append($(find_usages({tableData: tableData})));
 
         $modalBody.find('.link-to-question').click(function() {
@@ -735,9 +736,6 @@ define([
         });
 
         $modal.modal('show');
-        $modal.one('shown.bs.modal', function () {
-            $modalBody.find("input:first").focus().select();
-        });
     };
 
     fn.closeModal = function (done, immediate) {
