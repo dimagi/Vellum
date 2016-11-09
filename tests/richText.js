@@ -620,7 +620,7 @@ define([
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble, "No bubbles detected");
                         bubble.mouseenter();
-                        var $popover = $('.popover-content');
+                        var $popover = $('.popover-content:last');
                         assert.strictEqual($popover.find('p:first').text(),
                                            "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                         var $link = $popover.find("a");
@@ -639,7 +639,7 @@ define([
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble, "No bubbles detected");
                         bubble.mouseenter();
-                        var $popover = $('.popover-content p:first');
+                        var $popover = $('.popover-content:last p:first');
                         assert.strictEqual($popover.text(),
                                            "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                         var bubbles = widget.input.ckeditor().editor.widgets.instances;
