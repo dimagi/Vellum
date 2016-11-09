@@ -33,6 +33,18 @@
                 margin-left: -3px;
             }
         } 
+
+        > ul > li {
+            .action_remove {
+                display: none;
+            }
+
+            &:hover .action_remove {
+                display: inline-block;
+                cursor: pointer;
+                margin: 5px;
+            }
+        }
     }
 
     // Panel for question tree, including header
