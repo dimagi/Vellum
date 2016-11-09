@@ -30,13 +30,16 @@ requirejs.config({
             name: 'json',
             location: '../bower_components/requirejs-plugins/src',
             main: 'json.js'
-        }
+        },
+        {
+            name: "codemirror",
+            location: "../bower_components/codemirror",
+            main: "lib/codemirror",
+        },
     ],
     paths: {
         'vellum': '.',
 
-        'codemirror': '../lib/codemirror/xml',
-        'codemirrorBase': '../bower_components/codemirror/lib/codemirror',
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
@@ -67,13 +70,6 @@ requirejs.config({
         'fusejs': '../bower_components/fuse.js/src/fuse'
     },
     shim: {
-        'codemirror': {
-            deps: ['codemirrorBase', 'css!../bower_components/codemirror/lib/codemirror'],
-            exports: 'CodeMirror',
-        },
-        'codemirrorBase': {
-            exports: 'CodeMirror'
-        },
         'CryptoJS': {
             exports: 'CryptoJS'
         },

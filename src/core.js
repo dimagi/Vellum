@@ -68,6 +68,7 @@ define([
     setTimeout(function () {
         require([
             'codemirror',
+            'codemirror/mode/xml/xml',
             'diff-match-patch',
             'CryptoJS',
             'vellum/expressionEditor',
@@ -580,9 +581,11 @@ define([
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        codeMirror = require('codemirror').fromTextArea($textarea.get(0));
-        codeMirror.setOption('viewportMargin', Infinity);
-        codeMirror.setOption('lineNumbers', true);
+        codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
+            mode: 'xml',
+            lineNumbers: true,
+            viewportMargin: Infinity,
+        });
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
