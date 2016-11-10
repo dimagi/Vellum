@@ -64,21 +64,21 @@ define([
             }
         ],
     },
-        PREVIEW_TEMPLATES = {
+    PREVIEW_TEMPLATES = {
         image: multimedia_existing_image,
         audio: multimedia_existing_audio,
         video: multimedia_existing_video,
         'video-inline': multimedia_existing_video,
         text:  multimedia_existing_text,
     },
-        SLUG_TO_CLASS = {
+    SLUG_TO_CLASS = {
         image: 'CommCareImage',
         audio: 'CommCareAudio',
         video: 'CommCareVideo',
         'video-inline': 'CommCareVideo',
         text:  'CommCareMultimedia',
     },
-        SLUG_TO_UPLOADER_SLUG = {
+    SLUG_TO_UPLOADER_SLUG = {
         image: 'fd_hqimage',
         audio: 'fd_hqaudio',
         video: 'fd_hqvideo',
@@ -183,7 +183,7 @@ define([
 
             return $uiElem;
         };
-        
+
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
                 var newExtension = '.' + data.ref.path.split('.').pop().toLowerCase(),
@@ -274,7 +274,7 @@ define([
                 return;
             }
 
-            this.data.deferredInit = function () {
+            this.data.uploader.deferredInit = function () {
                 this.data.uploader.uploadControls = {
                     'image': this.initUploadController({
                         uploaderSlug: 'fd_hqimage',
@@ -309,15 +309,15 @@ define([
                 };
             };
         },
-        initWidget: function (widget) {
+        initMediaUploaderWidget: function (widget) {
             this.__callOld();
             if (!this.data.uploader.uploadEnabled) {
                 return;
             }
 
-            var deferredInit = this.data.deferredInit;
+            var deferredInit = this.data.uploader.deferredInit;
             if (deferredInit !== null) {
-                this.data.deferredInit = null;
+                this.data.uploader.deferredInit = null;
                 deferredInit.apply(this);
             }
 
@@ -335,9 +335,9 @@ define([
             // Load the uploader and its dependencies in the background after
             // core dependencies are already loaded, since it's not necessary at
             // page load.
-            // uploadControls is referenced in the initWidget call path, but
-            // never actually used until the upload button is clicked.  We use
-            // an object here as a poor man's promise.
+            // uploadControls is referenced in the initMediaUploaderWidget call
+            // path, but never actually used until the upload button is clicked.
+            // We use an object here as a poor man's promise.
             // Feel free to undo this if it's not worth it.
           
             var uploadController = {value: null};

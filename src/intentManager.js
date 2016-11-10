@@ -151,7 +151,7 @@ define([
     }
 
     function syncMugWithIntent (tags, mug) {
-        // called when initializing a mug from a parsed form
+        // called when initializing a new mug or when parsing a form
         if (mug.__className === "AndroidIntent" ||
             mug.__className === "PrintIntent") {
             var nodeID = mug.p.nodeID,

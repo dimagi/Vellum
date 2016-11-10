@@ -478,7 +478,7 @@ define([
                 return null;
             };
 
-            widget.mug.form.vellum.initWidget(widget);
+            widget.mug.form.vellum.initMediaUploaderWidget(widget);
 
             return widget;
         };
