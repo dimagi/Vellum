@@ -738,6 +738,7 @@ define([
             return false;
         });
 
+        this._resizeFullScreenModal($modal);
         $modal.modal('show');
     };
 
