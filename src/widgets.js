@@ -421,7 +421,10 @@ define([
                     leftAutocompleteChoices: autocompleteChoices,
                     value: super_getValue(),
                     xpathType: widget.definition.xpathType,
-                    onLoad: function ($ui) { setWidget($ui, widget); },
+                    onLoad: function ($ui) {
+                        setWidget($ui, widget);
+                        $ui.find(".property-name").text(options.lstring || "Expression");
+                    },
                     done: function (val) {
                         if (val !== false) {
                             super_setValue(val);
