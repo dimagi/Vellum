@@ -554,9 +554,14 @@ define([
                 it("cursor should be at end of input on focus", function () {
                     var editor = widget.input.editor;
                     widget.setValue('testing cursor');
-                    editor.focus();
-                    var selection = editor.getSelection(true);
-                    assert.strictEqual(selection.getNative().focusOffset, 14);
+
+                    // Make sure focus is elsewhere, then focus on the rich text input
+                    editor.on('instanceReady', function() {
+                        $('[name=property-nodeID]').focus();
+                        editor.focus();
+                        var selection = editor.getSelection(true);
+                        assert.strictEqual(selection.getNative().focusOffset, 14);
+                    });
                 });
 
                 it("should change output ref to output value", function () {
