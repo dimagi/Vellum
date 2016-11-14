@@ -1378,9 +1378,17 @@ define([
             }
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
-            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-            if ($firstInput.length) {
-                $firstInput.focus().select();
+
+            // Focus on first input, which might be a normal input or a rich text input
+            var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
+            if ($firstGroup.length) {
+                var $input = $firstGroup.find("input, textarea");
+                if ($input.length) {
+                    $input.focus();
+                } else {
+                    $input = $firstGroup.find(".fd-textarea, .fd-input");
+                    richText.editor($input).focus();
+                }
             }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
@@ -2002,10 +2010,10 @@ define([
                 properties: this.getMainProperties(),
                 help: {
                     title: "Basic",
-                    text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
-                        "It does not appear on the phone. It is the name of the question in data exports.</p>" +
-                        "<p>The <strong>Label</strong> is text that appears in the application. " +
-                        "This text will not appear in data exports.</p> ",
+                    text: "<p>The <strong>Label</strong> is text that appears in the application. " +
+                        "This text will not appear in data exports.</p> " +
+                        "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                        "It does not appear on the phone. It is the name of the question in data exports.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
@@ -2063,8 +2071,8 @@ define([
 
     fn.getMainProperties = function () {
         return [
-            "nodeID",
             "label",
+            "nodeID",
             "readOnlyControl",
             "itemsetData",
             "imageSize",
