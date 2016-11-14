@@ -1293,6 +1293,8 @@ define([
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
+        }).on('change-display-language', function (e) {
+            _this.refreshMugName(_this.getCurrentlySelectedMug());
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
@@ -1303,6 +1305,10 @@ define([
         var name = this.getMugDisplayName(mug);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
+        }
+        var currentMug = this.getCurrentlySelectedMug();
+        if (!currentMug || mug.ufid === currentMug.ufid) {
+            this.$f.find(".fd-question-properties .fd-head h2").text(name);
         }
     };
 
@@ -1528,8 +1534,6 @@ define([
 
         this.showContentRight();
         $props.addClass("hide");
-        var questionName = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
-        $props.find(".fd-head h2").text(questionName || "Question Details");
 
         this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),

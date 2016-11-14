@@ -192,8 +192,8 @@ define([
                 }
             });
 
-            if (form && form.vellum.getCurrentlySelectedMug()) {
-                form.vellum.getCurrentlySelectedMug().fire({
+            if (form) {
+                form.fire({
                     type: 'change-display-language',
                 });
             }
