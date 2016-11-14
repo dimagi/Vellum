@@ -1152,6 +1152,15 @@ define([
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
+        var currentMug = this.getCurrentlySelectedMug();
+        if (currentMug && !currentMug.p.nodeID) {
+            var suggestedID = currentMug.form.vellum.getMugDisplayName(currentMug);
+            suggestedID = suggestedID.toLowerCase();
+            suggestedID = suggestedID.replace(/[^\w\-\s]/g, '');
+            suggestedID = suggestedID.trim();
+            suggestedID = suggestedID.replace(/\s+/g, '_');
+            currentMug.p.nodeID = currentMug.form.generate_question_id(suggestedID, currentMug);
+        }
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
