@@ -501,7 +501,42 @@ define([
                 .map(function(ref) {
                     return [ref.path, null];
                 }).object().value();
-        }
+        },
+        /*
+         * Returns object describing references used in the logic manager
+         *
+         * {
+         *   /path/of/referenced/mug: {
+         *     /path/of/mug/referencing: property where ref occurs
+         *   }
+         * }
+         *
+         * Optionally can filter based on hashtag path
+         */
+        findUsages: function (path) {
+            var _this = this,
+                form = _this.form,
+                tableData = {},
+                formRefs = _this.reverse;
+
+            _.each(formRefs, function (refsToUsedMug, usedMugUfid) {
+                var usedMug = form.getMugByUFID(usedMugUfid),
+                    mugReferences = {};
+                if (path && path !== usedMug.hashtagPath) {
+                    return;
+                }
+                _.each(refsToUsedMug, function (refs, usedInMugUfid) {
+                    _.each(refs, function (ref) {
+                        var usedInMug = form.getMugByUFID(usedInMugUfid),
+                            readablePropName = usedInMug.spec[ref.property].lstring;
+                        mugReferences[usedInMug.hashtagPath] = readablePropName;
+                    });
+                });
+                tableData[usedMug.hashtagPath] = mugReferences;
+            });
+
+            return tableData;
+        },
     };
 
     return {

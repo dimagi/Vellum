@@ -7,10 +7,12 @@
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/BDBF500D-13AD-40F0-90B5-EE65A56F92E5" uiVersion="1" version="1" name="Untitled Form">
 					<question1 />
 					<question2 />
+					<question3 />
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" />
 			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:string" vellum:relevant="#form/question1 = 1" relevant="/data/question1 = 1" />
+			<bind vellum:nodeset="#form/question3" nodeset="/data/question3" type="xsd:string" vellum:relevant="#form/question2 = #form/question1" relevant="/data/question2 = /data/question1" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -19,6 +21,9 @@
 					<text id="question2-label">
 						<value>question2</value>
 					</text>
+					<text id="question3-label">
+						<value>question3</value>
+					</text>
 				</translation>
 				<translation lang="hin">
 					<text id="question1-label">
@@ -26,6 +31,9 @@
 					</text>
 					<text id="question2-label">
 						<value>question2</value>
+					</text>
+					<text id="question3-label">
+						<value>question3</value>
 					</text>
 				</translation>
 			</itext>
@@ -37,6 +45,9 @@
 		</input>
 		<input vellum:ref="#form/question2" ref="/data/question2">
 			<label ref="jr:itext('question2-label')" />
+		</input>
+		<input vellum:ref="#form/question3" ref="/data/question3">
+			<label ref="jr:itext('question3-label')" />
 		</input>
 	</h:body>
 </h:html>

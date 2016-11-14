@@ -44,6 +44,7 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
+    'vellum/analytics',
     'ckeditor',
     'ckeditor-jquery'
 ], function(
@@ -57,6 +58,7 @@ define([
     logic,
     util,
     xml,
+    analytics,
     CKEDITOR
 ){
     var CASE_REF_REGEX = /^#case\//,
@@ -164,6 +166,9 @@ define([
                             "got " + input.length);
         }
         options = options || {};
+        if (!options.createPopover && !form.vellum.opts().features.disable_popovers) {
+            options.createPopover = createPopover;
+        }
         var NOTSET = {},
             newval = NOTSET,  // HACK work around async get/set
             editor = input.ckeditor({
@@ -754,14 +759,9 @@ define([
                     hide: 200,
                 },
             }).on('shown.bs.popover', function() {
-                if (window.analytics) {
-                    if (isFormRef) {
-                        window.analytics.usage("Form Builder", "Hovered over easy form reference");
-                    } else {
-                        window.analytics.usage("Form Builder", "Hovered over easy case reference");
-                    }
-                    window.analytics.workflow("Hovered over easy reference");
-                }
+                var type = isFormRef ? 'form' : 'case';
+                analytics.fbUsage("Hovered over easy " + type + " reference");
+                analytics.workflow("Hovered over easy reference");
                 if (isDate || $this.attr("data-date-format")) {
                     var pos = $(this).offset(),
                         x = pos.left,
@@ -787,18 +787,11 @@ define([
         }
     }
 
-    function initEditor(input, form, options) {
-        if (options && form.vellum && !form.vellum.opts().features.disable_popovers) {
-            options = _.extend(options, {createPopover: createPopover});
-        }
-        return editor(input, form, options);
-    }
-
     return {
         REF_REGEX: REF_REGEX,
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
-        editor: initEditor,
+        editor: editor,
         fromRichText: fromRichText,
         toRichText: toRichText,
         isInvalid: isInvalid,

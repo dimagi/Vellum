@@ -27,6 +27,7 @@ define([
     'vellum/dateformats',
     'vellum/util',
     'vellum/xml',
+    'vellum/analytics',
     'vellum/javaRosa/itext',
     'vellum/javaRosa/itextBlock',
     'vellum/javaRosa/itextWidget',
@@ -40,6 +41,7 @@ define([
     dateformats,
     util,
     xml,
+    analytics,
     itext,
     itextBlock,
     itextWidget,
@@ -78,13 +80,13 @@ define([
                 } else {
                     jrUtil.insertOutputRef(_this, target, path, mug);
                 }
-                if (window.analytics) {
-                    if (_this.data.core.form.isCaseReference(path)) {
-                        window.analytics.usage("Case Reference", "Drag and Drop", "Label");
-                    } else {
-                        window.analytics.usage("Form Reference", "Drag and Drop", "Label");
-                    }
+                var category;
+                if (_this.data.core.form.isCaseReference(path)) {
+                    category = "Case Reference";
+                } else {
+                    category = "Form Reference";
                 }
+                analytics.usage(category, "Drag and Drop", "Label");
             } else {
                 _this.__callOld();
             }

@@ -17,6 +17,7 @@ define([
     'tpl!vellum/templates/alert_global',
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
+    'tpl!vellum/templates/find_usages',
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
@@ -24,6 +25,7 @@ define([
     'vellum/datasources',
     'vellum/util',
     'vellum/javaRosa/util',
+    'vellum/analytics',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -49,6 +51,7 @@ define([
     alert_global,
     modal_content,
     modal_button,
+    find_usages,
     mugs,
     widgets,
     richText,
@@ -56,6 +59,7 @@ define([
     datasources,
     util,
     jrUtil,
+    analytics,
     debug
 ) {
     
@@ -64,6 +68,7 @@ define([
     setTimeout(function () {
         require([
             'codemirror',
+            'codemirror/mode/xml/xml',
             'diff-match-patch',
             'CryptoJS',
             'vellum/expressionEditor',
@@ -159,9 +164,7 @@ define([
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
-                    if (window.analytics) {
-                        window.analytics.workflow("Clicked Save in form builder");
-                    }
+                    analytics.workflow("Clicked Save in the form builder");
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
@@ -200,10 +203,8 @@ define([
                 var $scrollable = $node.closest(".fd-scrollable");
                 $scrollable.scrollTop($node.position().top - $scrollable.position().top);
             }
-            if (window.analytics) {
-                window.analytics.usage("Form Builder", "Clicked link to show in tree");
-                window.analytics.workflow("Clicked on easy reference popover's link to show in tree");
-            }
+            analytics.fbUsage("Clicked link to show in tree");
+            analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
         this._init_toolbar();
@@ -368,6 +369,7 @@ define([
                 function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
+                        analytics.fbUsage("Tools", menuItem.name);
                         menuItem.action(function () {
                             _this.refreshVisibleData();
                         });
@@ -386,10 +388,8 @@ define([
         });
 
         this.$f.find('.fd-button-copy').click(function () {
-            if (window.analytics) {
-                window.analytics.usage("Copy Paste", "Copy Button");
-                window.analytics.workflow("Clicked Copy Button in form builder");
-            }
+            analytics.usage("Copy Paste", "Copy Button");
+            analytics.workflow("Clicked Copy Button in form builder");
             _this.ensureCurrentMugIsSaved(function () {
                 _this.displayMultipleSelectionView();
                 var selected = _this.jstree("get_selected");
@@ -418,10 +418,7 @@ define([
                         return a.text.match(/full screen/i);
                     }));
                     var html = $fullScreenMenuItem.html();
-                    if (window.analytics) {
-                        window.analytics.usage('Form Builder', 'Full Screen Mode',
-                                  _this.opts().core.formId);
-                    }
+                    analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
                     if (_this.data.windowManager.fullscreen) {
                         _this.data.windowManager.fullscreen = false;
                         $fullScreenMenuItem.html(html.replace(/Exit/, "Enter"));
@@ -453,7 +450,14 @@ define([
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
                 }
-            }
+            },
+            {
+                name: "Find Usages",
+                icon: "fa fa-search",
+                action: function (done) {
+                    _this.findUsages(done);
+                }
+            },
         ];
     };
 
@@ -562,7 +566,7 @@ define([
                          "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
         }));
 
-        $modal.addClass('fd-source-modal')
+        $modal.addClass('fd-full-screen-modal')
             .find('.modal-body')
             .removeClass('form-horizontal').removeClass('form')
             .html($updateForm);
@@ -577,9 +581,11 @@ define([
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        codeMirror = require('codemirror').fromTextArea($textarea.get(0));
-        codeMirror.setOption('viewportMargin', Infinity);
-        codeMirror.setOption('lineNumbers', true);
+        codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
+            mode: 'xml',
+            lineNumbers: true,
+            viewportMargin: Infinity,
+        });
 
         $modal.modal('show');
         $modal.one('shown.bs.modal', function () {
@@ -630,7 +636,7 @@ define([
                 action: function () {
                     $('#form-differences').show();
 
-                    $modal.addClass('fd-source-modal')
+                    $modal.addClass('fd-full-screen-modal')
                         .removeClass('form-horizontal')
                         .find('.modal-body')
                         .html($overwriteForm);
@@ -715,6 +721,27 @@ define([
         });
     };
 
+    fn.findUsages = function () {
+        var _this = this,
+            $modal = this.generateNewModal("Use of each question", []),
+            $modalBody = $modal.find('.modal-body'),
+            form = _this.data.core.form,
+            tableData = form.findUsages();
+
+        $modal.addClass('fd-full-screen-modal');
+        $modalBody.append($(find_usages({tableData: tableData})));
+
+        $modalBody.find('.link-to-question').click(function() {
+            var goToMug = $(this).text();
+            $modal.modal('hide');
+            _this.setCurrentMug(form.getMugByPath(goToMug));
+            return false;
+        });
+
+        this._resizeFullScreenModal($modal);
+        $modal.modal('show');
+    };
+
     fn.closeModal = function (done, immediate) {
         var _this = this,
             $modal = _this.$f.find('.fd-modal-generic-container .modal');
@@ -789,32 +816,27 @@ define([
                 target.val(target.val() + path).change();
             }
 
-            if (window.analytics) {
-                var targetType;
-                switch (target[0].id) {
-                    case 'property-relevantAttr':
-                        targetType = "Display";
-                        break;
-                    case 'property-constraintAttr':
-                        targetType = "Validation";
-                        break;
-                    case 'property-calculateAttr':
-                        targetType = "Calculation";
-                        break;
-                    default:
-                        targetType = "Expression Editor";
-                        break;
-                }
-                if (_this.data.core.form.isCaseReference(path)) {
-                    window.analytics.usage("Case Reference", "Drag and Drop", targetType);
-                } else {
-                    window.analytics.usage(
-                        "Form Reference",
-                        "Drag and Drop",
-                        targetType
-                    );
-                }
+            var targetType, category;
+            switch (target[0].id) {
+                case 'property-relevantAttr':
+                    targetType = "Display";
+                    break;
+                case 'property-constraintAttr':
+                    targetType = "Validation";
+                    break;
+                case 'property-calculateAttr':
+                    targetType = "Calculation";
+                    break;
+                default:
+                    targetType = "Expression Editor";
+                    break;
             }
+            if (_this.data.core.form.isCaseReference(path)) {
+                category = "Case Reference";
+            } else {
+                category = "Form Reference";
+            }
+            analytics.usage(category, "Drag and Drop", targetType);
         }
 
         if (mug && ops && mug.options.defaultOperator) {
@@ -1169,6 +1191,7 @@ define([
                     _this.$f.find('.fd-content-right .fd-column').addClass('hide');
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
+                $(".fd-tree .fd-head h2").text(_this.data.core.form.formName);
                 hidePageSpinner();
             } catch (e) {
                 window.console.log(util.formatExc(e));
@@ -1353,9 +1376,7 @@ define([
             if (!foo) {
                 throw new Error("cannot add " + qType + " at the current position");
             }
-            if (window.analytics) {
-                window.analytics.workflow("Added question in form builder");
-            }
+            analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
             var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
             if ($firstInput.length) {

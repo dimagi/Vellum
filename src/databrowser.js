@@ -121,8 +121,7 @@ define([
 
     function dataTreeJson(data, vellum) {
         function treeNode(node) {
-            var path = isRichText && node.hashtag || node.xpath,
-                getNodes = function () { return _.map(node.getNodes(), treeNode); },
+            var getNodes = function () { return _.map(node.getNodes(), treeNode); },
                 children = node.recursive ? true : getNodes();
             return {
                 text: node.name,
@@ -132,13 +131,14 @@ define([
                 state: {opened: !node.recursive && children.length <= MAX_OPEN_NODE},
                 children: children,
                 data: {
-                    handleDrop: _.partial(handleDrop, path, node.sourceInfo),
+                    handleDrop: _.partial(handleDrop, node, node.sourceInfo),
                     getNodes: node.recursive ? getNodes : null,
                 }
             };
         }
-        function handleDrop(path, info, target) {
-            var widget = widgets.util.getWidget(target, vellum);
+        function handleDrop(node, info, target) {
+            var widget = widgets.util.getWidget(target, vellum),
+                path = widget.mug.form.richText ? node.hashtag : node.xpath;
             while (info) {
                 var id = widget.addInstanceRef({id: info.id, src: info.uri});
                 if (id !== info.id) {
@@ -159,8 +159,7 @@ define([
             subCases = _.flatten(_.map(subCases, flattenNode));
             return [node].concat(subCases);
         }
-        var MAX_OPEN_NODE = 50,
-            isRichText = vellum.opts().features.rich_text;
+        var MAX_OPEN_NODE = 50;
         return _.chain(data)
             .map(treeNode)
             .map(flattenNode)

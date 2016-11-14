@@ -12,6 +12,7 @@ define([
     'text!static/databrowser/mother-ref.xml',
     'text!static/databrowser/child-ref-output-value.xml',
     'text!static/databrowser/child-ref-output-value-other-lang.xml',
+    'text!static/databrowser/ignore-rich-text.xml',
     'text!static/databrowser/preloaded-hashtags.xml',
     'text!static/databrowser/unknown-property-preloaded-hashtags.xml',
     'text!static/datasources/case-property.xml',
@@ -28,6 +29,7 @@ define([
     MOTHER_REF_XML,
     CHILD_REF_OUTPUT_VALUE_XML,
     CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
+    IGNORE_RICH_TEXT,
     PRELOADED_HASHTAGS_XML,
     UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML,
     CASE_PROPERTY_XML
@@ -201,6 +203,17 @@ define([
                     assert.equal(label.length, 1);
                     util.findNode(dataTree, "dob").data.handleDrop(label);
                 });
+            });
+
+            it("should drag/drop xpath (not hashtag) when rich text is off", function () {
+                util.loadXML(IGNORE_RICH_TEXT);
+                var dob = util.getMug("dob"),
+                    input = $("[name=property-calculateAttr]");
+                assert.equal(dob.p.calculateAttr, "");
+                util.findNode(dataTree, "dob").data.handleDrop(input);
+                assert.equal(input.val(), "instance('casedb')/cases/case[@case_id = " +
+                        "instance('commcaresession')/session/data/case_id]/dob");
+                assert.equal(dob.p.calculateAttr, "#case/dob");
             });
 
             describe("with two languages", function () {

@@ -22,7 +22,7 @@
     ],
     "dependencies": {
         "underscore": "~1.8.3",
-        "jquery": "~2.2.4",
+        "jquery": "~3.1.1",
         "requirejs": "~2.3.1",
         "requirejs-text": "~2.0.12",
         "require-less": "~0.1.2",
@@ -34,14 +34,14 @@
         "fuse.js": "~2.5.0",
 
         "bootstrap": "3.3.7",
-        "jstree": "~3.3.2",
+        "jstree": "~3.3.3",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath#v0.0.3",
         "jsdiff": ">=1",
         "markdown-it": "~7.0.0",
-        "codemirror": "3.24.0"
+        "codemirror": "5.19.0"
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",

@@ -621,7 +621,7 @@ define([
                         assert(bubble.length, "No bubbles detected");
                         try {
                             bubble.mouseenter();
-                            var $popover = $('.popover-content');
+                            var $popover = $('.popover-content:last');
                             assert.strictEqual($popover.find('p:first').text(),
                                                "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                             var $link = $popover.find("a");
@@ -644,7 +644,7 @@ define([
                         assert(bubble.length, "No bubbles detected");
                         try {
                             bubble.mouseenter();
-                            var $popover = $('.popover-content p:first');
+                            var $popover = $('.popover-content:last p:first');
                             assert.strictEqual($popover.text(),
                                 "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
 
