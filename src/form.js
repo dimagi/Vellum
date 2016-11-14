@@ -895,6 +895,9 @@ define([
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
+            if (isInternal && !mug.options.isControlOnly) {
+                mug.p.nodeID = this.generate_question_id();
+            }
             if (mug.__className === "Choice") {
                 var parent = refMug.__className === "Choice" ? refMug.parentMug : refMug;
                 mug.p.nodeID = this.generate_item_label(parent);
