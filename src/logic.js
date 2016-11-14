@@ -528,8 +528,12 @@ define([
                 _.each(refsToUsedMug, function (refs, usedInMugUfid) {
                     _.each(refs, function (ref) {
                         var usedInMug = form.getMugByUFID(usedInMugUfid),
+                            usedInMugPath = usedInMug.hashtagPath,
                             readablePropName = usedInMug.spec[ref.property].lstring;
-                        mugReferences[usedInMug.hashtagPath] = readablePropName;
+                        if (!usedInMugPath) {
+                            usedInMugPath = usedInMug.parentMug.hashtagPath;
+                        }
+                        mugReferences[usedInMugPath] = readablePropName;
                     });
                 });
                 tableData[usedMug.hashtagPath] = mugReferences;
