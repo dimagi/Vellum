@@ -1191,6 +1191,7 @@ define([
                     _this.$f.find('.fd-content-right .fd-column').addClass('hide');
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
+                $(".fd-tree .fd-head h2").text(_this.data.core.form.formName);
                 hidePageSpinner();
             } catch (e) {
                 window.console.log(util.formatExc(e));

@@ -53,6 +53,7 @@ body.vellum-full-screen {
 
             // Heading for any panel (question tree, expression editor, etc.)
             .fd-head {
+                @menuContainerWidth: 50px;
                 color: @white;
                 background-color: @cc-brand-low;
                 font-size: 17px;    // size icons
@@ -81,6 +82,10 @@ body.vellum-full-screen {
                     font-weight: normal;
                     line-height: 23px;
                     text-transform: uppercase;
+                    .text-overflow();
+                    position: absolute;
+                    left: 0;
+                    right: @menuContainerWidth - @contentPaddingVellum;
                 }
 
                 // Question tree menu (language switcher, copy, paste, etc.)
@@ -90,6 +95,7 @@ body.vellum-full-screen {
                     top: 0px;
                     line-height: 23px;
                     font-size: @baseFontSize * 0.9;
+                    min-width: @menuContainerWidth;
 
                     // Icon link to open dropdown
                     > a {
@@ -98,6 +104,7 @@ body.vellum-full-screen {
                         display: block;
                         padding: 0 @contentPaddingVellum;
                         text-decoration: none;
+                        background-color: @cc-brand-low;
 
                         &:hover {
                             text-decoration: none;
