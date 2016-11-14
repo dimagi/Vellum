@@ -1311,7 +1311,7 @@ define([
         }
         var currentMug = this.getCurrentlySelectedMug();
         if (!currentMug || mug.ufid === currentMug.ufid) {
-            this.$f.find(".fd-question-properties .fd-head h2").text(name);
+            this.$f.find(".fd-question-properties .fd-head h2").html(name);
         }
     };
 
