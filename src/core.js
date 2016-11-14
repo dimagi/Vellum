@@ -1528,6 +1528,8 @@ define([
 
         this.showContentRight();
         $props.addClass("hide");
+        var questionName = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+        $props.find(".fd-head h2").text(questionName || "Question Details");
 
         this._setPropertiesMug(mug);
         var $content = this.$f.find(".fd-props-content").empty(),
