@@ -758,6 +758,9 @@ define([
                     }
                     _.each(refsToUsedMug, function (propName, usedInMugPath) {
                         if (usedInMugPath.includes(searchKey)) {
+                            if (!filteredData[usedMugPath]) {
+                                filteredData[usedMugPath] = {};
+                            }
                             filteredData[usedMugPath][usedInMugPath] = propName;
                         }
                     });
