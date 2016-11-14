@@ -18,6 +18,7 @@ define([
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
     'tpl!vellum/templates/find_usages',
+    'tpl!vellum/templates/find_usages_search',
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
@@ -53,6 +54,7 @@ define([
     modal_content,
     modal_button,
     find_usages,
+    find_usages_search,
     mugs,
     widgets,
     richText,
@@ -731,8 +733,7 @@ define([
             tableData = form.findUsages();
 
         $modal.addClass('fd-full-screen-modal');
-        $modalBody.append($('<div>').append($('<label for="find-usages-search">').text("Search")));
-        $modalBody.append($('<div>').append($('<input id="find-usages-search">').attr('type', 'text')));
+        $modalBody.append($(find_usages_search()));
         $modalBody.append($(find_usages({tableData: tableData})));
 
         this._resizeFullScreenModal($modal);
@@ -745,7 +746,7 @@ define([
             return false;
         });
 
-        $modalBody.find('#find-usages-search').on('keyup inserted.atwho', function () {
+        $modalBody.find('#findUsagesSearch').on('keyup inserted.atwho', function () {
             var searchKey = $.trim(this.value),
                 filteredData = {};
             if (!searchKey) {
@@ -770,7 +771,7 @@ define([
             $modalBody.append($(find_usages({tableData: filteredData})));
         });
 
-        atwho.autocomplete($('#find-usages-search'), _this.getCurrentlySelectedMug(),{
+        atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
             useRichText: true,
         });
     };
