@@ -1294,7 +1294,10 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         }).on('change-display-language', function (e) {
-            _this.refreshMugName(_this.getCurrentlySelectedMug());
+            var mug = _this.getCurrentlySelectedMug();
+            if (mug) {
+                _this.refreshMugName(mug);
+            }
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
