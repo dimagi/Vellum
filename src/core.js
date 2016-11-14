@@ -735,6 +735,9 @@ define([
         $modalBody.append($('<div>').append($('<input id="find-usages-search">').attr('type', 'text')));
         $modalBody.append($(find_usages({tableData: tableData})));
 
+        this._resizeFullScreenModal($modal);
+        $modal.modal('show');
+
         $modalBody.find('.link-to-question').click(function() {
             var goToMug = $(this).text();
             $modal.modal('hide');
@@ -764,8 +767,6 @@ define([
             $modalBody.append($(find_usages({tableData: filteredData})));
         });
 
-        this._resizeFullScreenModal($modal);
-        $modal.modal('show');
         atwho.autocomplete($('#find-usages-search'), _this.getCurrentlySelectedMug(),{
             useRichText: true,
         });
