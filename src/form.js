@@ -179,6 +179,7 @@ define([
                 form.hashtagMap = _.clone(vellum.datasources.getHashtagMap({}));
                 form.invertedHashtagMap = _.invert(form.hashtagMap);
                 form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
+                form.hasCaseHashtags = true;
             } else {
                 form.hashtagMap = {};
                 form.invertedHashtagMap = {};
@@ -568,6 +569,10 @@ define([
         },
         setAttr: function (slug, val) {
             this[slug] = val;
+            if (slug === "richText" && val && !this.hasCaseHashtags) {
+                // TODO remove this if/when hashtags are loaded on form init
+                this._updateHashtags();
+            }
             this.fire({
                 type: 'change'
             });
