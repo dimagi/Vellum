@@ -45,6 +45,7 @@ define([
                 core: {onReady: done},
             });
         });
+
         it("should get and fix serialization errors for mugs with matching paths", function () {
             var form = util.loadXML(""),
                 one = util.addQuestion("Text", "question"),
@@ -350,6 +351,25 @@ define([
             assert(util.isTreeNodeValid(q1), q1.getErrors().join("\n"));
             util.deleteQuestion("q2");
             assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
+        });
+
+        describe("with rich text disabled", function() {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {onReady: done},
+                    features: {rich_text: false},
+                });
+            });
+
+            it("should update case hashtags on enabling rich text", function () {
+                var form = util.loadXML("");
+                util.addQuestion("Text", "text");
+                assert(form.isValidHashtag("#form/text"), "not valid: #form/text");
+                form.setAttr("richText", true);
+                assert(form.isValidHashtag("#case/dob"), "not valid: #case/dob");
+                assert(form.isValidHashtag("#form/text"), "not valid: #form/text");
+            });
         });
 
         describe("naming logic", function () {
