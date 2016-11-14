@@ -1154,7 +1154,7 @@ define([
     fn.ensureCurrentMugIsSaved = function (callback) {
         var currentMug = this.getCurrentlySelectedMug();
         if (currentMug && !currentMug.p.nodeID) {
-            var suggestedID = currentMug.form.vellum.getMugDisplayName(currentMug);
+            var suggestedID = currentMug.form.vellum.getMugDisplayName(currentMug) || "";
             suggestedID = suggestedID.toLowerCase();
             suggestedID = suggestedID.replace(/[^\w\-\s]/g, '');
             suggestedID = suggestedID.trim();
