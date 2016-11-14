@@ -26,6 +26,7 @@ define([
     'vellum/util',
     'vellum/javaRosa/util',
     'vellum/analytics',
+    'vellum/atwho',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -60,6 +61,7 @@ define([
     util,
     jrUtil,
     analytics,
+    atwho,
     debug
 ) {
     
@@ -729,6 +731,8 @@ define([
             tableData = form.findUsages();
 
         $modal.addClass('fd-full-screen-modal');
+        $modalBody.append($('<div>').append($('<label for="find-usages-search">').text("Search")));
+        $modalBody.append($('<div>').append($('<input id="find-usages-search">').attr('type', 'text')));
         $modalBody.append($(find_usages({tableData: tableData})));
 
         $modalBody.find('.link-to-question').click(function() {
@@ -738,8 +742,33 @@ define([
             return false;
         });
 
+        $modalBody.find('#find-usages-search').on('keyup inserted.atwho', function () {
+            var searchKey = $.trim(this.value),
+                filteredData = {};
+            if (!searchKey) {
+                filteredData = tableData;
+            } else {
+                _.each(tableData, function (refsToUsedMug, usedMugPath) {
+                    if (usedMugPath.includes(searchKey)) {
+                        filteredData[usedMugPath] = refsToUsedMug;
+                        return;
+                    }
+                    _.each(refsToUsedMug, function (propName, usedInMugPath) {
+                        if (usedInMugPath.includes(searchKey)) {
+                            filteredData[usedMugPath][usedInMugPath] = propName;
+                        }
+                    });
+                });
+            }
+            $modalBody.find('table').remove();
+            $modalBody.append($(find_usages({tableData: filteredData})));
+        });
+
         this._resizeFullScreenModal($modal);
         $modal.modal('show');
+        atwho.autocomplete($('#find-usages-search'), _this.getCurrentlySelectedMug(),{
+            useRichText: true,
+        });
     };
 
     fn.closeModal = function (done, immediate) {
