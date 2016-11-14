@@ -80,9 +80,9 @@ define([
 
         it("should add hashtag reference to jr:count", function () {
             util.loadXML("");
-            util.addQuestion("Int");
-            var mug = util.addQuestion("Repeat");
-            util.addQuestion("Text");
+            util.addQuestion("Int", "question1");
+            var mug = util.addQuestion("Repeat", "question2");
+            util.addQuestion("Text", "question3");
             mug.p.repeat_count = "#form/question1";
             util.assertXmlEqual(
                 util.call("createXML"),

@@ -366,8 +366,8 @@ define([
 
         it("itext widget should not overwrite label with question id", function () {
             util.loadXML("");
-            var q1 = util.addQuestion("Text");
-            util.addQuestion("Text");
+            var q1 = util.addQuestion("Text", "question1");
+            util.addQuestion("Text", "question2");
             util.clickQuestion("question1");
             $("[name='itext-en-label']").val("English").change();
             q1.p.nodeID = "newid";
