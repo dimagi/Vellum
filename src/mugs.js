@@ -800,6 +800,8 @@ define([
                     mug.p.nodeID = value;
                 },
                 widget: widgets.identifier,
+                help: "The <strong>Question ID</strong> is an internal identifier for a question. " +
+                      "It does not appear on the phone. It is the name of the question in data exports.",
                 validationFunc: function (mug) {
                     var caseWarning = {
                             key: "mug-nodeID-case-warning",
