@@ -2089,6 +2089,7 @@ define([
     fn.getMainProperties = function () {
         return [
             "label",
+            "nodeID",
             "readOnlyControl",
             "itemsetData",
             "imageSize",
@@ -2107,7 +2108,6 @@ define([
 
     fn.getLogicProperties = function () {
         return [
-            "nodeID",
             "calculateAttr",
             "requiredAttr",
             "relevantAttr",
