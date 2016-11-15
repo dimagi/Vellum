@@ -70,6 +70,20 @@ define([
             });
         });
 
+        it("should assign new media path on media upload", function () {
+            util.loadXML("");
+            var itext = util.addQuestion("Text", "text").p.labelItext,
+                pattern = /jr:\/\/file\/commcare\/image\/data\/text-\w+\.gif/;
+            $(".itext-block-label-add-form-image").click();
+            var media = util.getMediaUploader($(".fd-mm-upload-trigger:first"));
+            media.upload("old.gif");
+            var old = itext.get("image");
+            assert.match(old, pattern);
+            media.upload("new.gif");
+            assert.match(itext.get("image"), pattern);
+            assert.notEqual(itext.get("image"), old, "new upload should create a new path");
+        });
+
         describe("and non default language is first", function () {
             before(function (done) {
                 util.init({

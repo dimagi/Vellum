@@ -84,7 +84,8 @@ define([
         video: 'fd_hqvideo',
         'video-inline': 'fd_hqInlineVideo',
         text:  'fd_hqtext',
-    };
+    },
+    EXT = /(\.[^\/.]+)?$/;
 
     // These functions were extracted out when separating the uploader code from
     // the JavaRosa Itext media widget code.  They could easily be made part of
@@ -108,11 +109,15 @@ define([
             return ref.linkedObj.url;
         };
 
-        ref.updateController = function () {
+        ref.updateController = function (widget) {
             // see note about poor man's promise below
             var uploadController = uploadControls[ref.mediaType].value;
             uploadController.resetUploader();
             uploadController.currentReference = ref;
+            uploadController.updateMediaPath = function () {
+                var params = uploadController.uploadParams;
+                params.path = widget.getRandomizedMediaPath(params.path);
+            };
             uploadController.uploadParams = {
                 path: ref.path,
                 media_type : SLUG_TO_CLASS[ref.mediaType],
@@ -128,6 +133,30 @@ define([
     var addUploaderToWidget = function (widget, objectMap, uploadControls) {
         widget.mediaRef = multimediaReference(
             widget.form, objectMap, uploadControls);
+
+        if (!widget.getBaseMediaPath) {
+            /**
+             * Get media path without file type extension
+             *
+             * Example: jr://file/commcare/text/name
+             */
+            widget.getBaseMediaPath = function () {
+                throw new Error("abstract method not implemented: " +
+                                "widget.getBaseMediaPath()");
+            };
+        }
+
+        widget.getRandomizedMediaPath = function (oldPath) {
+            // The file type extension of the path returned here is replaced by
+            // the extension of the uploaded file, so it is not strictly
+            // necessary to pass in oldPath. However, the returned path must
+            // have an extension because of the way
+            // BaseHQMediaUploadController.startUpload() replaces it.
+            var extension = EXT.exec(oldPath)[0].toLowerCase() || ".xyz",
+                // generates 1 or 2 duplicates in 100K samples (probably random enough)
+                rand6 = Math.random().toString(36).slice(2, 8);
+            return widget.getBaseMediaPath() + "-" + rand6 + extension;
+        };
 
         var getValue = widget.getItextValue || widget.getValue,
             $input = widget.getControl(),
@@ -186,11 +215,8 @@ define([
 
         widget.handleUploadComplete = function (event, data, objectMap) {
             if (data.ref && data.ref.path) {
-                var newExtension = '.' + data.ref.path.split('.').pop().toLowerCase(),
-                    oldExtension = '.' + getValue().split('.').pop().toLowerCase();
-                if (newExtension !== oldExtension) {
-                    var currentPath = getValue().replace(/\.[^/.]+$/, newExtension);
-                    widget.getControl().val(currentPath);
+                if (getValue() !== data.ref.path) {
+                    widget.getControl().val(data.ref.path);
                     widget.handleChange();
                 }
                 objectMap[data.ref.path] = data.ref;
@@ -218,9 +244,10 @@ define([
 
     var getPreviewUI = function (widget, objectMap, ICONS) {
         var javarosa = _.isFunction(widget.getItextValue),
+            hasItext = _.isFunction(widget.getItextItem),
             currentPath = javarosa ? widget.getItextValue() : widget.getValue(),
             previewHtml;
-        if (!javarosa && !currentPath && !widget.isDefaultLang) {
+        if (hasItext && !javarosa && !currentPath && !widget.isDefaultLang) {
             currentPath = widget.getItextItem().get(widget.form, widget.defaultLang);
         }
         if (currentPath in objectMap) {
@@ -245,7 +272,7 @@ define([
             mediaType: SUPPORTED_EXTENSIONS[widget.form][0].description
         }));
         $uploadBtn.click(function () {
-            widget.mediaRef.updateController();
+            widget.mediaRef.updateController(widget);
         });
         return $uploadBtn;
     };
@@ -362,6 +389,11 @@ define([
                         sessionid: options.sessionid
                     }
                 );
+                var super_startUpload = uploadController.value.startUpload;
+                uploadController.value.startUpload = function (event) {
+                    uploadController.value.updateMediaPath();
+                    return super_startUpload.call(this, event);
+                };
                 uploadController.value.init();
             });
             return uploadController;

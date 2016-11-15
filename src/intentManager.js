@@ -61,6 +61,14 @@ define([
         return widget;
     }
 
+    function mediaWidget(mug, options) {
+        var widget = widgets.media(mug, options);
+        widget.getBaseMediaPath = function () {
+            return "jr://file/commcare/text/" + mug.p.nodeID;
+        };
+        return widget;
+    }
+
     var parseInnerTags = function (tagObj, innerTag) {
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
@@ -176,8 +184,6 @@ define([
             if (mug.p.androidIntentExtra['cc:print_template_reference']) {
                 mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'].replace(/^'|'$/g, '');
                 delete mug.p.androidIntentExtra['cc:print_template_reference'];
-            } else {
-                mug.p.docTemplate = "jr://file/commcare/text/" + mug.p.nodeID+ ".html";
             }
         }
     }
@@ -306,7 +312,7 @@ define([
             docTemplate: {
                 lstring: 'Document Template',
                 visibility: 'visible',
-                widget: widgets.media,
+                widget: mediaWidget,
             },
             androidIntentAppId: { visibility: 'hidden' },
         }

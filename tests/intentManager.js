@@ -78,6 +78,19 @@ define([
             util.assertXmlEqual(util.call("createXML"), INTENT_WITH_NO_MUG_XML);
         });
 
+        it("should assign new document template path on upload", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("PrintIntent", "print"),
+                media = util.getMediaUploader($(".fd-mm-upload-trigger")),
+                pathPattern = /jr:\/\/file\/commcare\/text\/print-\w+\.html/;
+            media.upload("temp.html");
+            var temp = mug.p.docTemplate;
+            assert.match(temp, pathPattern);
+            media.upload("file.html");
+            assert.match(mug.p.docTemplate, pathPattern);
+            assert.notEqual(mug.p.docTemplate, temp, "new upload should create a new path");
+        });
+
         describe("with multiple response pairs with matching keys", function () {
             var mug, xml, $xml;
             before(function () {
