@@ -1070,7 +1070,7 @@ define([
                 var node = this.tree.getNodeFromMug(mug);
                 mugs = this.tree.getParentNode(node).getChildrenMugs();
             }
-            return !_.any(mugs, function (mug) { return mug.p.nodeID === qId; });
+            return !_.any(mugs, function (m) { return m.p.nodeID === qId && (!mug || mug.ufid != m.ufid); });
         },
 
         /**
