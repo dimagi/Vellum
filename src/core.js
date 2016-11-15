@@ -1150,9 +1150,15 @@ define([
     };
 
     fn.nodeIDFromLabel = function(mug) {
-        // TODO: shorten
-        // TODO: get rid of bubbles
-        // TODO: turn of auto-generation if focus on question id...or just if label gets blurred
+        // TODO: turn off auto-generation if focus on question id...or just if label gets blurred
+        var suggestedID = this.getMugDisplayName(mug) || "";
+        suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
+        suggestedID = suggestedID.toLowerCase();
+        suggestedID = suggestedID.trim();
+        suggestedID = suggestedID.replace(/\s+/g, '_');         // collapse whitespace & replace with underscores
+        suggestedID = suggestedID.replace(/[^\w\-]/g, '');      // strip illegal characters
+        suggestedID = suggestedID.substring(0, 75);             // no exceedingly long IDs
+        return mug.form.generate_question_id(suggestedID, mug);
     };
 
     // Attempt to guard against doing actions when there are unsaved or invalid
@@ -1160,13 +1166,8 @@ define([
     fn.ensureCurrentMugIsSaved = function (callback) {
         var currentMug = this.getCurrentlySelectedMug();
 
-        if (currentMug) {
-            var suggestedID = this.getMugDisplayName(currentMug) || "";
-            suggestedID = suggestedID.toLowerCase();
-            suggestedID = suggestedID.replace(/[^\w\-\s]/g, '');
-            suggestedID = suggestedID.trim();
-            suggestedID = suggestedID.replace(/\s+/g, '_');
-            currentMug.p.nodeID = currentMug.form.generate_question_id(suggestedID, currentMug);
+        if (currentMug && !currentMug.p.nodeID) {
+            currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
         }
 
         this.data.core.form.generateNodeIDFromLabel = false;
@@ -1312,12 +1313,9 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
             if (_this.data.core.form.generateNodeIDFromLabel) {
-                var suggestedID = _this.getMugDisplayName(e.mug) || "";
-                suggestedID = suggestedID.toLowerCase();
-                suggestedID = suggestedID.replace(/[^\w\-\s]/g, '');
-                suggestedID = suggestedID.trim();
-                suggestedID = suggestedID.replace(/\s+/g, '_');
-                $("[name='property-nodeID']").val(e.mug.form.generate_question_id(suggestedID, e.mug));
+                // Fill in nodeID input with suggested ID
+                // ensureCurrentMugIsSaved will take care of actually setting the ID
+                $("[name='property-nodeID']").val(_this.nodeIDFromLabel(e.mug));
             }
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
