@@ -109,7 +109,7 @@ define([
         });
 
         if (options.useRichText) {
-            options.insertTpl = '${name}';
+            options.insertTpl = '${hashtagPath}';
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();
@@ -136,7 +136,7 @@ define([
             $(this).find('.atwho-inserted').children().unwrap();
         });
 
-        mug.on("change-display-language", function() {
+        mug.form.on("change-display-language", function() {
             if ($input.data('atwho')) {
                 $input.atwho('destroy');
                 addAtWhoToInput();

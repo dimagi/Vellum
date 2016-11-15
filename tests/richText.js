@@ -610,7 +610,7 @@ define([
                     util.loadXML(BURPEE_XML);
                     assert(!util.saveButtonEnabled(), "Save button should not be enabled");
                     util.clickQuestion("total_num_burpees");
-                    widget = util.getWidget('property-calculateAttr');
+                    var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
                         assert(!util.saveButtonEnabled(), "Save button should not be enabled");
                         done();
@@ -620,43 +620,95 @@ define([
                 it("should show xpath and tree reference link on popover", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");
-                    widget = util.getWidget('property-calculateAttr');
+                    var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
-                        assert(bubble, "No bubbles detected");
-                        bubble.mouseenter();
-                        var $popover = $('.popover-content:last');
-                        assert.strictEqual($popover.find('p:first').text(),
-                                           "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
-                        var $link = $popover.find("a");
-                        assert($link.length);
-                        $link.click();
-                        assert.strictEqual($(".jstree-hovered").length, 1);
+                        assert(bubble.length, "No bubbles detected");
+                        try {
+                            bubble.mouseenter();
+                            var $popover = $('.popover-content:last');
+                            assert.strictEqual($popover.find('p:first').text(),
+                                               "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+                            var $link = $popover.find("a");
+                            assert($link.length);
+                            $link.click();
+                            assert.strictEqual($(".jstree-hovered").length, 1);
+                        } finally {
+                            $(".popover").remove();
+                        }
                         done();
                     });
                 });
 
-                it("should destroy popover after destroy", function (done) {
+                it("should destroy popover on destroy widget", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");
-                    widget = util.getWidget('property-calculateAttr');
+                    var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
-                        assert(bubble, "No bubbles detected");
-                        bubble.mouseenter();
-                        var $popover = $('.popover-content:last p:first');
-                        assert.strictEqual($popover.text(),
-                                           "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
-                        var bubbles = widget.input.ckeditor().editor.widgets.instances;
+                        assert(bubble.length, "No bubbles detected");
+                        try {
+                            bubble.mouseenter();
+                            var $popover = $('.popover-content:last p:first');
+                            assert.strictEqual($popover.text(),
+                                "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
 
-                        _.each(bubbles, function(bubble) {
-                            bubble.fire('destroy');
-                        });
-
-                        // popover destroy just fades the popover
-                        assert.strictEqual($('.popover:not(.fade)').length, 0);
-
+                            widget.input.ckeditor().editor.widgets.destroyAll();
+                            // popover destroy just fades the popover
+                            assert.strictEqual($('.popover:not(.fade)').length, 0);
+                        } finally {
+                            $(".popover").remove();
+                        }
                         done();
+                    });
+                });
+
+                describe("for date references", function () {
+                    var widget;
+                    before(function (done) {
+                        util.loadXML("");
+                        util.paste([
+                            ["id", "type", "labelItext:en-default"],
+                            ["/date", "Date", "dob"],
+                            ["/text", "Text", ""],
+                        ]);
+                        util.clickQuestion("text");
+                        widget = util.getWidget('itext-en-label');
+                        widget.input.promise.then(done);
+                    });
+
+                    _.each({
+                        "#form/date": "#form/date (no formatting)",
+
+                        "format-date(date(#form/date), '%e/%n/%y')":
+                            "#form/date (d/m/yy)",
+
+                        "format-date(date(#form/date), '%a, %b %e, %Y')":
+                            "#form/date (ddd, mmm d, yyyy)",
+
+                    }, function (desc, xpath) {
+                        it("should show " + desc + " on popover", function (done) {
+                            var editor = richText.editor(widget.input),
+                                output = '<output value="' + xpath + '" />';
+                            editor.setValue(output, function () {
+                                var bubble = widget.input
+                                        .find('.cke_widget_drag_handler_container')
+                                        .children('img').first(),
+                                    $desc;
+                                assert(bubble.length, "No bubbles detected");
+                                try {
+                                    bubble.mouseenter();
+                                    $desc = $('.popover-title .text-muted');
+                                    assert.equal($desc.text(), desc);
+                                    // check for format selector link
+                                    assert.equal($desc.find('a').text(),
+                                                 /\((.*)\)/.exec(desc)[1]);
+                                } finally {
+                                    $(".popover").remove();
+                                }
+                                done();
+                            });
+                        });
                     });
                 });
             });

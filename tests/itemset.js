@@ -165,6 +165,17 @@ define([
             util.assertXmlEqual(call('createXML'), ITEMSET_WITH_QUESTION_REF_XML, {normalize_xmlns: true});
         });
 
+        it("should include filter usage in logic manager", function () {
+            var form = util.loadXML(ITEMSET_WITH_QUESTION_REF_XML);
+            assert.deepEqual(form.findUsages(),
+                {
+                    "#form/state": {
+                        "#form/district": "Filter"
+                    }
+                }
+            );
+        });
+
         describe("without access to lookup tables", function() {
             before(function (done) {
                 util.init({
