@@ -1327,6 +1327,11 @@ define([
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
+        }).on('change-display-language', function (e) {
+            var mug = _this.getCurrentlySelectedMug();
+            if (mug) {
+                _this.refreshMugName(mug);
+            }
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
@@ -1337,6 +1342,10 @@ define([
         var name = this.getMugDisplayName(mug);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
+        }
+        var currentMug = this.getCurrentlySelectedMug();
+        if (!currentMug || mug.ufid === currentMug.ufid) {
+            this.$f.find(".fd-question-properties .fd-head h2").html(name);
         }
     };
 

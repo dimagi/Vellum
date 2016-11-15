@@ -136,7 +136,7 @@ define([
             $(this).find('.atwho-inserted').children().unwrap();
         });
 
-        mug.on("change-display-language", function() {
+        mug.form.on("change-display-language", function() {
             if ($input.data('atwho')) {
                 $input.atwho('destroy');
                 addAtWhoToInput();
