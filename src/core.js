@@ -1150,7 +1150,6 @@ define([
     };
 
     fn.nodeIDFromLabel = function(mug) {
-        // TODO: turn off auto-generation if focus on question id...or just if label gets blurred
         var suggestedID = this.getMugDisplayName(mug) || "";
         suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
         suggestedID = suggestedID.toLowerCase();
@@ -1170,7 +1169,6 @@ define([
             currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
         }
 
-        this.data.core.form.generateNodeIDFromLabel = false;
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
@@ -1312,11 +1310,6 @@ define([
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
-            if (_this.data.core.form.generateNodeIDFromLabel) {
-                // Fill in nodeID input with suggested ID
-                // ensureCurrentMugIsSaved will take care of actually setting the ID
-                $("[name='property-nodeID']").val(_this.nodeIDFromLabel(e.mug));
-            }
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
@@ -1402,7 +1395,6 @@ define([
             }
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
-            _this.data.core.form.generateNodeIDFromLabel = true;
 
             // Focus on first input, which might be a normal input or a rich text input
             var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
