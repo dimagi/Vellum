@@ -109,7 +109,7 @@ define([
         });
 
         if (options.useRichText) {
-            options.insertTpl = '${name}';
+            options.insertTpl = '${hashtagPath}';
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();

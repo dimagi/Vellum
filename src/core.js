@@ -18,6 +18,7 @@ define([
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
     'tpl!vellum/templates/find_usages',
+    'tpl!vellum/templates/find_usages_search',
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
@@ -26,6 +27,7 @@ define([
     'vellum/util',
     'vellum/javaRosa/util',
     'vellum/analytics',
+    'vellum/atwho',
     'vellum/debugutil',
     'vellum/base',
     'vellum/jstree-plugins',
@@ -52,6 +54,7 @@ define([
     modal_content,
     modal_button,
     find_usages,
+    find_usages_search,
     mugs,
     widgets,
     richText,
@@ -60,6 +63,7 @@ define([
     util,
     jrUtil,
     analytics,
+    atwho,
     debug
 ) {
     
@@ -729,7 +733,11 @@ define([
             tableData = form.findUsages();
 
         $modal.addClass('fd-full-screen-modal');
+        $modalBody.append($(find_usages_search()));
         $modalBody.append($(find_usages({tableData: tableData})));
+
+        this._resizeFullScreenModal($modal);
+        $modal.modal('show');
 
         $modalBody.find('.link-to-question').click(function() {
             var goToMug = $(this).text();
@@ -738,8 +746,34 @@ define([
             return false;
         });
 
-        this._resizeFullScreenModal($modal);
-        $modal.modal('show');
+        $modalBody.find('#findUsagesSearch').on('keyup inserted.atwho', function () {
+            var searchKey = $.trim(this.value),
+                filteredData = {};
+            if (!searchKey) {
+                filteredData = tableData;
+            } else {
+                _.each(tableData, function (refsToUsedMug, usedMugPath) {
+                    if (usedMugPath.includes(searchKey)) {
+                        filteredData[usedMugPath] = refsToUsedMug;
+                        return;
+                    }
+                    _.each(refsToUsedMug, function (propName, usedInMugPath) {
+                        if (usedInMugPath.includes(searchKey)) {
+                            if (!filteredData[usedMugPath]) {
+                                filteredData[usedMugPath] = {};
+                            }
+                            filteredData[usedMugPath][usedInMugPath] = propName;
+                        }
+                    });
+                });
+            }
+            $modalBody.find('table').remove();
+            $modalBody.append($(find_usages({tableData: filteredData})));
+        });
+
+        atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
+            useRichText: true,
+        });
     };
 
     fn.closeModal = function (done, immediate) {
