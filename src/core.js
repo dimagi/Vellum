@@ -1149,10 +1149,27 @@ define([
             .addClass('disabled');
     };
 
+    fn.nodeIDFromLabel = function(mug) {
+        // TODO: shorten
+        // TODO: get rid of bubbles
+        // TODO: turn of auto-generation if focus on question id...or just if label gets blurred
+    };
+
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
         var currentMug = this.getCurrentlySelectedMug();
+
+        if (currentMug) {
+            var suggestedID = this.getMugDisplayName(currentMug) || "";
+            suggestedID = suggestedID.toLowerCase();
+            suggestedID = suggestedID.replace(/[^\w\-\s]/g, '');
+            suggestedID = suggestedID.trim();
+            suggestedID = suggestedID.replace(/\s+/g, '_');
+            currentMug.p.nodeID = currentMug.form.generate_question_id(suggestedID, currentMug);
+        }
+
+        this.data.core.form.generateNodeIDFromLabel = false;
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
@@ -1294,7 +1311,7 @@ define([
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
-            if (true) { // TODO
+            if (_this.data.core.form.generateNodeIDFromLabel) {
                 var suggestedID = _this.getMugDisplayName(e.mug) || "";
                 suggestedID = suggestedID.toLowerCase();
                 suggestedID = suggestedID.replace(/[^\w\-\s]/g, '');
@@ -1387,6 +1404,7 @@ define([
             }
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
+            _this.data.core.form.generateNodeIDFromLabel = true;
 
             // Focus on first input, which might be a normal input or a rich text input
             var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
