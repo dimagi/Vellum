@@ -1149,6 +1149,7 @@ define([
             .addClass('disabled');
     };
 
+    // Suggest a node ID, based on the mug's label
     fn.nodeIDFromLabel = function(mug) {
         var suggestedID = this.getMugDisplayName(mug) || "";
         suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
@@ -1164,7 +1165,6 @@ define([
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
         var currentMug = this.getCurrentlySelectedMug();
-
         if (currentMug && !currentMug.p.nodeID) {
             currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
         }
@@ -2028,9 +2028,7 @@ define([
                 help: {
                     title: "Basic",
                     text: "<p>The <strong>Label</strong> is text that appears in the application. " +
-                        "This text will not appear in data exports.</p> " +
-                        "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
-                        "It does not appear on the phone. It is the name of the question in data exports.</p>",
+                        "This text will not appear in data exports.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
@@ -2053,9 +2051,11 @@ define([
                 isCollapsed: true,
                 help: {
                     title: "Logic",
-                    text: "Use logic to control when questions are asked and what answers are valid. " +
+                    text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                        "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                        "<p>Use logic to control when questions are asked and what answers are valid. " +
                         "You can add logic to display a question based on a previous answer, to make " +
-                        "the question required or ensure the answer is in a valid range.",
+                        "the question required or ensure the answer is in a valid range.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
                 }
             },
