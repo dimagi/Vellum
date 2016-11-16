@@ -61,8 +61,8 @@ define([
         return widget;
     }
 
-    function mediaWidget(mug, options) {
-        var widget = widgets.media(mug, options);
+    function printTemplateWidget(mug, options) {
+        var widget = widgets.abstractMediaWidget(mug, options);
         widget.getBaseMediaPath = function () {
             return "jr://file/commcare/text/" + mug.p.nodeID;
         };
@@ -312,7 +312,7 @@ define([
             docTemplate: {
                 lstring: 'Document Template',
                 visibility: 'visible',
-                widget: mediaWidget,
+                widget: printTemplateWidget,
             },
             androidIntentAppId: { visibility: 'hidden' },
         }

@@ -135,15 +135,7 @@ define([
             widget.form, objectMap, uploadControls);
 
         if (!widget.getBaseMediaPath) {
-            /**
-             * Get media path without file type extension
-             *
-             * Example: jr://file/commcare/text/name
-             */
-            widget.getBaseMediaPath = function () {
-                throw new Error("abstract method not implemented: " +
-                                "widget.getBaseMediaPath()");
-            };
+            throw new Error("required method not found: widget.getBaseMediaPath()");
         }
 
         widget.getRandomizedMediaPath = function (oldPath) {

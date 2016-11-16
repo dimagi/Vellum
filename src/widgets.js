@@ -699,7 +699,7 @@ define([
         return widget;
     };
 
-    var media = function (mug, options) {
+    var abstractMediaWidget = function (mug, options) {
         var widget = normal(mug, options);
         widget.form = "text";
 
@@ -709,6 +709,18 @@ define([
 
         widget.setValue = function(val) {
             return widget.input.val(val);
+        };
+
+        /**
+         * Get media path without file type extension
+         *
+         * Example: jr://file/commcare/text/name
+         *
+         * This is an abstract method; it must be overridden.
+         */
+        widget.getBaseMediaPath = function () {
+            throw new Error("abstract method not implemented: " +
+                            "widget.getBaseMediaPath()");
         };
 
         widget.mug.form.vellum.initMediaUploaderWidget(widget);
@@ -806,7 +818,7 @@ define([
         xPath: xPath,
         baseKeyValue: baseKeyValue,
         readOnlyControl: readOnlyControl,
-        media: media,
+        abstractMediaWidget: abstractMediaWidget,
         util: {
             getWidget: getWidget,
             setWidget: setWidget,
