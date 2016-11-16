@@ -179,7 +179,7 @@ define([
                 form.hashtagMap = _.clone(vellum.datasources.getHashtagMap({}));
                 form.invertedHashtagMap = _.invert(form.hashtagMap);
                 form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
-                form.hasCaseHashtags = true;
+                form.hasCaseHashtags = vellum.datasources.isReady();
             } else {
                 form.hashtagMap = {};
                 form.invertedHashtagMap = {};
