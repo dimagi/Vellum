@@ -353,6 +353,33 @@ define([
             assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
         });
 
+        describe("with async data sources", function() {
+            var vellum, callback;
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (cb) { callback = cb; },
+                        onReady: function () {
+                            vellum = this;
+                            done();
+                        },
+                    },
+                });
+            });
+            beforeEach(function () {
+                vellum.datasources.reset();
+                callback = null;
+            });
+
+            it("should not set case hashtags flag before data sources are loaded", function () {
+                var form = util.loadXML("");
+                assert.isNotOk(form.hasCaseHashtags);
+                callback(util.options.dataSources);
+                assert.isOk(form.hasCaseHashtags);
+            });
+        });
+
         describe("with rich text disabled", function() {
             before(function (done) {
                 util.init({

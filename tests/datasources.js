@@ -203,13 +203,6 @@ define([
                 assert.equal(data.find("option:selected").text(), "outer - inner");
             });
 
-            /*
-            TODO make this test pass
-            Should not lose xpath expression when rich text is off.
-            Changing this seems to be a whack-a-mo--hashtag game. Vellum
-            inconsistently writes hashtags in non-vellum: attributes, which
-            should only ever contain valid xpath expressions.
-
             it("should not cause null xpath", function () {
                 // bug only appeared on load XML with vellum:attr="value" attributes
                 util.loadXML(CASE_PROPERTY_XML);
@@ -219,7 +212,6 @@ define([
                         .replace(/ vellum:\w+=".*?"/g, "")
                         .replace(/<vellum:hashtags.*>/, ""));
             });
-            */
         });
     });
 });
