@@ -517,7 +517,7 @@ define([
             var _this = this,
                 form = _this.form,
                 tableData = {},
-                formRefs = _this.reverse;
+                formRefs = _.omit(_this.reverse, CASE_REF_ID);
 
             _.each(formRefs, function (refsToUsedMug, usedMugUfid) {
                 var usedMug = form.getMugByUFID(usedMugUfid),
