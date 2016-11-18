@@ -1344,7 +1344,7 @@ define([
             this.jstree('rename_node', mug.ufid, name);
         }
         var currentMug = this.getCurrentlySelectedMug();
-        if (!currentMug || mug.ufid === currentMug.ufid) {
+        if (currentMug && mug.ufid === currentMug.ufid) {
             this.$f.find(".fd-question-properties .fd-head h2").html(name);
         }
     };
@@ -1608,6 +1608,7 @@ define([
         this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
+        this.refreshMugName(mug);
         this.toggleConstraintItext(mug);
     };
 

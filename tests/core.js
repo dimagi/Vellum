@@ -91,6 +91,22 @@ define([
                 "#form/g8/question1 = 'valley girl' and #form/g8/question2 = 'dude'");
         });
 
+        it("should update question properties header on select mug with Question ID as display name", function() {
+            util.loadXML("");
+            util.paste([
+                ["id", "type"],
+                ["/q1", "Text"],
+                ["/q2", "Text"],
+            ]);
+            $(".fd-question-tree-display").val('_ids').change();
+            var header = $(".fd-question-properties .fd-head h2");
+
+            util.clickQuestion("q1");
+            assert.equal(header.text(), "q1");
+            util.clickQuestion("q2");
+            assert.equal(header.text(), "q2");
+        });
+
         it("should show warning icons on invalid questions", function () {
             util.loadXML(INVALID_QUESTIONS_XML);
             var q0 = call("getMugByPath", "/data/q0"),
