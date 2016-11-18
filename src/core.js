@@ -1328,10 +1328,7 @@ define([
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
         }).on('change-display-language', function (e) {
-            var mug = _this.getCurrentlySelectedMug();
-            if (mug) {
-                _this.refreshMugName(mug);
-            }
+            _this.refreshQuestionPropertiesHead();
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
@@ -1342,10 +1339,6 @@ define([
         var name = this.getMugDisplayName(mug);
         if (name !== this.jstree("get_text", mug.ufid)) {
             this.jstree('rename_node', mug.ufid, name);
-        }
-        var currentMug = this.getCurrentlySelectedMug();
-        if (!currentMug || mug.ufid === currentMug.ufid) {
-            this.$f.find(".fd-question-properties .fd-head h2").html(name);
         }
     };
 
@@ -1570,6 +1563,7 @@ define([
         this.$f.find('.fd-default-panel').addClass('hide');
 
         this.showContentRight();
+        this.refreshQuestionPropertiesHead(mug);
         $props.addClass("hide");
 
         this._setPropertiesMug(mug);
@@ -1639,6 +1633,14 @@ define([
 
     fn.hideContentRight = function () {
         this.$f.find('.fd-content-right').hide();
+    };
+
+    fn.refreshQuestionPropertiesHead = function(mug) {
+        mug = mug || this.getCurrentlySelectedMug();
+        if (mug) {
+            var name = mug.getDisplayName(this.data.core.currentItextDisplayLanguage);
+            this.$f.find(".fd-question-properties .fd-head h2").html(name);
+        }
     };
 
     fn.showQuestionProperties = function () {
