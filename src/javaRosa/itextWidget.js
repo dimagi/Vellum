@@ -114,7 +114,7 @@ define([
         return widget;
     };
 
-    var itextLabelWidget = function (mug, language, form, options) {
+    var baseItextLabelWidget = function (mug, language, form, options) {
         var vellum = mug.form.vellum,
             Itext = vellum.data.javaRosa.Itext,
             // todo: id->class
@@ -230,7 +230,6 @@ define([
                     });
                 }
                 itextItem.getForm(widget.form).setValue(widget.language, value);
-                widget.fireChangeEvents();
             }
         };
 
@@ -278,12 +277,6 @@ define([
             }
         };
 
-        widget.destroy = function (e) {
-            if (e.form === widget.form) {
-                widget.fireChangeEvents();
-            }
-        };
-
         widget.mug.on('question-itext-deleted', widget.destroy, null, widget);
 
         widget.toggleDefaultLangSync = function (val) {
@@ -318,37 +311,6 @@ define([
             }, null, "teardown-mug-properties");
         }
 
-        widget.fireChangeEvents = function () {
-            var itextItem = widget.getItextItem();
-            if (!itextItem) {
-                return;
-            }
-            // todo: move this out of the widget
-            // this is one of three things that are relatively similar,
-            // including refreshVisibleData()
-            // Update any display values that are affected
-            // NOTE: This currently walks the whole tree since you may
-            // be sharing itext IDs. Generally it would be far more
-            // efficient to just do it based off the currently changing
-            // node. Left as a TODO if we have performance problems with
-            // this operation, but the current behavior is more correct.
-            var allMugs = mug.form.getMugList();
-            if (vellum.data.core.currentItextDisplayLanguage === widget.language) {
-                allMugs.map(function (mug) {
-                    var treeName = itextItem.get(widget.form, widget.language) || 
-                            mug.form.vellum.getMugDisplayName(mug),
-                        it = mug.p.labelItext;
-                    if (it && it.id === itextItem.id && widget.form === "default") {
-                        mug.form.fire({
-                            type: 'question-label-text-change',
-                            mug: mug,
-                            text: treeName
-                        });
-                    }
-                });
-            }
-        };
-
         widget.refreshMessages = function () {
             widget.getMessagesContainer()
                 .empty()
@@ -357,6 +319,29 @@ define([
 
         widget.save = function () {
             widget.setItextValue(widget.getValue());
+        };
+
+        return widget;
+    };
+
+    var itextLabelWidget = function (mug, language, form, options) {
+        var widget = baseItextLabelWidget(mug, language, form, options),
+            super_handleChange = widget.handleChange;
+
+        widget.handleChange = function () {
+            var item = widget.getItextItem(),
+                before = item && item.get(widget.form, widget.language);
+            super_handleChange();
+            var after = item && item.get(widget.form, widget.language);
+            if (before !== after) {
+                // TODO fire event for every mug that has an itext item
+                // with the same ID as this itext item
+                mug.form.fire({
+                    type: 'question-label-text-change',
+                    mug: mug,
+                    text: after
+                });
+            }
         };
 
         return widget;
@@ -453,7 +438,7 @@ define([
     var itextFormWidget = function (mug, language, form, options) {
         options = options || {};
         options.idSuffix = "-" + form;
-        var widget = itextLabelWidget(mug, language, form, options);
+        var widget = baseItextLabelWidget(mug, language, form, options);
 
         widget.getDisplayName = function () {
             return form + widget.getLangDesc();

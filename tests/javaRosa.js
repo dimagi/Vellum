@@ -395,6 +395,22 @@ define([
             assert.equal($(treeSelector).text(), "hindi");
         });
 
+        it("should not fire lost of events for every mug on change label", function () {
+            var form = util.loadXML(""),
+                names = {q1: 0, q2: 0};
+            form.on("question-label-text-change", function (event) {
+                names[event.mug.p.nodeID]++;
+            });
+            util.paste([
+                ["id", "type"],
+                ["/q1", "Text"],
+                ["/q2", "Text"],
+            ]);
+            util.clickQuestion("q2");
+            $("[name='itext-en-label']").val('english').change();
+            assert.deepEqual(names, {q1: 0, q2: 1});
+        });
+
         it("non-labelItext widget should contain value on load", function () {
             util.loadXML(TEXT_WITH_CONSTRAINT_XML);
             util.clickQuestion("text");
