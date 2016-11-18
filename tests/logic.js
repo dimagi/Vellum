@@ -29,7 +29,7 @@ define([
         before(function (done) {
             util.init({
                 core: {onReady: function () { done(); }},
-                features: {rich_text: false},
+                features: {rich_text: true},
             });
         });
 
@@ -37,7 +37,7 @@ define([
             util.loadXML(TEST_XML_1);
             util.getMug("question1").p.nodeID = 'question';
             var mug = util.getMug("/data/question2");
-            assert.equal(mug.p.relevantAttr, "#form/question = 1");
+            assert.equal(mug.p.relevantAttr, "#form/question = #case/dob");
         });
 
         it("should not update expressions for model iteration", function () {
@@ -51,16 +51,25 @@ define([
             assert(util.isTreeNodeValid(repeat), "repeat should be valid");
         });
 
-        it("should remove references for labels after removal", function () {
-            var form = util.loadXML(""),
-                logicManager = form._logicManager,
-                text;
-            util.addQuestion('Text', 'mug');
-            text = util.addQuestion('Text', 'text');
-            $('[name=itext-en-label]').val('<output value="/data/mug" />').change();
-            assert.equal(logicManager.forward[text.ufid].labelItext.length, 1);
-            util.deleteQuestion('/data/text');
-            assert.deepEqual(logicManager.forward[text.ufid], {});
+        describe("without rich text", function () {
+            before(function (done) {
+                util.init({
+                    core: {onReady: function () { done(); }},
+                    features: {rich_text: false},
+                });
+            });
+
+            it("should remove references for labels after removal", function () {
+                var form = util.loadXML(""),
+                    logicManager = form._logicManager,
+                    text;
+                util.addQuestion('Text', 'mug');
+                text = util.addQuestion('Text', 'text');
+                $('[name=itext-en-label]').val('<output value="/data/mug" />').change();
+                assert.equal(logicManager.forward[text.ufid].labelItext.length, 1);
+                util.deleteQuestion('/data/text');
+                assert.deepEqual(logicManager.forward[text.ufid], {});
+            });
         });
 
         describe("should add validation error for", function () {
