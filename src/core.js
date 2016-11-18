@@ -1608,6 +1608,7 @@ define([
         this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
+        this.refreshMugName(mug);
         this.toggleConstraintItext(mug);
     };
 
