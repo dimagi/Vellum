@@ -769,7 +769,7 @@ define([
             }
             $modalBody.find('table').remove();
             $modalBody.append($(find_usages({tableData: filteredData})));
-        }));
+        }, 250));
 
         atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
             useRichText: true,
