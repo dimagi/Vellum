@@ -746,7 +746,7 @@ define([
             return false;
         });
 
-        $modalBody.find('#findUsagesSearch').on('keyup keypress inserted.atwho', function (e) {
+        $modalBody.find('#findUsagesSearch').on('keypress inserted.atwho', function (e) {
             var searchKey = $.trim(this.value),
                 filteredData = {};
             if (!searchKey) {
@@ -769,12 +769,6 @@ define([
             }
             $modalBody.find('table').remove();
             $modalBody.append($(find_usages({tableData: filteredData})));
-            var code = e.keyCode || e.which;
-            if (code === 13) {
-                //disable submitting on enter
-                e.preventDefault();
-                return false;
-            }
         });
 
         atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
