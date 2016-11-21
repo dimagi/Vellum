@@ -746,7 +746,7 @@ define([
             return false;
         });
 
-        $modalBody.find('#findUsagesSearch').on('keyup inserted.atwho', _.debounce(function () {
+        $modalBody.find('#findUsagesSearch').on('keypress inserted.atwho', _.debounce(function () {
             var searchKey = $.trim(this.value),
                 filteredData = {};
             if (!searchKey) {
