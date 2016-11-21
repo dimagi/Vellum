@@ -746,7 +746,7 @@ define([
             return false;
         });
 
-        $modalBody.find('#findUsagesSearch').on('keyup inserted.atwho', function () {
+        $modalBody.find('#findUsagesSearch').on('keyup inserted.atwho', _.debounce(function () {
             var searchKey = $.trim(this.value),
                 filteredData = {};
             if (!searchKey) {
@@ -769,7 +769,7 @@ define([
             }
             $modalBody.find('table').remove();
             $modalBody.append($(find_usages({tableData: filteredData})));
-        });
+        }));
 
         atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
             useRichText: true,
