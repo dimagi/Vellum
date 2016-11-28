@@ -2,10 +2,12 @@ define([
     'tests/utils',
     'chai',
     'jquery',
+    'underscore',
 ], function (
     util,
     chai,
-    $
+    $,
+    _
 ) {
     var assert = chai.assert;
 
