@@ -9,7 +9,7 @@ define([
 ) {
     var assert = chai.assert;
 
-    describe("Mugs et al", function() {
+    describe("Mugs", function() {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -47,6 +47,27 @@ define([
             msg();
             msg();
             assert.equal(changes, 3);
+        });
+
+        it("at the top level should not be named meta", function() {
+            var data = [
+                    ["id", "type"],
+                    ["meta", "Group"],
+                    ["meta/meta", "Text"],
+                    ["group", "Group"],
+                    ["group/meta", "Group"],
+                ];
+            util.loadXML("");
+            util.paste(data);
+            _.each(data.slice(1), function (row) {
+                var mug = util.getMug(row[0]),
+                    messages = mug.messages.get("nodeID");
+                if (/\bmeta$/.test(mug.p.nodeID)) {
+                    assert.deepEqual(messages, ["'meta' is not a valid Question ID."]);
+                } else {
+                    assert.deepEqual(messages, []);
+                }
+            });
         });
     });
 });

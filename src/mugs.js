@@ -817,6 +817,8 @@ define([
                         return mug.p.nodeID + " is not a legal Question ID. " +
                             "It must start with a letter and contain only " +
                             "letters, numbers, and '-' or '_' characters.";
+                    } else if (mug.p.nodeID.toLowerCase() === "meta") {
+                        return "'meta' is not a valid Question ID.";
                     }
                     return "pass";
                 },
