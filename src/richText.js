@@ -66,7 +66,6 @@ define([
         REF_REGEX = /^#(form|case)\//,
         INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
-        isWebkit = 'WebkitAppearance' in document.documentElement.style,
         bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
@@ -145,11 +144,8 @@ define([
      *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
-        var TRAILING_SPACE = " ";
-        if (isWebkit) {
-            // HACK use ZWS to fix cursor movement/hiding near bubble
-            TRAILING_SPACE = "\u200b ";
-        }
+        // HACK use 1/4 em space to fix cursor movement/hiding near bubble
+        var TRAILING_SPACE = "\u2005";
         function insertHtmlWithSpace(content) {
             editor.insertHtml(content + TRAILING_SPACE);
         }
@@ -614,7 +610,7 @@ define([
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
-                   .replace(/(&nbsp;|\xa0|\u200b | \u200b|\u200b)/ig, " ")
+                   .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }
