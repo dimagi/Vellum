@@ -415,7 +415,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertExpression("#form/text");
-                    assert.equal(editor.getValue(), "one" + output + " two");
+                    assert.equal(editor.getValue(), "one" + output + "  two");
                     done();
                 });
             });
@@ -426,7 +426,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertOutput(output);
-                    assert.equal(editor.getValue(), "one" + output + " two");
+                    assert.equal(editor.getValue(), "one" + output + "  two");
                     done();
                 });
             });
@@ -482,11 +482,6 @@ define([
                         assert.equal(exprEditor.getValue(), expr);
                         exprEditor.select(i);
                         exprEditor.insertExpression('#form/text');
-                        if (expr === "one two" || i === 3) {
-                            // BUG for some reason ckeditor.getData() replaces
-                            // two spaces with one in this expression.
-                            result = result.replace(/  /g, " ");
-                        }
                         assert.equal(exprEditor.getValue(), result);
                         done();
                     });
