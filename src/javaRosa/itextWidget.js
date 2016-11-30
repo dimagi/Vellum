@@ -457,13 +457,17 @@ define([
                     // image: jr://file/commcare/image/form_id/question_id.png
                     // audio: jr://file/commcare/audio/form_id/question_id.mp3
                     var extension = DEFAULT_EXTENSIONS[form];
-                    return "jr://file/commcare/" + form + url_type +
-                           jrUtil.getDefaultItextRoot(widget.mug) + "." + extension;
+                    return widget.getBaseMediaPath() + "." + extension;
                 }
                 return null;
             };
 
-            widget.mug.form.vellum.initWidget(widget);
+            widget.getBaseMediaPath = function () {
+                return "jr://file/commcare/" + form + url_type +
+                       jrUtil.getDefaultItextRoot(widget.mug);
+            }
+
+            widget.mug.form.vellum.initMediaUploaderWidget(widget);
 
             return widget;
         };
