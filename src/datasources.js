@@ -23,6 +23,7 @@
  *              },
  *              ref-element: {
  *                  reference: {
+ *                      hashtag: string (optional hashtag prefix)
  *                      source: string (optional data source id, defaults to this data source)
  *                      subset: string (optional subset id)
  *                      key: string (referenced property)
@@ -43,7 +44,7 @@
  *              name: string (human readable name)
  *              structure: { ... }
  *              related: {
- *                  string (relationship): string (related subset name),
+ *                  string (relationship): string (related subset id),
  *                  ...
  *              }
  *          }]
@@ -245,19 +246,11 @@ define([
                     return null;
                 }
 
-                var path = parentPath ? (parentPath + "/" + id) : id,
-                    tree = getTree(item, id, path, info),
-                    hashtagPrefix = null,
-                    hashtag = null;
-                if (source && source.id !== "commcaresession") {
-                    // magic: case as the id means that this is the base case
-                    hashtagPrefix = '#case/' + (source.id !== 'case' ? source.id + '/' : '');
-                    hashtag = hashtagPrefix + id;
-                }
+                var path = parentPath ? parentPath + "/" + id : id,
+                    tree = getTree(item, id, path, info);
                 return {
                     name: tree.name,
-                    hashtag: hashtag,
-                    hashtagPrefix: hashtagPrefix,
+                    hashtag: info.hashtag ? info.hashtag + '/' + id : null,
                     parentPath: parentPath,
                     xpath: path,
                     index: index || false,
@@ -275,7 +268,19 @@ define([
                 var ref = item.reference;
                 source = sources[ref.source || info.id];
                 if (source) {
-                    info = _.extend(_.omit(source, "structure"), {_parent: info});
+                    info = _.extend(_.omit(source, "structure"), {
+                        _parent: info,
+                        hashtag: ref.hashtag,
+                    });
+                    if (!ref.hashtag && source.id === "casedb") {
+                        // magic: case hashtags
+                        // TODO put these in reference.hashtag (on server)
+                        if (ref.subset === "case") {
+                            info.hashtag = '#case';
+                        } else {
+                            info.hashtag = '#case/' + ref.subset;
+                        }
+                    }
                     path = "instance('" + source.id + "')" + source.path +
                            "[" + ref.key + " = " + path + "]";
                     if (source.subsets && ref.subset) {
@@ -357,7 +362,7 @@ define([
             _.each(nodes, function (node) {
                 if (node.hashtag && !node.index) {
                     hashtags.map[node.hashtag] = node.xpath;
-                    hashtags.transforms[node.hashtagPrefix] = function (prop) {
+                    hashtags.transforms[node.sourceInfo.hashtag + '/'] = function (prop) {
                         return node.parentPath + "/" + prop;
                     };
                 }

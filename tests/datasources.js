@@ -61,6 +61,7 @@ define([
                     structure: {
                         "userid": {
                             reference: {
+                                hashtag: "#user",
                                 source: "casedb",
                                 subset: "commcare-user",
                                 key: "hq_user_id",
@@ -96,7 +97,7 @@ define([
                 }
             }, {
                 id: "grandparent",
-                name: "grandparent (household)",
+                name: "household",
                 key: "@case_type",
                 structure: {
                     address: {},
@@ -161,6 +162,23 @@ define([
                     "instance('commcaresession')/session/data/case_id");
                 assert.equal(nodes.user.xpath,
                     "instance('commcaresession')/session/context/userid");
+            });
+
+            it("should use reference.hashtag", function() {
+                assert.equal(nodes.user.nodes.role.hashtag, "#user/role");
+            });
+
+            it("should construct #case hashtag with reference.subset", function() {
+                assert.equal(nodes.child.nodes.dob.hashtag, "#case/dob");
+            });
+
+            it("should construct #case/parent hashtag with related subset", function() {
+                assert.equal(nodes.child.nodes.mother.nodes.edd.hashtag, "#case/parent/edd");
+            });
+
+            it("should construct #case/grandparent hashtag with related subset", function() {
+                var house = nodes.child.nodes.mother.nodes.household.nodes;
+                assert.equal(house.address.hashtag, "#case/grandparent/address");
             });
         });
 
