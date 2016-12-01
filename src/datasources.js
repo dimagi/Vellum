@@ -19,7 +19,7 @@
  *                  structure: {
  *                      inner-element: { }
  *                  }
- *                  name: "Element" (the text used in dropdown for this element)
+ *                  name: "Element" (the text used to represent this element)
  *              },
  *              ref-element: {
  *                  reference: {
@@ -27,6 +27,13 @@
  *                      subset: string (optional subset id)
  *                      key: string (referenced property)
  *                  }
+ *              },
+ *              path-element: {
+ *                  merge: true (optional flag. When set, the element name
+ *                               will be appended to the path used to construct
+ *                               children and any children will be merged with
+ *                               this elements siblings.)
+ *                  structure: { ... }
  *              },
  *              @attribute: { }
  *          },
@@ -300,7 +307,14 @@ define([
         }
         function getNodes(source, path, info) {
             var nodes = _.chain(source && source.structure)
-                .map(node(source, path, info))
+                .map(function (item, id) {
+                    if (item.merge) {
+                        return getNodes(item, path + "/" + id, {_parent: info});
+                    } else {
+                        return node(source, path, info)(item, id);
+                    }
+                })
+                .flatten()
                 .compact() // TODO remove with invalidCaseProperties
                 .sortBy("text")
                 .value();

@@ -38,21 +38,95 @@ define([
                 "@id": {},
                 name: {}
             }
+        }, {
+            id: "commcaresession",
+            uri: "jr://instance/session",
+            path: "/session",
+            name: 'Session',
+            structure: {
+                data: {
+                    merge: true,
+                    structure: {
+                        "case_id": {
+                            reference: {
+                                source: "casedb",
+                                subset: "case",
+                                key: "@case_id",
+                            },
+                        },
+                    },
+                },
+                context: {
+                    merge: true,
+                    structure: {
+                        "userid": {
+                            reference: {
+                                source: "casedb",
+                                subset: "commcare-user",
+                                key: "hq_user_id",
+                            },
+                        },
+                    },
+                },
+            },
+        }, {
+            id: "casedb",
+            uri: "jr://instance/casedb",
+            path: "/cases/case",
+            name: 'Cases',
+            subsets: [{
+                id: "case",
+                name: "child",
+                key: "@case_type",
+                structure: {
+                    dob: {},
+                },
+                related: {
+                    parent: "parent",
+                },
+            }, {
+                id: "parent",
+                name: "mother",
+                key: "@case_type",
+                structure: {
+                    edd: {},
+                },
+                related: {
+                    parent: "grandparent",
+                }
+            }, {
+                id: "grandparent",
+                name: "grandparent (household)",
+                key: "@case_type",
+                structure: {
+                    address: {},
+                }
+            }, {
+                id: "commcare-user",
+                name: "user",
+                key: "@case_type",
+                structure: {
+                    role: {},
+                }
+            }]
         }];
 
     describe("The data sources loader", function () {
-        function beforeFn(done) {
+        var vellum;
+        before(function (done) {
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {
                     dataSourcesEndpoint: function (callback) { callback(FIXTURE_DATA); },
-                    onReady: done
+                    onReady: function () {
+                        vellum = this;
+                        done();
+                    },
                 },
                 features: {rich_text: false},
             });
-        }
-        before(beforeFn);
+        });
 
         it("displays nested structures", function() {
             util.loadXML("");
@@ -65,6 +139,29 @@ define([
                 "some-fixture-name - inner-attribute",
                 "some-fixture-name - inner-attribute - extra-inner-attribute",
             ].join("\n"));
+        });
+
+        describe("data nodes", function () {
+            var nodes;
+            before(function () {
+                function transform(nodes) {
+                    return _.object(_.map(nodes, function (node) {
+                        if (!node.recursive) {
+                            node.nodes = transform(node.getNodes());
+                        }
+                        return [node.name, node];
+                    }));
+                }
+                nodes = transform(vellum.datasources.getDataNodes());
+            });
+
+            it("should merge structures when merge flag is set", function() {
+                assert.deepEqual(_.keys(nodes), ["child", "user"]);
+                assert.equal(nodes.child.xpath,
+                    "instance('commcaresession')/session/data/case_id");
+                assert.equal(nodes.user.xpath,
+                    "instance('commcaresession')/session/context/userid");
+            });
         });
 
         describe("", function() {
