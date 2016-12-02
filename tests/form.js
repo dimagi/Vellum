@@ -527,7 +527,61 @@ define([
                     }
                 });
             });
+        });
 
+        describe("hashtag logic", function () {
+            var form;
+            before(function () {
+                form = util.loadXML("");
+            });
+
+            _.each({
+                "": null,
+                "#": null,
+
+                "#form": null,
+                /* TODO should these pass? (they don't)
+                "#form/": "is",
+                "#form/prop": "has",
+                */
+
+                "/data": null,
+                "/data/": null,
+                "/data/prop": "xpath",
+
+                "#case": null,
+                "#case/": "is",
+                "#case/prop": "has xpath",
+                /* TODO should these pass? (they don't)
+                "#case/ ": null,
+                "#case/+": null,
+                */
+
+            }, function (valid, path) {
+                function may(name) {
+                    return valid[name] ? "" : "not ";
+                }
+                valid = _.object(_.map((valid || "").split(" "), function (key) {
+                    return [key, true];
+                }));
+
+                it("should " + may("is") + "recognize " + path + " as hashtag prefix", function () {
+                    assert.equal(form.isValidHashtagPrefix(path), !!valid.is);
+                });
+
+                it("should " + may("has") + "recognize " + path + " as having hashtag prefix", function () {
+                    assert.equal(form.hasValidHashtagPrefix(path), !!valid.has);
+                });
+
+                it("should " + may("xpath") + "parse " + path + " to valid xpath", function () {
+                    try {
+                        form.xpath.parse(path).toXPath();
+                        assert(valid.xpath, "valid?! " + path);
+                    } catch (err) {
+                        assert(!valid.xpath, "not valid: " + path + "\nerror: " + err);
+                    }
+                });
+            });
         });
     });
 });
