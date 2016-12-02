@@ -210,12 +210,18 @@ define([
             tag = this.normalizeHashtag(tag);
             return this.hashtagTransformations.hasOwnProperty(tag);
         },
+        /**
+         * Check if tag has a valid hashtag prefix
+         *
+         * A valid hashtag prefix ends with a slash, and the given value must
+         * contain at least one character after the slash.
+         */
         hasValidHashtagPrefix: function(tag) {
             tag = this.normalizeHashtag(tag);
             var lastSlashIndex = tag.lastIndexOf("/");
             return lastSlashIndex !== -1 &&
-                this.hashtagTransformations.hasOwnProperty(tag.substring(0, lastSlashIndex + 1)) &&
-                tag.substring(lastSlashIndex + 1) !== "";
+                tag.length > lastSlashIndex + 1 &&
+                this.hashtagTransformations.hasOwnProperty(tag.substring(0, lastSlashIndex + 1));
         },
         addHashtag: function(hashtag, xpath) {
             this.hashtagMap[hashtag] = xpath;
