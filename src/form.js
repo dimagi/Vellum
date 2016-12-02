@@ -1144,9 +1144,6 @@ define([
             this.undomanager.undo();
             this.vellum.selectSomethingOrHideProperties();
         },
-        isCaseReference: function (path) {
-            return /^#case/.test(path);
-        },
         findUsages: function (path) {
             return this._logicManager.findUsages(path);
         },

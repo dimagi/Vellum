@@ -850,7 +850,8 @@ define([
                 target.val(target.val() + path).change();
             }
 
-            var targetType, category;
+            var targetType,
+                category = util.getReferenceName(path);
             switch (target[0].id) {
                 case 'property-relevantAttr':
                     targetType = "Display";
@@ -864,11 +865,6 @@ define([
                 default:
                     targetType = "Expression Editor";
                     break;
-            }
-            if (_this.data.core.form.isCaseReference(path)) {
-                category = "Case Reference";
-            } else {
-                category = "Form Reference";
             }
             analytics.usage(category, "Drag and Drop", targetType);
         }

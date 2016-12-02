@@ -363,8 +363,13 @@ define([
         ], lang);
     };
 
-    that.isCaseReference = function (value) {
-        return value.startsWith('#case/');
+    that.getReferenceName = function (value) {
+        var ref = /^#([^\/]+)\//.exec(value);
+        if (!ref) {
+            return "Form Reference";
+        }
+        ref = ref[1][0].toUpperCase() + ref[1].substring(1).toLowerCase();
+        return ref + " Reference";
     };
 
     return that;

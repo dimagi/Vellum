@@ -185,12 +185,7 @@ define([
                     });
                 },
                 beforeInsert: function(value, $li) {
-                    var category;
-                    if (util.isCaseReference(value)) {
-                        category = "Case Reference";
-                    } else {
-                        category = "Form Reference";
-                    }
+                    var category = util.getReferenceName(value);
                     analytics.usage(category, "Autocomplete", options.property);
                     return value;
                 },
