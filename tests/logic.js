@@ -349,8 +349,8 @@ define([
             },
             hashtagInfo = {
                 hashtagMap: hashtagMap,
-                invertedHashtagMap: _.object(_.map(
-                    hashtagMap, function (v, k) { return [v, k]; }))
+                invertedHashtagMap: _.invert(hashtagMap),
+                hashtagNamespaces: {form: true},
             },
             xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
 

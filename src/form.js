@@ -174,12 +174,16 @@ define([
             var form = this,
                 vellum = form.vellum,
                 oldHashtags = form.hashtagMap;
+            form.hashtagNamespaces = {form: true};
             if (form.richText) {
                 // TODO always load hashtags, even when rich text is disabled
                 form.hashtagMap = _.clone(vellum.datasources.getHashtagMap({}));
                 form.invertedHashtagMap = _.invert(form.hashtagMap);
                 form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
                 form.hasCaseHashtags = vellum.datasources.isReady();
+                _.each(form.hashtagTransformations, function (x, prefix) {
+                    form.hashtagNamespaces[/^#([^\/]+)/.exec(prefix)[1]] = true;
+                });
             } else {
                 form.hashtagMap = {};
                 form.invertedHashtagMap = {};
@@ -230,6 +234,7 @@ define([
         initHashtag: function(hashtag, xpath) {
             if (!this.hashtagMap[hashtag]) {
                 this.addHashtag(hashtag, xpath);
+                this.hashtagNamespaces[/^#([^\/]+)/.exec(hashtag)[1]] = true;
             }
         },
         removeHashtag: function(hashtag) {

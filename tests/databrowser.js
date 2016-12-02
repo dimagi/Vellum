@@ -336,7 +336,10 @@ define([
                                 callback(CASE_DATA);
                             });
                         },
-                        form: "",
+                        // need form with <hashtags> containing a case property
+                        // so the form knows about the #case namespace and shows
+                        // errors for unknown case properties
+                        form: MOTHER_REF_XML,
                         onReady: function () {
                             vellum = this;
                             blue = util.addQuestion("DataBindOnly", "blue");

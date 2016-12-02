@@ -537,7 +537,7 @@ define([
 
             longPaths["instance('casedb')/cases/case[" +
                 "@case_id = instance('commcaresession')/session/data/case_id" +
-                "]/dob"] = "xpath"
+                "]/dob"] = "xpath";
 
             _.each(_.extend({
                 "": null,
@@ -557,6 +557,9 @@ define([
                 "#case/": "is",
                 "#case/prop": "has xpath",
 
+                "#user": null,
+                "#user/": "is",
+                "#user/prop": "has xpath",
             }, longPaths), function (valid, path) {
                 function may(name) {
                     return valid[name] ? "" : "not ";
