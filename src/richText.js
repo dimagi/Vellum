@@ -61,9 +61,7 @@ define([
     analytics,
     CKEDITOR
 ){
-    var CASE_REF_REGEX = /^#case\//,
-        FORM_REF_REGEX = /^#form\//,
-        REF_REGEX = /^#(form|case)\//,
+    var FORM_REF_REGEX = /^#form\//,
         INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
         bubbleWidgetDefinition = {
@@ -424,12 +422,12 @@ define([
      */
     function makeBubble(form, xpath) {
         function _parseXPath(xpath, form) {
-            if (CASE_REF_REGEX.test(xpath)) {
+            if (!FORM_REF_REGEX.test(xpath)) {
                 if (form.isValidHashtag(xpath)) {
                     return {
                         classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                     };
-                } else if (form.hasValidHashtagPrefix(xpath)) {
+                } else if (form.hasValidHashtagPrefix(form.normalizeHashtag(xpath))) {
                     return {
                         classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
                     };
@@ -463,7 +461,7 @@ define([
         var info = extractXPathInfo($(output)),
             xpath = form.normalizeHashtag(info.value),
             attrs = _.omit(info, 'value'),
-            startsWithRef = REF_REGEX.test(xpath),
+            startsWithRef = FORM_REF_REGEX.test(xpath) || form.hasValidHashtagPrefix(xpath),
             containsWhitespace = /\s/.test(xpath);
 
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
@@ -784,7 +782,6 @@ define([
     }
 
     return {
-        REF_REGEX: REF_REGEX,
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: editor,

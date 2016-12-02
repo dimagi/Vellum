@@ -260,7 +260,7 @@ define([
                     pathString = isHashtag ? xpath : xobj.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
-                    isHashRef = form.hasValidHashtagPrefix(pathString),
+                    isHashRef = form.hasValidHashtagPrefix(xpath),
                     knownHashtag = isHashRef && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents

@@ -530,19 +530,23 @@ define([
         });
 
         describe("hashtag logic", function () {
-            var form;
+            var form, longPaths = {};
             before(function () {
                 form = util.loadXML("");
             });
 
-            _.each({
+            longPaths["instance('casedb')/cases/case[" +
+                "@case_id = instance('commcaresession')/session/data/case_id" +
+                "]/dob"] = "xpath"
+
+            _.each(_.extend({
                 "": null,
                 "#": null,
 
                 "#form": null,
-                /* TODO should these pass? (they don't)
+                /* should these pass? (they don't)
                 "#form/": "is",
-                "#form/prop": "has",
+                "#form/prop": "has xpath",
                 */
 
                 "/data": null,
@@ -552,12 +556,8 @@ define([
                 "#case": null,
                 "#case/": "is",
                 "#case/prop": "has xpath",
-                /* TODO should these pass? (they don't)
-                "#case/ ": null,
-                "#case/+": null,
-                */
 
-            }, function (valid, path) {
+            }, longPaths), function (valid, path) {
                 function may(name) {
                     return valid[name] ? "" : "not ";
                 }

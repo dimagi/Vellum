@@ -197,10 +197,10 @@ define([
                 afterMatchFailed: function(at, $el) {
                     if (options.useRichText && $el.html()) {
                         // If user typed out a full legitimate hashtag, or something that isn't
-                        // legit but looks vaguely like a case property, turn it into a bubble.
+                        // legit but looks like a valid hashtag reference, turn it into a bubble.
                         var content = $el.html().trim().replace(/^.*\s/, ""),
-                            isUnknownHashtag = richText.REF_REGEX.test(content) && !form.isValidHashtagPrefix(content),
-                            shouldBubble = form.isValidHashtag(content) || isUnknownHashtag;
+                            shouldBubble = form.isValidHashtag(content) ||
+                                           form.hasValidHashtagPrefix(content);
 
                         if (shouldBubble) {
                             options.functionOverrides.insert.call(this, content);
