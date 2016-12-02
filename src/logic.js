@@ -23,7 +23,7 @@ define([
             "hintItext",
         ],
         NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr'),
-        CASE_REF_ID = "#case/";
+        EXTERNAL_REF = "#";
 
     function LogicExpression (exprText, xpathParser) {
         this._text = exprText || "";
@@ -184,7 +184,7 @@ define([
         this.opts = opts;
         this.form = form;
         // see this._addReferences for ref structure
-        // refid is either refMug.ufid or CASE_REF_ID
+        // refid is either refMug.ufid or EXTERNAL_REF
         this.forward = {};  // {mug.ufid: {property: [ref, ...], ...}, ...}
         this.reverse = {};  // {refid: {mug.ufid: [ref, ...], ...}, ...}
         this.errors = {};
@@ -254,14 +254,14 @@ define([
 
             // append item for each mug referenced (by absolute path) in mug's
             // property value
-            refs = expr.absolutePaths.concat(expr.hashtags).map(function (path) {
-                var isHashtag = path.toHashtag().startsWith('#'),
-                    pathString = isHashtag ? path.toHashtag() : path.pathWithoutPredicates(),
+            refs = expr.absolutePaths.concat(expr.hashtags).map(function (xobj) {
+                var xpath = xobj.toHashtag(),
+                    isHashtag = xpath.startsWith('#'),
+                    pathString = isHashtag ? xpath : xobj.pathWithoutPredicates(),
                     pathWithoutRoot = isHashtag ? '' : pathString.substring(1 + pathString.indexOf('/', 1)),
                     refMug = form.getMugByPath(pathString),
-                    xpath = path.toHashtag(),
-                    isCaseRef = util.isCaseReference(pathString),
-                    knownHashtag = isCaseRef && form.isValidHashtag(xpath);
+                    isHashRef = form.hasValidHashtagPrefix(pathString),
+                    knownHashtag = isHashRef && form.isValidHashtag(xpath);
 
                 // last part is hack to allow root node in data parents
                 if ((!refMug && !knownHashtag) &&
@@ -270,13 +270,13 @@ define([
                     !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
                 {
                     unknowns.push(xpath);
-                } else if (!refMug && isCaseRef && !knownHashtag) {
+                } else if (!refMug && isHashRef && !knownHashtag) {
                     unknowns.push(xpath);
                 }
-                var refid = refMug ? refMug.ufid : (isCaseRef ? CASE_REF_ID : ""),
+                var refid = refMug ? refMug.ufid : (isHashRef ? EXTERNAL_REF : ""),
                     ref = {
                         mug: mug.ufid, // mug with property value referencing refMug
-                        ref: refid, // referenced Mug or CASE_REF_ID or ""
+                        ref: refid, // referenced Mug or EXTERNAL_REF or ""
                         property: property,
                         path: xpath, // path to refMug
                         sourcePath: mug.hashtagPath
@@ -297,7 +297,7 @@ define([
                 form.referenceInstance(id, mug, property);
             });
             _.each(expr.hashtags, function (hashtag) {
-                form.referenceHashtag(hashtag, mug, property);
+                form.referenceHashtag(hashtag.toHashtag(), mug, property);
             });
             if (unknowns.length > 0) {
                 if (!this.errors[mug.ufid]) {
@@ -461,11 +461,12 @@ define([
             this.reverse = {};
         },
         // This is to tell HQ's case summary what is referenced
+        // TODO maybe do not slice prop because it removes unrecoverable context
         caseReferences: function () {
             var _this = this,
                 load = {};
-            _.each(_.flatten(_.values(this.reverse[CASE_REF_ID] || {})), function(ref) {
-                var prop = ref.path.slice(CASE_REF_ID.length),
+            _.each(_.flatten(_.values(this.reverse[EXTERNAL_REF] || {})), function(ref) {
+                var prop = ref.path.slice(ref.path.indexOf('/') + 1),
                     path = _this.form.normalizeXPath(ref.sourcePath);
                 if (path === null) {
                     // Choices have null path, use parent path.
@@ -492,7 +493,7 @@ define([
         // returns object of external references that are known to be valid
         knownExternalReferences: function () {
             var _this = this;
-            return _.chain(this.reverse[CASE_REF_ID] || {})
+            return _.chain(this.reverse[EXTERNAL_REF] || {})
                 .values()
                 .flatten(true)
                 .filter(function(ref) {
@@ -517,7 +518,7 @@ define([
             var _this = this,
                 form = _this.form,
                 tableData = {},
-                formRefs = _.omit(_this.reverse, CASE_REF_ID);
+                formRefs = _.omit(_this.reverse, EXTERNAL_REF);
 
             _.each(formRefs, function (refsToUsedMug, usedMugUfid) {
                 var usedMug = form.getMugByUFID(usedMugUfid),

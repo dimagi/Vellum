@@ -261,7 +261,7 @@ define([
             return this._logicManager.knownExternalReferences();
         },
         referenceHashtag: function(hashtag, mug, property) {
-            if (/^#case\//.test(hashtag.toHashtag())) {
+            if (this.hasValidHashtagPrefix(hashtag)) {
                 this.referenceInstance('casedb', mug, property);
                 this.referenceInstance('commcaresession', mug, property);
             }
