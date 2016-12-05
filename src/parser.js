@@ -142,11 +142,6 @@ define([
             });
         };
 
-        if(root.children().length === 0) {
-            form.parseErrors.push(
-                'Data block has no children elements! Please make sure your form is a valid JavaRosa XForm!'
-            );
-        }
         if (root[0]) {
             form.setFormID(root[0].tagName);
         } else {
