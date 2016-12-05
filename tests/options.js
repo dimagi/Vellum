@@ -3,14 +3,33 @@ define(["underscore"], function (_) {
         {
             id: "commcaresession",
             uri: "jr://instance/session",
-            path: "/session/data",
+            path: "/session",
             name: 'Session',
             structure: {
-                "case_id": {
-                    reference: {
-                        source: "casedb",
-                        subset: "case",
-                        key: "@case_id",
+                data: {
+                    structure: {
+                        "case_id": {
+                            reference: {
+                                source: "casedb",
+                                subset: "case",
+                                subset_key: "@case_type",
+                                key: "@case_id",
+                            },
+                        },
+                    },
+                },
+                context: {
+                    structure: {
+                        "userid": {
+                            reference: {
+                                hashtag: "#user",
+                                source: "casedb",
+                                subset: "commcare-user",
+                                subset_key: "@case_type",
+                                subset_filter: true,
+                                key: "hq_user_id",
+                            },
+                        },
                     },
                 },
             },
@@ -38,6 +57,14 @@ define(["underscore"], function (_) {
                 },
                 related: {
                     parent: "grandparent",
+                }
+            }, {
+                id: "commcare-user",
+                name: "user",
+                key: "@case_type",
+                structure: {
+                    role: {},
+                    username: {},
                 }
             }, {
                 id: "case",

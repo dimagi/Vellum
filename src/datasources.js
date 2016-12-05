@@ -26,6 +26,11 @@
  *                      hashtag: string (optional hashtag prefix)
  *                      source: string (optional data source id, defaults to this data source)
  *                      subset: string (optional subset id)
+ *                      subset_key: string (optional subset key, if omitted then
+ *                                  the first subset with an `id` matching
+ *                                  this reference's `subset` will be used)
+ *                      subset_filter: boolean (optional, if true include
+ *                                     subset filter in xpath expression)
  *                      key: string (referenced property)
  *                  }
  *              },
@@ -281,14 +286,18 @@ define([
                             info.hashtag = '#case/' + ref.subset;
                         }
                     }
-                    path = "instance('" + source.id + "')" + source.path +
-                           "[" + ref.key + " = " + path + "]";
+                    var keyPath = path;
+                    path = "instance('" + source.id + "')" + source.path;
+                    if (ref.subset_filter && ref.subset_key && ref.subset) {
+                        path += "[" + ref.subset_key + " = '" + ref.subset + "']";
+                    }
+                    path += "[" + ref.key + " = " + keyPath + "]";
                     if (source.subsets && ref.subset) {
-                        // magic: match key: "@case_type"
-                        source = _.findWhere(
-                            source.subsets,
-                            {id: ref.subset, key: "@case_type"}
-                        ) || source;
+                        var where = {id: ref.subset};
+                        if (ref.subset_key) {
+                            where.key = ref.subset_key;
+                        }
+                        source = _.findWhere(source.subsets, where) || source;
                     }
                     var name = source.name || source.id;
                     if (name) {

@@ -51,6 +51,7 @@ define([
                             reference: {
                                 source: "casedb",
                                 subset: "case",
+                                subset_key: "@case_type",
                                 key: "@case_id",
                             },
                         },
@@ -64,6 +65,8 @@ define([
                                 hashtag: "#user",
                                 source: "casedb",
                                 subset: "commcare-user",
+                                subset_key: "@case_type",
+                                subset_filter: true,
                                 key: "hq_user_id",
                             },
                         },
