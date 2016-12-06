@@ -49,7 +49,11 @@
  *              name: string (human readable name)
  *              structure: { ... }
  *              related: {
- *                  string (relationship): string (related subset id),
+ *                  string (relationship): {
+ *                      // same keys as structure.ref-element.reference
+ *                      // plus one more:
+ *                      index: string (optional index path; default is '/index')
+ *                  } or string (related subset id, legacy)
  *                  ...
  *              }
  *          }]
@@ -278,8 +282,8 @@ define([
                         hashtag: ref.hashtag,
                     });
                     if (!ref.hashtag && source.id === "casedb") {
-                        // magic: case hashtags
-                        // TODO put these in reference.hashtag (on server)
+                        // legacy magic: case hashtags
+                        // TODO remove when HQ sends new schema format
                         if (ref.subset === "case") {
                             info.hashtag = '#case';
                         } else {
@@ -334,11 +338,18 @@ define([
                 .value();
             if (source && source.related) {
                 nodes = _.chain(source.related)
-                    .map(function (subset, relation) {
-                        // magic: reference key: @case_id
-                        var item = {reference: {subset: subset, key: "@case_id"}};
-                        // magic: append "/index" to path
-                        return node(source, path + "/index", info, true)(item, relation);
+                    .map(function (ref, relation) {
+                        var item, index;
+                        if (_.isObject(ref)) {
+                            item = {reference: ref};
+                            index = ref.index || "/index";
+                        } else {
+                            // legacy/magic
+                            // TODO remove when HQ sends new schema format
+                            item = {reference: {subset: ref, key: "@case_id"}};
+                            index = "/index";
+                        }
+                        return node(source, path + index, info, true)(item, relation);
                     })
                     .sortBy("text")
                     .value()

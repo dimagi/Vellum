@@ -49,6 +49,7 @@ define([
                     structure: {
                         "case_id": {
                             reference: {
+                                hashtag: "#case",
                                 source: "casedb",
                                 subset: "case",
                                 subset_key: "@case_type",
@@ -86,7 +87,12 @@ define([
                     dob: {},
                 },
                 related: {
-                    parent: "parent",
+                    parent: {
+                        hashtag: "#case/parent",
+                        subset: "parent",
+                        subset_key: "@case_type",
+                        key: "@case_id",
+                    }
                 },
             }, {
                 id: "parent",
@@ -96,7 +102,12 @@ define([
                     edd: {},
                 },
                 related: {
-                    parent: "grandparent",
+                    parent: {
+                        hashtag: "#case/grandparent",
+                        subset: "grandparent",
+                        subset_key: "@case_type",
+                        key: "@case_id",
+                    },
                 }
             }, {
                 id: "grandparent",

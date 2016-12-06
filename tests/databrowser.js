@@ -493,6 +493,7 @@ define([
                             structure: {
                                 case_id: {
                                     reference: {
+                                        hashtag: "#case",
                                         source: "casedb",
                                         subset: "case",
                                         subset_key: "@case_type",

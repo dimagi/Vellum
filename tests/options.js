@@ -10,6 +10,7 @@ define(["underscore"], function (_) {
                     structure: {
                         "case_id": {
                             reference: {
+                                hashtag: "#case",
                                 source: "casedb",
                                 subset: "case",
                                 subset_key: "@case_type",
@@ -56,7 +57,12 @@ define(["underscore"], function (_) {
                     edd: {},
                 },
                 related: {
-                    parent: "grandparent",
+                    parent: {
+                        hashtag: "#case/grandparent",
+                        subset: "grandparent",
+                        subset_key: "@case_type",
+                        key: "@case_id",
+                    }
                 }
             }, {
                 id: "commcare-user",
@@ -97,7 +103,12 @@ define(["underscore"], function (_) {
                     f_9814: {},
                 },
                 related: {
-                    parent: "parent",
+                    parent: {
+                        hashtag: "#case/parent",
+                        subset: "parent",
+                        subset_key: "@case_type",
+                        key: "@case_id",
+                    }
                 },
             }]
         }, {
