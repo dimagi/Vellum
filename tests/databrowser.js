@@ -490,6 +490,7 @@ define([
                     name: 'Session',
                     structure: {
                         data: {
+                            merge: true,
                             structure: {
                                 case_id: {
                                     reference: {
@@ -503,6 +504,7 @@ define([
                             },
                         },
                         context: {
+                            merge: true,
                             structure: {
                                 userid: {
                                     reference: {

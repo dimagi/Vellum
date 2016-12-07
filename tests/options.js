@@ -7,6 +7,7 @@ define(["underscore"], function (_) {
             name: 'Session',
             structure: {
                 data: {
+                    merge: true,
                     structure: {
                         "case_id": {
                             reference: {
@@ -20,6 +21,7 @@ define(["underscore"], function (_) {
                     },
                 },
                 context: {
+                    merge: true,
                     structure: {
                         "userid": {
                             reference: {
