@@ -277,8 +277,6 @@ define([
             }
         };
 
-        widget.mug.on('question-itext-deleted', widget.destroy, null, widget);
-
         widget.toggleDefaultLangSync = function (val) {
             widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
         };
