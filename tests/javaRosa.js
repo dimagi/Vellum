@@ -84,6 +84,20 @@ define([
             assert.notEqual(itext.get("image"), old, "new upload should create a new path");
         });
 
+        it("should remove MM widget on click delete", function () {
+            // this test is overly dependent on UI elements
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            $(".itext-block-label-add-form-image").click();
+            var widget = $("div.widget[data-hqmediapath]:visible"),
+                deleteButton = $(".delete-itext-block-label-group-image");
+            assert.equal(widget.length, 2, "widget not found");
+            assert(deleteButton.length, "delete button not found");
+            deleteButton.click();
+            assert.equal($("div.widget[data-hqmediapath]").length, 0,
+                "widget not deleted");
+        });
+
         describe("and non default language is first", function () {
             before(function (done) {
                 util.init({
