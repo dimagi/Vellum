@@ -108,7 +108,8 @@ define([
         }
         return that;
     };
-    var INSTANCE_REGEXP = /(^)instance\((['"])([^'"]+)\2\)/i;
+    var INSTANCE_REGEXP = /(^)instance\((['"])([^'"]+)\2\)/i,
+        HASHTAG_NAMESPACE = /^#([^\/]+)/;
 
     function Form (opts, vellum, mugTypes) {
         var _this = this;
@@ -182,7 +183,7 @@ define([
                 form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
                 form.hasCaseHashtags = vellum.datasources.isReady();
                 _.each(form.hashtagTransformations, function (x, prefix) {
-                    form.hashtagNamespaces[/^#([^\/]+)/.exec(prefix)[1]] = true;
+                    form.hashtagNamespaces[HASHTAG_NAMESPACE.exec(prefix)[1]] = true;
                 });
             } else {
                 form.hashtagMap = {};

@@ -19,7 +19,7 @@ define([
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
         plugins = _.union(util.options.options.plugins || [], ["itemset"]),
-        FIXTURE_DATA = [{
+        DATA_SOURCES = [{
             id: "some-fixture",
             uri: "jr://fixture/item-list:some-fixture",
             path: "/some-fixture_list/some-fixture",
@@ -133,7 +133,7 @@ define([
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {
-                    dataSourcesEndpoint: function (callback) { callback(FIXTURE_DATA); },
+                    dataSourcesEndpoint: function (callback) { callback(DATA_SOURCES); },
                     onReady: function () {
                         vellum = this;
                         done();
