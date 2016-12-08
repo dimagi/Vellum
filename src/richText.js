@@ -38,7 +38,6 @@ define([
     'underscore',
     'jquery',
     'tpl!vellum/templates/date_format_popover',
-    'tpl!vellum/templates/easy_reference_popover',
     'vellum/dateformats',
     'vellum/escapedHashtags',
     'vellum/logic',
@@ -52,7 +51,6 @@ define([
     _,
     $,
     date_format_popover,
-    easy_reference_popover,
     dateformats,
     escapedHashtags,
     logic,
@@ -741,36 +739,12 @@ define([
                 placement: 'bottom',
                 title: getTitle,
                 html: true,
-                content: easy_reference_popover({
-                    text: labelText.text(),
-                    ufid: isFormRef ? labelMug.ufid : "",
-                }),
+                content: '<p>' + labelText.text() + '</p>',
                 template: '<div contenteditable="false" class="popover rich-text-popover">' +
                     '<div class="popover-inner">' +
                     '<div class="popover-title"></div>' +
                     (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
                     '</div></div>',
-                delay: {
-                    show: 0,
-                    hide: 200,
-                },
-            }).on('shown.bs.popover', function() {
-                var type = isFormRef ? 'form' : 'case';
-                analytics.fbUsage("Hovered over easy " + type + " reference");
-                analytics.workflow("Hovered over easy reference");
-                if (isDate || $this.attr("data-date-format")) {
-                    var pos = $(this).offset(),
-                        x = pos.left,
-                        y = pos.top + $(this).height();
-                    $("#" + dateFormatID).click(function () {
-                        $imgs.popover('hide');
-                        dateformats.showMenu(x, y, function (format) {
-                            $this.attr("data-date-format", format);
-                            editor.fire("saveSnapshot");
-                        }, true);
-                        return false;
-                    });
-                }
             });
 
             ckwidget.on('destroy', function (e)  {

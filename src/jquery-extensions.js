@@ -87,30 +87,4 @@ define([
         	}
         } );
     }
-
-    // Delay popover closing so that user has time to move cursor
-    // into popover and can then interact with popover content.
-    // http://jsfiddle.net/hermanho/4886bozw/
-    var popoverLeave = $.fn.popover.Constructor.prototype.leave;
-    $.fn.popover.Constructor.prototype.leave = function(obj){
-        var self = obj instanceof this.constructor ?
-            obj : $(obj.currentTarget)[this.type](this.getDelegateOptions()).data('bs.' + this.type);
-        var container,
-            timeout;
-
-        popoverLeave.call(this, obj);
-
-        if (obj.currentTarget) {
-            container = $('.popover');  // Works even if there are multiple popovers
-            timeout = self.timeout;
-            container.one('mouseenter', function() {
-                // Entered the actual popover
-                clearTimeout(timeout);
-                // Monitor popover content instead
-                container.one('mouseleave', function() {
-                    $.fn.popover.Constructor.prototype.leave.call(self, self);
-                });
-            });
-        }
-    };
 });
