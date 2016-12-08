@@ -260,5 +260,40 @@ define([
                 });
             }, null, "showXPathEditor");
         });
+
+        it("simple xpath editor should change save button on remove expression", function (done) {
+            util.loadXML("");
+            util.paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/hidden", "DataBindOnly", "null"],
+            ]);
+
+            $(".fd-content-right .fd-question-properties [name=property-relevantAttr]")
+                .closest(".form-group")
+                .find(".fd-edit-button").click();
+
+            events.on("showXPathEditor", function () {
+                var saveButton = $('.fd-xpath-save-button');
+                assert.equal(saveButton.length, 1, 'save button');
+                assert(!saveButton.hasClass("btn-success"),
+                    "save button should not be active");
+
+                var addButton = $('.fd-add-exp');
+                assert.equal(addButton.length, 1, 'add button');
+                assert.equal($('.xpath-expression-group').length, 1, 'before add');
+                addButton.click();
+                assert.equal($('.xpath-expression-group').length, 2, 'after add row');
+                assert(!saveButton.hasClass("btn-success"),
+                    "should not activate save button on add expression");
+
+                var removeButton = $('.xpath-delete-expression').last();
+                assert.equal(removeButton.length, 1, 'remove button');
+                removeButton.click();
+                assert.equal($('.xpath-expression-group').length, 1, 'after remove row');
+                assert(saveButton.hasClass("btn-success"),
+                    "did not activate save button after remove expression");
+                done();
+            }, null, "showXPathEditor");
+        });
     });
 });

@@ -30,6 +30,11 @@ define([
             rightPlaceholder: "Drag question here",
         });
 
+        var handleChange = function () {
+            saveButton.removeClass("btn-default disabled").addClass("btn-success");
+            options.change();
+        };
+
         // Handlers for the simple expression editor
         var simpleExpressions = {};
         var operationOpts = [];
@@ -215,8 +220,7 @@ define([
                 };
 
                 var validateExpression = function(item) {
-                    saveButton.removeClass("btn-default disabled").addClass("btn-success");
-                    options.change();
+                    handleChange();
                     var le = getExpression(getLeftQuestionInput()),
                         re = getExpression(getRightQuestionInput());
 
@@ -246,6 +250,7 @@ define([
 
                 $expUI.find('.xpath-delete-expression').click(function() {
                     $expUI.remove();
+                    handleChange();
                 });
 
                 if (expOp) {
@@ -360,7 +365,7 @@ define([
             if (options.xpathType === "bool") {
                 showSimpleMode(options.value);
                 if (!options.value) {
-                    $div.find('.fd-add-exp').click();
+                    tryAddExpression();
                 }
             } else {
                 if (options.mug.form.richText) {
@@ -433,17 +438,12 @@ define([
                 tryAddExpression();
             });
 
-            var advancedInput = $xpathUI.find('.fd-xpath-editor-text'),
-                advancedChange = function () {
-                    saveButton.removeClass("btn-default disabled")
-                              .addClass("btn-success");
-                    options.change();
-                };
+            var advancedInput = $xpathUI.find('.fd-xpath-editor-text');
             if (options.mug.form.richText) {
                 richText.editor(advancedInput, form, richTextOptions)
-                        .on('change', advancedChange);
+                        .on('change', handleChange);
             } else {
-                advancedInput.on('change keyup', advancedChange);
+                advancedInput.on('change keyup', handleChange);
             }
 
             var done = function (val) {
