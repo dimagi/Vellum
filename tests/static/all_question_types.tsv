@@ -1,33 +1,34 @@
-Question	Type	Text (en)	Text (hin)	Audio (en)	Audio (hin)	Image (en)	Image (hin)	Video (en)	Video (hin)	Video Inline (en)	Video Inline (hin)	Display Condition	Validation Condition	Validation Message	Calculate Condition	Required
-/question1	Text	question1 en label	question1 hin label	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/image/data/question1.png	jr://file/commcare/image/data/question1.png	jr://file/commcare/video/data/question1.3gp	jr://file/commcare/video/data/question1.3gp	jr://file/commcare/video-inline/data/question1.3gp	jr://file/commcare/video-inline/data/question1.3gp	#form/question20	#form/question20 = 2	question1 en validation		yes
-/question2	Label															no
-/question30	Label															no
-/question3	Multiple Choice															no
-/question3-choice1	Choice	choice1	choice1	jr://file/commcare/audio/data/question3-choice1.mp3	jr://file/commcare/audio/data/question3-choice1.mp3	jr://file/commcare/image/data/question3-choice1.png	jr://file/commcare/image/data/question3-choice1.png	jr://file/commcare/video/data/question3-choice1.3gp	jr://file/commcare/video/data/question3-choice1.3gp	jr://file/commcare/video-inline/data/question3-choice1.3gp	jr://file/commcare/video-inline/data/question3-choice1.3gp					
-/question3-choice2	Choice	choice2	choice2													
-/question6	Checkbox															no
-/question6-choice1	Choice	choice1	choice1													
-/question6-choice2	Choice	choice2	choice2													
-/question13	Integer															no
-/question14	Phone Number or Numeric ID															no
-/question15	Decimal															no
-/question16	Long															no
-/question17	Date															no
-/question18	Time															no
-/question19	Date and Time															no
-/question21	Group															no
-/question21/question31	Repeat Group															no
-/question22	Repeat Group															no
-/question22/question23	Question List															no
-/question22/question23/question40	Group															no
-/question22/question23/question41	Repeat Group															no
-/question22/question23/question24	Image Capture															no
-/question22/question23/question25	Audio Capture															no
-/question22/question23/question26	Video Capture															no
-/question22/question23/question27	GPS															no
-/question22/question23/question28	Password															no
-/question22/question23/question29	Signature Capture															no
-/question22/question23/question7	Android App Callout															no
-/question20	Hidden Value															no
-/question32	Hidden Value														1 + 2	no
-	Base															no
+Question	Type	Text (en)	Text (hin)	Audio (en)	Audio (hin)	Image (en)	Image (hin)	Video (en)	Video (hin)	Video Inline (en)	Video Inline (hin)	Display Condition	Validation Condition	Validation Message	Calculate Condition	Required	Hint Text	Help Text	Comment
+/question1	Text	question1 en label	question1 hin label	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/audio/data/question1.mp3	jr://file/commcare/image/data/question1.png	jr://file/commcare/image/data/question1.png	jr://file/commcare/video/data/question1.3gp	jr://file/commcare/video/data/question1.3gp	jr://file/commcare/video-inline/data/question1.3gp	jr://file/commcare/video-inline/data/question1.3gp	#form/question20	#form/question20 = 2	question1 en validation		yes	question1 en hint	question1 en help	"question 1 comment
+* with __markdown__"
+/question2	Label															no			question 2 comment
+/question30	Label															no			
+/question3	Multiple Choice															no			
+/question3-choice1	Choice	choice1	choice1	jr://file/commcare/audio/data/question3-choice1.mp3	jr://file/commcare/audio/data/question3-choice1.mp3	jr://file/commcare/image/data/question3-choice1.png	jr://file/commcare/image/data/question3-choice1.png	jr://file/commcare/video/data/question3-choice1.3gp	jr://file/commcare/video/data/question3-choice1.3gp	jr://file/commcare/video-inline/data/question3-choice1.3gp	jr://file/commcare/video-inline/data/question3-choice1.3gp								
+/question3-choice2	Choice	choice2	choice2																
+/question6	Checkbox															no			
+/question6-choice1	Choice	choice1	choice1																
+/question6-choice2	Choice	choice2	choice2																
+/question13	Integer															no			
+/question14	Phone Number or Numeric ID															no			
+/question15	Decimal															no			
+/question16	Long															no			
+/question17	Date															no			
+/question18	Time															no			
+/question19	Date and Time															no			
+/question21	Group															no			
+/question21/question31	Repeat Group															no			
+/question22	Repeat Group															no			
+/question22/question23	Question List															no			
+/question22/question23/question40	Group															no			
+/question22/question23/question41	Repeat Group															no			
+/question22/question23/question24	Image Capture															no			
+/question22/question23/question25	Audio Capture															no			
+/question22/question23/question26	Video Capture															no			
+/question22/question23/question27	GPS															no			
+/question22/question23/question28	Password															no			
+/question22/question23/question29	Signature Capture															no			
+/question22/question23/question7	Android App Callout															no			
+/question20	Hidden Value															no			
+/question32	Hidden Value														1 + 2	no			
+	Base															no			

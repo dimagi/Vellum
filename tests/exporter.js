@@ -1,4 +1,11 @@
 /*jshint multistr: true */
+/*
+ Updating these tests can be hard due to whitespace differences.
+ The following approach is recommended:
+ * Edit the TSV files in VI with the following settings:
+    * :set list  # display invisible chars
+    * :set noeol  # don't add a trailing newline character when saving the file
+ */
 define([
     'chai',
     'jquery',
@@ -60,8 +67,8 @@ define([
                 'Question\tType\tText (en)\tText (hin)\tAudio (en)\t' +
                 'Audio (hin)\tImage (en)\tImage (hin)\tVideo (en)\t' +
                 'Video (hin)\tVideo Inline (en)\tVideo Inline (hin)\tDisplay Condition\t' +
-                'Validation Condition\tValidation Message\tCalculate Condition\tRequired\n' +
-                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t\t\t\tno'
+                'Validation Condition\tValidation Message\tCalculate Condition\tRequired\tHint Text\tHelp Text\tComment\n' +
+                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t\t\t\tno\t\t\t'
             );
         });
     });
