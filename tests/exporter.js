@@ -1,4 +1,11 @@
 /*jshint multistr: true */
+/*
+ Updating these tests can be hard due to whitespace differences.
+ The following approach is recommended:
+ * Edit the TSV files in VI with the following settings:
+    * :set list  # display invisible chars
+    * :set noeol  # don't add a trailing newline character when saving the file
+ */
 define([
     'chai',
     'jquery',
