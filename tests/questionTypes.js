@@ -305,6 +305,12 @@ define([
                             .val("question1 en custom").change();
                         $("[name='itext-hin-label-custom']")
                             .val("question1 hin custom").change();
+                        $("[name='property-comment']")
+                            .val("question 1 comment\n* with __markdown__").change();
+
+                        clickQuestion("question2");
+                        $("[name='property-comment']")
+                            .val("question 2 comment").change();
 
                         clickQuestion("question3/choice1");
                         addAllForms();
