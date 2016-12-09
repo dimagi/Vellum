@@ -607,7 +607,7 @@ define([
                     });
                 });
 
-                it("should show xpath and tree reference link on popover", function (done) {
+                it("should show xpath on popover", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");
                     var widget = util.getWidget('property-calculateAttr');
@@ -616,13 +616,8 @@ define([
                         assert(bubble.length, "No bubbles detected");
                         try {
                             bubble.mouseenter();
-                            var $popover = $('.popover-content:last');
-                            assert.strictEqual($popover.find('p:first').text(),
+                            assert.strictEqual($('.popover-content').text(),
                                                "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
-                            var $link = $popover.find("a");
-                            assert($link.length);
-                            $link.click();
-                            assert.strictEqual($(".jstree-hovered").length, 1);
                         } finally {
                             $(".popover").remove();
                         }
@@ -639,7 +634,7 @@ define([
                         assert(bubble.length, "No bubbles detected");
                         try {
                             bubble.mouseenter();
-                            var $popover = $('.popover-content:last p:first');
+                            var $popover = $('.popover-content:last');
                             assert.strictEqual($popover.text(),
                                 "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
 
