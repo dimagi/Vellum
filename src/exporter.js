@@ -89,7 +89,7 @@ define([
 
             row["Hint Text"] = defaultOrNothing(mug.p.hintItext, defaultLanguage, 'default');
             row["Help Text"] = defaultOrNothing(mug.p.helpItext, defaultLanguage, 'default');
-            row["Comment"] = mug.p.comment;
+            row.Comment = mug.p.comment;
 
             // make sure there aren't any null values
             for (var prop in row) {
