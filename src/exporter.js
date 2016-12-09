@@ -33,7 +33,10 @@ define([
             "Validation Condition", 
             "Validation Message", 
             "Calculate Condition", 
-            "Required"
+            "Required",
+            "Hint Text",
+            "Help Text",
+            "Comment"
         ]);
 
         var mugToExportRow = function (mug) {
@@ -83,6 +86,10 @@ define([
                     mug.p.constraintMsgItext,
                     defaultLanguage, 'default');
             }
+
+            row["Hint Text"] = defaultOrNothing(mug.p.hintItext, defaultLanguage, 'default');
+            row["Help Text"] = defaultOrNothing(mug.p.helpItext, defaultLanguage, 'default');
+            row["Comment"] = mug.p.comment;
 
             // make sure there aren't any null values
             for (var prop in row) {
