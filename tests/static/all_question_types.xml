@@ -5,8 +5,8 @@
 		<model>
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/526523F0-DA37-439C-B697-B620DB933526" uiVersion="1" version="1" name="Untitled Form">
-					<question1>default data value</question1>
-					<question2 />
+					<question1 vellum:comment="question 1 comment&#10;* with __markdown__">default data value</question1>
+					<question2 vellum:comment="question 2 comment" />
 					<question30 />
 					<question3 />
 					<!-- arbitrary data attributes -->
