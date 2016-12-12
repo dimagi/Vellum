@@ -614,19 +614,21 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        try {
-                            bubble.mouseenter();
-                            var $popover = $('.popover-content:last');
-                            assert.strictEqual($popover.find('p:first').text(),
-                                               "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
-                            var $link = $popover.find("a");
-                            assert($link.length);
-                            $link.click();
-                            assert.strictEqual($(".jstree-hovered").length, 1);
-                        } finally {
-                            $(".popover").remove();
-                        }
-                        done();
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.strictEqual($popover.find('p:first').text(),
+                                                   "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+                                var $link = $popover.find("a");
+                                assert($link.length);
+                                $link.click();
+                                assert.strictEqual($(".jstree-hovered").length, 1);
+                            } finally {
+                                $(".popover").remove();
+                                done();
+                            }
+                        });
+                        bubble.mouseenter();
                     });
                 });
 
@@ -687,7 +689,7 @@ define([
                                     $desc;
                                 assert(bubble.length, "No bubbles detected");
 
-                                var handler = function() {
+                                $(document).one('shown.bs.popover', function() {
                                     $desc = $('.popover-title .text-muted');
                                     try {
                                         assert.equal($desc.text(), desc);
@@ -698,9 +700,8 @@ define([
                                         $(".popover").remove();
                                     }
                                     done();
-                                };
+                                });
 
-                                $(document).one('shown.bs.popover', handler);
                                 bubble.mouseenter();
                             });
                         });
