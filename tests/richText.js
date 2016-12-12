@@ -686,17 +686,24 @@ define([
                                         .children('img').first(),
                                     $desc;
                                 assert(bubble.length, "No bubbles detected");
-                                try {
-                                    bubble.mouseenter();
+
+                                var handler = function() {
                                     $desc = $('.popover-title .text-muted');
-                                    assert.equal($desc.text(), desc);
-                                    // check for format selector link
-                                    assert.equal($desc.find('a').text(),
-                                                 /\((.*)\)/.exec(desc)[1]);
-                                } finally {
-                                    $(".popover").remove();
-                                }
-                                done();
+                                    try {
+                                        assert.equal($desc.text(), desc);
+
+                                        // check for format selector link
+                                        assert.equal($desc.find('a').text(), /\((.*)\)/.exec(desc)[1]);
+
+                                        $(document).off('shown.bs.popover', handler);
+                                    } finally {
+                                        $(".popover").remove();
+                                    }
+                                    done();
+                                };
+
+                                $(document).on('shown.bs.popover', handler);
+                                bubble.mouseenter();
                             });
                         });
                     });
