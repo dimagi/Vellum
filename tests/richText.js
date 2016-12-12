@@ -694,15 +694,13 @@ define([
 
                                         // check for format selector link
                                         assert.equal($desc.find('a').text(), /\((.*)\)/.exec(desc)[1]);
-
-                                        $(document).off('shown.bs.popover', handler);
                                     } finally {
                                         $(".popover").remove();
                                     }
                                     done();
                                 };
 
-                                $(document).on('shown.bs.popover', handler);
+                                $(document).one('shown.bs.popover', handler);
                                 bubble.mouseenter();
                             });
                         });
