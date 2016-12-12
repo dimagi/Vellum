@@ -19,14 +19,27 @@
  *                  structure: {
  *                      inner-element: { }
  *                  }
- *                  name: "Element" (the text used in dropdown for this element)
+ *                  name: "Element" (the text used to represent this element)
  *              },
  *              ref-element: {
  *                  reference: {
+ *                      hashtag: string (optional hashtag prefix)
  *                      source: string (optional data source id, defaults to this data source)
  *                      subset: string (optional subset id)
+ *                      subset_key: string (optional subset key, if omitted then
+ *                                  the first subset with an `id` matching
+ *                                  this reference's `subset` will be used)
+ *                      subset_filter: boolean (optional, if true include
+ *                                     subset filter in xpath expression)
  *                      key: string (referenced property)
  *                  }
+ *              },
+ *              path-element: {
+ *                  merge: true (optional flag. When set, the element name
+ *                               will be appended to the path used to construct
+ *                               children and any children will be merged with
+ *                               this elements siblings.)
+ *                  structure: { ... }
  *              },
  *              @attribute: { }
  *          },
@@ -36,7 +49,11 @@
  *              name: string (human readable name)
  *              structure: { ... }
  *              related: {
- *                  string (relationship): string (related subset name),
+ *                  string (relationship): {
+ *                      // same keys as structure.ref-element.reference
+ *                      // plus one more:
+ *                      index: string (optional index path; default is '/index')
+ *                  } or string (related subset id, legacy)
  *                  ...
  *              }
  *          }]
@@ -238,19 +255,11 @@ define([
                     return null;
                 }
 
-                var path = parentPath ? (parentPath + "/" + id) : id,
-                    tree = getTree(item, id, path, info),
-                    hashtagPrefix = null,
-                    hashtag = null;
-                if (source && source.id !== "commcaresession") {
-                    // magic: case as the id means that this is the base case
-                    hashtagPrefix = '#case/' + (source.id !== 'case' ? source.id + '/' : '');
-                    hashtag = hashtagPrefix + id;
-                }
+                var path = parentPath ? parentPath + "/" + id : id,
+                    tree = getTree(item, id, path, info);
                 return {
                     name: tree.name,
-                    hashtag: hashtag,
-                    hashtagPrefix: hashtagPrefix,
+                    hashtag: info.hashtag ? info.hashtag + '/' + id : null,
                     parentPath: parentPath,
                     xpath: path,
                     index: index || false,
@@ -268,15 +277,31 @@ define([
                 var ref = item.reference;
                 source = sources[ref.source || info.id];
                 if (source) {
-                    info = _.extend(_.omit(source, "structure"), {_parent: info});
-                    path = "instance('" + source.id + "')" + source.path +
-                           "[" + ref.key + " = " + path + "]";
+                    info = _.extend(_.omit(source, "structure"), {
+                        _parent: info,
+                        hashtag: ref.hashtag,
+                    });
+                    if (!ref.hashtag && source.id === "casedb") {
+                        // legacy magic: case hashtags
+                        // TODO remove when HQ sends new schema format
+                        if (ref.subset === "case") {
+                            info.hashtag = '#case';
+                        } else {
+                            info.hashtag = '#case/' + ref.subset;
+                        }
+                    }
+                    var keyPath = path;
+                    path = "instance('" + source.id + "')" + source.path;
+                    if (ref.subset_filter && ref.subset_key && ref.subset) {
+                        path += "[" + ref.subset_key + " = '" + ref.subset + "']";
+                    }
+                    path += "[" + ref.key + " = " + keyPath + "]";
                     if (source.subsets && ref.subset) {
-                        // magic: match key: "@case_type"
-                        source = _.findWhere(
-                            source.subsets,
-                            {id: ref.subset, key: "@case_type"}
-                        ) || source;
+                        var where = {id: ref.subset};
+                        if (ref.subset_key) {
+                            where.key = ref.subset_key;
+                        }
+                        source = _.findWhere(source.subsets, where) || source;
                     }
                     var name = source.name || source.id;
                     if (name) {
@@ -300,17 +325,31 @@ define([
         }
         function getNodes(source, path, info) {
             var nodes = _.chain(source && source.structure)
-                .map(node(source, path, info))
+                .map(function (item, id) {
+                    if (item.merge) {
+                        return getNodes(item, path + "/" + id, {_parent: info});
+                    } else {
+                        return node(source, path, info)(item, id);
+                    }
+                })
+                .flatten()
                 .compact() // TODO remove with invalidCaseProperties
                 .sortBy("text")
                 .value();
             if (source && source.related) {
                 nodes = _.chain(source.related)
-                    .map(function (subset, relation) {
-                        // magic: reference key: @case_id
-                        var item = {reference: {subset: subset, key: "@case_id"}};
-                        // magic: append "/index" to path
-                        return node(source, path + "/index", info, true)(item, relation);
+                    .map(function (ref, relation) {
+                        var item, index;
+                        if (_.isObject(ref)) {
+                            item = {reference: ref};
+                            index = ref.index || "/index";
+                        } else {
+                            // legacy/magic
+                            // TODO remove when HQ sends new schema format
+                            item = {reference: {subset: ref, key: "@case_id"}};
+                            index = "/index";
+                        }
+                        return node(source, path + index, info, true)(item, relation);
                     })
                     .sortBy("text")
                     .value()
@@ -343,7 +382,7 @@ define([
             _.each(nodes, function (node) {
                 if (node.hashtag && !node.index) {
                     hashtags.map[node.hashtag] = node.xpath;
-                    hashtags.transforms[node.hashtagPrefix] = function (prop) {
+                    hashtags.transforms[node.sourceInfo.hashtag + '/'] = function (prop) {
                         return node.parentPath + "/" + prop;
                     };
                 }

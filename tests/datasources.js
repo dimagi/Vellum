@@ -19,7 +19,7 @@ define([
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
         plugins = _.union(util.options.options.plugins || [], ["itemset"]),
-        FIXTURE_DATA = [{
+        DATA_SOURCES = [{
             id: "some-fixture",
             uri: "jr://fixture/item-list:some-fixture",
             path: "/some-fixture_list/some-fixture",
@@ -38,21 +38,110 @@ define([
                 "@id": {},
                 name: {}
             }
+        }, {
+            id: "commcaresession",
+            uri: "jr://instance/session",
+            path: "/session",
+            name: 'Session',
+            structure: {
+                data: {
+                    merge: true,
+                    structure: {
+                        "case_id": {
+                            reference: {
+                                hashtag: "#case",
+                                source: "casedb",
+                                subset: "case",
+                                subset_key: "@case_type",
+                                key: "@case_id",
+                            },
+                        },
+                    },
+                },
+                context: {
+                    merge: true,
+                    structure: {
+                        "userid": {
+                            reference: {
+                                hashtag: "#user",
+                                source: "casedb",
+                                subset: "commcare-user",
+                                subset_key: "@case_type",
+                                subset_filter: true,
+                                key: "hq_user_id",
+                            },
+                        },
+                    },
+                },
+            },
+        }, {
+            id: "casedb",
+            uri: "jr://instance/casedb",
+            path: "/cases/case",
+            name: 'Cases',
+            subsets: [{
+                id: "case",
+                name: "child",
+                key: "@case_type",
+                structure: {
+                    dob: {},
+                },
+                related: {
+                    parent: {
+                        hashtag: "#case/parent",
+                        subset: "parent",
+                        subset_key: "@case_type",
+                        key: "@case_id",
+                    }
+                },
+            }, {
+                id: "parent",
+                name: "mother",
+                key: "@case_type",
+                structure: {
+                    edd: {},
+                },
+                related: {
+                    parent: {
+                        hashtag: "#case/grandparent",
+                        subset: "grandparent",
+                        subset_key: "@case_type",
+                        key: "@case_id",
+                    },
+                }
+            }, {
+                id: "grandparent",
+                name: "household",
+                key: "@case_type",
+                structure: {
+                    address: {},
+                }
+            }, {
+                id: "commcare-user",
+                name: "user",
+                key: "@case_type",
+                structure: {
+                    role: {},
+                }
+            }]
         }];
 
     describe("The data sources loader", function () {
-        function beforeFn(done) {
+        var vellum;
+        before(function (done) {
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
                 core: {
-                    dataSourcesEndpoint: function (callback) { callback(FIXTURE_DATA); },
-                    onReady: done
+                    dataSourcesEndpoint: function (callback) { callback(DATA_SOURCES); },
+                    onReady: function () {
+                        vellum = this;
+                        done();
+                    },
                 },
                 features: {rich_text: false},
             });
-        }
-        before(beforeFn);
+        });
 
         it("displays nested structures", function() {
             util.loadXML("");
@@ -65,6 +154,46 @@ define([
                 "some-fixture-name - inner-attribute",
                 "some-fixture-name - inner-attribute - extra-inner-attribute",
             ].join("\n"));
+        });
+
+        describe("data nodes", function () {
+            var nodes;
+            before(function () {
+                function transform(nodes) {
+                    return _.object(_.map(nodes, function (node) {
+                        if (!node.recursive) {
+                            node.nodes = transform(node.getNodes());
+                        }
+                        return [node.name, node];
+                    }));
+                }
+                nodes = transform(vellum.datasources.getDataNodes());
+            });
+
+            it("should merge structures when merge flag is set", function() {
+                assert.deepEqual(_.keys(nodes), ["child", "user"]);
+                assert.equal(nodes.child.xpath,
+                    "instance('commcaresession')/session/data/case_id");
+                assert.equal(nodes.user.xpath,
+                    "instance('commcaresession')/session/context/userid");
+            });
+
+            it("should use reference.hashtag", function() {
+                assert.equal(nodes.user.nodes.role.hashtag, "#user/role");
+            });
+
+            it("should construct #case hashtag with reference.subset", function() {
+                assert.equal(nodes.child.nodes.dob.hashtag, "#case/dob");
+            });
+
+            it("should construct #case/parent hashtag with related subset", function() {
+                assert.equal(nodes.child.nodes.mother.nodes.edd.hashtag, "#case/parent/edd");
+            });
+
+            it("should construct #case/grandparent hashtag with related subset", function() {
+                var house = nodes.child.nodes.mother.nodes.household.nodes;
+                assert.equal(house.address.hashtag, "#case/grandparent/address");
+            });
         });
 
         describe("", function() {

@@ -108,7 +108,8 @@ define([
         }
         return that;
     };
-    var INSTANCE_REGEXP = /(^)instance\((['"])([^'"]+)\2\)/i;
+    var INSTANCE_REGEXP = /(^)instance\((['"])([^'"]+)\2\)/i,
+        HASHTAG_NAMESPACE = /^#([^\/]+)/;
 
     function Form (opts, vellum, mugTypes) {
         var _this = this;
@@ -174,12 +175,16 @@ define([
             var form = this,
                 vellum = form.vellum,
                 oldHashtags = form.hashtagMap;
+            form.hashtagNamespaces = {form: true};
             if (form.richText) {
                 // TODO always load hashtags, even when rich text is disabled
                 form.hashtagMap = _.clone(vellum.datasources.getHashtagMap({}));
                 form.invertedHashtagMap = _.invert(form.hashtagMap);
                 form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
                 form.hasCaseHashtags = vellum.datasources.isReady();
+                _.each(form.hashtagTransformations, function (x, prefix) {
+                    form.hashtagNamespaces[HASHTAG_NAMESPACE.exec(prefix)[1]] = true;
+                });
             } else {
                 form.hashtagMap = {};
                 form.invertedHashtagMap = {};
@@ -210,12 +215,18 @@ define([
             tag = this.normalizeHashtag(tag);
             return this.hashtagTransformations.hasOwnProperty(tag);
         },
+        /**
+         * Check if tag has a valid hashtag prefix
+         *
+         * A valid hashtag prefix ends with a slash, and the given value must
+         * contain at least one character after the slash. This does a raw
+         * string analysis, it does not convert xpath expressions to hashtags.
+         */
         hasValidHashtagPrefix: function(tag) {
-            tag = this.normalizeHashtag(tag);
             var lastSlashIndex = tag.lastIndexOf("/");
             return lastSlashIndex !== -1 &&
-                this.hashtagTransformations.hasOwnProperty(tag.substring(0, lastSlashIndex + 1)) &&
-                tag.substring(lastSlashIndex + 1) !== "";
+                tag.length > lastSlashIndex + 1 &&
+                this.hashtagTransformations.hasOwnProperty(tag.substring(0, lastSlashIndex + 1));
         },
         addHashtag: function(hashtag, xpath) {
             this.hashtagMap[hashtag] = xpath;
@@ -224,6 +235,7 @@ define([
         initHashtag: function(hashtag, xpath) {
             if (!this.hashtagMap[hashtag]) {
                 this.addHashtag(hashtag, xpath);
+                this.hashtagNamespaces[/^#([^\/]+)/.exec(hashtag)[1]] = true;
             }
         },
         removeHashtag: function(hashtag) {
@@ -261,7 +273,7 @@ define([
             return this._logicManager.knownExternalReferences();
         },
         referenceHashtag: function(hashtag, mug, property) {
-            if (/^#case\//.test(hashtag.toHashtag())) {
+            if (this.hasValidHashtagPrefix(hashtag)) {
                 this.referenceInstance('casedb', mug, property);
                 this.referenceInstance('commcaresession', mug, property);
             }
@@ -1137,9 +1149,6 @@ define([
         undo: function() {
             this.undomanager.undo();
             this.vellum.selectSomethingOrHideProperties();
-        },
-        isCaseReference: function (path) {
-            return /^#case/.test(path);
         },
         findUsages: function (path) {
             return this._logicManager.findUsages(path);

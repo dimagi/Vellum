@@ -80,12 +80,7 @@ define([
                 } else {
                     jrUtil.insertOutputRef(_this, target, path, mug);
                 }
-                var category;
-                if (_this.data.core.form.isCaseReference(path)) {
-                    category = "Case Reference";
-                } else {
-                    category = "Form Reference";
-                }
+                var category = util.getReferenceName(path);
                 analytics.usage(category, "Drag and Drop", "Label");
             } else {
                 _this.__callOld();

@@ -10,13 +10,14 @@ define([
         //   hashtagMap: {hashtag expression: XPath expression}
         //   invertedHashtagMap: {XPath expression: hashtag expression}
         //   hashtagTransformations: {hashtag prefix: function to return property}
+        //   hashtagNamespaces: {namespace: true}
         // NOTE hashtagInfo is not the same as hashtagConfig passed to
         // `xpath.makeXPathModels(hashtagConfig)`
         makeXPathModels: function (hashtagInfo, configDecorator) {
             configDecorator = configDecorator || function (v) { return v; };
             return xpath.makeXPathModels(configDecorator({
                 isValidNamespace: function (namespace) {
-                    return namespace === 'form' || namespace === 'case';
+                    return hashtagInfo.hashtagNamespaces.hasOwnProperty(namespace);
                 },
                 hashtagToXPath: function (hashtagExpr) {
                     if (hashtagInfo.hashtagMap.hasOwnProperty(hashtagExpr)) {

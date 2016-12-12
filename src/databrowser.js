@@ -138,11 +138,14 @@ define([
         }
         function handleDrop(node, info, target) {
             var widget = widgets.util.getWidget(target, vellum),
-                path = widget.mug.form.richText ? node.hashtag : node.xpath;
+                path = widget.mug.form.richText ? node.hashtag : node.xpath,
+                id;
             while (info) {
-                var id = widget.addInstanceRef({id: info.id, src: info.uri});
-                if (id !== info.id) {
-                    path = widget.mug.form.updateInstanceQuery(path, id, info.id);
+                if (info.id && info.uri) {
+                    id = widget.addInstanceRef({id: info.id, src: info.uri});
+                    if (id !== info.id) {
+                        path = widget.mug.form.updateInstanceQuery(path, id, info.id);
+                    }
                 }
                 info = info._parent;
             }
