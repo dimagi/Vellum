@@ -749,8 +749,8 @@ define([
                     (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
                     '</div></div>',
                 delay: {
-                    show: 0,
-                    hide: 200,
+                    show: 350,  // be less annoying
+                    hide: 200,  // allow time for user to move cursor into popover
                 },
             }).on('shown.bs.popover', function() {
                 var type = isFormRef ? 'form' : 'case';
