@@ -85,6 +85,7 @@ define([
             super_setValue = widget.setValue,
             currentValue = null;
 
+        widget.options.richText = false;
         widget.getUIElement = function () {
             var query = getUIElementWithEditButton(
                     getUIElement(widget.input, labelText),
@@ -159,13 +160,14 @@ define([
             hasValue = true;
         }
 
-        var widget = widgets.dropdown(mug, options), 
+        var widget = widgets.dropdown(mug, options),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             getSource = options.getSource ? options.getSource : local_getValue,
             setSource = options.setSource ? options.setSource : local_setValue,
             hasValue = false;
 
+        widget.options.richText = false;
         widget.addOption(EMPTY_VALUE, "Loading...");
         var disconnect = mug.form.vellum.datasources.onChangeReady(function () {
             var data = mug.form.vellum.datasources.getDataSources(),
@@ -200,6 +202,9 @@ define([
                                 source: getSource(mug),
                                 headerText: labelText,
                                 loadEditor: loadDataSourceEditor,
+                                onLoad: function ($ui) {
+                                    widgets.util.setWidget($ui, widget);
+                                },
                                 done: function (source) {
                                     if (!_.isUndefined(source)) {
                                         setSource(source, mug);
