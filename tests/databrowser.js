@@ -336,7 +336,10 @@ define([
                                 callback(CASE_DATA);
                             });
                         },
-                        form: "",
+                        // need form with <hashtags> containing a case property
+                        // so the form knows about the #case namespace and shows
+                        // errors for unknown case properties
+                        form: MOTHER_REF_XML,
                         onReady: function () {
                             vellum = this;
                             blue = util.addQuestion("DataBindOnly", "blue");
@@ -476,6 +479,123 @@ define([
                              "<output value=\"instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob\" />");
                 assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                 assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
+            });
+        });
+
+        describe("with user properties", function () {
+            var CASE_AND_USER_DATA = [{
+                    id: "commcaresession",
+                    uri: "jr://instance/session",
+                    path: "/session",
+                    name: 'Session',
+                    structure: {
+                        data: {
+                            merge: true,
+                            structure: {
+                                case_id: {
+                                    reference: {
+                                        hashtag: "#case",
+                                        source: "casedb",
+                                        subset: "case",
+                                        subset_key: "@case_type",
+                                        key: "@case_id",
+                                    },
+                                },
+                            },
+                        },
+                        context: {
+                            merge: true,
+                            structure: {
+                                userid: {
+                                    reference: {
+                                        hashtag: "#user",
+                                        source: "casedb",
+                                        subset: "commcare-user",
+                                        subset_key: "@case_type",
+                                        subset_filter: true,
+                                        key: "hq_user_id",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }, {
+                    id: "casedb",
+                    uri: "jr://instance/casedb",
+                    path: "/casedb/case",
+                    name: 'Cases',
+                    structure: {
+                        name: {},
+                    },
+                    subsets: [{
+                        id: "case",
+                        name: "child",
+                        key: "@case_type",
+                        structure: {
+                            dob: {},
+                            invalid: {}
+                        },
+                    }, {
+                        id: "commcare-user",
+                        name: "user",
+                        key: "@case_type",
+                        structure: {
+                            code_name: {},
+                            user_role: {},
+                        }
+                    }],
+                }];
+
+            before(function (done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (callback) { callback(CASE_AND_USER_DATA); },
+                        invalidCaseProperties: ['invalid'],
+                        onReady: function () {
+                            databrowser.initDataBrowser(this);
+                            dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
+                            done();
+                        }
+                    }
+                });
+            });
+
+            it("should drag/drop case property", function (done) {
+                util.loadXML("");
+                var mug = util.addQuestion("DataBindOnly", "mug"),
+                    input = $("[name=property-calculateAttr]"),
+                    editor = input.ckeditor().editor,
+                    widget = util.getWidget('property-calculateAttr');
+                widget.input.promise.then(function () {
+                    editor.on('change', function() {
+                        assert.equal(mug.p.calculateAttr, "#case/dob");
+                        done();
+                    });
+                    assert(!mug.p.calculateAttr, "unexpected: " + mug.p.calculateAttr);
+                    util.findNode(dataTree, "dob").data.handleDrop(input);
+                });
+            });
+
+            it("should drag/drop user property", function (done) {
+                var form = util.loadXML(""),
+                    mug = util.addQuestion("DataBindOnly", "mug"),
+                    input = $("[name=property-calculateAttr]"),
+                    editor = input.ckeditor().editor,
+                    widget = util.getWidget('property-calculateAttr');
+                widget.input.promise.then(function () {
+                    editor.on('change', function() {
+                        assert.equal(mug.p.calculateAttr, "#user/code_name");
+                        assert.equal(form.normalizeXPath("#user/code_name"),
+                            "instance('casedb')/casedb/case[@case_type = 'commcare-user']" +
+                            "[hq_user_id = instance('commcaresession')/session/context/userid]" +
+                            "/code_name");
+                        done();
+                    });
+                    assert(!mug.p.calculateAttr, "unexpected: " + mug.p.calculateAttr);
+                    util.findNode(dataTree, "code_name").data.handleDrop(input);
+                });
             });
         });
     });

@@ -11,7 +11,7 @@
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" />
-			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:string" vellum:relevant="#form/question1 = 1" relevant="/data/question1 = 1" />
+			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:string" vellum:relevant="#form/question1 = #case/dob" relevant="/data/question1 = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" />
 			<bind vellum:nodeset="#form/question3" nodeset="/data/question3" type="xsd:string" vellum:relevant="#form/question2 = #form/question1" relevant="/data/question2 = /data/question1" />
 			<itext>
 				<translation lang="en" default="">

@@ -746,7 +746,7 @@ define([
             return false;
         });
 
-        $modalBody.find('#findUsagesSearch').on('keyup inserted.atwho', function () {
+        $modalBody.find('#findUsagesSearch').on('keypress inserted.atwho', _.debounce(function () {
             var searchKey = $.trim(this.value),
                 filteredData = {};
             if (!searchKey) {
@@ -769,7 +769,7 @@ define([
             }
             $modalBody.find('table').remove();
             $modalBody.append($(find_usages({tableData: filteredData})));
-        });
+        }, 250));
 
         atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
             useRichText: true,
@@ -850,7 +850,8 @@ define([
                 target.val(target.val() + path).change();
             }
 
-            var targetType, category;
+            var targetType,
+                category = util.getReferenceName(path);
             switch (target[0].id) {
                 case 'property-relevantAttr':
                     targetType = "Display";
@@ -864,11 +865,6 @@ define([
                 default:
                     targetType = "Expression Editor";
                     break;
-            }
-            if (_this.data.core.form.isCaseReference(path)) {
-                category = "Case Reference";
-            } else {
-                category = "Form Reference";
             }
             analytics.usage(category, "Drag and Drop", targetType);
         }
@@ -1361,7 +1357,7 @@ define([
             this.jstree('rename_node', mug.ufid, name);
         }
         var currentMug = this.getCurrentlySelectedMug();
-        if (!currentMug || mug.ufid === currentMug.ufid) {
+        if (currentMug && mug.ufid === currentMug.ufid) {
             this.$f.find(".fd-question-properties .fd-head h2").html(name);
         }
     };
@@ -1633,6 +1629,7 @@ define([
         this.adjustToWindow();
         this.$f.find('.fd-help a').fdHelp();
 
+        this.refreshMugName(mug);
         this.toggleConstraintItext(mug);
     };
 
@@ -2274,7 +2271,7 @@ define([
 
     fn.contributeToHeadXML = function (xmlWriter, form) {}; 
 
-    fn.initWidget = function (widget) {};
+    fn.initMediaUploaderWidget = function (widget) {};
 
     fn.destroy = function () {};
 

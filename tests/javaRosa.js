@@ -70,6 +70,34 @@ define([
             });
         });
 
+        it("should assign new media path on media upload", function () {
+            util.loadXML("");
+            var itext = util.addQuestion("Text", "text").p.labelItext,
+                pattern = /jr:\/\/file\/commcare\/image\/data\/text-\w+\.gif/;
+            $(".itext-block-label-add-form-image").click();
+            var media = util.getMediaUploader($(".fd-mm-upload-trigger:first"));
+            media.upload("old.gif");
+            var old = itext.get("image");
+            assert.match(old, pattern);
+            media.upload("new.gif");
+            assert.match(itext.get("image"), pattern);
+            assert.notEqual(itext.get("image"), old, "new upload should create a new path");
+        });
+
+        it("should remove MM widget on click delete", function () {
+            // this test is overly dependent on UI elements
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            $(".itext-block-label-add-form-image").click();
+            var widget = $("div.widget[data-hqmediapath]:visible"),
+                deleteButton = $(".delete-itext-block-label-group-image");
+            assert.equal(widget.length, 2, "widget not found");
+            assert(deleteButton.length, "delete button not found");
+            deleteButton.click();
+            assert.equal($("div.widget[data-hqmediapath]").length, 0,
+                "widget not deleted");
+        });
+
         describe("and non default language is first", function () {
             before(function (done) {
                 util.init({
@@ -393,6 +421,22 @@ define([
             assert.equal($(treeSelector).text(), "english [en]");
             $("[name='itext-hin-label']").val('hindi').change();
             assert.equal($(treeSelector).text(), "hindi");
+        });
+
+        it("should not fire lost of events for every mug on change label", function () {
+            var form = util.loadXML(""),
+                names = {q1: 0, q2: 0};
+            form.on("question-label-text-change", function (event) {
+                names[event.mug.p.nodeID]++;
+            });
+            util.paste([
+                ["id", "type"],
+                ["/q1", "Text"],
+                ["/q2", "Text"],
+            ]);
+            util.clickQuestion("q2");
+            $("[name='itext-en-label']").val('english').change();
+            assert.deepEqual(names, {q1: 0, q2: 1});
         });
 
         it("non-labelItext widget should contain value on load", function () {

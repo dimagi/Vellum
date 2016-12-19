@@ -377,6 +377,33 @@ define([
             assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
         });
 
+        describe("with async data sources", function() {
+            var vellum, callback;
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (cb) { callback = cb; },
+                        onReady: function () {
+                            vellum = this;
+                            done();
+                        },
+                    },
+                });
+            });
+            beforeEach(function () {
+                vellum.datasources.reset();
+                callback = null;
+            });
+
+            it("should not set case hashtags flag before data sources are loaded", function () {
+                var form = util.loadXML("");
+                assert.isNotOk(form.hasCaseHashtags);
+                callback(util.options.dataSources);
+                assert.isOk(form.hasCaseHashtags);
+            });
+        });
+
         describe("with rich text disabled", function() {
             before(function (done) {
                 util.init({
@@ -524,7 +551,64 @@ define([
                     }
                 });
             });
+        });
 
+        describe("hashtag logic", function () {
+            var form, longPaths = {};
+            before(function () {
+                form = util.loadXML("");
+            });
+
+            longPaths["instance('casedb')/cases/case[" +
+                "@case_id = instance('commcaresession')/session/data/case_id" +
+                "]/dob"] = "xpath";
+
+            _.each(_.extend({
+                "": null,
+                "#": null,
+
+                "#form": null,
+                /* should these pass? (they don't)
+                "#form/": "is",
+                "#form/prop": "has xpath",
+                */
+
+                "/data": null,
+                "/data/": null,
+                "/data/prop": "xpath",
+
+                "#case": null,
+                "#case/": "is",
+                "#case/prop": "has xpath",
+
+                "#user": null,
+                "#user/": "is",
+                "#user/prop": "has xpath",
+            }, longPaths), function (valid, path) {
+                function may(name) {
+                    return valid[name] ? "" : "not ";
+                }
+                valid = _.object(_.map((valid || "").split(" "), function (key) {
+                    return [key, true];
+                }));
+
+                it("should " + may("is") + "recognize " + path + " as hashtag prefix", function () {
+                    assert.equal(form.isValidHashtagPrefix(path), !!valid.is);
+                });
+
+                it("should " + may("has") + "recognize " + path + " as having hashtag prefix", function () {
+                    assert.equal(form.hasValidHashtagPrefix(path), !!valid.has);
+                });
+
+                it("should " + may("xpath") + "parse " + path + " to valid xpath", function () {
+                    try {
+                        form.xpath.parse(path).toXPath();
+                        assert(valid.xpath, "valid?! " + path);
+                    } catch (err) {
+                        assert(!valid.xpath, "not valid: " + path + "\nerror: " + err);
+                    }
+                });
+            });
         });
     });
 });

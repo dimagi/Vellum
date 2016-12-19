@@ -147,8 +147,54 @@ define([
 
     function getWidget(name) {
         var vellum = $("#vellum").vellum("get"),
-            target = $("[name=" + name + "]");
+            target = _.isString(name) ? $("[name=" + name + "]") : name;
         return widgets.util.getWidget(target, vellum);
+    }
+
+    function getMediaUploader($el) {
+        var media = {},
+            widget = getWidget($el),
+            $uiElem;
+        if (!widget) {
+            throw new Error("media uploader widget not found");
+        }
+        _.find([
+            ".widget[data-hqmediapath]",
+            ".itext-block-container",
+        ], function (sel) {
+            $uiElem = $el.closest(sel);
+            return $uiElem.length;
+        });
+        if (!$uiElem) {
+            throw new Error("media uploader element not found");
+        }
+
+        /**
+         * Simulate media upload
+         *
+         * The filename passed in here is used to set the extension on
+         * the media path. The new randomized media path obtained here
+         * by calling `widget.getRandomizedMediaPath(filename)` is
+         * constructed in two steps in the real media uploader:
+         *
+         * - uploader.js overrides the upload controller's `startUpload`
+         *   method to call `widget.getRandomizedMediaPath(path)` and
+         *   assign a new media path to the upload controller's
+         *   `uploadParams` object. This new media path has the same
+         *   file type extension (e.g., .jpg) as the old media path.
+         * - `BaseHQMediaUploadController.startUpload()` replaces the
+         *   old file extension with the one from the uploaded file and
+         *   then POSTs it to the upload URL. A `ref` object containing
+         *   the new media path is received in the upload response and
+         *   broadcasted in the "mediaUploadComplete" event data.
+         */
+        media.upload = function (filename) {
+            var path = widget.getRandomizedMediaPath(filename),
+                data = {ref: {path: path}, errors: []};
+            $uiElem.trigger("mediaUploadComplete", data);
+        };
+
+        return media;
     }
 
     function assertInputCount(nameOrInputs, num, name) {
@@ -415,6 +461,7 @@ define([
         getMug: getMug,
         getInput: getInput,
         getWidget: getWidget,
+        getMediaUploader: getMediaUploader,
         assertEqual: assertEqual,
         assertInputCount: assertInputCount,
         assertXmlEqual: assertXmlEqual,

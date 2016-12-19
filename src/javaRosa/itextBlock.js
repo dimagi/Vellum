@@ -238,13 +238,10 @@ define([
         block.getDeleteFormButton = function (form) {
             var $deleteButton = $(button_remove);
             $deleteButton.addClass('pull-right')
+                .addClass("delete-" + block.getFormGroupClass(form))
                 .click(function () {
                     var $formGroup = $('.' + block.getFormGroupClass(form));
                     block.deleteItextForm(form);
-                    block.mug.fire({
-                        type: 'question-itext-deleted',
-                        form: form
-                    });
                     $formGroup.remove();
                     $(this).remove();
                     $('.' + block.getAddFormButtonClass(form))

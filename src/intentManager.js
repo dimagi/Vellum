@@ -61,6 +61,14 @@ define([
         return widget;
     }
 
+    function printTemplateWidget(mug, options) {
+        var widget = widgets.abstractMediaWidget(mug, options);
+        widget.getBaseMediaPath = function () {
+            return "jr://file/commcare/text/" + mug.p.nodeID;
+        };
+        return widget;
+    }
+
     var parseInnerTags = function (tagObj, innerTag) {
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
@@ -151,7 +159,7 @@ define([
     }
 
     function syncMugWithIntent (tags, mug) {
-        // called when initializing a mug from a parsed form
+        // called when initializing a new mug or when parsing a form
         if (mug.__className === "AndroidIntent" ||
             mug.__className === "PrintIntent") {
             var nodeID = mug.p.nodeID,
@@ -176,8 +184,6 @@ define([
             if (mug.p.androidIntentExtra['cc:print_template_reference']) {
                 mug.p.docTemplate = mug.p.androidIntentExtra['cc:print_template_reference'].replace(/^'|'$/g, '');
                 delete mug.p.androidIntentExtra['cc:print_template_reference'];
-            } else {
-                mug.p.docTemplate = "jr://file/commcare/text/" + mug.p.nodeID+ ".html";
             }
         }
     }
@@ -306,7 +312,7 @@ define([
             docTemplate: {
                 lstring: 'Document Template',
                 visibility: 'visible',
-                widget: widgets.media,
+                widget: printTemplateWidget,
             },
             androidIntentAppId: { visibility: 'hidden' },
         }

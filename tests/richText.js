@@ -415,7 +415,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertExpression("#form/text");
-                    assert.equal(editor.getValue(), "one" + output + " two");
+                    assert.equal(editor.getValue(), "one" + output + "  two");
                     done();
                 });
             });
@@ -426,7 +426,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertOutput(output);
-                    assert.equal(editor.getValue(), "one" + output + " two");
+                    assert.equal(editor.getValue(), "one" + output + "  two");
                     done();
                 });
             });
@@ -482,11 +482,6 @@ define([
                         assert.equal(exprEditor.getValue(), expr);
                         exprEditor.select(i);
                         exprEditor.insertExpression('#form/text');
-                        if (expr === "one two" || i === 3) {
-                            // BUG for some reason ckeditor.getData() replaces
-                            // two spaces with one in this expression.
-                            result = result.replace(/  /g, " ");
-                        }
                         assert.equal(exprEditor.getValue(), result);
                         done();
                     });
@@ -624,19 +619,21 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        try {
-                            bubble.mouseenter();
-                            var $popover = $('.popover-content:last');
-                            assert.strictEqual($popover.find('p:first').text(),
-                                               "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
-                            var $link = $popover.find("a");
-                            assert($link.length);
-                            $link.click();
-                            assert.strictEqual($(".jstree-hovered").length, 1);
-                        } finally {
-                            $(".popover").remove();
-                        }
-                        done();
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.strictEqual($popover.find('p:first').text(),
+                                                   "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+                                var $link = $popover.find("a");
+                                assert($link.length);
+                                $link.click();
+                                assert.strictEqual($(".jstree-hovered").length, 1);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        bubble.mouseenter();
                     });
                 });
 
@@ -647,19 +644,21 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        try {
-                            bubble.mouseenter();
-                            var $popover = $('.popover-content:last p:first');
-                            assert.strictEqual($popover.text(),
-                                "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last p:first');
+                                assert.strictEqual($popover.text(),
+                                    "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
 
-                            widget.input.ckeditor().editor.widgets.destroyAll();
-                            // popover destroy just fades the popover
-                            assert.strictEqual($('.popover:not(.fade)').length, 0);
-                        } finally {
-                            $(".popover").remove();
-                        }
-                        done();
+                                widget.input.ckeditor().editor.widgets.destroyAll();
+                                // popover destroy just fades the popover
+                                assert.strictEqual($('.popover:not(.fade)').length, 0);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        bubble.mouseenter();
                     });
                 });
 
@@ -696,17 +695,21 @@ define([
                                         .children('img').first(),
                                     $desc;
                                 assert(bubble.length, "No bubbles detected");
-                                try {
-                                    bubble.mouseenter();
+
+                                $(document).one('shown.bs.popover', function() {
                                     $desc = $('.popover-title .text-muted');
-                                    assert.equal($desc.text(), desc);
-                                    // check for format selector link
-                                    assert.equal($desc.find('a').text(),
-                                                 /\((.*)\)/.exec(desc)[1]);
-                                } finally {
-                                    $(".popover").remove();
-                                }
-                                done();
+                                    try {
+                                        assert.equal($desc.text(), desc);
+
+                                        // check for format selector link
+                                        assert.equal($desc.find('a').text(), /\((.*)\)/.exec(desc)[1]);
+                                        done();
+                                    } finally {
+                                        $(".popover").remove();
+                                    }
+                                });
+
+                                bubble.mouseenter();
                             });
                         });
                     });

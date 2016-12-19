@@ -61,12 +61,9 @@ define([
     analytics,
     CKEDITOR
 ){
-    var CASE_REF_REGEX = /^#case\//,
-        FORM_REF_REGEX = /^#form\//,
-        REF_REGEX = /^#(form|case)\//,
+    var FORM_REF_REGEX = /^#form\//,
         INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
-        isWebkit = 'WebkitAppearance' in document.documentElement.style,
         bubbleWidgetDefinition = {
         template:
             '<span class="label label-datanode label-datanode-internal">' +
@@ -145,11 +142,8 @@ define([
      *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
-        var TRAILING_SPACE = " ";
-        if (isWebkit) {
-            // HACK use ZWS to fix cursor movement/hiding near bubble
-            TRAILING_SPACE = "\u200b ";
-        }
+        // HACK use 1/4 em space to fix cursor movement/hiding near bubble
+        var TRAILING_SPACE = "\u2005";
         function insertHtmlWithSpace(content) {
             editor.insertHtml(content + TRAILING_SPACE);
         }
@@ -437,12 +431,12 @@ define([
      */
     function makeBubble(form, xpath) {
         function _parseXPath(xpath, form) {
-            if (CASE_REF_REGEX.test(xpath)) {
+            if (!FORM_REF_REGEX.test(xpath)) {
                 if (form.isValidHashtag(xpath)) {
                     return {
                         classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
                     };
-                } else if (form.hasValidHashtagPrefix(xpath)) {
+                } else if (form.hasValidHashtagPrefix(form.normalizeHashtag(xpath))) {
                     return {
                         classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
                     };
@@ -476,7 +470,7 @@ define([
         var info = extractXPathInfo($(output)),
             xpath = form.normalizeHashtag(info.value),
             attrs = _.omit(info, 'value'),
-            startsWithRef = REF_REGEX.test(xpath),
+            startsWithRef = FORM_REF_REGEX.test(xpath) || form.hasValidHashtagPrefix(xpath),
             containsWhitespace = /\s/.test(xpath);
 
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
@@ -623,7 +617,7 @@ define([
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
-                   .replace(/(&nbsp;|\xa0|\u200b | \u200b|\u200b)/ig, " ")
+                   .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }
@@ -764,8 +758,8 @@ define([
                     (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
                     '</div></div>',
                 delay: {
-                    show: 0,
-                    hide: 200,
+                    show: 350,  // be less annoying
+                    hide: 200,  // allow time for user to move cursor into popover
                 },
             }).on('shown.bs.popover', function() {
                 var type = isFormRef ? 'form' : 'case';
@@ -797,7 +791,6 @@ define([
     }
 
     return {
-        REF_REGEX: REF_REGEX,
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
         editor: editor,
