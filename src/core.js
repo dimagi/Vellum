@@ -1826,10 +1826,10 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
-                sections: _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
-                    return _.map(s.properties, function(property) {
+                sections: multiselect ? [] : _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
+                    return _.find(_.map(s.properties, function(property) {
                         return getWidgetClassAndOptions(property, mug);
-                    }).find(_.identity);
+                    }), _.identity);
                 }), function(s) {
                     return _.extend({
                         show: !_this.sectionIsCollapsed(s),

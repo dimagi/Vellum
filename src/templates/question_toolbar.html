@@ -5,21 +5,23 @@
         <button type="button" class="btn btn-danger fd-button-remove"  tabindex="-1">
             <i class="fa fa-trash-o"></i> Delete
         </button>
-        <div class="btn-group">
-            <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
-                <i class="fa fa-reorder"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-right checklist">
-                <li class="dropdown-header">Show</li>
-                <% _.each(sections, function(section) { %>
-                <li>
-                    <a href="#" <% if (section.show) { %>class="selected"<% } %>>
-                        <i class="fa fa-check"></i><%= section.displayName %>
-                    </a>
-                </li>
-                <% }); %>
-            </ul>
-        </div>
+        <% if (sections.length) { %>
+            <div class="btn-group">
+                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="fa fa-reorder"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right checklist">
+                    <li class="dropdown-header">Show</li>
+                    <% _.each(sections, function(section) { %>
+                    <li>
+                        <a href="#" <% if (section.show) { %>class="selected"<% } %>>
+                            <i class="fa fa-check"></i><%= section.displayName %>
+                        </a>
+                    </li>
+                    <% }); %>
+                </ul>
+            </div>
+        <% } %>
     <% } %>
     </div>
 </div>
