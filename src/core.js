@@ -2132,6 +2132,7 @@ define([
         return [
             "label",
             "nodeID",
+            "requiredAttr",
             "readOnlyControl",
             "itemsetData",
             "imageSize",
@@ -2151,7 +2152,6 @@ define([
     fn.getLogicProperties = function () {
         return [
             "calculateAttr",
-            "requiredAttr",
             "relevantAttr",
             "constraintAttr",
             "repeat_count",
