@@ -332,10 +332,6 @@ define([
         widget.input.addClass("input-group identifier");
         widget.input.prepend('<div class="input-group-addon">' + options.identifierString + '</div>');
 
-        widget.getControl = function () {
-            return widget.input.find("input");
-        };
-
         widget.updateValue = function () {
             var val = widget.getValue();
 
@@ -765,7 +761,10 @@ define([
             labelText: labelText,
             help: help,
         }));
-        $input.prop('disabled', !!isDisabled);
+
+        // Disable anything that can be disabled
+        $input.find("*").addBack().prop('disabled', !!isDisabled);
+
         $uiElem.find(".controls").prepend($input);
 
         if (help && !help.url) {
