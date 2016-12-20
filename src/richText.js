@@ -230,9 +230,8 @@ define([
                 if (editor.status === "ready") {
                     editor.focus();
                 } else {
-                    editor.on('instanceReady', function () {
-                        editor.focus();
-                    });
+                    editor.removeListener('instanceReady', editor.focus);
+                    editor.on('instanceReady', editor.focus);
                 }
             },
             select: function (index) {
