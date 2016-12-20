@@ -991,7 +991,7 @@ define([
         });
         $tree.jstree(true).add_action("all", {
             "id": "action_remove",
-            "class": "fa fa-trash-o action_remove pull-right",
+            "class": "fa fa-trash-o action_remove",
             "after": true,
             "selector": "a",
             "event": "click",

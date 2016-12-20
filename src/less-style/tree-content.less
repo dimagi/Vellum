@@ -34,15 +34,23 @@
             }
         } 
 
-        > ul > li {
-            .action_remove {
-                display: none;
-            }
+        > ul {
+            padding-left: 10px;
 
-            &:hover .action_remove {
-                display: inline-block;
-                cursor: pointer;
-                margin: 5px;
+            > li {
+                position: relative;
+
+                .action_remove {
+                    display: none;
+                    position: absolute;
+                    top: 5px;
+                    left: -5px;
+                }
+    
+                &:hover .action_remove {
+                    display: inline-block;
+                    cursor: pointer;
+                }
             }
         }
     }
