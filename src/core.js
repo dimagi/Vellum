@@ -1440,8 +1440,10 @@ define([
             if ($firstGroup.length) {
                 var $input = $firstGroup.find("input, textarea");
                 if ($input.length) {
+                    // Rich text is off
                     $input.focus();
                 } else {
+                    // Rich text is on
                     $input = $firstGroup.find(".fd-textarea, .fd-input");
                     richText.editor($input).focus();
                 }
