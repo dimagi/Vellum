@@ -1781,12 +1781,16 @@ define([
         }
     };
 
+    fn.sectionIsCollapsed = function(section) {
+        var collapseKey = "collapse-" + section.displayName;
+        return localStorage.hasOwnProperty(collapseKey) ?
+            localStorage.getItem(collapseKey) :
+            section.isCollapsed;
+    };
+
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
-            collapseKey = "collapse-" + options.displayName,
-            isCollapsed = localStorage.hasOwnProperty(collapseKey) ?
-                localStorage.getItem(collapseKey) :
-                options.isCollapsed,
+            isCollapsed = _this.sectionIsCollapsed(options),
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
@@ -1824,9 +1828,9 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
-                sections: _.map(_this.getSections(mug), function(s) {
+                sections: _.map(_.rest(_this.getSections(mug)), function(s) {
                     return _.extend({
-                        show: 1,    // TODO
+                        show: !_this.sectionIsCollapsed(s),
                     }, s);
                 }),
             }));
