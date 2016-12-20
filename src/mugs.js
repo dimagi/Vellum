@@ -1430,10 +1430,11 @@ define([
         },
         spec: {
             nodeID: {
-                lstring: 'Choice Value',
+                lstring: ' ',
                 visibility: 'visible',
                 presence: 'required',
                 widget: widgets.identifier,
+                identifierString: 'Choice Value',
                 setter: null,
                 validationFunc: function (mug) {
                     if (/\s/.test(mug.p.nodeID)) {
