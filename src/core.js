@@ -1559,10 +1559,7 @@ define([
     };
 
     fn.displayMugProperties = function (mug) {
-        var $props = this.$f.find('.fd-question-properties'),
-            _getWidgetClassAndOptions = function (property) {
-                return getWidgetClassAndOptions(property, mug);
-            };
+        var $props = this.$f.find('.fd-question-properties');
         this.$f.find('.fd-default-panel').addClass('hide');
 
         this.showContentRight();
@@ -1573,14 +1570,15 @@ define([
             sections = this.getSections(mug),
             $messages = $("<div class='messages' />");
 
-        // TODO: move this logic into getSections
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i];
 
             section.mug = mug;
             section.properties = _(section.properties)
-                .map(_getWidgetClassAndOptions)
+                .map(function (property) {
+                    return getWidgetClassAndOptions(property, mug);
+                })
                 .filter(_.identity);
 
             if (section.properties.length) {
@@ -1828,7 +1826,11 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
-                sections: _.map(_.rest(_this.getSections(mug)), function(s) {
+                sections: _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
+                    return _.map(s.properties, function(property) {
+                        return getWidgetClassAndOptions(property, mug);
+                    }).find(_.identity);
+                }), function(s) {
                     return _.extend({
                         show: !_this.sectionIsCollapsed(s),
                     }, s);
