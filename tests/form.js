@@ -108,12 +108,12 @@ define([
 
             it("should generate ID based on label", function () {
                 util.loadXML("");
-                var name = util.addQuestion("Text");
+                var name = call('addQuestion', "Text");
                 $("[name='itext-en-label']").val('What is your name?').change();
-                var question1 = util.addQuestion("Text"),
-                    copy = util.addQuestion("Text");
+                var question1 = call('addQuestion', "Text"),
+                    copy = call('addQuestion', "Text");
                 $("[name='itext-en-label']").val('What is your name?').change();
-                var blank = util.addQuestion("Text");
+                var blank = call('addQuestion', "Text");
                 assert.equal(name.p.nodeID, 'what_is_your_name');
                 assert.equal(question1.p.nodeID, 'question1');
                 assert.equal(copy.p.nodeID, 'copy-1-of-what_is_your_name');
