@@ -1573,6 +1573,7 @@ define([
             sections = this.getSections(mug),
             $messages = $("<div class='messages' />");
 
+        // TODO: move this logic into getSections
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i];
@@ -1823,6 +1824,11 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
+                sections: _.map(_this.getSections(mug), function(s) {
+                    return _.extend({
+                        show: 1,    // TODO
+                    }, s);
+                }),
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true, true);
