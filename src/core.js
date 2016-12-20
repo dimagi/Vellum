@@ -403,11 +403,17 @@ define([
             });
         });
 
+        // Section toggling events: within section changer and when clicking on section header
+        this.$f.on('click', '.fd-section-changer a', function(e) {
+            var slug = $(e.target).data("slug");
+            $(".fd-question-fieldset[data-slug='" + slug + "'] .collapse-toggle").click();
+        });
         this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
             var $target = $(e.target),
-                section = $target.parent().find("legend").text().trim(),
+                slug = $target.closest("[data-slug]").data("slug"),
                 shouldCollapse = $target.hasClass('in');
-            localStorage.setItem('collapse-' + section, shouldCollapse ? "1" : "");
+            $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
+            localStorage.setItem('collapse-' + slug, shouldCollapse ? "1" : "");
         });
     };
 
@@ -1780,7 +1786,7 @@ define([
     };
 
     fn.sectionIsCollapsed = function(section) {
-        var collapseKey = "collapse-" + section.displayName;
+        var collapseKey = "collapse-" + section.slug;
         return localStorage.hasOwnProperty(collapseKey) ?
             localStorage.getItem(collapseKey) :
             section.isCollapsed;
@@ -1792,6 +1798,7 @@ define([
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
+                fieldsetSlug: options.slug,
                 isCollapsed: !!isCollapsed,
                 help: options.help
             })),

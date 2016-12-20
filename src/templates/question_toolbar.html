@@ -6,7 +6,7 @@
             <i class="fa fa-trash-o"></i> Delete
         </button>
         <% if (sections.length) { %>
-            <div class="btn-group">
+            <div class="btn-group fd-section-changer">
                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="fa fa-reorder"></i>
                 </a>
@@ -14,7 +14,7 @@
                     <li class="dropdown-header">Show</li>
                     <% _.each(sections, function(section) { %>
                     <li>
-                        <a href="#" <% if (section.show) { %>class="selected"<% } %>>
+                        <a href="#" data-slug="<%= section.slug %>" <% if (section.show) { %>class="selected"<% } %>>
                             <i class="fa fa-check"></i><%= section.displayName %>
                         </a>
                     </li>
