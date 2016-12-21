@@ -334,6 +334,10 @@ define([
             widget.input.prepend('<div class="input-group-addon">' + options.identifierString + '</div>');
         }
 
+            widget.input = $("<div>").append(widget.input);
+            var src = "src/images/mugs/" + mug.__className + ".png";
+            widget.input.prepend("<img src='" + src + "' style='max-width: 100%; max-height: 100px; margin: 10px 0;' />");
+
         widget.updateValue = function () {
             var val = widget.getValue();
 
