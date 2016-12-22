@@ -198,11 +198,36 @@ define([
     };
         
     fn._init_tree_head = function() {
-        var _this = this;
+        var _this = this,
             $head = this.$f.find(".fd-tree .fd-head");
 
+        this.data.core.QUESTIONS_IN_TOOLBAR = [];
+        this.data.core.QUESTION_TYPE_TO_GROUP = {};
+
+        _.each(_this._getQuestionGroups(), function (groupData) {
+            var groupSlug = groupData.group[0];
+
+            var getQuestionData = function (questionType) {
+                var mugType = _this.data.core.mugTypes[questionType],
+                    questionData = [
+                        questionType, 
+                        mugType.typeName, 
+                        mugType.icon
+                    ];
+
+                _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
+                _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
+                return questionData;
+            };
+
+            groupData.questions = _.map(groupData.questions, getQuestionData);
+            if (groupData.related && groupData.related.length) {
+                groupData.related = _.map(groupData.related, getQuestionData);
+            }
+        });
+
         var $dropdown = $(add_question({
-            groups: _.map(this._getQuestionGroups(), function(groupData) {
+            groups: _.map(_this._getQuestionGroups(), function(groupData) {
                 return {
                     name: groupData.group[1],
                     questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
@@ -228,38 +253,6 @@ define([
     };
 
     fn._init_toolbar = function () {
-        var _this = this,
-            $questionGroupContainer = this.$f.find(
-                '.fd-container-question-type-group');
-
-        this.data.core.QUESTIONS_IN_TOOLBAR = [];
-        this.data.core.QUESTION_TYPE_TO_GROUP = {};
-
-        _.each(this._getQuestionGroups(), function (groupData) {
-            var groupSlug = groupData.group[0];
-
-            var getQuestionData = function (questionType) {
-                var mugType = _this.data.core.mugTypes[questionType],
-                    questionData = [
-                        questionType, 
-                        mugType.typeName, 
-                        mugType.icon
-                    ];
-
-                _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
-                _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
-                return questionData;
-            };
-
-            groupData.questions = _.map(groupData.questions, getQuestionData);
-            if (groupData.related && groupData.related.length) {
-                groupData.related = _.map(groupData.related, getQuestionData);
-            }
-
-            groupData.group[2] = groupData.group[2] || 
-                _this.data.core.mugTypes[groupData.group[0]].icon;
-        });
-
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
     };
