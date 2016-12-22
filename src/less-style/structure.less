@@ -53,7 +53,7 @@ body.vellum-full-screen {
 
             // Heading for any panel (question tree, expression editor, etc.)
             .fd-head {
-                @menuContainerWidth: 50px;
+                @menuContainerWidth: 30px;
                 color: @white;
                 background-color: @cc-brand-low;
                 font-size: 17px;    // size icons
@@ -84,19 +84,18 @@ body.vellum-full-screen {
                     .text-overflow();
                     position: absolute;
                     left: 0;
-                    right: @menuContainerWidth - @contentPaddingVellum;
+                    right: (@menuContainerWidth - @contentPaddingVellum) * 2;
                 }
 
-                // Question tree menu (language switcher, copy, paste, etc.)
-                .fd-questions-menu-container {
+                .fd-add-question, .fd-questions-menu-container {
                     position: absolute;
-                    right: 0px;
+                    position: absolute;
                     top: 0px;
                     line-height: 23px;
                     font-size: @baseFontSize * 0.9;
                     min-width: @menuContainerWidth;
 
-                    // Icon link to open dropdown
+                    // Icon links to open dropdown
                     > a {
                         color: @white;
                         cursor: pointer;
@@ -110,6 +109,16 @@ body.vellum-full-screen {
                             background-color: @cc-brand-mid;
                         }
                     }
+                }
+
+                // Menu to add new question
+                .fd-add-question {
+                    right: @menuContainerWidth;
+                }
+
+                // Question tree menu (language switcher, copy, paste, etc.)
+                .fd-questions-menu-container {
+                    right: 0px;
 
                     // Menu options
                     #fd-questions-dropdown-menu a {

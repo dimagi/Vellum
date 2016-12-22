@@ -6,6 +6,7 @@ define([
     'underscore',
     'jquery',
     'tpl!vellum/templates/main',
+    'tpl!vellum/templates/add_question',
     'tpl!vellum/templates/question_type_group',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/confirm_overwrite',
@@ -42,6 +43,7 @@ define([
     _,
     $,
     main_template,
+    add_question,
     question_type_group,
     edit_source,
     confirm_overwrite,
@@ -127,26 +129,6 @@ define([
             questions: _.map(groupData.questions, convertButtonSpec)
         }));
 
-        $questionGroup.find('.fd-question-type').click(function (event) {
-            if (!$(this).hasClass('disabled')) {
-                vellum.addQuestion($(this).data('qtype'));
-            }
-            event.preventDefault();
-        });
-        $questionGroup.find('.btn.fd-question-type > span').tooltip({
-            title: function () {
-                var qLabel = $(this).data('qlabel'),
-                    $qType = $(this).parent();
-
-                if($qType.hasClass('disabled')) {
-                    qLabel = qLabel + " (add " + defaultQuestion.title + " first)";
-                } else {
-                    qLabel = "Add " + qLabel;
-                }
-                return qLabel;
-            },
-            placement: 'bottom'
-        });
         return $questionGroup;
     };
 
@@ -212,6 +194,7 @@ define([
         });
 
         this._init_toolbar();
+        this._init_tree_head();
         this._createJSTree();
         this.datasources = datasources.init(
             this.opts().core.dataSourcesEndpoint,
@@ -245,6 +228,36 @@ define([
         return mugs.baseMugTypes;
     };
         
+    fn._init_tree_head = function() {
+        var _this = this;
+            $head = this.$f.find(".fd-tree .fd-head");
+
+        var $dropdown = $(add_question({
+            groups: _.map(this._getQuestionGroups(), function(groupData) {
+                return {
+                    name: groupData.group[1],
+                    questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
+                        var mugType = _this.data.core.mugTypes[questionType];
+                        return {
+                            slug: questionType,
+                            name: mugType.typeName,
+                            icon: mugType.icon,
+                        };
+                    }),
+                };
+            }),
+        }));
+
+        $dropdown.find('.fd-question-type').click(function (event) {
+            if (!$(this).hasClass('disabled')) {
+                _this.addQuestion($(this).data('qtype'));
+            }
+            event.preventDefault();
+        });
+
+        $head.find(".fd-questions-menu-container").before($dropdown);
+    };
+
     fn._init_toolbar = function () {
         var _this = this,
             $questionGroupContainer = this.$f.find(
