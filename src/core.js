@@ -204,43 +204,50 @@ define([
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
         this.data.core.QUESTION_TYPE_TO_GROUP = {};
 
-        _.each(_this._getQuestionGroups(), function (groupData) {
-            var groupSlug = groupData.group[0];
-
-            var getQuestionData = function (questionType) {
-                var mugType = _this.data.core.mugTypes[questionType],
-                    questionData = [
-                        questionType, 
-                        mugType.typeName, 
-                        mugType.icon
-                    ];
-
-                _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
-                _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
-                return questionData;
-            };
-
-            groupData.questions = _.map(groupData.questions, getQuestionData);
-            if (groupData.related && groupData.related.length) {
-                groupData.related = _.map(groupData.related, getQuestionData);
-            }
+        _.each(_this._getQuestionGroups(), function(column) {
+            _.each(column, function (groupData) {
+                var groupSlug = groupData.group[0];
+    
+                var getQuestionData = function (questionType) {
+                    var mugType = _this.data.core.mugTypes[questionType],
+                        questionData = [
+                            questionType, 
+                            mugType.typeName, 
+                            mugType.icon
+                        ];
+    
+                    _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
+                    _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
+                    return questionData;
+                };
+    
+                groupData.questions = _.map(groupData.questions, getQuestionData);
+                if (groupData.related && groupData.related.length) {
+                    groupData.related = _.map(groupData.related, getQuestionData);
+                }
+            });
         });
 
-        var $dropdown = $(add_question({
-            groups: _.map(_this._getQuestionGroups(), function(groupData) {
+        var context = {
+            columns: _.map(_this._getQuestionGroups(), function(column) {
                 return {
-                    name: groupData.group[1],
-                    questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
-                        var mugType = _this.data.core.mugTypes[questionType];
+                    groups: _.map(column, function(groupData) {
                         return {
-                            slug: questionType,
-                            name: mugType.typeName,
-                            icon: mugType.icon,
+                            name: groupData.group[1],
+                            questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
+                                var mugType = _this.data.core.mugTypes[questionType];
+                                return {
+                                    slug: questionType,
+                                    name: mugType.typeName,
+                                    icon: mugType.icon,
+                                };
+                            }),
                         };
-                    }),
+                    })
                 };
             }),
-        }));
+        };
+        var $dropdown = $(add_question(context));
 
         $dropdown.find('.fd-question-type').click(function (event) {
             if (!$(this).hasClass('disabled')) {
@@ -259,64 +266,70 @@ define([
 
     fn._getQuestionGroups = function () {
         return [
-            {
-                group: ["Text", 'Text'],  // key in mugTypes, <title>
-                questions: [
-                    "Text",
-                    "Trigger"
-                ]
-            },
-            {
-                group: ["Select", 'Multiple Choice'],
-                related: [
-                    "Choice"
-                ],
-                questions: this.getSelectQuestions()
-            },
-            {
-                group: ["Int", 'Number'],
-                questions: [
-                    "Int",
-                    "PhoneNumber",
-                    "Double",
-                ]
-            },
-            {
-                group: ["Date", 'Date'],
-                questions: [
-                    "Date",
-                    "Time",
-                    "DateTime"
-                ]
-            },
-            {
-                group: ["DataBindOnly", 'Hidden Value'],
-                questions: [
-                    "DataBindOnly"
-                ]
-            },
-            {
-                group: ["Group", 'Groups'],
-                questions: [
-                    "Group",
-                    "Repeat",
-                    "FieldList"
-                ]
-            },
-            {
-                group: ["Image", 'Multimedia Capture'],
-                questions: [
-                    "Image",
-                    "Audio",
-                    "Video",
-                    "Signature"
-                ]
-            },
-            {
-                group: ["Geopoint", 'Advanced', ''],
-                textOnly: true,
-                questions: this.getAdvancedQuestions()
-            }
+            [
+                {
+                    group: ["Text", 'Text'],  // key in mugTypes, <title>
+                    questions: [
+                        "Text",
+                        "Trigger"
+                    ]
+                },
+                {
+                    group: ["Select", 'Multiple Choice'],
+                    related: [
+                        "Choice"
+                    ],
+                    questions: this.getSelectQuestions()
+                },
+                {
+                    group: ["Int", 'Number'],
+                    questions: [
+                        "Int",
+                        "PhoneNumber",
+                        "Double",
+                    ]
+                },
+                {
+                    group: ["Date", 'Date'],
+                    questions: [
+                        "Date",
+                        "Time",
+                        "DateTime"
+                    ]
+                },
+            ],
+            [
+                {
+                    group: ["DataBindOnly", 'Hidden Value'],
+                    questions: [
+                        "DataBindOnly"
+                    ]
+                },
+                {
+                    group: ["Group", 'Groups'],
+                    questions: [
+                        "Group",
+                        "Repeat",
+                        "FieldList"
+                    ]
+                },
+                {
+                    group: ["Image", 'Multimedia Capture'],
+                    questions: [
+                        "Image",
+                        "Audio",
+                        "Video",
+                        "Signature"
+                    ]
+                },
+            ],
+            [
+                {
+                    group: ["Geopoint", 'Advanced', ''],
+                    textOnly: true,
+                    questions: this.getAdvancedQuestions()
+                }
+            ]
         ];
     };
 
