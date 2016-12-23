@@ -222,9 +222,6 @@ define([
                 };
 
                 groupData.questions = _.map(groupData.questions, getQuestionData);
-                if (groupData.related && groupData.related.length) {
-                    groupData.related = _.map(groupData.related, getQuestionData);
-                }
             });
         });
 
@@ -243,7 +240,7 @@ define([
                         groups: _.map(column, function(groupData) {
                             return {
                                 name: groupData.group[1],
-                                questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
+                                questions: _.map(groupData.questions, function(questionType) {
                                     var mugType = _this.data.core.mugTypes[questionType];
                                     return {
                                         slug: questionType,
@@ -286,9 +283,6 @@ define([
                 },
                 {
                     group: ["Select", 'Multiple Choice'],
-                    related: [
-                        "Choice"
-                    ],
                     questions: this.getSelectQuestions()
                 },
                 {
