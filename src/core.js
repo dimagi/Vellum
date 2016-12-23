@@ -163,7 +163,7 @@ define([
         });
 
         this._init_toolbar();
-        this._init_tree_head();
+        this._init_add_question();
         this._createJSTree();
         this.datasources = datasources.init(
             this.opts().core.dataSourcesEndpoint,
@@ -196,10 +196,10 @@ define([
     fn.getMugTypes = function () {
         return mugs.baseMugTypes;
     };
-        
-    fn._init_tree_head = function() {
+
+    fn._init_add_question = function() {
         var _this = this,
-            $head = this.$f.find(".fd-tree .fd-head");
+            $addQuestion = this.$f.find(".fd-add-question");
 
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
         this.data.core.QUESTION_TYPE_TO_GROUP = {};
@@ -207,7 +207,7 @@ define([
         _.each(_this._getQuestionGroups(), function(column) {
             _.each(column, function (groupData) {
                 var groupSlug = groupData.group[0];
-    
+
                 var getQuestionData = function (questionType) {
                     var mugType = _this.data.core.mugTypes[questionType],
                         questionData = [
@@ -215,12 +215,12 @@ define([
                             mugType.typeName, 
                             mugType.icon
                         ];
-    
+
                     _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
                     _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
                     return questionData;
                 };
-    
+
                 groupData.questions = _.map(groupData.questions, getQuestionData);
                 if (groupData.related && groupData.related.length) {
                     groupData.related = _.map(groupData.related, getQuestionData);
@@ -228,35 +228,45 @@ define([
             });
         });
 
-        var context = {
-            columns: _.map(_this._getQuestionGroups(), function(column) {
-                return {
-                    groups: _.map(column, function(groupData) {
-                        return {
-                            name: groupData.group[1],
-                            questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
-                                var mugType = _this.data.core.mugTypes[questionType];
-                                return {
-                                    slug: questionType,
-                                    name: mugType.typeName,
-                                    icon: mugType.icon,
-                                };
-                            }),
-                        };
-                    })
-                };
+        $addQuestion.popover({
+            trigger: 'focus',
+            container: 'body',
+            placement: 'bottom',
+            title: "Add Question",
+            html: true,
+            template: '<div class="popover add-question-popover"><div class="arrow"></div>' +
+                '<div class="popover-title"></div>' +
+                '<div class="popover-content"></div></div>',
+            content: add_question({
+                columns: _.map(_this._getQuestionGroups(), function(column) {
+                    return {
+                        groups: _.map(column, function(groupData) {
+                            return {
+                                name: groupData.group[1],
+                                questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
+                                    var mugType = _this.data.core.mugTypes[questionType];
+                                    return {
+                                        slug: questionType,
+                                        name: mugType.typeName,
+                                        icon: mugType.icon,
+                                    };
+                                }),
+                            };
+                        })
+                    };
+                }),
             }),
-        };
-        var $dropdown = $(add_question(context));
+            delay: {
+                hide: 200,  // make sure click registers
+            },
+        });
 
-        $dropdown.find('.fd-question-type').click(function (event) {
+        $(document).on('click', '.fd-question-type', function (event) {
             if (!$(this).hasClass('disabled')) {
                 _this.addQuestion($(this).data('qtype'));
             }
             event.preventDefault();
         });
-
-        $head.find(".fd-questions-menu-container").before($dropdown);
     };
 
     fn._init_toolbar = function () {
