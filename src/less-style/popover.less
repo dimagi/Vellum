@@ -1,35 +1,28 @@
 // Add question type
 // Largely mimics dropdown styles
 .add-question-popover {
-    max-width: 600px;
+    max-width: 750px;
 
     .popover-content {
         padding: 0;
         .clearfix();
 
-        .qtype-group {
+        ul {
             float: left;
-            padding-bottom: 10px;
 
-            .qtypes {
-                .dropdown-header {
-                    padding: 5px !important;
+            li {
+                &.dropdown-header:not(:first-child) {
+                    padding-top: 10px;
                 }
 
-                .qtype {
-                    float: left;
-                    padding: 5px 20px;
-                    width: 70px;
-                    height: 40px;
-                    text-align: center;
+                a {
+                    display: block;
+                    color: @cc-text;
+                    text-decoration: none;
+                    padding: 3px 20px;
 
                     &:hover {
                         background-color: @cc-bg;
-                    }
-
-                    i {
-                        color: @cc-neutral-low;
-                        font-size: 24px;
                     }
                 }
             }
