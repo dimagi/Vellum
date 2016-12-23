@@ -1,6 +1,6 @@
 // Add question type
 // Largely mimics dropdown styles
-.add-question-popover {
+.fd-add-question-popover {
     max-width: 750px;
 
     .popover-content {
@@ -21,8 +21,13 @@
                     text-decoration: none;
                     padding: 3px 20px;
 
-                    &:hover {
+                    &:hover:not(.disabled) {
                         background-color: @cc-bg;
+                    }
+
+                    &.disabled {
+                        color: @cc-neutral-hi;
+                        cursor: not-allowed;
                     }
                 }
             }

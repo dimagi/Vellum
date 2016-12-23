@@ -193,6 +193,10 @@ define([
         },
     };
 
+    fn.getQuestionTypeGroupClass = function (slug) {
+        return "fd-question-group-" + slug;
+    };
+
     fn.getMugTypes = function () {
         return mugs.baseMugTypes;
     };
@@ -228,40 +232,46 @@ define([
             });
         });
 
+        var makeQuestion = function(questionType) {
+            var mugType = _this.data.core.mugTypes[questionType];
+            return {
+                slug: questionType,
+                name: mugType.typeName,
+                icon: mugType.icon,
+            };
+        };
+
+        var $content = $(add_question({
+            columns: _.map(_this._getQuestionGroups(), function(column) {
+                return {
+                    groups: _.map(column, function(groupData) {
+                        return {
+                            groupClass: _this.getQuestionTypeGroupClass(groupData.group[0]),
+                            name: groupData.group[1],
+                            questions: _.map(groupData.questions, makeQuestion),
+                            related: _.map(groupData.related || [], makeQuestion),
+                        };
+                    })
+                };
+            }),
+        }));
+
         $addQuestion.popover({
             trigger: 'focus',
-            container: 'body',
+            container: _this.$f,
             placement: 'bottom',
             title: "Add Question",
             html: true,
-            template: '<div class="popover add-question-popover"><div class="arrow"></div>' +
+            template: '<div class="popover fd-add-question-popover"><div class="arrow"></div>' +
                 '<div class="popover-title"></div>' +
                 '<div class="popover-content"></div></div>',
-            content: add_question({
-                columns: _.map(_this._getQuestionGroups(), function(column) {
-                    return {
-                        groups: _.map(column, function(groupData) {
-                            return {
-                                name: groupData.group[1],
-                                questions: _.map(groupData.questions.concat(groupData.related || []), function(questionType) {
-                                    var mugType = _this.data.core.mugTypes[questionType];
-                                    return {
-                                        slug: questionType,
-                                        name: mugType.typeName,
-                                        icon: mugType.icon,
-                                    };
-                                }),
-                            };
-                        })
-                    };
-                }),
-            }),
+            content: $content,
             delay: {
                 hide: 200,  // make sure click registers
             },
         });
 
-        $(document).on('click', '.fd-question-type', function (event) {
+        _this.$f.on('click', '.fd-question-type', function (event) {
             if (!$(this).hasClass('disabled')) {
                 _this.addQuestion($(this).data('qtype'));
             }
@@ -946,6 +956,7 @@ define([
             } else if (selected.length < 2) {
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
+                _this.activateQuestionTypeGroup(mug);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -954,6 +965,7 @@ define([
                 _this.jstree("open_all", data.node);
             }
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
+            _this.activateQuestionTypeGroup(mug);
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
@@ -969,6 +981,8 @@ define([
             form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
+        }).on("deselect_all.jstree deselect_node.jstree", function (e, data) {
+            _this.resetQuestionTypeGroups();
         }).on('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for
             // most nodes, but some (items in select questions) have a
@@ -1151,6 +1165,28 @@ define([
         // its bound mug.
     };
 
+    fn.activateQuestionTypeGroup = function (mug) {
+        var _this = this,
+            className = mug.__className;
+        this.resetQuestionTypeGroups();
+
+        var groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
+        if (groupSlug &&
+            className !== 'MSelectDynamic' &&
+            className !== 'SelectDynamic' &&
+            !this.jstree("is_closed", mug.ufid)) {
+            this.$f
+                .find('.' + _this.getQuestionTypeGroupClass(groupSlug))
+                .find('.fd-question-type-related').removeClass('disabled');
+console.log("removed from " + this.$f.find('.' + _this.getQuestionTypeGroupClass(groupSlug)).find('.fd-question-type-related').length);
+        }
+    };
+
+    fn.resetQuestionTypeGroups = function () {
+        this.$f.find('.fd-add-question-popover .fd-question-type-related')
+            .addClass('disabled');
+    };
+
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
@@ -1245,6 +1281,7 @@ define([
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
+                _this.activateQuestionTypeGroup(e.mug);
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
