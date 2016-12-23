@@ -299,20 +299,14 @@ define([
                         "Double",
                     ]
                 },
+            ],
+            [
                 {
                     group: ["Date", 'Date'],
                     questions: [
                         "Date",
                         "Time",
                         "DateTime"
-                    ]
-                },
-            ],
-            [
-                {
-                    group: ["DataBindOnly", 'Hidden Value'],
-                    questions: [
-                        "DataBindOnly"
                     ]
                 },
                 {
@@ -335,10 +329,16 @@ define([
             ],
             [
                 {
+                    group: ["DataBindOnly", 'Hidden Value'],
+                    questions: [
+                        "DataBindOnly"
+                    ]
+                },
+                {
                     group: ["Geopoint", 'Advanced', ''],
                     textOnly: true,
                     questions: this.getAdvancedQuestions()
-                }
+                },
             ]
         ];
     };

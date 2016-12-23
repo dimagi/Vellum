@@ -9,10 +9,12 @@
 
         ul {
             float: left;
-            margin-left: 0;
-            margin-bottom: 20px;
 
             li {
+                &.dropdown-header:not(:first-child) {
+                    padding-top: 10px;
+                }
+
                 a {
                     display: block;
                     color: @cc-text;
