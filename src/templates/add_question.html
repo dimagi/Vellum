@@ -1,14 +1,16 @@
 <% _.each(columns, function(column) { %>
-    <ul class="list-unstyled">
-        <% _.each(column.groups, function(group) { %>
-            <li class="dropdown-header"><%= group.name %></li>
-            <% _.each(group.questions, function(question) { %>
-                <li>
-                    <a href="#" class="fd-question-type" data-qtype="<%= question.slug %>">
-                        <i class="<%= question.icon %>"></i> <%= question.name %>
-                    </a>
-                </li>
-            <% }); %>
-        <% }); %>
-    </ul>
+    <% _.each(column.groups, function(group) { %>
+        <div class="qtype-group">
+            <div class="dropdown-header"><%= group.name %></div>
+            <div class="qtypes">
+                <% _.each(group.questions, function(question) { %>
+                    <div class="qtype">
+                        <a href="#" class="fd-question-type" data-qtype="<%= question.slug %>">
+                            <i class="<%= question.icon %>"></i> <!--%= question.name %-->
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    <% }); %>
 <% }); %>

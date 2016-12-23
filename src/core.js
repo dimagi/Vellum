@@ -310,6 +310,12 @@ define([
                     ]
                 },
                 {
+                    group: ["DataBindOnly", 'Hidden Value'],
+                    questions: [
+                        "DataBindOnly"
+                    ]
+                },
+                {
                     group: ["Group", 'Groups'],
                     questions: [
                         "Group",
@@ -328,12 +334,6 @@ define([
                 },
             ],
             [
-                {
-                    group: ["DataBindOnly", 'Hidden Value'],
-                    questions: [
-                        "DataBindOnly"
-                    ]
-                },
                 {
                     group: ["Geopoint", 'Advanced', ''],
                     textOnly: true,
