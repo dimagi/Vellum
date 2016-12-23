@@ -1178,7 +1178,6 @@ define([
             this.$f
                 .find('.' + _this.getQuestionTypeGroupClass(groupSlug))
                 .find('.fd-question-type-related').removeClass('disabled');
-console.log("removed from " + this.$f.find('.' + _this.getQuestionTypeGroupClass(groupSlug)).find('.fd-question-type-related').length);
         }
     };
 
