@@ -439,6 +439,7 @@ define([
                 icon: "fa fa-file-excel-o",
                 action: function (done) {
                     _this.showExportModal(done);
+                    analytics.fbUsage("Clicked Export Form Contents");
                 }
             },
             {
