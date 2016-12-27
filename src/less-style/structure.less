@@ -59,11 +59,13 @@ body.vellum-full-screen {
                 font-size: 17px;    // size icons
                 height: @treeBrowserHeadHeight;
                 position: relative;
+                padding: 3px;
 
                 // Icon to expand/collapse panel
                 .fd-head-max-indicator {
                     position: absolute;
                     right: 10px;
+                    top: 5px;
 
                     i {
                         color: @cc-neutral-hi;
@@ -77,10 +79,9 @@ body.vellum-full-screen {
 
                 > h2 {
                     font-size: @baseFontSize * 0.9;
-                    padding: 1px @contentPaddingVellum 0;
-                    margin: 0;
+                    padding: 5px 0;
+                    margin: 2px 0 0 6px;
                     font-weight: normal;
-                    line-height: 23px;
                     .text-overflow();
                     position: absolute;
                     left: 0;
@@ -88,7 +89,6 @@ body.vellum-full-screen {
                 }
 
                 .fd-add-question, .fd-questions-menu-container {
-                    position: absolute;
                     position: absolute;
                     top: 0px;
                     line-height: 23px;
@@ -119,6 +119,7 @@ body.vellum-full-screen {
                 // Question tree menu (language switcher, copy, paste, etc.)
                 .fd-questions-menu-container {
                     right: 0px;
+                    top: 5px;
 
                     // Menu options
                     #fd-questions-dropdown-menu a {
