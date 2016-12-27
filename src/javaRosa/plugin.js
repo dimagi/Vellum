@@ -114,7 +114,7 @@ define([
                 return;
             }
             $menu.find('.language-selector').remove();
-            $menu.append(language_selector({languages: fullLangs}));
+            $menu.find('.fd-tools-menu').before(language_selector({languages: fullLangs}));
             $items = $menu.find(".fd-display-item");
             $items.click(function (e) {
                 $input.val($(this).data("code")).change();

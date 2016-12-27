@@ -372,8 +372,8 @@ define([
         var _this = this,
             menuItems = this.getToolsMenuItems();
 
-        var $toolsMenu = this.$f.find('.fd-tools-menu');
-        $toolsMenu.empty();
+        var $lastItem = this.$f.find('.fd-tools-menu');
+        $lastItem.nextUntil(".divider").remove();
         _(menuItems).each(function (menuItem) {
             var $a = $("<a tabindex='-1' href='#'><i class='" + menuItem.icon + "'></i> " + menuItem.name + "</a>").click(
                 function (e) {
@@ -386,7 +386,9 @@ define([
                     });
                 }
             );
-            $("<li></li>").append($a).appendTo($toolsMenu);
+            var $newItem = $("<li></li>").append($a);
+            $lastItem.after($newItem);
+            $lastItem = $newItem;
         });
 
         this.$f.find('.fd-expand-all').click(function() {
