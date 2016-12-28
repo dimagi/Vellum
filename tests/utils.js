@@ -474,6 +474,9 @@ define([
                 clickQuestion(this.prevId);
             }
             var mug = call('addQuestion', qType);
+            if (!nodeId && !mug.p.nodeID) {
+                nodeId = call('nodeIDFromLabel', mug);
+            }
             if (nodeId) {
                 assert(_.isUndefined(attrs.nodeID),
                        "unexpected attribute for " + qType + "[" + nodeId + "]");
