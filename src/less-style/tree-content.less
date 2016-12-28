@@ -7,32 +7,52 @@
     // Styles shared by both trees
     .jstree {
 
-        // Items in tree (type icon + name)
-        .jstree-anchor {
-            color: darken(@blueDark, 10);
+        .jstree-node {
+            // Items in tree (type icon + name)
+            .jstree-anchor {
+                color: darken(@blueDark, 10);
 
-            &.jstree-hovered,
-            &.jstree-clicked {
-                border: none;
-                background: desaturate(lighten(@blue, 58), 40);
+                &.jstree-hovered,
+                &.jstree-clicked {
+                    border: none;
+                    background: desaturate(lighten(@blue, 58), 40);
+                }
+
+                &.jstree-clicked {
+                    .box-shadow(0px 0px 4px fade(@blue, 60%));
+                }
+
+                .fd-tree-valid-alert-icon {
+                    color: lighten(@red, 15);
+                    margin-right: 3px;
+                    margin-left: -3px;
+                }
             }
 
-            &.jstree-clicked {
-                .box-shadow(0px 0px 4px fade(@blue, 60%));
-            }
-
-            > .jstree-icon {
+            .jstree-anchor > .jstree-icon, .add_choice:before {
                 background: none;
                 font-size: .85em;
                 color: @blueLight;
             }
 
-            .fd-tree-valid-alert-icon {
-                color: lighten(@red, 15);
-                margin-right: 3px;
-                margin-left: -3px;
+            .add_choice {
+                display: block;
+                margin-left: 55px;
+                cursor: pointer;
+
+                // Fragile: overwrite .fa styles with .jstree-anchor and body styles
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                line-height: 24px;
+                height: 24px;
+
+                &:before {
+                    // Bring back .fa font
+                    font: normal normal normal 14px/1 FontAwesome;
+
+                    margin-right: 6px;
+                }
             }
-        } 
+        }
 
         > ul {
             padding-left: 10px;

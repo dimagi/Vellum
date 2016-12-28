@@ -1572,11 +1572,11 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
-        var _this = this;
+        var _this = this, node;
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
         }, null, null, this.data.core);
-        return this.jstree("create_node",
+        node = this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
                 text: this.getMugDisplayName(mug),
@@ -1597,6 +1597,23 @@ define([
             // NOTE 'into' is not a supported position in JSTree
             (position === 'into' ? 'last' : position)
         );
+
+        if (mug.__className === 'MSelect' || mug.__className === 'Select') {
+            var tree = this.data.core.$tree;
+            tree.jstree(true).add_action(node, {
+                "id": "add_choice",
+                "class": "fa fa-plus add_choice",
+                "text": " Add Choice",
+                "after": true,
+                "selector": ":scope > :last-child",
+                "event": "click",
+                "callback": function (node_id, node, action_id, action_el) {
+                    _this.data.core.form.createQuestion(mug, 'into', "Choice", true);
+                }
+            });
+        }
+
+        return node;
     };
 
     fn.handleMugParseFinish = function (mug) {
