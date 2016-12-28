@@ -1879,9 +1879,6 @@ define([
             mugs = multiselect ? mug : [mug],
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
-                isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
-                    return _this.isMugRemoveable(mug, mug.hashtagPath);
-                }),
                 isCopyable: !multiselect && mug.options.isCopyable,
                 sections: multiselect ? [] : _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
                     return _.find(_.map(s.properties, function(property) {
