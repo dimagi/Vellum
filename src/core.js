@@ -412,11 +412,17 @@ define([
             });
         });
 
+        // Section toggling events: within section changer and when clicking on section header
+        this.$f.on('click', '.fd-section-changer a', function(e) {
+            var slug = $(e.target).data("slug");
+            $(".fd-question-fieldset[data-slug='" + slug + "'] .collapse-toggle").click();
+        });
         this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
             var $target = $(e.target),
-                section = $target.parent().find("legend").text().trim(),
+                slug = $target.closest("[data-slug]").data("slug"),
                 shouldCollapse = $target.hasClass('in');
-            localStorage.setItem('collapse-' + section, shouldCollapse ? "1" : "");
+            $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
+            localStorage.setItem('collapse-' + slug, shouldCollapse ? "1" : "");
         });
     };
 
@@ -1578,10 +1584,7 @@ define([
     };
 
     fn.displayMugProperties = function (mug) {
-        var $props = this.$f.find('.fd-question-properties'),
-            _getWidgetClassAndOptions = function (property) {
-                return getWidgetClassAndOptions(property, mug);
-            };
+        var $props = this.$f.find('.fd-question-properties');
         this.$f.find('.fd-default-panel').addClass('hide');
 
         this.showContentRight();
@@ -1598,7 +1601,9 @@ define([
 
             section.mug = mug;
             section.properties = _(section.properties)
-                .map(_getWidgetClassAndOptions)
+                .map(function (property) {
+                    return getWidgetClassAndOptions(property, mug);
+                })
                 .filter(_.identity);
 
             if (section.properties.length) {
@@ -1799,15 +1804,20 @@ define([
         }
     };
 
+    fn.sectionIsCollapsed = function(section) {
+        var collapseKey = "collapse-" + section.slug;
+        return localStorage.hasOwnProperty(collapseKey) ?
+            localStorage.getItem(collapseKey) :
+            section.isCollapsed;
+    };
+
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
-            collapseKey = "collapse-" + options.displayName,
-            isCollapsed = localStorage.hasOwnProperty(collapseKey) ?
-                localStorage.getItem(collapseKey) :
-                options.isCollapsed,
+            isCollapsed = _this.sectionIsCollapsed(options),
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
+                fieldsetSlug: options.slug,
                 isCollapsed: !!isCollapsed,
                 help: options.help
             })),
@@ -1842,6 +1852,15 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
+                sections: multiselect ? [] : _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
+                    return _.find(_.map(s.properties, function(property) {
+                        return getWidgetClassAndOptions(property, mug);
+                    }), _.identity);
+                }), function(s) {
+                    return _.extend({
+                        show: !_this.sectionIsCollapsed(s),
+                    }, s);
+                }),
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true, true);
