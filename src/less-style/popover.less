@@ -1,4 +1,41 @@
-// Styling for popovers for data node bubbles
+// Add question type
+// Largely mimics dropdown styles
+.fd-add-question-popover {
+    max-width: 750px;
+
+    .popover-content {
+        padding: 0;
+        .clearfix();
+
+        ul {
+            float: left;
+
+            li {
+                &.dropdown-header:not(:first-child) {
+                    padding-top: 10px;
+                }
+
+                a {
+                    display: inline-block;
+                    color: @cc-text;
+                    text-decoration: none;
+                    padding: 3px 20px;
+
+                    &:hover:not(.disabled) {
+                        background-color: @cc-bg;
+                    }
+
+                    &.disabled {
+                        color: @cc-neutral-hi;
+                        cursor: not-allowed;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Data node bubbles
 .rich-text-popover {
     .border-radius(3px);
     word-wrap: break-word;
