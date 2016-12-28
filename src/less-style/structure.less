@@ -87,33 +87,33 @@ body.vellum-full-screen {
                     right: (@menuContainerWidth - @contentPaddingVellum) * 2;
                 }
 
-                .fd-add-question, .fd-questions-menu-container {
+                .fd-questions-menu-container {
                     position: absolute;
                     position: absolute;
                     top: 0px;
                     line-height: 23px;
                     font-size: @baseFontSize * 0.9;
                     min-width: @menuContainerWidth;
+                    .clearfix();
 
                     // Icon links to open dropdown
-                    > a {
-                        color: @white;
-                        cursor: pointer;
-                        display: block;
-                        padding: 0 @contentPaddingVellum;
-                        text-decoration: none;
-                        background-color: @cc-brand-low;
+                    .dropdown {
+                        float: left;
 
-                        &:hover {
+                        > a {
+                            color: @white;
+                            cursor: pointer;
+                            display: block;
+                            padding: 0 @contentPaddingVellum;
                             text-decoration: none;
-                            background-color: @cc-brand-mid;
+                            background-color: @cc-brand-low;
+
+                            &:hover {
+                                text-decoration: none;
+                                background-color: @cc-brand-mid;
+                            }
                         }
                     }
-                }
-
-                // Menu to add new question
-                .fd-add-question {
-                    right: @menuContainerWidth;
                 }
 
                 // Question tree menu (language switcher, copy, paste, etc.)

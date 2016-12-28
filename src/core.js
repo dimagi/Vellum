@@ -216,60 +216,39 @@ define([
 
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
 
-        _.each(_this._getQuestionGroups(), function(column) {
-            _.each(column, function (groupData) {
-                var groupSlug = groupData.group[0];
+        _.each(_this._getQuestionGroups(), function (groupData) {
+            var groupSlug = groupData.group[0];
 
-                var getQuestionData = function (questionType) {
-                    var mugType = _this.data.core.mugTypes[questionType],
-                        questionData = [
-                            questionType, 
-                            mugType.typeName, 
-                            mugType.icon
-                        ];
+            var getQuestionData = function (questionType) {
+                var mugType = _this.data.core.mugTypes[questionType],
+                    questionData = [
+                        questionType,
+                        mugType.typeName,
+                        mugType.icon
+                    ];
 
-                    _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
-                    return questionData;
-                };
+                _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
+                return questionData;
+            };
 
-                groupData.questions = _.map(groupData.questions, getQuestionData);
-            });
+            groupData.questions = _.map(groupData.questions, getQuestionData);
         });
 
-        var $content = $(add_question({
-            columns: _.map(_this._getQuestionGroups(), function(column) {
+        _this.$f.find(".fd-add-question").after($(add_question({
+            groups: _.map(_this._getQuestionGroups(), function(groupData) {
                 return {
-                    groups: _.map(column, function(groupData) {
+                    name: groupData.group[1],
+                    questions: _.map(groupData.questions, function(questionType) {
+                        var mugType = _this.data.core.mugTypes[questionType];
                         return {
-                            name: groupData.group[1],
-                            questions: _.map(groupData.questions, function(questionType) {
-                                var mugType = _this.data.core.mugTypes[questionType];
-                                return {
-                                    slug: questionType,
-                                    name: mugType.typeName,
-                                    icon: mugType.icon,
-                                };
-                            }),
+                            slug: questionType,
+                            name: mugType.typeName,
+                            icon: mugType.icon,
                         };
-                    })
+                    }),
                 };
             }),
-        }));
-
-        $addQuestion.popover({
-            trigger: 'focus',
-            container: _this.$f,
-            placement: 'bottom',
-            title: "Add Question",
-            html: true,
-            template: '<div class="popover fd-add-question-popover"><div class="arrow"></div>' +
-                '<div class="popover-title"></div>' +
-                '<div class="popover-content"></div></div>',
-            content: $content,
-            delay: {
-                hide: 200,  // make sure click registers
-            },
-        });
+        })));
 
         _this.$f.on('click', '.fd-question-type', function (event) {
             if (!$(this).hasClass('disabled')) {
@@ -286,67 +265,61 @@ define([
 
     fn._getQuestionGroups = function () {
         return [
-            [
-                {
-                    group: ["Text", 'Text'],  // key in mugTypes, <title>
-                    questions: [
-                        "Text",
-                        "Trigger"
-                    ]
-                },
-                {
-                    group: ["Select", 'Multiple Choice'],
-                    questions: this.getSelectQuestions()
-                },
-                {
-                    group: ["Int", 'Number'],
-                    questions: [
-                        "Int",
-                        "PhoneNumber",
-                        "Double",
-                    ]
-                },
-            ],
-            [
-                {
-                    group: ["Date", 'Date'],
-                    questions: [
-                        "Date",
-                        "Time",
-                        "DateTime"
-                    ]
-                },
-                {
-                    group: ["Group", 'Groups'],
-                    questions: [
-                        "Group",
-                        "Repeat",
-                        "FieldList"
-                    ]
-                },
-                {
-                    group: ["Image", 'Multimedia Capture'],
-                    questions: [
-                        "Image",
-                        "Audio",
-                        "Video",
-                        "Signature"
-                    ]
-                },
-            ],
-            [
-                {
-                    group: ["DataBindOnly", 'Hidden Value'],
-                    questions: [
-                        "DataBindOnly"
-                    ]
-                },
-                {
-                    group: ["Geopoint", 'Advanced', ''],
-                    textOnly: true,
-                    questions: this.getAdvancedQuestions()
-                },
-            ]
+            {
+                group: ["Text", 'Text'],  // key in mugTypes, <title>
+                questions: [
+                    "Text",
+                    "Trigger"
+                ]
+            },
+            {
+                group: ["Select", 'Multiple Choice'],
+                questions: this.getSelectQuestions()
+            },
+            {
+                group: ["Int", 'Number'],
+                questions: [
+                    "Int",
+                    "PhoneNumber",
+                    "Double",
+                ]
+            },
+            {
+                group: ["Date", 'Date'],
+                questions: [
+                    "Date",
+                    "Time",
+                    "DateTime"
+                ]
+            },
+            {
+                group: ["Group", 'Groups'],
+                questions: [
+                    "Group",
+                    "Repeat",
+                    "FieldList"
+                ]
+            },
+            {
+                group: ["Image", 'Multimedia Capture'],
+                questions: [
+                    "Image",
+                    "Audio",
+                    "Video",
+                    "Signature"
+                ]
+            },
+            {
+                group: ["DataBindOnly", 'Hidden Value'],
+                questions: [
+                    "DataBindOnly"
+                ]
+            },
+            {
+                group: ["Geopoint", 'Advanced', ''],
+                textOnly: true,
+                questions: this.getAdvancedQuestions()
+            },
         ];
     };
 
