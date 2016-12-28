@@ -212,6 +212,14 @@ define([
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
+        $(document).on('mouseover', '.jstree-node', function(e) {
+            $(e.currentTarget).find(".action_remove").addClass("hide")
+            $(e.target).closest(".jstree-node").find(".action_remove").removeClass("hide");
+        });
+        $(document).on('mouseout', '.jstree-node', function(e) {
+            $(e.currentTarget).find(".action_remove").addClass("hide")
+        });
+
         this._init_toolbar();
         this._createJSTree();
         this.datasources = datasources.init(
