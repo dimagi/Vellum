@@ -1,19 +1,4 @@
 <div class="fd-ui-container">
-    <div class="fd-toolbar">
-        <div class="fd-form-actions pull-right btn-toolbar">
-            <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="fa fa-wrench"></i> Tools
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu fd-tools-menu">
-                </ul>
-            </div>
-            <div class="btn-group fd-save-button"></div>
-        </div>
-        <div class="fd-container-question-type-group btn-toolbar"></div>
-    </div>
-
     <div class="fd-content fd-content-left">
         <div class="fd-tree">
             <div class="fd-head">
@@ -27,10 +12,25 @@
                        href="#"
                        id="fd-questions-dropdown-menu-toggle">
                         <i class="fa fa-reorder"></i>
+                        <span class="label label-info save-notification">
+                            <i class="fa fa-exclamation"></i>
+                        </span>
                     </a>
                     <ul id="fd-questions-dropdown-menu"
                         class="dropdown-menu checklist"
                         role="menu">
+                        <li>
+                            <!-- TODO: make work... -->
+                            <!--div class="fd-save-button"></div-->
+                            <a class="fd-button-save">
+                                <i class="fa fa-save"></i>
+                                <span class="label label-info save-notification">
+                                    <i class="fa fa-exclamation"></i>
+                                </span>
+                                Save
+                                <span class="hotkey"><%-ctrl%>S</span>
+                            </a>
+                        </li>
                         <li>
                             <a class="fd-button-copy">
                                 <i class="fa fa-copy"></i>
@@ -49,6 +49,7 @@
                                 Collapse All<span class="hotkey"><%-ctrl%><%-alt%>&ndash;</span>
                             </a>
                         </li>
+                        <li class="divider fd-tools-menu"></li>
                     </ul>
                     <input type="hidden" class="fd-question-tree-display" />
                 </div>
