@@ -1011,16 +1011,6 @@ define([
                 }
             });
         });
-        $tree.jstree(true).add_action("all", {
-            "id": "action_remove",
-            "class": "fa fa-trash-o action_remove",
-            "after": true,
-            "selector": "a",
-            "event": "click",
-            "callback": function (node_id, node, action_id, action_el) {
-                _this.data.core.form.removeMugsFromForm([node.data.mug]);
-            }
-        });
     };
 
     /**
@@ -1622,6 +1612,20 @@ define([
             });
         }
 
+        if (_this.isMugRemoveable(mug, mug.hashtagPath)) {
+            _this.data.core.$tree.jstree(true).add_action(node, {
+                "id": "action_remove",
+                "class": "fa fa-trash-o action_remove",
+                "after": true,
+                "selector": "a",
+                "event": "click",
+                "callback": function (node_id, node, action_id, action_el) {
+                    _this.data.core.form.removeMugsFromForm([node.data.mug]);
+                    _this.refreshCurrentMug();
+                }
+            });
+        }
+
         return node;
     };
 
@@ -1901,9 +1905,6 @@ define([
             mugs = multiselect ? mug : [mug],
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
-                isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
-                    return _this.isMugRemoveable(mug, mug.hashtagPath);
-                }),
                 isCopyable: !multiselect && mug.options.isCopyable,
                 sections: multiselect ? [] : _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
                     return _.find(_.map(s.properties, function(property) {
@@ -1915,11 +1916,6 @@ define([
                     }, s);
                 }),
             }));
-        $baseToolbar.find('.fd-button-remove').click(function () {
-            var mugs = _this.getCurrentlySelectedMug(true, true);
-            form.removeMugsFromForm(mugs);
-            _this.refreshCurrentMug();
-        });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
                 .prepend(this.getQuestionTypeChanger(mug));
