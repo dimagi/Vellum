@@ -1011,6 +1011,7 @@ define([
             "event": "click",
             "callback": function (node_id, node, action_id, action_el) {
                 _this.data.core.form.removeMugsFromForm([node.data.mug]);
+                _this.refreshCurrentMug();
             }
         });
     };
@@ -1889,11 +1890,6 @@ define([
                     }, s);
                 }),
             }));
-        $baseToolbar.find('.fd-button-remove').click(function () {
-            var mugs = _this.getCurrentlySelectedMug(true, true);
-            form.removeMugsFromForm(mugs);
-            _this.refreshCurrentMug();
-        });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
                 .prepend(this.getQuestionTypeChanger(mug));

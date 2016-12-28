@@ -2,9 +2,6 @@
     <% if (isCopyable) { %><div class="btn-toolbar pull-left"></div><% } %>
     <div class="btn-toolbar pull-right">
     <% if (isDeleteable) { %>
-        <button type="button" class="btn btn-danger fd-button-remove"  tabindex="-1">
-            <i class="fa fa-trash-o"></i> Delete
-        </button>
         <% if (sections.length) { %>
             <div class="btn-group fd-section-changer">
                 <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
