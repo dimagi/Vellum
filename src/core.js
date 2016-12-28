@@ -1561,9 +1561,10 @@ define([
             var tree = this.data.core.$tree;
             tree.jstree(true).add_action(node, {
                 "id": "add_choice",
-                "class": "fcc fcc-fd-single-circle add_choice pull-right",
+                "class": "fa fa-plus add_choice",
+                "text": " Add Choice",
                 "after": true,
-                "selector": "a",
+                "selector": ":scope > :last-child",
                 "event": "click",
                 "callback": function (node_id, node, action_id, action_el) {
                     _this.data.core.form.createQuestion(mug, 'into', "Choice", true);
