@@ -215,7 +215,6 @@ define([
             $addQuestion = this.$f.find(".fd-add-question");
 
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
-        this.data.core.QUESTION_TYPE_TO_GROUP = {};
 
         _.each(_this._getQuestionGroups(), function(column) {
             _.each(column, function (groupData) {
@@ -230,35 +229,27 @@ define([
                         ];
 
                     _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
-                    _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
                     return questionData;
                 };
 
                 groupData.questions = _.map(groupData.questions, getQuestionData);
-                if (groupData.related && groupData.related.length) {
-                    groupData.related = _.map(groupData.related, getQuestionData);
-                }
             });
         });
-
-        var makeQuestion = function(questionType) {
-            var mugType = _this.data.core.mugTypes[questionType];
-            return {
-                slug: questionType,
-                name: mugType.typeName,
-                icon: mugType.icon,
-            };
-        };
 
         var $content = $(add_question({
             columns: _.map(_this._getQuestionGroups(), function(column) {
                 return {
                     groups: _.map(column, function(groupData) {
                         return {
-                            groupClass: _this.getQuestionTypeGroupClass(groupData.group[0]),
                             name: groupData.group[1],
-                            questions: _.map(groupData.questions, makeQuestion),
-                            related: _.map(groupData.related || [], makeQuestion),
+                            questions: _.map(groupData.questions, function(questionType) {
+                                var mugType = _this.data.core.mugTypes[questionType];
+                                return {
+                                    slug: questionType,
+                                    name: mugType.typeName,
+                                    icon: mugType.icon,
+                                };
+                            }),
                         };
                     })
                 };
@@ -305,9 +296,6 @@ define([
                 },
                 {
                     group: ["Select", 'Multiple Choice'],
-                    related: [
-                        "Choice"
-                    ],
                     questions: this.getSelectQuestions()
                 },
                 {
@@ -973,7 +961,6 @@ define([
             } else if (selected.length < 2) {
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
-                _this.activateQuestionTypeGroup(mug);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -982,7 +969,6 @@ define([
                 _this.jstree("open_all", data.node);
             }
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
-            _this.activateQuestionTypeGroup(mug);
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
@@ -998,8 +984,6 @@ define([
             form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
-        }).on("deselect_all.jstree deselect_node.jstree", function (e, data) {
-            _this.resetQuestionTypeGroups();
         }).on('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for
             // most nodes, but some (items in select questions) have a
@@ -1182,27 +1166,6 @@ define([
         // its bound mug.
     };
 
-    fn.activateQuestionTypeGroup = function (mug) {
-        var _this = this,
-            className = mug.__className;
-        this.resetQuestionTypeGroups();
-
-        var groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
-        if (groupSlug &&
-            className !== 'MSelectDynamic' &&
-            className !== 'SelectDynamic' &&
-            !this.jstree("is_closed", mug.ufid)) {
-            this.$f
-                .find('.' + _this.getQuestionTypeGroupClass(groupSlug))
-                .find('.fd-question-type-related').removeClass('disabled');
-        }
-    };
-
-    fn.resetQuestionTypeGroups = function () {
-        this.$f.find('.fd-add-question-popover .fd-question-type-related')
-            .addClass('disabled');
-    };
-
     // Suggest a node ID, based on the mug's label
     fn.nodeIDFromLabel = function(mug) {
         var suggestedID = this.getMugDisplayName(mug) || "";
@@ -1314,7 +1277,6 @@ define([
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
-                _this.activateQuestionTypeGroup(e.mug);
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
