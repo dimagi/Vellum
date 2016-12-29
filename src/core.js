@@ -236,12 +236,13 @@ define([
 
         _this.$f.find(".fd-add-question").after($(add_question({
             groups: _.map(_this._getQuestionGroups(), function(groupData) {
+                var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
                 return {
-                    name: groupData.group[1],
+                    name: groupData.group[1] || defaultMug.typeName,
                     defaultQuestion: {
                         slug: groupData.group[0],
-                        name: groupData.group[1],
-                        icon: groupData.group[2] || _this.data.core.mugTypes[groupData.group[0]].icon,
+                        name: groupData.group[1] || defaultMug.typeName,
+                        icon: groupData.group[2] || defaultMug.icon,
                     },
                     questions: _.map(groupData.questions, function(questionType) {
                         var mugType = _this.data.core.mugTypes[questionType];
@@ -271,11 +272,12 @@ define([
     fn._getQuestionGroups = function () {
         return [
             {
-                group: ["Text", 'Text'],  // key in mugTypes, <title>
-                questions: [
-                    "Text",
-                    "Trigger"
-                ]
+                group: ["Text"],
+                questions: ["Text"],
+            },
+            {
+                group: ["Trigger"],
+                questions: ["Trigger"],
             },
             {
                 group: ["Select", 'Multiple Choice'],
@@ -306,18 +308,18 @@ define([
                 ]
             },
             {
+                group: ["DataBindOnly", 'Hidden Value'],
+                questions: [
+                    "DataBindOnly"
+                ]
+            },
+            {
                 group: ["Image", 'Multimedia Capture'],
                 questions: [
                     "Image",
                     "Audio",
                     "Video",
                     "Signature"
-                ]
-            },
-            {
-                group: ["DataBindOnly", 'Hidden Value'],
-                questions: [
-                    "DataBindOnly"
                 ]
             },
             {
