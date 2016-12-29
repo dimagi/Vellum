@@ -238,6 +238,11 @@ define([
             groups: _.map(_this._getQuestionGroups(), function(groupData) {
                 return {
                     name: groupData.group[1],
+                    defaultQuestion: {
+                        slug: groupData.group[0],
+                        name: groupData.group[1],
+                        icon: groupData.group[2] || _this.data.core.mugTypes[groupData.group[0]].icon,
+                    },
                     questions: _.map(groupData.questions, function(questionType) {
                         var mugType = _this.data.core.mugTypes[questionType];
                         return {
