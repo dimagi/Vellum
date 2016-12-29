@@ -87,10 +87,11 @@ body.vellum-full-screen {
                     right: (@menuContainerWidth - @contentPaddingVellum) * 2;
                 }
 
-                .fd-questions-menu-container {
-                    position: absolute;
+                // Question tree menu (language switcher, copy, paste, etc.)
+                .fd-head-menu-container {
                     position: absolute;
                     top: 0px;
+                    right: 0px;
                     line-height: 23px;
                     font-size: @baseFontSize * 0.9;
                     min-width: @menuContainerWidth;
@@ -100,7 +101,7 @@ body.vellum-full-screen {
                     .dropdown {
                         float: left;
 
-                        > a {
+                        .dropdown-toggle {
                             color: @white;
                             cursor: pointer;
                             display: block;
@@ -112,43 +113,35 @@ body.vellum-full-screen {
                                 text-decoration: none;
                                 background-color: @cc-brand-mid;
                             }
+
+                            .save-notification {
+                                position: absolute;
+                                top: 2px;
+                            }
                         }
-                    }
-                }
 
-                // Question tree menu (language switcher, copy, paste, etc.)
-                .fd-questions-menu-container {
-                    right: 0px;
+                        .dropdown-menu {
+                            a {
+                                min-width: 170px;
 
-                    // Menu options
-                    #fd-questions-dropdown-menu a {
-                        min-width: 170px;
+                                > .hotkey {
+                                    float: right;
+                                }
+                            }
 
-                        > .hotkey {
-                            float: right;
+                            .save-notification {
+                                position: relative;
+                                bottom: 2px;
+                                left: 2px;
+                                margin-right: 5px;
+                            }
                         }
-                    }
 
-                    .save-notification {
-                        font-size: 7px;
-                        right: 2px;
-                        border-radius: 6px;
-                        padding: 2px 4px 2px 5px;
-                    }
-
-                    .dropdown-toggle {
                         .save-notification {
-                            position: absolute;
-                            top: 2px;
-                        }
-                    }
-
-                    .fd-button-save {
-                        .save-notification {
-                            position: relative;
-                            bottom: 2px;
-                            left: 2px;
-                            margin-right: 5px;
+                            font-size: 7px;
+                            right: 2px;
+                            border-radius: 6px;
+                            padding: 2px 4px 2px 5px;
                         }
                     }
                 }
