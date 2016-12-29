@@ -14,6 +14,7 @@ define([
     'tpl!vellum/templates/question_fieldset',
     'tpl!vellum/templates/question_type_changer',
     'tpl!vellum/templates/question_toolbar',
+    'tpl!vellum/templates/section_changer',
     'tpl!vellum/templates/alert_global',
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
@@ -51,6 +52,7 @@ define([
     question_fieldset,
     question_type_changer,
     question_toolbar,
+    section_changer,
     alert_global,
     modal_content,
     modal_button,
@@ -1622,7 +1624,8 @@ define([
         $props.addClass("hide");
 
         this._setPropertiesMug(mug);
-        var $content = this.$f.find(".fd-props-content").empty(),
+        var _this = this,
+            $content = this.$f.find(".fd-props-content").empty(),
             sections = this.getSections(mug),
             $messages = $("<div class='messages' />");
 
@@ -1641,6 +1644,18 @@ define([
                 this.getSectionDisplay(mug, section).appendTo($content);
             }
         }
+
+        this.$f.find(".fd-section-changer").html(section_changer({
+            sections: _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
+                return _.find(_.map(s.properties, function(property) {
+                    return getWidgetClassAndOptions(property, mug);
+                }), _.identity);
+            }), function(s) {
+                return _.extend({
+                    show: !_this.sectionIsCollapsed(s),
+                }, s);
+            }),
+        }));
 
         // Setup area for messages not associated with a property/widget.
         if ($content.children().length) {
@@ -1880,20 +1895,12 @@ define([
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
                 isCopyable: !multiselect && mug.options.isCopyable,
-                sections: multiselect ? [] : _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
-                    return _.find(_.map(s.properties, function(property) {
-                        return getWidgetClassAndOptions(property, mug);
-                    }), _.identity);
-                }), function(s) {
-                    return _.extend({
-                        show: !_this.sectionIsCollapsed(s),
-                    }, s);
-                }),
             }));
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
                 .prepend(this.getQuestionTypeChanger(mug));
         }
+
         return $baseToolbar;
     };
 

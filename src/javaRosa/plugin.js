@@ -94,7 +94,7 @@ define([
         _makeLanguageSelectorDropdown: function () {
             var _this = this,
                 langs = this.data.javaRosa.Itext.getLanguages(),
-                $menu = this.$f.find('#fd-questions-dropdown-menu'),
+                $menu = this.$f.find('.fd-questions-menu-container ul'),
                 $items,
                 $input,
                 fullLangs;
