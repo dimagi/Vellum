@@ -1,3 +1,23 @@
+// Consistent width for icons in menus
+.dropdown-menu a > i {
+    display: inline-block;
+    width: 16px;
+}
+
+.checklist {
+    i.fa-check {
+        display: none;
+        width: auto;
+    }
+
+    .selected i.fa-check {
+        display: inline-block;
+        margin-left: -14px;
+        margin-right: 2px;
+    }
+}
+
+// Nested dropdowns
 .dropdown-submenu {
     position: relative;
 
