@@ -661,6 +661,17 @@ define([
                     });
                 });
 
+                it("should not error on unknown question ref", function (done) {
+                    util.loadXML("");
+                    util.addQuestion("Text", "text");
+                    var widget = util.getWidget('property-relevantAttr'),
+                        editor = richText.editor(widget.input);
+                    editor.on("instanceReady", function () {
+                        editor.setValue("#form/unknown");
+                        done();
+                    });
+                });
+
                 describe("for date references", function () {
                     var widget;
                     before(function (done) {
