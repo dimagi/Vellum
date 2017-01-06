@@ -85,7 +85,9 @@ define([
 
             availableHorizSpace = $fdc.width();
 
-            var panelHeight = Math.max(availableVertSpace,
+            var toolbarHeight = this.$f.find('.fd-toolbar').outerHeight(false),
+                availableColumnSpace = availableVertSpace - toolbarHeight,
+                panelHeight = Math.max(availableColumnSpace,
                                        this.opts().windowManager.minHeight),
                 treeHeight = panelHeight,
                 columnHeight = panelHeight - this.$f.find('.fd-head').outerHeight(false),

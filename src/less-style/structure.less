@@ -84,23 +84,20 @@ body.vellum-full-screen {
                     .text-overflow();
                     position: absolute;
                     left: 0;
-                    right: (@menuContainerWidth - @contentPaddingVellum) * 2;
+                    right: @menuContainerWidth - @contentPaddingVellum;
                 }
 
                 // Question tree menu (language switcher, copy, paste, etc.)
                 .fd-head-menu-container {
                     position: absolute;
-                    top: 0px;
                     right: 0px;
+                    top: 0px;
                     line-height: 23px;
                     font-size: @baseFontSize * 0.9;
                     min-width: @menuContainerWidth;
-                    .clearfix();
 
-                    // Icon links to open dropdown
+                    // Icon link to open dropdown
                     .dropdown {
-                        float: left;
-
                         .dropdown-toggle {
                             color: @white;
                             cursor: pointer;
@@ -113,11 +110,6 @@ body.vellum-full-screen {
                                 text-decoration: none;
                                 background-color: @cc-brand-mid;
                             }
-
-                            .save-notification {
-                                position: absolute;
-                                top: 2px;
-                            }
                         }
 
                         .dropdown-menu {
@@ -128,20 +120,6 @@ body.vellum-full-screen {
                                     float: right;
                                 }
                             }
-
-                            .save-notification {
-                                position: relative;
-                                bottom: 2px;
-                                left: 2px;
-                                margin-right: 5px;
-                            }
-                        }
-
-                        .save-notification {
-                            font-size: 7px;
-                            right: 2px;
-                            border-radius: 6px;
-                            padding: 2px 4px 2px 5px;
                         }
                     }
                 }
