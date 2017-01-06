@@ -14,7 +14,6 @@ define([
     'tpl!vellum/templates/question_fieldset',
     'tpl!vellum/templates/question_type_changer',
     'tpl!vellum/templates/question_toolbar',
-    'tpl!vellum/templates/section_changer',
     'tpl!vellum/templates/alert_global',
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
@@ -52,7 +51,6 @@ define([
     question_fieldset,
     question_type_changer,
     question_toolbar,
-    section_changer,
     alert_global,
     modal_content,
     modal_button,
@@ -163,14 +161,6 @@ define([
             }
             analytics.fbUsage("Clicked link to show in tree");
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
-        });
-
-        $(document).on('mouseover', '.jstree-node', function(e) {
-            $(e.currentTarget).find(".action_remove").addClass("hide")
-            $(e.target).closest(".jstree-node").find(".action_remove").removeClass("hide");
-        });
-        $(document).on('mouseout', '.jstree-node', function(e) {
-            $(e.currentTarget).find(".action_remove").addClass("hide")
         });
 
         this._init_toolbar();
@@ -390,17 +380,14 @@ define([
             });
         });
 
-        // Section toggling events: within section changer and when clicking on section header
+        // Section toggling menu
         this.$f.on('click', '.fd-section-changer a', function(e) {
-            var slug = $(e.target).data("slug");
-            $(".fd-question-fieldset[data-slug='" + slug + "'] .collapse-toggle").click();
-        });
-        this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
-            var $target = $(e.target),
-                slug = $target.closest("[data-slug]").data("slug"),
-                shouldCollapse = $target.hasClass('in');
+            var slug = $(e.target).data("slug"),
+                $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']")
+            $fieldset.toggleClass("hide");
             $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
-            localStorage.setItem('collapse-' + slug, shouldCollapse ? "1" : "");
+
+            localStorage.setItem('collapse-' + slug, $fieldset.hasClass("hide") ? "1" : "");
         });
     };
 
@@ -1556,20 +1543,6 @@ define([
             });
         }
 
-        if (_this.isMugRemoveable(mug, mug.hashtagPath)) {
-            _this.data.core.$tree.jstree(true).add_action(node, {
-                "id": "action_remove",
-                "class": "fa fa-trash-o action_remove",
-                "after": true,
-                "selector": "a",
-                "event": "click",
-                "callback": function (node_id, node, action_id, action_el) {
-                    _this.data.core.form.removeMugsFromForm([node.data.mug]);
-                    _this.refreshCurrentMug();
-                }
-            });
-        }
-
         return node;
     };
 
@@ -1592,8 +1565,7 @@ define([
         $props.addClass("hide");
 
         this._setPropertiesMug(mug);
-        var _this = this,
-            $content = this.$f.find(".fd-props-content").empty(),
+        var $content = this.$f.find(".fd-props-content").empty(),
             sections = this.getSections(mug),
             $messages = $("<div class='messages' />");
 
@@ -1612,18 +1584,6 @@ define([
                 this.getSectionDisplay(mug, section).appendTo($content);
             }
         }
-
-        this.$f.find(".fd-section-changer").html(section_changer({
-            sections: _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
-                return _.find(_.map(s.properties, function(property) {
-                    return getWidgetClassAndOptions(property, mug);
-                }), _.identity);
-            }), function(s) {
-                return _.extend({
-                    show: !_this.sectionIsCollapsed(s),
-                }, s);
-            }),
-        }));
 
         // Setup area for messages not associated with a property/widget.
         if ($content.children().length) {
@@ -1820,6 +1780,10 @@ define([
 
     fn.sectionIsCollapsed = function(section) {
         var collapseKey = "collapse-" + section.slug;
+        if (section.slug === "main") {
+            // Always show basic section
+            return false;
+        }
         return localStorage.hasOwnProperty(collapseKey) ?
             localStorage.getItem(collapseKey) :
             section.isCollapsed;
@@ -1862,13 +1826,35 @@ define([
             mugs = multiselect ? mug : [mug],
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
+                isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
+                    return _this.isMugRemoveable(mug, mug.hashtagPath);
+                }),
                 isCopyable: !multiselect && mug.options.isCopyable,
+                sections: multiselect ? [] : _.chain(_this.getSections(mug))
+                    .rest()
+                    .filter(function(s) {
+                        // Limit to sections relevant to this mug
+                        return _.find(_.map(s.properties, function(property) {
+                            return getWidgetClassAndOptions(property, mug);
+                        }), _.identity);
+                    })
+                    .map(function(s) {
+                        // Just pass the template a show/hide flag
+                        return _.extend({
+                            show: !_this.sectionIsCollapsed(s),
+                        }, s);
+                    })
+                    .value(),
             }));
+        $baseToolbar.find('.fd-button-remove').click(function () {
+            var mugs = _this.getCurrentlySelectedMug(true, true);
+            form.removeMugsFromForm(mugs);
+            _this.refreshCurrentMug();
+        });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
                 .prepend(this.getQuestionTypeChanger(mug));
         }
-
         return $baseToolbar;
     };
 
