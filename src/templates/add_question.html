@@ -2,7 +2,7 @@
     <% _.each(groups, function(group) { %>
         <% if (group.questions.length > 1) { %>
             <li class="dropdown-submenu">
-                <a tabindex="-1" href="#">
+                <a tabindex="-1" href="#" class="fd-question-type" data-qtype="<%= group.defaultQuestion.slug %>">
                     <i class="<%= group.defaultQuestion.icon %>"></i>
                     <%= group.name %>
                 </a>
