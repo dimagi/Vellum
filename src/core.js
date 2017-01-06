@@ -208,7 +208,7 @@ define([
 
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
 
-        _.each(_this._getQuestionGroups(), function (groupData) {
+        _.each(_this.getQuestionGroups(), function (groupData) {
             var groupSlug = groupData.group[0];
 
             var getQuestionData = function (questionType) {
@@ -227,7 +227,7 @@ define([
         });
 
         _this.$f.find(".fd-add-question").after($(add_question({
-            groups: _.map(_this._getQuestionGroups(), function(groupData) {
+            groups: _.map(_this.getQuestionGroups(), function(groupData) {
                 var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
                 return {
                     name: groupData.group[1] || defaultMug.typeName,
@@ -261,7 +261,7 @@ define([
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
     };
 
-    fn._getQuestionGroups = function () {
+    fn.getQuestionGroups = function () {
         return [
             {
                 group: ["Text"],
@@ -273,7 +273,7 @@ define([
             },
             {
                 group: ["Select", 'Multiple Choice'],
-                questions: this.getSelectQuestions()
+                questions: ["Select", "MSelect"],
             },
             {
                 group: ["Int", 'Number'],
@@ -319,13 +319,6 @@ define([
                 textOnly: true,
                 questions: this.getAdvancedQuestions()
             },
-        ];
-    };
-
-    fn.getSelectQuestions = function () {
-        return [
-            "Select",
-            "MSelect"
         ];
     };
 
