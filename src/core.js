@@ -14,7 +14,6 @@ define([
     'tpl!vellum/templates/question_fieldset',
     'tpl!vellum/templates/question_type_changer',
     'tpl!vellum/templates/question_toolbar',
-    'tpl!vellum/templates/section_changer',
     'tpl!vellum/templates/alert_global',
     'tpl!vellum/templates/modal_content',
     'tpl!vellum/templates/modal_button',
@@ -52,7 +51,6 @@ define([
     question_fieldset,
     question_type_changer,
     question_toolbar,
-    section_changer,
     alert_global,
     modal_content,
     modal_button,
@@ -1602,8 +1600,7 @@ define([
         $props.addClass("hide");
 
         this._setPropertiesMug(mug);
-        var _this = this,
-            $content = this.$f.find(".fd-props-content").empty(),
+        var $content = this.$f.find(".fd-props-content").empty(),
             sections = this.getSections(mug),
             $messages = $("<div class='messages' />");
 
@@ -1622,24 +1619,6 @@ define([
                 this.getSectionDisplay(mug, section).appendTo($content);
             }
         }
-
-        this.$f.find(".fd-section-changer").html(section_changer({
-            sections: _.chain(_this.getSections(mug))
-                       .rest()
-                       .filter(function(s) {
-                            // Limit to sections relevant to this mug
-                            return _.find(_.map(s.properties, function(property) {
-                                return getWidgetClassAndOptions(property, mug);
-                            }), _.identity);
-                       })
-                       .map(function(s) {
-                            // Just pass the template a show/hide flag
-                            return _.extend({
-                                show: !_this.sectionIsCollapsed(s),
-                            }, s);
-                       })
-                       .value(),
-        }));
 
         // Setup area for messages not associated with a property/widget.
         if ($content.children().length) {
@@ -1882,6 +1861,21 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
+                sections: multiselect ? [] : _.chain(_this.getSections(mug))
+                    .rest()
+                    .filter(function(s) {
+                        // Limit to sections relevant to this mug
+                        return _.find(_.map(s.properties, function(property) {
+                            return getWidgetClassAndOptions(property, mug);
+                        }), _.identity);
+                    })
+                    .map(function(s) {
+                        // Just pass the template a show/hide flag
+                        return _.extend({
+                            show: !_this.sectionIsCollapsed(s),
+                        }, s);
+                    })
+                    .value(),
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true, true);
