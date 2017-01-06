@@ -404,17 +404,14 @@ define([
             });
         });
 
-        // Section toggling events: within section changer and when clicking on section header
+        // Section toggling menu
         this.$f.on('click', '.fd-section-changer a', function(e) {
-            var slug = $(e.target).data("slug");
-            $(".fd-question-fieldset[data-slug='" + slug + "'] .collapse-toggle").click();
-        });
-        this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
-            var $target = $(e.target),
-                slug = $target.closest("[data-slug]").data("slug"),
-                shouldCollapse = $target.hasClass('in');
+            var slug = $(e.target).data("slug"),
+                $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']")
+            $fieldset.toggleClass("hide");
             $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
-            localStorage.setItem('collapse-' + slug, shouldCollapse ? "1" : "");
+
+            localStorage.setItem('collapse-' + slug, $fieldset.hasClass("hide") ? "1" : "");
         });
     };
 
@@ -1815,6 +1812,10 @@ define([
 
     fn.sectionIsCollapsed = function(section) {
         var collapseKey = "collapse-" + section.slug;
+        if (section.slug === "main") {
+            // Always show basic section
+            return false;
+        }
         return localStorage.hasOwnProperty(collapseKey) ?
             localStorage.getItem(collapseKey) :
             section.isCollapsed;

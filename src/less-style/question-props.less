@@ -57,28 +57,11 @@
                 legend {
                     display: none;
                 }
-
-                // Force content to show even if header is "collapsed"
-                > .collapse {
-                    display: block;
-                }
             }
 
-            // Accordion header
-            .collapse-toggle {
-                cursor: pointer;
-                min-height: 30px;
-                .transition(background .4s ease-in-out);
-
-                &:hover {
-                    background-color: lighten(@grayLighter, 3);
-                    text-decoration: none;
-                }
-
-                // Make icon point right instead of down
-                &.collapsed .fa-angle-double-down::before {
-                    content: "\f101" !important;
-                }
+            // Header
+            legend {
+                min-height: 30px;   // tall enough for help icon
 
                 // Position section-level help at right of header
                 .fd-help {
