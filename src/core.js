@@ -214,14 +214,6 @@ define([
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
-        $(document).on('mouseover', '.jstree-node', function(e) {
-            $(e.currentTarget).find(".action_remove").addClass("hide")
-            $(e.target).closest(".jstree-node").find(".action_remove").removeClass("hide");
-        });
-        $(document).on('mouseout', '.jstree-node', function(e) {
-            $(e.currentTarget).find(".action_remove").addClass("hide")
-        });
-
         this._init_toolbar();
         this._createJSTree();
         this.datasources = datasources.init(
@@ -1589,20 +1581,6 @@ define([
             // NOTE 'into' is not a supported position in JSTree
             (position === 'into' ? 'last' : position)
         );
-
-        if (_this.isMugRemoveable(mug, mug.hashtagPath)) {
-            _this.data.core.$tree.jstree(true).add_action(node, {
-                "id": "action_remove",
-                "class": "fa fa-trash-o action_remove",
-                "after": true,
-                "selector": "a",
-                "event": "click",
-                "callback": function (node_id, node, action_id, action_el) {
-                    _this.data.core.form.removeMugsFromForm([node.data.mug]);
-                    _this.refreshCurrentMug();
-                }
-            });
-        }
     };
 
     fn.handleMugParseFinish = function (mug) {
@@ -1894,13 +1872,20 @@ define([
             mugs = multiselect ? mug : [mug],
             $baseToolbar = $(question_toolbar({
                 comment: multiselect ? '' : mug.p.comment,
+                isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
+                    return _this.isMugRemoveable(mug, mug.hashtagPath);
+                }),
                 isCopyable: !multiselect && mug.options.isCopyable,
             }));
+        $baseToolbar.find('.fd-button-remove').click(function () {
+            var mugs = _this.getCurrentlySelectedMug(true, true);
+            form.removeMugsFromForm(mugs);
+            _this.refreshCurrentMug();
+        });
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
                 .prepend(this.getQuestionTypeChanger(mug));
         }
-
         return $baseToolbar;
     };
 

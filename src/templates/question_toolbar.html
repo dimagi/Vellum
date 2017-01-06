@@ -1,5 +1,12 @@
 <div class="fd-question-toolbar-container clearfix">
     <% if (isCopyable) { %><div class="btn-toolbar pull-left"></div><% } %>
+    <div class="btn-toolbar pull-right">
+    <% if (isDeleteable) { %>
+        <button type="button" class="btn btn-danger fd-button-remove"  tabindex="-1">
+            <i class="fa fa-trash-o"></i> Delete
+        </button>
+    <% } %>
+    </div>
 </div>
 <% if (comment) { %>
 <div class="alert alert-info fd-question-comment">
