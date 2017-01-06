@@ -398,8 +398,8 @@ define([
                 name: "Enter Full Screen",
                 icon: "fa fa-expand",
                 action: function (done) {
-                    var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu a'), function(a) {
-                        return a.text.match(/full screen/i);
+                    var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
+                        return $(li).find("a").text().match(/full screen/i);
                     }));
                     var html = $fullScreenMenuItem.html();
                     analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
