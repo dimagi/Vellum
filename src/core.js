@@ -1560,7 +1560,7 @@ define([
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
         }, null, null, this.data.core);
-        node = this.jstree("create_node",
+        return this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
                 text: this.getMugDisplayName(mug),
@@ -1624,15 +1624,21 @@ define([
         }
 
         this.$f.find(".fd-section-changer").html(section_changer({
-            sections: _.map(_.filter(_.rest(_this.getSections(mug)), function(s) {
-                return _.find(_.map(s.properties, function(property) {
-                    return getWidgetClassAndOptions(property, mug);
-                }), _.identity);
-            }), function(s) {
-                return _.extend({
-                    show: !_this.sectionIsCollapsed(s),
-                }, s);
-            }),
+            sections: _.chain(_this.getSections(mug))
+                       .rest()
+                       .filter(function(s) {
+                            // Limit to sections relevant to this mug
+                            return _.find(_.map(s.properties, function(property) {
+                                return getWidgetClassAndOptions(property, mug);
+                            }), _.identity);
+                       })
+                       .map(function(s) {
+                            // Just pass the template a show/hide flag
+                            return _.extend({
+                                show: !_this.sectionIsCollapsed(s),
+                            }, s);
+                       })
+                       .value(),
         }));
 
         // Setup area for messages not associated with a property/widget.
