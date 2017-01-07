@@ -393,7 +393,7 @@ define([
                 action: function (done) {
                     var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
                         return $(li).find("a").text().match(/full screen/i);
-                    }));
+                    })).find("a");
                     var html = $fullScreenMenuItem.html();
                     analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
                     if (_this.data.windowManager.fullscreen) {
