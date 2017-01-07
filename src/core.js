@@ -1528,7 +1528,7 @@ define([
                 "class": "fa fa-plus add_choice",
                 "text": " Add Choice",
                 "after": true,
-                "selector": ":scope > :last-child",
+                "selector": "a",
                 "event": "click",
                 "callback": function (node_id, node, action_id, action_el) {
                     _this.data.core.form.createQuestion(mug, 'into', "Choice", true);
