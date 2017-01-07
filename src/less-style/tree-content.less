@@ -40,7 +40,7 @@
                 margin-left: 55px;
                 cursor: pointer;
 
-                // Fragile: overwrite .fa styles with .jstree-anchor and body styles
+                // This is fragile; it overwrites .fa styles with .jstree-anchor and body styles
                 font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 line-height: 24px;
                 height: 24px;
@@ -51,6 +51,10 @@
 
                     margin-right: 6px;
                 }
+            }
+
+            &.jstree-closed .add_choice {
+                display: none;
             }
         }
     }
