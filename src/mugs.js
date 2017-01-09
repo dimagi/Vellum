@@ -994,10 +994,10 @@ define([
             label: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Default Label",
+                lstring: "Default Display Text",
                 validationFunc: function (mug) {
                     if (!mug.p.label && mug.getPresence("label") === 'required') {
-                        return 'Default Label is required';
+                        return 'Default Display Text is required';
                     }
                     return 'pass';
                 }
@@ -1005,7 +1005,7 @@ define([
             hintLabel: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Hint Label"
+                lstring: "Hint Display Text"
             },
             rawControlAttributes: {
                 presence: 'optional',
