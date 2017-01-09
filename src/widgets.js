@@ -139,11 +139,10 @@ define([
         widget.input = $("<input />")
             .attr("name", inputID)
             .attr("id", inputID)
-            .attr("placeholder", options.widgetPlaceholder)
             .prop('disabled', disabled);
 
         widget.getControl = function () {
-            return widget.input; 
+            return widget.input;
         };
 
         widget.getMessagesContainer = function () {
@@ -240,7 +239,6 @@ define([
         widget.input = $("<textarea></textarea>")
             .attr("name", widget.id)
             .attr("id", widget.id)
-            .attr("placeholder", options.widgetPlaceholder)
             .attr("rows", "2")
             .addClass('form-control')
             .on('change input', function (e) { widget.handleChange(); })
@@ -283,7 +281,6 @@ define([
                 isExpression: options.widget === xPath || options.widget === droppableText,
                 disableNativeSpellChecker: options.disableNativeSpellChecker,
                 rtl: util.isRightToLeftLanguage(options.language),
-                placeholder: options.widgetPlaceholder,
             },
             editor = richTextUtils.editor(widget.input, mug.form, opts);
 
