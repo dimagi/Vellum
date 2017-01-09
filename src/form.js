@@ -802,11 +802,16 @@ define([
             }
         },
         changeMugType: function (mug, questionType) {
-            var _this = this,
-                action_id = "add_choice",
-                tree = _this.vellum.data.core.$tree;
+            var _this = this;
             _this.mugTypes.changeType(mug, questionType);
-            if (questionType === "Select" || questionType === "MSelect") {
+            _this.setMugActions(mug);
+        },
+        setMugActions: function(mug) {
+            var _this = this,
+                tree = _this.vellum.data.core.$tree,
+                action_id = "add_choice";
+
+            if (mug.__className === 'Select' || mug.__className === 'MSelect') {
                 tree.jstree(true).add_action(mug.ufid, {
                     "id": action_id,
                     "class": "fa fa-plus add_choice",
@@ -816,7 +821,7 @@ define([
                     "event": "click",
                     "callback": function (node_id, node, action_id, action_el) {
                         var newMug = _this.createQuestion(mug, 'into', "Choice", true);
-                        _this.ensureCurrentMugIsSaved();
+                        _this.vellum.ensureCurrentMugIsSaved();
                         _this.vellum.setCurrentMug(newMug);
                     }
                 });

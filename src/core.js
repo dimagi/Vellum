@@ -1521,22 +1521,7 @@ define([
             (position === 'into' ? 'last' : position)
         );
 
-        if (mug.__className === 'MSelect' || mug.__className === 'Select') {
-            var tree = this.data.core.$tree;
-            tree.jstree(true).add_action(node, {
-                "id": "add_choice",
-                "class": "fa fa-plus add_choice",
-                "text": " Add Choice",
-                "after": true,
-                "selector": "a",
-                "event": "click",
-                "callback": function (node_id, node, action_id, action_el) {
-                    var newMug = _this.data.core.form.createQuestion(mug, 'into', "Choice", true);
-                    _this.ensureCurrentMugIsSaved();
-                    _this.setCurrentMug(newMug);
-                }
-            });
-        }
+        _this.data.core.form.setMugActions(mug);
 
         return node;
     };
