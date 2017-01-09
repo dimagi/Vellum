@@ -816,6 +816,7 @@ define([
                     "event": "click",
                     "callback": function (node_id, node, action_id, action_el) {
                         var newMug = _this.createQuestion(mug, 'into', "Choice", true);
+                        _this.ensureCurrentMugIsSaved();
                         _this.vellum.setCurrentMug(newMug);
                     }
                 });
