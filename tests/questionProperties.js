@@ -4,7 +4,7 @@ define([
     'jquery',
     'underscore',
     'vellum/form',
-    'text!static/comments/comment-test.xml'
+    'text!static/questionProperties/comment-test.xml'
 ], function (
     util,
     chai,
@@ -40,6 +40,35 @@ define([
             var mug = util.addQuestion("Text", "mug");
             mug.p.comment = "This is a comment";
             util.assertXmlEqual(COMMENT_TEST_XML, call("createXML"), {normalize_xmlns: true});
+        });
+    });
+
+    describe("Section Toggler", function() {
+        before(function(done) {
+            util.init({
+                javaRosa: {langs: ['en']},
+                core: {onReady: done},
+            });
+        });
+
+        it("should show and hide sections", function() {
+            util.loadXML("");
+            util.addQuestion("Text");
+
+            var slug = 'logic',
+                $section = $(".fd-question-fieldset[data-slug='" + slug + "']"),
+                visible = $section.is(":visible"),
+                $command = $(".fd-section-changer a[data-slug='" + slug + "']");
+
+            assert.strictEqual($command.hasClass("selected"), visible);
+
+            $command.click();
+            assert.strictEqual($section.is(":visible"), !visible);
+            assert.strictEqual($command.hasClass("selected"), !visible);
+
+            $command.click();
+            assert.strictEqual($section.is(":visible"), visible);
+            assert.strictEqual($command.hasClass("selected"), visible);
         });
     });
 });
