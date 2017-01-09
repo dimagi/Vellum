@@ -608,6 +608,19 @@ define([
             assert.strictEqual($(".add_choice").length, 0);
         });
 
+        it("gives select questions an add choice action", function() {
+            util.loadXML("");
+            util.addQuestion("Select", "question1");
+
+            assert.strictEqual($(".add_choice").length, 1);
+            $(".add_choice").click();
+
+            util.assertJSTreeState(
+                "question1",
+                "  choice1"
+            );
+        });
+
         it("should show error on delete validation condition but not message", function() {
             util.loadXML("");
             var text = util.addQuestion("Text", "text");
