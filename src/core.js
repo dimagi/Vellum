@@ -407,7 +407,7 @@ define([
         // Section toggling menu
         this.$f.on('click', '.fd-section-changer a', function(e) {
             var slug = $(e.target).data("slug"),
-                $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']")
+                $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']");
             $fieldset.toggleClass("hide");
             $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
 
@@ -1551,7 +1551,7 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
-        var _this = this, node;
+        var _this = this;
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
         }, null, null, this.data.core);
