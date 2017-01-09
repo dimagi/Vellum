@@ -33,6 +33,7 @@ define([
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
+    'jstree-actions',
     'jquery.bootstrap',
     'caretjs',
     'atjs'
