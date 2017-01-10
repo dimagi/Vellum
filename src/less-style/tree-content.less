@@ -37,8 +37,9 @@
 
             .add_choice {
                 display: block;
-                margin-left: 30px;
+                margin-left: 25px;
                 cursor: pointer;
+                padding: 0 5px;
 
                 // This is fragile; it overwrites .fa styles with .jstree-anchor and body styles
                 font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -50,6 +51,14 @@
                     font: normal normal normal 14px/1 FontAwesome;
 
                     margin-right: 6px;
+                }
+
+                // Also fragile; both because of the static width and because the other styles
+                // are taken from .jstree-hovered
+                &:hover {
+                    border: none;
+                    background-color: #eaeff5;
+                    width: 95px;
                 }
             }
 
