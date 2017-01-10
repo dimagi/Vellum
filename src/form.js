@@ -912,16 +912,6 @@ define([
             }
 
             return function () {
-                var event = {
-                    type: 'mug-property-change',
-                    mug: mug,
-                    property: property,
-                    val: value,
-                    previous: previous
-                };
-                mug.validate(property);
-                this.fire(event);
-
                 // legacy, enables auto itext ID behavior, don't add
                 // additional dependencies on this code.  Some sort of
                 // data binding would be better.
@@ -931,6 +921,16 @@ define([
                     val: value,
                     previous: previous
                 });
+
+                var event = {
+                    type: 'mug-property-change',
+                    mug: mug,
+                    property: property,
+                    val: value,
+                    previous: previous
+                };
+                mug.validate(property);
+                this.fire(event);
 
                 this.fireChange(mug);
             }.bind(this);

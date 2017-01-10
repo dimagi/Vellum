@@ -1,85 +1,121 @@
 /**
- * Asynchronously loads data sources
+ * Data sources describe hashtag and XPath expressions that can be used
+ * to reference external data like cases and fixtures from within a form.
  *
  * Format in opts:
  * dataSourcesEndpoint: function(callback) or string (URL)
  *
  * The endpoint function receives a callback argument. It should call the
- * `callback` with a list of the following structure (for a URL, the response
- * should be JSON in this format):
+ * `callback` with a list of objects (for a URL, the response should be JSON
+ * in this format):
  * [
  *      {
- *          id: string (used in instance definition)
- *          uri: string (used in the instance definition)
- *          path: string (used in nodeset)
- *          name: string (human readable name)
- *          structure: nested dictionary of elements and attributes
- *          {
+ *          id: string (data source and instance id, must be unique for
+ *              each data source),
+ *          uri: string (instance src),
+ *          path: string (path to root node),
+ *          name: string (optional human readable name, defaults to id),
+ *          structure: {
+ *              // Elements and attributes in this data source. The keys
+ *              // in this object are XML element or attribute names.
+ *              // Attribute names start with @.
  *              element: {
+ *                  name: string (optional human readable name),
+ *                  merge: true (optional flag. When set, the element key
+ *                         will be appended to the path used to construct
+ *                         children and its children will be merged with
+ *                         this elements siblings. "name" is ignored if
+ *                         this flag is set.),
  *                  structure: {
- *                      inner-element: { }
- *                  }
- *                  name: "Element" (the text used to represent this element)
+ *                      // Optional, nested elements and attributes.
+ *                  },
  *              },
  *              ref-element: {
+ *                  // Element reference, similar to a foreign key. A filter
+ *                  // will be constructed on the referenced element equating
+ *                  // the value of this element to the reference `key`.
  *                  reference: {
- *                      hashtag: string (optional hashtag prefix)
- *                      source: string (optional data source id, defaults to this data source)
- *                      subset: string (optional subset id)
+ *                      hashtag: string (optional hashtag prefix for referenced
+ *                               elements and attributes),
+ *                      source: string (optional data source id, use
+ *                              this data source if not specified),
+ *                      subset: string (optional subset id),
  *                      subset_key: string (optional subset key, if omitted then
  *                                  the first subset with an `id` matching
- *                                  this reference's `subset` will be used)
- *                      subset_filter: boolean (optional, if true include
- *                                     subset filter in xpath expression)
- *                      key: string (referenced property)
+ *                                  this reference's `subset` will be used),
+ *                      subset_filter: true (optional, When set, add
+ *                                     `subset_key` predicate to the reference
+ *                                     expression),
+ *                      key: string (referenced element or attribute),
  *                  }
  *              },
- *              path-element: {
- *                  merge: true (optional flag. When set, the element name
- *                               will be appended to the path used to construct
- *                               children and any children will be merged with
- *                               this elements siblings.)
- *                  structure: { ... }
- *              },
- *              @attribute: { }
- *          },
- *          subsets: [{
- *              id: string (unique identifier for this subset)
- *              key: string (unique identifier property name)
- *              name: string (human readable name)
- *              structure: { ... }
- *              related: {
- *                  string (relationship): {
- *                      // same keys as structure.ref-element.reference
- *                      // plus one more:
- *                      index: string (optional index path; default is '/index')
- *                  } or string (related subset id, legacy)
- *                  ...
+ *              @attribute: {
+ *                  name: string (optional human readable name),
  *              }
- *          }]
+ *          },
+ *          subsets: [
+ *              {
+ *                  // Descriptor for a reference-able subset of elements
+ *                  // in this source.
+ *                  id: string (required identifier for this subset),
+ *                  key: string (optional id element or attribute name),
+ *                  name: string (optional human readable name),
+ *                  structure: { ... }, // see structure above
+ *                  related: {
+ *                      string (index name): {
+ *                          // same keys as structure.ref-element.reference
+ *                          // plus one more:
+ *                          index: string (optional index path, default: '/index'),
+ *                      } or string (deprecated, related subset id),
+ *                      ...
+ *                  },
+ *              },
+ *              ...
+ *          ],
  *      },
  *      ...
  * ]
  *
  * Elements can be nested indefinitely with structure keys describing inner
- * elements and attributes. Any element that has a `structure` key may also
- * have a `subsets` key, which defines structure specific to a subset of the
- * elements at that level of the tree. The structure of a subset is merged
- * with the unfiltered element structure, which means that all elements and
- * attributes available in the unfiltered element are also avaliable in the
- * filtered subset.
+ * elements and attributes. The structure of a subset is merged with the
+ * unfiltered element structure, which means that all elements and attributes
+ * available in the unfiltered element are also avaliable in the filtered
+ * subset.
  *
- * The result of that would be (if used in an itemset):
+ * See ../tests/options.js:dataSources for an example schema.
  *
- *     <instance src="{source.uri}" id="{source.id}">
- *     ...
- *     <itemset nodeset="instance('{source.id}'){source.path}" />
+ * Example instance element using data source id and uri:
  *
+ *  <instance id="commcaresession" src="jr://instance/session">
  *
- * The dropdown would have options:
+ * Example hashtags with corresponding XPath expressions constructed using
+ * the schema in tests/options.js:
  *
- *     name             (nodeset: instance('{source.id}'){source.path})
- *     name - Element   (nodeset: instance('{source.id}'){source.path}/element)
+ *  #case/dob
+ *  instance('casedb')/cases/case[
+ *      @case_id = instance('commcaresession')/session/data/case_id
+ *  ]/dob
+ *
+ *  #case/parent/edd
+ *  instance('casedb')/cases/case[
+ *      @case_id = instance('casedb')/cases/case[
+ *          @case_id = instance('commcaresession')/session/data/case_id
+ *      ]/index/parent
+ *  ]/edd
+ *
+ *  #case/grandparent/address
+ *  instance('casedb')/cases/case[
+ *      @case_id = instance('casedb')/cases/case[
+ *          @case_id = instance('casedb')/cases/case[
+ *              @case_id = instance('commcaresession')/session/data/case_id
+ *          ]/index/parent
+ *      ]/index/parent
+ *  ]/address
+ *
+ *  #user/role
+ *  instance('casedb')/cases/case[@case_type = 'commcare-user'][
+ *      hq_user_id = instance('commcaresession')/session/context/userid
+ *  ]/role
  *
  */
 define([

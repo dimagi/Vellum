@@ -748,7 +748,7 @@ define([
                 html: true,
                 content: easy_reference_popover({
                     text: labelText.text(),
-                    ufid: isFormRef ? labelMug.ufid : "",
+                    ufid: isFormRef && labelMug ? labelMug.ufid : "",
                 }),
                 template: '<div contenteditable="false" class="popover rich-text-popover">' +
                     '<div class="popover-inner">' +
