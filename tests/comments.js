@@ -35,6 +35,13 @@ define([
             assert($('.fd-props-toolbar > .alert-info'));
         });
 
+        it('should update comment without reloading', function () {
+            util.loadXML(COMMENT_TEST_XML);
+            assert.strictEqual($('.fd-question-comment').text(), 'This is a comment');
+            $('#property-comment').val('still a comment').change();
+            assert.strictEqual($('.fd-question-comment').text(), 'still a comment');
+        });
+
         it("should write the comment", function() {
             util.loadXML("");
             var mug = util.addQuestion("Text", "mug");

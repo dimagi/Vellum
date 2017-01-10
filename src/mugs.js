@@ -982,6 +982,10 @@ define([
                 lstring: 'Comment',
                 visibility: 'visible',
                 widget: widgets.multilineText,
+                setter: function (mug, attr, value) {
+                    mug.p.set(attr, value);
+                    $('.fd-question-comment').text(value);
+                },
             }
         },
 
