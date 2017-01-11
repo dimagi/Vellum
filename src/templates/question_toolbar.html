@@ -8,6 +8,8 @@
     <% } %>
     </div>
 </div>
-<% if (comment) { %>
-<div class="alert alert-info fd-question-comment"><%= comment %></div>
+<div class="alert alert-info fd-question-comment"
+<% if (!comment) { %>
+  style="display: none"
 <% } %>
+><%= comment %></div>

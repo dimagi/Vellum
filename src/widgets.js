@@ -267,12 +267,6 @@ define([
             return widget.input.val();
         };
 
-        mug.on("property-changed", function (e) {
-            if (e.property === "comment") {
-                $('.fd-question-comment').text(widget.mugValue(mug));
-            }
-        }, null, "teardown-mug-properties");
-
         return widget;
     };
 

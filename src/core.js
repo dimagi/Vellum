@@ -1329,6 +1329,10 @@ define([
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
+            if (e.property === 'comment' && e.val) {
+                _this.$f.find('.fd-question-comment').show();
+                _this.$f.find('.fd-question-comment').text(e.val);
+            }
         });
     };
 
@@ -1830,6 +1834,9 @@ define([
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
                 .prepend(this.getQuestionTypeChanger(mug));
+            if (mug.p.comment) {
+                $baseToolbar.find('.fd-question-comment').show();
+            }
         }
         return $baseToolbar;
     };

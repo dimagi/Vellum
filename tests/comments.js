@@ -48,5 +48,18 @@ define([
             mug.p.comment = "This is a comment";
             util.assertXmlEqual(COMMENT_TEST_XML, call("createXML"), {normalize_xmlns: true});
         });
+
+        it("should not show comment the comment if there isn't one", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "mug");
+            assert(!$('.fd-props-toolbar > .alert-info').is(':visible'));
+        });
+
+        it("should display a comment once it is specified", function() {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", "mug");
+            mug.p.comment = 'this is a comment'
+            assert($('.fd-props-toolbar > .alert-info').is(':visible'));
+        });
     });
 });
