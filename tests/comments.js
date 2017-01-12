@@ -58,7 +58,7 @@ define([
         it("should display a comment once it is specified", function() {
             util.loadXML("");
             var mug = util.addQuestion("Text", "mug");
-            mug.p.comment = 'this is a comment'
+            mug.p.comment = 'this is a comment';
             assert($('.fd-props-toolbar > .alert-info').is(':visible'));
         });
     });
