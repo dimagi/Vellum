@@ -1,15 +1,5 @@
 <div class="fd-ui-container">
-    <div class="fd-toolbar">
-        <div class="fd-form-actions pull-right btn-toolbar">
-            <div class="btn-group fd-save-button"></div>
-        </div>
-        <div class="dropdown pull-left">
-            <a class="fd-add-question dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">
-                <i class="fa fa-plus"></i> Add Question
-                <i class="fa fa-caret-down"></i>
-            </a>
-        </div>
-    </div>
+
     <div class="fd-content fd-content-left">
         <div class="fd-tree">
             <div class="fd-head">
@@ -49,6 +39,12 @@
             </div>
             <div class="fd-undo-container"> </div>
             <div class="fd-scrollable fd-scrollable-tree">
+                <div class="dropdown add-question-dropdown">
+                    <a class="fd-add-question dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">
+                        <i class="fa fa-plus"></i> Add Question
+                        <i class="fa fa-caret-down"></i>
+                    </a>
+                </div>
                 <div class="fd-question-tree"></div>
                 <div class="hide fd-default-panel fd-default-qtree"></div>
             </div>
@@ -58,6 +54,9 @@
     </div>
     <div class="fd-content fd-content-divider fd-content-vertical-divider"></div>
     <div class="fd-content fd-content-right">
+        <div class="fd-form-actions btn-toolbar">
+            <div class="btn-group fd-save-button"></div>
+        </div>
         <div class="fd-column fd-question-properties hide">
             <div class="fd-head"><h2>Question Details</h2></div>
             <div class="fd-props-toolbar"></div>
@@ -81,3 +80,27 @@
 <div class="fd-multimedia-modal-container"></div>
 <div class="fd-modal-generic-container"></div>
 <!-- end modal divs -->
+<script type="text/html" id="fd-template-add-question-popover">
+  <div class="popover popover-additem" role="tooltip">
+    <div class="arrow"></div>
+    <h3 class="popover-title"></h3>
+    <div class="popover-content"></div>
+  </div>
+</script>
+
+<script type="text/html" id="fd-template-content-add-question-popover">
+  <div class="row">
+    <div class="col-xs-6">
+      <button type="button" class="popover-additem-option new-module" data-type="survey">
+        <i class="fa fa-file-o"></i>
+        Surveys
+      </button>
+    </div>
+    <div class="col-xs-6">
+      <button type="button" class="popover-additem-option new-module" data-type="case">
+        <i class="fa fa-bars"></i>
+        Case List
+      </button>
+    </div>
+  </div>
+</script>

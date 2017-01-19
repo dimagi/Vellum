@@ -1,8 +1,12 @@
 // Styling for trees (question tree and external data tree)
 @import "lib/main";
 
+
+
 // Vellum wrappers
 .formdesigner .fd-ui-container {
+
+
 
     // Styles shared by both trees
     .jstree {
@@ -11,6 +15,8 @@
             // Items in tree (type icon + name)
             .jstree-anchor {
                 color: darken(@blueDark, 10);
+                line-height: 27px;
+                height: 26px;
 
                 &.jstree-hovered,
                 &.jstree-clicked {
@@ -32,7 +38,7 @@
             .jstree-anchor > .jstree-icon, .add_choice:before {
                 background: none;
                 font-size: .85em;
-                color: @blueLight;
+                color: @cc-brand-mid;
             }
 
             .add_choice {
@@ -132,4 +138,29 @@
 #jstree-dnd {
     max-width: 300px;
     .text-overflow();
+}
+
+.fd-add-question {
+    width: 100%;
+    border-radius: 0;
+    text-align: left;
+}
+
+
+.formdesigner .fd-ui-container .fd-content .fd-tree .fd-head {
+    height: 44px;
+    h2 {
+        line-height: 44px;
+        font-size: 14px;
+    }
+    .fd-head-menu-container {
+        line-height: 44px;
+    }
+}
+
+.formdesigner .fd-ui-container .fd-content .fd-question-properties .fd-head {
+    height: 31px;
+    h2 {
+        line-height: 30px;
+    }
 }
