@@ -570,6 +570,8 @@ define([
         it("prevents changing selects with children to non-selects", function() {
             util.loadXML("");
             util.addQuestion("Select", "question1");
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             var changerSelector = ".fd-question-changer";
 
             $(changerSelector + " > a").click();
