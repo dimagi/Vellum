@@ -227,15 +227,15 @@ define([
             Itemset.lookupTablesEnabled = this.opts().features.lookup_tables;
             changeSubscriptionLink = this.opts().core.externalLinks.changeSubscription;
         },
-        getSelectQuestions: function () {
-            var questions = this.__callOld();
+        getQuestionGroups: function () {
+            var groups = this.__callOld();
             if (this.opts().features.lookup_tables) {
-                questions = questions.concat([
-                    "SelectDynamic",
-                    "MSelectDynamic"
-                ]);
+                groups.splice(groups.length - 1, 0, {
+                    group: ["SelectDynamic", 'Lookup Tables'],
+                    questions: ["SelectDynamic", "MSelectDynamic"],
+                });
             }
-            return questions;
+            return groups;
         },
         getMugTypes: function () {
             var types = this.__callOld();

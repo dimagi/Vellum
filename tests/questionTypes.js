@@ -570,6 +570,8 @@ define([
         it("prevents changing selects with children to non-selects", function() {
             util.loadXML("");
             util.addQuestion("Select", "question1");
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             var changerSelector = ".fd-question-changer";
 
             $(changerSelector + " > a").click();
@@ -581,6 +583,44 @@ define([
             util.deleteQuestion("question1/choice2");
             util.clickQuestion("question1");
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
+        });
+
+        it("adds and removes the add choice action when type changes", function() {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+            var changerSelector = ".fd-question-changer";
+
+            $(changerSelector + " > a").click();
+            var $options = $(changerSelector + " .change-question");
+            $options.filter("[data-qtype='Select']").click();
+
+            assert.strictEqual($(".add_choice").length, 1);
+            $(".add_choice").click();
+
+            util.assertJSTreeState(
+                "question1",
+                "  choice1"
+            );
+
+            util.deleteQuestion("question1/choice1");
+
+            $(changerSelector + " > a").click();
+            var $options = $(changerSelector + " .change-question");
+            $options.filter("[data-qtype='Text']").click();
+            assert.strictEqual($(".add_choice").length, 0);
+        });
+
+        it("gives select questions an add choice action", function() {
+            util.loadXML("");
+            util.addQuestion("Select", "question1");
+
+            assert.strictEqual($(".add_choice").length, 1);
+            $(".add_choice").click();
+
+            util.assertJSTreeState(
+                "question1",
+                "  choice1"
+            );
         });
 
         it("should show error on delete validation condition but not message", function() {

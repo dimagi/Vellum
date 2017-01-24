@@ -245,8 +245,8 @@ define([
         it ("should show warnings for duplicate choice value", function() {
             util.loadXML("");
             var select = util.addQuestion("Select", 'select'),
-                item1 = select.form.getChildren(select)[0],
-                item2 = select.form.getChildren(select)[1];
+                item1 = util.addQuestion('Choice', 'choice1'),
+                item2 = util.addQuestion('Choice', 'choice2');
             assert(util.isTreeNodeValid(item1), item1.getErrors().join("\n"));
             assert(util.isTreeNodeValid(item2), item2.getErrors().join("\n"));
             item2.p.nodeID = "choice1";

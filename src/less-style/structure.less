@@ -53,7 +53,7 @@ body.vellum-full-screen {
 
             // Heading for any panel (question tree, expression editor, etc.)
             .fd-head {
-                @menuContainerWidth: 30px;
+                @menuContainerWidth: 50px;
                 color: @white;
                 background-color: @cc-brand-low;
                 font-size: 17px;    // size icons
@@ -97,26 +97,29 @@ body.vellum-full-screen {
                     min-width: @menuContainerWidth;
 
                     // Icon link to open dropdown
-                    > a {
-                        color: @white;
-                        cursor: pointer;
-                        display: block;
-                        padding: 0 @contentPaddingVellum;
-                        text-decoration: none;
-                        background-color: @cc-brand-low;
-
-                        &:hover {
+                    .dropdown {
+                        .dropdown-toggle {
+                            color: @white;
+                            cursor: pointer;
+                            display: block;
+                            padding: 0 @contentPaddingVellum;
                             text-decoration: none;
-                            background-color: @cc-brand-mid;
+                            background-color: @cc-brand-low;
+
+                            &:hover {
+                                text-decoration: none;
+                                background-color: @cc-brand-mid;
+                            }
                         }
-                    }
 
-                    // Menu options
-                    ul a {
-                        min-width: 170px;
+                        .dropdown-menu {
+                            a {
+                                min-width: 170px;
 
-                        > .hotkey {
-                            float: right;
+                                > .hotkey {
+                                    float: right;
+                                }
+                            }
                         }
                     }
                 }
@@ -126,8 +129,7 @@ body.vellum-full-screen {
         // Draggable separators between .fd-content blocks
         .fd-content-vertical-divider {
             width: 5px;
-            margin: 0 1px;
-            background: @navbarBackground;
+            background: @cc-brand-mid;
         }
 
         .fd-content-horizontal-divider {
@@ -166,17 +168,26 @@ body.vellum-full-screen {
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
         }
+    }
+}
 
-        .checklist {
-            i.fa-check {
-                display: none;
-            }
+.formdesigner {
+    .fd-tree .fd-head > h2:before {
+        font-family: 'FontAwesome';
+        content: '\f044';
+        display: inline-block;
+        margin-right: 5px;
+    }
+}
 
-            .selected i.fa-check {
-                display: inline-block;
-                margin-left: -14px;
-                margin-right: 2px;
-            }
-        }
+.formdesigner {
+    .fd-question-tree-add {
+        padding: 8px 15px;
+        width: 100%;
+    }
+
+    .fd-form-actions {
+        background-color: #004ebc;
+        padding: 5px 8px 8px;
     }
 }

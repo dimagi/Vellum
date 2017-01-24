@@ -1,36 +1,75 @@
 // Styling for trees (question tree and external data tree)
 @import "lib/main";
 
+
+
 // Vellum wrappers
 .formdesigner .fd-ui-container {
+
+
 
     // Styles shared by both trees
     .jstree {
 
-        // Items in tree (type icon + name)
-        .jstree-anchor {
-            color: darken(@blueDark, 10);
+        .jstree-node {
+            // Items in tree (type icon + name)
+            .jstree-anchor {
+                color: darken(@blueDark, 10);
+                line-height: 27px;
+                height: 26px;
 
-            &.jstree-hovered,
-            &.jstree-clicked {
-                border: none;
-                background: desaturate(lighten(@blue, 58), 40);
+                &.jstree-hovered,
+                &.jstree-clicked {
+                    border: none;
+                    background: desaturate(lighten(@blue, 58), 40);
+                }
+
+                &.jstree-clicked {
+                    .box-shadow(0px 0px 4px fade(@blue, 60%));
+                }
+
+                .fd-tree-valid-alert-icon {
+                    color: lighten(@red, 15);
+                    margin-right: 3px;
+                    margin-left: -3px;
+                }
             }
 
-            &.jstree-clicked {
-                .box-shadow(0px 0px 4px fade(@blue, 60%));
-            }
-
-            > .jstree-icon {
+            .jstree-anchor > .jstree-icon, .add_choice:before {
                 background: none;
                 font-size: .85em;
-                color: @blueLight;
+                color: @cc-brand-mid;
             }
 
-            .fd-tree-valid-alert-icon {
-                color: lighten(@red, 15);
-                margin-right: 3px;
-                margin-left: -3px;
+            .add_choice {
+                display: block;
+                margin-left: 25px;
+                cursor: pointer;
+                padding: 0 5px;
+
+                // This is fragile; it overwrites .fa styles with .jstree-anchor and body styles
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                line-height: 24px;
+                height: 24px;
+
+                &:before {
+                    // Bring back .fa font
+                    font: normal normal normal 14px/1 FontAwesome;
+
+                    margin-right: 6px;
+                }
+
+                // Also fragile; both because of the static width and because the other styles
+                // are taken from .jstree-hovered
+                &:hover {
+                    border: none;
+                    background-color: #eaeff5;
+                    width: 95px;
+                }
+            }
+
+            &.jstree-closed .add_choice {
+                display: none;
             }
         }
     }
@@ -99,4 +138,29 @@
 #jstree-dnd {
     max-width: 300px;
     .text-overflow();
+}
+
+.fd-add-question {
+    width: 100%;
+    border-radius: 0;
+    text-align: left;
+}
+
+
+.formdesigner .fd-ui-container .fd-content .fd-tree .fd-head {
+    height: 44px;
+    h2 {
+        line-height: 44px;
+        font-size: 14px;
+    }
+    .fd-head-menu-container {
+        line-height: 44px;
+    }
+}
+
+.formdesigner .fd-ui-container .fd-content .fd-question-properties .fd-head {
+    height: 31px;
+    h2 {
+        line-height: 30px;
+    }
 }

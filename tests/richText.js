@@ -127,7 +127,7 @@ define([
     function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
     function html(value) { return wrapWithDiv(value).html(); }
 
-    before(function (done) {
+    function setupGlobalForm(done) {
         util.init({
             javaRosa: {langs: ['en']},
             core: {
@@ -142,9 +142,11 @@ define([
                 },
             },
         });
-    });
+    }
 
     describe("Rich text utilities", function() {
+        before(setupGlobalForm);
+
         describe("simple conversions", function() {
             // path, display value, icon
             var simpleConversions = [
@@ -362,6 +364,8 @@ define([
     });
 
     describe("The rich text editor", function () {
+        before(setupGlobalForm);
+
         describe("", function() {
             var el = $("<div id='cktestparent'><div contenteditable /><div contenteditable /></div>"),
                 options = {isExpression: false},
@@ -659,6 +663,17 @@ define([
                             }
                         });
                         bubble.mouseenter();
+                    });
+                });
+
+                it("should not error on unknown question ref", function (done) {
+                    util.loadXML("");
+                    util.addQuestion("Text", "text");
+                    var widget = util.getWidget('property-relevantAttr'),
+                        editor = richText.editor(widget.input);
+                    editor.on("instanceReady", function () {
+                        editor.setValue("#form/unknown");
+                        done();
                     });
                 });
 
