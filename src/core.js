@@ -203,14 +203,11 @@ define([
     };
 
     fn._init_add_question = function() {
-        var _this = this,
-            $addQuestion = this.$f.find(".fd-add-question");
+        var _this = this;
 
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
 
         _.each(_this.getQuestionGroups(), function (groupData) {
-            var groupSlug = groupData.group[0];
-
             var getQuestionData = function (questionType) {
                 var mugType = _this.data.core.mugTypes[questionType],
                     questionData = [
@@ -1493,7 +1490,7 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
-        var _this = this;
+        var node, _this = this;
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
         }, null, null, this.data.core);
