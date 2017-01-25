@@ -168,7 +168,6 @@ define([
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
                 disableNativeSpellChecker: options.disableNativeSpellChecker,
-                placeholder: options.placeholder,
             }).editor;
         wrapper = {
             getValue: function (callback) {

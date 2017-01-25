@@ -2080,7 +2080,7 @@ define([
                 properties: this.getMainProperties(),
                 help: {
                     title: "Basic",
-                    text: "<p>The <strong>Label</strong> is text that appears in the application. " +
+                    text: "<p>The <strong>Display Text</strong> appears in the application. " +
                         "This text will not appear in data exports.</p> ",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }

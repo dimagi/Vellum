@@ -144,7 +144,7 @@ define([
                 },
             },
             labelRef: {
-                lstring: 'Label Field',
+                lstring: 'Display Text Field',
                 widget: refWidget,
                 visibility: 'visible',
                 presence: 'required',
