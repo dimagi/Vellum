@@ -1188,9 +1188,26 @@ define([
             .addClass('disabled');
     };
 
+    // Suggest a node ID, based on the mug's label
+    fn.nodeIDFromLabel = function(mug) {
+        var suggestedID = this.getMugDisplayName(mug) || "";
+        suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
+        suggestedID = suggestedID.toLowerCase();
+        suggestedID = suggestedID.trim();
+        suggestedID = suggestedID.replace(/\s+/g, '_');         // collapse whitespace & replace with underscores
+        suggestedID = suggestedID.replace(/[^\w\-]/g, '');      // strip illegal characters
+        suggestedID = suggestedID.substring(0, 75);             // no exceedingly long IDs
+        return mug.form.generate_question_id(suggestedID, mug);
+    };
+
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
+        var currentMug = this.getCurrentlySelectedMug();
+        if (currentMug && !currentMug.p.nodeID) {
+            currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
+        }
+
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
