@@ -1,10 +1,5 @@
-<fieldset class="fd-question-fieldset">
-    <legend class="collapse-toggle<% if (isCollapsed) { %> collapsed<% } %>"
-            data-toggle="collapse"
-            data-target="#<%=fieldsetClass%>"
-            aria-expanded="<% if (isCollapsed) { %> true<% } else { %>false<% } %>"
-            aria-controls="<%=fieldsetClass%>"
-    >
+<fieldset class="fd-question-fieldset<% if (isCollapsed) { %> hide<% } %>" data-slug="<%= fieldsetSlug %>">
+    <legend>
         <% if (help) { %>
         <div class="fd-help pull-right">
             <a href="#" class="help" tabindex="-1"
@@ -14,13 +9,12 @@
             </a>
         </div>
         <% } %>
-        <i class="fa fa-angle-double-down"></i>
         <%=fieldsetTitle%>
     </legend>
     <!-- todo: don't require passing a unique ID to this template or an
     interface that exposes it (i.e., allow passing a non-unique id and then
     append it to a random one, or something -->
-    <div id="<%=fieldsetClass%>" class="<% if (isCollapsed) { %> collapse<% } else { %> in<% } %>">
+    <div id="<%=fieldsetClass%>">
         <div class="fd-fieldset-content"></div>
     </div>
 </fieldset>

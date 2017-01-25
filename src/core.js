@@ -403,11 +403,14 @@ define([
             });
         });
 
-        this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
-            var $target = $(e.target),
-                section = $target.parent().find("legend").text().trim(),
-                shouldCollapse = $target.hasClass('in');
-            localStorage.setItem('collapse-' + section, shouldCollapse ? "1" : "");
+        // Section toggling menu
+        this.$f.on('click', '.fd-section-changer a', function(e) {
+            var slug = $(e.target).data("slug"),
+                $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']");
+            $fieldset.toggleClass("hide");
+            $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
+
+            localStorage.setItem('collapse-' + slug, $fieldset.hasClass("hide") ? "1" : "");
         });
     };
 
@@ -1788,15 +1791,24 @@ define([
         }
     };
 
+    fn.sectionIsCollapsed = function(section) {
+        var collapseKey = "collapse-" + section.slug;
+        if (section.slug === "main") {
+            // Always show basic section
+            return false;
+        }
+        return localStorage.hasOwnProperty(collapseKey) ?
+            localStorage.getItem(collapseKey) :
+            section.isCollapsed;
+    };
+
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
-            collapseKey = "collapse-" + options.displayName,
-            isCollapsed = localStorage.hasOwnProperty(collapseKey) ?
-                localStorage.getItem(collapseKey) :
-                options.isCollapsed,
+            isCollapsed = _this.sectionIsCollapsed(options),
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
+                fieldsetSlug: options.slug,
                 isCollapsed: !!isCollapsed,
                 help: options.help
             })),
@@ -1831,6 +1843,21 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
+                sections: multiselect ? [] : _.chain(_this.getSections(mug))
+                    .rest()
+                    .filter(function(s) {
+                        // Limit to sections relevant to this mug
+                        return _.find(_.map(s.properties, function(property) {
+                            return getWidgetClassAndOptions(property, mug);
+                        }), _.identity);
+                    })
+                    .map(function(s) {
+                        // Just pass the template a show/hide flag
+                        return _.extend({
+                            show: !_this.sectionIsCollapsed(s),
+                        }, s);
+                    })
+                    .value(),
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true, true);

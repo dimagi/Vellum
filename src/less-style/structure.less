@@ -88,7 +88,7 @@ body.vellum-full-screen {
                 }
 
                 // Question tree menu (language switcher, copy, paste, etc.)
-                .fd-questions-menu-container {
+                .fd-head-menu-container {
                     position: absolute;
                     right: 0px;
                     top: 0px;
@@ -112,19 +112,8 @@ body.vellum-full-screen {
                     }
 
                     // Menu options
-                    #fd-questions-dropdown-menu a {
+                    ul a {
                         min-width: 170px;
-
-                        // Checkmarks to show selected language
-                        i.fa-check {
-                            display: none;
-                        }
-
-                        &.selected i.fa-check {
-                            display: inline-block;
-                            margin-left: -14px;
-                            margin-right: 2px;
-                        }
 
                         > .hotkey {
                             float: right;
@@ -176,6 +165,18 @@ body.vellum-full-screen {
 
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
+        }
+
+        .checklist {
+            i.fa-check {
+                display: none;
+            }
+
+            .selected i.fa-check {
+                display: inline-block;
+                margin-left: -14px;
+                margin-right: 2px;
+            }
         }
     }
 }
