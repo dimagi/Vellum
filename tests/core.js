@@ -199,6 +199,18 @@ define([
             );
         });
 
+        it("should update choice name in tree on change question ID", function () {
+            util.loadXML("");
+            util.addQuestion("Select", "select");
+            util.clickQuestion("select/choice1");
+            $("[name=property-nodeID]").val("yes").change();
+            util.assertJSTreeState(
+                "select",
+                "  yes",
+                "  choice2"
+            );
+        });
+
         it("should not change mugs on collapse", function () {
             util.loadXML("");
             var group1 = util.addQuestion("Group", "group"),
