@@ -33,6 +33,7 @@ define([
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
+    'jstree-actions',
     'jquery.bootstrap',
     'caretjs',
     'atjs'
@@ -940,7 +941,7 @@ define([
                     return node;
                 }
             },
-            "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
+            "plugins" : [ "themes", "types", "dnd", "conditionalevents", "actions" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -1558,11 +1559,11 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
-        var _this = this;
+        var node, _this = this;
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
         }, null, null, this.data.core);
-        return this.jstree("create_node",
+        node = _this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
                 text: this.getMugDisplayName(mug),
@@ -1583,6 +1584,10 @@ define([
             // NOTE 'into' is not a supported position in JSTree
             (position === 'into' ? 'last' : position)
         );
+
+        _this.data.core.form.setMugActions(mug);
+
+        return node;
     };
 
     fn.handleMugParseFinish = function (mug) {

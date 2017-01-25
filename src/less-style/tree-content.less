@@ -7,24 +7,60 @@
     // Styles shared by both trees
     .jstree {
 
-        // Items in tree (type icon + name)
-        .jstree-anchor {
-            color: darken(@blueDark, 10);
+        .jstree-node {
 
-            &.jstree-hovered,
-            &.jstree-clicked {
-                border: none;
-                background: desaturate(lighten(@blue, 58), 40);
+            // Items in tree (type icon + name)
+            .jstree-anchor {
+                color: darken(@blueDark, 10);
+                line-height: 27px;
+                height: 26px;
+
+                &.jstree-hovered,
+                &.jstree-clicked {
+                    border: none;
+                    background: desaturate(lighten(@blue, 58), 40);
+                }
+
+                &.jstree-clicked {
+                    .box-shadow(0px 0px 4px fade(@blue, 60%));
+                }
             }
 
-            &.jstree-clicked {
-                .box-shadow(0px 0px 4px fade(@blue, 60%));
-            }
-
-            > .jstree-icon {
+            .jstree-anchor > .jstree-icon, .add_choice:before {
                 background: none;
                 font-size: .85em;
-                color: @blueLight;
+                color: @cc-brand-mid;
+            }
+
+            .add_choice {
+                display: block;
+                margin-left: 25px;
+                cursor: pointer;
+                padding: 0 5px;
+
+                // This is fragile; it overwrites .fa styles with .jstree-anchor and body styles
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                line-height: 24px;
+                height: 24px;
+
+                &:before {
+                    margin-right: 6px;
+
+                    // Bring back .fa font
+                    font: normal normal normal 14px/1 FontAwesome;
+                }
+
+                // Also fragile; both because of the static width and because the other styles
+                // are taken from .jstree-hovered
+                &:hover {
+                    border: none;
+                    background-color: #eaeff5;
+                    width: 95px;
+                }
+            }
+
+            &.jstree-closed .add_choice {
+                display: none;
             }
 
             .fd-tree-valid-alert-icon {
@@ -32,7 +68,7 @@
                 margin-right: 3px;
                 margin-left: -3px;
             }
-        } 
+        }
     }
 
     // Panel for question tree, including header
