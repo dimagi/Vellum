@@ -1587,10 +1587,7 @@ define([
     };
 
     fn.displayMugProperties = function (mug) {
-        var $props = this.$f.find('.fd-question-properties'),
-            _getWidgetClassAndOptions = function (property) {
-                return getWidgetClassAndOptions(property, mug);
-            };
+        var $props = this.$f.find('.fd-question-properties');
         this.$f.find('.fd-default-panel').addClass('hide');
 
         this.showContentRight();
@@ -1607,7 +1604,9 @@ define([
 
             section.mug = mug;
             section.properties = _(section.properties)
-                .map(_getWidgetClassAndOptions)
+                .map(function(property) {
+                    return getWidgetClassAndOptions(property, mug);
+                })
                 .filter(_.identity);
 
             if (section.properties.length) {
