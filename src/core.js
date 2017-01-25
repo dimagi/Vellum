@@ -961,32 +961,38 @@ define([
      *
      * NOTE this is done once when Vellum is loaded. These handlers must work
      * for multiple Vellum instances on the same page.
+     *
+     * These handlers need to be executed AFTER jstree's own dnd_move and
+     * dnd_stop handlers, so wait to attach them until the first time a
+     * drag begins.
      */
-    $(document).on("dnd_move.vakata.jstree", function (e, data) {
-        var source = $(data.data.obj),
-            target = $(data.event.target),
-            inst = $.jstree.reference(target);
-        if (!inst && target.vellum("get") === source.vellum("get")) {
-            // only when not dragging inside the tree
-            if (target.closest('.jstree-drop').length) {
-                data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
-            } else {
-                data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
-            }
-        }
-    }).on("dnd_stop.vakata.jstree", function (e, data) {
-        var vellum = $(data.data.obj).vellum("get"),
-            target = $(data.event.target),
-            inst = $.jstree.reference(target);
-
-        if (!inst && (target.closest('.jstree-drop').length) && vellum === target.vellum("get")) {
-            if (data.data.origin) {
-                var node = data.data.origin.get_node(data.data.nodes[0]);
-                if (node.data && node.data.handleDrop) {
-                    node.data.handleDrop(target.closest('.jstree-drop'));
+    $(document).one("dnd_move.vakata.jstree", function (e, data) {
+        $(document).on("dnd_move.vakata.jstree", function (e, data) {
+            var source = $(data.data.obj),
+                target = $(data.event.target),
+                inst = $.jstree.reference(target);
+            if (!inst && target.vellum("get") === source.vellum("get")) {
+                // only when not dragging inside the tree
+                if (target.closest('.jstree-drop').length) {
+                    data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
+                } else {
+                    data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
                 }
             }
-        }
+        }).on("dnd_stop.vakata.jstree", function (e, data) {
+            var vellum = $(data.data.obj).vellum("get"),
+                target = $(data.event.target),
+                inst = $.jstree.reference(target);
+
+            if (!inst && (target.closest('.jstree-drop').length) && vellum === target.vellum("get")) {
+                if (data.data.origin) {
+                    var node = data.data.origin.get_node(data.data.nodes[0]);
+                    if (node.data && node.data.handleDrop) {
+                        node.data.handleDrop(target.closest('.jstree-drop'));
+                    }
+                }
+            }
+        });
     });
 
     /**
@@ -1291,6 +1297,10 @@ define([
         }).on('mug-property-change', function (e) {
             _this.refreshMugName(e.mug);
             _this.toggleConstraintItext(e.mug);
+            if (e.property === 'comment' && e.val) {
+                _this.$f.find('.fd-question-comment').show();
+                _this.$f.find('.fd-question-comment').text(e.val);
+            }
         });
     };
 
@@ -1829,6 +1839,9 @@ define([
         if (!multiselect) {
             $baseToolbar.find('.btn-toolbar.pull-left')
                 .prepend(this.getQuestionTypeChanger(mug));
+            if (mug.p.comment) {
+                $baseToolbar.find('.fd-question-comment').show();
+            }
         }
         return $baseToolbar;
     };
