@@ -1445,9 +1445,19 @@ define([
             }
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
-            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-            if ($firstInput.length) {
-                $firstInput.focus().select();
+
+            // Focus on first input, which might be a normal input or a rich text input
+            var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
+            if ($firstGroup.length) {
+                var $input = $firstGroup.find("input, textarea");
+                if ($input.length) {
+                    // Rich text is off
+                    $input.focus();
+                } else {
+                    // Rich text is on
+                    $input = $firstGroup.find(".fd-textarea, .fd-input");
+                    richText.editor($input).focus();
+                }
             }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
@@ -2155,8 +2165,8 @@ define([
 
     fn.getMainProperties = function () {
         return [
-            "nodeID",
             "label",
+            "nodeID",
             "requiredAttr",
             "readOnlyControl",
             "itemsetData",

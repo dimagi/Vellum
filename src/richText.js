@@ -225,6 +225,14 @@ define([
                 editor.fire("saveSnapshot");
                 return wrapper;
             },
+            focus: function() {
+                if (editor.status === "ready") {
+                    editor.focus();
+                } else {
+                    editor.removeListener('instanceReady', editor.focus);
+                    editor.on('instanceReady', editor.focus);
+                }
+            },
             select: function (index) {
                 ckSelect.call(null, editor, index);
                 return wrapper;
