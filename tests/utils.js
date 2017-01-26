@@ -492,6 +492,13 @@ define([
                 }
                 mug.p[name] = val;
             });
+
+            // Open all sections
+            localStorage.clear();
+            localStorage.setItem('collapse-logic', "");
+            localStorage.setItem('collapse-content', "");
+            localStorage.setItem('collapse-advanced', "");
+
             return mug;
         },
         paste: paste,

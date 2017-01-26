@@ -366,7 +366,7 @@ define([
         });
 
         // Section toggling menu
-        this.$f.on('click', '.fd-section-changer a', function(e) {
+        this.$f.find(".fd-content-right").on('click', '.fd-section-changer .dropdown-menu a', function(e) {
             var slug = $(e.target).data("slug"),
                 $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']");
             $fieldset.toggleClass("hide");
