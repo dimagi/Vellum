@@ -569,7 +569,7 @@ define([
 
             // can't add new long via UI
             var $dropdown = $(".add-question-dropdown");
-            assert.equal($dropdown.find("[data-qtype='Text']").length, 2); // one for group, one for individual item
+            assert.equal($dropdown.find("[data-qtype='Text']").length, 1);
             assert.equal($dropdown.find("[data-qtype='Long']").length, 0);
         });
 

@@ -256,15 +256,12 @@ define([
     fn.getQuestionGroups = function () {
         return [
             {
-                group: ["Text", 'Text'],  // key in mugTypes, <title>
-                questions: [
-                    "Text",
-                    "Trigger"
-                ]
+                group: ["Text"],
+                questions: ["Text"],
             },
             {
                 group: ["Select", 'Multiple Choice'],
-                questions: this.getSelectQuestions()
+                questions: ["Select", "MSelect"],
             },
             {
                 group: ["Int", 'Number'],
@@ -280,12 +277,6 @@ define([
                     "Date",
                     "Time",
                     "DateTime"
-                ]
-            },
-            {
-                group: ["DataBindOnly", 'Hidden Value'],
-                questions: [
-                    "DataBindOnly"
                 ]
             },
             {
@@ -306,17 +297,20 @@ define([
                 ]
             },
             {
+                group: ["Trigger"],
+                questions: ["Trigger"],
+            },
+            {
+                group: ["DataBindOnly", 'Hidden Value'],
+                questions: [
+                    "DataBindOnly"
+                ]
+            },
+            {
                 group: ["Geopoint", 'Advanced', ''],
                 textOnly: true,
                 questions: this.getAdvancedQuestions()
             }
-        ];
-    };
-
-    fn.getSelectQuestions = function () {
-        return [
-            "Select",
-            "MSelect"
         ];
     };
 
