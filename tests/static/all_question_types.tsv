@@ -7,8 +7,6 @@ Question	Type	Text (en)	Text (hin)	Audio (en)	Audio (hin)	Image (en)	Image (hin)
 /question3-choice1	Choice	choice1	choice1	jr://file/commcare/audio/data/question3-choice1.mp3	jr://file/commcare/audio/data/question3-choice1.mp3	jr://file/commcare/image/data/question3-choice1.png	jr://file/commcare/image/data/question3-choice1.png	jr://file/commcare/video/data/question3-choice1.3gp	jr://file/commcare/video/data/question3-choice1.3gp	jr://file/commcare/video-inline/data/question3-choice1.3gp	jr://file/commcare/video-inline/data/question3-choice1.3gp	jr://file/commcare/expanded-audio/data/question3-choice1.mp3	jr://file/commcare/expanded-audio/data/question3-choice1.mp3								
 /question3-choice2	Choice	choice2	choice2																		
 /question6	Checkbox																	no			
-/question6-choice1	Choice	choice1	choice1																		
-/question6-choice2	Choice	choice2	choice2																		
 /question13	Integer																	no			
 /question14	Phone Number or Numeric ID																	no			
 /question15	Decimal																	no			

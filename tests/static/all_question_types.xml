@@ -115,12 +115,6 @@
 					<text id="question3-choice2-label">
 						<value>choice2</value>
 					</text>
-					<text id="question6-choice1-label">
-						<value>choice1</value>
-					</text>
-					<text id="question6-choice2-label">
-						<value>choice2</value>
-					</text>
 				</translation>
 				<translation lang="hin">
 					<text id="question1-label">
@@ -167,12 +161,6 @@
 					<text id="question3-choice2-label">
 						<value>choice2</value>
 					</text>
-					<text id="question6-choice1-label">
-						<value>choice1</value>
-					</text>
-					<text id="question6-choice2-label">
-						<value>choice2</value>
-					</text>
 				</translation>
 			</itext>
 		</model>
@@ -202,14 +190,6 @@
 		</select1>
 		<!-- arbitrary control attributes -->
 		<select ref="/data/question6" foo="baz">
-			<item>
-				<label ref="jr:itext('question6-choice1-label')" />
-				<value>choice1</value>
-			</item>
-			<item>
-				<label ref="jr:itext('question6-choice2-label')" />
-				<value>choice2</value>
-			</item>
 		</select>
 		<input ref="/data/question13"/>
 		<input ref="/data/question14" appearance="numeric"/>
