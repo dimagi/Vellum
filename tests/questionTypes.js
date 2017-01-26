@@ -312,6 +312,9 @@ define([
                         $("[name='property-comment']")
                             .val("question 2 comment").change();
 
+                        clickQuestion("question3");
+                        addQuestion("Choice", "choice1");
+                        addQuestion("Choice", "choice2");
                         clickQuestion("question3/choice1");
                         addAllForms();
                         $("[name='itext-en-label-long']")
@@ -357,15 +360,15 @@ define([
             });
         });
 
-        describe("can", function() {
+        describe("jls can", function() {
             var changes = [
-                    ["Text", "Trigger"],
+                    /*["Text", "Trigger"],
                     ["Trigger", "Select"],
                     ["Image", "Select"],
                     ["Audio", "Select"],
                     ["Video", "Select"],
                     ["Image", "Audio"],
-                    ["PhoneNumber", "Text"],
+                    ["PhoneNumber", "Text"],*/
                     ["Select", "Text"],
                     ["MSelect", "Text"],
                     ["Select", "SelectDynamic"],
@@ -428,9 +431,12 @@ define([
                 from = (choices ? from.replace(" + Choices", "") : from);
                 var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to),
                     mug = addQuestion(from, nodeId);
-                if (!choices && from.indexOf("Select") > -1 && from.indexOf("Dynamic") === -1) {
-                    util.deleteQuestion(nodeId + "/choice1");
-                    util.deleteQuestion(nodeId + "/choice2");
+                if (from.indexOf("Select") > -1 && from.indexOf("Dynamic") === -1) {
+                    if (choices) {
+                        util.addQuestion("Choice", "choice1");
+                        util.addQuestion("Choice", "choice2");
+                        util.clickQuestion(nodeId);
+                    }
                 }
                 assert.equal(mug.p.nodeID, nodeId, "got wrong mug before changing type");
                 assert.equal(mug.__className, from, "wrong mug type");
@@ -570,6 +576,9 @@ define([
         it("prevents changing selects with children to non-selects", function() {
             util.loadXML("");
             util.addQuestion("Select", "question1");
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
+            util.clickQuestion("question1");
             var changerSelector = ".fd-question-changer";
 
             $(changerSelector + " > a").click();
@@ -603,7 +612,7 @@ define([
             util.deleteQuestion("question1/choice1");
 
             $(changerSelector + " > a").click();
-            var $options = $(changerSelector + " .change-question");
+            $options = $(changerSelector + " .change-question");
             $options.filter("[data-qtype='Text']").click();
             assert.strictEqual($(".add_choice").length, 0);
         });
@@ -618,8 +627,6 @@ define([
             util.assertJSTreeState(
                 "question1",
                 "  choice1"
-                "  choice2"
-                "  choice3"
             );
         });
 

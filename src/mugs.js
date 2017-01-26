@@ -1500,11 +1500,6 @@ define([
             }
             return '';
         },
-        afterInsert: function (form, mug) {
-            var choice = "Choice";
-            form.createQuestion(mug, 'into', choice, true);
-            form.createQuestion(mug, 'into', choice, true);
-        },
         spec: {
             appearance: {
                 deleteOnCopy: false,
