@@ -10,6 +10,8 @@ body.vellum-full-screen {
 
     // Another wrapper around all of vellum, can be styled (say, for full-screen mode)
     .fd-ui-container {
+        @leftHeadHeight: 44px;
+
         top: 0;
         width: 100%;
         background-color: white;
@@ -26,6 +28,18 @@ body.vellum-full-screen {
             &.fd-content-left {
                 width: 30%;
 
+                .fd-head {
+                    height: @leftHeadHeight;
+                    h2 {
+                        line-height: @leftHeadHeight;
+                        font-size: 14px;
+                    }
+
+                    .fd-head-menu-container {
+                        line-height: @leftHeadHeight;
+                    }
+                }
+
                 .fd-add-question {
                     width: 100%;
                     border-radius: 0;
@@ -41,6 +55,14 @@ body.vellum-full-screen {
 
             // Right column: question properties or expression editor
             &.fd-content-right {
+                .fd-head {
+                    height: 31px;
+
+                    h2 {
+                        line-height: 30px;
+                    }
+                }
+
                 // Tweak bootstrap's well styles
                 .well {
                     padding: 10px;
@@ -76,6 +98,7 @@ body.vellum-full-screen {
                 .fd-head-max-indicator {
                     position: absolute;
                     right: 10px;
+                    line-height: @leftHeadHeight;
 
                     i {
                         color: @cc-neutral-hi;
