@@ -362,13 +362,13 @@ define([
 
         describe("can", function() {
             var changes = [
-                    /*["Text", "Trigger"],
+                    ["Text", "Trigger"],
                     ["Trigger", "Select"],
                     ["Image", "Select"],
                     ["Audio", "Select"],
                     ["Video", "Select"],
                     ["Image", "Audio"],
-                    ["PhoneNumber", "Text"],*/
+                    ["PhoneNumber", "Text"],
                     ["Select", "Text"],
                     ["MSelect", "Text"],
                     ["Select", "SelectDynamic"],
