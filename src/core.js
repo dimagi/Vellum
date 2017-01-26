@@ -199,7 +199,8 @@ define([
     };
 
     fn._init_add_question = function () {
-        var _this = this;
+        var _this = this,
+            $dropdown = _this.$f.find(".fd-add-question-dropdown");
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
 
         _.each(_this.getQuestionGroups(), function (groupData) {
@@ -218,7 +219,7 @@ define([
             groupData.questions = _.map(groupData.questions, getQuestionData);
         });
 
-        _this.$f.find(".fd-add-question").after($(add_question({
+        $dropdown.find(".fd-add-question").after($(add_question({
             groups: _.map(_this.getQuestionGroups(), function(groupData) {
                 var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
                 return {
@@ -240,7 +241,7 @@ define([
             }),
         })));
 
-        _this.$f.on('click', '.fd-question-type', function (e) {
+        $dropdown.find(".fd-question-type").click(function (e) {
             if (!$(this).hasClass('disabled')) {
                 _this.addQuestion($(this).data('qtype'));
             }
