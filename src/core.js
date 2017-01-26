@@ -367,12 +367,8 @@ define([
 
         // Section toggling menu
         this.$f.find(".fd-content-right").on('click', '.fd-section-changer .dropdown-menu a', function(e) {
-            var slug = $(e.target).data("slug"),
-                $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']");
-            $fieldset.toggleClass("hide");
-            $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
-
-            localStorage.setItem('collapse-' + slug, $fieldset.hasClass("hide") ? "1" : "");
+            var $link = $(e.target);
+            _this.collapseSection($link.data("slug"), $link.hasClass("selected"));
         });
     };
 
@@ -1767,6 +1763,19 @@ define([
         return localStorage.hasOwnProperty(collapseKey) ?
             localStorage.getItem(collapseKey) :
             section.isCollapsed;
+    };
+
+    fn.collapseSection = function(slug, shouldCollapse) {
+        var $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']"),
+            $command = $(".fd-section-changer [data-slug='" + slug + "']");
+        if (shouldCollapse) {
+            $fieldset.addClass("hide");
+            $command.removeClass("selected");
+        } else {
+            $fieldset.removeClass("hide");
+            $command.addClass("selected");
+        }
+        localStorage.setItem('collapse-' + slug, shouldCollapse ? "1" : "");
     };
 
     fn.getSectionDisplay = function (mug, options) {

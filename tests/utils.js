@@ -494,10 +494,9 @@ define([
             });
 
             // Open all sections
-            localStorage.clear();
-            localStorage.setItem('collapse-logic', "");
-            localStorage.setItem('collapse-content', "");
-            localStorage.setItem('collapse-advanced', "");
+            _.each(call('getSections', mug), function(section) {
+                call('collapseSection', section.slug, false);
+            });
 
             return mug;
         },
