@@ -71,8 +71,20 @@
         }
     }
 
-    // Panel for question tree, including header
+    // Styles for question tree only, including header
     .fd-tree {
+        .fd-head {
+            height: 44px;
+            h2 {
+                line-height: 44px;
+                font-size: 14px;
+            }
+
+            .fd-head-menu-container {
+                line-height: 44px;
+            }
+        }
+
         .fd-scrollable {
             overflow-x: auto;
 
@@ -135,4 +147,12 @@
 #jstree-dnd {
     max-width: 300px;
     .text-overflow();
+}
+
+// TODO: clean up
+.formdesigner .fd-ui-container .fd-content .fd-question-properties .fd-head {
+    height: 31px;
+    h2 {
+        line-height: 30px;
+    }
 }

@@ -26,6 +26,12 @@ body.vellum-full-screen {
             &.fd-content-left {
                 width: 30%;
 
+                .fd-add-question {
+                    width: 100%;
+                    border-radius: 0;
+                    text-align: left;
+                }
+
                 // Bottom half of left column: data tree
                 .fd-accessory-pane {
                     overflow-x: hidden;
@@ -130,8 +136,7 @@ body.vellum-full-screen {
         // Draggable separators between .fd-content blocks
         .fd-content-vertical-divider {
             width: 5px;
-            margin: 0 1px;
-            background: @navbarBackground;
+            background: @cc-brand-mid;
         }
 
         .fd-content-horizontal-divider {
@@ -170,5 +175,27 @@ body.vellum-full-screen {
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
         }
+    }
+}
+
+// TODO: clean up
+.formdesigner {
+    .fd-tree .fd-head > h2:before {
+        font-family: 'FontAwesome';
+        content: '\f044';
+        display: inline-block;
+        margin-right: 5px;
+    }
+}
+
+.formdesigner {
+    .fd-question-tree-add {
+        padding: 8px 15px;
+        width: 100%;
+    }
+
+    .fd-form-actions {
+        background-color: #004ebc;
+        padding: 5px 8px 8px;
     }
 }

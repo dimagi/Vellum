@@ -326,8 +326,8 @@ define([
         var _this = this,
             menuItems = this.getToolsMenuItems();
 
-        var $toolsMenu = this.$f.find('.fd-tools-menu');
-        $toolsMenu.empty();
+        var $lastItem = this.$f.find('.fd-tools-menu');
+        $lastItem.nextUntil(".divider").remove();
         _(menuItems).each(function (menuItem) {
             var $a = $("<a tabindex='-1' href='#'><i class='" + menuItem.icon + "'></i> " + menuItem.name + "</a>").click(
                 function (e) {
@@ -340,7 +340,9 @@ define([
                     });
                 }
             );
-            $("<li></li>").append($a).appendTo($toolsMenu);
+            var $newItem = $("<li></li>").append($a);
+            $lastItem.after($newItem);
+            $lastItem = $newItem;
         });
 
         this.$f.find('.fd-expand-all').click(function() {
@@ -381,9 +383,9 @@ define([
                 name: "Enter Full Screen",
                 icon: "fa fa-expand",
                 action: function (done) {
-                    var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu a'), function(a) {
-                        return a.text.match(/full screen/i);
-                    }));
+                    var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
+                        return $(li).find("a").text().match(/full screen/i);
+                    })).find("a");
                     var html = $fullScreenMenuItem.html();
                     analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
                     if (_this.data.windowManager.fullscreen) {

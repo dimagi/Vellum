@@ -1,19 +1,4 @@
 <div class="fd-ui-container">
-    <div class="fd-toolbar">
-        <div class="fd-form-actions pull-right btn-toolbar">
-            <div class="btn-group">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
-                    <i class="fa fa-wrench"></i> Tools
-                    <span class="caret"></span>
-                </a>
-                <ul class="dropdown-menu fd-tools-menu">
-                </ul>
-            </div>
-            <div class="btn-group fd-save-button"></div>
-        </div>
-        <div class="fd-container-question-type-group btn-toolbar"></div>
-    </div>
-
     <div class="fd-content fd-content-left">
         <div class="fd-tree">
             <div class="fd-head">
@@ -45,12 +30,13 @@
                                     Collapse All<span class="hotkey"><%-ctrl%><%-alt%>&ndash;</span>
                                 </a>
                             </li>
+                            <li class="divider fd-tools-menu"></li>
                         </ul>
                         <input type="hidden" class="fd-question-tree-display" />
                     </div>
                 </div>
             </div>
-            <div class="dropdown add-question-dropdown">
+            <div class="dropdown fd-add-question-dropdown">
                 <a class="fd-add-question dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">
                     <i class="fa fa-plus"></i> Add Question
                     <i class="fa fa-caret-down"></i>
@@ -67,6 +53,9 @@
     </div>
     <div class="fd-content fd-content-divider fd-content-vertical-divider"></div>
     <div class="fd-content fd-content-right">
+        <div class="fd-form-actions btn-toolbar">
+            <div class="btn-group fd-save-button"></div>
+        </div>
         <div class="fd-column fd-question-properties hide">
             <div class="fd-head"><h2>Question Details</h2></div>
             <div class="fd-props-toolbar"></div>
