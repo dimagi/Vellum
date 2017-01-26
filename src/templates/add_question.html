@@ -1,0 +1,23 @@
+<ul class="dropdown-menu multi-level" role="menu">
+    <% _.each(groups, function(group) { %>
+        <% if (group.questions.length > 1) { %>
+            <li class="dropdown-submenu">
+                <a tabindex="-1" href="#" class="fd-question-type" data-qtype="<%= group.defaultQuestion.slug %>">
+                    <i class="<%= group.defaultQuestion.icon %>"></i>
+                    <%= group.name %>
+                </a>
+                <ul class="dropdown-menu">
+        <% } %>
+                    <% _.each(group.questions, function(question) { %>
+                        <li>
+                            <a tabindex="-1" href="#" class="fd-question-type" data-qtype="<%= question.slug %>">
+                                <i class="<%= question.icon %>"></i> <%= question.name %>
+                            </a>
+                        </li>
+                    <% }) %>
+        <% if (group.questions.length > 1) { %>
+                </ul>
+            </li>
+        <% } %>
+    <% }); %>
+</ul>

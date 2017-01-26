@@ -360,7 +360,7 @@ define([
             });
         });
 
-        describe("jls can", function() {
+        describe("can", function() {
             var changes = [
                     /*["Text", "Trigger"],
                     ["Trigger", "Select"],
@@ -567,10 +567,10 @@ define([
             assert.equal($changer.find("[data-qtype='Text']").length, 1);
             assert.equal($changer.find("[data-qtype='Long']").length, 0);
 
-            // can't add new long with toolbar
-            var $toolbar = $(".fd-container-question-type-group");
-            assert.equal($toolbar.find("[data-qtype='Text']:not(.btn)").length, 1); // dropdown item, not button
-            assert.equal($toolbar.find("[data-qtype='Long']").length, 0);
+            // can't add new long via UI
+            var $dropdown = $(".add-question-dropdown");
+            assert.equal($dropdown.find("[data-qtype='Text']").length, 2); // one for group, one for individual item
+            assert.equal($dropdown.find("[data-qtype='Long']").length, 0);
         });
 
         it("prevents changing selects with children to non-selects", function() {

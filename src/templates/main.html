@@ -19,47 +19,47 @@
             <div class="fd-head">
                 <h2>Questions</h2>
                 <div class="fd-head-menu-container">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                        <i class="fa fa-reorder"></i>
-                        <i class="fa fa-caret-down"></i>
-                    </a>
-                    <ul class="dropdown-menu checklist fd-questions-menu" role="menu">
-                        <li>
-                            <a class="fd-button-copy">
-                                <i class="fa fa-copy"></i>
-                                Copy<span class="hotkey"><%-ctrl%>C</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="fd-expand-all">
-                                <i class="fa fa-angle-double-down"></i>
-                                Expand All<span class="hotkey"><%-ctrl%><%-alt%>=</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="fd-collapse-all">
-                                <i class="fa fa-angle-double-right"></i>
-                                Collapse All<span class="hotkey"><%-ctrl%><%-alt%>&ndash;</span>
-                            </a>
-                        </li>
-                    </ul>
-                    <input type="hidden" class="fd-question-tree-display" />
+                    <div class="dropdown">
+                        <a class="dropdown-toggle"
+                           data-toggle="dropdown"
+                           href="#">
+                            <i class="fa fa-reorder"></i>
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu checklist fd-questions-menu" role="menu">
+                            <li>
+                                <a class="fd-button-copy">
+                                    <i class="fa fa-copy"></i>
+                                    Copy<span class="hotkey"><%-ctrl%>C</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="fd-expand-all">
+                                    <i class="fa fa-angle-double-down"></i>
+                                    Expand All<span class="hotkey"><%-ctrl%><%-alt%>=</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="fd-collapse-all">
+                                    <i class="fa fa-angle-double-right"></i>
+                                    Collapse All<span class="hotkey"><%-ctrl%><%-alt%>&ndash;</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <input type="hidden" class="fd-question-tree-display" />
+                    </div>
                 </div>
+            </div>
+            <div class="dropdown add-question-dropdown">
+                <a class="fd-add-question dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">
+                    <i class="fa fa-plus"></i> Add Question
+                    <i class="fa fa-caret-down"></i>
+                </a>
             </div>
             <div class="fd-undo-container"> </div>
             <div class="fd-scrollable fd-scrollable-tree">
                 <div class="fd-question-tree"></div>
-                <div class="hide fd-default-panel fd-default-qtree">
-                    <h2>New Form</h2>
-                    <p class="lead">Please add questions above.</p>
-                    <p>Clicking the <i class="fcc fcc-fd-text"></i> button is a good place to start.</p>
-                    <p>
-                        Need help?
-                        <a href="https://wiki.commcarehq.org/display/commcarepublic/Application+Building" target="_blank">
-                            View our documentation
-                        </a>.
-                    </p>
-                </div>
+                <div class="hide fd-default-panel fd-default-qtree"></div>
             </div>
         </div>
         <div class="fd-external-sources-divider fd-content-left-divider fd-content-horizontal-divider"></div>

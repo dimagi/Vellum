@@ -97,26 +97,30 @@ body.vellum-full-screen {
                     min-width: @menuContainerWidth;
 
                     // Icon link to open dropdown
-                    > a {
-                        color: @white;
-                        cursor: pointer;
-                        display: block;
-                        padding: 0 @contentPaddingVellum;
-                        text-decoration: none;
-                        background-color: @cc-brand-low;
-
-                        &:hover {
+                    .dropdown {
+                        .dropdown-toggle {
+                            color: @white;
+                            cursor: pointer;
+                            display: block;
+                            padding: 0 @contentPaddingVellum;
                             text-decoration: none;
-                            background-color: @cc-brand-mid;
+                            background-color: @cc-brand-low;
+
+                            &:hover {
+                                text-decoration: none;
+                                background-color: @cc-brand-mid;
+                            }
                         }
-                    }
 
-                    // Menu options
-                    ul a {
-                        min-width: 170px;
+                        // Menu options
+                        .dropdown-menu {
+                            a {
+                                min-width: 170px;
 
-                        > .hotkey {
-                            float: right;
+                                > .hotkey {
+                                    float: right;
+                                }
+                            }
                         }
                     }
                 }
@@ -165,18 +169,6 @@ body.vellum-full-screen {
 
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
-        }
-
-        .checklist {
-            i.fa-check {
-                display: none;
-            }
-
-            .selected i.fa-check {
-                display: inline-block;
-                margin-left: -14px;
-                margin-right: 2px;
-            }
         }
     }
 }

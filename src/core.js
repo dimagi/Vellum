@@ -6,7 +6,7 @@ define([
     'underscore',
     'jquery',
     'tpl!vellum/templates/main',
-    'tpl!vellum/templates/question_type_group',
+    'tpl!vellum/templates/add_question',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/confirm_overwrite',
     'tpl!vellum/templates/control_group_stdInput',
@@ -43,7 +43,7 @@ define([
     _,
     $,
     main_template,
-    question_type_group,
+    add_question,
     edit_source,
     confirm_overwrite,
     control_group_stdInput,
@@ -100,55 +100,6 @@ define([
             title: "Form Warning",
             icon: "fa fa-info-circle",
         }
-    };
-
-
-    var getQuestionTypeGroupClass = function (slug) {
-        return "fd-question-group-" + slug;
-    };
-    
-    var convertButtonSpec = function (buttonSpec) {
-        return {
-            slug: buttonSpec[0],
-            title: buttonSpec[1],
-            icon: buttonSpec.length > 2 ? buttonSpec[2] : null
-        };
-    };
-        
-    var QuestionTypeGroup = function (groupData, vellum) {
-        var defaultQuestion = convertButtonSpec(groupData.group),
-            groupClass = getQuestionTypeGroupClass(defaultQuestion.slug);
-
-        var $questionGroup = $(question_type_group({
-            groupClass: groupClass,
-            showDropdown: groupData.questions.length > 1,
-            textOnly: groupData.textOnly,
-            relatedQuestions: _.map(groupData.related || [], convertButtonSpec),
-            defaultQuestion: defaultQuestion,
-            questions: _.map(groupData.questions, convertButtonSpec)
-        }));
-
-        $questionGroup.find('.fd-question-type').click(function (event) {
-            if (!$(this).hasClass('disabled')) {
-                vellum.addQuestion($(this).data('qtype'));
-            }
-            event.preventDefault();
-        });
-        $questionGroup.find('.btn.fd-question-type > span').tooltip({
-            title: function () {
-                var qLabel = $(this).data('qlabel'),
-                    $qType = $(this).parent();
-
-                if($qType.hasClass('disabled')) {
-                    qLabel = qLabel + " (add " + defaultQuestion.title + " first)";
-                } else {
-                    qLabel = "Add " + qLabel;
-                }
-                return qLabel;
-            },
-            placement: 'bottom'
-        });
-        return $questionGroup;
     };
 
     var fn = {};
@@ -213,6 +164,7 @@ define([
         });
 
         this._init_toolbar();
+        this._init_add_question();
         this._createJSTree();
         this.datasources = datasources.init(
             this.opts().core.dataSourcesEndpoint,
@@ -245,47 +197,63 @@ define([
     fn.getMugTypes = function () {
         return mugs.baseMugTypes;
     };
-        
-    fn._init_toolbar = function () {
-        var _this = this,
-            $questionGroupContainer = this.$f.find(
-                '.fd-container-question-type-group');
 
+    fn._init_add_question = function () {
+        var _this = this;
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
-        this.data.core.QUESTION_TYPE_TO_GROUP = {};
 
-        _.each(this._getQuestionGroups(), function (groupData) {
-            var groupSlug = groupData.group[0];
-
+        _.each(_this.getQuestionGroups(), function (groupData) {
             var getQuestionData = function (questionType) {
                 var mugType = _this.data.core.mugTypes[questionType],
                     questionData = [
-                        questionType, 
-                        mugType.typeName, 
+                        questionType,
+                        mugType.typeName,
                         mugType.icon
                     ];
 
                 _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
-                _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
                 return questionData;
             };
 
             groupData.questions = _.map(groupData.questions, getQuestionData);
-            if (groupData.related && groupData.related.length) {
-                groupData.related = _.map(groupData.related, getQuestionData);
-            }
-
-            groupData.group[2] = groupData.group[2] || 
-                _this.data.core.mugTypes[groupData.group[0]].icon;
-            $questionGroupContainer.append(
-                new QuestionTypeGroup(groupData, _this));
         });
 
+        _this.$f.find(".fd-add-question").after($(add_question({
+            groups: _.map(_this.getQuestionGroups(), function(groupData) {
+                var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
+                return {
+                    name: groupData.group[1] || defaultMug.typeName,
+                    defaultQuestion: {
+                        slug: groupData.group[0],
+                        name: groupData.group[1] || defaultMug.typeName,
+                        icon: groupData.group[2] || defaultMug.icon,
+                    },
+                    questions: _.map(groupData.questions, function(questionType) {
+                        var mugType = _this.data.core.mugTypes[questionType];
+                        return {
+                            slug: questionType,
+                            name: mugType.typeName,
+                            icon: mugType.icon,
+                        };
+                    }),
+                };
+            }),
+        })));
+
+        _this.$f.on('click', '.fd-question-type', function (e) {
+            if (!$(this).hasClass('disabled')) {
+                _this.addQuestion($(this).data('qtype'));
+            }
+            e.preventDefault();
+        });
+    };
+
+    fn._init_toolbar = function () {
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
     };
 
-    fn._getQuestionGroups = function () {
+    fn.getQuestionGroups = function () {
         return [
             {
                 group: ["Text", 'Text'],  // key in mugTypes, <title>
@@ -296,9 +264,6 @@ define([
             },
             {
                 group: ["Select", 'Multiple Choice'],
-                related: [
-                    "Choice"
-                ],
                 questions: this.getSelectQuestions()
             },
             {
@@ -954,7 +919,6 @@ define([
             } else if (selected.length < 2) {
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
-                _this.activateQuestionTypeGroup(mug);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -963,7 +927,6 @@ define([
                 _this.jstree("open_all", data.node);
             }
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
-            _this.activateQuestionTypeGroup(mug);
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
@@ -979,8 +942,6 @@ define([
             form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
-        }).on("deselect_all.jstree deselect_node.jstree", function (e, data) {
-            _this.resetQuestionTypeGroups();
         }).on('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for
             // most nodes, but some (items in select questions) have a
@@ -1169,26 +1130,6 @@ define([
         // its bound mug.
     };
 
-    fn.activateQuestionTypeGroup = function (mug) {
-        var className = mug.__className;
-        this.resetQuestionTypeGroups();
-
-        var groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
-        if (groupSlug && 
-            className !== 'MSelectDynamic' && 
-            className !== 'SelectDynamic' && 
-            !this.jstree("is_closed", mug.ufid)) {
-            this.$f
-                .find('.' + getQuestionTypeGroupClass(groupSlug))
-                .find('.fd-question-type-related').removeClass('disabled');
-        }
-    };
-
-    fn.resetQuestionTypeGroups = function () {
-        this.$f.find('.fd-container-question-type-group .fd-question-type-related')
-            .addClass('disabled');
-    };
-
     // Suggest a node ID, based on the mug's label
     fn.nodeIDFromLabel = function(mug) {
         var suggestedID = this.getMugDisplayName(mug) || "";
@@ -1298,7 +1239,6 @@ define([
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
-                _this.activateQuestionTypeGroup(e.mug);
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
