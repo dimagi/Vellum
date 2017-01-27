@@ -35,7 +35,7 @@
 
         "bootstrap": "3.3.7",
         "jstree": "~3.3.3",
-        "jstree-actions": "alexandernst/jstree-actions#0.1.1",
+        "jstree-actions": "orangejenny/jstree-actions#make-module",
         "langcodes": "dimagi/langcodes",
         "XMLWriter": "dimagi/XMLWriter#master",
         "MediaUploader": "dimagi/MediaUploader#master",
