@@ -67,6 +67,13 @@ Vellum targets modern browsers.  IE8 and earlier are not supported.
 Tests
 -----
 
+Make sure everything is up to date:
+
+```
+$ bower update
+$ npm update
+```
+
 Test in a browser:
 ```
 $ `npm bin`/http-server -c-1
