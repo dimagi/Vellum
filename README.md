@@ -86,7 +86,7 @@ parameter is present in the query string.
 Commands to run tests headlessly:
 ```
 grunt test
-grunt test --grep "test grep"
+grunt test --grep="test grep"
 ```
 
 You can also use `grunt watch` to test as file changes happen.
