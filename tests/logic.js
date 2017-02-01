@@ -7,6 +7,7 @@ define([
     'vellum/logic',
     'vellum/xpath',
     'text!tests/static/logic/test-xml-1.xml',
+    'text!tests/static/logic/save_to_case.xml',
     'text!tests/static/databrowser/mother-ref.xml',
 ], function (
     chai,
@@ -16,6 +17,7 @@ define([
     logic,
     xpath,
     TEST_XML_1,
+    SAVE_TO_CASE_XML,
     MOTHER_REF_XML
 ) {
     var assert = chai.assert,
@@ -211,6 +213,29 @@ define([
                 ]);
                 assert.deepEqual(manager.caseReferences(),
                                  {load: {"/data/select": ["name", "dob"]}});
+            });
+            it("should pull properties from save to case questions", function () {
+                var form = util.loadXML(SAVE_TO_CASE_XML),
+                    manager = form._logicManager;
+                assert.deepEqual(manager.caseReferences(), {
+                    load: {},
+                    save: {
+                        "/data/question3/save_to_case_in_group": {
+                            "case_type": "child",
+                            "properties": [
+                                "p1",
+                                "p3"
+                            ]
+                        },
+                        "/data/save_to_case": {
+                            "case_type": "mother",
+                            "properties": [
+                                "p1",
+                                "p2"
+                            ]
+                        }
+                    }
+                });
             });
         });
 

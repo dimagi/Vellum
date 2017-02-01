@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/080C5E4A-0EA8-4AFD-92F1-75B79B5FC627" uiVersion="1" version="1" name="Untitled Form">
+					<save_to_case vellum:case_type="mother" vellum:role="SaveToCase">
+						<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
+							<create>
+								<case_name />
+								<case_type />
+							</create>
+							<update>
+								<p1 />
+								<p2 />
+							</update>
+							<close />
+						</case>
+					</save_to_case>
+					<question1 />
+					<question2 />
+					<question3>
+						<save_to_case_in_group vellum:case_type="child" vellum:role="SaveToCase">
+							<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
+								<create>
+									<case_name />
+									<case_type />
+								</create>
+								<update>
+									<p1 />
+									<p3 />
+								</update>
+								<close />
+							</case>
+						</save_to_case_in_group>
+					</question3>
+				</data>
+			</instance>
+			<bind nodeset="/data/save_to_case/case/create/case_name" calculate="'name'" />
+			<bind nodeset="/data/save_to_case/case/create/case_type" calculate="'mother'" />
+			<bind nodeset="/data/save_to_case/case/update/p1" calculate="'property 1'" />
+			<bind nodeset="/data/save_to_case/case/update/p2" calculate="'property 2'" />
+			<bind nodeset="/data/save_to_case/case/close" />
+			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/save_to_case/case/@user_id" calculate="'user_id'" />
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" />
+			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:int" />
+			<bind vellum:nodeset="#form/question3" nodeset="/data/question3" />
+			<bind nodeset="/data/question3/save_to_case_in_group/case/create/case_name" calculate="'name'" />
+			<bind nodeset="/data/question3/save_to_case_in_group/case/create/case_type" calculate="'child'" />
+			<bind nodeset="/data/question3/save_to_case_in_group/case/update/p1" calculate="'property 1'" />
+			<bind nodeset="/data/question3/save_to_case_in_group/case/update/p3" calculate="'property 3'" />
+			<bind nodeset="/data/question3/save_to_case_in_group/case/close" />
+			<bind nodeset="/data/question3/save_to_case_in_group/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/question3/save_to_case_in_group/case/@user_id" calculate="'user_id'" />
+			<setvalue event="xforms-ready" ref="/data/save_to_case/case/@case_id" value="'case_id_normal'" />
+			<setvalue event="xforms-ready" ref="/data/question3/save_to_case_in_group/case/@case_id" value="'case_id_in_group'" />
+			<itext>
+				<translation lang="en" default="" />
+				<translation lang="hin" />
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input vellum:ref="#form/question1" ref="/data/question1" />
+		<input vellum:ref="#form/question2" ref="/data/question2" />
+		<group vellum:ref="#form/question3" ref="/data/question3" />
+	</h:body>
+</h:html>
