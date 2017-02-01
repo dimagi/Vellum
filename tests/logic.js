@@ -234,6 +234,8 @@ define([
                             "close": false,
                             "create": true,
                             "properties": [
+                                "case_name",
+                                "case_type",
                                 "p1",
                                 "p2"
                             ]

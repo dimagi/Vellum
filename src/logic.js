@@ -494,9 +494,13 @@ define([
             });
             _.each(saveToCaseQuestions, function (mug) {
                 var mugPath = _this.form.getAbsolutePath(mug);
+                var propertyNames = _.union(
+                    _.keys(mug.p.createProperty || {}),
+                    _.keys(mug.p.updateProperty || {})
+                );
                 save[mugPath] = {
                     case_type: mug.p.case_type || '',
-                    properties: _.filter(_.keys(mug.p.updateProperty || {}), function (property) {
+                    properties: _.filter(propertyNames, function (property) {
                         // filter out empty properties
                         return Boolean(property);
                     }),
