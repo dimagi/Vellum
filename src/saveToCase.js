@@ -192,6 +192,12 @@ define([
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
                 },
+                "case_type": {
+                    lstring: "Case Type",
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.text,
+                },
                 "case_id": {
                     lstring: "Case ID",
                     visibility: 'visible',
@@ -365,7 +371,8 @@ define([
             },
             getExtraDataAttributes: function (mug) {
                 return {
-                    "vellum:role": "SaveToCase"
+                    "vellum:role": "SaveToCase",
+                    "vellum:case_type": mug.p.case_type || "",
                 };
             },
             dataChildFilter: function (children, mug) {
@@ -500,12 +507,16 @@ define([
                 return ret;
             },
             parseDataNode: function (mug, $node) {
-                var case_ = $node.children(),
+                var case_type = $node.attr('vellum:case_type'),
+                    case_ = $node.children(),
                     create = case_.find('create'),
                     close = case_.find('close'),
                     update = case_.find('update'),
                     index = case_.find('index'),
                     attach = case_.find('attachment');
+                if (case_type) {
+                    mug.p.case_type = case_type;
+                }
                 if (create && create.length !== 0) {
                     mug.p.useCreate = true;
                 }
@@ -561,6 +572,7 @@ define([
                         "nodeID",
                         "date_modified",
                         "user_id",
+                        "case_type",
                         "case_id",
                     ],
                 },

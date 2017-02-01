@@ -9,6 +9,7 @@ define([
     'text!static/saveToCase/update_property.xml',
     'text!static/saveToCase/index_property.xml',
     'text!static/saveToCase/attachment_property.xml',
+    'text!static/saveToCase/case_type_property.xml',
     'text!static/saveToCase/create_2_property.xml',
 ], function (
     util,
@@ -21,6 +22,7 @@ define([
     UPDATE_PROPERTY_XML,
     INDEX_PROPERTY_XML,
     ATTACHMENT_PROPERTY_XML,
+    CASE_TYPE_PROPERTY_XML,
     CREATE_2_PROPERTY_XML
 ) {
     var assert = chai.assert,
@@ -111,6 +113,13 @@ define([
             assert.equal(attach.p.user_id, "/data/meta/userID");
             assert.equal(attach.p.case_id, "/data/meta/caseID");
             util.assertXmlEqual(call("createXML"), ATTACHMENT_PROPERTY_XML);
+        });
+
+        it("should load and save the case type property", function () {
+            util.loadXML(CASE_TYPE_PROPERTY_XML);
+            var create = util.getMug("save_to_case");
+            window.console.log(create);
+            util.assertXmlEqual(call("createXML"), CASE_TYPE_PROPERTY_XML);
         });
 
         describe("should not allow", function () {
