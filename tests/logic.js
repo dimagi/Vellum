@@ -173,14 +173,14 @@ define([
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
                 assert.deepEqual(manager.caseReferences(),
-                    {load: {"/data/mug": ["parent/edd"]}});
+                    {load: {"/data/mug": ["parent/edd"]}, save: {}});
             });
 
             it("should not send deleted references", function () {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
                 util.deleteQuestion('/data/mug');
-                assert.deepEqual(manager.caseReferences(), {load: {}});
+                assert.deepEqual(manager.caseReferences(), {load: {}, save: {}});
             });
 
             it("should not write unknown case properties to xml", function () {
@@ -200,7 +200,7 @@ define([
                     ["/select/choice", "Choice", '<output value="#case/dob" />'],
                 ]);
                 assert.deepEqual(manager.caseReferences(),
-                                 {load: {"/data/select": ["dob"]}});
+                                 {load: {"/data/select": ["dob"]}, save: {}});
             });
 
             it("should send all properties referenced by a question", function () {
@@ -212,7 +212,7 @@ define([
                     ["/select/choice", "Choice", '<output value="#case/dob" />'],
                 ]);
                 assert.deepEqual(manager.caseReferences(),
-                                 {load: {"/data/select": ["name", "dob"]}});
+                                 {load: {"/data/select": ["name", "dob"]}, save: {}});
             });
             it("should pull properties from save to case questions", function () {
                 var form = util.loadXML(SAVE_TO_CASE_XML),
