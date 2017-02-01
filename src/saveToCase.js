@@ -562,6 +562,18 @@ define([
                 }
                 return [];
             },
+            getCaseSaveData: function (mug) {
+                var propertyNames = _.union(
+                    _.keys(mug.p.createProperty || {}),
+                    _.keys(mug.p.updateProperty || {})
+                );
+                return {
+                    case_type: mug.p.case_type || '',
+                    properties: _.filter(propertyNames, _.identity), // filter out empty properties
+                    create: mug.p.useCreate || false,
+                    close: mug.p.useClose || false,
+                };
+            },
         },
         sectionData = {
             SaveToCase: [

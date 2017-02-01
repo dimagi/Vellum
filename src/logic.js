@@ -490,20 +490,11 @@ define([
                 }
             });
             var saveToCaseQuestions = _.filter(this.form.getMugList(), function(mug) {
-                return mug.__className === "SaveToCase";
+                return mug.options.getCaseSaveData !== undefined;
             });
             _.each(saveToCaseQuestions, function (mug) {
                 var mugPath = _this.form.getAbsolutePath(mug);
-                var propertyNames = _.union(
-                    _.keys(mug.p.createProperty || {}),
-                    _.keys(mug.p.updateProperty || {})
-                );
-                save[mugPath] = {
-                    case_type: mug.p.case_type || '',
-                    properties: _.filter(propertyNames, _.identity), // filter out empty properties
-                    create: mug.p.useCreate || false,
-                    close: mug.p.useClose || false,
-                };
+                save[mugPath] = mug.options.getCaseSaveData(mug);
             });
             return {load: load, save: save};
         },
