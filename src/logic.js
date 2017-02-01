@@ -500,10 +500,7 @@ define([
                 );
                 save[mugPath] = {
                     case_type: mug.p.case_type || '',
-                    properties: _.filter(propertyNames, function (property) {
-                        // filter out empty properties
-                        return Boolean(property);
-                    }),
+                    properties: _.filter(propertyNames, _.identity), // filter out empty properties
                     create: mug.p.useCreate || false,
                     close: mug.p.useClose || false,
                 };
