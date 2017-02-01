@@ -7,7 +7,6 @@ define([
     'vellum/logic',
     'vellum/xpath',
     'text!tests/static/logic/test-xml-1.xml',
-    'text!tests/static/logic/save_to_case.xml',
     'text!tests/static/databrowser/mother-ref.xml',
 ], function (
     chai,
@@ -17,7 +16,6 @@ define([
     logic,
     xpath,
     TEST_XML_1,
-    SAVE_TO_CASE_XML,
     MOTHER_REF_XML
 ) {
     var assert = chai.assert,
@@ -213,41 +211,6 @@ define([
                 ]);
                 assert.deepEqual(manager.caseReferences(),
                                  {load: {"/data/select": ["name", "dob"]}, save: {}});
-            });
-            it("should pull properties from save to case questions", function () {
-                var form = util.loadXML(SAVE_TO_CASE_XML),
-                    manager = form._logicManager;
-                assert.deepEqual(manager.caseReferences(), {
-                    load: {},
-                    save: {
-                        "/data/group/save_to_case_in_group": {
-                            "case_type": "child",
-                            "close": false,
-                            "create": false,
-                            "properties": [
-                                "p1",
-                                "p3"
-                            ]
-                        },
-                        "/data/save_to_case_create": {
-                            "case_type": "mother",
-                            "close": false,
-                            "create": true,
-                            "properties": [
-                                "case_name",
-                                "case_type",
-                                "p1",
-                                "p2"
-                            ]
-                        },
-                        "/data/save_to_case_close": {
-                            "case_type": "close_case",
-                            "close": true,
-                            "create": false,
-                            "properties": []
-                        }
-                    }
-                });
             });
         });
 

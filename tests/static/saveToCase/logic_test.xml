@@ -53,7 +53,6 @@
 			<setvalue event="xforms-ready" ref="/data/save_to_case_create/case/@case_id" value="'case_id_normal'" />
 			<itext>
 				<translation lang="en" default="" />
-				<translation lang="hin" />
 			</itext>
 		</model>
 	</h:head>
