@@ -500,6 +500,8 @@ define([
                         // filter out empty properties
                         return Boolean(property);
                     }),
+                    create: mug.p.useCreate || false,
+                    close: mug.p.useClose || false,
                 };
             });
             return {load: load, save: save};

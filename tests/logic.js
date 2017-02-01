@@ -220,19 +220,29 @@ define([
                 assert.deepEqual(manager.caseReferences(), {
                     load: {},
                     save: {
-                        "/data/question3/save_to_case_in_group": {
+                        "/data/group/save_to_case_in_group": {
                             "case_type": "child",
+                            "close": false,
+                            "create": false,
                             "properties": [
                                 "p1",
                                 "p3"
                             ]
                         },
-                        "/data/save_to_case": {
+                        "/data/save_to_case_create": {
                             "case_type": "mother",
+                            "close": false,
+                            "create": true,
                             "properties": [
                                 "p1",
                                 "p2"
                             ]
+                        },
+                        "/data/save_to_case_close": {
+                            "case_type": "close_case",
+                            "close": true,
+                            "create": false,
+                            "properties": []
                         }
                     }
                 });
