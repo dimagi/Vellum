@@ -489,7 +489,7 @@ define([
                     load[path] = [prop];
                 }
             });
-            saveToCaseQuestions = _.filter(this.form.getMugList(), function(mug) {
+            var saveToCaseQuestions = _.filter(this.form.getMugList(), function(mug) {
                 return mug.__className === "SaveToCase";
             });
             _.each(saveToCaseQuestions, function (mug) {
