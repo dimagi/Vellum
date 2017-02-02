@@ -463,7 +463,6 @@ define([
         // This is to tell HQ's case summary what is referenced
         // TODO maybe do not slice prop because it removes unrecoverable context
         caseReferences: function () {
-
             var _this = this,
                 load = {},
                 save = {};
