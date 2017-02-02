@@ -21,6 +21,7 @@
  *              // Attribute names start with @.
  *              element: {
  *                  name: string (optional human readable name),
+ *                  description: string (optional description of the element),
  *                  merge: true (optional flag. When set, the element key
  *                         will be appended to the path used to construct
  *                         children and its children will be merged with
@@ -295,6 +296,7 @@ define([
                     tree = getTree(item, id, path, info);
                 return {
                     name: tree.name,
+                    description: tree.description,
                     hashtag: info.hashtag ? info.hashtag + '/' + id : null,
                     parentPath: parentPath,
                     xpath: path,
@@ -306,7 +308,11 @@ define([
             };
         }
         function getTree(item, id, path, info) {
-            var tree = {name: item.name || id, recursive: false},
+            var tree = {
+                    name: item.name || id,
+                    description: item.description || '',
+                    recursive: false
+            },
                 source = item,
                 children = null;
             if (!item.structure && item.reference) {
