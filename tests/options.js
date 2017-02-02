@@ -79,7 +79,7 @@ define(["underscore"], function (_) {
                 name: "case (child)",
                 key: "@case_type",
                 structure: {
-                    dob: {},
+                    dob: {description: "Date of Birth"},
                     f_0762: {},
                     f_1065: {},
                     f_1089: {},

@@ -52,6 +52,7 @@
  *              },
  *              @attribute: {
  *                  name: string (optional human readable name),
+ *                  description: string (optional description of the element),
  *              }
  *          },
  *          subsets: [
@@ -170,6 +171,11 @@ define([
 
         that.getHashtagTransforms = function (defaultValue) {
             return getValue(that, "hashtagTransforms", defaultValue);
+        };
+
+        that.getNode = function (hashtag, defaultValue) {
+            var nodeMap = getValue(that, "nodeMap", {});
+            return nodeMap.hasOwnProperty(hashtag) ? nodeMap[hashtag] : defaultValue;
         };
 
         /**
@@ -422,6 +428,9 @@ define([
     builders.hashtags = function (that) {
         function walk(nodes, hashtags) {
             _.each(nodes, function (node) {
+                if (!node.index) {
+                    hashtags.nodeMap[node.hashtag || node.xpath] = node;
+                }
                 if (node.hashtag && !node.index) {
                     hashtags.map[node.hashtag] = node.xpath;
                     hashtags.transforms[node.sourceInfo.hashtag + '/'] = function (prop) {
@@ -435,7 +444,19 @@ define([
             return hashtags;
         }
         var nodes = getValue(that, "dataNodes");
-        return nodes ? walk(nodes, {map: {}, transforms: {}}) : undefined;
+        return nodes ? walk(nodes, {
+            map: {},
+            nodeMap: {},
+            transforms: {},
+        }) : undefined;
+    };
+
+    /**
+     * Build an object containing hashtags mapped to data nodes.
+     */
+    builders.nodeMap = function (that) {
+        var hashtags = getValue(that, "hashtags");
+        return hashtags && hashtags.nodeMap;
     };
 
     /**
