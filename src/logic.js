@@ -464,7 +464,8 @@ define([
         // TODO maybe do not slice prop because it removes unrecoverable context
         caseReferences: function () {
             var _this = this,
-                load = {};
+                load = {},
+                save = {};
             _.each(_.flatten(_.values(this.reverse[EXTERNAL_REF] || {})), function(ref) {
                 var prop = ref.path.slice(ref.path.indexOf('/') + 1),
                     path = _this.form.normalizeXPath(ref.sourcePath);
@@ -487,8 +488,14 @@ define([
                     load[path] = [prop];
                 }
             });
-
-            return {load: load};
+            var saveToCaseQuestions = _.filter(this.form.getMugList(), function(mug) {
+                return mug.options.getCaseSaveData !== undefined;
+            });
+            _.each(saveToCaseQuestions, function (mug) {
+                var mugPath = _this.form.getAbsolutePath(mug);
+                save[mugPath] = mug.options.getCaseSaveData(mug);
+            });
+            return {load: load, save: save};
         },
         // returns object of external references that are known to be valid
         knownExternalReferences: function () {
