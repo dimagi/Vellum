@@ -463,7 +463,8 @@ define([
         // This is to tell HQ's case summary what is referenced
         caseReferences: function () {
             var _this = this,
-                load = {};
+                load = {},
+                save = {};
             _.each(_.flatten(_.values(this.reverse[EXTERNAL_REF] || {})), function(ref) {
                 var path = _this.form.normalizeXPath(ref.sourcePath);
                 if (path === null) {
@@ -485,8 +486,14 @@ define([
                     load[path] = [ref.path];
                 }
             });
-
-            return {load: load};
+            var saveToCaseQuestions = _.filter(this.form.getMugList(), function(mug) {
+                return mug.options.getCaseSaveData !== undefined;
+            });
+            _.each(saveToCaseQuestions, function (mug) {
+                var mugPath = _this.form.getAbsolutePath(mug);
+                save[mugPath] = mug.options.getCaseSaveData(mug);
+            });
+            return {load: load, save: save};
         },
         // returns object of external references that are known to be valid
         knownExternalReferences: function () {

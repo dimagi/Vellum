@@ -6,7 +6,7 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E1B03643-109D-4DC6-9737-815E4401DE79" uiVersion="1" version="1" name="Untitled Form">
 					<name />
-					<create1 vellum:role="SaveToCase">
+					<create1 vellum:role="SaveToCase" vellum:case_type="" >
 						<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
 							<create>
 								<case_type />
@@ -15,7 +15,7 @@
 							</create>
 						</case>
 					</create1>
-					<create2 vellum:role="SaveToCase">
+					<create2 vellum:role="SaveToCase" vellum:case_type="" >
 						<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
 							<create>
 								<case_type />

@@ -4,34 +4,32 @@
 		<h:title>Untitled Form</h:title>
 		<model>
 			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/2F7E3113-5827-455B-B5E0-2E8856FE23E8" uiVersion="1" version="1" name="Untitled Form">
-					<question1 />
-					<save_to_case vellum:role="SaveToCase" vellum:case_type="" >
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E1B03643-109D-4DC6-9737-815E4401DE79" uiVersion="1" version="1" name="Untitled Form">
+					<name />
+					<save_to_case vellum:role="SaveToCase" vellum:case_type="household" >
 						<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
-							<attachment>
-								<attach from="local" name="name" />
-							</attachment>
+							<close />
 						</case>
 					</save_to_case>
 				</data>
 			</instance>
-			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="binary" />
-			<bind nodeset="/data/save_to_case/case/attachment/attach/@src" vellum:calculate="#form/question1" calculate="/data/question1" />
+			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
+			<bind nodeset="/data/save_to_case/case/close" relevant="1=1" />
 			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/save_to_case/case/@user_id" calculate="/data/meta/userID" />
 			<bind nodeset="/data/save_to_case/case/@case_id" calculate="/data/meta/caseID" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="question1-label">
-						<value>question1</value>
+					<text id="name-label">
+						<value>name</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<upload mediatype="image/*" vellum:ref="#form/question1" ref="/data/question1">
-			<label ref="jr:itext('question1-label')" />
-		</upload>
+		<input vellum:ref="#form/name" ref="/data/name">
+			<label ref="jr:itext('name-label')" />
+		</input>
 	</h:body>
 </h:html>
