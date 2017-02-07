@@ -704,28 +704,33 @@ define([
             var isFormRef = FORM_REF_REGEX.test(xpath),
                 isText = function () { return this.nodeType === 3; },
                 displayId = $this.contents().filter(isText)[0].nodeValue,
-                desc = util.escape(widget.mug.form.normalizeHashtag(xpath)),
+                hashtag = widget.mug.form.normalizeHashtag(xpath),
+                title = util.escape(hashtag),
                 labelMug = widget.mug.form.getMugByPath(xpath),
-                labelText = labelMug && labelMug.p.labelItext ?
+                description = labelMug && labelMug.p.labelItext ?
                             labelMug.p.labelItext.get() : "",
                 isDate = labelMug && labelMug.__className.indexOf("Date") === 0,
                 $dragContainer = $(dragContainer.$),
                 $imgs = $dragContainer.children("img"),
                 dateFormatID = util.get_guid(),
                 getTitle = function () {
-                    var description = desc,
+                    var title_ = title,
                         format = $this.attr("data-date-format");
                     if (isDate || format) {
-                        description += date_format_popover({
+                        title_ += date_format_popover({
                             guid: dateFormatID,
                             text: util.escape(getHumanReadableDateFormat(format)),
                         });
                     }
                     return '<h3>' + util.escape(displayId) + '</h3>' +
-                        '<div class="text-muted">' + description + '</div>';
+                        '<div class="text-muted">' + title_ + '</div>';
                 };
-            labelText = $('<div>').append(labelText);
-            labelText.find('output').replaceWith(function () {
+            if (!labelMug) {
+                var datasources = widget.mug.form.vellum.datasources;
+                description = datasources.getNode(hashtag, {}).description || "";
+            }
+            description = $('<div>').append(description);
+            description.find('output').replaceWith(function () {
                 var xpath = extractXPathInfo($(this)).value;
                 return widget.mug.form.normalizeHashtag(xpath);
             });
@@ -740,13 +745,14 @@ define([
                 title: getTitle,
                 html: true,
                 content: easy_reference_popover({
-                    text: labelText.text(),
-                    ufid: isFormRef && labelMug ? labelMug.ufid : "",
+                    text: description.text(),
+                    ufid: labelMug ? labelMug.ufid : "",
                 }),
                 template: '<div contenteditable="false" class="popover rich-text-popover">' +
                     '<div class="popover-inner">' +
                     '<div class="popover-title"></div>' +
-                    (isFormRef ? '<div class="popover-content"><p></p></div>' : '') +
+                    (labelMug || description.text() ?
+                        '<div class="popover-content"><p></p></div>' : '') +
                     '</div></div>',
                 delay: {
                     show: 350,  // be less annoying
