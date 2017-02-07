@@ -75,7 +75,7 @@ body.vellum-full-screen {
 
                 // Bar with save button
                 .fd-form-actions {
-                    background-color: #004ebc;
+                    background: @navbarBackground;
                     padding: 5px 8px 8px;
                 }
             }
@@ -165,7 +165,7 @@ body.vellum-full-screen {
         // Draggable separators between .fd-content blocks
         .fd-content-vertical-divider {
             width: 5px;
-            background: @cc-brand-mid;
+            background: @navbarBackground;
         }
 
         .fd-content-horizontal-divider {
@@ -203,6 +203,16 @@ body.vellum-full-screen {
 
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
+        }
+    }
+
+    &.app-manager-v2 {
+        .fd-form-actions {
+            background-color: @cc-brand-mid !important; // lazy because this is temporary code
+        }
+
+        .fd-content-vertical-divider {
+            background: @cc-brand-mid;
         }
     }
 }
