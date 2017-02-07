@@ -171,7 +171,7 @@ define([
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
                 assert.deepEqual(manager.caseReferences(),
-                    {load: {"/data/mug": ["parent/edd"]}, save: {}});
+                    {load: {"/data/mug": ["#case/parent/edd"]}, save: {}});
             });
 
             it("should not send deleted references", function () {
@@ -198,7 +198,7 @@ define([
                     ["/select/choice", "Choice", '<output value="#case/dob" />'],
                 ]);
                 assert.deepEqual(manager.caseReferences(),
-                                 {load: {"/data/select": ["dob"]}, save: {}});
+                                 {load: {"/data/select": ["#case/dob"]}, save: {}});
             });
 
             it("should send all properties referenced by a question", function () {
@@ -208,9 +208,14 @@ define([
                     ["id", "type", "labelItext:en-default"],
                     ["/select", "Select", '<output value="#case/name" />'],
                     ["/select/choice", "Choice", '<output value="#case/dob" />'],
+                    ["/select/other", "Choice", '<output value="#user/role" />'],
                 ]);
                 assert.deepEqual(manager.caseReferences(),
-                                 {load: {"/data/select": ["name", "dob"]}, save: {}});
+                                 {load: {"/data/select": [
+                                    "#case/name",
+                                    "#case/dob",
+                                    "#user/role",
+                                 ]}, save: {}});
             });
         });
 

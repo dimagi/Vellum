@@ -461,14 +461,12 @@ define([
             this.reverse = {};
         },
         // This is to tell HQ's case summary what is referenced
-        // TODO maybe do not slice prop because it removes unrecoverable context
         caseReferences: function () {
             var _this = this,
                 load = {},
                 save = {};
             _.each(_.flatten(_.values(this.reverse[EXTERNAL_REF] || {})), function(ref) {
-                var prop = ref.path.slice(ref.path.indexOf('/') + 1),
-                    path = _this.form.normalizeXPath(ref.sourcePath);
+                var path = _this.form.normalizeXPath(ref.sourcePath);
                 if (path === null) {
                     // Choices have null path, use parent path.
                     // This is a little fragile. Currently all mug types
@@ -481,11 +479,11 @@ define([
                     }
                 }
                 if (load.hasOwnProperty(path)) {
-                    if (!_.contains(load[path], prop)) {
-                        load[path].push(prop);
+                    if (!_.contains(load[path], ref.path)) {
+                        load[path].push(ref.path);
                     }
                 } else {
-                    load[path] = [prop];
+                    load[path] = [ref.path];
                 }
             });
             var saveToCaseQuestions = _.filter(this.form.getMugList(), function(mug) {
