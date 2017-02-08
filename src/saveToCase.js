@@ -173,6 +173,7 @@ define([
             icon: 'fa fa-save',
             init: function (mug, form) {
                 mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
+                mug.p.user_id = mug.p.user_id || "instance('commcaresession')/session/context/userid";
             },
             spec: {
                 xmlnsAttr: { presence: "optional" },
