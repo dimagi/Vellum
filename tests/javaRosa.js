@@ -274,9 +274,11 @@ define([
         it("should preserve itext values on load + save", function () {
             util.loadXML("");
             util.addQuestion("Text", "question1");
-            $(".btn:contains(image)").click();
-            $(".btn:contains(audio)").click();
-            $(".btn:contains(video)").click();
+            _.each(['image', 'audio', 'video', 'video-inline', 'expanded-audio'], function (i) {
+                $(".btn.itext-block-label-add-form-" + i).click();
+                $(".btn.itext-block-constraintMsg-add-form-" + i).click();
+                $(".btn.itext-block-help-add-form-" + i).click();
+            });
             $(".btn:contains(long)").click();
             $(".btn:contains(short)").click();
             $(".btn:contains(custom)").click();
@@ -619,9 +621,11 @@ define([
                 Itext = util.call("getData").javaRosa.Itext;
             assert.equal(jr.generateItextXLS(form, Itext),
                          'label\tdefault_en\tdefault_hin\t' +
-                         'audio_en\taudio_hin\timage_en\timage_hin\tvideo_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\n' +
+                         'audio_en\taudio_hin\timage_en\timage_hin\t' +
+                         'video_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\t' +
+                         'expanded-audio_en\texpanded-audio_hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
-                         'Hindu trans\t\t\t\t\t\t\t\t');
+                         'Hindu trans\t\t\t\t\t\t\t\t\t\t');
         });
 
         it("should escape all languages when generating bulk translations", function () {
@@ -629,8 +633,9 @@ define([
                 Itext = util.call("getData").javaRosa.Itext;
             assert.equal(jr.generateItextXLS(form, Itext),
                          'label\tdefault_en\tdefault_hin\taudio_en\taudio_hin\t' +
-                         'image_en\timage_hin\tvideo_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\n' +
-                         'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t');
+                         'image_en\timage_hin\tvideo_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\t' +
+                         'expanded-audio_en\texpanded-audio_hin\n' +
+                         'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t');
         });
 
         it("bulk translation tool should not create empty itext forms", function () {

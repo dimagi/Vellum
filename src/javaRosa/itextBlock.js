@@ -16,9 +16,9 @@ define([
     util,
     itextWidget
 ) {
-    var RESERVED_ITEXT_CONTENT_TYPES = [
-            'default', 'short', 'long', 'audio', 'video', 'image', 'video-inline',
-        ],
+    var RESERVED_ITEXT_CONTENT_TYPES = _.union(
+            util.SUPPORTED_MEDIA_TYPES, ['default', 'short', 'long']
+        ),
         NO_MARKDOWN_MUGS = ['Choice', 'Group', 'FieldList', 'Repeat'];
 
     var baseItextBlock = function (mug, options) {

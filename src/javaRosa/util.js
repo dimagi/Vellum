@@ -13,7 +13,7 @@ define([
     xml,
     util
 ) {
-    var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
+    var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline', 'expanded-audio'],
         ITEXT_PROPERTIES = [
             'labelItext',
             'hintItext',
@@ -132,7 +132,7 @@ define([
     };
 
     var parseXLSItext = function (form, str, Itext) {
-        var forms = ["default", "audio", "image" , "video", 'video-inline'],
+        var forms = ["default", "audio", "image" , "video", 'video-inline', 'expanded-audio'],
             languages = Itext.getLanguages(),
             nextRow = tsv.makeRowParser(str),
             header = nextRow(),
@@ -194,7 +194,7 @@ define([
         }
 
         // TODO: should this be configurable?
-        var forms = ["default", "audio", "image" , "video", 'video-inline'],
+        var forms = ["default", "audio", "image" , "video", 'video-inline', 'expanded-audio'],
             languages = Itext.getLanguages(),
             rows = [];
 
