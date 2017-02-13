@@ -98,7 +98,7 @@ define([
             $tree.children(":not(.fd-scrollable)").each(function(i, child) {
                 treeHeight -= $(child).outerHeight(false);
             });
-    
+
             if (accessoryPane.children().length) {
                 // Decrement tree height by height of accessory pane
                 var accessoryHeight = accessoryPane.outerHeight(false),
@@ -121,7 +121,9 @@ define([
                 .find('.fd-scrollable.full').css('height', columnHeight + 'px');
 
             $fdc.find('.fd-props-scrollable')
-                .css('height', columnHeight - $fdc.find('.fd-props-toolbar').outerHeight(true) + 'px');
+                .css('height', columnHeight
+                                - $fdc.find('.fd-props-toolbar').outerHeight(true)
+                                - $fdc.find('.fd-form-actions').outerHeight(false) + 'px');
         },
         getLeftWidth: function () {
             return 2 + this.$f.find('.fd-content-left').outerWidth(false) + 
