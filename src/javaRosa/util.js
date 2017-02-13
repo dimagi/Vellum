@@ -14,7 +14,7 @@ define([
     util
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline', 'expanded-audio'],
-        ITEXT_TYPES = _.union(['default'], SUPPORTED_MEDIA_TYPES),
+        ITEXT_TYPES = ['default', 'audio', 'image', 'video', 'video-inline', 'expanded-audio'],
         ITEXT_PROPERTIES = [
             'labelItext',
             'hintItext',
