@@ -1500,6 +1500,7 @@ define([
             }
             return '';
         },
+        canAddChoices: true,
         spec: {
             appearance: {
                 deleteOnCopy: false,

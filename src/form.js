@@ -811,7 +811,7 @@ define([
                 tree = _this.vellum.data.core.$tree,
                 action_id = "add_choice";
 
-            if (mug.__className === 'Select' || mug.__className === 'MSelect') {
+            if (mug.options.canAddChoices) {
                 tree.jstree(true).add_action(mug.ufid, {
                     "id": action_id,
                     "class": "fa fa-plus add_choice",

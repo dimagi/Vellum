@@ -257,6 +257,7 @@ define([
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
                     afterInsert: afterDynamicSelectInsert,
+                    canAddChoices: false,
                     spec: {
                         itemsetData: itemsetDataSpec,
                         valueRef: itemsetDataSpec,
@@ -280,6 +281,7 @@ define([
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
                     afterInsert: afterDynamicSelectInsert,
+                    canAddChoices: false,
                     spec: {
                         itemsetData: itemsetDataSpec,
                         valueRef: itemsetDataSpec,
