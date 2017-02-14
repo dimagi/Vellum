@@ -641,6 +641,28 @@ define([
                     });
                 });
 
+                it("should show case property description on popover", function (done) {
+                    util.loadXML();
+                    var mug = util.addQuestion("Text", "text");
+                    mug.p.calculateAttr = "#case/dob";
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.equal($popover.find('p:first').text(), "Date of Birth");
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        bubble.mouseenter();
+                    });
+                });
+
                 it("should destroy popover on destroy widget", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");

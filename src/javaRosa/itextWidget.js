@@ -22,7 +22,8 @@ define([
             image: 'png',
             audio: 'mp3',
             video: '3gp',
-            'video-inline': '3gp'
+            'video-inline': '3gp',
+            'expanded-audio': 'mp3',
         };
 
     var iTextIDWidget = function (mug, options) {

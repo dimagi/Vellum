@@ -21,6 +21,7 @@
  *              // Attribute names start with @.
  *              element: {
  *                  name: string (optional human readable name),
+ *                  description: string (optional description of the element),
  *                  merge: true (optional flag. When set, the element key
  *                         will be appended to the path used to construct
  *                         children and its children will be merged with
@@ -51,6 +52,7 @@
  *              },
  *              @attribute: {
  *                  name: string (optional human readable name),
+ *                  description: string (optional description of the element),
  *              }
  *          },
  *          subsets: [
@@ -169,6 +171,11 @@ define([
 
         that.getHashtagTransforms = function (defaultValue) {
             return getValue(that, "hashtagTransforms", defaultValue);
+        };
+
+        that.getNode = function (hashtag, defaultValue) {
+            var nodeMap = getValue(that, "nodeMap", {});
+            return nodeMap.hasOwnProperty(hashtag) ? nodeMap[hashtag] : defaultValue;
         };
 
         /**
@@ -295,6 +302,7 @@ define([
                     tree = getTree(item, id, path, info);
                 return {
                     name: tree.name,
+                    description: tree.description,
                     hashtag: info.hashtag ? info.hashtag + '/' + id : null,
                     parentPath: parentPath,
                     xpath: path,
@@ -306,7 +314,11 @@ define([
             };
         }
         function getTree(item, id, path, info) {
-            var tree = {name: item.name || id, recursive: false},
+            var tree = {
+                    name: item.name || id,
+                    description: item.description || '',
+                    recursive: false
+            },
                 source = item,
                 children = null;
             if (!item.structure && item.reference) {
@@ -416,6 +428,9 @@ define([
     builders.hashtags = function (that) {
         function walk(nodes, hashtags) {
             _.each(nodes, function (node) {
+                if (!node.index) {
+                    hashtags.nodeMap[node.hashtag || node.xpath] = node;
+                }
                 if (node.hashtag && !node.index) {
                     hashtags.map[node.hashtag] = node.xpath;
                     hashtags.transforms[node.sourceInfo.hashtag + '/'] = function (prop) {
@@ -429,7 +444,19 @@ define([
             return hashtags;
         }
         var nodes = getValue(that, "dataNodes");
-        return nodes ? walk(nodes, {map: {}, transforms: {}}) : undefined;
+        return nodes ? walk(nodes, {
+            map: {},
+            nodeMap: {},
+            transforms: {},
+        }) : undefined;
+    };
+
+    /**
+     * Build an object containing hashtags mapped to data nodes.
+     */
+    builders.nodeMap = function (that) {
+        var hashtags = getValue(that, "hashtags");
+        return hashtags && hashtags.nodeMap;
     };
 
     /**

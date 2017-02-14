@@ -263,10 +263,11 @@ define([
                         });
 
                         function addAllForms() {
-                            $(".btn:contains(image)").click();
-                            $(".btn:contains(audio)").click();
-                            $(".btn:contains(video)").click();
-                            $(".btn:contains(video-inline)").click();
+                            _.each(['image', 'audio', 'video', 'video-inline', 'expanded-audio'], function (i) {
+                                $(".btn.itext-block-label-add-form-" + i).click();
+                                $(".btn.itext-block-constraintMsg-add-form-" + i).click();
+                                $(".btn.itext-block-help-add-form-" + i).click();
+                            });
                             $(".btn:contains(long)").click();
                             $(".btn:contains(short)").click();
                             $(".btn:contains(custom)").click();

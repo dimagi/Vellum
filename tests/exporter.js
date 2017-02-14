@@ -66,9 +66,10 @@ define([
             assert.equal(call("getData").core.form.getExportTSV(),
                 'Question\tType\tText (en)\tText (hin)\tAudio (en)\t' +
                 'Audio (hin)\tImage (en)\tImage (hin)\tVideo (en)\t' +
-                'Video (hin)\tVideo Inline (en)\tVideo Inline (hin)\tDisplay Condition\t' +
+                'Video (hin)\tVideo Inline (en)\tVideo Inline (hin)\t' +
+                'Expanded Audio (en)\tExpanded Audio (hin)\tDisplay Condition\t' +
                 'Validation Condition\tValidation Message\tCalculate Condition\tRequired\tHint Text\tHelp Text\tComment\n' +
-                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t\t\t\tno\t\t\t'
+                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tno\t\t\t'
             );
         });
     });
