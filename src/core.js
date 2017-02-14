@@ -1132,6 +1132,7 @@ define([
         suggestedID = suggestedID.replace(/\s+/g, '_');         // collapse whitespace & replace with underscores
         suggestedID = suggestedID.replace(/[^\w\-]/g, '');      // strip illegal characters
         suggestedID = suggestedID.replace(/^[^a-z]*/i, '');     // must start with a letter
+        suggestedID = suggestedID.replace(/_*$/g, '');          // drop trailing underscores
         suggestedID = suggestedID.substring(0, 75);             // no exceedingly long IDs
         return mug.form.generate_question_id(suggestedID, mug);
     };
