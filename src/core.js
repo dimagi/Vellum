@@ -1140,9 +1140,6 @@ define([
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
         var currentMug = this.getCurrentlySelectedMug();
-        if (currentMug && !currentMug.p.nodeID) {
-            currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
-        }
 
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
@@ -1151,6 +1148,9 @@ define([
                 "Please save changes before continuing.");
             return false;
         } else {
+            if (currentMug && !currentMug.p.nodeID) {
+                currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
+            }
             (callback || function () {})();
             return true;
         }
@@ -1825,9 +1825,9 @@ define([
                     .rest()
                     .filter(function(s) {
                         // Limit to sections relevant to this mug
-                        return _.find(_.map(s.properties, function(property) {
+                        return _.some(_.map(s.properties, function(property) {
                             return getWidgetClassAndOptions(property, mug);
-                        }), _.identity);
+                        }));
                     })
                     .map(function(s) {
                         // Just pass the template a show/hide flag
