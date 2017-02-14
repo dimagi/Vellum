@@ -6,7 +6,7 @@
  *  2) Grab the HQ stylesheets linked from the page. At the time of writing, there were
  *     two relevant files (one for app manager styling, one for the rest of HQ).
  *  3) Run the stylesheets through a minifier like http://unminify.com/ and overwrite this file.
- *  4) Replace any URLs from the prod styles, which will be links to the CDN, with relative links
+ *  4) Replace any new URLs from the prod styles, which will be links to the CDN, with relative links
  *     (grep for "cloudfront" to get all CDN references, or in the event we switch CDNs, grep for
  *     "Halflings" to see a class that references a URL).
  */
