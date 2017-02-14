@@ -178,11 +178,7 @@ define([
             it("should rename itext item ID after move", function () {
                 util.loadXML("");
                 util.addQuestion("Select", "ns");
-                util.addQuestion("Choice", "choice1");
-                util.addQuestion("Choice", "choice2");
                 util.addQuestion("Select", "ew");
-                util.addQuestion("Choice", "choice1");
-                util.addQuestion("Choice", "choice2");
                 var north = util.getMug("ns/choice1"),
                     south = util.getMug("ew/choice1");
                 north.p.nodeID = "north";
@@ -754,7 +750,6 @@ define([
         it("should not allow apostrophes in item labels", function() {
             util.loadXML("");
             util.addQuestion("Select", "select");
-            util.addQuestion("Choice", "choice1");
             util.clickQuestion('select/choice1');
             $("[name='property-nodeID']").val("blah ' blah").change();
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
@@ -763,7 +758,6 @@ define([
         it("should not allow > in item labels", function() {
             util.loadXML("");
             util.addQuestion("Select", "select");
-            util.addQuestion("Choice", "choice1");
             util.clickQuestion('select/choice1');
             $("[name='property-nodeID']").val("blah > blah").change();
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
@@ -1006,8 +1000,8 @@ define([
 
         it("should show a validation error for choices without labels", function() {
             util.loadXML("");
-            util.addQuestion("Select", "question1");
-            var item = util.addQuestion("Choice", "choice1");
+            var select = util.addQuestion("Select", "question1"),
+                item = select.form.getChildren(select)[0];
             util.clickQuestion("question1/choice1");
 
             var messages = item.messages.get('labelItext');
@@ -1022,8 +1016,8 @@ define([
 
         it("should not show a validation error for manually added choices", function() {
             util.loadXML("");
-            util.addQuestion("Select", "question1");
-            var item = util.addQuestion("Choice", "choice1");
+            var select = util.addQuestion("Select", "question1"),
+                item = select.form.getChildren(select)[0];
 
             util.clickQuestion("question1/choice1");
 
