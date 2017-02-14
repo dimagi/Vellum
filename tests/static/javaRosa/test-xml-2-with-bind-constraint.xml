@@ -25,6 +25,7 @@
 						<value form="audio">jr://file/commcare/audio/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/data/question1.3gp</value>
+						<value form="expanded-audio">jr://file/commcare/expanded-audio/data/question1.mp3</value>
 						<value form="long">question1 en long</value>
 						<value form="short">question1 en short</value>
 						<value form="custom">question1 en custom</value>
@@ -38,6 +39,7 @@
 						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/help/data/question1.3gp</value>
+						<value form="expanded-audio">jr://file/commcare/expanded-audio/help/data/question1.mp3</value>
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 en validation</value>
@@ -45,6 +47,7 @@
 						<value form="audio">jr://file/commcare/audio/constraintMsg/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/constraintMsg/data/question1.3gp</value>
+						<value form="expanded-audio">jr://file/commcare/expanded-audio/constraintMsg/data/question1.mp3</value>
 					</text>
 				</translation>
 				<translation lang="hin">
@@ -54,6 +57,7 @@
 						<value form="audio">jr://file/commcare/audio/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/data/question1.3gp</value>
+						<value form="expanded-audio">jr://file/commcare/expanded-audio/data/question1.mp3</value>
 						<value form="long">question1 hin long</value>
 						<value form="short">question1 hin short</value>
 						<value form="custom">question1 hin custom</value>
@@ -67,6 +71,7 @@
 						<value form="audio">jr://file/commcare/audio/help/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/help/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/help/data/question1.3gp</value>
+						<value form="expanded-audio">jr://file/commcare/expanded-audio/help/data/question1.mp3</value>
 					</text>
 					<text id="question1-constraintMsg">
 						<value>question1 hin validation</value>
@@ -74,6 +79,7 @@
 						<value form="audio">jr://file/commcare/audio/constraintMsg/data/question1.mp3</value>
 						<value form="video">jr://file/commcare/video/constraintMsg/data/question1.3gp</value>
 						<value form="video-inline">jr://file/commcare/video-inline/constraintMsg/data/question1.3gp</value>
+						<value form="expanded-audio">jr://file/commcare/expanded-audio/constraintMsg/data/question1.mp3</value>
 					</text>
 				</translation>
 			</itext>
