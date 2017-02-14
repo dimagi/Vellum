@@ -121,9 +121,9 @@ define([
                 .find('.fd-scrollable.full').css('height', columnHeight + 'px');
 
             $fdc.find('.fd-props-scrollable')
-                .css('height', columnHeight
-                                - $fdc.find('.fd-props-toolbar').outerHeight(true)
-                                - $fdc.find('.fd-form-actions').outerHeight(false) + 'px');
+                .css('height', columnHeight -
+                                $fdc.find('.fd-props-toolbar').outerHeight(true) -
+                                $fdc.find('.fd-form-actions').outerHeight(false) + 'px');
         },
         getLeftWidth: function () {
             return 2 + this.$f.find('.fd-content-left').outerWidth(false) + 
