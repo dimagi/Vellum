@@ -10737,11 +10737,11 @@ url('fontawesome-webfont.svg')
 
 @font-face {
     font-family: 'CommCareHQFontRegular';
-    src: url('/static/style/font/commcarehqfont-regular.eot?v=1.1&2db46cf0c6d6');
-    src: url('/static/style/font/commcarehqfont-regular.eot?&2db46cf0c6d6#iefix&v=1.1')
-format('embedded-opentype'), url('/static/style/font/commcarehqfont-regular.woff?v=1.1&d68065ecb660')
-format('woff'), url('/static/style/font/commcarehqfont-regular.ttf?v=1.1&b7dbbd6d243e') format('truetype'),
-url('/static/style/font/commcarehqfont-regular.svg?v=1.1&a9fe226ed027#CommCareHQFontRegular') format('svg');
+    src: url('commcarehqfont-regular.eot?v=1.1');
+    src: url('commcarehqfont-regular.eot?#iefix&v=1.1')
+format('embedded-opentype'), url('commcarehqfont-regular.woff?v=1.1')
+format('woff'), url('commcarehqfont-regular.ttf?v=1.1') format('truetype'),
+url('commcarehqfont-regular.svg?v=1.1#CommCareHQFontRegular') format('svg');
     font-weight: normal;
     font-style: normal
 }
