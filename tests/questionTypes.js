@@ -361,7 +361,7 @@ define([
             });
         });
 
-        describe("jls can", function() {
+        describe("can", function() {
             var changes = [
                     /*["Text", "Trigger"],
                     ["Trigger", "Select"],

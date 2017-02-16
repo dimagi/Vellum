@@ -1271,6 +1271,7 @@ define([
             });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
+            _this.setTreeActions(e.mug);
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
                 _this.displayMugProperties(currentMug);
@@ -1524,8 +1525,6 @@ define([
             // NOTE 'into' is not a supported position in JSTree
             (position === 'into' ? 'last' : position)
         );
-
-        _this.data.core.form.setMugActions(mug);
 
         return node;
     };
@@ -1904,6 +1903,30 @@ define([
 
     fn.changeMugType = function (mug, type) {
         this.data.core.form.changeMugType(mug, type);
+        this.setTreeActions(mug);
+    };
+
+    fn.setTreeActions = function(mug) {
+        var _this = this,
+            tree = _this.data.core.$tree,
+            action_id = "add_choice";
+        if (mug.options.canAddChoices) {
+            tree.jstree(true).add_action(mug.ufid, {
+                "id": action_id,
+                "class": "fa fa-plus add_choice",
+                "text": " Add Choice",
+                "after": true,
+                "selector": "a",
+                "event": "click",
+                "callback": function (node_id, node, action_id, action_el) {
+                    var newMug = _this.data.core.form.createQuestion(mug, 'into', "Choice", true);
+                    _this.ensureCurrentMugIsSaved();
+                    _this.setCurrentMug(newMug);
+                }
+            });
+        } else {
+            tree.jstree(true).remove_action(mug.ufid, action_id);
+        }
     };
 
     fn.createXML = function () {
