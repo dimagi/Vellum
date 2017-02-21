@@ -545,6 +545,16 @@ define([
             });
         });
 
+        it("changing type from required Text to Label removes required attribute", function () {
+            util.loadXML("");
+            addQuestion("Text", "question", {requiredAttr: "true()"});
+            var mug = util.getMug("question");
+
+            call("changeMugType", mug, "Trigger");
+
+            assert.equal(mug.p.requiredAttr, undefined);
+        });
+
         it("should allow user to view longs but not add them", function() {
             util.loadXML("");
 

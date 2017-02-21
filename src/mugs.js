@@ -1481,9 +1481,12 @@ define([
         spec: {
             dataValue: { presence: 'optional' },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
-            requiredAttr: { visibility: function (mug) {
-                return mug.p.appearance !== "minimal";
-            }},
+            requiredAttr: {
+                deleteOnCopy: true,
+                visibility: function (mug) {
+                    return mug.p.appearance !== "minimal";
+                },
+            },
         }
     });
 
