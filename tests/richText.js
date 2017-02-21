@@ -460,6 +460,12 @@ define([
                 });
             });
 
+            it("should not paste style content into editor", function () {
+                var html = '<style type="text/css"><!--td--></style><span>A</span>';
+                input.ckeditor().editor.execCommand('paste', html);
+                assert.equal(editor.getValue(), 'A');
+            });
+
             function applyArgs(func) {
                 return function (args) {
                     return func.apply(this, args);
