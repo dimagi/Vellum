@@ -7,7 +7,7 @@ define([
     $,
     _,
     util,
-    UNDO_ALERT
+    undo_alert
 ) {
     function alertShown() {
         var alert = $('.fd-undo-delete');
@@ -20,13 +20,16 @@ define([
         return alert.length;
     }
 
-    function createAlert() {
-        $('.fd-undo-container').append(UNDO_ALERT);
+    function createAlert(mugs) {
+        var refs = _.filter(_.map(mugs, function (mug) {
+                return mug.isReferencedByOtherMugs(mugs) ? mug.p.nodeID : "";
+            }), _.identity);
+        $('.fd-undo-container').append(undo_alert({errors: refs}));
     }
 
     function toggleAlert(undoStack) {
         if (undoStack.length && !alertShown()) {
-            createAlert();
+            createAlert(_.map(undoStack, function (x) { return x[0]; }));
         } else if (undoStack.length === 0 && alertShown()) {
             $('.fd-undo-delete').remove();
         }
@@ -51,8 +54,8 @@ define([
                 type: 'reset',
             });
         },
-        appendMug: function (mug, previousMug, position) {
-            this.undoStack = this.undoStack.concat([[mug, previousMug, position]]);
+        setUndo: function (stack) {
+            this.undoStack = this.undoStack.concat(stack);
             toggleAlert(this.undoStack);
         },
         undo: function () {
