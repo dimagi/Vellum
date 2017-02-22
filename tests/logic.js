@@ -251,6 +251,15 @@ define([
             it("should return empty dictionary when question not referenced", function () {
                 assert.deepEqual(form.findUsages("#form/question3"), {});
             });
+
+            it("should not error after deleting reference", function () {
+                var mug = util.addQuestion("Text", "mug"),
+                    q3 = util.getMug("question3");
+                q3.p.relevantAttr = "#form/mug";
+                form.removeMugsFromForm([mug]);
+                q3.p.relevantAttr = "";
+                assert.deepEqual(form.findUsages("#form/question3"), {});
+            });
         });
 
     });
