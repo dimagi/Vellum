@@ -983,6 +983,21 @@ define([
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
         },
+        isReferencedByOtherMugs: function (mug, except) {
+            var ref = false,
+                ufids = {},
+                exclude = _.object(_.map(except, function (mug) {
+                    return [mug.ufid, null];
+                }));
+            exclude[mug.ufid] = null;
+            ufids[mug.ufid] = null;
+            this._logicManager.forEachReferencingProperty(ufids, function (mug) {
+                if (!exclude.hasOwnProperty(mug.ufid)) {
+                    ref = true;
+                }
+            });
+            return ref;
+        },
         /**
          * Get the logical path of the mug's node in the data tree
          *

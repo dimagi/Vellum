@@ -71,5 +71,21 @@ define([
                 }
             });
         });
+
+        it("should have a function to tell if referenced by other mugs", function () {
+            var data = [
+                    ["id", "type", "relevantAttr"],
+                    ["red", "Text", ""],
+                    ["blue", "Text", "#form/red = '1'"],
+                ];
+            util.loadXML("");
+            util.paste(data);
+            var red = util.getMug("red"),
+                blue = util.getMug("blue");
+            assert.isNotOk(blue.isReferencedByOtherMugs(), "blue should not be referenced");
+            assert.isOk(red.isReferencedByOtherMugs(), "red should be referenced");
+            assert.isNotOk(red.isReferencedByOtherMugs([blue]),
+                "red with except=[blue] should not be referenced");
+        });
     });
 });
