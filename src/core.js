@@ -1309,6 +1309,7 @@ define([
 
             $('.fd-undo').click(function () {
                 _this.ensureCurrentMugIsSaved(form.undo.bind(form));
+                return false;
             });
             $('.fd-undo-container').on('click', '.close', function() {
                 form.undomanager.resetUndo();
