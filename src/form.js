@@ -1167,6 +1167,7 @@ define([
         },
         undo: function() {
             this.undomanager.undo();
+            this.fixBrokenReferences();
             this.vellum.selectSomethingOrHideProperties();
         },
         findUsages: function (path) {
