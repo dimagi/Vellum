@@ -673,10 +673,6 @@ define([
             $modalBody = $modal.find('.modal-body'),
             formProperties = [
                 {
-                    label: "Form Name",
-                    slug: "formName"
-                },
-                {
                     label: "Disable Text Formatting",
                     slug: "noMarkdown",
                     type: "checkbox",
