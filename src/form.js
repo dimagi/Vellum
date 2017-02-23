@@ -983,6 +983,15 @@ define([
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
         },
+        isReferencedByOtherMugs: function (mug, except) {
+            var exclude = _.object(_.map(except, function (mug) {
+                    return [mug.ufid, null];
+                }));
+            exclude[mug.ufid] = null;
+            return this._logicManager.hasReferencingMug(mug, function (mug) {
+                return !exclude.hasOwnProperty(mug.ufid);
+            });
+        },
         /**
          * Get the logical path of the mug's node in the data tree
          *
@@ -1022,35 +1031,39 @@ define([
             }
             var _this = this,
                 seen = {},
-                ufids = {},
-                undoUfids = {};
+                ufids = {};
             this.undomanager.resetUndo();
-            _.each(mugs, function (mug) {
-                _this._addToUndoManager(mug, undoUfids);
-            });
+            _this._addToUndoManager(mugs);
             _.each(mugs, function (mug) {
                 _this._removeMugFromForm(mug, ufids, false);
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _addToUndoManager: function(mug, ufids) {
-            if (ufids.hasOwnProperty(mug.ufid)) {
-                return; // already removed
-            }
-            ufids[mug.ufid] = null;
-            var node = this.tree.getNodeFromMug(mug),
-                parentMug = mug.parentMug,
-                hasChildren = false,
-                previousSibling = mug.previousSibling,
-                position = previousSibling === parentMug ? 'first' : 'after';
-            this.undomanager.appendMug(mug, previousSibling, position);
-            if (node) {
-                var children = node.getChildrenMugs();
-                hasChildren = children.length > 0;
-                for (var i = 0; i < children.length; i++) {
-                    this._addToUndoManager(children[i], ufids);
+        _addToUndoManager: function(mugs) {
+            function pushUndoItem(mug) {
+                if (ufids.hasOwnProperty(mug.ufid)) {
+                    return; // already removed
+                }
+                ufids[mug.ufid] = null;
+                var node = tree.getNodeFromMug(mug),
+                    parentMug = mug.parentMug,
+                    hasChildren = false,
+                    previousSibling = mug.previousSibling,
+                    position = previousSibling === parentMug ? 'first' : 'after';
+                stack.push([mug, previousSibling, position]);
+                if (node) {
+                    var children = node.getChildrenMugs();
+                    hasChildren = children.length > 0;
+                    for (var i = 0; i < children.length; i++) {
+                        pushUndoItem(children[i], ufids);
+                    }
                 }
             }
+            var tree = this.tree,
+                ufids = {},
+                stack = [];
+            _.each(mugs, pushUndoItem);
+            this.undomanager.setUndo(stack);
         },
         _removeMugFromForm: function(mug, ufids, isInternal) {
             if (ufids.hasOwnProperty(mug.ufid)) {
@@ -1148,6 +1161,7 @@ define([
         },
         undo: function() {
             this.undomanager.undo();
+            this.fixBrokenReferences();
             this.vellum.selectSomethingOrHideProperties();
         },
         findUsages: function (path) {
