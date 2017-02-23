@@ -456,6 +456,22 @@ define([
                 }
             });
         },
+        /**
+         * Find a mug that references the given mug
+         *
+         * @param predicate - predicate function used to find a match.
+         * @returns Boolean
+         */
+        hasReferencingMug: function (mug, predicate) {
+            var form = this.form;
+            if (this.reverse.hasOwnProperty(mug.ufid)) {
+                return _.find(this.reverse[mug.ufid], function (refs, ufid) {
+                    var mug = form.getMugByUFID(ufid);
+                    return refs.length && mug && predicate(mug);
+                });
+            }
+            return false;
+        },
         reset: function () {
             this.forward = {};
             this.reverse = {};
