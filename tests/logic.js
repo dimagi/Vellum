@@ -262,6 +262,28 @@ define([
             });
         });
 
+        describe("hasBrokenReferences", function () {
+            var form;
+            beforeEach(function () {
+                form = util.loadXML();
+            });
+
+            it("should return false for empty form", function () {
+                assert.isNotOk(form.hasBrokenReferences());
+            });
+
+            it("should return true for form with broken reference", function () {
+                util.addQuestion("Text", "text", {relevantAttr: "/data/unknown"});
+                assert.isOk(form.hasBrokenReferences());
+            });
+
+            it("should return false after broken reference is fixed", function () {
+                util.addQuestion("Text", "text", {relevantAttr: "/data/other"});
+                assert.isOk(form.hasBrokenReferences(), "should have broken");
+                util.addQuestion("Text", "other", {relevantAttr: "/data/other"});
+                assert.isNotOk(form.hasBrokenReferences());
+            });
+        });
     });
 
     describe("Logic expression", function() {

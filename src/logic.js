@@ -421,6 +421,11 @@ define([
                 }
             }, this);
         },
+        hasBrokenReferences: function () {
+            return _.find(this.errors, function (properties) {
+                return _.some(properties);
+            });
+        },
         /**
          * Call function for each expression property that references a mug
          * identified by one of the given ufids
