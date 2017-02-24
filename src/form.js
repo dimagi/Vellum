@@ -983,6 +983,9 @@ define([
             var _this = this;
             this._logicManager.forEachBrokenReference(updateReferences);
         },
+        hasBrokenReferences: function () {
+            return this._logicManager.hasBrokenReferences();
+        },
         isReferencedByOtherMugs: function (mug, except) {
             var exclude = _.object(_.map(except, function (mug) {
                     return [mug.ufid, null];

@@ -176,6 +176,20 @@ define([
             csrftoken: _this.opts().csrftoken
         });
 
+        var hasBrokenReferences = _.debounce(function () {
+            return _this.data.core.form.hasBrokenReferences();
+        }, 500, true);
+        _this.data.core.saveButton.ui.tooltip({
+            title: function () {
+                if (hasBrokenReferences()) {
+                    return "Warning: form has reference errors. Check the question tree.";
+                } else {
+                    return "";
+                }
+            },
+            placement: 'bottom'
+        });
+
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
 
