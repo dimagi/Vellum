@@ -132,15 +132,28 @@ define([
         var hasBrokenReferences = _.debounce(function () {
             return _this.data.core.form.hasBrokenReferences();
         }, 500, true);
-        _this.data.core.saveButton.ui.tooltip({
+        _this.data.core.saveButton.ui.popover({
             title: function () {
                 if (hasBrokenReferences()) {
-                    return "Warning: form has reference errors. Check the question tree.";
+                    return "Errors in Form";
                 } else {
                     return "";
                 }
             },
-            placement: 'bottom'
+            content: function() {
+                if (hasBrokenReferences()) {
+                    return "<div class='alert alert-danger'>Form has reference errors." +
+                           "<br>Look for questions marked with " +
+                           "<i class='fd-tree-valid-alert-icon fa fa-warning'></i> " +
+                           "and check they don't reference deleted questions.</div>";
+                } else {
+                    return "";
+                }
+            },
+            html: true,
+            placement: 'bottom',
+            container: 'body',
+            trigger: 'hover',
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
