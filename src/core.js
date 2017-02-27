@@ -129,6 +129,20 @@ define([
             csrftoken: _this.opts().csrftoken
         });
 
+        var hasBrokenReferences = _.debounce(function () {
+            return _this.data.core.form.hasBrokenReferences();
+        }, 500, true);
+        _this.data.core.saveButton.ui.tooltip({
+            title: function () {
+                if (hasBrokenReferences()) {
+                    return "Warning: form has reference errors. Check the question tree.";
+                } else {
+                    return "";
+                }
+            },
+            placement: 'bottom'
+        });
+
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
 
@@ -640,10 +654,6 @@ define([
             $modal = this.generateNewModal("Edit Form Properties", []),
             $modalBody = $modal.find('.modal-body'),
             formProperties = [
-                {
-                    label: "Form Name",
-                    slug: "formName"
-                },
                 {
                     label: "Disable Text Formatting",
                     slug: "noMarkdown",
@@ -1271,6 +1281,7 @@ define([
 
             $('.fd-undo').click(function () {
                 _this.ensureCurrentMugIsSaved(form.undo.bind(form));
+                return false;
             });
             $('.fd-undo-container').on('click', '.close', function() {
                 form.undomanager.resetUndo();

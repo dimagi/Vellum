@@ -10,12 +10,16 @@ define([
     var assert = chai.assert;
 
     describe("The undo manager", function () {
-        beforeEach(function(done) {
+        before(function(done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: { onReady: done },
                 features: {rich_text: false},
             });
+        });
+
+        beforeEach(function() {
+            util.loadXML("");
         });
 
         it("should show an alert when deleting questions", function () {
@@ -237,6 +241,15 @@ define([
             assert(getHeight() === heightWithAlert, "Height changed with addition of alert.");
             $(".fd-undo-delete .close").click();
             assert(getHeight() === heightWithoutAlert, "Height restored after closing alert.");
+        });
+
+        it("should fix broken references on undelete referenced question", function () {
+            util.addQuestion("Text", "red");
+            var blue = util.addQuestion("Text", "blue", {relevantAttr: "#form/red = '1'"});
+            util.deleteQuestion("red");
+            assert(!util.isTreeNodeValid(blue), "blue should have reference error");
+            blue.form.undo();
+            assert(util.isTreeNodeValid(blue), "blue should be valid");
         });
     });
 });

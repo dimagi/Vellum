@@ -1,4 +1,9 @@
-<div class="fd-undo-delete alert alert-success fade in">
+<div class="fd-undo-delete alert alert-<%= errors.length ? "danger" : "success" %> fade in">
   <button type="button" class="close">&times;</button>
   You have deleted a question. <a href="#" class="fd-undo">Undo</a>
+  <% if (errors.length) { %>
+    <p>Warning: <%= errors.join(", ") %>
+      <% errors.length > 1 ? "are" : "is" %>
+      still referenced by other questions.</p>
+  <% } %>
 </div>
