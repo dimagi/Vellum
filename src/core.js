@@ -1188,6 +1188,16 @@ define([
                     _this.$f.find('.fd-content-right .fd-column').addClass('hide');
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
+                if (_this.opts().core.formIconClass) {
+                    _this.$f.find('.fd-form-icon').addClass(_this.opts().core.formIconClass);
+                } else {
+                    _this.$f.find('.fd-form-icon').addClass('fa fa-edit');
+                }
+                if (_this.opts().core.defaultHelpTextTemplateId) {
+                    _this.$f.find('.fd-default-helptext')
+                        .html($(_this.opts().core.defaultHelpTextTemplateId).html())
+                        .addClass('alert alert-info');
+                }
                 $(".fd-tree .fd-head-text").text(_this.data.core.form.formName);
                 hidePageSpinner();
             } catch (e) {
