@@ -276,6 +276,12 @@ define([
             }
         });
 
+        // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
+        var STYLE = /<style type="text\/css">.*?<\/style>/g;
+        editor.on('paste', function(event) {
+            event.data.dataValue = event.data.dataValue.replace(STYLE, "");
+        }, null, null, 2 );
+
         if (_.isFunction(options.createPopover)) {
             editor.addCommand('createPopover', {
                 exec: options.createPopover,

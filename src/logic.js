@@ -421,6 +421,11 @@ define([
                 }
             }, this);
         },
+        hasBrokenReferences: function () {
+            return _.find(this.errors, function (properties) {
+                return _.some(properties);
+            });
+        },
         /**
          * Call function for each expression property that references a mug
          * identified by one of the given ufids
@@ -455,6 +460,22 @@ define([
                     });
                 }
             });
+        },
+        /**
+         * Find a mug that references the given mug
+         *
+         * @param predicate - predicate function used to find a match.
+         * @returns Boolean
+         */
+        hasReferencingMug: function (mug, predicate) {
+            var form = this.form;
+            if (this.reverse.hasOwnProperty(mug.ufid)) {
+                return _.find(this.reverse[mug.ufid], function (refs, ufid) {
+                    var mug = form.getMugByUFID(ufid);
+                    return refs.length && mug && predicate(mug);
+                });
+            }
+            return false;
         },
         reset: function () {
             this.forward = {};
@@ -528,7 +549,7 @@ define([
             _.each(formRefs, function (refsToUsedMug, usedMugUfid) {
                 var usedMug = form.getMugByUFID(usedMugUfid),
                     mugReferences = {};
-                if (path && path !== usedMug.hashtagPath) {
+                if (!usedMug || path && path !== usedMug.hashtagPath) {
                     return;
                 }
                 _.each(refsToUsedMug, function (refs, usedInMugUfid) {

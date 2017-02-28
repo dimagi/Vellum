@@ -473,6 +473,15 @@ define([
             }
             return this.parentMug && this.parentMug.isInRepeat();
         },
+        /**
+         * Check if mug is referenced by other mugs
+         *
+         * @param except - Array of mugs to exclude when looking for references.
+         * @returns Boolean
+         */
+        isReferencedByOtherMugs: function (except) {
+            return this.form.isReferencedByOtherMugs(this, except);
+        },
     };
 
     Object.defineProperty(Mug.prototype, "absolutePath", {
@@ -1481,9 +1490,12 @@ define([
         spec: {
             dataValue: { presence: 'optional' },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
-            requiredAttr: { visibility: function (mug) {
-                return mug.p.appearance !== "minimal";
-            }},
+            requiredAttr: {
+                deleteOnCopy: true,
+                visibility: function (mug) {
+                    return mug.p.appearance !== "minimal";
+                },
+            },
         }
     });
 

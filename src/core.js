@@ -129,6 +129,33 @@ define([
             csrftoken: _this.opts().csrftoken
         });
 
+        var hasBrokenReferences = _.debounce(function () {
+            return _this.data.core.form.hasBrokenReferences();
+        }, 500, true);
+        _this.data.core.saveButton.ui.popover({
+            title: function () {
+                if (hasBrokenReferences()) {
+                    return "Errors in Form";
+                } else {
+                    return "";
+                }
+            },
+            content: function() {
+                if (hasBrokenReferences()) {
+                    return "<div class='alert alert-danger'>Form has reference errors." +
+                           "<br>Look for questions marked with " +
+                           "<i class='fd-tree-valid-alert-icon fa fa-warning'></i> " +
+                           "and check they don't reference deleted questions.</div>";
+                } else {
+                    return "";
+                }
+            },
+            html: true,
+            placement: 'bottom',
+            container: 'body',
+            trigger: 'hover',
+        });
+
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
 
@@ -640,10 +667,6 @@ define([
             $modal = this.generateNewModal("Edit Form Properties", []),
             $modalBody = $modal.find('.modal-body'),
             formProperties = [
-                {
-                    label: "Form Name",
-                    slug: "formName"
-                },
                 {
                     label: "Disable Text Formatting",
                     slug: "noMarkdown",
@@ -1281,6 +1304,7 @@ define([
 
             $('.fd-undo').click(function () {
                 _this.ensureCurrentMugIsSaved(form.undo.bind(form));
+                return false;
             });
             $('.fd-undo-container').on('click', '.close', function() {
                 form.undomanager.resetUndo();
