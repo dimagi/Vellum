@@ -20,10 +20,26 @@ define([
     xpath_expression,
     xpath_tpl
 ) {
+    function validateXPath(form, expr) {
+        if (expr) {
+            if (richText.isInvalid(expr)) {
+                expr = richText.unescapeXPath(expr, form);
+            }
+            try {
+                var parsed = form.xpath.parse(expr);
+                return [true, parsed];
+            } catch (err) {
+                return [false, err];
+            }
+        }
+        return [true, null];
+    }
+
     function showXPathEditor($div, options) {
         var editorContent = $div,
             richTextOptions = {isExpression: true},
             form = options.mug.form,
+            validate = _.partial(validateXPath, form),
             saveButton;
         options = _.defaults(options, {
             leftPlaceholder: "Drag question here",
@@ -154,18 +170,6 @@ define([
             } else {
                 return getExpressionFromSimpleMode();
             }
-        };
-
-        var validate = function (expr) {
-            if (expr) {
-                try {
-                    var parsed = form.xpath.parse(expr);
-                    return [true, parsed];
-                } catch (err) {
-                    return [false, err];
-                }
-            }
-            return [true, null];
         };
 
         var tryAddExpression = function(parsedExpression, joiningOp) {
@@ -480,6 +484,7 @@ define([
     }
 
     return {
-        showXPathEditor: showXPathEditor
+        showXPathEditor: showXPathEditor,
+        validateXPath: validateXPath,
     };
 });
