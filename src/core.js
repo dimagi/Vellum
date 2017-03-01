@@ -33,7 +33,6 @@ define([
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
-    'jquery.menu-aim',
     'jstree-actions',
     'jquery.bootstrap',
     'caretjs',
@@ -274,11 +273,6 @@ define([
                 _this.addQuestion($(this).data('qtype'));
             }
             e.preventDefault();
-        });
-
-        $dropdown.find(".dropdown-menu").menuAim({
-            activate: $.noop,  // fired on row activation
-            deactivate: $.noop  // fired on row deactivation
         });
     };
 
