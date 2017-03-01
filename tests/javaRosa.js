@@ -7,6 +7,7 @@ define([
     'vellum/javaRosa/itext',
     'vellum/javaRosa/util',
     'vellum/util',
+    'text!static/javaRosa/bare-output.xml',
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
     'text!static/javaRosa/multi-lang-trans.xml',
@@ -36,6 +37,7 @@ define([
     jrItext,
     jr,
     vellumUtil,
+    BARE_OUTPUT,
     OUTPUTREF_GROUP_RENAME_XML,
     TEXT_QUESTION_XML,
     MULTI_LANG_TRANS_XML,
@@ -783,7 +785,6 @@ define([
     describe("The javaRosaplugin with one language", function() {
         before(function(done) {
             util.init({
-                features: {rich_text: false},
                 javaRosa: { langs: ['en'] },
                 core: {
                     onReady: function () {
@@ -803,6 +804,13 @@ define([
             util.assertXmlEqual(call("createXML"), 
                                 NO_LABEL_TEXT_ONE_LANG_XML,
                                 {normalize_xmlns: true});
+        });
+
+        it ("should not error on form with output without value", function() {
+            util.loadXML(BARE_OUTPUT);
+            var mug = util.getMug("output");
+            assert.equal(mug.p.labelItext.get(), "x <output /> x");
+            util.assertXmlEqual(call('createXML'), BARE_OUTPUT);
         });
     });
 
