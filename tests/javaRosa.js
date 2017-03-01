@@ -7,7 +7,7 @@ define([
     'vellum/javaRosa/itext',
     'vellum/javaRosa/util',
     'vellum/util',
-    'text!static/form/bare-output.xml',
+    'text!static/javaRosa/bare-output.xml',
     'text!static/javaRosa/outputref-group-rename.xml',
     'text!static/javaRosa/text-question.xml',
     'text!static/javaRosa/multi-lang-trans.xml',
