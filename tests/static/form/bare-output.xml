@@ -4,24 +4,23 @@
 		<h:title>Untitled Form</h:title>
 		<model>
 			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/0423112D-4950-4768-B59F-A4E4616FF73D" uiVersion="1" version="1" name="Untitled Form">
-					<label />
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E2D9313B-4D8F-4E79-B37C-A2A286928A47" uiVersion="1" version="1" name="Untitled Form">
+					<output />
 				</data>
 			</instance>
-			<bind vellum:nodeset="#form/label" nodeset="/data/label" />
+			<bind vellum:nodeset="#form/output" nodeset="/data/output" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="label-label">
-						<value></value>
-						<value form="image">jr://file/commcare/image/data/label.png</value>
+					<text id="output-label">
+						<value>x <output /> x</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<trigger vellum:ref="#form/label" ref="/data/label" appearance="minimal">
-			<label ref="jr:itext('label-label')" />
-		</trigger>
+		<input vellum:ref="#form/output" ref="/data/output">
+			<label ref="jr:itext('output-label')" />
+		</input>
 	</h:body>
 </h:html>
