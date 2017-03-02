@@ -90,6 +90,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/parser',
         'tests/questionTypes',
         'tests/exporter',
+        'tests/expressionEditor',
         'tests/widgets',
         'tests/writer',
         'tests/commtrack',
