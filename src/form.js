@@ -211,10 +211,6 @@ define([
             tag = this.normalizeHashtag(tag);
             return this.hashtagMap.hasOwnProperty(tag);
         },
-        isValidHashtagPrefix: function(tag) {
-            tag = this.normalizeHashtag(tag);
-            return this.hashtagTransformations.hasOwnProperty(tag);
-        },
         /**
          * Check if tag has a valid hashtag prefix
          *

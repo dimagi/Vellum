@@ -545,7 +545,6 @@ define([
 
                 "#form": null,
                 /* should these pass? (they don't)
-                "#form/": "is",
                 "#form/prop": "has xpath",
                 */
 
@@ -554,11 +553,9 @@ define([
                 "/data/prop": "xpath",
 
                 "#case": null,
-                "#case/": "is",
                 "#case/prop": "has xpath",
 
                 "#user": null,
-                "#user/": "is",
                 "#user/prop": "has xpath",
             }, longPaths), function (valid, path) {
                 function may(name) {
@@ -567,10 +564,6 @@ define([
                 valid = _.object(_.map((valid || "").split(" "), function (key) {
                     return [key, true];
                 }));
-
-                it("should " + may("is") + "recognize " + path + " as hashtag prefix", function () {
-                    assert.equal(form.isValidHashtagPrefix(path), !!valid.is);
-                });
 
                 it("should " + may("has") + "recognize " + path + " as having hashtag prefix", function () {
                     assert.equal(form.hasValidHashtagPrefix(path), !!valid.has);
