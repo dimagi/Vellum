@@ -34,7 +34,6 @@
         "fuse.js": "~2.5.0",
 
         "bootstrap": "3.3.7",
-        "jquery.menu-aim": "jquery.menuaim#^1.0.0",
         "jstree": "~3.3.3",
         "jstree-actions": "alexandernst/jstree-actions#0.1.2",
         "langcodes": "dimagi/langcodes",

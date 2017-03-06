@@ -44,7 +44,6 @@ requirejs.config({
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../bower_components/jquery/dist/jquery',
         'jquery.jstree': '../bower_components/jstree/dist/jstree',
-        'jquery.menu-aim': '../bower_components/jquery.menu-aim/jquery.menu-aim',
         'jstree-actions': '../bower_components/jstree-actions/jstree-actions',
         'jquery.bootstrap': '../bower_components/bootstrap/dist/js/bootstrap',
         'underscore': '../bower_components/underscore/underscore',
@@ -82,10 +81,6 @@ requirejs.config({
         'jquery.jstree': {
             deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
-        },
-        'jquery.menu-aim': {
-            deps: ['jquery'],
-            exports: '$.fn.menuAim'
         },
         'jstree-actions': {
             deps: ['jquery.jstree'],

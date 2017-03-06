@@ -116,7 +116,6 @@
             name: 'local-deps',
             include: [
                 'jquery.jstree',
-                'jquery.menu-aim',
                 'jstree-actions',
                 'save-button',
                 'ckeditor',
