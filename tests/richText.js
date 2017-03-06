@@ -313,7 +313,8 @@ define([
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                     ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
-                    ['<output value="concat(1, 2" />', '&lt;output value="concat(1, 2" /&gt;']
+                    ['<output value="concat(1, 2" />', '&lt;output value="concat(1, 2" /&gt;'],
+                    ['<output />', '&lt;output /&gt;'],
                 ],
                 ico = icon('fcc-fd-text');
 

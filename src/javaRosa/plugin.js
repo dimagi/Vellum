@@ -290,6 +290,7 @@ define([
                             } else if (ref) {
                                 return tempOutput.attr('ref', _toHashtag(ref))[0].outerHTML;
                             }
+                            return this;
                         });
                         itForm.setValue(lang, value.html());
                     });

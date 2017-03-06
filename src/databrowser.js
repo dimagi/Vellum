@@ -81,6 +81,12 @@ define([
             $search = $container.find(".fd-external-resource-search input"),
             $tree = $container.find(".fd-external-sources-tree");
         vellum.data.core.databrowser.errorContainer = $container;
+        $tree.on('after_open.jstree', function () {
+            $('.jstree-anchor').popover();
+        });
+        $tree.on('redraw.jstree', function () {
+            $('.jstree-anchor').popover();
+        });
         $tree.jstree({
             core: {
                 data: function (node, callback) {
@@ -133,6 +139,11 @@ define([
                 data: {
                     handleDrop: _.partial(handleDrop, node, node.sourceInfo),
                     getNodes: node.recursive ? getNodes : null,
+                },
+                a_attr: {
+                    'data-content': node.description,
+                    'data-container': 'body',
+                    'data-trigger': 'hover',
                 }
             };
         }

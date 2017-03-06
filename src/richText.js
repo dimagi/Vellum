@@ -474,7 +474,8 @@ define([
         var info = extractXPathInfo($(output)),
             xpath = form.normalizeHashtag(info.value),
             attrs = _.omit(info, 'value'),
-            startsWithRef = FORM_REF_REGEX.test(xpath) || form.hasValidHashtagPrefix(xpath),
+            startsWithRef = xpath && (FORM_REF_REGEX.test(xpath) ||
+                                      form.hasValidHashtagPrefix(xpath)),
             containsWhitespace = /\s/.test(xpath);
 
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
