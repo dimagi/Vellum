@@ -126,6 +126,7 @@ define([
             uploadController.updateMediaPath = function () {
                 var params = uploadController.uploadParams;
                 params.path = widget.getRandomizedMediaPath(params.path);
+                widget.updateReference(params.path);
             };
             uploadController.uploadParams = {
                 path: ref.path,
@@ -236,8 +237,8 @@ define([
             widget.updateReference();
         };
 
-        widget.updateReference = function () {
-            var currentPath = getValue();
+        widget.updateReference = function (path) {
+            var currentPath = path || getValue();
             $uiElem.attr('data-hqmediapath', currentPath);
             widget.mediaRef.updateRef(currentPath);
         };
