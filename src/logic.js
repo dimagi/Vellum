@@ -326,8 +326,8 @@ define([
             var _this = this,
                 returned = {};
             this.clearReferences(mug, property);
-            if (!value && mug.p[property] && _.isFunction(mug.p[property].forEachLogicExpression)) {
-                return mug.p[property].forEachLogicExpression(function (expr) {
+            if (!value && mug.p[property] && _.isFunction(mug.p[property].mapLogicExpressions)) {
+                return mug.p[property].mapLogicExpressions(function (expr) {
                     var messages = _this._addReferences(mug, property, expr);
                     return _.filter(messages, function (msg) {
                         if (!returned.hasOwnProperty(msg.key)) {
@@ -390,17 +390,28 @@ define([
             var seen = {},
                 form = this.form;
             function updatePath(mug, property, paths) {
+                function updateExpression(value) {
+                    var expr = new LogicExpression(value, form.xpath),
+                        orig = expr.getText();
+                    expr.updatePath(paths[0], paths[1]);
+                    var updated = expr.getText();
+                    return updated !== orig ? updated : value;
+                }
+
                 var pkey = mug.ufid + " " + property + " " + paths[0];
                 if (seen.hasOwnProperty(pkey)) {
                     return;
                 }
                 seen[pkey] = null;
-                var expr = new LogicExpression(mug.p[property], form.xpath),
-                    orig = expr.getText();
-                expr.updatePath(paths[0], paths[1]);
-                if (orig !== expr.getText()) {
-                    // update without triggering validation/events
-                    mug.p.set(property, expr.getText());
+                var value = mug.p[property];
+                if (value && _.isFunction(value.updateLogicExpressions)) {
+                    value.updateLogicExpressions(updateExpression, mug);
+                } else {
+                    var result = updateExpression(value);
+                    if (value !== result) {
+                        // update without triggering validation/events
+                        mug.p.set(property, result);
+                    }
                 }
             }
             this.forEachReferencingProperty(data, updatePath, subtree);
