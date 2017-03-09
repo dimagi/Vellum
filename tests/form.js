@@ -555,6 +555,14 @@ define([
                 "#case": null,
                 "#case/prop": "has xpath",
 
+                "#case/parent": "has xpath",
+                "#case/parent/prop": "has xpath",
+
+                "#case/grandparent": "has xpath",
+                "#case/grandparent/prop": "has xpath",
+
+                "#case/nope/not": null,
+
                 "#user": null,
                 "#user/prop": "has xpath",
             }, longPaths), function (valid, path) {
