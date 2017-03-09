@@ -20,8 +20,9 @@ define([
                     return hashtagInfo.hashtagNamespaces.hasOwnProperty(namespace);
                 },
                 hashtagToXPath: function (hashtagExpr) {
-                    if (hashtagInfo.hashtagMap.hasOwnProperty(hashtagExpr)) {
-                        return hashtagInfo.hashtagMap[hashtagExpr];
+                    var xpath_ = hashtagInfo.hashtagMap[hashtagExpr];
+                    if (xpath_) {
+                        return xpath_;
                     }
 
                     // If full hashtag isn't recognized, remove the property name and check
@@ -51,8 +52,8 @@ define([
             ret.models = ret.yy.xpathmodels;
             return ret;
         },
-        parser: function (hashtagInfo) {
-            var models = this.makeXPathModels(hashtagInfo);
+        parser: function (hashtagInfo, configDecorator) {
+            var models = this.makeXPathModels(hashtagInfo, configDecorator);
             return this.createParser(models);
         },
     };

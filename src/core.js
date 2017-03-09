@@ -1277,6 +1277,7 @@ define([
         }
         this.data.core.form = form = parser.parseXForm(
             formXML, options, this, _this.data.core.parseWarnings);
+        this.onXFormLoaded(form);
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
             _this._populateTree();
@@ -1351,6 +1352,16 @@ define([
                 _this.$f.find('.fd-question-comment').text(e.val);
             }
         });
+    };
+
+    /**
+     * Setup form after parsing XML
+     *
+     * This method is provided for plugins to perform setup related
+     * tasks that need access to the form object. It is called just
+     * after parsing XML before tree population.
+     */
+    fn.onXFormLoaded = function (form) {
     };
 
     fn.refreshMugName = function (mug) {

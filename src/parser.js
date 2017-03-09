@@ -663,6 +663,7 @@ define([
         var method = (noPop ? el.attr : el.popAttr).bind(el),
             vellumAttr = method('vellum:' + key.replace(/:/g, "__")),
             xmlAttr = method(key);
+        form.inferHashtagMeanings(vellumAttr, xmlAttr);
         return form.normalizeHashtag(form.richText && vellumAttr ? vellumAttr : xmlAttr);
     }
 
