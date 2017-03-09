@@ -209,6 +209,7 @@ define([
             assert.equal(text.hashtagPath, "#form/product/text");
             text.p.calculateAttr = blue.hashtagPath;
             blue.p.labelItext.set('<output value="' + text.hashtagPath + '"/>');
+            blue.validate("labelItext");
             repeat.p.dataSource = {
                 instance: {id: "casedb", src: "jr://instance/casedb"},
                 idsQuery: "instance('casedb')/mother/child/@case_id"
@@ -241,6 +242,7 @@ define([
                 text = util.addQuestion("Text", "text");
             text.p.calculateAttr = blue.hashtagPath;
             blue.p.labelItext.set('<output value="' + text.hashtagPath + '"/>');
+            blue.validate("labelItext");
             assert.equal(blue.hashtagPath, "#form/product/item/blue");
             assert.equal(text.hashtagPath, "#form/product/item/text");
 

@@ -141,16 +141,27 @@ define([
                 });
             });
         },
-        forEachLogicExpression: function (fn) {
+        mapLogicExpressions: function (fn) {
             var forms = this.getForms(),
                 ret = _.map(forms, function(form) {
-                    return _.map(form.getOutputRefExpressions(), function (exprs, lang) {
-                        return _.map(exprs, function (expr) {
-                            return fn(expr);
-                        });
-                    });
+                    return _.map(form.getOutputRefExpressions(), fn);
                 });
             return _.flatten(ret);
+        },
+        /**
+         * Call the given function for each output value
+         *
+         * Each expression will be replaced with the value returned by
+         * the function unless undefined.
+         */
+        updateLogicExpressions: function (fn, mug) {
+            var changed = _.some(_.map(this.getForms(), function (iform) {
+                return iform.forEachExpression(fn);
+            }));
+            if (changed) {
+                // HACK strange place to fire form event
+                mug.form.fire({type: 'question-label-text-change', mug: mug});
+            }
         },
     };
 
@@ -204,33 +215,59 @@ define([
         },
         getOutputRefExpressions: function () {
             if (this.outputExpressions === null) {
-                this.updateOutputRefExpressions();
+                this.outputExpressions = this._getOutputRefExpressions();
             }
             return this.outputExpressions;
         },
-        updateOutputRefExpressions: function () {
-            var allRefs = {},
-                langRefs,
-                outputs;
+        _getOutputRefExpressions: function () {
+            var refs = [];
+            this.forEachExpression(function (expr) {
+                if (expr) {
+                    refs.push(expr);
+                }
+            })
+            return refs;
+        },
+        /**
+         * Call a function for each output in this form's values
+         *
+         * The function will be passed two arguments:
+         *
+         * - expression: the output value expression.
+         * - lang: the language of the form containing the expression.
+         * 
+         * The return value of the function will be assigned to the
+         * output value if it is truthy and different from the
+         * expression that was passed to the function.
+         *
+         * @returns true if any expression was changed else false.
+         */
+        forEachExpression: function (fn) {
+            var change = false,
+                shouldReset, div;
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang]) {
-                    outputs = $('<div>').append(this.data[lang]).find('output');
-                    langRefs = [];
-                    _.each(outputs, function (output) {
+                    shouldReset = false;
+                    div = $('<div>').append(this.data[lang]);
+                    _.each(div.find('output'), function (output) {
                         output = $(output);
-                        var value = output.attr('vellum:value') || output.attr('value'),
-                            ref = output.attr('vellum:ref') || output.attr('ref');
-                        if (value) {
-                            langRefs.push(value);
-                        } else if (ref) {
-                            langRefs.push(ref);
+                        var key = !output.is("[ref]") ? "value" : "ref",
+                            vkey = "vellum:" + key,
+                            value = output.attr(vkey) || output.attr(key),
+                            result = fn(value);
+                        if (result !== undefined && result !== value) {
+                            output.attr(key, result).removeAttr(vkey)
+                            shouldReset = true;
                         }
                     });
-                    allRefs[lang] = langRefs;
+                    if (shouldReset) {
+                        this.setValue(lang, div.html());
+                        change = true;
+                    }
                 }
             }
-            this.outputExpressions = allRefs;
-        }
+            return change;
+        },
     };
 
     /**
