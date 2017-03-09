@@ -2181,6 +2181,7 @@ define([
     fn.getMainProperties = function () {
         return [
             "label",
+            "calculateAttr",
             "nodeID",
             "requiredAttr",
             "readOnlyControl",
@@ -2201,7 +2202,6 @@ define([
 
     fn.getLogicProperties = function () {
         return [
-            "calculateAttr",
             "relevantAttr",
             "constraintAttr",
             "repeat_count",
