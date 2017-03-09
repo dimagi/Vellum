@@ -372,58 +372,6 @@ define([
             this.__callOld();
             this.data.javaRosa.Itext.updateForExistingMug(mug);
         },
-        handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
-            this.__callOld();
-
-            function getOutputRef(expression, returnRegex) {
-                if (returnRegex) {
-                    expression = RegExp.escape(expression);
-                    return '<output\\s*(ref|value)="' + expression + '"\\s*(\/|><\/output)>';
-                } else {
-                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_string_as_a_parameter
-                    return '<output value="' + expression.replace(/\$/g, '$$$$') + '" />';
-                }
-            }
-
-            var oldPathRe,
-                outputRe,
-                newRef,
-                change;
-
-            oldPath = oldPath ? RegExp.escape(oldPath) : oldPath;
-            if (mug.options.isSpecialGroup) {
-                oldPathRe = new RegExp(oldPath + '/', 'mg');
-                newPath = newPath + '/';
-            } else {
-                oldPathRe = new RegExp(oldPath + '(?![\\w/-])', 'mg');
-            }
-
-            jrUtil.forEachItextItem(form, function (item, mug) {
-                change = false;
-                _(item.forms).each(function (itForm) {
-                    _(itForm.getOutputRefExpressions()).each(function (refs, lang) {
-                        _(refs).each(function (ref){
-                            if (ref.match(oldPathRe)) {
-                                newRef = ref.replace(oldPathRe, newPath);
-                                outputRe = new RegExp(getOutputRef(ref, true), 'mg');
-                                itForm.setValue(
-                                    lang,
-                                    itForm.getValue(lang)
-                                          .replace(outputRe, getOutputRef(newRef)));
-                                change = true;
-                            }
-                        });
-                    });
-                });
-                if (change) {
-                    form.fire({
-                        type: 'question-label-text-change',
-                        mug: mug, // TODO fire for other mugs referencing item
-                        text: item.get()
-                    });
-                }
-            });
-        },
         duplicateMugProperties: function (mug) {
             this.__callOld();
             _.each(jrUtil.ITEXT_PROPERTIES, function (path) {

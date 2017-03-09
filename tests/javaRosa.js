@@ -490,6 +490,7 @@ define([
             var label = util.addQuestion("Trigger", "label"),
                 text2 = util.addQuestion("Text", "text2");
             label.p.labelItext.set('<output value="/data/load-one" />');
+            label.validate("labelItext");
             text2.p.nodeID = "load";
             text2.p.nodeID = "load-two";
             assert.equal(label.p.labelItext.get(), '<output value="/data/load-one" />');
