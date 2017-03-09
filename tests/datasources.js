@@ -341,7 +341,7 @@ define([
                 util.assertXmlEqual(util.call("createXML"),
                     CASE_PROPERTY_XML
                         .replace(/ vellum:\w+=".*?"/g, "")
-                        .replace(/<vellum:hashtags.*>/, ""));
+                        .replace(/<vellum:hashtag.*>/g, ""));
             });
         });
 
@@ -366,9 +366,18 @@ define([
             });
 
             it("should not lose output value xpath on save", function () {
-                util.loadXML(NULL_HASHTAGS_XML);
+                var hashtrans = /<vellum:hashtagTransforms.*>/,
+                    form = util.loadXML(NULL_HASHTAGS_XML.replace(hashtrans, ""));
                 assert(!vellum.datasources.isReady(), 'data sources should not be ready');
                 util.assertXmlEqual(util.call("createXML"), NULL_HASHTAGS_XML);
+                assert(form.shouldInferHashtags, "form.shouldInferHashtags");
+            });
+
+            it("should not infer hashtags when <vellum:hashtagTransforms> is present", function () {
+                var form = util.loadXML(NULL_HASHTAGS_XML);
+                assert(!vellum.datasources.isReady(), 'data sources should not be ready');
+                util.assertXmlEqual(util.call("createXML"), NULL_HASHTAGS_XML);
+                assert(!form.shouldInferHashtags, "form.shouldInferHashtags should be false");
             });
         });
     });

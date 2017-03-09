@@ -354,7 +354,9 @@ define([
                 widget.setValue(dobProp);
                 widget.handleChange();
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
-                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
+                assert.deepEqual(util.getMessages(blue),
+                    // TODO soften this message when data sources are not yet loaded
+                    'calculateAttr:\n  - Unknown question: #case/dob');
                 event.fire("loadCaseData");
                 loadDataTree(function() {
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
@@ -401,7 +403,7 @@ define([
             it("overwrites the forms preloaded tags", function() {
                 var form = call('getData').core.form;
                 assert(form.isValidHashtag(dobProp));
-                assert.strictEqual(form.hashtagMap[dobProp], null);
+                form.hashtagMap[dobProp] = null;
                 event.fire("loadCaseData");
                 assert(form.isValidHashtag(dobProp));
                 assert.notStrictEqual(form.hashtagMap[dobProp], null);

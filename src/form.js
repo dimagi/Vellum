@@ -276,6 +276,17 @@ define([
         knownExternalReferences: function () {
             return this._logicManager.knownExternalReferences();
         },
+        knownHashtagTransforms: function () {
+            var data = {},
+                prefixes = this.hashtagTransformations;
+            if (!_.isEmpty(this.hashtagTransformations)) {
+                // Save as "prefixes" leaving room for other types in future
+                data.prefixes = _.object(_.map(prefixes, function (func, key) {
+                    return [key, func("")];
+                }));
+            }
+            return data;
+        },
         referenceHashtag: function(hashtag, mug, property) {
             if (this.hasValidHashtagPrefix(hashtag)) {
                 this.referenceInstance('casedb', mug, property);
