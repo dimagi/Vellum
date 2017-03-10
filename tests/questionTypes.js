@@ -641,6 +641,11 @@ define([
             );
         });
 
+        it("gives select questions in loaded XML an add choice action", function () {
+            util.loadXML(SELECT1_HELP_WITH_TYPE_XML);
+            assert.strictEqual($(".add_choice").length, 1);
+        });
+
         it("should show error on delete validation condition but not message", function() {
             util.loadXML("");
             var text = util.addQuestion("Text", "text");

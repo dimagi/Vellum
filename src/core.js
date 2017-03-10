@@ -1381,6 +1381,7 @@ define([
                 if (!changed && mug.getErrors().length) {
                     _this.setTreeValidationIcon(mug);
                 }
+                _this.setTreeActions(mug);
             }
         });
         this.selectSomethingOrHideProperties(true);
