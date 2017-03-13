@@ -401,12 +401,15 @@ define([
             });
 
             it("overwrites the forms preloaded tags", function() {
-                var form = call('getData').core.form;
-                assert(form.isValidHashtag(dobProp));
+                var form = call('getData').core.form,
+                    path = "instance('casedb')/cases/case[@case_id = " +
+                           "instance('commcaresession')/session/data/case_id]/dob";
+                assert(form.isValidHashtag(dobProp), "invalid before test");
+                assert.equal(form.hashtagMap[dobProp], path);
                 form.hashtagMap[dobProp] = null;
                 event.fire("loadCaseData");
-                assert(form.isValidHashtag(dobProp));
-                assert.notStrictEqual(form.hashtagMap[dobProp], null);
+                assert(form.isValidHashtag(dobProp), "not valid after loadCaseData");
+                assert.equal(form.hashtagMap[dobProp], path);
             });
 
             it("should not write unknown referenced hashtags to form", function() {
