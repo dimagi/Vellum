@@ -354,7 +354,9 @@ define([
                 widget.setValue(dobProp);
                 widget.handleChange();
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
-                assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 1);
+                assert.deepEqual(util.getMessages(blue),
+                    // TODO soften this message when data sources are not yet loaded
+                    'calculateAttr:\n  - Unknown question: #case/dob');
                 event.fire("loadCaseData");
                 loadDataTree(function() {
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
@@ -399,12 +401,15 @@ define([
             });
 
             it("overwrites the forms preloaded tags", function() {
-                var form = call('getData').core.form;
-                assert(form.isValidHashtag(dobProp));
-                assert.strictEqual(form.hashtagMap[dobProp], null);
+                var form = call('getData').core.form,
+                    path = "instance('casedb')/cases/case[@case_id = " +
+                           "instance('commcaresession')/session/data/case_id]/dob";
+                assert(form.isValidHashtag(dobProp), "invalid before test");
+                assert.equal(form.hashtagMap[dobProp], path);
+                form.hashtagMap[dobProp] = null;
                 event.fire("loadCaseData");
-                assert(form.isValidHashtag(dobProp));
-                assert.notStrictEqual(form.hashtagMap[dobProp], null);
+                assert(form.isValidHashtag(dobProp), "not valid after loadCaseData");
+                assert.equal(form.hashtagMap[dobProp], path);
             });
 
             it("should not write unknown referenced hashtags to form", function() {

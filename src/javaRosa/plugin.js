@@ -271,32 +271,54 @@ define([
             this.__callOld();
 
             delete this.data.javaRosa.itextMap;
-            var form = this.data.core.form;
+            Itext.on('change', function () { _this.onFormChange(); });
+        },
+        onXFormLoaded: function (form) {
             function _toHashtag(value) {
-                return form.xpath.parse(value).toHashtag();
+                try {
+                    return form.xpath.parse(value).toHashtag();
+                } catch (err) {
+                    return value;
+                }
             }
+            var langs = this.opts().javaRosa.langs;
+            // detect hashtag references in output values
             jrUtil.forEachItextItem(form, function (item, mug) {
                 _(item.forms).each(function (itForm) {
                     _.each(langs, function (lang) {
-                        var value = $('<div>').append(itForm.getValue(lang));
-                        if (!value) { return; }
-                        value.find('output').replaceWith(function() {
-                            var tempOutput = $('<output>'),
-                                output = $(this),
-                                value = output.attr('vellum:value') || output.attr('value'),
-                                ref = output.attr('vellum:ref') || output.attr('ref');
-                            if (value) {
-                                return tempOutput.attr('value', _toHashtag(value))[0].outerHTML;
-                            } else if (ref) {
-                                return tempOutput.attr('ref', _toHashtag(ref))[0].outerHTML;
+                        var text = itForm.getValue(lang);
+                        if (!text) { return; }
+                        var div = $('<div>').append(text),
+                            changed = false;
+                        div.find('output').replaceWith(function() {
+                            var output = $(this),
+                                key = output.is("[value]") ||
+                                    !output.is("[ref]") ? "value" : "ref",
+                                vkey = "vellum:" + key,
+                                value = output.attr(key),
+                                hashval = output.attr(vkey);
+                            if (hashval) {
+                                if (value) {
+                                    form.inferHashtagMeanings(hashval, value);
+                                }
+                                value = hashval;
+                            } else {
+                                // hashtagify xpath expression if possible
+                                // NOTE the success of this could depend
+                                // on whether data sources are loaded,
+                                // which means outputs may load differently
+                                // based on network conditions.
+                                value = _toHashtag(value);
                             }
-                            return this;
+                            // always use value attribute internally
+                            return $("<output />").attr("value", value);
                         });
-                        itForm.setValue(lang, value.html());
+                        itForm.setValue(lang, div.html());
                     });
                 });
             });
-            Itext.on('change', function () { _this.onFormChange(); });
+
+            this.__callOld();
         },
         populateControlMug: function(mug, controlElement) {
             this.__callOld();
@@ -397,9 +419,10 @@ define([
             // non-duplicates
 
             function hashtags(outputRef) {
-                var value = $(outputRef).attr('value') || $(outputRef).attr('ref'),
-                    key = $(outputRef).attr('value') ? 'value' : 'ref',
-                    ret = $("<output>"),
+                var output = $(outputRef),
+                    key = output.is("[value]") || !output.is("[ref]") ? "value" : "ref",
+                    vkey = "vellum:" + key,
+                    value = output.attr(vkey) || output.attr(key),
                     parsed, hashtag, xpath;
                 try {
                     parsed = xpathParser.parse(value);
@@ -412,17 +435,15 @@ define([
                     xpath = value;
                 }
                 if (!form_.richText || xpath === hashtag) {
-                    return ret.attr(key, xpath)[0].outerHTML;
+                    output.attr(key, xpath).removeAttr(vkey);
                 } else {
-                    return ret.attr(key, xpath).attr('vellum:' + key, hashtag)[0].outerHTML;
+                    output.attr(key, xpath).attr(vkey, hashtag);
                 }
             }
 
             function writeValue(xmlWriter, val) {
                 val = $('<div>').append(val);
-                val.find('output').replaceWith(function() {
-                    return hashtags(this);
-                });
+                val.find('output').each(function() { hashtags(this); });
                 xmlWriter.writeXML(xml.normalize(val.html()));
             }
 

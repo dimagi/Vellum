@@ -49,6 +49,12 @@ define([
             xmlWriter.writeString(JSON.stringify(hashtags));
             xmlWriter.writeEndElement();
         }
+        var transforms = form.knownHashtagTransforms();
+        if (form.richText && !_.isEmpty(hashtags)) {
+            xmlWriter.writeStartElement('vellum:hashtagTransforms');
+            xmlWriter.writeString(JSON.stringify(transforms));
+            xmlWriter.writeEndElement();
+        }
 
         form.vellum.contributeToHeadXML(xmlWriter, form);
 

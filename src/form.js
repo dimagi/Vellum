@@ -138,6 +138,8 @@ define([
         // specified in features will always write vellum:ignore="richText"
         this.mayDisableRichText = this.richText;
 
+        this._inferHashtags = makeHashtagInferencer(this);
+        this.shouldInferHashtags = this.richText;
         vellum.datasources.on("change", this._updateHashtags.bind(this), null, null, this);
         this._updateHashtags();
 
@@ -182,6 +184,7 @@ define([
                 form.invertedHashtagMap = _.invert(form.hashtagMap);
                 form.hashtagTransformations = vellum.datasources.getHashtagTransforms({});
                 form.hasCaseHashtags = vellum.datasources.isReady();
+                form.shouldInferHashtags = !form.hasCaseHashtags;
                 _.each(form.hashtagTransformations, function (x, prefix) {
                     form.hashtagNamespaces[HASHTAG_NAMESPACE.exec(prefix)[1]] = true;
                 });
@@ -207,13 +210,14 @@ define([
             // every new hashtag, but only for the mugs that reference that hashtag
             form.fixBrokenReferences();
         },
+        inferHashtagMeanings: function(hashtag, xpath_) {
+            if (hashtag && xpath && this.shouldInferHashtags) {
+                this._inferHashtags(hashtag, xpath_);
+            }
+        },
         isValidHashtag: function(tag) {
             tag = this.normalizeHashtag(tag);
             return this.hashtagMap.hasOwnProperty(tag);
-        },
-        isValidHashtagPrefix: function(tag) {
-            tag = this.normalizeHashtag(tag);
-            return this.hashtagTransformations.hasOwnProperty(tag);
         },
         /**
          * Check if tag has a valid hashtag prefix
@@ -235,7 +239,7 @@ define([
         initHashtag: function(hashtag, xpath) {
             if (!this.hashtagMap[hashtag]) {
                 this.addHashtag(hashtag, xpath);
-                this.hashtagNamespaces[/^#([^\/]+)/.exec(hashtag)[1]] = true;
+                this.hashtagNamespaces[HASHTAG_NAMESPACE.exec(hashtag)[1]] = true;
             }
         },
         removeHashtag: function(hashtag) {
@@ -271,6 +275,17 @@ define([
         },
         knownExternalReferences: function () {
             return this._logicManager.knownExternalReferences();
+        },
+        knownHashtagTransforms: function () {
+            var data = {},
+                prefixes = this.hashtagTransformations;
+            if (!_.isEmpty(this.hashtagTransformations)) {
+                // Save as "prefixes" leaving room for other types in future
+                data.prefixes = _.object(_.map(prefixes, function (func, key) {
+                    return [key, func("")];
+                }));
+            }
+            return data;
         },
         referenceHashtag: function(hashtag, mug, property) {
             if (this.hasValidHashtagPrefix(hashtag)) {
@@ -977,10 +992,7 @@ define([
             }
         },
         fixBrokenReferences: function () {
-            function updateReferences(mug) {
-                _this.updateLogicReferences(mug);
-            }
-            var _this = this;
+            var updateReferences = this.updateLogicReferences.bind(this);
             this._logicManager.forEachBrokenReference(updateReferences);
         },
         hasBrokenReferences: function () {
@@ -1171,6 +1183,80 @@ define([
             return this._logicManager.findUsages(path);
         },
     };
+
+    function makeHashtagInferencer(form) {
+        function decorator(obj) {
+            var realHashtagToXPath = obj.hashtagToXPath;
+            obj.hashtagToXPath = function (hashtag) {
+                var xpath = realHashtagToXPath(hashtag);
+                if (xpath !== info.hashtagMap[hashtag]) {
+                    info.hashtagMap[hashtag] = xpath;
+                    changes[hashtag] = xpath;
+                }
+                return xpath;
+            };
+            return obj;
+        }
+
+        function makeTransform(hashtagPrefix, parentPath) {
+            function transform(prop) { return parentPath + "/" + prop; }
+            return [hashtagPrefix, function (prop) {
+                usedTransforms[hashtagPrefix] = transform;
+                return transform(prop);
+            }];
+        }
+
+        // Default case hashtag prefixes used to guess hashtag meanings.
+        var session = "instance('commcaresession')/session/data/case_id",
+            casepath = "instance('casedb')/cases/case[@case_id = " + session + "]",
+            parent = "instance('casedb')/cases/case[@case_id = " + casepath + "/index/parent]",
+            grandma = "instance('casedb')/cases/case[@case_id = " + parent + "/index/parent]",
+            user = "instance('casedb')/cases/case[@case_type = 'commcare-user']" +
+                   "[hq_user_id = instance('commcaresession')/session/context/userid]",
+            info = {
+                hashtagTransformations: _.object([
+                    makeTransform("#case/", casepath),
+                    makeTransform("#case/parent/", parent),
+                    makeTransform("#case/grandparent/", grandma),
+                    makeTransform("#user/", user),
+                ]),
+            },
+            changes = null, // reset on inferHashtags
+            usedTransforms = null, // reset on inferHashtags
+            parser = xpath.parser(info, decorator);
+
+        /**
+         * Infer hashtags using default hashtag transformations
+         *
+         * This function tries to make up for the fact that there was a
+         * time when xpath transform details were not written in the
+         * <vellum:hashtags> element of form XML, and therefore it is
+         * necessary to guess hashtag meansings using default transformations.
+         */
+        return function inferHashtags(hashtag, xpath_) {
+            var newpath;
+            changes = {};
+            usedTransforms = {};
+            info.hashtagMap = _.clone(form.hashtagMap);
+            info.hashtagNamespaces = form.hashtagNamespaces;
+            try {
+                newpath = parser.parse(hashtag).toXPath();
+            } catch (err) {
+                window.console.log(util.formatExc(err));
+            }
+            // Update form when the guess matches the real xpath expression
+            if (newpath === xpath_ && _.some(changes)) {
+                _.each(changes, function (xpath, hashtag) {
+                    form.initHashtag(hashtag, xpath);
+                });
+                _.each(usedTransforms, function (transform, key) {
+                    if (!form.hashtagTransformations.hasOwnProperty(key)) {
+                        form.hashtagTransformations[key] = transform;
+                    }
+                });
+            }
+        };
+    }
 
     return {
         Form: Form,

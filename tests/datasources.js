@@ -7,6 +7,7 @@ define([
     'underscore',
     'vellum/itemset',
     'text!static/datasources/case-property.xml',
+    'text!static/datasources/null-hashtags.xml',
 ], function (
     options,
     util,
@@ -14,7 +15,8 @@ define([
     $,
     _,
     itemset,
-    CASE_PROPERTY_XML
+    CASE_PROPERTY_XML,
+    NULL_HASHTAGS_XML
 ) {
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
@@ -339,7 +341,43 @@ define([
                 util.assertXmlEqual(util.call("createXML"),
                     CASE_PROPERTY_XML
                         .replace(/ vellum:\w+=".*?"/g, "")
-                        .replace(/<vellum:hashtags.*>/, ""));
+                        .replace(/<vellum:hashtag.*>/g, ""));
+            });
+        });
+
+        describe("when still loading", function() {
+            var vellum, callback;
+            before(function (done) {
+                util.init({
+                    plugins: plugins,
+                    javaRosa: {langs: ['en']},
+                    core: {
+                        dataSourcesEndpoint: function (cb) { callback = cb; },
+                        onReady: function () {
+                            vellum = this;
+                            done();
+                        },
+                    },
+                });
+            });
+            beforeEach(function () {
+                vellum.datasources.reset();
+                callback = null;
+            });
+
+            it("should not lose output value xpath on save", function () {
+                var hashtrans = /<vellum:hashtagTransforms.*>/,
+                    form = util.loadXML(NULL_HASHTAGS_XML.replace(hashtrans, ""));
+                assert(!vellum.datasources.isReady(), 'data sources should not be ready');
+                util.assertXmlEqual(util.call("createXML"), NULL_HASHTAGS_XML);
+                assert(form.shouldInferHashtags, "form.shouldInferHashtags");
+            });
+
+            it("should not infer hashtags when <vellum:hashtagTransforms> is present", function () {
+                var form = util.loadXML(NULL_HASHTAGS_XML);
+                assert(!vellum.datasources.isReady(), 'data sources should not be ready');
+                util.assertXmlEqual(util.call("createXML"), NULL_HASHTAGS_XML);
+                assert(!form.shouldInferHashtags, "form.shouldInferHashtags should be false");
             });
         });
     });
