@@ -795,7 +795,7 @@ define([
             nodeID: {
                 visibility: 'visible',
                 presence: 'required',
-                lstring: ' ',
+                lstring: 'Question ID',
                 setter: function (mug, attr, value) {
                     mug.form.moveMug(mug, "rename", value);
                 },
@@ -809,7 +809,6 @@ define([
                     mug.p.nodeID = value;
                 },
                 widget: widgets.identifier,
-                identifierString: 'Question ID',
                 validationFunc: function (mug) {
                     var caseWarning = {
                             key: "mug-nodeID-case-warning",
@@ -1439,11 +1438,10 @@ define([
         },
         spec: {
             nodeID: {
-                lstring: ' ',
+                lstring: 'Choice Value',
                 visibility: 'visible',
                 presence: 'required',
                 widget: widgets.identifier,
-                identifierString: 'Choice Value',
                 setter: null,
                 validationFunc: function (mug) {
                     if (/\s/.test(mug.p.nodeID)) {
