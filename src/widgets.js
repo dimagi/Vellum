@@ -325,12 +325,6 @@ define([
         var widget = text(mug, options),
             super_updateValue = widget.updateValue;
 
-        if (options.identifierString) {
-            widget.input = $("<div>").append(widget.input);
-            widget.input.addClass("input-group identifier");
-            widget.input.prepend('<div class="input-group-addon">' + options.identifierString + '</div>');
-        }
-
         widget.updateValue = function () {
             var val = widget.getValue();
 

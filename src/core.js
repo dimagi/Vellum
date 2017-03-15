@@ -2199,7 +2199,6 @@ define([
         return [
             "label",
             "calculateAttr",
-            "nodeID",
             "requiredAttr",
             "readOnlyControl",
             "itemsetData",
@@ -2219,6 +2218,7 @@ define([
 
     fn.getLogicProperties = function () {
         return [
+            "nodeID",
             "relevantAttr",
             "constraintAttr",
             "repeat_count",
