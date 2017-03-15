@@ -82,6 +82,19 @@ define([
 
     var isMac = /Mac/.test(navigator.platform);
 
+    var HOTKEY_UNICODE = {
+        ctrl: "Ctrl+",
+        alt: "Alt+",
+        shift: "Shift+",
+    };
+    if (isMac) {
+        HOTKEY_UNICODE = {
+            ctrl: "\u2318",
+            alt: "\u2325",
+            shift: "\u21E7",
+        };
+    }
+
     var DEBUG_MODE = false;
 
     var MESSAGE_TYPES = {
@@ -160,19 +173,13 @@ define([
 
         this.data.core.lastSavedXForm = this.opts().core.form;
 
-        var ctrl = "Ctrl+",
-            alt = "Alt+";
-        if (isMac) {
-            ctrl = "\u2318";
-            alt = "\u2325";
-        }
         this.$f.addClass('formdesigner');
-        this.$f.empty().append(main_template({ctrl: ctrl, alt: alt}));
+        this.$f.empty().append(main_template(HOTKEY_UNICODE));
         $(document).on("keydown", function (e) {
             var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
                 metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
                 key = (ctrlKey ? "Ctrl+" : "") +
-                      (e.altKey ? "Alt+" : "") + 
+                      (e.altKey ? "Alt+" : "") +
                       (e.shiftKey ? "Shift+" : "") +
                       (metaKey ? "Meta+" : "") + e.keyCode;
             (hotkeys[key] || _.identity).call(_this, e);
@@ -218,6 +225,9 @@ define([
         },
         "Ctrl+Alt+189" /* - */: function () {
             this.data.core.$tree.jstree("close_all");
+        },
+        "Ctrl+Shift+70" /* F */: function() {
+            this.toggleFullScreen();
         },
     };
 
@@ -400,27 +410,33 @@ define([
         });
     };
 
+    fn.toggleFullScreen = function () {
+        var _this = this,
+            $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
+                return $(li).find("a").text().match(/(expand|shrink) editor/i);
+            })).find("a"),
+            html = $fullScreenMenuItem.html();
+        analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
+        if (_this.data.windowManager.fullscreen) {
+            _this.data.windowManager.fullscreen = false;
+            $fullScreenMenuItem.html(html.replace(/Shrink/, "Expand"));
+        } else {
+            _this.data.windowManager.fullscreen = true;
+            $fullScreenMenuItem.html(html.replace(/Expand/, "Shrink"));
+        }
+        $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
+        _this.adjustToWindow();
+    };
+
     fn.getToolsMenuItems = function () {
-        var _this = this;
+        var _this = this,
+            shortcut = "<span class='hotkey'>" + HOTKEY_UNICODE.shift + HOTKEY_UNICODE.ctrl + "F</span>";
         return [
             {
-                name: "Enter Full Screen",
+                name: 'Expand Editor' + shortcut,
                 icon: "fa fa-expand",
                 action: function (done) {
-                    var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
-                        return $(li).find("a").text().match(/full screen/i);
-                    })).find("a");
-                    var html = $fullScreenMenuItem.html();
-                    analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
-                    if (_this.data.windowManager.fullscreen) {
-                        _this.data.windowManager.fullscreen = false;
-                        $fullScreenMenuItem.html(html.replace(/Exit/, "Enter"));
-                    } else {
-                        _this.data.windowManager.fullscreen = true;
-                        $fullScreenMenuItem.html(html.replace(/Enter/, "Exit"));
-                    }
-                    $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
-                    _this.adjustToWindow();
+                    _this.toggleFullScreen();
                 }
             },
             {
