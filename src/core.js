@@ -413,7 +413,7 @@ define([
     fn.toggleFullScreen = function () {
         var _this = this,
             $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
-                return $(li).find("a").text().match(/editor/i);
+                return $(li).find("a").text().match(/(expand|shrink) editor/i);
             })).find("a"),
             html = $fullScreenMenuItem.html();
         analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
