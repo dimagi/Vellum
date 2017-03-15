@@ -167,6 +167,11 @@ define([
             container: 'body',
             trigger: 'hover',
         });
+        // Saving, and the associated modal, can interfere with the popover,
+        // so make absolutely sure that the popover is removed on save.
+        _this.data.core.saveButton.ui.on('click', function() {
+            $(this).popover('hide');
+        });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
         this.data.core.currentErrors = [];
