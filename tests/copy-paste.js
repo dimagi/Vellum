@@ -1055,8 +1055,8 @@ define([
                 ["/group/hidden", "DataBindOnly", "1"],
                 ["/group/text", "Text", "null"],
             ]);
-            util.clickQuestion('group/text');
-            assert.equal($("[name=property-calculateAttr]").length, 0);
+            var mug = util.getMug('group/text');
+            assert(!mug.isVisible("calculateAttr"), "calculateAttr should not be visible");
         });
 
         describe("with instances without src", function() {
