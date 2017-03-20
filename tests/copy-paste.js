@@ -1047,6 +1047,18 @@ define([
             });
         });
 
+        it("should not add calculate condition to text node on paste", function() {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/group", "Group", "null"],
+                ["/group/hidden", "DataBindOnly", "1"],
+                ["/group/text", "Text", "null"],
+            ]);
+            util.clickQuestion('group/text');
+            assert.equal($("[name=property-calculateAttr]").length, 0);
+        });
+
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({
