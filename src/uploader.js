@@ -75,7 +75,7 @@ define([
         audio: multimedia_existing_audio,
         video: multimedia_existing_video,
         'video-inline': multimedia_existing_video,
-        'expanded-audio': multimedia_existing_video,
+        'expanded-audio': multimedia_existing_audio,
         text:  multimedia_existing_text,
     },
     SLUG_TO_CLASS = {
