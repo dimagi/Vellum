@@ -431,6 +431,9 @@ define([
         }
         $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
         _this.adjustToWindow();
+        if (_this.opts().windowManager.toggleFullScreenCallback) {
+            _this.opts().windowManager.toggleFullScreenCallback(_this.data.windowManager.fullscreen);
+        }
     };
 
     fn.getToolsMenuItems = function () {
