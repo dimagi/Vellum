@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/938C01FA-667D-49DD-BE72-E65D436289CB" uiVersion="1" version="1" name="Untitled Form">
+					<text />
+				</data>
+			</instance>
+			<instance src="jr://instance/casedb" id="casedb" />
+			<instance src="jr://instance/session" id="commcaresession" />
+			<bind vellum:nodeset="#form/text" nodeset="/data/text" type="xsd:string" vellum:relevant="#case/parent/edd + #case/grandparent/days + #user/days" relevant="instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd + instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/index/parent]/days + instance('casedb')/cases/case[@case_type = 'commcare-user'][hq_user_id = instance('commcaresession')/session/context/userid]/days" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="text-label">
+						<value><output value="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob" vellum:value="#case/dob" /> </value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+		<vellum:hashtags>{&quot;#user/days&quot;:null,&quot;#case/parent/edd&quot;:null,&quot;#case/grandparent/days&quot;:null,&quot;#case/dob&quot;:null}</vellum:hashtags>
+		<vellum:hashtagTransforms>{&quot;prefixes&quot;:{&quot;#case/parent/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/&quot;,&quot;#case/grandparent/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/index/parent]/&quot;,&quot;#user/&quot;:&quot;instance('casedb')/cases/case[@case_type = 'commcare-user'][hq_user_id = instance('commcaresession')/session/context/userid]/&quot;,&quot;#case/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/&quot;}}</vellum:hashtagTransforms>
+	</h:head>
+	<h:body>
+		<input vellum:ref="#form/text" ref="/data/text">
+			<label ref="jr:itext('text-label')" />
+		</input>
+	</h:body>
+</h:html>

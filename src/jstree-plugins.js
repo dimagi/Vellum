@@ -45,5 +45,8 @@ define([
                 base = {inst: this, parent: parent};
             return this.settings.conditionalevents.redraw_node.apply(base, args);
         };
+        this.edit = function () {
+            // do nothing: disable F2 -> rename node
+        };
     };
 });

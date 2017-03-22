@@ -775,6 +775,8 @@ define([
         try {
             if (value) {
                 value = mug.form.xpath.parse(value.toString()).toHashtag();
+            } else if (value === null) {
+                value = undefined;
             }
         } catch (err) {
             if (_.isString(value) && !value.startsWith('#invalid/')) {

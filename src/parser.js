@@ -74,17 +74,11 @@ define([
 
         if (form.richText && !form.vellum.datasources.isReady()) {
             // load hashtags from form to prevent unknown hashtag warnings
-            // WARNING hashtag values will not be written correctly (on save
-            // or edit XML) unil after data sources are loaded.
-            var hashtags = head.children('vellum\\:hashtags, hashtags');
-            try {
-                hashtags = JSON.parse($.trim(hashtags.text()));
-            } catch (err) {
-                hashtags = {};
-            }
-            _.each(hashtags, function (xpath, hash) {
-                form.initHashtag(hash, xpath);
-            });
+            initHashtags(
+                form,
+                head.children('vellum\\:hashtags, hashtags'),
+                head.children('vellum\\:hashtagTransforms, hashtagTransforms')
+            );
         }
 
         // TODO! adapt
@@ -123,6 +117,40 @@ define([
 
         form.isLoadingXForm = false;
         return form;
+    }
+
+    function initHashtags(form, hashtags, transforms) {
+        function transformHashtag(hashtag, xpath) {
+            if (!xpath) {
+                var match = /(#.+\/)([^\/]+)/.exec(hashtag);
+                if (match && transforms.hasOwnProperty(match[1])) {
+                    return transforms[match[1]] + match[2];
+                }
+            }
+            return xpath;
+        }
+
+        try {
+            hashtags = JSON.parse($.trim(hashtags.text()));
+        } catch (err) {
+            hashtags = {};
+        }
+        try {
+            transforms = JSON.parse($.trim(transforms.text())).prefixes || {};
+        } catch (err) {
+            transforms = {};
+        }
+        if (!_.isEmpty(transforms)) {
+            form.hashtagTransformations = _.object(_.map(transforms, function (val, key) {
+                return [key, function (prop) { return val + prop; }];
+            }));
+        }
+        _.each(hashtags, function (xpath, hash) {
+            form.initHashtag(hash, transformHashtag(hash, xpath, transforms));
+        });
+        form.shouldInferHashtags = _.some(form.hashtagMap, function (value) {
+            return value === null;
+        });
     }
 
     // DATA PARSING FUNCTIONS
@@ -663,6 +691,7 @@ define([
         var method = (noPop ? el.attr : el.popAttr).bind(el),
             vellumAttr = method('vellum:' + key.replace(/:/g, "__")),
             xmlAttr = method(key);
+        form.inferHashtagMeanings(vellumAttr, xmlAttr);
         return form.normalizeHashtag(form.richText && vellumAttr ? vellumAttr : xmlAttr);
     }
 

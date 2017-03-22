@@ -20,6 +20,7 @@
 			</itext>
 		</model>
 		<vellum:hashtags>{&quot;#case/dob&quot;:null}</vellum:hashtags>
+		<vellum:hashtagTransforms>{&quot;prefixes&quot;:{&quot;#case/parent/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/&quot;,&quot;#case/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/&quot;}}</vellum:hashtagTransforms>
 	</h:head>
 	<h:body>
 		<input vellum:ref="#form/mug" ref="/data/mug">

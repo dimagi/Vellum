@@ -419,14 +419,18 @@ define([
         /**
          * Call a function for each mug with broken references
          *
-         * The function is called with one argument: the mug with broken
-         * references.
+         * The function is called with one argument or two arguments:
+         * the mug with broken references and property if known.
          */
         forEachBrokenReference: function(func) {
-            _.each(_.keys(this.errors), function (ufid) {
+            _.each(this.errors, function (props, ufid) {
                 var mug = this.form.getMugByUFID(ufid);
                 if (mug) {
-                    func(mug);
+                    if (props) {
+                        _.each(props, function (v, prop) { func(mug, prop); });
+                    } else {
+                        func(mug);
+                    }
                 } else {
                     delete this.errors[ufid];
                 }

@@ -103,23 +103,30 @@ define([
 
             function testReference(attr, value, bad) {
                 var mug = util.getMug(mugMap[attr] || "text");
-                assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                assert.deepEqual(mug.messages.get(attr), []);
+                assert(util.isTreeNodeValid(mug),
+                    "precondition failed:\n" + util.getMessages(mug));
+                assert.deepEqual(mug.messages.get(attr), [],
+                    "pre-check: mug has messages");
 
                 mug.p[attr] = value;
-                if (bad) {
-                    assert(!util.isTreeNodeValid(mug), "mug should not be valid");
-                    assert(mug.messages.get(attr).length,
-                           attr + " should have messages");
-                } else {
-                    assert(util.isTreeNodeValid(mug), "mug should be valid");
-                    assert(mug.messages.get(attr).length === 0,
-                           attr + " should not have messages");
+                try {
+                    if (bad) {
+                        assert(!util.isTreeNodeValid(mug), "mug should not be valid");
+                        assert(mug.messages.get(attr).length,
+                               attr + " should have messages");
+                    } else {
+                        assert(util.isTreeNodeValid(mug), "mug should be valid");
+                        assert(mug.messages.get(attr).length === 0,
+                               attr + " should not have messages");
+                    }
+                } finally {
+                    mug.p[attr] = "";
                 }
 
-                mug.p[attr] = "";
-                assert(util.isTreeNodeValid(mug), util.getMessages(mug));
-                assert.deepEqual(mug.messages.get(attr), []);
+                assert(util.isTreeNodeValid(mug),
+                    "postcondition failed:\n" + util.getMessages(mug));
+                assert.deepEqual(mug.messages.get(attr), [],
+                    "post-check: mug has messages");
             }
 
             _.each(properties, function (attr) {

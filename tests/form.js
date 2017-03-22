@@ -6,16 +6,16 @@ define([
     'vellum/form',
     'vellum/tree',
     'text!static/form/alternate-root-node-name.xml',
-    'text!static/form/question-referencing-other.xml',
     'text!static/form/group-with-internal-refs.xml',
     'text!static/form/hidden-value-in-group.xml',
-    'text!static/form/name-template.xml',
-    'text!static/form/nested-groups.xml',
-    'text!static/form/select-questions.xml',
-    'text!static/form/mismatch-tree-order.xml',
     'text!static/form/hidden-value-tree-order.xml',
     'text!static/form/instance-reference.xml',
-    'text!static/form/manual-instance-reference.xml'
+    'text!static/form/manual-instance-reference.xml',
+    'text!static/form/mismatch-tree-order.xml',
+    'text!static/form/name-template.xml',
+    'text!static/form/nested-groups.xml',
+    'text!static/form/question-referencing-other.xml',
+    'text!static/form/select-questions.xml',
 ], function (
     util,
     chai,
@@ -24,16 +24,16 @@ define([
     form_,
     Tree,
     ALTERNATE_ROOT_NODE_NAME_XML,
-    QUESTION_REFERENCING_OTHER_XML,
     GROUP_WITH_INTERNAL_REFS_XML,
     HIDDEN_VALUE_IN_GROUP_XML,
-    NAME_TEMPLATE,
-    NESTED_GROUPS_XML,
-    SELECT_QUESTIONS,
-    MISMATCH_TREE_ORDER_XML,
     HIDDEN_VALUE_TREE_ORDER,
     INSTANCE_REFERENCE_XML,
-    MANUAL_INSTANCE_REFERENCE_XML
+    MANUAL_INSTANCE_REFERENCE_XML,
+    MISMATCH_TREE_ORDER_XML,
+    NAME_TEMPLATE,
+    NESTED_GROUPS_XML,
+    QUESTION_REFERENCING_OTHER_XML,
+    SELECT_QUESTIONS
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -569,7 +569,6 @@ define([
 
                 "#form": null,
                 /* should these pass? (they don't)
-                "#form/": "is",
                 "#form/prop": "has xpath",
                 */
 
@@ -578,11 +577,17 @@ define([
                 "/data/prop": "xpath",
 
                 "#case": null,
-                "#case/": "is",
                 "#case/prop": "has xpath",
 
+                "#case/parent": "has xpath",
+                "#case/parent/prop": "has xpath",
+
+                "#case/grandparent": "has xpath",
+                "#case/grandparent/prop": "has xpath",
+
+                "#case/nope/not": null,
+
                 "#user": null,
-                "#user/": "is",
                 "#user/prop": "has xpath",
             }, longPaths), function (valid, path) {
                 function may(name) {
@@ -591,10 +596,6 @@ define([
                 valid = _.object(_.map((valid || "").split(" "), function (key) {
                     return [key, true];
                 }));
-
-                it("should " + may("is") + "recognize " + path + " as hashtag prefix", function () {
-                    assert.equal(form.isValidHashtagPrefix(path), !!valid.is);
-                });
 
                 it("should " + may("has") + "recognize " + path + " as having hashtag prefix", function () {
                     assert.equal(form.hasValidHashtagPrefix(path), !!valid.has);
