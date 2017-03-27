@@ -643,6 +643,37 @@ define([
                     });
                 });
 
+                it("should expand tree on click show in question list", function (done) {
+                    util.paste([
+                        ["id", "type", "relevantAttr"],
+                        ["/group", "Group", "null"],
+                        ["/group/text", "Text", "null"],
+                        ["/text", "Text", '#form/group/text'],
+                    ]);
+                    var group = util.getMug("group");
+                    util.collapseGroup(group);
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-relevantAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                var $link = $popover.find("a");
+                                assert.strictEqual($(".jstree-hovered").length, 0);
+                                assert($link.length);
+                                $link.click();
+                                assert.strictEqual($(".jstree-hovered").length, 1);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        bubble.mouseenter();
+                    });
+                });
+
                 it("should show case property description on popover", function (done) {
                     util.loadXML();
                     var mug = util.addQuestion("Text", "text");
