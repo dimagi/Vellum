@@ -215,7 +215,10 @@ define([
 
         $(document).on('click', '.jstree-hover', function(e) {
             e.preventDefault();
-            _this.jstree("hover_node", $(this).data("ufid"));
+            var ufid = $(this).data("ufid");
+            // http://stackoverflow.com/a/30538877/10840
+            _this.jstree("_open_to", ufid);
+            _this.jstree("hover_node", ufid);
             var $node = $(".jstree-hovered");
             if ($node.length) {
                 var $scrollable = $node.closest(".fd-scrollable");
