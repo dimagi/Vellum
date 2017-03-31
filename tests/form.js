@@ -97,6 +97,30 @@ define([
             assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
         });
 
+        describe("The form's ID generation", function() {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {onReady: done},
+                    features: {rich_text: false},
+                });
+            });
+
+            it("should generate ID based on label", function () {
+                util.loadXML("");
+                var name = call('addQuestion', "Text");
+                $("[name='itext-en-label']").val('What is your name?').change();
+                var question1 = call('addQuestion', "Text"),
+                    copy = call('addQuestion', "Text");
+                $("[name='itext-en-label']").val('What is your name?').change();
+                var blank = call('addQuestion', "Text");
+                assert.equal(name.p.nodeID, 'what_is_your_name');
+                assert.equal(question1.p.nodeID, 'question1');
+                assert.equal(copy.p.nodeID, 'copy-1-of-what_is_your_name');
+                assert.equal(blank.p.nodeID, undefined);
+            });
+        });
+
         it("should show warnings for broken references on delete mug", function () {
             util.loadXML(QUESTION_REFERENCING_OTHER_XML);
             var blue = call("getMugByPath", "/data/blue"),

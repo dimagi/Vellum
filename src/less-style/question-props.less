@@ -50,6 +50,20 @@
             min-width: 0px; /* for chrome */
             display: table-column; /* for firefox */
 
+            // Always show main/basic section, but hide header
+            &:first-child {
+                margin-top: 20px;
+
+                legend {
+                    display: none;
+                }
+
+                // Force content to show even if header is "collapsed"
+                > .collapse {
+                    display: block;
+                }
+            }
+
             // Accordion header
             .collapse-toggle {
                 cursor: pointer;
@@ -103,6 +117,10 @@
                     .btn-danger {
                         margin: 10px;
                     }
+                }
+
+                .identifier {
+                    opacity: 0.5;
                 }
             }
 

@@ -1201,9 +1201,26 @@ define([
             .addClass('disabled');
     };
 
+    // Suggest a node ID, based on the mug's label
+    fn.nodeIDFromLabel = function(mug) {
+        var suggestedID = this.getMugDisplayName(mug) || "";
+        suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
+        suggestedID = suggestedID.toLowerCase();
+        suggestedID = suggestedID.trim();
+        suggestedID = suggestedID.replace(/\s+/g, '_');         // collapse whitespace & replace with underscores
+        suggestedID = suggestedID.replace(/[^\w\-]/g, '');      // strip illegal characters
+        suggestedID = suggestedID.substring(0, 75);             // no exceedingly long IDs
+        return mug.form.generate_question_id(suggestedID, mug);
+    };
+
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
+        var currentMug = this.getCurrentlySelectedMug();
+        if (currentMug && !currentMug.p.nodeID) {
+            currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
+        }
+
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
@@ -1453,9 +1470,19 @@ define([
             }
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
-            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-            if ($firstInput.length) {
-                $firstInput.focus().select();
+
+            // Focus on first input, which might be a normal input or a rich text input
+            var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
+            if ($firstGroup.length) {
+                var $input = $firstGroup.find("input, textarea");
+                if ($input.length) {
+                    // Rich text is off
+                    $input.focus();
+                } else {
+                    // Rich text is on
+                    $input = $firstGroup.find(".fd-textarea, .fd-input");
+                    richText.editor($input).focus();
+                }
             }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
@@ -2082,7 +2109,7 @@ define([
                 help: {
                     title: "Basic",
                     text: "<p>The <strong>Label</strong> is text that appears in the application. " +
-                        "This text will not appear in data exports.</p> ",
+                          "This text will not appear in data exports.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
@@ -2105,9 +2132,11 @@ define([
                 isCollapsed: true,
                 help: {
                     title: "Logic",
-                    text: "Use logic to control when questions are asked and what answers are valid. " +
+                    text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                        "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                        "<p>Use logic to control when questions are asked and what answers are valid. " +
                         "You can add logic to display a question based on a previous answer, to make " +
-                        "the question required or ensure the answer is in a valid range.",
+                        "the question required or ensure the answer is in a valid range.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
                 }
             },
@@ -2140,8 +2169,9 @@ define([
 
     fn.getMainProperties = function () {
         return [
-            "nodeID",
             "label",
+            "nodeID",
+            "requiredAttr",
             "readOnlyControl",
             "itemsetData",
             "imageSize",
@@ -2161,7 +2191,6 @@ define([
     fn.getLogicProperties = function () {
         return [
             "calculateAttr",
-            "requiredAttr",
             "relevantAttr",
             "constraintAttr",
             "repeat_count",
