@@ -95,7 +95,7 @@ define([
         _makeLanguageSelectorDropdown: function () {
             var _this = this,
                 langs = this.data.javaRosa.Itext.getLanguages(),
-                $menu = this.$f.find('#fd-questions-dropdown-menu'),
+                $menu = this.$f.find('.fd-questions-menu'),
                 $items,
                 $input,
                 fullLangs;
@@ -748,7 +748,7 @@ define([
             control.labelItext = addSerializer({
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Label",
+                lstring: "Display Text",
                 widget: function (mug, options) {
                     return itextBlock.label(mug, $.extend(options, {
                         itextType: "label",
@@ -756,17 +756,16 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.labelItext;
                         },
-                        displayName: "Label"
+                        displayName: "Display Text"
                     }));
                 },
-                widgetPlaceholder: "Display Text",
-                validationFunc: itextValidator("labelItext", "Label")
+                validationFunc: itextValidator("labelItext", "Display Text")
             });
             // virtual property used to define a widget
             control.labelItextID = {
                 visibility: 'labelItext',
                 presence: 'optional',
-                lstring: "Label Itext ID",
+                lstring: "Display Text Itext ID",
                 widget: itextWidget.id,
                 widgetValuePath: "labelItext"
             };

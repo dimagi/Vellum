@@ -50,21 +50,18 @@
             min-width: 0px; /* for chrome */
             display: table-column; /* for firefox */
 
-            // Accordion header
-            .collapse-toggle {
-                cursor: pointer;
-                min-height: 30px;
-                .transition(background .4s ease-in-out);
+            // Always show main/basic section, but hide header
+            &:first-child {
+                margin-top: 20px;
 
-                &:hover {
-                    background-color: lighten(@grayLighter, 3);
-                    text-decoration: none;
+                legend {
+                    display: none;
                 }
+            }
 
-                // Make icon point right instead of down
-                &.collapsed .fa-angle-double-down::before {
-                    content: "\f101" !important;
-                }
+            // Header
+            legend {
+                min-height: 30px;   // tall enough for help icon
 
                 // Position section-level help at right of header
                 .fd-help {
@@ -103,6 +100,10 @@
                     .btn-danger {
                         margin: 10px;
                     }
+                }
+
+                .identifier {
+                    opacity: 0.5;
                 }
             }
 

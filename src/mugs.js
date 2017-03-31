@@ -797,7 +797,7 @@ define([
             nodeID: {
                 visibility: 'visible',
                 presence: 'required',
-                lstring: 'Question ID',
+                lstring: ' ',
                 setter: function (mug, attr, value) {
                     mug.form.moveMug(mug, "rename", value);
                 },
@@ -811,8 +811,7 @@ define([
                     mug.p.nodeID = value;
                 },
                 widget: widgets.identifier,
-                help: "The <strong>Question ID</strong> is an internal identifier for a question. " +
-                      "It does not appear on the phone. It is the name of the question in data exports.",
+                identifierString: 'Question ID',
                 validationFunc: function (mug) {
                     var caseWarning = {
                             key: "mug-nodeID-case-warning",
@@ -1006,10 +1005,10 @@ define([
             label: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Default Label",
+                lstring: "Default Display Text",
                 validationFunc: function (mug) {
                     if (!mug.p.label && mug.getPresence("label") === 'required') {
-                        return 'Default Label is required';
+                        return 'Default Display Text is required';
                     }
                     return 'pass';
                 }
@@ -1017,7 +1016,7 @@ define([
             hintLabel: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Hint Label"
+                lstring: "Hint Display Text"
             },
             rawControlAttributes: {
                 presence: 'optional',
@@ -1442,10 +1441,11 @@ define([
         },
         spec: {
             nodeID: {
-                lstring: 'Choice Value',
+                lstring: ' ',
                 visibility: 'visible',
                 presence: 'required',
                 widget: widgets.identifier,
+                identifierString: 'Choice Value',
                 setter: null,
                 validationFunc: function (mug) {
                     if (/\s/.test(mug.p.nodeID)) {

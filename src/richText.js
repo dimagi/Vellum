@@ -168,7 +168,6 @@ define([
             editor = input.ckeditor({
                 contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
                 disableNativeSpellChecker: options.disableNativeSpellChecker,
-                placeholder: options.placeholder,
             }).editor;
         wrapper = {
             getValue: function (callback) {
@@ -225,6 +224,14 @@ define([
             change: function () {
                 editor.fire("saveSnapshot");
                 return wrapper;
+            },
+            focus: function() {
+                if (editor.status === "ready") {
+                    editor.focus();
+                } else {
+                    editor.removeListener('instanceReady', editor.focus);
+                    editor.on('instanceReady', editor.focus);
+                }
             },
             select: function (index) {
                 ckSelect.call(null, editor, index);

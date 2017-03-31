@@ -420,11 +420,14 @@ define([
             });
         });
 
-        this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
-            var $target = $(e.target),
-                section = $target.parent().find("legend").text().trim(),
-                shouldCollapse = $target.hasClass('in');
-            localStorage.setItem('collapse-' + section, shouldCollapse ? "1" : "");
+        // Section toggling menu
+        this.$f.on('click', '.fd-section-changer a', function(e) {
+            var slug = $(e.target).data("slug"),
+                $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']");
+            $fieldset.toggleClass("hide");
+            $(".fd-section-changer [data-slug='" + slug + "']").toggleClass("selected");
+
+            localStorage.setItem('collapse-' + slug, $fieldset.hasClass("hide") ? "1" : "");
         });
     };
 
@@ -953,7 +956,7 @@ define([
                     return node;
                 }
             },
-            "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
+            "plugins" : [ "themes", "types", "dnd", "conditionalevents", "actions" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -1201,9 +1204,26 @@ define([
             .addClass('disabled');
     };
 
+    // Suggest a node ID, based on the mug's label
+    fn.nodeIDFromLabel = function(mug) {
+        var suggestedID = this.getMugDisplayName(mug) || "";
+        suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
+        suggestedID = suggestedID.toLowerCase();
+        suggestedID = suggestedID.trim();
+        suggestedID = suggestedID.replace(/\s+/g, '_');         // collapse whitespace & replace with underscores
+        suggestedID = suggestedID.replace(/[^\w\-]/g, '');      // strip illegal characters
+        suggestedID = suggestedID.substring(0, 75);             // no exceedingly long IDs
+        return mug.form.generate_question_id(suggestedID, mug);
+    };
+
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
+        var currentMug = this.getCurrentlySelectedMug();
+        if (currentMug && !currentMug.p.nodeID) {
+            currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
+        }
+
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
@@ -1453,9 +1473,19 @@ define([
             }
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
-            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-            if ($firstInput.length) {
-                $firstInput.focus().select();
+
+            // Focus on first input, which might be a normal input or a rich text input
+            var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
+            if ($firstGroup.length) {
+                var $input = $firstGroup.find("input, textarea");
+                if ($input.length) {
+                    // Rich text is off
+                    $input.focus();
+                } else {
+                    // Rich text is on
+                    $input = $firstGroup.find(".fd-textarea, .fd-input");
+                    richText.editor($input).focus();
+                }
             }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
@@ -1595,10 +1625,7 @@ define([
     };
 
     fn.displayMugProperties = function (mug) {
-        var $props = this.$f.find('.fd-question-properties'),
-            _getWidgetClassAndOptions = function (property) {
-                return getWidgetClassAndOptions(property, mug);
-            };
+        var $props = this.$f.find('.fd-question-properties');
         this.$f.find('.fd-default-panel').addClass('hide');
 
         this.showContentRight();
@@ -1615,7 +1642,9 @@ define([
 
             section.mug = mug;
             section.properties = _(section.properties)
-                .map(_getWidgetClassAndOptions)
+                .map(function (property) {
+                    return getWidgetClassAndOptions(property, mug);
+                })
                 .filter(_.identity);
 
             if (section.properties.length) {
@@ -1816,15 +1845,24 @@ define([
         }
     };
 
+    fn.sectionIsCollapsed = function(section) {
+        var collapseKey = "collapse-" + section.slug;
+        if (section.slug === "main") {
+            // Always show basic section
+            return false;
+        }
+        return localStorage.hasOwnProperty(collapseKey) ?
+            localStorage.getItem(collapseKey) :
+            section.isCollapsed;
+    };
+
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
-            collapseKey = "collapse-" + options.displayName,
-            isCollapsed = localStorage.hasOwnProperty(collapseKey) ?
-                localStorage.getItem(collapseKey) :
-                options.isCollapsed,
+            isCollapsed = _this.sectionIsCollapsed(options),
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
+                fieldsetSlug: options.slug,
                 isCollapsed: !!isCollapsed,
                 help: options.help
             })),
@@ -1859,6 +1897,21 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
+                sections: multiselect ? [] : _.chain(_this.getSections(mug))
+                    .rest()
+                    .filter(function(s) {
+                        // Limit to sections relevant to this mug
+                        return _.find(_.map(s.properties, function(property) {
+                            return getWidgetClassAndOptions(property, mug);
+                        }), _.identity);
+                    })
+                    .map(function(s) {
+                        // Just pass the template a show/hide flag
+                        return _.extend({
+                            show: !_this.sectionIsCollapsed(s),
+                        }, s);
+                    })
+                    .value(),
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true, true);
@@ -2081,8 +2134,8 @@ define([
                 properties: this.getMainProperties(),
                 help: {
                     title: "Basic",
-                    text: "<p>The <strong>Label</strong> is text that appears in the application. " +
-                        "This text will not appear in data exports.</p> ",
+                    text: "<p>The <strong>Display Text</strong> is text that appears in the application. " +
+                          "This text will not appear in data exports.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
@@ -2105,9 +2158,11 @@ define([
                 isCollapsed: true,
                 help: {
                     title: "Logic",
-                    text: "Use logic to control when questions are asked and what answers are valid. " +
+                    text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                        "It does not appear on the phone. It is the name of the question in data exports.</p>" +
+                        "<p>Use logic to control when questions are asked and what answers are valid. " +
                         "You can add logic to display a question based on a previous answer, to make " +
-                        "the question required or ensure the answer is in a valid range.",
+                        "the question required or ensure the answer is in a valid range.</p>",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
                 }
             },
@@ -2140,8 +2195,9 @@ define([
 
     fn.getMainProperties = function () {
         return [
-            "nodeID",
             "label",
+            "nodeID",
+            "requiredAttr",
             "readOnlyControl",
             "itemsetData",
             "imageSize",
@@ -2161,7 +2217,6 @@ define([
     fn.getLogicProperties = function () {
         return [
             "calculateAttr",
-            "requiredAttr",
             "relevantAttr",
             "constraintAttr",
             "repeat_count",

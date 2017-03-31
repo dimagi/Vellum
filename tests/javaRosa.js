@@ -1105,11 +1105,11 @@ define([
         });
 
         it("should only display once after multiple load xml", function() {
-            assert.strictEqual($('#fd-questions-dropdown-menu li:contains("Display")').length, 1);
+            assert.strictEqual($('.fd-head-menu-container li:contains("Display")').length, 1);
             util.loadXML("");
-            assert.strictEqual($('#fd-questions-dropdown-menu li:contains("Display")').length, 1);
+            assert.strictEqual($('.fd-head-menu-container li:contains("Display")').length, 1);
             util.loadXML("");
-            assert.strictEqual($('#fd-questions-dropdown-menu li:contains("Display")').length, 1);
+            assert.strictEqual($('.fd-head-menu-container li:contains("Display")').length, 1);
         });
     });
 });

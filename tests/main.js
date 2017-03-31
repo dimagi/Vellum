@@ -112,7 +112,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/saveToCase',
         'tests/setvalue',
         'tests/richText',
-        'tests/comments',
+        'tests/questionProperties',
         'tests/atwho',
         'tests/escapedHashtags',
         'tests/undomanager',
