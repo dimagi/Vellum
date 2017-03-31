@@ -33,6 +33,7 @@ define([
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
+    'jstree-actions',
     'jquery.bootstrap',
     'caretjs',
     'atjs'
@@ -226,6 +227,14 @@ define([
             }
             analytics.fbUsage("Clicked link to show in tree");
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
+        });
+
+        $(document).on('mouseover', '.jstree-node', function(e) {
+            $(e.currentTarget).find(".action_remove").addClass("hide")
+            $(e.target).closest(".jstree-node").find(".action_remove").removeClass("hide");
+        });
+        $(document).on('mouseout', '.jstree-node', function(e) {
+            $(e.currentTarget).find(".action_remove").addClass("hide")
         });
 
         this._init_toolbar();
@@ -953,7 +962,7 @@ define([
                     return node;
                 }
             },
-            "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
+            "plugins" : [ "themes", "types", "dnd", "conditionalevents", "actions" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -1003,6 +1012,16 @@ define([
                     node.icon = node.data.mug.getIcon();
                 }
             });
+        });
+        $tree.jstree(true).add_action("all", {
+            "id": "action_remove",
+            "class": "fa fa-trash-o action_remove",
+            "after": true,
+            "selector": "a",
+            "event": "click",
+            "callback": function (node_id, node, action_id, action_el) {
+                _this.data.core.form.removeMugsFromForm([node.data.mug]);
+            }
         });
     };
 
