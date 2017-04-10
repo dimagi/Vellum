@@ -73,6 +73,19 @@
 
     // Styles for question tree only, including header
     .fd-tree {
+        .fd-head {
+            @height: 46px;
+            height: @height;
+
+            h2 {
+                line-height: @height;
+            }
+
+            .fd-head-menu-container {
+                line-height: @height;
+            }
+        }
+
         .fd-scrollable {
             overflow-x: auto;
 

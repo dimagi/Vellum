@@ -10,8 +10,6 @@ body.vellum-full-screen {
 
     // Another wrapper around all of vellum, can be styled (say, for full-screen mode)
     .fd-ui-container {
-        @leftHeadHeight: 46px;
-
         top: 0;
         width: 100%;
         background-color: white;
@@ -28,16 +26,8 @@ body.vellum-full-screen {
             &.fd-content-left {
                 width: 30%;
 
-                .fd-head {
-                    height: @leftHeadHeight;
-                    h2 {
-                        line-height: @leftHeadHeight;
-                        font-size: 14px;
-                    }
-
-                    .fd-head-menu-container {
-                        line-height: @leftHeadHeight;
-                    }
+                .fd-head h2 {
+                    font-size: 14px;
                 }
 
                 .fd-add-question {
@@ -100,7 +90,6 @@ body.vellum-full-screen {
                 .fd-head-max-indicator {
                     position: absolute;
                     right: 10px;
-                    line-height: @leftHeadHeight;
 
                     i {
                         color: @cc-neutral-hi;
