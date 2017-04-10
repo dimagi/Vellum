@@ -605,7 +605,7 @@ define([
 
         it("adds and removes the add choice action when type changes", function() {
             util.loadXML("");
-            util.addQuestion("Text", "question1");
+            var mug = util.addQuestion("Text", "question1");
             var changerSelector = ".fd-question-changer";
 
             $(changerSelector + " > a").click();
@@ -614,6 +614,8 @@ define([
 
             assert.strictEqual($(".add_choice").length, 1);
             $(".add_choice").click();
+            mug.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
+            clickQuestion("question1/choice1");
 
             util.assertJSTreeState(
                 "question1",
@@ -630,10 +632,12 @@ define([
 
         it("gives select questions an add choice action", function() {
             util.loadXML("");
-            util.addQuestion("Select", "question1");
+            var mug = util.addQuestion("Select", "question1");
 
             assert.strictEqual($(".add_choice").length, 1);
             $(".add_choice").click();
+            mug.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
+            clickQuestion("question1/choice1");
 
             util.assertJSTreeState(
                 "question1",
