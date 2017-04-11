@@ -615,6 +615,13 @@ define([
             assert.strictEqual($(".add_choice").length, 1);
             $(".add_choice").click();
 
+            var choice = call("getCurrentlySelectedMug");
+            assert(!choice.messages.get().length, "New mug should have no errors");
+            assert(!choice.p.nodeID, "New mug shouldn't have an id");
+            assert(!choice.p.labelItext.get(), "New mug shouldn't have a label");
+            choice.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
+            clickQuestion("question1/choice1");
+
             util.assertJSTreeState(
                 "question1",
                 "  choice1"
@@ -630,10 +637,12 @@ define([
 
         it("gives select questions an add choice action", function() {
             util.loadXML("");
-            util.addQuestion("Select", "question1");
+            var mug = util.addQuestion("Select", "question1");
 
             assert.strictEqual($(".add_choice").length, 1);
             $(".add_choice").click();
+            mug.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
+            clickQuestion("question1/choice1");
 
             util.assertJSTreeState(
                 "question1",
