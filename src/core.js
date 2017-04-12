@@ -6,7 +6,7 @@ define([
     'underscore',
     'jquery',
     'tpl!vellum/templates/main',
-    'tpl!vellum/templates/question_type_group',
+    'tpl!vellum/templates/add_question',
     'tpl!vellum/templates/edit_source',
     'tpl!vellum/templates/confirm_overwrite',
     'tpl!vellum/templates/control_group_stdInput',
@@ -33,6 +33,7 @@ define([
     'vellum/jstree-plugins',
     'less!vellum/less-style/main',
     'jquery.jstree',
+    'jstree-actions',
     'jquery.bootstrap',
     'caretjs',
     'atjs'
@@ -42,7 +43,7 @@ define([
     _,
     $,
     main_template,
-    question_type_group,
+    add_question,
     edit_source,
     confirm_overwrite,
     control_group_stdInput,
@@ -81,6 +82,19 @@ define([
 
     var isMac = /Mac/.test(navigator.platform);
 
+    var HOTKEY_UNICODE = {
+        ctrl: "Ctrl+",
+        alt: "Alt+",
+        shift: "Shift+",
+    };
+    if (isMac) {
+        HOTKEY_UNICODE = {
+            ctrl: "\u2318",
+            alt: "\u2325",
+            shift: "\u21E7",
+        };
+    }
+
     var DEBUG_MODE = false;
 
     var MESSAGE_TYPES = {
@@ -99,55 +113,6 @@ define([
             title: "Form Warning",
             icon: "fa fa-info-circle",
         }
-    };
-
-
-    var getQuestionTypeGroupClass = function (slug) {
-        return "fd-question-group-" + slug;
-    };
-    
-    var convertButtonSpec = function (buttonSpec) {
-        return {
-            slug: buttonSpec[0],
-            title: buttonSpec[1],
-            icon: buttonSpec.length > 2 ? buttonSpec[2] : null
-        };
-    };
-        
-    var QuestionTypeGroup = function (groupData, vellum) {
-        var defaultQuestion = convertButtonSpec(groupData.group),
-            groupClass = getQuestionTypeGroupClass(defaultQuestion.slug);
-
-        var $questionGroup = $(question_type_group({
-            groupClass: groupClass,
-            showDropdown: groupData.questions.length > 1,
-            textOnly: groupData.textOnly,
-            relatedQuestions: _.map(groupData.related || [], convertButtonSpec),
-            defaultQuestion: defaultQuestion,
-            questions: _.map(groupData.questions, convertButtonSpec)
-        }));
-
-        $questionGroup.find('.fd-question-type').click(function (event) {
-            if (!$(this).hasClass('disabled')) {
-                vellum.addQuestion($(this).data('qtype'));
-            }
-            event.preventDefault();
-        });
-        $questionGroup.find('.btn.fd-question-type > span').tooltip({
-            title: function () {
-                var qLabel = $(this).data('qlabel'),
-                    $qType = $(this).parent();
-
-                if($qType.hasClass('disabled')) {
-                    qLabel = qLabel + " (add " + defaultQuestion.title + " first)";
-                } else {
-                    qLabel = "Add " + qLabel;
-                }
-                return qLabel;
-            },
-            placement: 'bottom'
-        });
-        return $questionGroup;
     };
 
     var fn = {};
@@ -179,15 +144,33 @@ define([
         var hasBrokenReferences = _.debounce(function () {
             return _this.data.core.form.hasBrokenReferences();
         }, 500, true);
-        _this.data.core.saveButton.ui.tooltip({
+        _this.data.core.saveButton.ui.popover({
             title: function () {
                 if (hasBrokenReferences()) {
-                    return "Warning: form has reference errors. Check the question tree.";
+                    return "Errors in Form";
                 } else {
                     return "";
                 }
             },
-            placement: 'bottom'
+            content: function() {
+                if (hasBrokenReferences()) {
+                    return "<div class='alert alert-danger'>Form has reference errors." +
+                           "<br>Look for questions marked with " +
+                           "<i class='fd-tree-valid-alert-icon fa fa-warning'></i> " +
+                           "and check they don't reference deleted questions.</div>";
+                } else {
+                    return "";
+                }
+            },
+            html: true,
+            placement: 'bottom',
+            container: 'body',
+            trigger: 'hover',
+        });
+        // Saving, and the associated modal, can interfere with the popover,
+        // so make absolutely sure that the popover is removed on save.
+        _this.data.core.saveButton.ui.on('click', function() {
+            $(this).popover('hide');
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
@@ -195,19 +178,13 @@ define([
 
         this.data.core.lastSavedXForm = this.opts().core.form;
 
-        var ctrl = "Ctrl+",
-            alt = "Alt+";
-        if (isMac) {
-            ctrl = "\u2318";
-            alt = "\u2325";
-        }
         this.$f.addClass('formdesigner');
-        this.$f.empty().append(main_template({ctrl: ctrl, alt: alt}));
+        this.$f.empty().append(main_template(HOTKEY_UNICODE));
         $(document).on("keydown", function (e) {
             var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
                 metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
                 key = (ctrlKey ? "Ctrl+" : "") +
-                      (e.altKey ? "Alt+" : "") + 
+                      (e.altKey ? "Alt+" : "") +
                       (e.shiftKey ? "Shift+" : "") +
                       (metaKey ? "Meta+" : "") + e.keyCode;
             (hotkeys[key] || _.identity).call(_this, e);
@@ -229,6 +206,7 @@ define([
         });
 
         this._init_toolbar();
+        this._init_add_question();
         this._createJSTree();
         this.datasources = datasources.init(
             this.opts().core.dataSourcesEndpoint,
@@ -256,66 +234,80 @@ define([
         "Ctrl+Alt+189" /* - */: function () {
             this.data.core.$tree.jstree("close_all");
         },
+        "Ctrl+Shift+70" /* F */: function() {
+            this.toggleFullScreen();
+        },
     };
 
     fn.getMugTypes = function () {
         return mugs.baseMugTypes;
     };
-        
-    fn._init_toolbar = function () {
+
+    fn._init_add_question = function () {
         var _this = this,
-            $questionGroupContainer = this.$f.find(
-                '.fd-container-question-type-group');
-
+            $dropdown = _this.$f.find(".fd-add-question-dropdown");
         this.data.core.QUESTIONS_IN_TOOLBAR = [];
-        this.data.core.QUESTION_TYPE_TO_GROUP = {};
 
-        _.each(this._getQuestionGroups(), function (groupData) {
-            var groupSlug = groupData.group[0];
-
+        _.each(_this.getQuestionGroups(), function (groupData) {
             var getQuestionData = function (questionType) {
                 var mugType = _this.data.core.mugTypes[questionType],
                     questionData = [
-                        questionType, 
-                        mugType.typeName, 
+                        questionType,
+                        mugType.typeName,
                         mugType.icon
                     ];
 
                 _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
-                _this.data.core.QUESTION_TYPE_TO_GROUP[questionType] = groupSlug;
                 return questionData;
             };
 
             groupData.questions = _.map(groupData.questions, getQuestionData);
-            if (groupData.related && groupData.related.length) {
-                groupData.related = _.map(groupData.related, getQuestionData);
-            }
-
-            groupData.group[2] = groupData.group[2] || 
-                _this.data.core.mugTypes[groupData.group[0]].icon;
-            $questionGroupContainer.append(
-                new QuestionTypeGroup(groupData, _this));
         });
 
+        $dropdown.find(".fd-add-question").after($(add_question({
+            groups: _.map(_this.getQuestionGroups(), function(groupData) {
+                var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
+                return {
+                    name: groupData.group[1] || defaultMug.typeName,
+                    defaultQuestion: {
+                        slug: groupData.group[0],
+                        name: groupData.group[1] || defaultMug.typeName,
+                        icon: groupData.group[2] || defaultMug.icon,
+                    },
+                    questions: _.map(groupData.questions, function(questionType) {
+                        var mugType = _this.data.core.mugTypes[questionType];
+                        return {
+                            slug: questionType,
+                            name: mugType.typeName,
+                            icon: mugType.icon,
+                        };
+                    }),
+                };
+            }),
+        })));
+
+        $dropdown.find(".fd-question-type").click(function (e) {
+            if (!$(this).hasClass('disabled')) {
+                _this.addQuestion($(this).data('qtype'));
+            }
+            e.preventDefault();
+        });
+    };
+
+    fn._init_toolbar = function () {
         var $saveButtonContainer = this.$f.find('.fd-save-button');
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
     };
 
-    fn._getQuestionGroups = function () {
+    fn.getQuestionGroups = function () {
         return [
             {
-                group: ["Text", 'Text'],  // key in mugTypes, <title>
-                questions: [
-                    "Text",
-                    "Trigger"
-                ]
+                group: ["Text"],
+                questions: ["Text"],
             },
             {
                 group: ["Select", 'Multiple Choice'],
-                related: [
-                    "Choice"
-                ],
-                questions: this.getSelectQuestions()
+                questions: ["Select", "MSelect"],
             },
             {
                 group: ["Int", 'Number'],
@@ -331,12 +323,6 @@ define([
                     "Date",
                     "Time",
                     "DateTime"
-                ]
-            },
-            {
-                group: ["DataBindOnly", 'Hidden Value'],
-                questions: [
-                    "DataBindOnly"
                 ]
             },
             {
@@ -357,17 +343,20 @@ define([
                 ]
             },
             {
+                group: ["Trigger"],
+                questions: ["Trigger"],
+            },
+            {
+                group: ["DataBindOnly", 'Hidden Value'],
+                questions: [
+                    "DataBindOnly"
+                ]
+            },
+            {
                 group: ["Geopoint", 'Advanced', ''],
                 textOnly: true,
                 questions: this.getAdvancedQuestions()
             }
-        ];
-    };
-
-    fn.getSelectQuestions = function () {
-        return [
-            "Select",
-            "MSelect"
         ];
     };
 
@@ -383,8 +372,8 @@ define([
         var _this = this,
             menuItems = this.getToolsMenuItems();
 
-        var $toolsMenu = this.$f.find('.fd-tools-menu');
-        $toolsMenu.empty();
+        var $lastItem = this.$f.find('.fd-tools-menu');
+        $lastItem.nextUntil(".divider").remove();
         _(menuItems).each(function (menuItem) {
             var $a = $("<a tabindex='-1' href='#'><i class='" + menuItem.icon + "'></i> " + menuItem.name + "</a>").click(
                 function (e) {
@@ -397,7 +386,9 @@ define([
                     });
                 }
             );
-            $("<li></li>").append($a).appendTo($toolsMenu);
+            var $newItem = $("<li></li>").append($a);
+            $lastItem.after($newItem);
+            $lastItem = $newItem;
         });
 
         this.$f.find('.fd-expand-all').click(function() {
@@ -420,38 +411,43 @@ define([
             });
         });
 
-        this.$f.on('show.bs.collapse hide.bs.collapse', function(e) {
-            var $target = $(e.target),
-                section = $target.parent().find("legend").text().trim(),
-                shouldCollapse = $target.hasClass('in');
-            localStorage.setItem('collapse-' + section, shouldCollapse ? "1" : "");
+        // Section toggling menu
+        this.$f.find(".fd-content-right").on('click', '.fd-section-changer .dropdown-menu a', function(e) {
+            var $link = $(e.target);
+            _this.collapseSection($link.data("slug"), $link.hasClass("selected"));
         });
     };
 
+    fn.toggleFullScreen = function () {
+        var _this = this,
+            $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
+                return $(li).find("a").text().match(/(expand|shrink) editor/i);
+            })).find("a"),
+            html = $fullScreenMenuItem.html();
+        analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
+        if (_this.data.windowManager.fullscreen) {
+            _this.data.windowManager.fullscreen = false;
+            $fullScreenMenuItem.html(html.replace(/Shrink/, "Expand"));
+        } else {
+            _this.data.windowManager.fullscreen = true;
+            $fullScreenMenuItem.html(html.replace(/Expand/, "Shrink"));
+        }
+        $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
+        _this.adjustToWindow();
+        if (_this.opts().windowManager.toggleFullScreenCallback) {
+            _this.opts().windowManager.toggleFullScreenCallback(_this.data.windowManager.fullscreen);
+        }
+    };
+
     fn.getToolsMenuItems = function () {
-        var _this = this;
+        var _this = this,
+            shortcut = "<span class='hotkey'>" + HOTKEY_UNICODE.shift + HOTKEY_UNICODE.ctrl + "F</span>";
         return [
             {
-                name: "Enter Full Screen",
+                name: 'Expand Editor' + shortcut,
                 icon: "fa fa-expand",
                 action: function (done) {
-                    var $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu a'), function(a) {
-                        return a.text.match(/full screen/i);
-                    }));
-                    var html = $fullScreenMenuItem.html();
-                    analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
-                    if (_this.data.windowManager.fullscreen) {
-                        _this.data.windowManager.fullscreen = false;
-                        $fullScreenMenuItem.html(html.replace(/Exit/, "Enter"));
-                    } else {
-                        _this.data.windowManager.fullscreen = true;
-                        $fullScreenMenuItem.html(html.replace(/Enter/, "Exit"));
-                    }
-                    $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
-                    _this.adjustToWindow();
-                    if (_this.opts().windowManager.toggleFullScreenCallback) {
-                        _this.opts().windowManager.toggleFullScreenCallback(_this.data.windowManager.fullscreen);
-                    }
+                    _this.toggleFullScreen();
                 }
             },
             {
@@ -953,7 +949,7 @@ define([
                     return node;
                 }
             },
-            "plugins" : [ "themes", "types", "dnd", "conditionalevents" ]
+            "plugins" : [ "themes", "types", "dnd", "conditionalevents", "actions" ]
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -966,7 +962,6 @@ define([
             } else if (selected.length < 2) {
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
-                _this.activateQuestionTypeGroup(mug);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -975,7 +970,6 @@ define([
                 _this.jstree("open_all", data.node);
             }
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
-            _this.activateQuestionTypeGroup(mug);
             _this.data.core.form.getDescendants(mug).map(function(descendant) {
                 _this.refreshMugName(descendant);
             });
@@ -991,8 +985,6 @@ define([
             form.moveMug(mug, rel.position, rel.mug);
             data.node.icon = mug.getIcon();
             _this.refreshCurrentMug();
-        }).on("deselect_all.jstree deselect_node.jstree", function (e, data) {
-            _this.resetQuestionTypeGroups();
         }).on('model.jstree', function (e, data) {
             // Dynamically update node icons. This is unnecessary for
             // most nodes, but some (items in select questions) have a
@@ -1181,29 +1173,25 @@ define([
         // its bound mug.
     };
 
-    fn.activateQuestionTypeGroup = function (mug) {
-        var className = mug.__className;
-        this.resetQuestionTypeGroups();
-
-        var groupSlug = this.data.core.QUESTION_TYPE_TO_GROUP[className];
-        if (groupSlug && 
-            className !== 'MSelectDynamic' && 
-            className !== 'SelectDynamic' && 
-            !this.jstree("is_closed", mug.ufid)) {
-            this.$f
-                .find('.' + getQuestionTypeGroupClass(groupSlug))
-                .find('.fd-question-type-related').removeClass('disabled');
-        }
-    };
-
-    fn.resetQuestionTypeGroups = function () {
-        this.$f.find('.fd-container-question-type-group .fd-question-type-related')
-            .addClass('disabled');
+    // Suggest a node ID, based on the mug's label
+    fn.nodeIDFromLabel = function(mug) {
+        var suggestedID = this.getMugDisplayName(mug) || "";
+        suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
+        suggestedID = suggestedID.toLowerCase();
+        suggestedID = suggestedID.trim();
+        suggestedID = suggestedID.replace(/\s+/g, '_');         // collapse whitespace & replace with underscores
+        suggestedID = suggestedID.replace(/[^\w\-]/g, '');      // strip illegal characters
+        suggestedID = suggestedID.replace(/^[^a-z]*/i, '');     // must start with a letter
+        suggestedID = suggestedID.replace(/_*$/g, '');          // drop trailing underscores
+        suggestedID = suggestedID.substring(0, 75);             // no exceedingly long IDs
+        return mug.form.generate_question_id(suggestedID, mug);
     };
 
     // Attempt to guard against doing actions when there are unsaved or invalid
     // pending changes.
     fn.ensureCurrentMugIsSaved = function (callback) {
+        var currentMug = this.getCurrentlySelectedMug();
+
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
                 "Unsaved Changes in Editor",
@@ -1211,6 +1199,9 @@ define([
                 "Please save changes before continuing.");
             return false;
         } else {
+            if (currentMug && !currentMug.p.nodeID) {
+                currentMug.p.nodeID = this.nodeIDFromLabel(currentMug);
+            }
             (callback || function () {})();
             return true;
         }
@@ -1241,7 +1232,17 @@ define([
                     _this.$f.find('.fd-content-right .fd-column').addClass('hide');
                     _this.$f.find('.fd-default-panel').removeClass('hide');
                 }
-                $(".fd-tree .fd-head h2").text(_this.data.core.form.formName);
+                if (_this.opts().core.formIconClass) {
+                    _this.$f.find('.fd-form-icon').addClass(_this.opts().core.formIconClass);
+                } else {
+                    _this.$f.find('.fd-form-icon').addClass('fa fa-edit');
+                }
+                if (_this.opts().core.defaultHelpTextTemplateId) {
+                    _this.$f.find('.fd-default-helptext')
+                        .html($(_this.opts().core.defaultHelpTextTemplateId).html())
+                        .addClass('alert alert-info');
+                }
+                $(".fd-tree .fd-head-text").text(_this.data.core.form.formName);
                 hidePageSpinner();
             } catch (e) {
                 window.console.log(util.formatExc(e));
@@ -1294,7 +1295,6 @@ define([
 
             if (e.mug === _this.getCurrentlySelectedMug()) {
                 _this.refreshCurrentMug();
-                _this.activateQuestionTypeGroup(e.mug);
             }
         }).on('parent-question-type-change', function (e) {
             _this.jstree("set_icon", e.childMug.ufid, e.childMug.getIcon());
@@ -1333,6 +1333,7 @@ define([
             });
         }).on('question-create', function (e) {
             _this.handleNewMug(e.mug, e.refMug, e.position);
+            _this.setTreeActions(e.mug);
             var currentMug = _this.getCurrentlySelectedMug();
             if (e.mug && e.mug.parentMug && e.mug.parentMug === currentMug) {
                 _this.displayMugProperties(currentMug);
@@ -1344,6 +1345,11 @@ define([
             _this.onFormChange(e.mug);
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
+            if (!e.mug.p.nodeID) {
+                // If the user doesn't provide an ID, we're going to
+                // auto-generate it (eventually). Show the user what it will be.
+                $("#property-nodeID").attr("placeholder", _this.nodeIDFromLabel(e.mug));
+            }
             _this.toggleConstraintItext(e.mug);
         }).on('change-display-language', function (e) {
             var mug = _this.getCurrentlySelectedMug();
@@ -1413,6 +1419,7 @@ define([
                 if (!changed && mug.getErrors().length) {
                     _this.setTreeValidationIcon(mug);
                 }
+                _this.setTreeActions(mug);
             }
         });
         this.selectSomethingOrHideProperties(true);
@@ -1453,9 +1460,19 @@ define([
             }
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
-            var $firstInput = _this.$f.find(".fd-question-properties input:text:visible:first");
-            if ($firstInput.length) {
-                $firstInput.focus().select();
+
+            // Focus on first input, which might be a normal input or a rich text input
+            var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
+            if ($firstGroup.length) {
+                var $input = $firstGroup.find("input, textarea");
+                if ($input.length) {
+                    // Rich text is off
+                    $input.focus();
+                } else {
+                    // Rich text is on
+                    $input = $firstGroup.find(".fd-textarea, .fd-input");
+                    richText.editor($input).focus();
+                }
             }
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
@@ -1556,11 +1573,11 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
-        var _this = this;
+        var node, _this = this;
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
         }, null, null, this.data.core);
-        return this.jstree("create_node",
+        node = _this.jstree("create_node",
             refMug ? "#" + refMug.ufid : "#",
             {
                 text: this.getMugDisplayName(mug),
@@ -1581,6 +1598,8 @@ define([
             // NOTE 'into' is not a supported position in JSTree
             (position === 'into' ? 'last' : position)
         );
+
+        return node;
     };
 
     fn.handleMugParseFinish = function (mug) {
@@ -1595,10 +1614,7 @@ define([
     };
 
     fn.displayMugProperties = function (mug) {
-        var $props = this.$f.find('.fd-question-properties'),
-            _getWidgetClassAndOptions = function (property) {
-                return getWidgetClassAndOptions(property, mug);
-            };
+        var $props = this.$f.find('.fd-question-properties');
         this.$f.find('.fd-default-panel').addClass('hide');
 
         this.showContentRight();
@@ -1615,7 +1631,9 @@ define([
 
             section.mug = mug;
             section.properties = _(section.properties)
-                .map(_getWidgetClassAndOptions)
+                .map(function(property) {
+                    return getWidgetClassAndOptions(property, mug);
+                })
                 .filter(_.identity);
 
             if (section.properties.length) {
@@ -1816,15 +1834,37 @@ define([
         }
     };
 
+    fn.sectionIsCollapsed = function(section) {
+        var collapseKey = "collapse-" + section.slug;
+        if (section.slug === "main") {
+            // Always show basic section
+            return false;
+        }
+        return localStorage.hasOwnProperty(collapseKey) ?
+            localStorage.getItem(collapseKey) :
+            section.isCollapsed;
+    };
+
+    fn.collapseSection = function(slug, shouldCollapse) {
+        var $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']"),
+            $command = $(".fd-section-changer [data-slug='" + slug + "']");
+        if (shouldCollapse) {
+            $fieldset.addClass("hide");
+            $command.removeClass("selected");
+        } else {
+            $fieldset.removeClass("hide");
+            $command.addClass("selected");
+        }
+        localStorage.setItem('collapse-' + slug, shouldCollapse ? "1" : "");
+    };
+
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
-            collapseKey = "collapse-" + options.displayName,
-            isCollapsed = localStorage.hasOwnProperty(collapseKey) ?
-                localStorage.getItem(collapseKey) :
-                options.isCollapsed,
+            isCollapsed = _this.sectionIsCollapsed(options),
             $sec = $(question_fieldset({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
+                fieldsetSlug: options.slug,
                 isCollapsed: !!isCollapsed,
                 help: options.help
             })),
@@ -1859,6 +1899,21 @@ define([
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
                 }),
                 isCopyable: !multiselect && mug.options.isCopyable,
+                sections: multiselect ? [] : _.chain(_this.getSections(mug))
+                    .rest()
+                    .filter(function(s) {
+                        // Limit to sections relevant to this mug
+                        return _.some(_.map(s.properties, function(property) {
+                            return getWidgetClassAndOptions(property, mug);
+                        }));
+                    })
+                    .map(function(s) {
+                        // Just pass the template a show/hide flag
+                        return _.extend({
+                            show: !_this.sectionIsCollapsed(s),
+                        }, s);
+                    })
+                    .value(),
             }));
         $baseToolbar.find('.fd-button-remove').click(function () {
             var mugs = _this.getCurrentlySelectedMug(true, true);
@@ -1921,6 +1976,28 @@ define([
 
     fn.changeMugType = function (mug, type) {
         this.data.core.form.changeMugType(mug, type);
+        this.setTreeActions(mug);
+    };
+
+    fn.setTreeActions = function(mug) {
+        var _this = this,
+            tree = _this.data.core.$tree,
+            action_id = "add_choice";
+        if (mug.options.canAddChoices) {
+            tree.jstree(true).add_action(mug.ufid, {
+                "id": action_id,
+                "class": "fa fa-plus add_choice",
+                "text": " Add Choice",
+                "after": true,
+                "selector": "a",
+                "event": "click",
+                "callback": function (node_id, node, action_id, action_el) {
+                    _this.addQuestion("Choice");
+                }
+            });
+        } else {
+            tree.jstree(true).remove_action(mug.ufid, action_id);
+        }
     };
 
     fn.createXML = function () {
@@ -2081,7 +2158,7 @@ define([
                 properties: this.getMainProperties(),
                 help: {
                     title: "Basic",
-                    text: "<p>The <strong>Label</strong> is text that appears in the application. " +
+                    text: "<p>The <strong>Display Text</strong> appears in the application. " +
                         "This text will not appear in data exports.</p> ",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
@@ -2140,8 +2217,10 @@ define([
 
     fn.getMainProperties = function () {
         return [
-            "nodeID",
             "label",
+            "calculateAttr",
+            "nodeID",
+            "requiredAttr",
             "readOnlyControl",
             "itemsetData",
             "imageSize",
@@ -2160,8 +2239,6 @@ define([
 
     fn.getLogicProperties = function () {
         return [
-            "calculateAttr",
-            "requiredAttr",
             "relevantAttr",
             "constraintAttr",
             "repeat_count",

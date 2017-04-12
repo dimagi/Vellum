@@ -178,16 +178,18 @@ define([
         it("should not be able to add choice to collapsed select", function () {
             util.loadXML("");
             var group = util.addQuestion("Select", "select");
-            util.addQuestion("Choice", "choice3");
+            util.addQuestion("Choice", "choice1");
             util.collapseGroup(group);
             chai.expect(function() {
-                util.addQuestion.bind({prevId: "select"})("Choice", "choice4");
+                util.addQuestion.bind({prevId: "select"})("Choice", "choice2");
             }).to.throw(Error);
         });
 
         it("should add text outside of collapsed select", function () {
             util.loadXML("");
             var group = util.addQuestion("Select", "select");
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             util.collapseGroup(group);
             util.addQuestion.bind({prevId: "select"})("Text", "text1");
             util.expandGroup(group);
@@ -202,6 +204,8 @@ define([
         it("should update choice name in tree on change question ID", function () {
             util.loadXML("");
             util.addQuestion("Select", "select");
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             util.clickQuestion("select/choice1");
             $("[name=property-nodeID]").val("yes").change();
             util.assertJSTreeState(
@@ -383,6 +387,7 @@ define([
         it("should use single quotes on drag/drop choice", function() {
             util.loadXML("");
             util.addQuestion("Select", "select");
+            util.addQuestion("Choice", "choice1");
             var mug = util.addQuestion("DataBindOnly", "mug"),
                 calc = $("[name=property-calculateAttr]"),
                 tree = $(".fd-question-tree").jstree(true);
@@ -537,6 +542,7 @@ define([
                 form = util.loadXML("");
                 map.Text = util.addQuestion("Text");
                 map.Select = util.addQuestion("Select");
+                util.addQuestion("Choice");
                 map.SelectDynamic = util.addQuestion("SelectDynamic");
                 map.Transfer = util.addQuestion("Transfer");
                 map.Dispense = util.addQuestion("Dispense");

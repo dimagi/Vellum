@@ -1,0 +1,56 @@
+// Consistent width for icons in menus
+.dropdown-menu a > i {
+    display: inline-block;
+    width: 16px;
+}
+
+.checklist {
+    i.fa-check {
+        display: none;
+        width: auto;
+    }
+
+    .selected i.fa-check {
+        display: inline-block;
+        margin-left: -14px;
+        margin-right: 2px;
+    }
+}
+
+// Nested dropdowns
+.dropdown-submenu {
+    position: relative;
+
+    > a {
+        &:after {
+            display: block;
+            content: " ";
+            float: right;
+            width: 0;
+            height: 0;
+            border-color: transparent transparent transparent #ccc;
+            border-style: solid;
+            border-width: 5px 0 5px 5px;
+            margin-top: 5px;
+            margin-right: -10px;
+        }
+    }
+
+    > .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -6px;
+        margin-left: -1px;
+        border-radius: 0 6px 6px 6px;
+    }
+
+    &:hover {
+        > .dropdown-menu {
+            display: block;
+        }
+
+        > a:after {
+            border-left-color: @white;
+        }
+    }
+}

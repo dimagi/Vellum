@@ -26,6 +26,17 @@ body.vellum-full-screen {
             &.fd-content-left {
                 width: 30%;
 
+                .fd-head h2 {
+                }
+
+                .fd-add-question {
+                    width: 100%;
+                    border-radius: 0;
+                    text-align: left;
+                    border: 0;
+
+                }
+
                 // Bottom half of left column: data tree
                 .fd-accessory-pane {
                     overflow-x: hidden;
@@ -35,6 +46,14 @@ body.vellum-full-screen {
 
             // Right column: question properties or expression editor
             &.fd-content-right {
+                .fd-head {
+                    height: 31px;
+
+                    h2 {
+                        line-height: 30px;
+                    }
+                }
+
                 // Tweak bootstrap's well styles
                 .well {
                     padding: 10px;
@@ -43,6 +62,12 @@ body.vellum-full-screen {
                     .col-sm-1 {
                         padding: 0;
                     }
+                }
+
+                // Bar with save button
+                .fd-form-actions {
+                    background: @navbarBackground;
+                    padding: 5px 8px 8px;
                 }
             }
 
@@ -88,7 +113,7 @@ body.vellum-full-screen {
                 }
 
                 // Question tree menu (language switcher, copy, paste, etc.)
-                .fd-questions-menu-container {
+                .fd-head-menu-container {
                     position: absolute;
                     right: 0px;
                     top: 0px;
@@ -97,37 +122,30 @@ body.vellum-full-screen {
                     min-width: @menuContainerWidth;
 
                     // Icon link to open dropdown
-                    > a {
-                        color: @white;
-                        cursor: pointer;
-                        display: block;
-                        padding: 0 @contentPaddingVellum;
-                        text-decoration: none;
-                        background-color: @cc-brand-low;
-
-                        &:hover {
+                    .dropdown {
+                        .dropdown-toggle {
+                            color: @white;
+                            cursor: pointer;
+                            display: block;
+                            padding: 0 @contentPaddingVellum;
                             text-decoration: none;
-                            background-color: @cc-brand-mid;
-                        }
-                    }
+                            background-color: @cc-brand-low;
 
-                    // Menu options
-                    #fd-questions-dropdown-menu a {
-                        min-width: 170px;
-
-                        // Checkmarks to show selected language
-                        i.fa-check {
-                            display: none;
+                            &:hover {
+                                text-decoration: none;
+                                background-color: @cc-brand-mid;
+                            }
                         }
 
-                        &.selected i.fa-check {
-                            display: inline-block;
-                            margin-left: -14px;
-                            margin-right: 2px;
-                        }
+                        // Menu options
+                        .dropdown-menu {
+                            a {
+                                min-width: 170px;
 
-                        > .hotkey {
-                            float: right;
+                                > .hotkey {
+                                    float: right;
+                                }
+                            }
                         }
                     }
                 }
@@ -137,7 +155,6 @@ body.vellum-full-screen {
         // Draggable separators between .fd-content blocks
         .fd-content-vertical-divider {
             width: 5px;
-            margin: 0 1px;
             background: @navbarBackground;
         }
 
@@ -176,6 +193,16 @@ body.vellum-full-screen {
 
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
+        }
+    }
+
+    &.app-manager-v2 {
+        .fd-form-actions {
+            background-color: @cc-brand-mid !important; // lazy because this is temporary code
+        }
+
+        .fd-content-vertical-divider {
+            background: @cc-brand-mid;
         }
     }
 }

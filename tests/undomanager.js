@@ -148,6 +148,8 @@ define([
 
         it("should undelete a multiple choice question with correct number of children", function () {
             util.addQuestion('Select', 'select');
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             util.clickQuestion('select');
             util.assertJSTreeState("select", "  choice1", "  choice2");
             $('.fd-button-remove').click();
@@ -177,6 +179,8 @@ define([
         it("should reset the undo manager after a delete", function () {
             util.addQuestion('Text', 'text');
             util.addQuestion('Select', 'select');
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             util.assertJSTreeState('text', 'select', '  choice1', '  choice2');
             util.clickQuestion('text');
             $('.fd-button-remove').click();
@@ -191,6 +195,8 @@ define([
         it("should reset the undo manager after adding a question", function () {
             util.addQuestion('Text', 'text');
             util.addQuestion('Select', 'select');
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             util.assertJSTreeState('text', 'select', '  choice1', '  choice2');
             util.clickQuestion('text');
             $('.fd-button-remove').click();
@@ -202,6 +208,8 @@ define([
         it("should undelete a multiple choice question when selected with others", function() {
             util.addQuestion('Text', 'text');
             util.addQuestion('Select', 'select');
+            util.addQuestion("Choice", "choice1");
+            util.addQuestion("Choice", "choice2");
             util.clickQuestion('text', 'select');
             util.assertJSTreeState('text', "select", "  choice1", "  choice2");
             $('.fd-button-remove').click();

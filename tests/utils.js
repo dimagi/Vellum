@@ -474,6 +474,9 @@ define([
                 clickQuestion(this.prevId);
             }
             var mug = call('addQuestion', qType);
+            if (!nodeId && !mug.p.nodeID) {
+                nodeId = call('nodeIDFromLabel', mug);
+            }
             if (nodeId) {
                 assert(_.isUndefined(attrs.nodeID),
                        "unexpected attribute for " + qType + "[" + nodeId + "]");
@@ -489,6 +492,12 @@ define([
                 }
                 mug.p[name] = val;
             });
+
+            // Open all sections
+            _.each(call('getSections', mug), function(section) {
+                call('collapseSection', section.slug, false);
+            });
+
             return mug;
         },
         paste: paste,

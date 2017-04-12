@@ -97,6 +97,30 @@ define([
             assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
         });
 
+        describe("The form's ID generation", function() {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    core: {onReady: done},
+                    features: {rich_text: false},
+                });
+            });
+
+            it("should generate ID based on label", function () {
+                util.loadXML("");
+                var name = call('addQuestion', "Text");
+                $("[name='itext-en-label']").val('What is your name?').change();
+                var question1 = call('addQuestion', "Text"),
+                    copy = call('addQuestion', "Text");
+                $("[name='itext-en-label']").val('What is your name?').change();
+                var blank = call('addQuestion', "Text");
+                assert.equal(name.p.nodeID, 'what_is_your_name');
+                assert.equal(question1.p.nodeID, 'question1');
+                assert.equal(copy.p.nodeID, 'copy-1-of-what_is_your_name');
+                assert.equal(blank.p.nodeID, undefined);
+            });
+        });
+
         it("should show warnings for broken references on delete mug", function () {
             util.loadXML(QUESTION_REFERENCING_OTHER_XML);
             var blue = call("getMugByPath", "/data/blue"),
@@ -174,8 +198,8 @@ define([
         it("should be able to move item from Select to MSelect", function () {
             util.loadXML(SELECT_QUESTIONS);
             var form = call("getData").core.form,
-                item1 = util.getMug("question1/item1"),
-                item2 = util.getMug("question2/item2");
+                item1 = util.addQuestion('Choice', 'choice1'),
+                item2 = util.addQuestion('Choice', 'choice2');
             // should not throw an error
             form.moveMug(item1, 'before', item2);
         });
@@ -220,9 +244,9 @@ define([
 
         it ("should show warnings for duplicate choice value", function() {
             util.loadXML("");
-            var select = util.addQuestion("Select", 'select'),
-                item1 = select.form.getChildren(select)[0],
-                item2 = select.form.getChildren(select)[1];
+            util.addQuestion("Select", 'select');
+            var item1 = util.addQuestion('Choice', 'choice1'),
+                item2 = util.addQuestion('Choice', 'choice2');
             assert(util.isTreeNodeValid(item1), item1.getErrors().join("\n"));
             assert(util.isTreeNodeValid(item2), item2.getErrors().join("\n"));
             item2.p.nodeID = "choice1";

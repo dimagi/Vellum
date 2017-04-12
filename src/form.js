@@ -817,7 +817,8 @@ define([
             }
         },
         changeMugType: function (mug, questionType) {
-            this.mugTypes.changeType(mug, questionType);
+            var _this = this;
+            _this.mugTypes.changeType(mug, questionType);
         },
         getChildren: function (mug) {
             var ctrlNode = this.tree.getNodeFromMug(mug),
@@ -927,14 +928,21 @@ define([
         },
         createQuestion: function (refMug, position, newMugType, isInternal) {
             var mug = this.mugTypes.make(newMugType, this);
-            if (!mug.options.isControlOnly) {
+            if (isInternal && !mug.options.isControlOnly) {
                 mug.p.nodeID = this.generate_question_id();
             }
             if (mug.__className === "Choice") {
-                var parent = refMug.__className === "Choice" ? refMug.parentMug : refMug;
-                mug.p.nodeID = this.generate_item_label(parent);
+                mug.p.nodeID = "";
             }
             this.insertQuestion(mug, refMug, position, isInternal);
+
+            // Choice require a nodeID and a label, but give user
+            // a chance to enter them before displaying an error
+            if (mug.__className === "Choice") {
+                mug.dropMessage("labelItext", "mug-labelItext-error");
+                mug.dropMessage("nodeID", "mug-nodeID-error");
+            }
+
             // should we fix broken references when nodeID is auto-generated?
             //if (!mug.options.isControlOnly && !this.isLoadingXForm) {
             //    this.fixBrokenReferences();
@@ -1138,7 +1146,7 @@ define([
                     new_id = "copy-" + i + "-of-" + question_id;
                 }
             } else {
-                return this._make_label('question', mug);
+                return this._make_label(mug && mug.__className === "Choice" ? 'choice' : 'question', mug);
             }
         },
         generate_item_label: function (parentMug, name, i) {
