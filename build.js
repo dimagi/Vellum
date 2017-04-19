@@ -146,6 +146,16 @@
                 //'deferred-components', 
                 'local-deps'
             ]
+        },
+        {
+            create: true,
+            name: 'options',
+            include: [
+                '../tests/options'
+            ],
+            exclude: [
+                'exclude'
+            ]
         }
         // end buildmain.py delimiter
     ]
