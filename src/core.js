@@ -1992,6 +1992,7 @@ define([
                 "selector": "a",
                 "event": "click",
                 "callback": function (node_id, node, action_id, action_el) {
+                    _this.setCurrentMug(mug);
                     _this.addQuestion("Choice");
                 }
             });
