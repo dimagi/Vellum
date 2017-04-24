@@ -613,6 +613,8 @@ define([
             $options.filter("[data-qtype='Select']").click();
 
             assert.strictEqual($(".add_choice").length, 1);
+
+            util.addQuestion("Text", "question2");
             $(".add_choice").click();
 
             var choice = call("getCurrentlySelectedMug");
@@ -624,7 +626,8 @@ define([
 
             util.assertJSTreeState(
                 "question1",
-                "  choice1"
+                "  choice1",
+                "question2"
             );
 
             util.deleteQuestion("question1/choice1");
