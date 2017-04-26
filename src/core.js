@@ -1211,7 +1211,11 @@ define([
         done = done || function () {};
         var _this = this;
 
-        showPageSpinner();
+        if (_this.opts().core.formLoadingCallback) {
+            _this.opts().core.formLoadingCallback();
+        } else {
+            showPageSpinner();
+        }
         //wait for the spinner to come up.
         window.setTimeout(function () {
             //universal flag for indicating that there's something wrong enough
@@ -1243,7 +1247,11 @@ define([
                         .addClass('alert alert-info');
                 }
                 $(".fd-tree .fd-head-text").text(_this.data.core.form.formName);
-                hidePageSpinner();
+                if (_this.opts().core.formLoadedCallback) {
+                    _this.opts().core.formLoadedCallback();
+                } else {
+                    hidePageSpinner();
+                }
             } catch (e) {
                 window.console.log(util.formatExc(e));
                 // hack: don't display the whole invalid XML block if it
@@ -1262,7 +1270,11 @@ define([
                 _this.data.core.formLoadingFailed = true;
                 _this.data.core.failedLoadXML = formString;
 
-                hidePageSpinner();
+                if (_this.opts().core.formLoadedCallback) {
+                    _this.opts().core.formLoadedCallback();
+                } else {
+                    hidePageSpinner();
+                }
                 throw e;
             }
             done();
