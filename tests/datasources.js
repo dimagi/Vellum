@@ -8,6 +8,7 @@ define([
     'vellum/itemset',
     'text!static/datasources/case-property.xml',
     'text!static/datasources/null-hashtags.xml',
+    'text!static/datasources/unknown-case-property.xml',
 ], function (
     options,
     util,
@@ -16,7 +17,8 @@ define([
     _,
     itemset,
     CASE_PROPERTY_XML,
-    NULL_HASHTAGS_XML
+    NULL_HASHTAGS_XML,
+    UNKNOWN_CASE_PROPERTY_XML
 ) {
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
@@ -378,6 +380,16 @@ define([
                 assert(!vellum.datasources.isReady(), 'data sources should not be ready');
                 util.assertXmlEqual(util.call("createXML"), NULL_HASHTAGS_XML);
                 assert(!form.shouldInferHashtags, "form.shouldInferHashtags should be false");
+            });
+
+            it("should show error on load sources with previously-known case property", function () {
+                var form = util.loadXML(UNKNOWN_CASE_PROPERTY_XML),
+                    hid = util.getMug('hid');
+                assert(!vellum.datasources.isReady(), 'data sources should not be ready');
+                assert(util.isTreeNodeValid(hid), util.getMessages(hid));
+                assert(!form.shouldInferHashtags, "form.shouldInferHashtags");
+                callback(DATA_SOURCES);
+                assert(!util.isTreeNodeValid(hid), '/data/hid should not be valid');
             });
         });
     });

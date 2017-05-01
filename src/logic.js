@@ -442,6 +442,23 @@ define([
             });
         },
         /**
+         * Find and update invalid external references
+         */
+        validateExternalReferences: function () {
+            var _this = this,
+                invalid = _.chain(this.reverse[EXTERNAL_REF] || {})
+                    .values()
+                    .flatten(true)
+                    .filter(function(ref) {
+                        return !_this.form.isValidHashtag(ref.path);
+                    })
+                    .value();
+            _.each(invalid, function(ref) {
+                var mug = _this.form.getMugByUFID(ref.mug);
+                _this.updateReferences(mug, ref.property, mug.p[ref.property]);
+            });
+        },
+        /**
          * Call function for each expression property that references a mug
          * identified by one of the given ufids
          *

@@ -209,6 +209,7 @@ define([
             // done here for performance reasons. would be nice to be done after
             // every new hashtag, but only for the mugs that reference that hashtag
             form.fixBrokenReferences();
+            this._logicManager.validateExternalReferences();
         },
         inferHashtagMeanings: function(hashtag, xpath_) {
             if (hashtag && xpath && this.shouldInferHashtags) {
