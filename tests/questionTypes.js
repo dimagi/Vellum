@@ -616,41 +616,47 @@ define([
 
             util.addQuestion("Text", "question2");
             $(".add_choice").click();
+            $(".add_choice").click();
+            $(".add_choice").click();
 
             var choice = call("getCurrentlySelectedMug");
             assert(!choice.messages.get().length, "New mug should have no errors");
             assert(!choice.p.nodeID, "New mug shouldn't have an id");
             assert(!choice.p.labelItext.get(), "New mug shouldn't have a label");
-            choice.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
-            clickQuestion("question1/choice1");
+            _.defer(function() {
+                clickQuestion("question1/choice1");
 
-            util.assertJSTreeState(
-                "question1",
-                "  choice1",
-                "question2"
-            );
+                util.assertJSTreeState(
+                    "question1",
+                    "  choice1",
+                    "  choice2",
+                    "  choice3",
+                    "question2"
+                );
 
-            util.deleteQuestion("question1/choice1");
+                util.deleteQuestion("question1/choice1");
 
-            $(changerSelector + " > a").click();
-            $options = $(changerSelector + " .change-question");
-            $options.filter("[data-qtype='Text']").click();
-            assert.strictEqual($(".add_choice").length, 0);
+                $(changerSelector + " > a").click();
+                $options = $(changerSelector + " .change-question");
+                $options.filter("[data-qtype='Text']").click();
+                assert.strictEqual($(".add_choice").length, 0);
+            });
         });
 
         it("gives select questions an add choice action", function() {
             util.loadXML("");
-            var mug = util.addQuestion("Select", "question1");
+            util.addQuestion("Select", "question1");
 
             assert.strictEqual($(".add_choice").length, 1);
             $(".add_choice").click();
-            mug.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
-            clickQuestion("question1/choice1");
+            _.defer(function() {
+                clickQuestion("question1/choice1");
 
-            util.assertJSTreeState(
-                "question1",
-                "  choice1"
-            );
+                util.assertJSTreeState(
+                    "question1",
+                    "  choice1"
+                );
+            });
         });
 
         it("gives select questions in loaded XML an add choice action", function () {
