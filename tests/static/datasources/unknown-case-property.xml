@@ -6,17 +6,27 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/C8476EEA-C514-44FE-BF1D-F287BC8BD28C" uiVersion="1" version="1" name="Untitled Form">
 					<hid />
+					<text />
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb" />
 			<instance src="jr://instance/session" id="commcaresession" />
 			<bind vellum:nodeset="#form/hid" nodeset="/data/hid" vellum:calculate="#case/unknown" calculate="instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/unknown" />
+			<bind vellum:nodeset="#form/text" nodeset="/data/text" />
 			<itext>
-				<translation lang="en" default="" />
+				<translation lang="en" default="">
+					<text id="text-label">
+						<value>Ref <output value="instance('casedb')/casedb/case[@case_id = instance('commcaresession')/session/data/case_id]/unknown" vellum:value="#case/unknown" /> </value>
+					</text>
+				</translation>
 			</itext>
 		</model>
 		<vellum:hashtags>{&quot;#case/unknown&quot;:null}</vellum:hashtags>
 		<vellum:hashtagTransforms>{&quot;prefixes&quot;:{&quot;#case/parent/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/&quot;,&quot;#case/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/&quot;}}</vellum:hashtagTransforms>
 	</h:head>
-	<h:body />
+	<h:body>
+		<input vellum:ref="#form/text" ref="/data/text">
+			<label ref="jr:itext('text-label')" />
+		</input>
+	</h:body>
 </h:html>

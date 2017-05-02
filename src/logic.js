@@ -455,7 +455,7 @@ define([
                     .value();
             _.each(invalid, function(ref) {
                 var mug = _this.form.getMugByUFID(ref.mug);
-                _this.updateReferences(mug, ref.property, mug.p[ref.property]);
+                _this.updateReferences(mug, ref.property);
             });
         },
         /**

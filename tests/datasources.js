@@ -384,12 +384,15 @@ define([
 
             it("should show error on load sources with previously-known case property", function () {
                 var form = util.loadXML(UNKNOWN_CASE_PROPERTY_XML),
-                    hid = util.getMug('hid');
+                    hid = util.getMug('hid'),
+                    txt = util.getMug('text');
                 assert(!vellum.datasources.isReady(), 'data sources should not be ready');
                 assert(util.isTreeNodeValid(hid), util.getMessages(hid));
+                assert(util.isTreeNodeValid(txt), util.getMessages(txt));
                 assert(!form.shouldInferHashtags, "form.shouldInferHashtags");
                 callback(DATA_SOURCES);
                 assert(!util.isTreeNodeValid(hid), '/data/hid should not be valid');
+                assert(!util.isTreeNodeValid(txt), '/data/text should not be valid');
             });
         });
     });
