@@ -603,7 +603,7 @@ define([
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
         });
 
-        it("jls adds and removes the add choice action when type changes", function() {
+        it("adds and removes the add choice action when type changes", function() {
             util.loadXML("");
             util.addQuestion("Text", "question1");
             var changerSelector = ".fd-question-changer";
