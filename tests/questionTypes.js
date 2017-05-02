@@ -603,7 +603,7 @@ define([
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
         });
 
-        it("adds and removes the add choice action when type changes", function() {
+        it("jls adds and removes the add choice action when type changes", function() {
             util.loadXML("");
             util.addQuestion("Text", "question1");
             var changerSelector = ".fd-question-changer";
@@ -617,46 +617,43 @@ define([
             util.addQuestion("Text", "question2");
             $(".add_choice").click();
             $(".add_choice").click();
-            $(".add_choice").click();
 
             var choice = call("getCurrentlySelectedMug");
             assert(!choice.messages.get().length, "New mug should have no errors");
             assert(!choice.p.nodeID, "New mug shouldn't have an id");
             assert(!choice.p.labelItext.get(), "New mug shouldn't have a label");
-            _.defer(function() {
-                clickQuestion("question1/choice1");
 
-                util.assertJSTreeState(
-                    "question1",
-                    "  choice1",
-                    "  choice2",
-                    "  choice3",
-                    "question2"
-                );
+            util.assertJSTreeState(
+                "question1",
+                "  choice1",
+                "  ",
+                "question2"
+            );
 
-                util.deleteQuestion("question1/choice1");
+            choice.form.vellum.ensureCurrentMugIsSaved();  // force choice2 id to generate
+            util.deleteQuestion("question1/choice1");
+            util.deleteQuestion("question1/choice2");
 
-                $(changerSelector + " > a").click();
-                $options = $(changerSelector + " .change-question");
-                $options.filter("[data-qtype='Text']").click();
-                assert.strictEqual($(".add_choice").length, 0);
-            });
+            clickQuestion("question1");
+            $(changerSelector + " > a").click();
+            $options = $(changerSelector + " .change-question");
+            $options.filter("[data-qtype='Text']").click();
+            assert.strictEqual($(".add_choice").length, 0);
         });
 
         it("gives select questions an add choice action", function() {
             util.loadXML("");
-            util.addQuestion("Select", "question1");
+            var mug = util.addQuestion("Select", "question1");
 
             assert.strictEqual($(".add_choice").length, 1);
             $(".add_choice").click();
-            _.defer(function() {
-                clickQuestion("question1/choice1");
+            mug.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
+            clickQuestion("question1/choice1");
 
-                util.assertJSTreeState(
-                    "question1",
-                    "  choice1"
-                );
-            });
+            util.assertJSTreeState(
+                "question1",
+                "  choice1"
+            );
         });
 
         it("gives select questions in loaded XML an add choice action", function () {
