@@ -236,9 +236,6 @@ define([
                     return;
                 }
                 Itext.addLanguage(lang);
-                if (el.attr('default') !== undefined) {
-                    Itext.setDefaultLanguage(lang);
-                }
 
                 //loop through children
                 el.children().each(eachText);
@@ -250,6 +247,7 @@ define([
                 for (var i = 0; i < langs.length; i++) {
                     Itext.addLanguage(langs[i]);
                 }
+                // the first language is the default
                 Itext.setDefaultLanguage(langs[0]);
             }
 
