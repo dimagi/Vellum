@@ -100,7 +100,7 @@ define([
                 "widget not deleted");
         });
 
-        describe("and non default language is first", function () {
+        describe("and non default language is first in options", function () {
             before(function (done) {
                 util.init({
                     features: {rich_text: false},
@@ -109,8 +109,13 @@ define([
                 });
             });
 
-            it("should load xml", function() {
+            it("should change default to first language on save", function() {
                 util.loadXML(NON_DEFAULT_LANG_FIRST_XML);
+                var xml = $(call('createXML'));
+                assert(xml.find("translation[lang=en]").attr("default") === undefined,
+                    "English should not be the default language");
+                assert(xml.find("translation[lang=hin]").attr("default") === "",
+                    "Hindi should be the default language");
             });
         });
 
