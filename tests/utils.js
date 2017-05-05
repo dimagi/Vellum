@@ -469,7 +469,7 @@ define([
         assertJSTreeState: assertJSTreeState,
         assertTreeState: assertTreeState,
         addQuestion: function (qType, nodeId, attrs) {
-            attrs = attrs || {};
+            attrs = _.extend({}, attrs);
             if (this.prevId) {
                 clickQuestion(this.prevId);
             }
@@ -485,12 +485,19 @@ define([
                 }
                 // HACK set nodeID after label itext so tree node gets renamed
                 mug.p.nodeID = nodeId;
+                if (qType === "Choice" && !attrs.hasOwnProperty("labelItext")) {
+                    attrs.labelItext = nodeId;
+                }
             }
             _.each(attrs, function (val, name) {
                 if (!_.isBoolean(val)) {
                     val = String(val);
                 }
-                mug.p[name] = val;
+                if (/.+Itext/.test(name)) {
+                    mug.p[name].set(val);
+                } else {
+                    mug.p[name] = val;
+                }
             });
 
             // Open all sections
