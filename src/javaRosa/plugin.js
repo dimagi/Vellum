@@ -364,12 +364,9 @@ define([
                 helpEl = controlElement.children('help'),
                 alertEl = controlElement.children('alert');
             if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
-                var labelItext = parseItextRef(labelEl, "label");
-                if (labelItext.isEmpty()) {
-                    //if no default Itext has been set, set it with the default label
-                    var labelVal = xml.humanize(labelEl);
-                    labelItext.set(labelVal || mug.getDefaultLabelValue());
-                }
+                var labelItext = parseItextRef(labelEl, "label"),
+                    labelVal = xml.humanize(labelEl) || mug.getDefaultLabelValue();
+                labelItext.getOrCreateForm("default").initUndefined(labelVal);
                 mug.p.labelItext = labelItext;
             }
             if (hintEl.length && mug.getPresence("hintLabel") !== 'notallowed') {
