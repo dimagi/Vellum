@@ -276,7 +276,7 @@ define([
     function clickQuestion() {
         var mugs = [],
             ufids = _.map(arguments, function (path) {
-                var mug = getMug(path);
+                var mug = _.isString(path) ? getMug(path) : path;
                 if (!(mug && mug.ufid)) {
                     throw new Error("mug not found: " + path);
                 }

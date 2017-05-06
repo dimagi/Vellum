@@ -323,7 +323,15 @@ define([
 
     var identifier = function (mug, options) {
         var widget = text(mug, options),
-            super_updateValue = widget.updateValue;
+            super_updateValue = widget.updateValue,
+            super_handleChange = widget.handleChange;
+
+        function updatePlaceholder() {
+            // If the user doesn't provide an ID, we're going to
+            // auto-generate it (eventually). Show the user what it will be.
+            var proposedId = mug.form.vellum.nodeIDFromLabel(mug);
+            widget.input.attr("placeholder", proposedId);
+        }
 
         widget.updateValue = function () {
             var val = widget.getValue();
@@ -334,21 +342,35 @@ define([
                 widget.setValue(val.replace(/\s/g, '_'));
             }
 
-            //short circuit the mug property changing process for when the
-            //nodeID is changed to empty-string (i.e. when the user backspaces
-            //the whole value).  This allows us to keep a reference to everything
-            //and rename smoothly to the new value the user will ultimately enter.
             if (val === "") {
-                return;
+                updatePlaceholder();
             }
 
             super_updateValue();
+        };
+
+        widget.handleChange = function () {
+            super_handleChange();
+            if (!mug.p.nodeID) {
+                // HACK drop errors; nodeID will be set automatically on save
+                mug.dropMessage("nodeID", "mug-nodeID-error");
+            }
         };
 
         mug.on("property-changed", function (e) {
             if (e.property === "conflictedNodeId" && !widget.saving) {
                 widget.setValue(widget.mugValue(mug));
             }
+        }, null, "teardown-mug-properties");
+
+        mug.form.on('question-label-text-change', function (e) {
+            if (!mug.p.nodeID) {
+                updatePlaceholder();
+            }
+        }, null, null, widget);
+
+        mug.on("teardown-mug-properties", function () {
+            mug.form.unbind(widget);
         }, null, "teardown-mug-properties");
 
         return widget;
