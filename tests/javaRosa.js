@@ -20,6 +20,7 @@ define([
     'text!static/javaRosa/itext-item-rename-group-move.xml',
     'text!static/javaRosa/itext-item-non-auto-id.xml',
     'text!static/javaRosa/select1-help.xml',
+    'text!static/javaRosa/single-lang-select.xml',
     'text!static/javaRosa/no-label-text-one-lang.xml',
     'text!static/javaRosa/test-xml-1.xml',
     'text!static/javaRosa/test-xml-2.xml',
@@ -50,6 +51,7 @@ define([
     ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
     ITEXT_ITEM_NON_AUTO_ID_XML,
     SELECT1_HELP_XML,
+    SINGLE_LANG_SELECT_XML,
     NO_LABEL_TEXT_ONE_LANG_XML,
     TEST_XML_1,
     TEST_XML_2,
@@ -98,6 +100,12 @@ define([
             deleteButton.click();
             assert.equal($("div.widget[data-hqmediapath]").length, 0,
                 "widget not deleted");
+        });
+
+        it("should not error on choice on add new language", function () {
+            util.loadXML(SINGLE_LANG_SELECT_XML);
+            var mug = util.getMug("select/choice");
+            assert.equal(util.getMessages(mug), "");
         });
 
         describe("and non default language is first in options", function () {

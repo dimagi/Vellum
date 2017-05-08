@@ -213,6 +213,25 @@ define([
             }
             return true;
         },
+        /**
+         * Initialize undefined languages in this form
+         *
+         * This will use the value returned by `getValueOrDefault()`
+         * unless the form is empty, in which case it will use the
+         * provided `defaultValue`, which defaults to an empty string.
+         *
+         * @param defaultValue - value to use if the form is empty.
+         */
+        initUndefined: function (defaultValue) {
+            var defLang = this.itextModel.getDefaultLanguage(),
+                data = this.data;
+            defaultValue = this.getValueOrDefault(defLang) || defaultValue || "";
+            _.each(this.itextModel.languages, function (lang) {
+                if (!data.hasOwnProperty(lang)) {
+                    data[lang] = defaultValue;
+                }
+            })
+        },
         getOutputRefExpressions: function () {
             if (this.outputExpressions === null) {
                 this.outputExpressions = this._getOutputRefExpressions();
