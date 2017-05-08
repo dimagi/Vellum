@@ -303,7 +303,7 @@ define([
                 return {
                     name: tree.name,
                     description: tree.description,
-                    hashtag: info.hashtag ? info.hashtag + '/' + id : null,
+                    hashtag: info.hashtag && !index ? info.hashtag + '/' + id : null,
                     parentPath: parentPath,
                     xpath: path,
                     index: index || false,

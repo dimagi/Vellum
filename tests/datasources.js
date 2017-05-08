@@ -89,6 +89,7 @@ define([
                 key: "@case_type",
                 structure: {
                     dob: {},
+                    parent: {},
                 },
                 related: {
                     parent: {
@@ -197,6 +198,20 @@ define([
             it("should construct #case/grandparent hashtag with related subset", function() {
                 var house = nodes.child.nodes.mother.nodes.household.nodes;
                 assert.equal(house.address.hashtag, "#case/grandparent/address");
+            });
+
+            it("should use index path for related parent node", function() {
+                assert.strictEqual(nodes.child.nodes.mother.hashtag, null);
+                assert.equal(nodes.child.nodes.mother.xpath,
+                    "instance('casedb')/cases/case[@case_id = " +
+                    "instance('commcaresession')/session/data/case_id]/index/parent");
+            });
+
+            it("should support property with same name as related index", function() {
+                assert.equal(nodes.child.nodes.parent.hashtag, "#case/parent");
+                assert.equal(nodes.child.nodes.parent.xpath,
+                    "instance('casedb')/cases/case[@case_id = " +
+                    "instance('commcaresession')/session/data/case_id]/parent");
             });
         });
 
