@@ -149,7 +149,7 @@ define([
         }
         function handleDrop(node, info, target) {
             var widget = widgets.util.getWidget(target, vellum),
-                path = widget.mug.form.richText ? node.hashtag : node.xpath,
+                path = widget.mug.form.richText && node.hashtag ? node.hashtag : node.xpath,
                 id;
             while (info) {
                 if (info.id && info.uri) {

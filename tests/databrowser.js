@@ -583,6 +583,23 @@ define([
                 });
             });
 
+            it("should drag/drop case index", function (done) {
+                util.loadXML("");
+                var mug = util.addQuestion("DataBindOnly", "mug"),
+                    input = $("[name=property-calculateAttr]"),
+                    editor = input.ckeditor().editor,
+                    widget = util.getWidget('property-calculateAttr');
+                widget.input.promise.then(function () {
+                    editor.on('change', function() {
+                        assert.equal(mug.p.calculateAttr,
+                            "instance('commcaresession')/session/data/case_id");
+                        done();
+                    });
+                    assert(!mug.p.calculateAttr, "unexpected: " + mug.p.calculateAttr);
+                    util.findNode(dataTree, "child").data.handleDrop(input);
+                });
+            });
+
             it("should drag/drop user property", function (done) {
                 var form = util.loadXML(""),
                     mug = util.addQuestion("DataBindOnly", "mug"),
