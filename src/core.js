@@ -1357,11 +1357,6 @@ define([
             _this.onFormChange(e.mug);
         }).on('question-label-text-change', function (e) {
             _this.refreshMugName(e.mug);
-            if (!e.mug.p.nodeID) {
-                // If the user doesn't provide an ID, we're going to
-                // auto-generate it (eventually). Show the user what it will be.
-                $("#property-nodeID").attr("placeholder", _this.nodeIDFromLabel(e.mug));
-            }
             _this.toggleConstraintItext(e.mug);
         }).on('change-display-language', function (e) {
             var mug = _this.getCurrentlySelectedMug();

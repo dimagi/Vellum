@@ -201,20 +201,6 @@ define([
             );
         });
 
-        it("should update choice name in tree on change question ID", function () {
-            util.loadXML("");
-            util.addQuestion("Select", "select");
-            util.addQuestion("Choice", "choice1");
-            util.addQuestion("Choice", "choice2");
-            util.clickQuestion("select/choice1");
-            $("[name=property-nodeID]").val("yes").change();
-            util.assertJSTreeState(
-                "select",
-                "  yes",
-                "  choice2"
-            );
-        });
-
         it("should not change mugs on collapse", function () {
             util.loadXML("");
             var group1 = util.addQuestion("Group", "group"),
@@ -498,27 +484,43 @@ define([
             });
         });
 
-        describe("should", function () {
+        describe("with duplicate ID should", function () {
             var form, dup;
             before(function () {
                 form = util.loadXML("");
-                util.addQuestion("Text", "question1");
-                dup = util.addQuestion("Text", "question2");
+                util.addQuestion("Text", "same");
+                dup = util.addQuestion("Text", "temp");
+                dup.p.labelItext.set("same");
+                util.clickQuestion(dup);
             });
 
-            it("show validation error on add question with duplicate path", function () {
-                dup.p.nodeID = "question1";
+            beforeEach(function () {
+                dup.p.nodeID = "same";
                 assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
+            });
+
+            it("show validation error", function () {
                 assert(!util.isTreeNodeValid(dup), "mug should not be valid");
             });
 
+            it("show placeholder on delete question ID", function () {
+                var input = $("[name=property-nodeID]");
+
+                input.val("").change();
+                assert.equal(dup.p.nodeID, "");
+                assert.equal(input.attr("placeholder"), "copy-1-of-same");
+                assert(util.isTreeNodeValid(dup), util.getMessages(dup));
+
+                assert(form.vellum.ensureCurrentMugIsSaved(), "mug is not saved");
+                assert.equal(dup.p.nodeID, "copy-1-of-same");
+            });
+
             it("reset question ID on dismiss duplicate path error", function () {
-                dup.p.nodeID = "question1";
                 var msg = dup.messages.get("nodeID", "mug-conflictedNodeId-warning");
                 assert(msg, "unexpected: validation error is missing");
                 dup.dropMessage("nodeID", "mug-conflictedNodeId-warning");
                 assert(util.isTreeNodeValid(dup), util.getMessages(dup));
-                assert.match(dup.p.nodeID, /^copy-\d+-of-question1$/);
+                assert.match(dup.p.nodeID, /^copy-\d+-of-same$/);
                 assert(!dup.p.conflictedNodeId,
                     "conflictedNodeId should not be set; got " + dup.p.conflictedNodeId);
             });

@@ -194,7 +194,6 @@ define([
         widget.defaultLang = Itext.getDefaultLanguage();
         widget.isDefaultLang = widget.language === widget.defaultLang;
         widget.isSyncedWithDefaultLang = false;
-        widget.hasNodeIdAsDefault = options.path === 'labelItext';
 
         widget.getItextItem = function () {
             // Make sure the real itextItem is being updated at all times, not a stale one.
@@ -261,7 +260,7 @@ define([
                     if (!widget.isDefaultLang) {
                         value = widget.getItextValue(widget.defaultLang) || "";
                     } else {
-                        value = widget.hasNodeIdAsDefault ? widget.mug.p.nodeID : "";
+                        value = "";
                     }
                 }
 
@@ -285,17 +284,6 @@ define([
         widget.getDefaultValue = function () {
             return null;
         };
-
-        if (widget.hasNodeIdAsDefault && widget.isDefaultLang) {
-            widget.mug.on('property-changed', function (e) {
-                if (e.property === "nodeID") {
-                    if (widget.getItextValue() === e.previous) {
-                        widget.setItextValue(e.val);
-                        widget.setValue(widget.getItextValue());
-                    }
-                }
-            }, null, "teardown-mug-properties");
-        }
 
         if (!widget.isDefaultLang) {
             widget.mug.on('defaultLanguage-itext-changed', function (e) {
