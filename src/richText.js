@@ -234,8 +234,8 @@ define([
                     editor.on('instanceReady', editor.focus);
                 }
             },
-            select: function (index) {
-                ckSelect.call(null, editor, index);
+            select: function (index, length) {
+                ckSelect.call(null, editor, index, length);
                 return wrapper;
             },
             on: function () {
@@ -277,11 +277,40 @@ define([
             }
         });
 
-        // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
-        var STYLE = /<style type="text\/css">.*?<\/style>/g;
+        editor._vellum_fromRichText = function (html) {
+            return fromRichText(html, form, options.isExpression);
+        };
+
         editor.on('paste', function(event) {
-            event.data.dataValue = event.data.dataValue.replace(STYLE, "");
-        }, null, null, 2 );
+            var data = event.data;
+            if (data.dataTransfer && data.dataTransfer.getData("Text")) {
+                // Get plain text instead of HTML because HTML encoded
+                // content from applications like Word or your text
+                // editor often contains unwanted styling information.
+                //
+                // Insert HTML-ified plain text rather than HTML with
+                // bubbles because we cannot reliably find hashtags in
+                // text fragments that are not valid XPath expressions.
+                // We need to know where the text is being pasted (is it
+                // inside a string?), and finally put the cursor at the
+                // end of the pasted content. It's hard, but maybe
+                // possible? For now this tries to follow the law of
+                // least surprise by inserting plain text. Unfortunately
+                // a surprising thing happens later: hashtags are
+                // automatically converted to bubbles the next time the
+                // expression is loaded in a rich text editor.
+                var text = data.dataTransfer.getData("Text");
+                data.type = 'html';
+                data.dataValue = $('<div />').text(text).html()
+                    .replace(/\n/g, "<br />")
+                    .replace(/  /g, " &nbsp;");
+            } else {
+                // fall back to HTML
+                // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
+                var style = /<style type="text\/css">.*?<\/style>/g;
+                data.dataValue = data.dataValue.replace(style, "");
+            }
+        }, null, null, 2);
 
         if (_.isFunction(options.createPopover)) {
             editor.addCommand('createPopover', {
@@ -295,10 +324,34 @@ define([
         return wrapper;
     };
 
+    function richTextDataTransfer(nativeDataTransfer, editor) {
+        realDataTransfer.call(this, nativeDataTransfer);
+
+        if (editor) {
+            this.sourceEditor = editor;
+
+            var html = editor.getSelectedHtml(1),
+                text = editor._vellum_fromRichText(html);
+            if (isInvalid(text)) {
+                text = escapedHashtags.transform(
+                    text.slice(INVALID_PREFIX.length),
+                    function (v) { return v; }
+                );
+            }
+            // always copy plain text, not HTML
+            this.setData('text/plain', text);
+        }
+    }
+    // monkeypatch clipboard plugin to transform easy reference
+    // bubbles to hashtags on copy/cut.
+    var realDataTransfer = CKEDITOR.plugins.clipboard.dataTransfer;
+    richTextDataTransfer.prototype = realDataTransfer.prototype;
+    CKEDITOR.plugins.clipboard.dataTransfer = richTextDataTransfer;
+
     /**
      * Set selection in CKEditor
      */
-    function ckSelect(editor, index) {
+    function ckSelect(editor, index, length) {
         function iterNodes(parent) {
             var i = 0,
                 children = parent.getChildren(),
@@ -325,11 +378,15 @@ define([
                         return next();
                     }
                     if (name === "span" || name === "br") {
-                        return {node: parent, length: 1};
+                        return {node: child, length: 1, isText: false};
                     }
                     throw new Error("not implemented: " + name);
                 } else if (child.type === CKEDITOR.NODE_TEXT) {
-                    return {node: child, length: child.getText().length};
+                    return {
+                        node: child,
+                        length: child.getText().length,
+                        isText: true,
+                    };
                 }
                 throw new Error("unhandled element type: " + child.type);
             }
@@ -340,7 +397,11 @@ define([
                 node = nextNode();
             while (node) {
                 if (node.length >= offset) {
-                    return {node: node.node, offset: offset};
+                    return {
+                        node: node.node,
+                        offset: offset,
+                        isText: node.isText,
+                    };
                 }
                 offset -= node.length;
                 node = nextNode();
@@ -352,8 +413,22 @@ define([
             nextNode = iterNodes(sel.root),
             node = getNodeOffset(index, nextNode),
             range = sel.getRanges()[0];
-        range.setStart(node.node, node.offset);
-        range.collapse(true);
+        if (node.isText) {
+            range.setStart(node.node, node.offset);
+        } else {
+            range.setStartAfter(node.node);
+        }
+        if (length) {
+            nextNode = iterNodes(sel.root);
+            node = getNodeOffset(index + length, nextNode);
+            if (node.isText) {
+                range.setEnd(node.node, node.offset);
+            } else {
+                range.setEndAfter(node.node);
+            }
+        } else {
+            range.collapse(true);
+        }
         sel.selectRanges([range]);
     }
 
@@ -623,6 +698,7 @@ define([
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
+                   .replace(/<br \/>/ig, "\n")
                    .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
