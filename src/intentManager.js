@@ -269,6 +269,32 @@ define([
                              "Before you can make a new version of your application, " +
                              "you must " + text + " or delete this question.";
                     }
+
+                    // Validate that IDs are unique across app callouts
+                    var intents = _.filter(mug.form.getMugList(), function(m) {
+                        return m.p.androidIntentAppId;
+                    });
+                    if (intents.length > 1) {
+                        var idCounts = _.countBy(intents, function(i) {
+                            return i.p.nodeID;
+                        });
+                        _.each(intents, function(i) {
+                            var changed = false;
+                            if (idCounts[i.p.nodeID] > 1) {
+                                changed = i.messages.update("nodeID", {
+                                    key: "intent-nodeID-duplicate",
+                                    level: i.ERROR,
+                                    message: "Android app callouts of the same type must have different question ids.",
+                                });
+                            } else {
+                                changed = i.dropMessage("nodeID", "intent-nodeID-duplicate");
+                            }
+                            if (changed) {
+                                i.fire({type: "messages-changed", mug: i});
+                            }
+                        });
+                    }
+
                     return 'pass';
                 },
             },
