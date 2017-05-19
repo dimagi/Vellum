@@ -91,6 +91,19 @@ define([
             assert.notEqual(mug.p.docTemplate, temp, "new upload should create a new path");
         });
 
+        it("should error when question ids are not unique across intents that share a template", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("AndroidIntent", "intent");
+            util.addQuestion("Group", "group");
+            var sameMug = util.addQuestion("AndroidIntent", "intent");
+            util.addQuestion("Group", "group");
+            var differentMug = util.addQuestion("AndroidIntent", "otherIntent");
+
+            assert.equal(mug.messages.get("nodeID").length, 1, "Original intent should error");
+            assert.equal(sameMug.messages.get("nodeID").length, 1, "Same template, same ID should error");
+            assert.equal(differentMug.messages.get("nodeID").length, 0, "Different ID should be fine");
+        });
+
         describe("with multiple response pairs with matching keys", function () {
             var mug, xml, $xml;
             before(function () {

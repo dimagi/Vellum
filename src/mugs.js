@@ -173,7 +173,7 @@ define([
         ERROR: "error",
         WARNING: "warning",
         /**
-         * Add a message for a property
+         * Add a message for a property. Returns true if mug changed.
          *
          * Adding a message object with the same key as an existing
          * message will replace the existing message.
@@ -187,16 +187,17 @@ define([
          */
         addMessage: function (attr, msg) {
             var messages = this.messages;
-            this._withMessages(function () {
+            return this._withMessages(function () {
                 return messages.update(attr, msg);
             });
         },
         dropMessage: function (attr, key) {
             var spec = this.spec[attr];
-            this.addMessage(attr, {key: key});
+            var changed = this.addMessage(attr, {key: key});
             if (spec && spec.dropMessage) {
                 spec.dropMessage(this, attr, key);
             }
+            return changed;
         },
         /**
          * Add many messages for many properties at once
