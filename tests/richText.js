@@ -265,6 +265,7 @@ define([
                 [" ", " "],
                 ["   ", " \xa0 "],
                 ["   ", " &nbsp; "],
+                ["' ,", "'\u200B,"],
             ];
 
             _.each(text, function(val){

@@ -700,6 +700,9 @@ define([
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
                    .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
+                   // CKEditor uses zero-width spaces as markers
+                   // and sometimes they leak out (on copy/paste?)
+                   .replace(/\u200b+/ig, " ")
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }
