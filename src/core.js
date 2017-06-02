@@ -393,10 +393,12 @@ define([
 
         this.$f.find('.fd-expand-all').click(function() {
             _this.data.core.$tree.jstree("open_all");
+            analytics.fbUsage("Clicked Expand All");
         });
 
         this.$f.find('.fd-collapse-all').click(function() {
             _this.data.core.$tree.jstree("close_all");
+            analytics.fbUsage("Clicked Collapse All");
         });
 
         this.$f.find('.fd-button-copy').click(function () {
@@ -455,6 +457,7 @@ define([
                 icon: "fa fa-file-excel-o",
                 action: function (done) {
                     _this.showExportModal(done);
+                    analytics.fbUsage("Clicked Export Form Contents");
                 }
             },
             {

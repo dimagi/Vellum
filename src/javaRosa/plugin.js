@@ -920,6 +920,7 @@ define([
                     icon: "fa fa-language",
                     action: function (done) {
                         _this.showItextModal(done);
+                        analytics.fbUsage("Clicked Edit Bulk Translations");
                     }
                 }
             ]);
