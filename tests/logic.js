@@ -399,7 +399,7 @@ define([
 
             function compareHashtags(expr, expected) {
                 var tags = _.map(expr.getHashtags(), getHashtags);
-                assert.sameMembers(tags, expected.hashtags);
+                assert.includeMembers(tags, expected.hashtags);
             }
 
             _.each(hashtags, function(hashtag) {
