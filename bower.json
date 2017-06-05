@@ -46,7 +46,7 @@
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
-        "chai": ">=1.5.0",
+        "chai": "^4.0.0",
         "xrayquire": "requirejs/xrayquire"
     }
 }

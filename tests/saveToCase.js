@@ -233,7 +233,7 @@ define([
                     'case_name': 'name'
                 }
             });
-            assert.include(mug.options.getBindList(mug), {
+            assert.deepInclude(mug.options.getBindList(mug), {
                 nodeset: mug.absolutePath + "/case/@case_id",
                 calculate: 'uuid()'
             });
