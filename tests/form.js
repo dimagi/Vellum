@@ -429,6 +429,14 @@ define([
                 assert(form.isValidHashtag("#case/dob"), "not valid: #case/dob");
                 assert(form.isValidHashtag("#form/text"), "not valid: #form/text");
             });
+
+            it("should update fuse on enabling rich text", function () {
+                var form = util.loadXML("");
+                form.fire("form-load-finished");
+                assert.deepEqual(form.fuse.list(), []);
+                form.setAttr("richText", true);
+                assert.notDeepEqual(form.fuse.list(), []);
+            });
         });
 
         describe("naming logic", function () {
