@@ -20,6 +20,7 @@ define([
 
         form.vellum.datasources.on("change", function() {
             _this.dataset = generateNewFuseData(form);
+            _this.fusejs.set(_this.dataset);
         }, null, null, form);  // context=form for form.disconnectDataSources()
 
         if (!this.dataset) {
