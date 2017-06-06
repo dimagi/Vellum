@@ -172,6 +172,12 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         if (mocha.env) {
             // ensure the first instance is fully loaded before running tests
             load("", function () { mocha.run(); });
+        } else if (/[?&]load=saved(&|#|$)/.test(window.location.href)) {
+            // Use Chrome dev tools to preset form XML
+            // (Application > Storage > Session Storage > http://localhost...
+            //  > vellum.tests.main.lastSavedForm value)
+            // and then add ?load=saved to query string and reload.
+            load(session.getItem("vellum.tests.main.lastSavedForm") || "");
         } else {
             load(""); // load empty form on initial page load
         }
