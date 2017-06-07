@@ -156,7 +156,7 @@ define([
                 if (hasBrokenReferences()) {
                     return "<div class='alert alert-danger'>Form has reference errors." +
                            "<br>Look for questions marked with " +
-                           "<i class='fd-tree-valid-alert-icon fa fa-warning'></i> " +
+                           "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
                            "and check they don't reference deleted questions.</div>";
                 } else {
                     return "";
@@ -519,40 +519,11 @@ define([
     };
 
     fn.showSourceXMLModal = function (done) {
-        var _this = this;
-
-        function validateMug(mug) {
-            mug.validate();
-            return !mug.getErrors().length;
-        }
-        // todo: should this also show up for saving? Did it at some point in
-        // the past?
-        if (!_this.data.core.form.isFormValid(validateMug)) {
-            var $modal = _this.generateNewModal("Error", [
-                {
-                    title: 'Continue',
-                    cssClasses: "btn-default",
-                    action: function() {
-                        _this.closeModal(function() {
-                            _this.showSourceInModal(done);
-                        });
-                    }
-                },
-                {
-                    title: 'Abort',
-                    cssClasses: "btn-primary",
-                    action: function() {
-                        _this.closeModal();
-                    }
-                }
-            ], false, "fa fa-warning");
-            var content = "There are validation errors in the form.  Do you want to continue anyway?";
-            content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
-            $modal.find(".modal-body").html(content);
-            $modal.modal('show');
-        } else {
-            _this.showSourceInModal(done);
-        }
+        var error = !this.data.core.form.isFormValid(function (mug) {
+                mug.validate();
+                return !mug.getErrors().length;
+            });
+        this.showSourceInModal(done, error);
     };
 
     fn._resizeFullScreenModal = function($modal) {
@@ -564,11 +535,14 @@ define([
         $modal.find(".modal-body").css('height', modalBodyHeight + 'px');
     };
 
-    fn.showSourceInModal = function (done) {
+    fn.showSourceInModal = function (done, error) {
         var _this = this,
-            $modal, $updateForm, $textarea, codeMirror;
+            $modal, $updateForm, $textarea, codeMirror,
+            warn = error ? " <i class='fd-valid-alert-icon fa fa-warning' /> " +
+                "Validation failed. Form may not perform correctly on your " +
+                "device!" : "";
 
-        $modal = this.generateNewModal("Edit Form's Source XML", [
+        $modal = this.generateNewModal("Edit Form's Source XML" + warn, [
             {
                 title: "Update Source",
                 cssClasses: "btn-primary",
@@ -1802,7 +1776,7 @@ define([
             var errors = mug.getErrors();
             if (errors.length) {
                 var msg = errors.join("\n").replace(/"/g, "'");
-                node.data.errors = '<i class="fd-tree-valid-alert-icon ' +
+                node.data.errors = '<i class="fd-valid-alert-icon ' +
                     'fa fa-warning" title="' + msg + '"></i>';
             } else {
                 node.data.errors = null;

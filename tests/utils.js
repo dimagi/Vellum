@@ -523,7 +523,7 @@ define([
                 assert(mug, "mug not found: " + path);
             }
             var $node = $("#vellum").find('#' + mug.ufid + ' > a');
-            return $node.children(".fd-tree-valid-alert-icon").length === 0;
+            return $node.children(".fd-valid-alert-icon").length === 0;
         },
         markdownVisible: markdownVisible,
     };
