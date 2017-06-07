@@ -113,6 +113,18 @@ define([
             util.deleteQuestion("/data/fieldlist/text1");
             util.call("createXML");
         });
+
+        it("should not write empty itext ref", function () {
+            util.loadXML("");
+            util.addQuestion("Select", "select");
+            var choice = util.addQuestion("Choice", "blank", {labelItext: ""});
+            assert.equal(choice.p.labelItext.get(), "");
+            var xml = $(util.call('createXML'));
+            assert.equal(xml.find("text[id=select-blank-label]").length, 0,
+                "should not write select-blank-label itext item");
+            assert.equal(xml.find("label").attr("ref"), undefined,
+                "item label ref should not be defined");
+        });
     });
 
 });

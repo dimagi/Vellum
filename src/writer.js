@@ -286,7 +286,7 @@ define([
     function createLabel(xmlWriter, mug) {
         var labelItext = mug.p.labelItext,
             labelRef;
-        if (labelItext) {
+        if (labelItext && labelItext.id) {
             labelRef = "jr:itext('" + labelItext.id + "')";
             // iID is optional so by extension Itext is optional.
             if (labelItext.isEmpty() &&
