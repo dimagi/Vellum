@@ -402,6 +402,14 @@ define([
                 callback(util.options.dataSources);
                 assert.isOk(form.hasCaseHashtags);
             });
+
+            it("should update fuse when data sources are loaded", function () {
+                var form = util.loadXML("");
+                form.fire("form-load-finished");
+                assert.deepEqual(form.fuse.list(), []);
+                callback(util.options.dataSources);
+                assert.notDeepEqual(form.fuse.list(), []);
+            });
         });
 
         describe("with rich text disabled", function() {
@@ -420,6 +428,14 @@ define([
                 form.setAttr("richText", true);
                 assert(form.isValidHashtag("#case/dob"), "not valid: #case/dob");
                 assert(form.isValidHashtag("#form/text"), "not valid: #form/text");
+            });
+
+            it("should update fuse on enabling rich text", function () {
+                var form = util.loadXML("");
+                form.fire("form-load-finished");
+                assert.deepEqual(form.fuse.list(), []);
+                form.setAttr("richText", true);
+                assert.notDeepEqual(form.fuse.list(), []);
             });
         });
 
