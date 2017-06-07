@@ -3,11 +3,13 @@ define([
     'chai',
     'jquery',
     'underscore',
+    'text!static/mugs/blank-choice.xml',
 ], function (
     util,
     chai,
     $,
-    _
+    _,
+    BLANK_CHOICE_XML
 ) {
     var assert = chai.assert;
 
@@ -86,6 +88,12 @@ define([
             assert.isOk(red.isReferencedByOtherMugs(), "red should be referenced");
             assert.isNotOk(red.isReferencedByOtherMugs([blue]),
                 "red with except=[blue] should not be referenced");
+        });
+
+        it("should not default choice label to node ID", function () {
+            util.loadXML(BLANK_CHOICE_XML);
+            var blank = util.getMug("select/blank");
+            assert.equal(blank.p.labelItext.get(), "", "blank label itext");
         });
     });
 });

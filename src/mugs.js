@@ -289,7 +289,7 @@ define([
          * Gets a default label, auto-generating if necessary
          */
         getDefaultLabelValue: function () {
-            return this.p.label || (this.__className === "Choice" ? this.p.nodeID : "");
+            return this.getLabelValue();
         },
 
         /*
@@ -297,12 +297,7 @@ define([
          * string if not found.
          */
         getLabelValue: function () {
-            var label = this.p.label;
-            if (label) {
-                return label;
-            } else {
-                return "";
-            }
+            return this.p.label || "";
         },
         /**
          * deprecated
