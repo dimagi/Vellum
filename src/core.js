@@ -115,6 +115,11 @@ define([
         }
     };
 
+    function validateMug(mug) {
+        mug.validate();
+        return !mug.getErrors().length;
+    }
+
     var fn = {};
 
     fn.init = function () {
@@ -141,26 +146,34 @@ define([
             csrftoken: _this.opts().csrftoken
         });
 
-        var hasBrokenReferences = _.debounce(function () {
-            return _this.data.core.form.hasBrokenReferences();
+        var validateForSave = _.debounce(function () {
+            var form = _this.data.core.form;
+            if (form.hasBrokenReferences()) {
+                return {
+                    title: "Errors in Form",
+                    content: "<div class='alert alert-danger'>Form has " +
+                        "reference errors.<br>Look for questions marked with " +
+                        "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
+                        "and check they don't reference deleted questions.</div>",
+                };
+            } else if (!form.isFormValid(validateMug)) {
+                return {
+                    title: "Validation Failed",
+                    content: "<div class='alert alert-danger'>Form has " +
+                        "validation errors.<br>Look for questions marked with " +
+                        "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
+                        "and fix the errors.</div>",
+                };
+            } else {
+                return {title: "", content: ""};
+            }
         }, 500, true);
         _this.data.core.saveButton.ui.popover({
             title: function () {
-                if (hasBrokenReferences()) {
-                    return "Errors in Form";
-                } else {
-                    return "";
-                }
+                return validateForSave().title;
             },
             content: function() {
-                if (hasBrokenReferences()) {
-                    return "<div class='alert alert-danger'>Form has reference errors." +
-                           "<br>Look for questions marked with " +
-                           "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
-                           "and check they don't reference deleted questions.</div>";
-                } else {
-                    return "";
-                }
+                return validateForSave().content;
             },
             html: true,
             placement: 'bottom',
@@ -519,10 +532,7 @@ define([
     };
 
     fn.showSourceXMLModal = function (done) {
-        var error = !this.data.core.form.isFormValid(function (mug) {
-                mug.validate();
-                return !mug.getErrors().length;
-            });
+        var error = !this.data.core.form.isFormValid(validateMug);
         this.showSourceInModal(done, error);
     };
 
