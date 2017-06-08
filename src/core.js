@@ -542,7 +542,7 @@ define([
 
     fn.showSourceXMLModal = function (done) {
         var _this = this,
-            $modal, $updateForm, $textarea, codeMirror;
+            $modal, $updateForm, $textarea, codeMirror,
             warn = !this.data.core.form.isFormValid(validateMug) ?
                 " <i class='fd-valid-alert-icon fa fa-warning' /> " +
                 "Validation failed. Form may not perform correctly on your " +
