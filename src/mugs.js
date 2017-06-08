@@ -286,13 +286,6 @@ define([
             });
         },
         /*
-         * Gets a default label, auto-generating if necessary
-         */
-        getDefaultLabelValue: function () {
-            return this.getLabelValue();
-        },
-
-        /*
          * Gets the actual label, either from the control element or an empty
          * string if not found.
          */

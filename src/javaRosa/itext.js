@@ -352,20 +352,12 @@ define([
                 hasMarkdown: hasMarkdown
             });
         },
-        updateForNewMug: function(mug) {
-            // for new mugs, generate a label
-            return this.updateForMug(mug, mug.getDefaultLabelValue());
-        },
-        updateForExistingMug: function(mug) {
-            // for existing, just use what's there
-            return this.updateForMug(mug, mug.getLabelValue());
-        },
-        updateForMug: function (mug, defaultLabelValue) {
+        updateForMug: function (mug) {
             // set default itext id/values
             if (!mug.options.isDataOnly) {
                 if (!mug.p.labelItext && mug.getPresence("labelItext") !== "notallowed") {
                     var item = mug.p.labelItext = this.createItem();
-                    item.set(defaultLabelValue);
+                    item.set(mug.getLabelValue());
                     mug.validate();
                 }
                 if (!mug.p.hintItext && mug.getPresence("hintItext") !== "notallowed") {

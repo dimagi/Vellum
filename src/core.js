@@ -531,11 +531,6 @@ define([
         return val;
     };
 
-    fn.showSourceXMLModal = function (done) {
-        var error = !this.data.core.form.isFormValid(validateMug);
-        this.showSourceInModal(done, error);
-    };
-
     fn._resizeFullScreenModal = function($modal) {
         var modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
         modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
@@ -545,10 +540,11 @@ define([
         $modal.find(".modal-body").css('height', modalBodyHeight + 'px');
     };
 
-    fn.showSourceInModal = function (done, error) {
+    fn.showSourceXMLModal = function (done) {
         var _this = this,
-            $modal, $updateForm, $textarea, codeMirror,
-            warn = error ? " <i class='fd-valid-alert-icon fa fa-warning' /> " +
+            $modal, $updateForm, $textarea, codeMirror;
+            warn = !this.data.core.form.isFormValid(validateMug) ?
+                " <i class='fd-valid-alert-icon fa fa-warning' /> " +
                 "Validation failed. Form may not perform correctly on your " +
                 "device!" : "";
 
