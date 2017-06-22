@@ -89,7 +89,7 @@ define([
         },
         handleNewMug: function (mug) {
             var ret = this.__callOld();
-            this.data.javaRosa.Itext.updateForNewMug(mug);
+            this.data.javaRosa.Itext.updateForMug(mug);
             return ret;
         },
         _makeLanguageSelectorDropdown: function () {
@@ -365,7 +365,7 @@ define([
                 alertEl = controlElement.children('alert');
             if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
                 var labelItext = parseItextRef(labelEl, "label"),
-                    labelVal = xml.humanize(labelEl) || mug.getDefaultLabelValue();
+                    labelVal = xml.humanize(labelEl) || mug.getLabelValue();
                 labelItext.getOrCreateForm("default").initUndefined(labelVal);
                 mug.p.labelItext = labelItext;
             }
@@ -387,7 +387,7 @@ define([
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
-            this.data.javaRosa.Itext.updateForExistingMug(mug);
+            this.data.javaRosa.Itext.updateForMug(mug);
         },
         duplicateMugProperties: function (mug) {
             this.__callOld();

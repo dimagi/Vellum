@@ -117,6 +117,15 @@ define([
 
     var fn = {};
 
+    fn.isCurrentlySelectedMugValid = function () {
+        var mug = this.getCurrentlySelectedMug();
+        if (mug) {
+            mug.validate();
+            return !mug.hasErrors();
+        }
+        return true;
+    };
+
     fn.init = function () {
         this.data.core.mugTypes = new mugs.MugTypesManager(
             this.getMugSpec(), this.getMugTypes(), this.opts());
@@ -141,26 +150,36 @@ define([
             csrftoken: _this.opts().csrftoken
         });
 
-        var hasBrokenReferences = _.debounce(function () {
-            return _this.data.core.form.hasBrokenReferences();
+        var validateForSave = _.debounce(function () {
+            var form = _this.data.core.form;
+            if (form.hasBrokenReferences()) {
+                return {
+                    title: "Errors in Form",
+                    content: "<div class='alert alert-danger'>Form has " +
+                        "reference errors.<br>Look for questions marked with " +
+                        "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
+                        "and check they don't reference deleted questions.</div>",
+                };
+            } else if (!_this.isCurrentlySelectedMugValid()) {
+                // TODO make a more efficient way to check if any mug in the
+                // form is not valid and use that insteaad of only current mug.
+                return {
+                    title: "Validation Failed",
+                    content: "<div class='alert alert-danger'>Form has " +
+                        "validation errors.<br>Look for questions marked with " +
+                        "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
+                        "and fix the errors.</div>",
+                };
+            } else {
+                return {title: "", content: ""};
+            }
         }, 500, true);
         _this.data.core.saveButton.ui.popover({
             title: function () {
-                if (hasBrokenReferences()) {
-                    return "Errors in Form";
-                } else {
-                    return "";
-                }
+                return validateForSave().title;
             },
             content: function() {
-                if (hasBrokenReferences()) {
-                    return "<div class='alert alert-danger'>Form has reference errors." +
-                           "<br>Look for questions marked with " +
-                           "<i class='fd-tree-valid-alert-icon fa fa-warning'></i> " +
-                           "and check they don't reference deleted questions.</div>";
-                } else {
-                    return "";
-                }
+                return validateForSave().content;
             },
             html: true,
             placement: 'bottom',
@@ -174,7 +193,6 @@ define([
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
-        this.data.core.currentErrors = [];
 
         this.data.core.lastSavedXForm = this.opts().core.form;
 
@@ -518,43 +536,6 @@ define([
         return val;
     };
 
-    fn.showSourceXMLModal = function (done) {
-        var _this = this;
-
-        function validateMug(mug) {
-            mug.validate();
-            return !mug.getErrors().length;
-        }
-        // todo: should this also show up for saving? Did it at some point in
-        // the past?
-        if (!_this.data.core.form.isFormValid(validateMug)) {
-            var $modal = _this.generateNewModal("Error", [
-                {
-                    title: 'Continue',
-                    cssClasses: "btn-default",
-                    action: function() {
-                        _this.closeModal(function() {
-                            _this.showSourceInModal(done);
-                        });
-                    }
-                },
-                {
-                    title: 'Abort',
-                    cssClasses: "btn-primary",
-                    action: function() {
-                        _this.closeModal();
-                    }
-                }
-            ], false, "fa fa-warning");
-            var content = "There are validation errors in the form.  Do you want to continue anyway?";
-            content += "<br><br>WARNING: The form will not be valid and likely not perform correctly on your device!";
-            $modal.find(".modal-body").html(content);
-            $modal.modal('show');
-        } else {
-            _this.showSourceInModal(done);
-        }
-    };
-
     fn._resizeFullScreenModal = function($modal) {
         var modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
         modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
@@ -564,11 +545,19 @@ define([
         $modal.find(".modal-body").css('height', modalBodyHeight + 'px');
     };
 
-    fn.showSourceInModal = function (done) {
+    fn.showSourceXMLModal = function (done) {
+        function validateMug(mug) {
+            mug.validate();
+            return !mug.hasErrors();
+        }
         var _this = this,
-            $modal, $updateForm, $textarea, codeMirror;
+            $modal, $updateForm, $textarea, codeMirror,
+            warn = !this.data.core.form.isFormValid(validateMug) ?
+                " <i class='fd-valid-alert-icon fa fa-warning' /> " +
+                "Validation failed. Form may not perform correctly on your " +
+                "device!" : "";
 
-        $modal = this.generateNewModal("Edit Form's Source XML", [
+        $modal = this.generateNewModal("Edit Form's Source XML" + warn, [
             {
                 title: "Update Source",
                 cssClasses: "btn-primary",
@@ -1423,7 +1412,7 @@ define([
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
                 var changed = mug.validate();
-                if (!changed && mug.getErrors().length) {
+                if (!changed && mug.hasErrors()) {
                     _this.setTreeValidationIcon(mug);
                 }
                 _this.setTreeActions(mug);
@@ -1802,7 +1791,7 @@ define([
             var errors = mug.getErrors();
             if (errors.length) {
                 var msg = errors.join("\n").replace(/"/g, "'");
-                node.data.errors = '<i class="fd-tree-valid-alert-icon ' +
+                node.data.errors = '<i class="fd-valid-alert-icon ' +
                     'fa fa-warning" title="' + msg + '"></i>';
             } else {
                 node.data.errors = null;

@@ -248,6 +248,9 @@ define([
         getErrors: function () {
             return _.uniq(this.messages.get());
         },
+        hasErrors: function () {
+            return !this.messages.isEmpty();
+        },
         /**
          * Get a list of form serialization warnings
          *
@@ -286,23 +289,11 @@ define([
             });
         },
         /*
-         * Gets a default label, auto-generating if necessary
-         */
-        getDefaultLabelValue: function () {
-            return this.p.label || (this.__className === "Choice" ? this.p.nodeID : "");
-        },
-
-        /*
          * Gets the actual label, either from the control element or an empty
          * string if not found.
          */
         getLabelValue: function () {
-            var label = this.p.label;
-            if (label) {
-                return label;
-            } else {
-                return "";
-            }
+            return this.p.label || "";
         },
         /**
          * deprecated
@@ -666,7 +657,13 @@ define([
                     });
                 });
             }
-        }
+        },
+        /**
+         * Check if this messages object is empty
+         */
+        isEmpty: function() {
+            return _.isEmpty(this.messages);
+        },
     };
 
     function MugProperties (options) {
