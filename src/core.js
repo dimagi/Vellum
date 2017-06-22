@@ -115,12 +115,16 @@ define([
         }
     };
 
-    function validateMug(mug) {
-        mug.validate();
-        return !mug.getErrors().length;
-    }
-
     var fn = {};
+
+    fn.isCurrentlySelectedMugValid = function () {
+        var mug = this.getCurrentlySelectedMug();
+        if (mug) {
+            mug.validate();
+            return !mug.hasErrors();
+        }
+        return true;
+    };
 
     fn.init = function () {
         this.data.core.mugTypes = new mugs.MugTypesManager(
@@ -156,7 +160,9 @@ define([
                         "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
                         "and check they don't reference deleted questions.</div>",
                 };
-            } else if (!form.isFormValid(validateMug)) {
+            } else if (!_this.isCurrentlySelectedMugValid()) {
+                // TODO make a more efficient way to check if any mug in the
+                // form is not valid and use that insteaad of only current mug.
                 return {
                     title: "Validation Failed",
                     content: "<div class='alert alert-danger'>Form has " +
@@ -187,7 +193,6 @@ define([
         });
 
         bindBeforeUnload(this.data.core.saveButton.beforeunload);
-        this.data.core.currentErrors = [];
 
         this.data.core.lastSavedXForm = this.opts().core.form;
 
@@ -541,6 +546,10 @@ define([
     };
 
     fn.showSourceXMLModal = function (done) {
+        function validateMug(mug) {
+            mug.validate();
+            return !mug.hasErrors();
+        }
         var _this = this,
             $modal, $updateForm, $textarea, codeMirror,
             warn = !this.data.core.form.isFormValid(validateMug) ?
@@ -1403,7 +1412,7 @@ define([
             var inTree = _this.createQuestion(mug, mug.parentMug, 'into');
             if (inTree) {
                 var changed = mug.validate();
-                if (!changed && mug.getErrors().length) {
+                if (!changed && mug.hasErrors()) {
                     _this.setTreeValidationIcon(mug);
                 }
                 _this.setTreeActions(mug);

@@ -248,6 +248,9 @@ define([
         getErrors: function () {
             return _.uniq(this.messages.get());
         },
+        hasErrors: function () {
+            return !this.messages.isEmpty();
+        },
         /**
          * Get a list of form serialization warnings
          *
@@ -654,7 +657,13 @@ define([
                     });
                 });
             }
-        }
+        },
+        /**
+         * Check if this messages object is empty
+         */
+        isEmpty: function() {
+            return _.isEmpty(this.messages);
+        },
     };
 
     function MugProperties (options) {
