@@ -162,7 +162,7 @@ define([
                 };
             } else if (!_this.isCurrentlySelectedMugValid()) {
                 // TODO make a more efficient way to check if any mug in the
-                // form is not valid and use that insteaad of only current mug.
+                // form is not valid and use that instead of only current mug.
                 return {
                     title: "Validation Failed",
                     content: "<div class='alert alert-danger'>Form has " +

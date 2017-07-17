@@ -187,7 +187,7 @@ define([
         // refid is either refMug.ufid or EXTERNAL_REF
         this.forward = {};  // {mug.ufid: {property: [ref, ...], ...}, ...}
         this.reverse = {};  // {refid: {mug.ufid: [ref, ...], ...}, ...}
-        this.errors = {};
+        this.errors = {};   // {mug.ufid: {property: true, ...}, ...}
     }
 
     LogicManager.prototype = {
@@ -208,6 +208,7 @@ define([
             var reverse = this.reverse,
                 forward = this.forward,
                 removeMugFromReverse;
+            delete this.errors[mug.ufid];
             mug.form.dropAllInstanceReferences(mug, property, true);
             if (forward.hasOwnProperty(mug.ufid)) {
                 if (property) {

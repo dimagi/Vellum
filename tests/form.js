@@ -144,6 +144,16 @@ define([
             assert(util.isTreeNodeValid(black), util.getMessages(black));
         });
 
+        it("should remove warnings when broken mug is deleted", function () {
+            var form = util.loadXML(QUESTION_REFERENCING_OTHER_XML),
+                blue = call("getMugByPath", "/data/blue"),
+                black = call("getMugByPath", "/data/black");
+            form.removeMugsFromForm([blue]);
+            assert(form.hasBrokenReferences(), "form should have broken reference");
+            form.removeMugsFromForm([black]);
+            assert(!form.hasBrokenReferences(), "form should not have broken references");
+        });
+
         it("should show duplicate question ID warning inline", function () {
             util.loadXML("");
             util.addQuestion("Text", "text");
