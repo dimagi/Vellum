@@ -207,8 +207,8 @@ define([
 
             var reverse = this.reverse,
                 forward = this.forward,
+                errors = this.errors,
                 removeMugFromReverse;
-            delete this.errors[mug.ufid];
             mug.form.dropAllInstanceReferences(mug, property, true);
             if (forward.hasOwnProperty(mug.ufid)) {
                 if (property) {
@@ -226,6 +226,13 @@ define([
                 }
             } else {
                 forward[mug.ufid] = {};
+            }
+            if (errors.hasOwnProperty(mug.ufid)) {
+                if (property) {
+                    delete this.errors[mug.ufid][property];
+                } else {
+                    delete this.errors[mug.ufid];
+                }
             }
         },
         _addReferences: function (mug, property, value) {
