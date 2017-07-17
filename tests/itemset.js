@@ -11,6 +11,7 @@ define([
     'text!static/itemset/test1-with-constraint.xml',
     'text!static/itemset/test1-with-appearance.xml',
     'text!static/itemset/inner-filters.xml',
+    'text!static/itemset/itemset-sort.xml',
     'text!static/itemset/dropdown-fixture.xml',
     'text!static/itemset/data-itemset.xml',
     'text!static/itemset/itemset-with-question-ref.xml',
@@ -27,6 +28,7 @@ define([
     TEST_XML_1_WITH_CONSTRAINT,
     TEST_XML_1_WITH_APPEARANCE,
     INNER_FILTERS_XML,
+    ITEMSET_SORT_XML,
     DROPDOWN_FIXTURE_XML,
     DATA_ITEMSET_XML,
     ITEMSET_WITH_QUESTION_REF_XML
@@ -133,6 +135,28 @@ define([
                 "instance('some-fixture')/some-fixture_list/some-fixture");
             assert(itemset.find("label").attr("ref"), "name");
             assert(itemset.find("value").attr("ref"), "@id");
+        });
+
+        it("should add sort element when sort field has a value", function () {
+            util.loadXML("");
+            util.addQuestion("SelectDynamic", "select");
+            clickQuestion("select/itemset");
+            var mug = util.getMug("select/itemset");
+            $("[name=property-sortRef]").val("@id").change();
+            assert.equal(mug.p.sortRef, "@id");
+            var xml = call('createXML'),
+                $xml = $(xml),
+                itemset = $xml.find("itemset");
+            assert.equal(itemset.find("sort").attr("ref"), "@id");
+        });
+
+        it("should load dynamic select with sort element", function () {
+            util.loadXML(ITEMSET_SORT_XML);
+            var mug = util.getMug("select/itemset");
+            assert.equal(mug.p.sortRef, "inner-attribute");
+            clickQuestion("select/itemset");
+            assert.equal($("[name=property-sortRef]").val(), "inner-attribute");
+            util.assertXmlEqual(call('createXML'), ITEMSET_SORT_XML, {normalize_xmlns: true});
         });
 
         it("should load dynamic select without errors", function () {
