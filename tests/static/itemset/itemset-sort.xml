@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/77F64702-954B-42B8-B670-6D962CD20846" uiVersion="1" version="1" name="Untitled Form">
+					<select />
+				</data>
+			</instance>
+			<instance src="jr://fixture/item-list:some-fixture" id="some-fixture" />
+			<bind vellum:nodeset="#form/select" nodeset="/data/select" />
+			<itext>
+				<translation lang="en" default="" />
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select1 vellum:ref="#form/select" ref="/data/select">
+			<itemset nodeset="instance('some-fixture')/some-fixture_list/some-fixture">
+				<label ref="name" />
+				<value ref="@id" />
+				<sort ref="inner-attribute" />
+			</itemset>
+		</select1>
+	</h:body>
+</h:html>

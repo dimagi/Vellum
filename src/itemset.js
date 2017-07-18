@@ -60,7 +60,8 @@ define([
                 nodeset = data.nodeset,
                 filter = mug.p.filter,
                 valueRef = mug.p.valueRef,
-                labelRef = mug.p.labelRef;
+                labelRef = mug.p.labelRef,
+                sortRef = mug.p.sortRef;
             if (filter) {
                 nodeset += '[' + filter + ']';
             }
@@ -71,6 +72,11 @@ define([
             xmlWriter.writeStartElement('value');
             xmlWriter.writeAttributeString('ref', valueRef || '');
             xmlWriter.writeEndElement();
+            if (sortRef && sortRef.trim()) {
+                xmlWriter.writeStartElement('sort');
+                xmlWriter.writeAttributeString('ref', sortRef);
+                xmlWriter.writeEndElement();
+            }
         },
         spec: {
             label: { presence: 'notallowed' },
@@ -152,6 +158,18 @@ define([
                 serialize: function (value, key, mug, data) {
                     if (mug.p.labelRef) {
                         data.itemsetData[0].labelRef = mug.p.labelRef;
+                    }
+                },
+            },
+            sortRef: {
+                lstring: 'Sort Field',
+                widget: refWidget,
+                visibility: 'visible',
+                presence: 'optional',
+                validationFunc: validateRefWidget('sortRef'),
+                serialize: function (value, key, mug, data) {
+                    if (mug.p.sortRef) {
+                        data.itemsetData[0].sortRef = mug.p.sortRef;
                     }
                 },
             },
@@ -262,6 +280,7 @@ define([
                         itemsetData: itemsetDataSpec,
                         valueRef: itemsetDataSpec,
                         labelRef: itemsetDataSpec,
+                        sortRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
                     }
                 }),
@@ -286,6 +305,7 @@ define([
                         itemsetData: itemsetDataSpec,
                         valueRef: itemsetDataSpec,
                         labelRef: itemsetDataSpec,
+                        sortRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
                     }
                 })
@@ -314,6 +334,10 @@ define([
                     };
                     mug.p.labelRef = $element.children('label').attr('ref');
                     mug.p.valueRef = $element.children('value').attr('ref');
+                    var sortEl = $element.children('sort');
+                    if (sortEl.length) {
+                        mug.p.sortRef = sortEl.attr('ref');
+                    }
                     return mug;
                 };
                 adapt.ignoreDataNode = true;
@@ -333,6 +357,7 @@ define([
             return this.__callOld().concat([
                 'valueRef',
                 'labelRef',
+                'sortRef',
             ]);
         },
         getLogicProperties: function () {
@@ -412,6 +437,7 @@ define([
                 choices = datasourceWidgets.autocompleteChoices(data, value ? value.src : "");
             atwho.autocomplete(valueRef(), mug, {choices: choices});
             atwho.autocomplete(labelRef(), mug, {choices: choices});
+            atwho.autocomplete(sortRef(), mug, {choices: choices});
             return choices;
         }
 
@@ -437,6 +463,7 @@ define([
 
         function labelRef() { return $('#property-labelRef'); }
         function valueRef() { return $('#property-valueRef'); }
+        function sortRef() { return $('#property-sortRef'); }
 
         options = _.extend({}, options, {
             onOptionsLoaded: onOptionsLoaded,
