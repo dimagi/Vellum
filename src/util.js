@@ -372,5 +372,23 @@ define([
         return ref + " Reference";
     };
 
+    /**
+     * Simple string interpolation
+     *
+     * Usage: ``format("Across the {thing}", {thing: "Universe"})``
+     *
+     * Placeholder names must start with a letter and may contain
+     * letters, numbers and underscores. Unmatched placeholders are
+     * ignored.
+     */
+    that.format = function (string, map) {
+        return string.replace(/\{([a-z][\w_]*)\}/ig, function (match, key) {
+            if (map.hasOwnProperty(key)) {
+                return map[key];
+            }
+            return match;
+        });
+    };
+
     return that;
 });

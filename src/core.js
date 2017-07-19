@@ -67,7 +67,6 @@ define([
     atwho,
     debug
 ) {
-    
     // Load these modules in the background after all runtime dependencies have
     // been resolved, since they're not needed initially.
     setTimeout(function () {
