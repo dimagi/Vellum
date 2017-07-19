@@ -1,11 +1,11 @@
 <div class="fd-copy-paste-help">
     <h3>Copying and Pasting Questions</h3>
     <div class="copy-paste-help">
-        These actions are available via the browser's Edit menu, and you can also use:
+        <%-gettext("These actions are available via the browser's Edit menu, and you can also use:")%>
         <div class="row">
             <div class="col-sm-3">
                 <h1><%=metachar%>C</h1>
-                <span>for copy</span>
+                <span><%-gettext("for copy")%></span>
             </div>
             <!--div class="col-sm-3">
                 <h1><%=metachar%>X</h1>
@@ -13,23 +13,22 @@
             </div-->
             <div class="col-sm-3">
                 <h1><%=metachar%>V</h1>
-                <span>for paste</span>
+                <span><%-gettext("for paste")%></span>
             </div>
         </div>
     </div>
     <div class="copy-paste-box hide">
-        <p>Copy from or Paste into this text box: <textarea></textarea></p>
-        <p><button class="btn btn-default insert-questions">Insert Questions</button></p>
+        <p><%-gettext("Copy from or Paste into this text box:")%> <textarea></textarea></p>
+        <p><button class="btn btn-default insert-questions"><%-gettext("Insert Questions")%></button></p>
     </div>
-    <h3>Selecting Multiple Questions</h3>
+    <h3><%-gettext("Selecting Multiple Questions")%></h3>
     <div class="row">
-        Hold <strong><%
-            if (metachar[metachar.length - 1] === "+") {
-                %><%=metachar.slice(0, -1)%><%
-            } else {
-                %><%=metachar%><%
-            } %></strong> and click on each question.
+        <%
+            var key = metachar.endsWith("+") ? metachar.slice(0, -1) : metachar;
+            key = "<strong>" + key + "</strong>";
+            print(format(gettext("Hold {key} and click on each question."), {key: key}));
+        %>
     </div>
-    <h3>Other Tips</h3>
-    <p>Questions can be copied between forms, and even to other apps.</p>
+    <h3><%-gettext("Other Tips")%></h3>
+    <p><%-gettext("Questions can be copied between forms, and even to other apps.")%></p>
 </div>

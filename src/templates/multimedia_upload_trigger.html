@@ -1,5 +1,5 @@
 <a href="#<%= uploaderId %>"
    class="btn btn-primary"
    data-toggle="modal">
-    <% if (multimediaExists) { %>Replace<% } else { %>Upload<% } %> <%=mediaType%>
+    <%- multimediaExists ? gettext("Replace") : gettext("Upload") %> <%=mediaType%>
 </a>

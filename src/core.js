@@ -196,7 +196,8 @@ define([
         this.data.core.lastSavedXForm = this.opts().core.form;
 
         this.$f.addClass('formdesigner');
-        this.$f.empty().append(main_template(HOTKEY_UNICODE));
+        var mainVars = _.extend({format: util.format}, HOTKEY_UNICODE);
+        this.$f.empty().append(main_template(mainVars));
         $(document).on("keydown", function (e) {
             var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
                 metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),

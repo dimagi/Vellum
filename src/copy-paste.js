@@ -4,6 +4,7 @@ define([
     'tpl!vellum/templates/copy_paste_help',
     'vellum/mugs',
     'vellum/tsv',
+    'vellum/util',
     'vellum/analytics',
     'vellum/core'
 ], function (
@@ -12,6 +13,7 @@ define([
     copy_paste_help,
     mugs,
     tsv,
+    util,
     analytics
 ) {
     var PREAMBLE = ["Form Builder clip", "version 1"],
@@ -360,7 +362,10 @@ define([
                 copyPasteBox.removeClass("hide");
                 copyPasteArea.val(copy(true));
             }
-            var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")})),
+            var html = $(copy_paste_help({
+                    "metachar": (isMac ? "\u2318" : "Ctrl+"),
+                    "format": util.format,
+                })),
                 copyPasteHelp = html.find(".copy-paste-help"),
                 copyPasteBox = html.find(".copy-paste-box"),
                 copyPasteArea = copyPasteBox.find("textarea");

@@ -5,7 +5,7 @@
     <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-name form-control"
-               value="<%-k%>" type="text" placeholder="Relationship Identifier (e.g. parent or host)"/>
+               value="<%-k%>" type="text" placeholder="<%-gettext("Relationship Identifier (e.g. parent or host)")%>"/>
       </div>
       <div class="col-sm-1">
         <a href="#" class="btn fd-remove-property btn-sm btn-danger">
@@ -16,19 +16,19 @@
     <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-source form-control"
-               value="<%-v['calculate']%>" type="text" placeholder="Referenced Case ID" />
+               value="<%-v['calculate']%>" type="text" placeholder="<%-gettext("Referenced Case ID")%>" />
       </div>
     </div>
     <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-case-type form-control"
-               value="<%-v['case_type']%>" type="text" placeholder="Referenced Case Type"/>
+               value="<%-v['case_type']%>" type="text" placeholder="<%-gettext("Referenced Case Type")%>"/>
       </div>
     </div>
     <div class="form-group">
       <div class="col-sm-11">
         <input class="fd-index-property-relationship form-control"
-               value="<%-v['relationship']%>" type="text" placeholder="Relationship (child or extension)"/>
+               value="<%-v['relationship']%>" type="text" placeholder="<%-gettext("Relationship (child or extension)")%>"/>
       </div>
     </div>
   </div>
