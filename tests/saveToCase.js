@@ -120,7 +120,7 @@ define([
         it("should load and save the case type property", function () {
             util.loadXML(CASE_TYPE_PROPERTY_XML);
             var create = util.getMug("save_to_case");
-            window.console.log(create);
+            assert.isOk(create, "save_to_case mug should exist");
             util.assertXmlEqual(call("createXML"), CASE_TYPE_PROPERTY_XML);
         });
 
