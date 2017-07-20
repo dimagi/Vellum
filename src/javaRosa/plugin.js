@@ -284,8 +284,7 @@ define([
                     _.each(langs, function (lang) {
                         var text = itForm.getValue(lang);
                         if (!text) { return; }
-                        var div = $('<div>').append(text),
-                            changed = false;
+                        var div = $('<div>').append(text);
                         div.find('output').replaceWith(function() {
                             var output = $(this),
                                 key = output.is("[value]") ||
@@ -715,7 +714,6 @@ define([
                     return result;
                 }
             });
-            var super_constraintAttr_validate = databind.constraintAttr.validationFunc;
             databind.constraintAttr.validationFunc = validateConstraintMsgAttr;
             // virtual property used to define a widget
             databind.constraintMsgItextID = {

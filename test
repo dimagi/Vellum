@@ -39,7 +39,7 @@ else
 fi
 
 if [[ "$run_jshint" == "true" ]]; then
-    jshint src/*.js \
-        && jshint --config tests/.jshintrc tests/*.js \
+    jshint src \
+        && jshint --config tests/.jshintrc tests \
         && echo "jshint passed"
 fi
