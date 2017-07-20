@@ -99,17 +99,17 @@ define([
     var MESSAGE_TYPES = {
         "error": {
             cssClass: "alert-danger",
-            title: "Error",
+            title: gettext("Error"),
             icon: "fa fa-exclamation-circle",
         },
         "parse-warning": {
             cssClass: "",
-            title: "Warning",
+            title: gettext("Warning"),
             icon: "fa fa-warning",
         },
         "form-warning": {
             cssClass: "",
-            title: "Form Warning",
+            title: gettext("Form Warning"),
             icon: "fa fa-info-circle",
         }
     };
@@ -135,9 +135,9 @@ define([
             save: function(event) {
                 var forceFullSave = event && event.altKey;
                 if (forceFullSave &&
-                    !window.confirm("Holding the ALT key while clicking save " +
+                    !window.confirm(gettext("Holding the ALT key while clicking save " +
                             "invokes an inefficient save procedure. Do " +
-                            "this only if a normal save fails.")) {
+                            "this only if a normal save fails."))) {
                     return; // abort
                 }
                 _this.ensureCurrentMugIsSaved(function () {
@@ -145,29 +145,35 @@ define([
                     _this.validateAndSaveXForm(forceFullSave);
                 });
             },
-            unsavedMessage: 'Are you sure you want to exit? All unsaved changes will be lost!',
+            unsavedMessage: gettext('Are you sure you want to exit? All unsaved changes will be lost!'),
             csrftoken: _this.opts().csrftoken
         });
 
         var validateForSave = _.debounce(function () {
-            var form = _this.data.core.form;
+            var form = _this.data.core.form,
+                template = "<div class='alert alert-danger'>{error}<br/>{action}</div>",
+                icon = "<i class='fd-valid-alert-icon fa fa-warning'></i>",
+                action;
             if (form.hasBrokenReferences()) {
+                action = gettext("Look for questions marked with $1 and " +
+                    "check they don't reference deleted questions.");
                 return {
-                    title: "Errors in Form",
-                    content: "<div class='alert alert-danger'>Form has " +
-                        "reference errors.<br>Look for questions marked with " +
-                        "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
-                        "and check they don't reference deleted questions.</div>",
+                    title: gettext("Errors in Form"),
+                    content: util.format(template, {
+                        error: gettext("Form has reference errors."),
+                        action: action.replace('$1', icon),
+                    }),
                 };
             } else if (!_this.isCurrentlySelectedMugValid()) {
+                action = gettext("Look for questions marked with $1 and fix the errors.");
                 // TODO make a more efficient way to check if any mug in the
                 // form is not valid and use that instead of only current mug.
                 return {
                     title: "Validation Failed",
-                    content: "<div class='alert alert-danger'>Form has " +
-                        "validation errors.<br>Look for questions marked with " +
-                        "<i class='fd-valid-alert-icon fa fa-warning'></i> " +
-                        "and fix the errors.</div>",
+                    content: util.format(template, {
+                        error: gettext("Form has validation errors."),
+                        action: action.replace('$1', icon),
+                    }),
                 };
             } else {
                 return {title: "", content: ""};
@@ -324,11 +330,11 @@ define([
                 questions: ["Text"],
             },
             {
-                group: ["Select", 'Multiple Choice'],
+                group: ["Select", gettext('Multiple Choice')],
                 questions: ["Select", "MSelect"],
             },
             {
-                group: ["Int", 'Number'],
+                group: ["Int", gettext('Number')],
                 questions: [
                     "Int",
                     "PhoneNumber",
@@ -336,7 +342,7 @@ define([
                 ]
             },
             {
-                group: ["Date", 'Date'],
+                group: ["Date", gettext('Date')],
                 questions: [
                     "Date",
                     "Time",
@@ -344,7 +350,7 @@ define([
                 ]
             },
             {
-                group: ["Group", 'Groups'],
+                group: ["Group", gettext('Groups')],
                 questions: [
                     "Group",
                     "Repeat",
@@ -352,7 +358,7 @@ define([
                 ]
             },
             {
-                group: ["Image", 'Multimedia Capture'],
+                group: ["Image", gettext('Multimedia Capture')],
                 questions: [
                     "Image",
                     "Audio",
@@ -365,13 +371,13 @@ define([
                 questions: ["Trigger"],
             },
             {
-                group: ["DataBindOnly", 'Hidden Value'],
+                group: ["DataBindOnly", gettext('Hidden Value')],
                 questions: [
                     "DataBindOnly"
                 ]
             },
             {
-                group: ["Geopoint", 'Advanced', ''],
+                group: ["Geopoint", gettext('Advanced'), ''],
                 textOnly: true,
                 questions: this.getAdvancedQuestions()
             }
@@ -438,17 +444,20 @@ define([
 
     fn.toggleFullScreen = function () {
         var _this = this,
+            expand = gettext("Expand Editor"),
+            shrink = gettext("Shrink Editor"),
+            expandOrShrink = new RegExp(RegExp.escape(expand) + "|" + RegExp.escape(shrink)),
             $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
-                return $(li).find("a").text().match(/(expand|shrink) editor/i);
+                return $(li).find("a").text().match(expandOrShrink);
             })).find("a"),
             html = $fullScreenMenuItem.html();
         analytics.fbUsage("Full Screen Mode", _this.opts().core.formid);
         if (_this.data.windowManager.fullscreen) {
             _this.data.windowManager.fullscreen = false;
-            $fullScreenMenuItem.html(html.replace(/Shrink/, "Expand"));
+            $fullScreenMenuItem.html(html.replace(new RegExp(RegExp.escape(shrink)), expand));
         } else {
             _this.data.windowManager.fullscreen = true;
-            $fullScreenMenuItem.html(html.replace(/Expand/, "Shrink"));
+            $fullScreenMenuItem.html(html.replace(new RegExp(RegExp.escape(expand)), shrink));
         }
         $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
         _this.adjustToWindow();
@@ -462,35 +471,35 @@ define([
             shortcut = "<span class='hotkey'>" + HOTKEY_UNICODE.shift + HOTKEY_UNICODE.ctrl + "F</span>";
         return [
             {
-                name: 'Expand Editor' + shortcut,
+                name: gettext('Expand Editor') + shortcut,
                 icon: "fa fa-expand",
                 action: function (done) {
                     _this.toggleFullScreen();
                 }
             },
             {
-                name: "Export Form Contents",
+                name: gettext("Export Form Contents"),
                 icon: "fa fa-file-excel-o",
                 action: function (done) {
                     _this.showExportModal(done);
                 }
             },
             {
-                name: "Edit Source XML",
+                name: gettext("Edit Source XML"),
                 icon: "fa fa-edit",
                 action: function (done) {
                     _this.showSourceXMLModal(done);
                 }
             },
             {
-                name: "Form Properties",
+                name: gettext("Form Properties"),
                 icon: "fa fa-list-alt",
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
                 }
             },
             {
-                name: "Find Usages",
+                name: gettext("Find Usages"),
                 icon: "fa fa-search",
                 action: function (done) {
                     _this.findUsages(done);
@@ -554,12 +563,12 @@ define([
             $modal, $updateForm, $textarea, codeMirror,
             warn = !this.data.core.form.isFormValid(validateMug) ?
                 " <i class='fd-valid-alert-icon fa fa-warning' /> " +
-                "Validation failed. Form may not perform correctly on your " +
-                "device!" : "";
+                gettext("Validation failed. Form may not perform correctly on your device!") :
+                "";
 
-        $modal = this.generateNewModal("Edit Form's Source XML" + warn, [
+        $modal = this.generateNewModal(gettext("Edit Form's Source XML") + warn, [
             {
-                title: "Update Source",
+                title: gettext("Update Source"),
                 cssClasses: "btn-primary",
                 action: function () {
                     codeMirror.save();
@@ -571,8 +580,9 @@ define([
             }
         ]);
         $updateForm = $(edit_source({
-            description: "This is the raw XML. You can edit or paste into this box to make changes " +
-                         "to your form. Press 'Update Source' to save changes, or 'Close' to cancel."
+            description: gettext("This is the raw XML. You can edit or paste " +
+                "into this box to make changes to your form. Press 'Update " +
+                "Source' to save changes, or 'Close' to cancel.")
         }));
 
         $modal.addClass('fd-full-screen-modal')
@@ -611,10 +621,11 @@ define([
         var $modal,
             $exportForm;
 
-        $modal = this.generateNewModal("Export Form Contents", []);
+        $modal = this.generateNewModal(gettext("Export Form Contents"), []);
         $exportForm = $(edit_source({
-            description: "Copy and paste this content into a spreadsheet program like Excel " +
-                         "to easily share your form with others."
+            description: gettext("Copy and paste this content into a " +
+                "spreadsheet program like Excel to easily share your " +
+                "form with others.")
         }));
         $modal.find('.modal-body').html($exportForm);
 
@@ -628,9 +639,9 @@ define([
     fn.showOverwriteWarning = function(send, formText, serverForm) {
         var $modal, $overwriteForm, _this = this;
 
-        $modal = _this.generateNewModal("Lost Work Warning", [
+        $modal = _this.generateNewModal(gettext("Lost Work Warning"), [
             {
-                title: "Overwrite their work",
+                title: gettext("Overwrite their work"),
                 cssClasses: "btn-primary",
                 defaultButton: true,
                 action: function () {
@@ -640,7 +651,7 @@ define([
                 }
             },
             {
-                title: "Show XML Differences",
+                title: gettext("Show XML Differences"),
                 cssClasses: "btn-info",
                 action: function () {
                     $('#form-differences').show();
@@ -654,14 +665,14 @@ define([
                     $modal.find('.btn-info').prop('disabled', true);
                 }
             }
-        ], "Cancel", "fa fa-warning");
+        ], gettext("Cancel"), "fa fa-warning");
 
         var diff = util.xmlDiff(formText, serverForm);
 
         $overwriteForm = $(confirm_overwrite({
-            description: "Looks like someone else has edited this form " +
+            description: gettext("Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
-                         "to overwrite their work?",
+                         "to overwrite their work?"),
             xmldiff: util.escape(diff),
         }));
         $modal.find('.modal-body').html($overwriteForm);
@@ -674,11 +685,11 @@ define([
         // moved over just for display purposes, apparently the original
         // wasn't working perfectly, so this is a todo
         var _this = this,
-            $modal = this.generateNewModal("Edit Form Properties", []),
+            $modal = this.generateNewModal(gettext("Edit Form Properties"), []),
             $modalBody = $modal.find('.modal-body'),
             formProperties = [
                 {
-                    label: "Disable Text Formatting",
+                    label: gettext("Disable Text Formatting"),
                     slug: "noMarkdown",
                     type: "checkbox",
                     value: function(jq, val) {
@@ -689,7 +700,7 @@ define([
 
         if (this.opts().features.rich_text) {
             formProperties.push({
-                label: "Use Easy References",
+                label: gettext("Use Easy References"),
                 slug: "richText",
                 type: "checkbox",
                 value: function(jq, val) {
@@ -728,7 +739,7 @@ define([
 
     fn.findUsages = function () {
         var _this = this,
-            $modal = this.generateNewModal("Use of each question", []),
+            $modal = this.generateNewModal(gettext("Use of each question"), []),
             $modalBody = $modal.find('.modal-body'),
             form = _this.data.core.form,
             tableData = form.findUsages();
@@ -794,7 +805,7 @@ define([
     
     fn.generateNewModal = function (title, buttons, closeButtonTitle, headerIcon) {
         if (typeof closeButtonTitle === "undefined") {
-            closeButtonTitle = "Close";
+            closeButtonTitle = gettext("Close");
         }
         buttons.reverse();
         buttons = _.map(buttons, function (button) {
@@ -1183,9 +1194,9 @@ define([
 
         if (this.data.core.hasXPathEditorChanged) {
             this.alert(
-                "Unsaved Changes in Editor",
-                "You have UNSAVED changes in the Expression Editor. " +
-                "Please save changes before continuing.");
+                gettext("Unsaved Changes in Editor"),
+                gettext("You have UNSAVED changes in the Expression Editor. " +
+                        "Please save changes before continuing."));
             return false;
         } else {
             if (currentMug && !currentMug.p.nodeID) {
@@ -1247,12 +1258,13 @@ define([
                 // was a parse error
                 var msg = e.toString();
                 if (msg.indexOf("Invalid XML") === 0) {
-                    msg = "Parsing Error. Please check that your form is valid XML.";
+                    msg = gettext("Parsing Error. Please check that your form is valid XML.");
                 }
 
                 _this.hideQuestionProperties();
 
-                var $modal = _this.generateNewModal("Error", [], "OK", "fa fa-warning");
+                var $modal = _this.generateNewModal(
+                        gettext("Error"), [], gettext("OK"), "fa fa-warning");
                 $modal.find(".modal-body").text(msg);
                 $modal.modal('show');
 
@@ -1743,7 +1755,7 @@ define([
     };
 
     fn.displayXPathEditor = function(options) {
-        options.headerText = "Expression Editor";
+        options.headerText = gettext("Expression Editor");
         options.loadEditor = function($div, options) {
             require(['vellum/expressionEditor'], function (expressionEditor) {
                 expressionEditor.showXPathEditor($div, options);
@@ -1761,7 +1773,7 @@ define([
         var _this = this;
         this.data.core.isAlertVisible = true;
         if (!buttons.length) {
-            buttons.push({title: "OK", defaultButton: true});
+            buttons.push({title: gettext("OK"), defaultButton: true});
         }
 
         var $modal = this.generateNewModal(title, buttons, false, "fa fa-warning");
@@ -1962,7 +1974,7 @@ define([
             try {
                 _this.changeMugType(mug, $(this).data('qtype'));
             } catch (err) {
-                window.alert("Sorry, " + err);
+                window.alert(util.format(gettext("Sorry, {err}"), {err: err}));
             }
             e.preventDefault();
         });
@@ -1983,7 +1995,7 @@ define([
             tree.jstree(true).add_action(mug.ufid, {
                 "id": action_id,
                 "class": "fa fa-plus add_choice",
-                "text": " Add Choice",
+                "text": " " + gettext("Add Choice"),
                 "after": true,
                 "selector": "a",
                 "event": "click",
@@ -2013,15 +2025,15 @@ define([
                     errors: warnings,
                     displayLanguage: displayLanguage
                 }));
-            forAction = forAction ? " and " + forAction : "";
-            this.alert("There are errors in the form", message, [
+            forAction = forAction ? " " + gettext("and") + " " + forAction : "";
+            this.alert(gettext("There are errors in the form"), message, [
                 {
-                    title: "Fix Manually",
+                    title: gettext("Fix Manually"),
                     action: function () {
                         _this.data.core.$modal.modal('hide');
                     }
                 }, {
-                    title: "Fix Automatically" + forAction,
+                    title: gettext("Fix Automatically") + forAction,
                     cssClasses: 'btn-primary',
                     defaultButton: true,
                     action: function () {
@@ -2042,7 +2054,7 @@ define([
             _this.validateAndSaveXForm(forceFullSave);
         }
         var _this = this;
-        if (!this.canSerializeXForm("Save", retry)) {
+        if (!this.canSerializeXForm(gettext("Save"), retry)) {
             return; // validate/create XML failed
         }
         var formText = this.createXML();
@@ -2052,21 +2064,22 @@ define([
         } catch (err) {
             // something went wrong parsing, but maybe the user wants to save anyway
             // let's ask them with a scary message encouraging them not to.
-            var theScaryWarning = "It looks like your form is not valid XML. This can " +
+            var theScaryWarning = gettext(
+                "It looks like your form is not valid XML. This can " +
                 "often happen if you use a reserved character in one of your questions. " +
                 "Characters to look out for are <, >, and &. You can still save, but " +
                 "you CANNOT LOAD THIS FORM again until you fix the XML by hand. " +
-                "What would you like to do?";
-            var $modal = _this.generateNewModal("Form Validation Error", [
+                "What would you like to do?");
+            var $modal = _this.generateNewModal(gettext("Form Validation Error"), [
                 {
-                    title: 'Fix the problem (recommended)',
+                    title: gettext('Fix the problem (recommended)'),
                     cssClasses: "btn-primary",
                     action: function() {
                         _this.closeModal();
                     },
                 },
                 {
-                    title: 'Save anyway',
+                    title: gettext('Save anyway'),
                     cssClasses: "btn-default",
                     action: function() {
                         _this.closeModal();
@@ -2153,61 +2166,62 @@ define([
         return [
             {
                 slug: "main",
-                displayName: "Basic",
+                displayName: gettext("Basic"),
                 properties: this.getMainProperties(),
                 help: {
-                    title: "Basic",
-                    text: "<p>The <strong>Display Text</strong> appears in the application. " +
-                        "This text will not appear in data exports.</p> ",
+                    title: gettext("Basic"),
+                    text: "<p>" + gettext("The <strong>Display Text</strong> " +
+                        "appears in the application. This text will not " +
+                        "appear in data exports.") + "</p> ",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
             {
                 slug: "data_source",
-                displayName: "Data Source",
+                displayName: gettext("Data Source"),
                 properties: this.getDataSourceProperties(),
                 isCollapsed: true,
                 help: {
-                    title: "Data Source",
-                    text: "You can configure an external data source like a " +
+                    title: gettext("Data Source"),
+                    text: gettext("You can configure an external data source like a " +
                         "case list or lookup table to use as the choices for " +
-                        "a multiple choice question."
+                        "a multiple choice question.")
                 }
             },
             {
                 slug: "logic",
-                displayName: "Logic",
+                displayName: gettext("Logic"),
                 properties: this.getLogicProperties(),
                 isCollapsed: true,
                 help: {
-                    title: "Logic",
-                    text: "Use logic to control when questions are asked and what answers are valid. " +
+                    title: gettext("Logic"),
+                    text: gettext("Use logic to control when questions are asked and what answers are valid. " +
                         "You can add logic to display a question based on a previous answer, to make " +
-                        "the question required or ensure the answer is in a valid range.",
+                        "the question required or ensure the answer is in a valid range."),
                     link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
                 }
             },
             {
-                displayName: "Media",
+                displayName: gettext("Media"),
                 slug: "content",
                 properties: this.getMediaProperties(),
                 isCollapsed: true,
                 help: {
-                    title: "Media",
-                    text: "This will allow you to add images, audio or video media to a question, or other custom content.",
+                    title: gettext("Media"),
+                    text: gettext("This will allow you to add images, audio or video media to a question, or other custom content."),
                     link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare"
                 }
             },
             {
                 slug: "advanced",
                 type: "accordion",
-                displayName: "Advanced",
+                displayName: gettext("Advanced"),
                 properties: this.getAdvancedProperties(),
                 isCollapsed: true,
                 help: {
-                    title: "Advanced",
-                    text: "These are advanced settings and are not needed for most applications.  " +
-                        "Please only change these if you have a specific need!",
+                    title: gettext("Advanced"),
+                    text: gettext("These are advanced settings and are not needed for most applications.  " +
+                        "Please only change these if you have a specific need!"),
                     link: "https://confluence.dimagi.com/display/commcarepublic/Application+Building"
                 }
             }

@@ -178,7 +178,7 @@ define([
             spec: {
                 xmlnsAttr: { presence: "optional" },
                 "date_modified": {
-                    lstring: "Date Modified",
+                    lstring: gettext("Date Modified"),
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
@@ -186,7 +186,7 @@ define([
                     deserialize: mugs.deserializeXPath,
                 },
                 "user_id": {
-                    lstring: "User ID",
+                    lstring: gettext("User ID"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
@@ -194,13 +194,13 @@ define([
                     deserialize: mugs.deserializeXPath,
                 },
                 "case_type": {
-                    lstring: "Case Type",
+                    lstring: gettext("Case Type"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.text,
                 },
                 "case_id": {
-                    lstring: "Case ID",
+                    lstring: gettext("Case ID"),
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
@@ -208,13 +208,13 @@ define([
                     deserialize: mugs.deserializeXPath,
                 },
                 useCreate: {
-                    lstring: "Create Case",
+                    lstring: gettext("Create Case"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
                 createProperty: {
-                    lstring: "Properties To Create",
+                    lstring: gettext("Properties To Create"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: saveCasePropWidget,
@@ -231,15 +231,18 @@ define([
                                 });
 
                             if (requiredProps.length !== required.length) {
-                                return "You must include " + 
-                                    required.join(", ") + 
-                                    " columns to create a case";
+                                return util.format(
+                                    gettext("You must include {columns} columns to create a case"),
+                                    {columns: required.join(", ")}
+                                );
                             } else if (illegalProps.length > 0) {
-                                return "You can only use the following properties: " +
-                                    legal.join(', ');
+                                return gettext("You can only use the following properties:") +
+                                    " " + legal.join(', ');
                             } else if (invalidProps.length > 0) {
-                                return invalidProps.join(", ") + 
-                                    " are invalid properties";
+                                return util.format(
+                                    gettext("{props} are invalid properties"),
+                                    {props: invalidProps.join(", ")}
+                                );
                             }
 
                         }
@@ -247,13 +250,13 @@ define([
                     }
                 },
                 useClose: {
-                    lstring: "Close Case",
+                    lstring: gettext("Close Case"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
                 closeCondition: {
-                    lstring: "Close Condition",
+                    lstring: gettext("Close Condition"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
@@ -261,13 +264,13 @@ define([
                     deserialize: mugs.deserializeXPath,
                 },
                 useUpdate: {
-                    lstring: "Update Case",
+                    lstring: gettext("Update Case"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
                 updateProperty: {
-                    lstring: "Properties To Update",
+                    lstring: gettext("Properties To Update"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: saveCasePropWidget,
@@ -279,21 +282,23 @@ define([
                                 });
 
                             if (invalidProps.length > 0) {
-                                return invalidProps.join(", ") + 
-                                    " are invalid properties";
+                                return util.format(
+                                    gettext("{props} are invalid properties"),
+                                    {props: invalidProps.join(", ")}
+                                );
                             }
                         }
                         return 'pass';
                     }
                 },
                 useIndex: {
-                    lstring: "Use Index",
+                    lstring: gettext("Use Index"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
                 indexProperty: {
-                    lstring: "Index Properties",
+                    lstring: gettext("Index Properties"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: indexCaseWidget,
@@ -311,23 +316,25 @@ define([
                                 });
 
                             if (invalidProps.length > 0) {
-                                return invalidProps.join(", ") + 
-                                    " are invalid properties";
+                                return util.format(
+                                    gettext("{props} are invalid properties"),
+                                    {props: invalidProps.join(", ")}
+                                );
                             } else if (invalidRelationships.length > 0) {
-                                return "Relationship must be child or extension";
+                                return gettext("Relationship must be child or extension");
                             }
                         }
                         return 'pass';
                     }
                 },
                 useAttachment: {
-                    lstring: "Use Attachments",
+                    lstring: gettext("Use Attachments"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.checkbox
                 },
                 attachmentProperty: {
-                    lstring: "Attachment Properties",
+                    lstring: gettext("Attachment Properties"),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: attachmentCaseWidget,
@@ -352,18 +359,20 @@ define([
                             });
 
                         if (invalidProps.length > 0) {
-                            return invalidProps.join(", ") + 
-                                " are invalid properties";
+                            return util.format(
+                                gettext("{props} are invalid properties"),
+                                {props: invalidProps.join(", ")}
+                            );
                         }
 
                         if (invalidFroms.length > 0) {
-                            return "The from attribute must be one of: " + 
-                                "local, remote, or inline";
+                            return gettext("The from attribute must be one of: " +
+                                "local, remote, or inline");
                         }
                         
                         if (invalidInlines.length > 0) {
-                            return "Inlined attachments must have an " +
-                                "attachment name";
+                            return gettext("Inlined attachments must have an " +
+                                "attachment name");
                         }
 
                         return "pass";
@@ -580,7 +589,7 @@ define([
             SaveToCase: [
                 {
                     slug: "main",
-                    displayName: "Basic",
+                    displayName: gettext("Basic"),
                     properties: [
                         "nodeID",
                         "date_modified",
@@ -591,7 +600,7 @@ define([
                 },
                 {
                     slug: "create",
-                    displayName: "Create",
+                    displayName: gettext("Create"),
                     properties: [
                         "useCreate",
                         "createProperty",
@@ -602,7 +611,7 @@ define([
                 },
                 {
                     slug: "update",
-                    displayName: "Update",
+                    displayName: gettext("Update"),
                     properties: [
                         "useUpdate",
                         "updateProperty",
@@ -613,7 +622,7 @@ define([
                 },
                 {
                     slug: "close",
-                    displayName: "Close",
+                    displayName: gettext("Close"),
                     properties: [
                         "useClose",
                         "closeCondition",
@@ -624,7 +633,7 @@ define([
                 },
                 {
                     slug: "index",
-                    displayName: "Index",
+                    displayName: gettext("Index"),
                     properties: [
                         "useIndex",
                         "indexProperty",
@@ -635,7 +644,7 @@ define([
                 },
                 {
                     slug: "attachment",
-                    displayName: "Attachments",
+                    displayName: gettext("Attachments"),
                     properties: [
                         "useAttachment",
                         "attachmentProperty",
@@ -742,9 +751,11 @@ define([
                             mug.p[attr.mugProp] = el.attr(attr.elAttr);
                             return;
                         }
-                        form.parseWarnings.push(
-                            "An error occurred when parsing bind node [" +
-                            path + "]. Please fix this.");
+                        form.parseWarnings.push(util.format(
+                            gettext("An error occurred when parsing bind " + 
+                                    "node [{path}]. Please fix this."),
+                            {path: path}
+                        ));
                         return;
                     }
                 }

@@ -779,7 +779,7 @@ define([
         // "%e/%n/%y"       -> "d/m/yy"
         // "%a, %b %e, %Y"  -> "ddd, mmm d, yyyy"
         if (!format) {
-            return "no formatting";
+            return gettext("no formatting");
         }
         return format.replace(/(%[YymnbdeHhMS3a])/g, function (match, fmt) {
             return DATE_FORMATS.hasOwnProperty(fmt[1]) ? DATE_FORMATS[fmt[1]] : fmt;

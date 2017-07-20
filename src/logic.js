@@ -248,10 +248,11 @@ define([
 
             expr.analyze();
             if (expr.referencesSelf && _.contains(NO_SELF_REFERENCES, property)) {
-                warning = "The " + propertyName + " for a question " +
+                warning = util.format(gettext("The {property} for a question " +
                     "is not allowed to reference the question itself. " +
-                    "Please remove the . from the " +
-                    propertyName +" or your form will have errors.";
+                    "Please remove the . from the {property} " +
+                    "or your form will have errors."),
+                    {property: propertyName});
             }
 
             messages.push({
@@ -322,9 +323,9 @@ define([
                     if (!unknowns.length) {
                         return "";
                     } else if (unknowns.length === 1) {
-                        return "Unknown question: " + unknowns[0];
+                        return gettext("Unknown question:") + " " + unknowns[0];
                     }
-                    return "Unknown questions:\n- " + unknowns.join("\n- ");
+                    return gettext("Unknown questions:") + "\n- " + unknowns.join("\n- ");
                 })()
             });
             return messages;

@@ -89,7 +89,7 @@ define([
         xmlWriter.writeAttributeString("xmlns", uuid);
         xmlWriter.writeAttributeString("uiVersion", form.formUIVersion || "1");
         xmlWriter.writeAttributeString("version", form.formVersion || "1");
-        xmlWriter.writeAttributeString("name", form.formName || "New Form");
+        xmlWriter.writeAttributeString("name", form.formName || gettext("New Form"));
     };
 
     function write_html_tag_boilerplate (xmlWriter, form) {

@@ -274,10 +274,10 @@ define([
                     ],
                     isCollapsed: true,
                     help: {
-                        title: "Advanced",
-                        text: "This question represents advanced content " +
+                        title: gettext("Advanced"),
+                        text: gettext("This question represents advanced content " +
                           "that is not supported by the form builder. Please " +
-                          "only change it if you have a specific need!"
+                          "only change it if you have a specific need!")
                     }
                 }];
             }
@@ -312,7 +312,7 @@ define([
     });
 
     var IgnoredQuestion = {
-            typeName: "Ignored XML",
+            typeName: gettext("Ignored XML"),
             icon: 'fa fa-question-circle',
             isTypeChangeable: false,
             isRemoveable: false,

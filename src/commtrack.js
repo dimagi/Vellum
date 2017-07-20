@@ -52,7 +52,7 @@ define([
         },
         basicSection = {
             slug: "main",
-            displayName: "Basic",
+            displayName: gettext("Basic"),
             properties: [
                 "nodeID",
                 "src",
@@ -63,20 +63,20 @@ define([
                 "date",
             ],
             help: {
-                title: "Basic",
-                text: "<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
-                    "It does not appear on the phone. It is the name of the question in data exports.</p>",
+                title: gettext("Basic"),
+                text: gettext("<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
+                    "It does not appear on the phone. It is the name of the question in data exports.</p>"),
                 link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
             },
         },
         logicSection = {
             slug: "logic",
-            displayName: "Logic",
+            displayName: gettext("Logic"),
             help: {
-                title: "Logic",
-                text: "Use logic to control when questions are asked and what answers are valid. " +
+                title: gettext("Logic"),
+                text: gettext("Use logic to control when questions are asked and what answers are valid. " +
                     "You can add logic to display a question based on a previous answer, to make " +
-                    "the question required or ensure the answer is in a valid range.",
+                    "the question required or ensure the answer is in a valid range."),
                 link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
             },
             properties: [
@@ -137,42 +137,42 @@ define([
             isHashtaggable: false,
             spec: {
                 date: {
-                    lstring: 'Date',
+                    lstring: gettext('Date'),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
                     xpathType: 'generic',
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: 'The date and time of the action, e.g., now() or today()',
+                    help: gettext('The date and time of the action, e.g., now() or today()'),
                 },
                 sectionId: {
-                    lstring: 'Balance ID',
+                    lstring: gettext('Balance ID'),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.text,
-                    help: 'The name of the balance you are tracking. ' + 
-                         'This is an internal identifier which does not appear on the phone.',
+                    help: gettext('The name of the balance you are tracking. ' +
+                         'This is an internal identifier which does not appear on the phone.'),
                 },
                 entryId: {
-                    lstring: 'Product',
+                    lstring: gettext('Product'),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
                     xpathType: "generic",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: 'A reference to a product ID, e.g., "/data/products/current_product"',
+                    help: gettext('A reference to a product ID, e.g., "/data/products/current_product"'),
                 },
                 quantity: {
-                    lstring: 'Quantity',
+                    lstring: gettext('Quantity'),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
                     xpathType: "generic",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: 'A reference to an integer question in this form.',
+                    help: gettext('A reference to an integer question in this form.'),
                 },
                 relevantAttr: {
                     visibility: 'visible',
@@ -181,7 +181,7 @@ define([
                     xpathType: "bool",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    lstring: 'Display Condition'
+                    lstring: gettext('Display Condition')
                 },
             },
             getSetValues: function (mug) {
@@ -236,14 +236,14 @@ define([
                     serialize: serializeNodeId
                 },
                 entityId: {
-                    lstring: 'Case',
+                    lstring: gettext('Case'),
                     visibility: 'visible',
                     presence: 'optional',
                     widget: widgets.xPath,
                     xpathType: "generic",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: 'XPath expression for the case ID associated with this balance.',
+                    help: gettext('XPath expression for the case ID associated with this balance.'),
                 },
                 requiredAttr: { presence: "notallowed" },
                 constraintAttr: { presence : "notallowed" },
@@ -253,8 +253,8 @@ define([
         transferMugValidation = function (mug) {
             var error = {key: "commtrack-transfer-src-dest-error", level: mug.ERROR};
             if (!mug.p.dest || !mug.p.src) {
-                error.message = 'Transfer must have both Source Case and ' +
-                                'Destination Case defined.';
+                error.message = gettext('Transfer must have both Source Case and ' +
+                                'Destination Case defined.');
             }
             mug.addMessages({src: [error], dest: [error]});
             return 'pass';
@@ -269,7 +269,7 @@ define([
                         isTransaction({__className: typeName})) {
                     return "";
                 }
-                return "Cannot change $1 to $2"
+                return gettext("Cannot change $1 to $2")
                         .replace("$1", mug.__className)
                         .replace("$2", typeName);
             },
@@ -313,25 +313,25 @@ define([
                     deserialize: function () {}
                 },
                 src: {
-                    lstring: 'Source Case',
+                    lstring: gettext('Source Case'),
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
                     xpathType: "generic",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: 'XPath expression for the case ID issuing the transaction.',
+                    help: gettext('XPath expression for the case ID issuing the transaction.'),
                     validationFunc: transferMugValidation,
                 },
                 dest: {
-                    lstring: 'Destination Case',
+                    lstring: gettext('Destination Case'),
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.xPath,
                     xpathType: "generic",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: 'XPath expression for the case ID receiving the transaction.',
+                    help: gettext('XPath expression for the case ID receiving the transaction.'),
                     validationFunc: transferMugValidation,
                 },
                 requiredAttr: { presence: "notallowed" },
@@ -348,7 +348,7 @@ define([
                         if (mug.p.src) {
                             return 'pass';
                         }
-                        return 'Dispense must have a Source Case.';
+                        return gettext('Dispense must have a Source Case.');
                     },
                 },
                 dest: { presence: "notallowed" },
@@ -364,7 +364,7 @@ define([
                         if (mug.p.dest) {
                             return 'pass';
                         }
-                        return 'Receive must have a Destination Case.';
+                        return gettext('Receive must have a Destination Case.');
                     },
                 },
             }

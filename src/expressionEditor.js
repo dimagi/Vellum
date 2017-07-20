@@ -42,8 +42,8 @@ define([
             validate = _.partial(validateXPath, form),
             saveButton;
         options = _.defaults(options, {
-            leftPlaceholder: "Drag question here",
-            rightPlaceholder: "Drag question here",
+            leftPlaceholder: gettext("Drag question here"),
+            rightPlaceholder: gettext("Drag question here"),
         });
 
         var handleChange = function () {
@@ -86,13 +86,13 @@ define([
             operationOpts.push([label, value]);
         }
 
-        addOp(BinOpHandler, expTypes.EQ, "is equal to");
-        addOp(BinOpHandler, expTypes.NEQ, "is not equal to");
-        addOp(BinOpHandler, expTypes.LT, "is less than");
-        addOp(BinOpHandler, expTypes.LTE, "is less than or equal to");
-        addOp(BinOpHandler, expTypes.GT, "is greater than");
-        addOp(BinOpHandler, expTypes.GTE, "is greater than or equal to");
-        addOp(FunctionHandler, "selected", "has selected value");
+        addOp(BinOpHandler, expTypes.EQ, gettext("is equal to"));
+        addOp(BinOpHandler, expTypes.NEQ, gettext("is not equal to"));
+        addOp(BinOpHandler, expTypes.LT, gettext("is less than"));
+        addOp(BinOpHandler, expTypes.LTE, gettext("is less than or equal to"));
+        addOp(BinOpHandler, expTypes.GT, gettext("is greater than"));
+        addOp(BinOpHandler, expTypes.GTE, gettext("is greater than or equal to"));
+        addOp(FunctionHandler, "selected", gettext("has selected value"));
 
         var getExpressionInput = function () {
             return $div.find(".fd-xpath-editor-text");
@@ -419,8 +419,8 @@ define([
 
             var $xpathUI = $(xpath_tpl({
                 topLevelJoinOpts: [
-                    ["True when ALL of the expressions are true.", expTypes.AND],
-                    ["True when ANY of the expressions are true.", expTypes.OR]
+                    [gettext("True when ALL of the expressions are true."), expTypes.AND],
+                    [gettext("True when ANY of the expressions are true."), expTypes.OR]
                 ],
                 tag: tag,
                 tagArgs: tagArgs,

@@ -40,7 +40,7 @@ define([
 
     Itemset = util.extend(mugs.defaultOptions, {
         isControlOnly: true,
-        typeName: 'Lookup Table Data',
+        typeName: gettext('Lookup Table Data'),
         tagName: 'itemset',
         icon: 'fa fa-th',
         isTypeChangeable: false,
@@ -91,7 +91,7 @@ define([
             otherItext: { presence: 'notallowed' },
             appearance: { presence: 'notallowed' },
             itemsetData: {
-                lstring: 'Lookup Table',
+                lstring: gettext('Lookup Table'),
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: itemsetWidget,
@@ -119,16 +119,21 @@ define([
                 },
                 validationFunc: function (mug) {
                     if (!mug.options.lookupTablesEnabled) {
-                        return _.template("You no longer have access to Lookup Tables in your application. " +
+                        return util.format(gettext(
+                            "You no longer have access to Lookup Tables in your application. " +
                             "Lookup Tables are available on the Standard plan and higher.\n" +
                             "Before you can make a new version of your application, " +
-                            "you must <%= link %> or delete this question")({
-                            link: changeSubscriptionLink ? "[change your subscription](" + changeSubscriptionLink + ")": "change your subscription"
+                            "you must {link} or delete this question"
+                        ), {
+                            link: changeSubscriptionLink ?
+                                "[" + gettext("change your subscription") +
+                                "](" + changeSubscriptionLink + ")" :
+                                gettext("change your subscription")
                         });
                     }
                     var itemsetData = mug.p.itemsetData;
                     if (!itemsetData.nodeset) {
-                        return "A data source must be selected.";
+                        return gettext("A data source must be selected.");
                     } else {
                         mug.form.updateLogicReferences(
                             mug, "itemsetData", itemsetData.nodeset);
@@ -150,7 +155,7 @@ define([
                 },
             },
             labelRef: {
-                lstring: 'Display Text Field',
+                lstring: gettext('Display Text Field'),
                 widget: refWidget,
                 visibility: 'visible',
                 presence: 'required',
@@ -162,7 +167,7 @@ define([
                 },
             },
             sortRef: {
-                lstring: 'Sort Field',
+                lstring: gettext('Sort Field'),
                 widget: refWidget,
                 visibility: 'visible',
                 presence: 'optional',
@@ -174,7 +179,7 @@ define([
                 },
             },
             filter: {
-                lstring: 'Filter',
+                lstring: gettext('Filter'),
                 presence: 'optional',
                 widget: widgets.xPath,
                 xpathType: 'bool',
@@ -187,8 +192,8 @@ define([
                         src = mug.p.itemsetData.instance.src;
                     return datasourceWidgets.autocompleteChoices(sources, src);
                 },
-                help: "This is an XPath expression that will filter the set " +
-                      "of choices from the lookup table",
+                help: gettext("This is an XPath expression that will filter the set " +
+                      "of choices from the lookup table"),
             }
         }
     });
@@ -249,7 +254,7 @@ define([
             var groups = this.__callOld();
             if (this.opts().features.lookup_tables) {
                groups.splice(groups.length - 1, 0, {
-                    group: ["SelectDynamic", 'Lookup Tables'],
+                    group: ["SelectDynamic", gettext('Lookup Tables')],
                     questions: ["SelectDynamic", "MSelectDynamic"],
                 });
             }
@@ -260,17 +265,18 @@ define([
             types.auxiliary.Itemset = Itemset;
             types.normal = $.extend(types.normal, {
                 "MSelectDynamic": util.extend(mugTypes.MSelect, {
-                    typeName: 'Checkbox Lookup Table',
+                    typeName: gettext('Checkbox Lookup Table'),
                     typeChangeError: function (mug, typeName) {
                         if (typeName.match(/^M?Select$/)) {
                             if (mug.form.getChildren(mug).length > 0) {
-                                return "Cannot change to Multiple/Single Choice " +
+                                return gettext("Cannot change to Multiple/Single Choice " +
                                       "question if it has Choices. " +
-                                      "Please remove all Choices and try again.";
+                                      "Please remove all Choices and try again.");
                             }
                             return '';
                         }
-                        return typeName === "SelectDynamic" ? "" : "Can only change to a Multiple Choice Lookup Table";
+                        return typeName === "SelectDynamic" ? "" :
+                            gettext("Can only change to a Multiple Choice Lookup Table");
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -285,17 +291,18 @@ define([
                     }
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
-                    typeName: 'Multiple Choice Lookup Table',
+                    typeName: gettext('Multiple Choice Lookup Table'),
                     typeChangeError: function (mug, typeName) {
                         if (typeName.match(/^M?Select$/)) {
                             if (mug.form.getChildren(mug).length > 0) {
-                                return "Cannot change to Multiple/Single Choice " +
+                                return gettext("Cannot change to Multiple/Single Choice " +
                                       "question if it has Choices. " +
-                                      "Please remove all Choices and try again.";
+                                      "Please remove all Choices and try again.");
                             }
                             return '';
                         }
-                        return typeName === "MSelectDynamic" ? "" : "Can only change to a Checkbox Lookup Table";
+                        return typeName === "MSelectDynamic" ? "" :
+                            gettext("Can only change to a Checkbox Lookup Table");
                     },
                     validChildTypes: ["Itemset"],
                     maxChildren: 1,
@@ -491,7 +498,7 @@ define([
             dataSources = [],
             optionsLoaded = false,
             canUpdateAutocomplete = false,
-            widget = datasourceWidgets.fixtureWidget(mug, options, "Lookup Table"),
+            widget = datasourceWidgets.fixtureWidget(mug, options, gettext("Lookup Table")),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue,
             super_handleChange = widget.handleChange;
@@ -564,7 +571,10 @@ define([
                 strippedMugAttr = mugAttr.replace(filterRegex, "");
 
             if (notCustom && !_.contains(choices, strippedMugAttr)) {
-                return mugAttr + " was not found in the lookup table";
+                return util.format(
+                    gettext("{attr} was not found in the lookup table"),
+                    {attr: mugAttr}
+                );
             }
 
             return 'pass';

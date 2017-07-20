@@ -7,7 +7,7 @@ define([
 ){
     function showMenu(x, y, callback, hideOnLeave) {
         var formats = {
-                "": "No Formatting",
+                "": gettext("No Formatting"),
                 "%e/%n/%y": "d/m/yy e.g. 30/1/14",
                 "%a, %b %e, %Y": "ddd, mmm d, yyyy e.g. Thu, Jan 30, 2014"
             };

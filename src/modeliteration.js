@@ -132,7 +132,7 @@ define([
                     }
                 }),
                 dataSource: {
-                    lstring: 'Data Source',
+                    lstring: gettext('Data Source'),
                     visibility: 'visible_if_present',
                     presence: 'optional',
                     widget: idsQueryDataSourceWidget,
@@ -314,7 +314,7 @@ define([
 
     function idsQueryDataSourceWidget(mug, options) {
         var widget = datasourceWidgets.advancedDataSourceWidget(
-                                    mug, options, "Model Iteration ID Query"),
+                                    mug, options, gettext("Model Iteration ID Query")),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
 

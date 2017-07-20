@@ -136,7 +136,7 @@ define([
      *      setSource(source, mug) - Saves the source from the advanced editor
      */
     function fixtureWidget(mug, options, labelText) {
-        var CUSTOM_XML = "Lookup table was not found in the project",
+        var CUSTOM_XML = gettext("Lookup table was not found in the project"),
             EMPTY_VALUE = JSON.stringify({src: "", id: "", query: ""});
 
         function isEmptyValue(val) {
@@ -168,7 +168,7 @@ define([
             hasValue = false;
 
         widget.options.richText = false;
-        widget.addOption(EMPTY_VALUE, "Loading...");
+        widget.addOption(EMPTY_VALUE, gettext("Loading..."));
         var disconnect = mug.form.vellum.datasources.onChangeReady(function () {
             var data = mug.form.vellum.datasources.getDataSources(),
                 value;

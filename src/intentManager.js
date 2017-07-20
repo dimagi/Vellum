@@ -210,7 +210,7 @@ define([
     }
 
     var AndroidIntent = util.extend(mugs.defaultOptions, {
-        typeName: 'Android App Callout',
+        typeName: gettext('Android App Callout'),
         dataType: 'intent',
         tagName: 'input',
         icon: 'fcc fcc-fd-android-intent',
@@ -220,11 +220,11 @@ define([
         },
         spec: {
             androidIntentAppId: {
-                lstring: 'External App',
+                lstring: gettext('External App'),
                 visibility: 'visible',
                 widget: intentAppIdWidget,
                 noCustom: true,
-                placeholder: 'Insert Android Application ID',
+                placeholder: gettext('Insert Android Application ID'),
                 deserialize: function (data, key, mug) {
                     if (data.intent) {
                         // support old format for now
@@ -255,19 +255,22 @@ define([
                     var opts = mug.form.vellum.opts(),
                         features = opts.features,
                         link = opts.core.externalLinks.changeSubscription,
-                        text = link ? "[change your subscription](" + link + ")" : "change your subscription";
+                        text = link ? "[" + gettext("change your subscription") +
+                            "](" + link + ")" : gettext("change your subscription");
                     if (noIntents(features)) {
-                        return "You no longer have access to built in or external integration in your application.\n\n" +
+                        return util.format(gettext(
+                            "You no longer have access to built in or external integration in your application.\n\n" +
                             "Built in integrations are available on the Pro plan and higher. " +
                             "External integrations are available on the Advanced plan and higher. " +
                             "Before you can make a new version of your application, " +
-                            "you must " + text + " or delete this question.";
+                            "you must {link} or delete this question."), {link: text});
                     } else if (onlyTemplatedIntents(features) &&
                                valueNotInIntentTemplates(mug.p.androidIntentAppId)) {
-                         return "Your subscription only has access to built-in integration.\n\n" +
-                             "External integrations are available on the Advanced plan and higher. " +
-                             "Before you can make a new version of your application, " +
-                             "you must " + text + " or delete this question.";
+                        return util.format(gettext(
+                            "Your subscription only has access to built-in integration.\n\n" +
+                            "External integrations are available on the Advanced plan and higher. " +
+                            "Before you can make a new version of your application, " +
+                            "you must {link} or delete this question."), {link: text});
                     }
 
                     // Validate that IDs are unique across app callouts
@@ -284,7 +287,7 @@ define([
                                 changed = i.messages.update("nodeID", {
                                     key: "intent-nodeID-duplicate",
                                     level: i.ERROR,
-                                    message: "Android app callouts of the same type must have different question ids.",
+                                    message: gettext("Android app callouts of the same type must have different question ids."),
                                 });
                             } else {
                                 changed = i.dropMessage("nodeID", "intent-nodeID-duplicate");
@@ -299,13 +302,13 @@ define([
                 },
             },
             androidIntentExtra: {
-                lstring: 'Extra',
+                lstring: gettext('Extra'),
                 visibility: 'visible',
                 widget: widgets.baseKeyValue,
                 serialize: serializeAttrs,
             },
             androidIntentResponse: {
-                lstring: 'Response',
+                lstring: gettext('Response'),
                 visibility: 'visible',
                 widget: widgets.baseKeyValue,
                 serialize: serializeAttrs,
@@ -318,7 +321,7 @@ define([
             intentXmlns: {
                 visibility: 'hidden',
                 presence: 'optional',
-                lstring: "Special Intent XMLNS attribute",
+                lstring: gettext("Special Intent XMLNS attribute"),
             }
         },
         // todo: move to spec system
@@ -328,7 +331,7 @@ define([
     });
 
     var PrintIntent = util.extend(AndroidIntent, {
-        typeName: 'Print',
+        typeName: gettext('Print'),
         icon: 'fa fa-print',
         init: function (mug, form) {
             AndroidIntent.init(mug, form);
@@ -336,7 +339,7 @@ define([
         },
         spec: {
             docTemplate: {
-                lstring: 'Document Template',
+                lstring: gettext('Document Template'),
                 visibility: 'visible',
                 widget: printTemplateWidget,
             },

@@ -210,9 +210,9 @@ define([
     
     that.getOneOrFail = function (list, infoMsg) {
         if (list.length === 0) {
-            throw ("No match for " + infoMsg + " found!");
+            throw that.format(gettext("No match for {info} found!"), {info: infoMsg});
         } else if (list.length > 1) {
-            throw ("Multiple matches for " + infoMsg + " found!");
+            throw that.format(gettext("Multiple matches for {info} found!"), {info: infoMsg});
         }
         return list[0];
     };
@@ -282,9 +282,16 @@ define([
         }
         localForm = cleanForDiff(localForm);
         serverForm = cleanForDiff(serverForm);
-        var patch = jsdiff.createPatch("", serverForm, localForm, "Server Form", "Local Form");
+        var patch = jsdiff.createPatch(
+            "",
+            serverForm,
+            localForm,
+            gettext("Server Form"),
+            gettext("Local Form")
+        );
         patch = patch.replace(/^Index:/,
-                "XML " + (opts.not ? "should not be equivalent" : "mismatch"));
+            opts.not ? gettext("XML should not be equivalent") : gettext("XML mismatch")
+        );
         return patch;
     };
 

@@ -52,7 +52,7 @@ define([
             setValues = head.find('> model > setvalue');
 
         if($(xml).find('parsererror').length > 0) {
-            throw 'PARSE ERROR!:' + $(xml).find('parsererror').find('div').html();
+            throw gettext('PARSE ERROR!:') + $(xml).find('parsererror').find('div').html();
         }
 
         ignore = ignore ? ignore.split(" ") : [];
@@ -84,7 +84,7 @@ define([
         // TODO! adapt
         if(data.length === 0) {
             form.parseErrors.push(
-                'No Data block was found in the form.  Please check that your form is valid!');
+                gettext('No Data block was found in the form. Please check that your form is valid!'));
         }
        
         parseDataTree(form, data[0], title.length ? title.text() : "");
@@ -189,20 +189,21 @@ define([
         if (formName) {
             form.formName = formName;
         } else {
-            form.parseWarnings.push('Form does not have a Name! The default form name will be used');
+            form.parseWarnings.push(
+                gettext('Form does not have a Name! The default form name will be used'));
         }
 
         if (!form.formUuid || form.formUuid === "undefined") {
             form.formUuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
         }
         if (!form.formJRM) {
-            form.parseWarnings.push('Form JRM namespace attribute was not found in data block. One will be added automatically');
+            form.parseWarnings.push(gettext('Form JRM namespace attribute was not found in data block. One will be added automatically'));
         }
         if (!form.formUIVersion) {
-            form.parseWarnings.push('Form does not have a UIVersion attribute, one will be generated automatically');
+            form.parseWarnings.push(gettext('Form does not have a UIVersion attribute, one will be generated automatically'));
         }
         if (!form.formVersion) {
-            form.parseWarnings.push('Form does not have a Version attribute (in the data block), one will be added automatically');
+            form.parseWarnings.push(gettext('Form does not have a Version attribute (in the data block), one will be added automatically'));
         }
     }
 
@@ -545,7 +546,7 @@ define([
             if (nodeId) {
                 pathToTry = processPath(nodeId, rootNodeName, form);
                 if (!form.getMugByPath(pathToTry)) {
-                    form.parseWarnings.push("Ambiguous bind: " + nodeId);
+                    form.parseWarnings.push(gettext("Ambiguous bind:") + " " + nodeId);
                 } else {
                     path = pathToTry;
                 }
@@ -663,9 +664,11 @@ define([
         var mug = form.getMugByPath(path);
 
         if(!mug){
-            form.parseWarnings.push(
-                "Bind Node [" + path + "] found but has no associated " +
-                "Data node. This bind node will be discarded!");
+            form.parseWarnings.push(util.format(
+                gettext("Bind Node [{path}] found but has no associated " +
+                        "Data node. This bind node will be discarded!"),
+                {path: path}
+            ));
             return;
         }
 

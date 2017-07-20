@@ -209,7 +209,7 @@ define([
                 id: "",
                 uri: "",
                 path: "",
-                name: "Not Found",
+                name: gettext("Not Found"),
                 structure: {}
             }]};
             that.loading = false;
