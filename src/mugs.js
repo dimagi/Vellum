@@ -1059,7 +1059,8 @@ define([
                         if(!dataParentMug &&
                            form.getBasePath().slice(0, -1) !== dataParent) {
                             return gettext("Must be valid path");
-                        } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
+                        } else if (dataParentMug && (dataParentMug === mug ||
+                                !dataParentMug.options.possibleDataParent)) {
                             return util.format(
                                 gettext("{path} is not a valid data parent"),
                                 {path: dataParentMug.hashtagPath}

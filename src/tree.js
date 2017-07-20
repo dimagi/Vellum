@@ -153,7 +153,7 @@ define([
                 parentPath;
             if (dataParent) {
                 var dataParentMug = mug.form.getMugByPath(dataParent);
-                if (!dataParentMug) {
+                if (!dataParentMug || dataParentMug === mug) {
                     if (excludeRoot) {
                         parentPath = '';
                     } else {

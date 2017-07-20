@@ -207,5 +207,15 @@ define([
             );
             util.assertXmlEqual(call("createXML"), DATA_PARENT_MUG_IN_BETWEEN);
         });
+
+        it("should error on recursive data parent", function() {
+            util.loadXML("");
+            var mug = util.addQuestion("Text", 'mug');
+            assert.equal(mug.absolutePath, "/data/mug");
+            mug.p.dataParent = '#form/mug';
+            assert.deepEqual(mug.getErrors(),
+                [gettext("{path} is not a valid data parent")
+                    .replace("{path}", "#form/mug")]);
+        });
     });
 });
