@@ -72,7 +72,8 @@ define([
             xmlWriter.writeStartElement('value');
             xmlWriter.writeAttributeString('ref', valueRef || '');
             xmlWriter.writeEndElement();
-            if (sortRef && sortRef.trim()) {
+            var features = mug.form.vellum.opts().features;
+            if (sortRef && sortRef.trim() && features.sorted_itemsets) {
                 xmlWriter.writeStartElement('sort');
                 xmlWriter.writeAttributeString('ref', sortRef);
                 xmlWriter.writeEndElement();
@@ -113,6 +114,9 @@ define([
                         }
                         if (value.labelRef) {
                             mug.p.labelRef = value.labelRef;
+                        }
+                        if (value.sortRef) {
+                            mug.p.sortRef = value.sortRef;
                         }
                     }
                     return value;
@@ -164,7 +168,9 @@ define([
             sortRef: {
                 lstring: 'Sort Field',
                 widget: refWidget,
-                visibility: 'visible',
+                visibility: function (mug) {
+                    return mug.form.vellum.opts().features.sorted_itemsets;
+                },
                 presence: 'optional',
                 validationFunc: validateRefWidget('sortRef'),
                 serialize: function (value, key, mug, data) {
