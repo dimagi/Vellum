@@ -64,8 +64,12 @@ define([
             ],
             help: {
                 title: gettext("Basic"),
-                text: gettext("<p>The <strong>Question ID</strong> is an internal identifier for a question. " +
-                    "It does not appear on the phone. It is the name of the question in data exports.</p>"),
+                text: "<p>" + util.format(
+                    gettext("The {questionid} is an internal identifier for " +
+                            "a question. It does not appear on the phone. It " +
+                            "is the name of the question in data exports."),
+                    {questionid: "<strong>" + gettext("Question ID") + "</strong>"}
+                ) + "</p>",
                 link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
             },
         },

@@ -255,22 +255,22 @@ define([
                     var opts = mug.form.vellum.opts(),
                         features = opts.features,
                         link = opts.core.externalLinks.changeSubscription,
-                        text = link ? "[" + gettext("change your subscription") +
-                            "](" + link + ")" : gettext("change your subscription");
+                        changesub = gettext("change your subscription");
+                    link = link ? "[" + changesub + "](" + link + ")" : changesub;
                     if (noIntents(features)) {
                         return util.format(gettext(
                             "You no longer have access to built in or external integration in your application.\n\n" +
                             "Built in integrations are available on the Pro plan and higher. " +
                             "External integrations are available on the Advanced plan and higher. " +
                             "Before you can make a new version of your application, " +
-                            "you must {link} or delete this question."), {link: text});
+                            "you must {link} or delete this question."), {link: link});
                     } else if (onlyTemplatedIntents(features) &&
                                valueNotInIntentTemplates(mug.p.androidIntentAppId)) {
                         return util.format(gettext(
                             "Your subscription only has access to built-in integration.\n\n" +
                             "External integrations are available on the Advanced plan and higher. " +
                             "Before you can make a new version of your application, " +
-                            "you must {link} or delete this question."), {link: text});
+                            "you must {link} or delete this question."), {link: link});
                     }
 
                     // Validate that IDs are unique across app callouts

@@ -2170,9 +2170,12 @@ define([
                 properties: this.getMainProperties(),
                 help: {
                     title: gettext("Basic"),
-                    text: "<p>" + gettext("The <strong>Display Text</strong> " +
-                        "appears in the application. This text will not " +
-                        "appear in data exports.") + "</p> ",
+                    text: "<p>" + util.format(
+                        gettext("The {displaytext} " +
+                            "appears in the application. This text will not " +
+                            "appear in data exports."),
+                        {displaytext: "<strong>" + gettext("Display Text") + "</strong>"}
+                    ) + "</p> ",
                     link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
                 }
             },
