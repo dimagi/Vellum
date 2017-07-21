@@ -240,6 +240,7 @@ define(["underscore"], function (_) {
             'group_in_field_list': true,
             'rich_text': true,
             'advanced_itemsets': true,
+            'sorted_itemsets': true,
             'printing': true,
             'templated_intents': true,
             'custom_intents': true,
