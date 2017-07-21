@@ -200,6 +200,19 @@ define([
             );
         });
 
+        it("should update sortRef on paste dynamic select with sorted itemset", function () {
+            var data = [
+                ["id", "type", "labelItext:en-default", "instances", "itemsetData"],
+                ["/select", "SelectDynamic", "select",
+                 '{"foo":{"src":"jr://foo"}}',
+                 '[{"instance":{"id":"foo","src":"jr://foo"},' +
+                   '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id","sortRef":"name"}]'],
+            ];
+            util.loadXML("");
+            util.paste(data);
+            assert.equal(util.getMug("select/itemset").p.sortRef, "name");
+        });
+
         describe("without access to lookup tables", function() {
             before(function (done) {
                 util.init({

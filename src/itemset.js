@@ -115,6 +115,9 @@ define([
                         if (value.labelRef) {
                             mug.p.labelRef = value.labelRef;
                         }
+                        if (value.sortRef) {
+                            mug.p.sortRef = value.sortRef;
+                        }
                     }
                     return value;
                 },
