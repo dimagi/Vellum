@@ -49,7 +49,7 @@ define([
                 availableHorizSpace,
                 position = (this.getCurrentTopOffset() === 0) ? 'fixed' : 'static',
                 $fdc = this.$f.find('.fd-ui-container');
-    
+
             if (this.data.windowManager.fullscreen) {
                 $fdc.parent().css({height: null, width: null});
                 $fdc.css({height: null, width: null});
@@ -64,6 +64,7 @@ define([
                 });
                 $fdc.css('width', $(window).width());
             } else {
+                $fdc.removeClass("full-screen");
                 $('body').removeClass("vellum-full-screen");
                 $fdc.parent().css({
                     top: '',
