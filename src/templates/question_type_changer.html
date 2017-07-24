@@ -6,9 +6,9 @@
     </a>
     <ul class="dropdown-menu">
         <% if (questions.length === 0) { %>
-            <li class="dropdown-header">Cannot Change Question Type</li>
+            <li class="dropdown-header"><%-gettext("Cannot Change Question Type")%></li>
         <% } else { %>
-            <li class="dropdown-header">Change Question Type To</li>
+            <li class="dropdown-header"><%-gettext("Change Question Type To")%></li>
             <% _.each(questions, function(question) { %>
             <li>
                 <a href="#" class="change-question" data-qtype="<%=question.slug%>">

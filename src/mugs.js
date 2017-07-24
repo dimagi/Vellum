@@ -147,16 +147,17 @@ define([
             // TODO use data.hasOwnProperty(attr) rather than !value?
             if (!value && presence === 'required') {
                 // can the user always fix this error?
-                message = label + ' is required.';
+                message = gettext('{question} is required.');
             } else if (value && presence === 'notallowed') {
                 // can the user always fix this error?
-                message = label + ' is not allowed.';
+                message = gettext('{question} is not allowed.');
             } else if (spec.validationFunc) {
                 try {
                     message = spec.validationFunc(mug);
                 } catch (err) {
                     // this should never happen
-                    message = label + " validation failed\n" + util.formatExc(err);
+                    message = gettext("{question} validation failed") +
+                        "\n" + util.formatExc(err);
                 }
                 if (message === "pass") {
                     message = "";
@@ -166,7 +167,7 @@ define([
             return this.messages.update(attr, {
                 key: "mug-" + attr + "-error",
                 level: this.ERROR,
-                message: message
+                message: util.format(message || "", {question: label})
             });
         },
         // message levels
@@ -378,10 +379,10 @@ define([
                 nodeID = this.p.conflictedNodeId || this.p.nodeID;
 
             if (this.__className === "ReadOnly") {
-                return "Unknown (read-only) question type";
+                return gettext("Unknown (read-only) question type");
             }
             if (this.__className === "Itemset") {
-                return "Lookup Table Data";
+                return gettext("Lookup Table Data");
             }
 
             if (!itextItem || lang === '_ids') {
@@ -390,7 +391,7 @@ define([
             lang = lang || defaultLang;
 
             if(!lang) {
-                return 'No Translation Data';
+                return gettext('No Translation Data');
             }
 
             defaultDisp = itextItem.get("default", defaultLang);
@@ -795,7 +796,7 @@ define([
             nodeID: {
                 visibility: 'visible',
                 presence: 'required',
-                lstring: 'Question ID',
+                lstring: gettext('Question ID'),
                 setter: function (mug, attr, value) {
                     mug.form.moveMug(mug, "rename", value);
                 },
@@ -815,17 +816,19 @@ define([
                             level: mug.WARNING,
                         };
                     if (mug.p.nodeID.toLowerCase() === "case") {
-                        caseWarning.message = "The ID 'case' may cause " +
-                            "problems with case management. It is " +
-                            "recommended to pick a different Question ID.";
+                        caseWarning.message = gettext("The ID 'case' may " +
+                            "cause problems with case management. It is " +
+                            "recommended to pick a different Question ID.");
                     }
                     mug.addMessage("nodeID", caseWarning);
                     if (!util.isValidElementName(mug.p.nodeID)) {
-                        return mug.p.nodeID + " is not a legal Question ID. " +
+                        return util.format(gettext(
+                            "{nodeID} is not a legal Question ID. " +
                             "It must start with a letter and contain only " +
-                            "letters, numbers, and '-' or '_' characters.";
+                            "letters, numbers, and '-' or '_' characters."),
+                            {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
-                        return "'meta' is not a valid Question ID.";
+                        return gettext("'meta' is not a valid Question ID.");
                     }
                     return "pass";
                 },
@@ -869,9 +872,9 @@ define([
                     var message = null;
                     if (value) {
                         mug.p.set(attr, value);
-                        message = "This question has the same " +
+                        message = gettext("This question has the same " +
                             "Question ID as another question in the same " +
-                            "group. Please choose a unique Question ID.";
+                            "group. Please choose a unique Question ID.");
                     } else {
                         mug.p.set(attr);
                     }
@@ -889,16 +892,16 @@ define([
             dataValue: {
                 visibility: 'visible_if_present',
                 presence: 'optional',
-                lstring: 'Default Data Value',
+                lstring: gettext('Default Data Value'),
             },
             xmlnsAttr: {
                 visibility: 'visible',
                 presence: 'notallowed',
-                lstring: "Special Hidden Value XMLNS attribute"
+                lstring: gettext("Special Hidden Value XMLNS attribute")
             },
             rawDataAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Data Attributes',
+                lstring: gettext('Extra Data Attributes'),
             },
 
             // BIND ELEMENT
@@ -909,7 +912,7 @@ define([
                 xpathType: "bool",
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                lstring: 'Display Condition'
+                lstring: gettext('Display Condition')
             },
             calculateAttr: {
                 // only show calculate condition for non-data nodes if it already
@@ -922,7 +925,7 @@ define([
                 xpathType: "generic",
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                lstring: 'Calculate Condition'
+                lstring: gettext('Calculate Condition')
             },
             constraintAttr: {
                 visibility: 'visible',
@@ -934,7 +937,7 @@ define([
                 xpathType: "bool",
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                lstring: 'Validation Condition'
+                lstring: gettext('Validation Condition')
             },
             // non-itext constraint message
             constraintMsgAttr: {
@@ -942,17 +945,17 @@ define([
                 presence: 'optional',
                 validationFunc : function (mug) {
                     if (mug.p.constraintMsgAttr && !mug.p.constraintAttr) {
-                        return 'You cannot have a Validation Error Message with no Validation Condition!';
+                        return gettext('You cannot have a Validation Error Message with no Validation Condition!');
                     } else {
                         return 'pass';
                     }
                 },
-                lstring: 'Validation Error Message'
+                lstring: gettext('Validation Error Message')
             },
             requiredAttr: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Required",
+                lstring: gettext("Required"),
                 widget: widgets.checkbox
             },
             nodeset: {
@@ -962,12 +965,12 @@ define([
             // could use a key-value widget for this in the future
             rawBindAttributes: {
                 presence: 'optional',
-                lstring: 'Extra Bind Attributes'
+                lstring: gettext('Extra Bind Attributes')
             },
             defaultValue: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: 'Default Value',
+                lstring: gettext('Default Value'),
                 widget: widgets.xPath,
                 xpathType: 'generic',
                 serialize: serializeXPath,
@@ -978,15 +981,16 @@ define([
                         var paths = mug.form.getHashtagsInXPath(mug.p.defaultValue);
                         paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
                         if (paths.length) {
-                            return "You are referencing a node in this form. " +
-                                   "This can cause errors in the form";
+                            return gettext(
+                                "You are referencing a node in this form. " +
+                                "This can cause errors in the form");
                         }
                     }
                     return 'pass';
                 }
             },
             comment: {
-                lstring: 'Comment',
+                lstring: gettext('Comment'),
                 visibility: 'visible',
                 widget: widgets.multilineText,
             }
@@ -997,15 +1001,15 @@ define([
                 deleteOnCopy: true,
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: 'Appearance Attribute'
+                lstring: gettext('Appearance Attribute')
             },
             label: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Default Display Text",
+                lstring: gettext("Default Display Text"),
                 validationFunc: function (mug) {
                     if (!mug.p.label && mug.getPresence("label") === 'required') {
-                        return 'Default Display Text is required';
+                        return gettext('Default Display Text is required');
                     }
                     return 'pass';
                 }
@@ -1013,18 +1017,18 @@ define([
             hintLabel: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Hint Display Text"
+                lstring: gettext("Hint Display Text")
             },
             rawControlAttributes: {
                 presence: 'optional',
-                lstring: "Extra Control Attributes",
+                lstring: gettext("Extra Control Attributes"),
             },
             rawControlXML: {
                 presence: 'optional',
-                lstring: 'Raw XML'
+                lstring: gettext('Raw XML')
             },
             dataParent: {
-                lstring: 'Data Parent',
+                lstring: gettext('Data Parent'),
                 visibility: function(mug) {
                     function recFunc(mug) {
                         if (!mug) {
@@ -1054,11 +1058,16 @@ define([
 
                         if(!dataParentMug &&
                            form.getBasePath().slice(0, -1) !== dataParent) {
-                            return "Must be valid path";
-                        } else if (dataParentMug && !dataParentMug.options.possibleDataParent) {
-                            return dataParentMug.hashtagPath + " is not a valid data parent";
+                            return gettext("Must be valid path");
+                        } else if (dataParentMug && (dataParentMug === mug ||
+                                !dataParentMug.options.possibleDataParent)) {
+                            return util.format(
+                                gettext("{path} is not a valid data parent"),
+                                {path: dataParentMug.hashtagPath}
+                            );
                         } else if (!mug.spec.dataParent.visibility(mug)) {
-                            return "Children of repeat groups cannot have a different data parent";
+                            return gettext("Children of repeat groups cannot " +
+                                "have a different data parent");
                         }
                     }
 
@@ -1215,7 +1224,7 @@ define([
 
     var DataBindOnly = util.extend(defaultOptions, {
         isDataOnly: true,
-        typeName: 'Hidden Value',
+        typeName: gettext('Hidden Value'),
         icon: 'fcc fcc-fd-variable',
         isTypeChangeable: false,
         spec: {
@@ -1240,7 +1249,7 @@ define([
     });
 
     var Text = util.extend(defaultOptions, {
-        typeName: "Text",
+        typeName: gettext("Text"),
         dataType: "xsd:string",
         icon: "fcc fcc-fd-text",
         init: function (mug, form) {
@@ -1248,7 +1257,7 @@ define([
     });
 
     var PhoneNumber = util.extend(Text, {
-        typeName: 'Phone Number or Numeric ID',
+        typeName: gettext('Phone Number or Numeric ID'),
         icon: 'fa fa-signal',
         init: function (mug, form) {
             Text.init(mug, form);
@@ -1260,7 +1269,7 @@ define([
     });
 
     var Secret = util.extend(defaultOptions, {
-        typeName: 'Password',
+        typeName: gettext('Password'),
         dataType: 'xsd:string',
         tagName: 'secret',
         icon: 'fa fa-key',
@@ -1270,7 +1279,7 @@ define([
     });
 
     var Int = util.extend(defaultOptions, {
-        typeName: 'Integer',
+        typeName: gettext('Integer'),
         dataType: 'xsd:int',
         icon: 'fcc fcc-fd-numeric',
         init: function (mug, form) {
@@ -1278,7 +1287,7 @@ define([
     });
 
     var Audio = util.extend(defaultOptions, {
-        typeName: 'Audio Capture',
+        typeName: gettext('Audio Capture'),
         dataType: 'binary',
         tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
@@ -1290,27 +1299,27 @@ define([
     });
 
     var Image = util.extend(Audio, {
-        typeName: 'Image Capture',
+        typeName: gettext('Image Capture'),
         icon: 'fa fa-camera',
         mediaType: "image/*", /* */
         spec: {
             imageSize: {
-                lstring: "Image Size",
+                lstring: gettext("Image Size"),
                 visibility: 'visible',
                 widget: widgets.dropdown,
                 enabled: function(mug) {
                     return mug.options.resize_enabled;
                 },
                 defaultOptions: [
-                    { text: "Small", value: "250" },
-                    { text: "Medium", value: "500" },
-                    { text: "Large", value: "1000" },
-                    { text: "Original", value: "" },
+                    { text: gettext("Small"), value: "250" },
+                    { text: gettext("Medium"), value: "500" },
+                    { text: gettext("Large"), value: "1000" },
+                    { text: gettext("Original"), value: "" },
                 ],
-                help: "This will resize the image before sending the form. " +
+                help: gettext("This will resize the image before sending the form. " +
                     "Use this option to send smaller images in areas of poor " +
                     "connectivity.<ul><li>Small - 0.1 megapixels</li><li>" +
-                    "Medium - 0.2 megapixels</li><li>Large - 0.5 megapixels</li></ul>",
+                    "Medium - 0.2 megapixels</li><li>Large - 0.5 megapixels</li></ul>"),
             }
         },
         writeCustomXML: function (xmlWriter, mug) {
@@ -1328,13 +1337,13 @@ define([
     });
 
     var Video = util.extend(Audio, {
-        typeName: 'Video Capture',
+        typeName: gettext('Video Capture'),
         icon: 'fa fa-video-camera',
         mediaType: "video/*", /* */
     });
 
     var Signature = util.extend(Image, {
-        typeName: 'Signature Capture',
+        typeName: gettext('Signature Capture'),
         icon: 'fcc fcc-fd-signature',
         spec: {
             imageSize: {
@@ -1351,7 +1360,7 @@ define([
     });
 
     var Geopoint = util.extend(defaultOptions, {
-        typeName: 'GPS',
+        typeName: gettext('GPS'),
         dataType: 'geopoint',
         icon: 'fa fa-map-marker',
         init: function (mug, form) {
@@ -1359,7 +1368,7 @@ define([
     });
 
     var Barcode = util.extend(defaultOptions, {
-        typeName: 'Barcode Scan',
+        typeName: gettext('Barcode Scan'),
         dataType: 'barcode',
         icon: 'fa fa-barcode',
         init: function (mug, form) {
@@ -1367,7 +1376,7 @@ define([
     });
 
     var Date = util.extend(defaultOptions, {
-        typeName: 'Date',
+        typeName: gettext('Date'),
         dataType: 'xsd:date',
         icon: 'fa fa-calendar',
         init: function (mug, form) {
@@ -1375,7 +1384,7 @@ define([
     });
 
     var DateTime = util.extend(defaultOptions, {
-        typeName: 'Date and Time',
+        typeName: gettext('Date and Time'),
         dataType: 'xsd:dateTime',
         icon: 'fcc fcc-fd-datetime',
         init: function (mug, form) {
@@ -1383,7 +1392,7 @@ define([
     });
 
     var Time = util.extend(defaultOptions, {
-        typeName: 'Time',
+        typeName: gettext('Time'),
         dataType: 'xsd:time',
         icon: 'fa fa-clock-o',
         init: function (mug, form) {
@@ -1393,7 +1402,7 @@ define([
     // Deprecated. Users may not add new longs to forms, 
     // but must be able to view forms already containing longs.
     var Long = util.extend(Int, {
-        typeName: 'Long',
+        typeName: gettext('Long'),
         dataType: 'xsd:long',
         icon: 'fcc fcc-fd-long',
         init: function (mug, form) {
@@ -1401,7 +1410,7 @@ define([
     });
 
     var Double = util.extend(Int, {
-        typeName: 'Decimal',
+        typeName: gettext('Decimal'),
         dataType: 'xsd:double',
         icon: 'fcc fcc-fd-decimal',
         init: function (mug, form) {
@@ -1410,7 +1419,7 @@ define([
 
     var Choice = util.extend(defaultOptions, {
         isControlOnly: true,
-        typeName: 'Choice',
+        typeName: gettext('Choice'),
         tagName: 'item',
         icon: 'fcc fcc-fd-single-circle',
         isTypeChangeable: false,
@@ -1438,14 +1447,14 @@ define([
         },
         spec: {
             nodeID: {
-                lstring: 'Choice Value',
+                lstring: gettext('Choice Value'),
                 visibility: 'visible',
                 presence: 'required',
                 widget: widgets.identifier,
                 setter: null,
                 validationFunc: function (mug) {
                     if (/\s/.test(mug.p.nodeID)) {
-                        return "Whitespace in values is not allowed.";
+                        return gettext("Whitespace in values is not allowed.");
                     }
                     if (mug.parentMug) {
                         var siblings = mug.form.getChildren(mug.parentMug),
@@ -1453,7 +1462,7 @@ define([
                                 return ele !== mug && ele.p.nodeID === mug.p.nodeID;
                             });
                         if (dup) {
-                            return "This choice value has been used in the same question";
+                            return gettext("This choice value has been used in the same question");
                         }
                     }
                     return "pass";
@@ -1476,7 +1485,7 @@ define([
     });
 
     var Trigger = util.extend(defaultOptions, {
-        typeName: 'Label',
+        typeName: gettext('Label'),
         tagName: 'trigger',
         icon: 'fa fa-tag',
         init: function (mug, form) {
@@ -1504,9 +1513,9 @@ define([
         },
         typeChangeError: function (mug, typeName) {
             if (mug.form.getChildren(mug).length > 0 && !typeName.match(/^M?Select$/)) {
-                return "Cannot change a Multiple/Single Choice " +
+                return gettext("Cannot change a Multiple/Single Choice " +
                       "question to a non-Choice question if it has Choices. " +
-                      "Please remove all Choices and try again.";
+                      "Please remove all Choices and try again.");
             }
             return '';
         },
@@ -1520,21 +1529,21 @@ define([
     });
 
     var MSelect = util.extend(BaseSelect, {
-        typeName: 'Checkbox',
+        typeName: gettext('Checkbox'),
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
         defaultOperator: "selected"
     });
 
     var Select = util.extend(BaseSelect, {
-        typeName: 'Multiple Choice',
+        typeName: gettext('Multiple Choice'),
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
         defaultOperator: null
     });
 
     var Group = util.extend(defaultOptions, {
-        typeName: 'Group',
+        typeName: gettext('Group'),
         tagName: 'group',
         icon: 'fa fa-folder-open',
         isSpecialGroup: true,
@@ -1564,7 +1573,7 @@ define([
     // of grouped questions.  It's a separate question type because it can't
     // nest other group types and it has a very different end-user functionality
     var FieldList = util.extend(Group, {
-        typeName: 'Question List',
+        typeName: gettext('Question List'),
         icon: 'fa fa-reorder',
         init: function (mug, form) {
             Group.init(mug, form);
@@ -1576,7 +1585,7 @@ define([
     });
 
     var Repeat = util.extend(Group, {
-        typeName: 'Repeat Group',
+        typeName: gettext('Repeat Group'),
         icon: 'fa fa-retweet',
         possibleDataParent: false,
         controlNodeChildren: function ($node) {
@@ -1621,7 +1630,7 @@ define([
         },
         spec: {
             repeat_count: {
-                lstring: 'Repeat Count',
+                lstring: gettext('Repeat Count'),
                 visibility: 'visible_if_present',
                 presence: 'optional',
                 widget: widgets.droppableText,
@@ -1639,7 +1648,7 @@ define([
                     }
 
                     if (!$.trim(mug.p.repeat_count) && insideFieldList(mug)) {
-                        return "Repeat Count is required.";
+                        return gettext("Repeat Count is required.");
                     }
 
                     return "pass";
@@ -1647,7 +1656,7 @@ define([
             },
             rawRepeatAttributes: {
                 presence: 'optional',
-                lstring: "Extra Repeat Attributes",
+                lstring: gettext("Extra Repeat Attributes"),
             }
         }
     });

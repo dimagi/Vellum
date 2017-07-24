@@ -636,9 +636,9 @@ define([
         widget.addCustomIfNeeded = function (value) {
             var customOption = $('[name=property-androidIntentAppId]')
                 .find('option')
-                .filter(function () { return $(this).text() === "Custom"; });
+                .filter(function () { return $(this).text() === gettext("Custom"); });
             if (customOption.length === 0) {
-                widget.addOption(value, "Custom");
+                widget.addOption(value, gettext("Custom"));
             } else {
                 customOption.val(value);
             }
@@ -689,7 +689,7 @@ define([
 
         widget.dropdown.change(function () {
             var selectedOption = widget.dropdown.find(':selected');
-            widget.text.attr('readonly', selectedOption.text() !== "Custom");
+            widget.text.attr('readonly', selectedOption.text() !== gettext("Custom"));
             widget.text.val(selectedOption.val());
             super_handleChange();
         });

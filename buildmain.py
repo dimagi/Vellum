@@ -62,6 +62,13 @@ requirejs.config({
 define('css/css', {});
 define('less/less', {});
 
+if (!window.gettext) {
+    window.gettext = function (arg) { return arg; };
+    window.ngettext = function (singular, plural, count) {
+        return count === 1 ? singular : plural;
+    };
+}
+
 define([
     'jquery',
     %(main_components)s

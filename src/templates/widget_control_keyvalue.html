@@ -3,10 +3,10 @@
     <% _.each(pairs, function (v, k) { _.each(_.isArray(v) ? v : [v], function (v) { %>
         <div class="fd-kv-pair form-group">
             <div class="col-sm-3">
-                <input class="fd-kv-key form-control" type="text" value="<%=k%>" placeholder="key" />
+                <input class="fd-kv-key form-control" type="text" value="<%=k%>" placeholder="<%-gettext("key")%>" />
             </div>
             <div class="col-sm-1 fd-kv-arrow"><i class="fa fa-arrow-right"></i></div>
-            <div class="col-sm-7"><input class="fd-kv-val form-control jstree-drop" type="text" value="<%=v%>" placeholder="value" /></div>
+            <div class="col-sm-7"><input class="fd-kv-val form-control jstree-drop" type="text" value="<%=v%>" placeholder="<%-gettext("value")%>" /></div>
             <div class="col-sm-1">
                 <a href="#" class="btn fd-kv-remove-pair btn-sm btn-danger<% if (k =='') { %> hide<% } %>">
                     <i class="fa fa-remove"></i>
@@ -14,5 +14,5 @@
             </div>
         </div>
     <% }); }); %>
-    <a href="#" class="btn btn-default fd-kv-add-pair hide"><i class="fa fa-plus"></i> Add Key&rarr;Value Pair</a>
+    <a href="#" class="btn btn-default fd-kv-add-pair hide"><i class="fa fa-plus"></i> <%=gettext("Add Key&rarr;Value Pair")%></a>
 </div>

@@ -4,6 +4,7 @@ define([
     'tpl!vellum/templates/copy_paste_help',
     'vellum/mugs',
     'vellum/tsv',
+    'vellum/util',
     'vellum/analytics',
     'vellum/core'
 ], function (
@@ -12,6 +13,7 @@ define([
     copy_paste_help,
     mugs,
     tsv,
+    util,
     analytics
 ) {
     var PREAMBLE = ["Form Builder clip", "version 1"],
@@ -165,10 +167,12 @@ define([
         if (!pos) {
             pos = {};
             if (!node.mug) {
-                pos.error = "Cannot insert " +
-                            nameOf(values.type) + " into tree root";
+                pos.error = util.format(
+                    gettext("Cannot insert {type} into tree root"),
+                    {type: nameOf(values.type)}
+                );
             } else {
-                pos.error = "Cannot insert $1 into or after $2"
+                pos.error = gettext("Cannot insert $1 into or after $2")
                         .replace("$1", nameOf(values.type))
                         .replace("$2", nameOf(node.mug.__className));
             }
@@ -177,7 +181,7 @@ define([
             while (node.mug !== pos.mug) {
                 if (!node.parent) {
                     // valid insertion point was outside of the paste root
-                    pos.error = "Cannot insert $1 into $2"
+                    pos.error = gettext("Cannot insert $1 into $2")
                         .replace("$1", nameOf(values.type))
                         .replace("$2", nameOf(node.mug.parentMug.__className));
                     return pos;
@@ -263,7 +267,7 @@ define([
         analytics.workflow("Paste questions in form builder");
         var next = tsv.makeRowParser(data);
         if (!_.isEqual(next().slice(0, 2), PREAMBLE)) {
-            return ["Unsupported paste format"];
+            return [gettext("Unsupported paste format")];
         }
         var types = vellum.data.core.mugTypes.allTypes,
             form = vellum.data.core.form,
@@ -290,11 +294,11 @@ define([
                     return valuify(str);
                 }));
             } catch (err) {
-                errors.add("Unsupported paste format: " + row.join(", "));
+                errors.add(gettext("Unsupported paste format:") + " " + row.join(", "));
                 continue;
             }
             if (!types.hasOwnProperty(values.type)) {
-                errors.add("Unknown question type: " + row.join(", "));
+                errors.add(gettext("Unknown question type:") + " " + row.join(", "));
                 continue;
             }
             pos = getInsertTargetAndPosition(node, values);
@@ -360,7 +364,10 @@ define([
                 copyPasteBox.removeClass("hide");
                 copyPasteArea.val(copy(true));
             }
-            var html = $(copy_paste_help({"metachar": (isMac ? "\u2318" : "Ctrl+")})),
+            var html = $(copy_paste_help({
+                    "metachar": (isMac ? "\u2318" : "Ctrl+"),
+                    "format": util.format,
+                })),
                 copyPasteHelp = html.find(".copy-paste-help"),
                 copyPasteBox = html.find(".copy-paste-box"),
                 copyPasteArea = copyPasteBox.find("textarea");

@@ -2,27 +2,27 @@
 
     <fieldset class="xpath-advanced hide">
         <legend> 
-            <i class="fa fa-cog"></i> Edit <span class='property-name'>Expression</span> (Advanced)
+            <i class="fa fa-cog"></i> <%=gettext("Edit <span class='property-name'>Expression</span> (Advanced)")%>
             <button type="button" class="btn btn-default fd-xpath-show-simple-button pull-right xpath-mode-toggle">
-                Show Simple Mode
+                <%-gettext("Show Simple Mode")%>
             </button>
         </legend>
         <div class="alert alert-info xpath-advanced-notice hide">
             <i class="fa fa-info-circle"></i>
-            You are currently in Advanced Mode because your logic is too complicated for Simple Mode.
+            <%-gettext("You are currently in Advanced Mode because your logic is too complicated for Simple Mode.")%>
         </div>
         <div class="form-group">
             <label class="control-label col-sm-2">
-                XPath Expression
+                <%-gettext("XPath Expression")%>
             </label>
             <div class="col-sm-10">
                 <<%= tag %> <%= tagArgs %>
                           class="fd-textarea form-control fd-xpath-editor-text jstree-drop"></<%= tag %>>
-                <p class="help-block">You can drag a question into the box.</p>
+                <p class="help-block"><%-gettext("You can drag a question into the box.")%></p>
                 <p class="help-block">
                     <a target="_blank"
                        href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
-                        <i class="fa fa-info-circle"></i> Guide to Common Logic and Calculations
+                        <i class="fa fa-info-circle"></i> <%-gettext("Guide to Common Logic and Calculations")%>
                     </a>
                 </p>
             </div>
@@ -31,13 +31,13 @@
 
     <fieldset class="xpath-simple hide fieldset-condensed">
         <legend>
-            Edit <span class='property-name'>Expression</span>
+            <%=gettext("Edit <span class='property-name'>Expression</span>")%>
             <button type="button" class="btn btn-default pull-right xpath-mode-toggle fd-xpath-show-advanced-button">
-                <i class="fa fa-cog"></i> Show Advanced Mode
+                <i class="fa fa-cog"></i> <%-gettext("Show Advanced Mode")%>
             </button>
         </legend>
         <div class="form-group">
-            <label class="control-label col-sm-2">Result is</label>
+            <label class="control-label col-sm-2"><%-gettext("Result is")%></label>
             <div class="col-sm-10">
                 <select class="form-control top-level-join-select">
                     <% _.each(topLevelJoinOpts, function (opt) { %>
@@ -47,18 +47,18 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="control-label col-sm-2">Expression</label>
+            <label class="control-label col-sm-2"><%-gettext("Expression")%></label>
             <div class="col-sm-10">
                 <div class="fd-xpath-editor-expressions well"></div>
                 <p class="help-block pull-right">
                     <a target="_blank"
                        href="https://help.commcarehq.org/display/commcarepublic/Common+Logic+and+Calculations">
-                        <i class="fa fa-info-circle"></i> Guide to Common Logic and Calculations
+                        <i class="fa fa-info-circle"></i> <%-gettext("Guide to Common Logic and Calculations")%>
                     </a>
                 </p>
                 <p>
                     <button type="button" class="btn btn-default fd-add-exp">
-                        <i class="fa fa-plus"></i> Add Expression
+                        <i class="fa fa-plus"></i> <%-gettext("Add Expression")%>
                     </button>
                 </p>
             </div>
@@ -70,8 +70,8 @@
     <div class="form-actions form-actions-condensed fd-xpath-actions">
         <div class="col-sm-2"></div>
         <div class="col-sm-10">
-            <button type="button" class="btn btn-default fd-xpath-save-button">Save</button>
-            <button type="button" class="btn btn-default fd-xpath-cancel-button">Cancel</button>
+            <button type="button" class="btn btn-default fd-xpath-save-button"><%-gettext("Save")%></button>
+            <button type="button" class="btn btn-default fd-xpath-cancel-button"><%-gettext("Cancel")%></button>
         </div>
     </div>
 </div>

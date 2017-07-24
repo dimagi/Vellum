@@ -219,9 +219,11 @@ define([
                 current.addMessage(null, {
                     key: "javaRosa-output-value-type-error",
                     level: mug.WARNING,
-                    message: typeName + " nodes cannot be used in an " +
-                        "output value. Please remove the output value for " +
-                        "'" + path + "' or your form will have errors."
+                    message: util.format(gettext(
+                        "{type} nodes cannot be used in an output value. " +
+                        "Please remove the output value for '{path}' or " +
+                        "your form will have errors."
+                    ), {type: typeName, path: path}),
                 });
             }
         }
@@ -242,10 +244,11 @@ define([
             mug.addMessage(propName, {
                 key: "core-circular-reference-warning",
                 level: mug.WARNING,
-                message: "The " + fieldName + " for a question " +
-                    "is not allowed to reference the question itself. " +
-                    "Please remove the " + refName + " from the " +
-                    fieldName +" or your form will have errors."
+                message: util.format(gettext(
+                    "The {field} for a question is not allowed to reference " +
+                    "the question itself. Please remove the {ref} from the " +
+                    "{field} or your form will have errors."
+                ), {field: fieldName, ref: refName}),
             });
         }
     };
@@ -259,7 +262,8 @@ define([
             util.insertTextAtCursor(target, output, true);
         }
         if (mug) {
-            warnOnCircularReference('label', mug, path, 'output value', target.attr('name'));
+            warnOnCircularReference(
+                'label', mug, path, gettext('output value'), target.attr('name'));
             warnOnNonOutputableValue(form, mug, path);
         }
     };

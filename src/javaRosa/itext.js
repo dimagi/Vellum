@@ -230,7 +230,7 @@ define([
                 if (!data.hasOwnProperty(lang)) {
                     data[lang] = defaultValue;
                 }
-            })
+            });
         },
         getOutputRefExpressions: function () {
             if (this.outputExpressions === null) {
@@ -244,7 +244,7 @@ define([
                 if (expr) {
                     refs.push(expr);
                 }
-            })
+            });
             return refs;
         },
         /**
@@ -275,7 +275,7 @@ define([
                             value = output.attr(vkey) || output.attr(key),
                             result = fn(value);
                         if (result !== undefined && result !== value) {
-                            output.attr(key, result).removeAttr(vkey)
+                            output.attr(key, result).removeAttr(vkey);
                             shouldReset = true;
                         }
                     });

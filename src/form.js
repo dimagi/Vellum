@@ -126,7 +126,7 @@ define([
         this.vellum = vellum;
         this.mugTypes = mugTypes;
 
-        this.formName = vellum.opts().core.formName || "New Form";
+        this.formName = vellum.opts().core.formName || gettext("New Form");
         this.noMarkdown = false;
         this.mugMap = {};
         this.instanceMetadata = [InstanceMetadata({})];

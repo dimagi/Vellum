@@ -24,7 +24,10 @@ define([
         var refs = _.filter(_.map(mugs, function (mug) {
                 return mug.isReferencedByOtherMugs(mugs) ? mug.p.nodeID : "";
             }), _.identity);
-        $('.fd-undo-container').append(undo_alert({errors: refs}));
+        $('.fd-undo-container').append(undo_alert({
+            errors: refs,
+            format: util.format,
+        }));
     }
 
     function toggleAlert(undoStack) {

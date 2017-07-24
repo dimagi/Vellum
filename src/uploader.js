@@ -35,37 +35,37 @@ define([
     var SUPPORTED_EXTENSIONS = {
         image: [
             {
-                'description': 'Image',
+                'description': gettext('Image'),
                 'extensions': '*.jpg;*.png;*.gif'
             }
         ],
         audio: [
             {
-                'description': 'Audio',
+                'description': gettext('Audio'),
                 'extensions': '*.mp3;*.wav'
             }
         ],
         video: [
             {
-                'description': 'Video',
+                'description': gettext('Video'),
                 'extensions': '*.3gp;*.mp4'
             }
         ],
         'video-inline': [
             {
-                'description': 'Inline Video',
+                'description': gettext('Inline Video'),
                 'extensions': '*.3gp;*.mp4'
             }
         ],
         'expanded-audio': [
             {
-                'description': 'Audio with a Seekbar',
+                'description': gettext('Audio with a Seekbar'),
                 'extensions': '*.mp3;*.wav'
             }
         ],
         text: [
             {
-                'description': 'HTML',
+                'description': gettext('HTML'),
                 'extensions': '*.html'
             }
         ],

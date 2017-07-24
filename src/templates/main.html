@@ -4,7 +4,7 @@
             <div class="fd-head">
                 <h2>
                     <i class="fd-form-icon"></i>
-                    <span class="fd-head-text">Questions</span>
+                    <span class="fd-head-text"><%-gettext("Questions")%></span>
                 </h2>
                 <div class="fd-head-menu-container">
                     <div class="dropdown">
@@ -18,19 +18,19 @@
                             <li>
                                 <a class="fd-button-copy">
                                     <i class="fa fa-copy"></i>
-                                    Copy<span class="hotkey"><%-ctrl%>C</span>
+                                    <%-gettext("Copy")%><span class="hotkey"><%-ctrl%>C</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="fd-expand-all">
                                     <i class="fa fa-angle-double-down"></i>
-                                    Expand All<span class="hotkey"><%-ctrl%><%-alt%>=</span>
+                                    <%-gettext("Expand All")%><span class="hotkey"><%-ctrl%><%-alt%>=</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="fd-collapse-all">
                                     <i class="fa fa-angle-double-right"></i>
-                                    Collapse All<span class="hotkey"><%-ctrl%><%-alt%>&ndash;</span>
+                                    <%-gettext("Collapse All")%><span class="hotkey"><%-ctrl%><%-alt%>&ndash;</span>
                                 </a>
                             </li>
                             <li class="divider fd-tools-menu"></li>
@@ -41,7 +41,7 @@
             </div>
             <div class="dropdown fd-add-question-dropdown">
                 <a class="fd-add-question dropdown-toggle btn btn-purple" data-toggle="dropdown" href="#">
-                    <i class="fa fa-plus"></i> Add Question
+                    <i class="fa fa-plus"></i> <%-gettext("Add Question")%>
                     <i class="fa fa-caret-down"></i>
                 </a>
             </div>
@@ -51,7 +51,12 @@
                 <div class="hide fd-default-panel fd-default-qtree">
                   <div class="helpbubble helpbubble-purple helpbubble-top-left">
                     <p class="lead">
-                      Click <i class="fa fa-plus"></i> <strong>Add Question</strong> to start building your form.
+                    <%
+                        var msg = gettext("Click {btn} to start building your form."),
+                            add = gettext("Add Question"),
+                            btn = '<i class="fa fa-plus"></i> <strong>' + add + '</strong>';
+                        print(format(msg, {btn: btn}));
+                    %>
                     </p>
                     <p class="fd-default-helptext"></p>
                   </div>
@@ -67,14 +72,14 @@
             <div class="btn-group fd-save-button"></div>
         </div>
         <div class="fd-column fd-question-properties hide">
-            <div class="fd-head"><h2>Question Details</h2></div>
+            <div class="fd-head"><h2><%-gettext("Question Details")%></h2></div>
             <div class="fd-props-toolbar"></div>
             <div class="fd-scrollable fd-props-scrollable">
                 <form class="form form-horizontal fd-props-content"></form>
             </div>
         </div>
         <div class="fd-xpath-editor fd-column hide">
-            <div class="fd-head"><h2>Expression Editor</h2></div>
+            <div class="fd-head"><h2><%-gettext("Expression Editor")%></h2></div>
             <div class="fd-scrollable full">
                 <div class="fd-xpath-editor-content"></div>
             </div>

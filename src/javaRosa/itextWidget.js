@@ -452,7 +452,7 @@ define([
             widget.getBaseMediaPath = function () {
                 return "jr://file/commcare/" + form + url_type +
                        jrUtil.getDefaultItextRoot(widget.mug);
-            }
+            };
 
             widget.mug.form.vellum.initMediaUploaderWidget(widget);
 

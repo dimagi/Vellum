@@ -287,7 +287,7 @@ define([
                 text = errors.text();
             assert.equal(errors.length, 1, text);
             assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
-            assert(text.indexOf("page: es.") > -1, text);
+            assert(text.indexOf("page: es") > -1, text);
         });
 
         it("should preserve itext values on load + save", function () {

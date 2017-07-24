@@ -15,5 +15,9 @@
     "nonew": true,
     "undef": true,
     "unused": "vars",
-    "globals": {"define": false}
+    "globals": {
+        "define": false,
+        "gettext": false,
+        "ngettext": false
+    }
 }

@@ -165,16 +165,16 @@ define([
 
         block.getAddCustomItextButton = function () {
             var $customButton = $("<button />")
-                    .text("custom...")
+                    .text(gettext("custom..."))
                     .addClass('btn btn-default')
                     .attr('type', 'button'),
                 newItextBtnClass = 'fd-new-itext-button';
 
             $customButton.click(function () {
                 var $modal, $newItemForm, $newItemInput;
-                $modal = mug.form.vellum.generateNewModal("New Content Type", [
+                $modal = mug.form.vellum.generateNewModal(gettext("New Content Type"), [
                     {
-                        title: "Add",
+                        title: gettext("Add"),
                         cssClasses: newItextBtnClass + " disabled ",
                         attributes: {
                             disabled: "disabled"
@@ -183,7 +183,7 @@ define([
                 ]);
 
                 $newItemForm = $(control_group({
-                    label: "Content Type"
+                    label: gettext("Content Type")
                 }));
 
                 $newItemInput = $("<input />").attr("type", "text").addClass("form-control");

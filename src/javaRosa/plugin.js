@@ -108,7 +108,7 @@ define([
             });
             fullLangs[fullLangs.length] = {
                 code: '_ids',
-                name: 'Question ID'
+                name: gettext('Question ID')
             };
 
             if (fullLangs.length < 2) {
@@ -226,13 +226,11 @@ define([
 
                 if (langs && langs.indexOf(lang) === -1) {
                     // todo: plugins!
-                    _this.data.core.parseWarnings.push(
+                    _this.data.core.parseWarnings.push(gettext(
                         "You have languages in your form that are not specified " +
                         "in the \"Languages\" page of the application builder. " +
                         "The following language will be deleted on save " +
-                        "unless you add it to the \"Languages\" page: " +
-                        lang + "."
-                    );
+                        "unless you add it to the \"Languages\" page:") + " " + lang);
                     return;
                 }
                 Itext.addLanguage(lang);
@@ -286,8 +284,7 @@ define([
                     _.each(langs, function (lang) {
                         var text = itForm.getValue(lang);
                         if (!text) { return; }
-                        var div = $('<div>').append(text),
-                            changed = false;
+                        var div = $('<div>').append(text);
                         div.find('output').replaceWith(function() {
                             var output = $(this),
                                 key = output.is("[value]") ||
@@ -527,17 +524,29 @@ define([
                         hasItext = itext && itext.hasHumanReadableItext();
                     if (!hasItext && mug.getPresence(property) === 'required') {
                         if (itext.itextModel.languages.length === 1) {
-                            return name + " (or multimedia) is required.";
+                            return util.format(
+                                gettext("{name} (or multimedia) is required."),
+                                {name: name}
+                            );
                         } else {
-                            return name + " (or multimedia) is required for all languages.";
+                            return util.format(
+                                gettext("{name} (or multimedia) is required for all languages."),
+                                {name: name}
+                            );
                         }
                     }
                     if (itext && !itext.autoId && !itext.isEmpty()) {
                         // Itext ID validation
                         if (!itext.id) {
-                            return name + " Itext ID is required";
+                            return util.format(
+                                gettext("{name} Itext ID is required."),
+                                {name: name}
+                            );
                         } else if (!util.isValidAttributeValue(itext.id)) {
-                            return itext.id + " is not a valid ID";
+                            return util.format(
+                                gettext("{name} is not a valid ID."),
+                                {name: itext.id}
+                            );
                         }
                     }
                     return "pass";
@@ -624,8 +633,8 @@ define([
                                     mug.addMessage(name, {
                                         key: "missing-multimedia-warning",
                                         level: mug.WARNING,
-                                        message: "Multimedia was not copied; " +
-                                                 "it must be uploaded separately."
+                                        message: gettext("Multimedia was not copied; " +
+                                                 "it must be uploaded separately."),
                                     });
                                 }
                                 found = true;
@@ -650,13 +659,15 @@ define([
                         var msg = errors.get(null, WARNING_KEY);
                         if (msg) {
                             msg.langs = _.union(msg.langs, discardedLangs);
-                            msg.message = "Discarded languages: " + msg.langs.join(", ");
+                            msg.message = gettext("Discarded languages:") +
+                                " " + msg.langs.join(", ");
                         } else {
                             errors.update(null, {
                                 key: WARNING_KEY,
                                 level: mug.WARNING,
                                 langs: discardedLangs,
-                                message: "Discarded languages: " + discardedLangs.join(", ")
+                                message: gettext("Discarded languages:") +
+                                    " " + discardedLangs.join(", ")
                             });
                         }
                     }
@@ -668,8 +679,8 @@ define([
             function validateConstraintMsgAttr(mug) {
                 var itext = mug.p.constraintMsgItext;
                 if (!mug.p.constraintAttr && itext && !itext.isEmpty()) {
-                    return 'You cannot have a Validation Error Message ' +
-                           'with no Validation Condition!';
+                    return gettext('You cannot have a Validation Error ' +
+                           'Message with no Validation Condition!');
                 }
                 return 'pass';
             }
@@ -680,7 +691,7 @@ define([
                 presence: function (mug) {
                     return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: 'Validation Message',
+                lstring: gettext('Validation Message'),
                 widget: function (mug, options) {
                     return itextBlock.label(mug, $.extend(options, {
                         itextType: "constraintMsg",
@@ -688,13 +699,13 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.constraintMsgItext;
                         },
-                        displayName: "Validation Message"
+                        displayName: gettext("Validation Message")
                     }));
                 },
                 validationFunc: function (mug) {
                     var itext = mug.p.constraintMsgItext;
                     if (!mug.p.constraintAttr && itext && itext.id && !itext.autoId) {
-                        return "Can't have a Validation Message Itext ID without a Validation Condition";
+                        return gettext("Can't have a Validation Message Itext ID without a Validation Condition");
                     }
                     var result = itextValidator("constraintMsgItext", "Validation Message")(mug);
                     if (result === "pass") {
@@ -703,13 +714,12 @@ define([
                     return result;
                 }
             });
-            var super_constraintAttr_validate = databind.constraintAttr.validationFunc;
             databind.constraintAttr.validationFunc = validateConstraintMsgAttr;
             // virtual property used to define a widget
             databind.constraintMsgItextID = {
                 visibility: 'constraintMsgItext',
                 presence: 'optional',
-                lstring: "Validation Message Itext ID",
+                lstring: gettext("Validation Message Itext ID"),
                 widget: itextWidget.id,
                 widgetValuePath: "constraintMsgItext"
             };
@@ -719,10 +729,10 @@ define([
                         return mug.isVisible("constraintAttr");
                     },
                     presence: 'optional',
-                    lstring: 'Add Validation Media',
+                    lstring: gettext('Add Validation Media'),
                     widget: function (mug, options) {
                         return itextBlock.media(mug, $.extend(options, {
-                            displayName: "Add Validation Media",
+                            displayName: gettext("Add Validation Media"),
                             itextType: "constraintMsg",
                             getItextByMug: function (mug) {
                                 return mug.p.constraintMsgItext;
@@ -743,7 +753,7 @@ define([
             control.labelItext = addSerializer({
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: "Display Text",
+                lstring: gettext("Display Text"),
                 widget: function (mug, options) {
                     return itextBlock.label(mug, $.extend(options, {
                         itextType: "label",
@@ -751,16 +761,16 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.labelItext;
                         },
-                        displayName: "Display Text"
+                        displayName: gettext("Display Text")
                     }));
                 },
-                validationFunc: itextValidator("labelItext", "Display Text")
+                validationFunc: itextValidator("labelItext", gettext("Display Text"))
             });
             // virtual property used to define a widget
             control.labelItextID = {
                 visibility: 'labelItext',
                 presence: 'optional',
-                lstring: "Display Text Itext ID",
+                lstring: gettext("Display Text Itext ID"),
                 widget: itextWidget.id,
                 widgetValuePath: "labelItext"
             };
@@ -770,7 +780,7 @@ define([
                 presence: function (mug) {
                     return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Hint Message",
+                lstring: gettext("Hint Message"),
                 widget: function (mug, options) {
                     return itextBlock.label(mug, $.extend(options, {
                         itextType: "hint",
@@ -778,15 +788,15 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.hintItext;
                         },
-                        displayName: "Hint Message"
+                        displayName: gettext("Hint Message")
                     }));
                 },
-                validationFunc: itextValidator("hintItext", "Hint Message")
+                validationFunc: itextValidator("hintItext", gettext("Hint Message"))
             });
             // virtual property used to get a widget
             control.hintItextID = {
                 visibility: 'hintItext',
-                lstring: "Hint Itext ID",
+                lstring: gettext("Hint Itext ID"),
                 widget: itextWidget.id,
                 widgetValuePath: "hintItext"
             };
@@ -796,7 +806,7 @@ define([
                 presence: function (mug) {
                     return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
-                lstring: "Help Message",
+                lstring: gettext("Help Message"),
                 widget: function (mug, options) {
                     var block = itextBlock.label(mug, $.extend(options, {
                             itextType: "help",
@@ -804,17 +814,17 @@ define([
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
                             },
-                            displayName: "Help Message"
+                            displayName: gettext("Help Message")
                         }));
 
                     return block;
                 },
-                validationFunc: itextValidator("helpItext", "Help Message")
+                validationFunc: itextValidator("helpItext", gettext("Help Message"))
             });
             // virtual property used to get a widget
             control.helpItextID = {
                 visibility: 'helpItext',
-                lstring: "Help Itext ID",
+                lstring: gettext("Help Itext ID"),
                 widget: itextWidget.id,
                 widgetValuePath: "helpItext"
             };
@@ -824,10 +834,10 @@ define([
                 return mugOptions.isSpecialGroup ? undefined : {
                     visibility: 'labelItext',
                     presence: 'optional',
-                    lstring: "Add Other Content",
+                    lstring: gettext("Add Other Content"),
                     widget: function (mug, options) {
                         return itextBlock.configurable(mug, $.extend(options, {
-                            displayName: "Add Other Content",
+                            displayName: gettext("Add Other Content"),
                             itextType: "label",
                             getItextByMug: function (mug) {
                                 return mug.p.labelItext;
@@ -843,10 +853,10 @@ define([
                 return mugOptions.isSpecialGroup ? undefined : {
                     visibility: 'labelItext',
                     presence: 'optional',
-                    lstring: 'Add Multimedia',
+                    lstring: gettext('Add Multimedia'),
                     widget: function (mug, options) {
                         return itextBlock.media(mug, $.extend(options, {
-                            displayName: "Add Multimedia",
+                            displayName: gettext("Add Multimedia"),
                             itextType: "label",
                             pathPrefix: "",
                             getItextByMug: function (mug) {
@@ -863,10 +873,10 @@ define([
                 return mugOptions.isSpecialGroup ? undefined : {
                     visibility: 'helpItext',
                     presence: 'optional',
-                    lstring: 'Add Help Media',
+                    lstring: gettext('Add Help Media'),
                     widget: function (mug, options) {
                         return itextBlock.media(mug, $.extend(options, {
-                            displayName: "Add Help Media",
+                            displayName: gettext("Add Help Media"),
                             itextType: "help",
                             getItextByMug: function (mug) {
                                 return mug.p.helpItext;
@@ -916,7 +926,7 @@ define([
             var _this = this;
             return this.__callOld().concat([
                 {
-                    name: "Edit Bulk Translations",
+                    name: gettext("Edit Bulk Translations"),
                     icon: "fa fa-language",
                     action: function (done) {
                         _this.showItextModal(done);
@@ -930,9 +940,9 @@ define([
                 Itext = vellum.data.javaRosa.Itext,
                 form = vellum.data.core.form;
 
-            $modal = vellum.generateNewModal("Edit Bulk Translations", [
+            $modal = vellum.generateNewModal(gettext("Edit Bulk Translations"), [
                 {
-                    title: "Update Translations",
+                    title: gettext("Update Translations"),
                     cssClasses: "btn-primary",
                     action: function () {
                         jrUtil.parseXLSItext(form, $textarea.val(), Itext);
@@ -942,11 +952,12 @@ define([
                 }
             ]);
             $updateForm = $(edit_source({
-                description: "Copy these translations into a spreadsheet program " + 
+                description: gettext(
+                "Copy these translations into a spreadsheet program " +
                 "like Excel. You can edit them there and then paste them back " +
                 "here when you're done. These will update the translations used in " +
                 "your form. Press 'Update Translations' to save changes, or 'Close' " +
-                "to cancel."
+                "to cancel.")
             }));
             $modal.find('.modal-body').html($updateForm);
 
