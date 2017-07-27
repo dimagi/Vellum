@@ -12,7 +12,7 @@ define([
     'text!vellum/templates/multimedia_existing_video.html',
     'text!vellum/templates/multimedia_existing_text.html',
     'tpl!vellum/templates/multimedia_nomedia',
-    'text!vellum/templates/multimedia_block.html',
+    'tpl!vellum/templates/multimedia_block',
     'vellum/core'
 ], function (
     require,
@@ -181,7 +181,7 @@ define([
             $previewContainer.html(getPreviewUI(widget, objectMap, ICONS));
             $controlBlock.append($previewContainer);
 
-            $uploadContainer.html(multimedia_block);
+            $uploadContainer.html(multimedia_block());
             $uploadContainer.find('.fd-mm-upload-trigger')
                 .append(getUploadButtonUI(widget, objectMap));
             $uploadContainer.find('.fd-mm-path-input')
