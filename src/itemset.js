@@ -338,7 +338,9 @@ define([
                         debug.log("Unknown parent type: " + parentMug.__className);
                     }
                     mug = adaptItemset(mug, form);
-                    var nodeset = parseNodeset($element.popAttr('nodeset'));
+                    var nodeset = parseNodeset(
+                            $element.popAttr('vellum:nodeset') ||
+                            $element.popAttr('nodeset'));
                     mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
                         instance: form.parseInstance(

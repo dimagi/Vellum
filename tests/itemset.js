@@ -14,6 +14,7 @@ define([
     'text!static/itemset/itemset-sort.xml',
     'text!static/itemset/dropdown-fixture.xml',
     'text!static/itemset/data-itemset.xml',
+    'text!static/itemset/filter-with-case-property.xml',
     'text!static/itemset/itemset-with-question-ref.xml',
 ], function (
     options,
@@ -31,6 +32,7 @@ define([
     ITEMSET_SORT_XML,
     DROPDOWN_FIXTURE_XML,
     DATA_ITEMSET_XML,
+    FILTER_WITH_CASE_PROPERTY,
     ITEMSET_WITH_QUESTION_REF_XML
 ) {
     var assert = chai.assert,
@@ -269,6 +271,12 @@ define([
                     INNER_FILTERS_XML.replace('case_name', 'dummy'),
                     call('createXML')
                 );
+            });
+
+            it("correctly parses filter with reference to case property", function () {
+                util.loadXML(FILTER_WITH_CASE_PROPERTY);
+                var mug = util.getMug("lookup/itemset");
+                assert.equal(mug.p.filter, "name = #case/dob");
             });
 
             it("uses a dropdown when the nodeset is known", function() {
