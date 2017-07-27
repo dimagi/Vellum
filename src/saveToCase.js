@@ -666,19 +666,16 @@ define([
             if (!createsCase(mug)) {
                 return;
             }
-            var values = _.object(_.map(mug.form.getSetValues(), function (value) {
-                    return [value.ref, value];
-                })),
-                caseIdRegex = new RegExp(mug.p.nodeID + "/case/@case_id$");
-
-            _.each(values, function(value) {
-                if (caseIdRegex.test(value.ref)) {
-                    mug.p.case_id = value.value;
-                    mug.form.dropSetValues(function(inner) {
-                        return value.ref === inner.ref;
-                    });
-                }
-            });
+            var ref = mug.absolutePath + "/case/@case_id",
+                value = _.find(mug.form.getSetValues(), function (value) {
+                    return value.ref === ref;
+                });
+            if (value) {
+                mug.p.case_id = value.value;
+                mug.form.dropSetValues(function(inner) {
+                    return value === inner;
+                });
+            }
         },
         getMugTypes: function () {
             var types = this.__callOld();
