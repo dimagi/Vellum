@@ -330,16 +330,18 @@ define([
         if (editor) {
             this.sourceEditor = editor;
 
-            var html = editor.getSelectedHtml(1),
-                text = editor._vellum_fromRichText(html);
-            if (isInvalid(text)) {
-                text = escapedHashtags.transform(
-                    text.slice(INVALID_PREFIX.length),
-                    function (v) { return v; }
-                );
+            var html = editor.getSelectedHtml(1);
+            if (html) {
+                var text = editor._vellum_fromRichText(html);
+                if (isInvalid(text)) {
+                    text = escapedHashtags.transform(
+                        text.slice(INVALID_PREFIX.length),
+                        function (v) { return v; }
+                    );
+                }
+                // always copy plain text, not HTML
+                this.setData('text/plain', text);
             }
-            // always copy plain text, not HTML
-            this.setData('text/plain', text);
         }
     }
     // monkeypatch clipboard plugin to transform easy reference
