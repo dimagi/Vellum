@@ -12,6 +12,7 @@ define([
     'text!static/saveToCase/case_type_property.xml',
     'text!static/saveToCase/create_2_property.xml',
     'text!static/saveToCase/logic_test.xml',
+    'text!static/saveToCase/two-same-name.xml',
 ], function (
     util,
     chai,
@@ -25,7 +26,8 @@ define([
     ATTACHMENT_PROPERTY_XML,
     CASE_TYPE_PROPERTY_XML,
     CREATE_2_PROPERTY_XML,
-    LOGIC_TEST_XML
+    LOGIC_TEST_XML,
+    TWO_SAME_NAME_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -122,6 +124,14 @@ define([
             var create = util.getMug("save_to_case");
             assert.isOk(create, "save_to_case mug should exist");
             util.assertXmlEqual(call("createXML"), CASE_TYPE_PROPERTY_XML);
+        });
+
+        it("should support two questions with same name", function () {
+            util.loadXML(TWO_SAME_NAME_XML);
+            var one = util.getMug("one/save"),
+                two = util.getMug("two/save");
+            assert.equal(one.p.case_id, 'uuid()', 'one');
+            assert.equal(two.p.case_id, 'uuid()', 'two');
         });
 
         describe("should not allow", function () {

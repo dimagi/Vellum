@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/45D58D8B-834F-495E-8439-0190233678CA" uiVersion="1" version="1" name="Untitled Form">
+					<one>
+						<save vellum:role="SaveToCase" vellum:case_type="case">
+							<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
+								<create>
+									<case_type />
+									<case_name />
+								</create>
+							</case>
+						</save>
+					</one>
+					<two>
+						<save vellum:role="SaveToCase" vellum:case_type="case">
+							<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
+								<create>
+									<case_type />
+									<case_name />
+								</create>
+							</case>
+						</save>
+					</two>
+				</data>
+			</instance>
+			<bind vellum:nodeset="#form/one" nodeset="/data/one" />
+			<bind nodeset="/data/one/save/case/create/case_type" calculate="'case'" />
+			<bind nodeset="/data/one/save/case/create/case_name" calculate="'name'" />
+			<bind nodeset="/data/one/save/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/one/save/case/@user_id" calculate="instance('commcaresession')/session/context/userid" />
+			<bind vellum:nodeset="#form/two" nodeset="/data/two" />
+			<bind nodeset="/data/two/save/case/create/case_type" calculate="'case'" />
+			<bind nodeset="/data/two/save/case/create/case_name" calculate="'name'" />
+			<bind nodeset="/data/two/save/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
+			<bind nodeset="/data/two/save/case/@user_id" calculate="instance('commcaresession')/session/context/userid" />
+			<setvalue event="xforms-ready" ref="/data/one/save/case/@case_id" value="uuid()" />
+			<setvalue event="xforms-ready" ref="/data/two/save/case/@case_id" value="uuid()" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="one-label">
+						<value>one</value>
+					</text>
+					<text id="two-label">
+						<value>two</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group vellum:ref="#form/one" ref="/data/one">
+			<label ref="jr:itext('one-label')" />
+		</group>
+		<group vellum:ref="#form/two" ref="/data/two">
+			<label ref="jr:itext('two-label')" />
+		</group>
+	</h:body>
+</h:html>
