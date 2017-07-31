@@ -408,13 +408,11 @@ define([
 
             if (widget.getItextItem().hasMarkdown) {
                 parent.addClass("has-markdown");
-            }
-            else {
-                parent.addClass("markdown-ignorant");
-            }
-            if (jrUtil.looksLikeMarkdown(val)) {
+            } else if (jrUtil.looksLikeMarkdown(val)) {
                 markdownOutput.html(util.markdown(val));
                 markdownOff.removeClass('hide');
+            } else {
+                parent.addClass("markdown-ignorant");
             }
             return elem;
         };
