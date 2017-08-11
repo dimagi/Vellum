@@ -249,7 +249,7 @@ define([
                 delete this.hashtagMap[hashtag];
             }
         },
-        normalize: function (methodName, xpath) {
+        normalize: function (methodName, xpath, strict) {
             if (!xpath || (this.richText && richText.isInvalid(xpath))) {
                 return xpath;
             }
@@ -258,11 +258,11 @@ define([
             try {
                 return this.xpath.parse(xpath)[methodName]();
             } catch (err) {
-                return xpath;
+                return strict ? null : xpath;
             }
         },
-        normalizeHashtag: function (xpath_) {
-            return this.normalize('toHashtag', xpath_);
+        normalizeHashtag: function (xpath_, strict) {
+            return this.normalize('toHashtag', xpath_, strict);
         },
         normalizeXPath: function (xpath_) {
             return this.normalize('toXPath', xpath_);
