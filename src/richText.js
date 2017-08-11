@@ -550,7 +550,7 @@ define([
      */
     function outputToBubble(form, output) {
         var info = extractXPathInfo($(output)),
-            xpath = form.normalizeHashtag(info.value),
+            xpath = form.normalizeHashtag(info.value, true),
             attrs = _.omit(info, 'value'),
             startsWithRef = xpath && (FORM_REF_REGEX.test(xpath) ||
                                       form.hasValidHashtagPrefix(xpath)),
