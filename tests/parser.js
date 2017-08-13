@@ -100,6 +100,19 @@ define([
             assert.equal(item.p.nodeID, 'other');
         });
 
+        it("should un-escape HTML entities in select item", function () {
+            util.loadXML("");
+            util.addQuestion("Select", "select");
+            var choice = util.addQuestion("Choice", "choice");
+            choice.p.nodeID = 'a&b<c';
+            var xml = util.call("createXML");
+            assert.include(util.call("createXML"), 'a&amp;b&lt;c');
+            util.loadXML(xml);
+            var select = util.getMug("select");
+            choice = select.form.getChildren(select)[0];
+            assert.equal(choice.p.nodeID, "a&b<c");
+        });
+
         it("should load mugs with relative paths and label without itext", function () {
             util.loadXML(LABEL_WITHOUT_ITEXT_XML, null, ignoreWarnings);
             var grp = call("getMugByPath", "/data/group"),
