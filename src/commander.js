@@ -31,7 +31,18 @@ define([
                 if (handlers.hasOwnProperty(chord)) {
                     handlers[chord](cmd);
                     e.preventDefault();
+                } else {
+                    cmd.input.removeClass("alert-danger");
                 }
+            });
+            cmd.container.find(".fd-add-question-toggle").click(function (e) {
+                hideCommander(cmd);
+                e.preventDefault();
+                setTimeout(function () {
+                    // open add question menu after delay to allow atwo menu
+                    // to hide. https://stackoverflow.com/a/29572644/10840
+                    $(".fd-add-question-dropdown").addClass('open');
+                }, 0);
             });
             $(".fd-add-question-dropdown").append(cmd.container.hide());
             $(document).on("keydown", function (e) {
@@ -50,13 +61,13 @@ define([
         }
         cmd.addQuestion.hide();
         cmd.container.show();
-        cmd.input.focus().select().removeClass("error");
+        cmd.input.focus().select();
     }
 
     function hideCommander(cmd) {
         cmd.addQuestion.show();
         cmd.container.hide();
-        cmd.input.val("");
+        cmd.input.val("").removeClass("alert-danger");
     }
 
     function setupAutocomplete(input, choices) {
@@ -83,7 +94,7 @@ define([
             if (ok) {
                 hideCommander(cmd);
             } else {
-                cmd.input.addClass("error");
+                cmd.input.addClass("alert-danger");
             }
         }
     }
@@ -110,7 +121,6 @@ define([
                 vellum.addQuestion(types[text].__className);
                 return true;
             } catch (err) {
-                // TODO display error in UI
             }
         }
         return false;
