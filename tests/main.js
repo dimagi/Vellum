@@ -93,6 +93,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/expressionEditor',
         'tests/widgets',
         'tests/writer',
+        'tests/commander',
         'tests/commtrack',
         'tests/copy-paste',
         'tests/javaRosa',

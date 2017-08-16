@@ -22,6 +22,7 @@ define([
             'uploader',
             'windowManager',
             'copyPaste',
+            'commander',
         ];
 
     function bindPluginMethod(pluginName, fn, fnName) {
