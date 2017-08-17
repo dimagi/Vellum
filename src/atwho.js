@@ -97,6 +97,7 @@ define([
      *                  insertTpl: string to add to input when question is selected
      *                  property: sent to analytics
      *                  useRichText: use rich text editor insert method
+     *                  useHashtags: autocomplete hashtags (always on with useRichText)
      *                  outputValue: use output value in the template
      */
     that._questionAutocomplete = function ($input, mug, options) {
@@ -105,11 +106,13 @@ define([
             property: '',
             outputValue: false,
             useRichText: false,
+            useHashtags: false,
+            tabSelectsMatch: false,
             functionOverrides: {},
         });
 
         if (options.useRichText) {
-            options.insertTpl = '${hashtagPath}';
+            options.useHashtags = true;
             options.functionOverrides.insert = function(content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();
@@ -120,11 +123,14 @@ define([
                 }
             };
         }
+        if (options.useHashtags) {
+            options.insertTpl = '${hashtagPath}';
+        }
 
         function addAtWhoToInput() {
             $input.one('focus', function () {
                 $input.atwho(_atWhoOptions(mug.form.getBasePath(), mug, options));
-                if (options.useRichText) {
+                if (options.useHashtags) {
                     $input.atwho(_atWhoOptions('#', mug, options));
                 }
             });
@@ -154,7 +160,7 @@ define([
             limit: 10,
             maxLen: 30,
             startWithSpace: false,
-            tabSelectsMatch: false,
+            tabSelectsMatch: options.tabSelectsMatch,
             callbacks: {
                 matcher: function(flag, subtext) {
                     var match, regexp;

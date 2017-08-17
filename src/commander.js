@@ -58,7 +58,7 @@ define([
     function showCommander(cmd) {
         if (!cmd.autocompleted) {
             var names = _.pluck(fn.getQuestionMap(cmd.vellum), "typeName");
-            setupAutocomplete(cmd.input, names);
+            setupAutocomplete(cmd, names);
             cmd.autocompleted = true;
         }
         cmd.addQuestionButton.hide();
@@ -72,7 +72,8 @@ define([
         cmd.input.val("").removeClass("alert-danger");
     }
 
-    function setupAutocomplete(input, choices) {
+    function setupAutocomplete(cmd, choices) {
+        var input = cmd.input;
         input.atwho({
             at: "",
             data: choices,
@@ -81,6 +82,11 @@ define([
             suffix: " ",
             tabSelectsMatch: true,
         });
+        atwho.autocomplete(
+            input,
+            {form: cmd.vellum.data.core.form, on: _.identity},  // fake mug
+            {useHashtags: true, tabSelectsMatch: true}          // options
+        );
         input.on("inserted.atwho", function (event, item) {
             event.preventDefault();
         });
