@@ -17,7 +17,8 @@ define([
     var fn = {},
         handlers = {},
         isMac = /Mac/.test(navigator.platform),
-        INSERT_AT = /^(.*) +(before|after|into|in|first|last)(?: +((?:#form|\/data)\/[^ ]+))? *$/;
+        INSERT_AT = /^(.+) +(before|after|into|in|first|last)(?: +((?:#form|\/data)\/[^\s]+))?$/,
+        MUG_PATH = /^((?:#form|\/data)\/[^\s]+)$/;
 
     $.vellum.plugin('commander', {}, {
         init: function () {
@@ -114,17 +115,17 @@ define([
     handlers.Return = onCommand;
     handlers.Escape = hideCommander;
 
-    fn.doCommand = function (text, vellum) {
-        text = text.toLowerCase().trim();
+    fn.doCommand = function (command, vellum) {
+        command = command.trim();
         var types = fn.getQuestionMap(vellum),
-            insertAt = INSERT_AT.exec(text),
+            insertAt = INSERT_AT.exec(command),
+            typeName = (insertAt ? insertAt[1] : command).toLowerCase(),
             position, refMug;
-        if (insertAt) {
-            text = insertAt[1];
-        }
-        if (types.hasOwnProperty(text)) {
+        if (types.hasOwnProperty(typeName)) {
+            // add new question
+            var className = types[typeName].__className;
             if (insertAt) {
-                position = insertAt[2];
+                position = insertAt[2].toLowerCase();
                 if (position === "in") {
                     position = "into";
                 }
@@ -138,9 +139,19 @@ define([
                 }
             }
             try {
-                return vellum.addQuestion(types[text].__className, position, refMug);
+                return vellum.addQuestion(className, position, refMug);
             } catch (err) {
                 //window.console.log(err.message);
+            }
+            return;
+        }
+        var mugPath = MUG_PATH.exec(command);
+        if (mugPath) {
+            // jump to question
+            var mug = vellum.getMugByPath(command);
+            if (mug) {
+                vellum.setCurrentMug(mug);
+                return mug;
             }
         }
     };

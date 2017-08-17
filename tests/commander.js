@@ -76,6 +76,26 @@ define([
         });
 
         _.each([
+            "#form/group",
+            "#form/group/select",
+            "#form/text",
+        ], function (path) {
+            it("should select " + path, function () {
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/group", "Group", "group"],
+                    ["/group/select", "Select", "select"],
+                    ["/group/select/item", "Choice", "item"],
+                    ["/text", "Text", "text"],
+                ]);
+                var result = commander.doCommand(path, vellum);
+                assert.isOk(result, "question not selected");
+                var mug = vellum.getCurrentlySelectedMug();
+                assert.equal(mug.hashtagPath, path);
+            });
+        });
+
+        _.each([
             "choice",
             "choice in #form/group",
         ], function (cmd) {
