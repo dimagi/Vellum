@@ -81,6 +81,10 @@ define([
             maxLen: Infinity,
             suffix: " ",
             tabSelectsMatch: true,
+            callbacks: {
+                // match first argument only
+                matcher: function (flag, subtext) { return subtext; }
+            }
         });
         atwho.autocomplete(
             input,
@@ -158,6 +162,7 @@ define([
             var mug = vellum.getMugByPath(command);
             if (mug) {
                 vellum.setCurrentMug(mug);
+                // TODO select first input field
                 return mug;
             }
         }
