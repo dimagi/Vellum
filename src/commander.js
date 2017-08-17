@@ -16,7 +16,8 @@ define([
 ) {
     var fn = {},
         handlers = {},
-        isMac = /Mac/.test(navigator.platform);
+        isMac = /Mac/.test(navigator.platform),
+        INSERT_AT = /^(.*) +(before|after|into|in|first|last)(?: +((?:#form|\/data)\/[^ ]+))? *$/;
 
     $.vellum.plugin('commander', {}, {
         init: function () {
@@ -24,7 +25,7 @@ define([
                 cmd = vellum.data.commander;
             cmd.vellum = vellum;
             cmd.container = $(commanderTemplate());
-            cmd.addQuestion = vellum.$f.find(".fd-add-question");
+            cmd.addQuestionButton = vellum.$f.find(".fd-add-question");
             cmd.input = cmd.container.find("input");
             cmd.input.on("keydown", function (e) {
                 var chord = getKeyChord(e);
@@ -59,13 +60,13 @@ define([
             setupAutocomplete(cmd.input, names);
             cmd.autocompleted = true;
         }
-        cmd.addQuestion.hide();
+        cmd.addQuestionButton.hide();
         cmd.container.show();
         cmd.input.focus().select();
     }
 
     function hideCommander(cmd) {
-        cmd.addQuestion.show();
+        cmd.addQuestionButton.show();
         cmd.container.hide();
         cmd.input.val("").removeClass("alert-danger");
     }
@@ -114,16 +115,34 @@ define([
     handlers.Escape = hideCommander;
 
     fn.doCommand = function (text, vellum) {
-        var types = fn.getQuestionMap(vellum);
         text = text.toLowerCase().trim();
+        var types = fn.getQuestionMap(vellum),
+            insertAt = INSERT_AT.exec(text),
+            position, refMug;
+        if (insertAt) {
+            text = insertAt[1];
+        }
         if (types.hasOwnProperty(text)) {
+            if (insertAt) {
+                position = insertAt[2];
+                if (position === "in") {
+                    position = "into";
+                }
+                if (insertAt[3]) {
+                    refMug = vellum.getMugByPath(insertAt[3]);
+                    if (!refMug) {
+                        return;
+                    }
+                } else {
+                    refMug = vellum.getCurrentlySelectedMug();
+                }
+            }
             try {
-                vellum.addQuestion(types[text].__className);
-                return true;
+                return vellum.addQuestion(types[text].__className, position, refMug);
             } catch (err) {
+                //window.console.log(err.message);
             }
         }
-        return false;
     };
 
     fn.getQuestionMap = function (vellum) {

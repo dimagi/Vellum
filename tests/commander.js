@@ -25,25 +25,63 @@ define([
             });
         });
 
+        beforeEach(function () { util.loadXML(); });
+
         _.each([
             {cmd: "text", type: "Text"},
-            {cmd: "choice"},
+            {cmd: "text before", type: "Text", index: 3},
+            {cmd: "text after", type: "Text", index: 3, select: "group"},
+            {cmd: "text before #form/group", type: "Text", index: 0},
+            {cmd: "Text after #form/group", type: "Text", index: 3},
+            {cmd: "Text into #form/group", type: "Text", index: 3, indent: "  "},
+            {cmd: "Text in #form/group", type: "Text", index: 3, indent: "  "},
+            {cmd: "Text before #form/group/select", type: "Text", index: 1, indent: "  "},
+            {cmd: "Text after #form/group/select", type: "Text", index: 3, indent: "  "},
+            //{cmd: "choice before #form/group/select/item", type: "Choice", index: 2, indent: "    "},
+            //{cmd: "Choice after #form/group/select/item", type: "Choice", index: 3, indent: "    "},
+            {cmd: "choice", type: "Choice", index: 3, indent: "    ", select: "group/select"},
+            {cmd: "Choice in #form/group/select", type: "Choice", index: 3, indent: "    "},
+            {cmd: "Choice last #form/group/select", type: "Choice", index: 3, indent: "    "},
+            {cmd: "Choice first #form/group/select", type: "Choice", index: 2, indent: "    "},
         ], function (args) {
             it("should add a " + args.type + " question with '" + args.cmd + "'", function () {
-                util.loadXML();
-                var result = commander.doCommand(args.cmd, vellum);
-                if (args.hasOwnProperty("type")) {
-                    assert.isOk(result, "question not added");
-                    $("[name=property-nodeID]").val("new").change();
-                    vellum.ensureCurrentMugIsSaved();
-                    util.assertJSTreeState("new");
-                    var mug = util.getMug("new");
-                    assert.equal(mug.__className, args.type);
-                } else {
-                    assert.isNotOk(result, "question added unexpectedly");
-                    assert.isNotOk(util.getMug("new"),
-                        "'new' question should not exist");
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/group", "Group", "group"],
+                    ["/group/select", "Select", "select"],
+                    ["/group/select/item", "Choice", "item"],
+                    ["/text", "Text", "text"],
+                ]);
+                if (args.select) {
+                    util.clickQuestion(args.select);
                 }
+                var result = commander.doCommand(args.cmd, vellum);
+                assert.isOk(result, "question not added");
+                $("[name=property-nodeID]").val("new").change();
+                vellum.ensureCurrentMugIsSaved();
+                var items = [
+                    "group",
+                    "  select",
+                    "    item",
+                    "text",
+                ];
+                if (args.hasOwnProperty("index")) {
+                    items.splice(args.index, 0, (args.indent || "") + "new");
+                } else {
+                    items.push("new");
+                }
+                util.assertJSTreeState.apply(null, items);
+                assert.equal(result.__className, args.type);
+            });
+        });
+
+        _.each([
+            "choice",
+            "choice in #form/group",
+        ], function (cmd) {
+            it("should not execute bad command: " + cmd, function () {
+                var result = commander.doCommand(cmd, vellum);
+                assert.isUndefined(result, "unexpected result: " + result);
             });
         });
 

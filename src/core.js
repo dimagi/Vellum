@@ -1457,17 +1457,29 @@ define([
         return true;
     };
         
-    fn.addQuestion = function (qType) {
+    fn.addQuestion = function (qType, position, refMug) {
         var _this = this,
             mug;
         this.ensureCurrentMugIsSaved(function () {
-            var foo = _this.getInsertTargetAndPosition(
-                _this.getCurrentlySelectedMug(), qType);
-            if (!foo) {
-                throw new Error("cannot add " + qType + " at the current position");
+            if (position) {
+                if (!/^(before|after|into|first|last)$/.test(position)) {
+                    throw new Error("bad position: " + position);
+                }
+                if (!_this.isInsertAllowed(qType, position, refMug)) {
+                    throw new Error("cannot insert " + qType + " " + position +
+                        " " + (refMug ? refMug.hashtagPath : "root node"));
+                }
+            } else {
+                var foo = _this.getInsertTargetAndPosition(
+                    _this.getCurrentlySelectedMug(), qType);
+                if (!foo) {
+                    throw new Error("cannot add " + qType + " at the current position");
+                }
+                position = foo.position;
+                refMug = foo.mug;
             }
             analytics.workflow("Added question in form builder");
-            mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
+            mug = _this.data.core.form.createQuestion(refMug, position, qType);
 
             // Focus on first input, which might be a normal input or a rich text input
             var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
@@ -1553,12 +1565,11 @@ define([
         var parentType = "#"; // root type
         if (refMug) {
             if (position === "after" || position === "before") {
-                if (refMug.parent) {
-                    throw new Error("validation of insert " + position + " " +
-                                    refMug.__className + " not implemented");
-                    //parentType = refMug.parent.__className;
+                if (refMug.parentMug) {
+                    parentType = refMug.parentMug.__className;
                 }
-            //} else if (position === "into" || position === "first" || position === "last") {
+            } else if (position === "into" || position === "first" || position === "last") {
+                parentType = refMug.__className;
             } else {
                 throw new Error("validation of insert " + position + " " +
                                 refMug.__className + " not implemented");
@@ -1566,7 +1577,6 @@ define([
         } else if (position !== "into" && position !== "first" && position !== "last") {
             throw new Error("validation of insert " + position +
                             " root node not implemented");
-            //return false;
         }
         return typeData[parentType].valid_children.indexOf(type) !== -1;
     };
