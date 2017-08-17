@@ -117,6 +117,7 @@ define([
             return key;
     }
 
+    handlers.Tab = function () {};
     handlers.Enter = onCommand;
     handlers.Return = onCommand;
     handlers.Escape = hideCommander;
