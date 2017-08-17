@@ -17,7 +17,7 @@ define([
     var fn = {},
         handlers = {},
         isMac = /Mac/.test(navigator.platform),
-        INSERT_AT = /^(.+) +(before|after|into|in|first|last)(?: +((?:#form|\/data)\/[^\s]+))?$/,
+        INSERT_AT = /^(.+) +(before|after|into|in|first|first in|last)(?: +((?:#form|\/data)\/[^\s]+))?$/,
         MUG_PATH = /^((?:#form|\/data)\/[^\s]+)$/;
 
     $.vellum.plugin('commander', {}, {
@@ -56,11 +56,7 @@ define([
     });
 
     function showCommander(cmd) {
-        if (!cmd.autocompleted) {
-            var names = _.pluck(fn.getQuestionMap(cmd.vellum), "typeName");
-            setupAutocomplete(cmd, names);
-            cmd.autocompleted = true;
-        }
+        setupAutocomplete(cmd);
         cmd.addQuestionButton.hide();
         cmd.container.show();
         cmd.input.focus().select();
@@ -72,28 +68,94 @@ define([
         cmd.input.val("").removeClass("alert-danger");
     }
 
-    function setupAutocomplete(cmd, choices) {
-        var input = cmd.input;
-        input.atwho({
-            at: "",
-            data: choices,
-            limit: 50,
-            maxLen: Infinity,
-            suffix: " ",
-            tabSelectsMatch: true,
-            callbacks: {
-                // match first argument only
-                matcher: function (flag, subtext) { return subtext; }
-            }
-        });
+    function setupAutocomplete(cmd) {
+        if (cmd.atwhoConfig) {
+            return;
+        }
+        var typeNames = _.pluck(fn.getQuestionMap(cmd.vellum), "typeName"),
+            positions = ["after", "before", "in", "first in"],
+            questionRe = /[#\/][^\s]+/;
+        cmd.atwhoConfig = getAtwhoConfig([
+            [literals(typeNames), literals(positions), {regexp: questionRe.source}],
+            [{regexp: questionRe.source}],
+        ]);
+        cmd.input.atwho(cmd.atwhoConfig);
         atwho.autocomplete(
-            input,
+            cmd.input,
             {form: cmd.vellum.data.core.form, on: _.identity},  // fake mug
             {useHashtags: true, tabSelectsMatch: true}          // options
         );
-        input.on("inserted.atwho", function (event, item) {
+        cmd.input.on("inserted.atwho", function (event) {
             event.preventDefault();
         });
+    }
+
+    function literals(names) {
+        var source = "(" + _.map(names, RegExp.escape).join("|") + ")";
+        return {regexp: source, names: names};
+    }
+
+    function getAtwhoConfig(commandForms) {
+        function xname(predicate) {
+            return function (item) {
+                return predicate(item.name);
+            };
+        }
+
+        function itemizer(prefix) {
+            return function (name) {
+                return {name: name, full: prefix + name};
+            };
+        }
+
+        function filter(query, data, key) {
+            var items = [];
+            _.each(forms, function (form) {
+                var match = form.regexp.exec(query);
+                if (match) {
+                    var lastMatch = match[match.length - 1],
+                        prefix = lastMatch ? query.slice(0, -lastMatch.length) : query,
+                        subquery = lastMatch.trimLeft(),
+                        matched = callbacks.filter(subquery, form.items, key);
+                    matched = _.map(matched, xname(itemizer(prefix)));
+                    Array.prototype.push.apply(items, matched);
+                }
+            });
+            return items;
+        }
+
+        var callbacks = $.fn.atwho["default"].callbacks,
+            forms = [];
+
+        _.each(commandForms, function (argSet) {
+            var seen = [];
+            _.each(argSet, function (argInfo) {
+                if (argInfo.names) {
+                    var parts = seen.concat(["(.*)$"]);
+                    forms.splice(0, 0, {
+                        regexp: new RegExp("^" + parts.join("\\s+"), "i"),
+                        items: _.map(argInfo.names, itemizer("")),
+                    });
+                }
+                seen.push(argInfo.regexp);
+            });
+        });
+
+        return {
+            at: "",
+            data: [],
+            limit: 50,
+            maxLen: Infinity,
+            insertTpl: "${full}",
+            suffix: " ",
+            searchKey: $.fn.atwho["default"].searchKey,
+            tabSelectsMatch: true,
+            callbacks: {
+                matcher: function (flag, subtext) { return subtext; },
+                filter: filter,
+                sorter: function(query, items) { return items; },
+            },
+        };
     }
 
     function onCommand(cmd) {
@@ -126,6 +188,16 @@ define([
     handlers.Return = onCommand;
     handlers.Escape = hideCommander;
 
+    /**
+     * This is for testing internal atwho config
+     */
+    fn.getCompletions = function (command, vellum) {
+        var cmd = vellum.data.commander;
+        setupAutocomplete(cmd);
+        var config = cmd.atwhoConfig;
+        return config.callbacks.filter(command, null, config.searchKey);
+    };
+
     fn.doCommand = function (command, vellum) {
         command = command.trim();
         var types = fn.getQuestionMap(vellum),
@@ -139,6 +211,8 @@ define([
                 position = insertAt[2].toLowerCase();
                 if (position === "in") {
                     position = "into";
+                } else if (position === "first in") {
+                    position = "first";
                 }
                 if (insertAt[3]) {
                     refMug = vellum.getMugByPath(insertAt[3]);
