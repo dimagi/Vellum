@@ -44,14 +44,16 @@ define([
                 }, 0);
             });
             $(".fd-add-question-dropdown").append(cmd.container.hide());
-            $(document).on("keydown", function (e) {
-                var chord = util.getKeyChord(e);
-                // two key codes to lower probability of unusable commander
-                // due to collision with user key mapping
-                if (chord === "Ctrl+;" || chord === "Ctrl+Alt+;") {
-                    showCommander(cmd);
-                }
+        },
+        getToolsMenuItems: function () {
+            var menuItems = this.__callOld();
+            menuItems.splice(menuItems.length - 1, 0, {
+                name: gettext('Command Bar'),
+                icon: "fa fa-terminal",
+                hotkey: "Ctrl+;",
+                action: function () { showCommander(this.data.commander); },
             });
+            return menuItems;
         },
     });
 

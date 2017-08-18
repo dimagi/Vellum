@@ -81,15 +81,15 @@ define([
 
     var isMac = util.isMac,
         HOTKEY_UNICODE = {
-            ctrl: "Ctrl+",
-            alt: "Alt+",
-            shift: "Shift+",
+            Ctrl: "Ctrl+",
+            Alt: "Alt+",
+            Shift: "Shift+",
         };
     if (isMac) {
         HOTKEY_UNICODE = {
-            ctrl: "\u2318",
-            alt: "\u2325",
-            shift: "\u21E7",
+            Ctrl: "\u2318",
+            Alt: "\u2325",
+            Shift: "\u21E7",
         };
     }
 
@@ -205,7 +205,7 @@ define([
         this.$f.empty().append(main_template(mainVars));
         $(document).on("keydown", function (e) {
             var key = util.getKeyChord(e);
-            (hotkeys[key] || _.identity).call(_this, e);
+            (fn.hotkeys[key] || _.identity).call(_this, e);
         });
 
         $(document).on('click', '.jstree-hover', function(e) {
@@ -238,15 +238,12 @@ define([
         });
     };
 
-    var hotkeys = {
+    fn.hotkeys = {
         "Ctrl+Alt+=": function () {
             this.data.core.$tree.jstree("open_all");
         },
         "Ctrl+Alt+-": function () {
             this.data.core.$tree.jstree("close_all");
-        },
-        "Ctrl+Shift+F": function() {
-            this.toggleFullScreen();
         },
     };
 
@@ -386,18 +383,30 @@ define([
         var $lastItem = this.$f.find('.fd-tools-menu');
         $lastItem.nextUntil(".divider").remove();
         _(menuItems).each(function (menuItem) {
-            var $a = $("<a tabindex='-1' href='#'><i class='" + menuItem.icon + "'></i> " + menuItem.name + "</a>").click(
-                function (e) {
+            var hotkey = menuItem.hotkey || "",
+                key = "";
+            if (hotkey) {
+                fn.hotkeys[hotkey] = function () {
+                    menuItem.action.apply(_this, function () {});
+                };
+                key = hotkey.replace(/(Ctrl|Alt|Shift)\+/g, function (match, mod) {
+                    return HOTKEY_UNICODE[mod] || mod;
+                });
+                key = "<span class='hotkey'>" + key + "</span>";
+            }
+            var $a = $(util.format(
+                    "<a tabindex='-1' href='#'><i class='{icon}'></i> {name}{key}</a>",
+                    _.extend({key: key}, menuItem)
+                )).click(function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
                         analytics.fbUsage("Tools", menuItem.name);
-                        menuItem.action(function () {
+                        menuItem.action.apply(_this, function () {
                             _this.refreshVisibleData();
                         });
                     });
-                }
-            );
-            var $newItem = $("<li></li>").append($a);
+                }),
+                $newItem = $("<li></li>").append($a);
             $lastItem.after($newItem);
             $lastItem = $newItem;
         });
@@ -454,12 +463,12 @@ define([
     };
 
     fn.getToolsMenuItems = function () {
-        var _this = this,
-            shortcut = "<span class='hotkey'>" + HOTKEY_UNICODE.shift + HOTKEY_UNICODE.ctrl + "F</span>";
+        var _this = this;
         return [
             {
-                name: gettext('Expand Editor') + shortcut,
+                name: gettext('Expand Editor'),
                 icon: "fa fa-expand",
+                hotkey: "Ctrl+Alt+F",
                 action: function (done) {
                     _this.toggleFullScreen();
                 }
