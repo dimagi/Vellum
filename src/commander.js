@@ -1,5 +1,5 @@
 /**
- * External data source tree/browser plugin
+ * Command bar plugin
  */
 define([
     'jquery',
