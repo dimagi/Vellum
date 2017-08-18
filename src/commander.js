@@ -15,8 +15,7 @@ define([
     commanderTemplate
 ) {
     var fn = {},
-        handlers = {},
-        isMac = /Mac/.test(navigator.platform);
+        handlers = {};
 
     $.vellum.plugin('commander', {}, {
         init: function () {
@@ -27,7 +26,7 @@ define([
             cmd.addQuestionButton = vellum.$f.find(".fd-add-question");
             cmd.input = cmd.container.find("input");
             cmd.input.on("keydown", function (e) {
-                var chord = getKeyChord(e);
+                var chord = util.getKeyChord(e);
                 if (handlers.hasOwnProperty(chord)) {
                     handlers[chord](cmd);
                     e.preventDefault();
@@ -46,7 +45,10 @@ define([
             });
             $(".fd-add-question-dropdown").append(cmd.container.hide());
             $(document).on("keydown", function (e) {
-                if (getKeyChord(e) === "Ctrl+;") {
+                var chord = util.getKeyChord(e);
+                // two key codes to lower probability of unusable commander
+                // due to collision with user key mapping
+                if (chord === "Ctrl+;" || chord === "Ctrl+Alt+;") {
                     showCommander(cmd);
                 }
             });
@@ -296,17 +298,7 @@ define([
         }
     }
 
-    function getKeyChord(e) {
-        var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
-            metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
-            key = (ctrlKey ? "Ctrl+" : "") +
-                  (e.altKey ? "Alt+" : "") +
-                  (e.shiftKey ? "Shift+" : "") +
-                  (metaKey ? "Meta+" : "") + e.key; // TODO investigate e.key portability
-            return key;
-    }
-
-    handlers.Tab = function () {};
+    handlers.Tab = function () { /* prevent default */ };
     handlers.Enter = onCommand;
     handlers.Return = onCommand;
     handlers.Escape = hideCommander;

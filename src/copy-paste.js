@@ -24,7 +24,6 @@ define([
             width: 0,
             height: 0
         }).css(offScreen).appendTo('body'),
-        isMac = /Mac/.test(navigator.platform),
         isChrome = /Chrome/.test(navigator.userAgent),
         isSafari = /Safari/.test(navigator.userAgent) && !isChrome;
 
@@ -333,26 +332,16 @@ define([
             var opts = this.opts().copyPaste;
             vellum = this;
 
-            function copyModifierKeyPressed(event) {
-                return (isMac && event.metaKey) || (!isMac && event.ctrlKey);
-            }
-
             // Firefox only fires copy/paste when it thinks it's appropriate
             // Chrome doesn't fire copy/paste after key down has changed the focus
             // So we need implement both copy/paste as catching keystrokes Ctrl+C/V
             $(document).on('cut copy paste keydown', function (e) {
-                if (e.type === 'cut' ||
-                    copyModifierKeyPressed(e) &&
-                    String.fromCharCode(e.keyCode) === 'X') {
+                if (e.type === 'cut' || util.getKeyChord(e) === 'Ctrl+X') {
                     // Disable cut until undo feature is implemented
                     if (false) { onCut(opts); }
-                } else if (e.type === 'copy' ||
-                           copyModifierKeyPressed(e) &&
-                           String.fromCharCode(e.keyCode) === 'C') {
+                } else if (e.type === 'copy' || util.getKeyChord(e) === 'Ctrl+C') {
                     onCopy(opts);
-                } else if (e.type === 'paste' ||
-                           copyModifierKeyPressed(e) &&
-                           String.fromCharCode(e.keyCode) === 'V') {
+                } else if (e.type === 'paste' || util.getKeyChord(e) === 'Ctrl+V') {
                     onPaste(opts);
                 }
             });
@@ -365,7 +354,7 @@ define([
                 copyPasteArea.val(copy(true));
             }
             var html = $(copy_paste_help({
-                    "metachar": (isMac ? "\u2318" : "Ctrl+"),
+                    "metachar": (util.isMac ? "\u2318" : "Ctrl+"),
                     "format": util.format,
                 })),
                 copyPasteHelp = html.find(".copy-paste-help"),

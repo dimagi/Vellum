@@ -79,13 +79,12 @@ define([
         ], function () {});
     }, 0);
 
-    var isMac = /Mac/.test(navigator.platform);
-
-    var HOTKEY_UNICODE = {
-        ctrl: "Ctrl+",
-        alt: "Alt+",
-        shift: "Shift+",
-    };
+    var isMac = util.isMac,
+        HOTKEY_UNICODE = {
+            ctrl: "Ctrl+",
+            alt: "Alt+",
+            shift: "Shift+",
+        };
     if (isMac) {
         HOTKEY_UNICODE = {
             ctrl: "\u2318",
@@ -205,12 +204,7 @@ define([
         var mainVars = _.extend({format: util.format}, HOTKEY_UNICODE);
         this.$f.empty().append(main_template(mainVars));
         $(document).on("keydown", function (e) {
-            var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
-                metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
-                key = (ctrlKey ? "Ctrl+" : "") +
-                      (e.altKey ? "Alt+" : "") +
-                      (e.shiftKey ? "Shift+" : "") +
-                      (metaKey ? "Meta+" : "") + e.keyCode;
+            var key = util.getKeyChord(e);
             (hotkeys[key] || _.identity).call(_this, e);
         });
 
@@ -245,13 +239,13 @@ define([
     };
 
     var hotkeys = {
-        "Ctrl+Alt+187" /* = */: function () {
+        "Ctrl+Alt+=": function () {
             this.data.core.$tree.jstree("open_all");
         },
-        "Ctrl+Alt+189" /* - */: function () {
+        "Ctrl+Alt+-": function () {
             this.data.core.$tree.jstree("close_all");
         },
-        "Ctrl+Shift+70" /* F */: function() {
+        "Ctrl+Shift+F": function() {
             this.toggleFullScreen();
         },
     };
