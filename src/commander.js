@@ -70,7 +70,7 @@ define([
         if (cmd.atwhoConfig) {
             return;
         }
-        _.extend(cmd.config, configure(cmd.vellum));
+        _.extend(cmd, configure(cmd.vellum));
         cmd.input.atwho(cmd.atwhoConfig);
         atwho.autocomplete(
             cmd.input,
@@ -207,7 +207,8 @@ define([
                         var mug = args[0];
                         if (mug) {
                             vellum.setCurrentMug(mug);
-                            // TODO select first input field
+                            vellum.scrollTreeTo(mug.ufid);
+                            vellum.focusFirstInput();
                             return mug;
                         }
                     }

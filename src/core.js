@@ -217,14 +217,7 @@ define([
         $(document).on('click', '.jstree-hover', function(e) {
             e.preventDefault();
             var ufid = $(this).data("ufid");
-            // http://stackoverflow.com/a/30538877/10840
-            _this.jstree("_open_to", ufid);
-            _this.jstree("hover_node", ufid);
-            var $node = $(".jstree-hovered");
-            if ($node.length) {
-                var $scrollable = $node.closest(".fd-scrollable");
-                $scrollable.scrollTop($node.position().top - $scrollable.position().top);
-            }
+            _this.scrollTreeTo(ufid);
             analytics.fbUsage("Clicked link to show in tree");
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
@@ -1037,6 +1030,25 @@ define([
         });
     });
 
+    fn.scrollTreeTo = function (ufid) {
+        // http://stackoverflow.com/a/30538877/10840
+        this.jstree("_open_to", ufid);
+        this.jstree("hover_node", ufid);
+        var $node = $(".jstree-hovered");
+        if ($node.length) {
+            var $scrollable = $node.closest(".fd-scrollable"),
+                treeTop = $scrollable.offset().top,
+                treeHeight = $scrollable.height(),
+                nodeTop = $node.offset().top,
+                nodeHeight = $node.height(),
+                nodesOffset = nodeTop - $node.closest(".fd-question-tree").offset().top;
+            if (nodeTop < treeTop || nodeTop + nodeHeight > treeTop + treeHeight) {
+                // scroll node to middle of tree viewport
+                $scrollable.scrollTop(nodesOffset - (treeHeight - nodeHeight) / 2);
+            }
+        }
+    };
+
     /**
      * Get relative position like "before", "after", "first", or "last"
      *
@@ -1481,23 +1493,28 @@ define([
             analytics.workflow("Added question in form builder");
             mug = _this.data.core.form.createQuestion(refMug, position, qType);
 
-            // Focus on first input, which might be a normal input or a rich text input
-            var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
-            if ($firstGroup.length) {
-                var $input = $firstGroup.find("input, textarea");
-                if ($input.length) {
-                    // Rich text is off
-                    $input.focus();
-                } else {
-                    // Rich text is on
-                    $input = $firstGroup.find(".fd-textarea, .fd-input");
-                    richText.editor($input).focus();
-                }
-            }
+            _this.scrollTreeTo(mug.ufid);
+            _this.focusFirstInput();
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
         return mug;
+    };
+
+    fn.focusFirstInput = function () {
+        // Focus on first input, which might be a normal input or a rich text input
+        var $firstGroup = this.$f.find(".fd-question-properties .form-group:first");
+        if ($firstGroup.length) {
+            var $input = $firstGroup.find("input, textarea");
+            if ($input.length) {
+                // Rich text is off
+                $input.focus();
+            } else {
+                // Rich text is on
+                $input = $firstGroup.find(".fd-textarea, .fd-input");
+                richText.editor($input).focus();
+            }
+        }
     };
 
     fn.adjustToWindow = function() {
