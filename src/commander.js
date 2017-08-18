@@ -16,9 +16,7 @@ define([
 ) {
     var fn = {},
         handlers = {},
-        isMac = /Mac/.test(navigator.platform),
-        INSERT_AT = /^(.+) +(before|after|into|in|first|first in|last)(?: +((?:#form|\/data)\/[^\s]+))?$/,
-        MUG_PATH = /^((?:#form|\/data)\/[^\s]+)$/;
+        isMac = /Mac/.test(navigator.platform);
 
     $.vellum.plugin('commander', {}, {
         init: function () {
@@ -72,13 +70,7 @@ define([
         if (cmd.atwhoConfig) {
             return;
         }
-        var typeNames = _.pluck(fn.getQuestionMap(cmd.vellum), "typeName"),
-            positions = ["after", "before", "in", "first in"],
-            questionRe = /[#\/][^\s]+/;
-        cmd.atwhoConfig = getAtwhoConfig([
-            [literals(typeNames), literals(positions), {regexp: questionRe.source}],
-            [{regexp: questionRe.source}],
-        ]);
+        _.extend(cmd.config, configure(cmd.vellum));
         cmd.input.atwho(cmd.atwhoConfig);
         atwho.autocomplete(
             cmd.input,
@@ -90,12 +82,42 @@ define([
         });
     }
 
-    function literals(names) {
-        var source = "(" + _.map(names, RegExp.escape).join("|") + ")";
-        return {regexp: source, names: names};
-    }
+    function configure(vellum) {
+        function getMugClassName(typeName) {
+            typeName = typeName.toLowerCase();
+            if (mugTypes.hasOwnProperty(typeName)) {
+                return mugTypes[typeName].__className;
+            }
+        }
 
-    function getAtwhoConfig(commandForms) {
+        function getPosition(position) {
+            if (position) {
+                position = position.toLowerCase();
+                if (positionMap.hasOwnProperty(position)) {
+                    position = positionMap[position];
+                }
+            }
+            return position;
+        }
+
+        function getMug(path) {
+            var refMug;
+            if (path) {
+                refMug = vellum.getMugByPath(path);
+                if (!refMug) {
+                    throw new Error("bad path: " + path);
+                }
+            } else {
+                refMug = vellum.getCurrentlySelectedMug();
+            }
+            return refMug;
+        }
+
+        function literals(names, getArg) {
+            var source = _.map(names, RegExp.escape).join("|");
+            return {regexp: source, names: names, getArg: getArg};
+        }
+
         function xname(predicate) {
             return function (item) {
                 return predicate(item.name);
@@ -124,36 +146,116 @@ define([
             return items;
         }
 
-        var callbacks = $.fn.atwho["default"].callbacks,
-            forms = [];
+        function tokenize(command) {
+            var i, tokens;
+            command = command.trim();
+            for (i = 0; i < tokenizers.length; i++) {
+                tokens = tokenizers[i].exec(command);
+                if (tokens) {
+                    return {
+                        tokens: _.tail(tokens),
+                        config: tokenizers[i].config,
+                    };
+                }
+            }
+        }
 
-        _.each(commandForms, function (argSet) {
-            var seen = [];
-            _.each(argSet, function (argInfo) {
-                if (argInfo.names) {
+        function dispatch(command) {
+            var obj = tokenize(command), args;
+            if (!obj) {
+                return;
+            }
+            try {
+                args = _.map(obj.tokens, function (token, i) {
+                    return obj.config.args[i].getArg(token);
+                });
+            } catch (err) {
+                return;  // fail on bad argument
+            }
+            return obj.config.run(args);
+        }
+
+        var callbacks = $.fn.atwho["default"].callbacks,
+            mugTypes = fn.getQuestionMap(vellum),
+            typeNames = _.pluck(mugTypes, "typeName"),
+            positions = ["after", "before", "in", "first in"],
+            positionMap = {"in": "into", "first in": "first"},
+            questionRef = {regexp: /[#\/][^\s]+/.source, getArg: getMug},
+            tokenizers = [],
+            forms = [],
+            commandConfigs = [
+                // command configurations
+                {
+                    name: "insert",
+                    args: [
+                        literals(typeNames, getMugClassName),
+                        literals(positions, getPosition),
+                        questionRef,
+                    ],
+                    run: function (args) {
+                        try {
+                            return vellum.addQuestion.apply(vellum, args);
+                        } catch (err) {
+                            //window.console.log(err.message);
+                        }
+                    }
+                },
+                {
+                    name: "select",
+                    args: [questionRef],
+                    run: function (args) {
+                        var mug = args[0];
+                        if (mug) {
+                            vellum.setCurrentMug(mug);
+                            // TODO select first input field
+                            return mug;
+                        }
+                    }
+                },
+            ];
+
+        _.each(commandConfigs, function (commandConfig) {
+            var seen = [],
+                args = [];
+            _.each(commandConfig.args, function (arg) {
+                if (arg.names) {
                     var parts = seen.concat(["(.*)$"]);
                     forms.splice(0, 0, {
                         regexp: new RegExp("^" + parts.join("\\s+"), "i"),
-                        items: _.map(argInfo.names, itemizer("")),
+                        items: _.map(arg.names, itemizer("")),
                     });
                 }
-                seen.push(argInfo.regexp);
+                seen.push("(?:" + arg.regexp + ")");
+                if (args.length < 1) {
+                    args.push("^(" + arg.regexp + ")");
+                } else {
+                    args.push("(?:\\s+(" + arg.regexp + ")");
+                }
             });
+            args.push.apply(args, _.map(args, function () { return ")?"; }));
+            args[args.length - 1] = "$";
+            var tokenizer = new RegExp(args.join(""), "i");
+            tokenizer.config = commandConfig;
+            tokenizers.push(tokenizer);
         });
 
         return {
-            at: "",
-            data: [],
-            limit: 50,
-            maxLen: Infinity,
-            insertTpl: "${full}",
-            suffix: " ",
-            searchKey: $.fn.atwho["default"].searchKey,
-            tabSelectsMatch: true,
-            callbacks: {
-                matcher: function (flag, subtext) { return subtext; },
-                filter: filter,
-                sorter: function(query, items) { return items; },
+            tokenize: tokenize,
+            dispatch: dispatch,
+            atwhoConfig: {
+                at: "",
+                data: [],
+                limit: 50,
+                maxLen: Infinity,
+                insertTpl: "${full}",
+                suffix: " ",
+                searchKey: $.fn.atwho["default"].searchKey,
+                tabSelectsMatch: true,
+                callbacks: {
+                    matcher: function (flag, subtext) { return subtext; },
+                    filter: filter,
+                    sorter: function(query, items) { return items; },
+                },
             },
         };
     }
@@ -189,57 +291,26 @@ define([
     handlers.Escape = hideCommander;
 
     /**
-     * This is for testing internal atwho config
+     * For testing internal atwho config
      */
     fn.getCompletions = function (command, vellum) {
-        var cmd = vellum.data.commander;
-        setupAutocomplete(cmd);
-        var config = cmd.atwhoConfig;
-        return config.callbacks.filter(command, null, config.searchKey);
+        var cfg = configure(vellum).atwhoConfig;
+        return cfg.callbacks.filter(command, null, cfg.searchKey);
+    };
+
+    /**
+     * For testing internal tokenizer
+     */
+    fn.tokenize = function (command, vellum) {
+        return configure(vellum).tokenize(command);
     };
 
     fn.doCommand = function (command, vellum) {
-        command = command.trim();
-        var types = fn.getQuestionMap(vellum),
-            insertAt = INSERT_AT.exec(command),
-            typeName = (insertAt ? insertAt[1] : command).toLowerCase(),
-            position, refMug;
-        if (types.hasOwnProperty(typeName)) {
-            // add new question
-            var className = types[typeName].__className;
-            if (insertAt) {
-                position = insertAt[2].toLowerCase();
-                if (position === "in") {
-                    position = "into";
-                } else if (position === "first in") {
-                    position = "first";
-                }
-                if (insertAt[3]) {
-                    refMug = vellum.getMugByPath(insertAt[3]);
-                    if (!refMug) {
-                        return;
-                    }
-                } else {
-                    refMug = vellum.getCurrentlySelectedMug();
-                }
-            }
-            try {
-                return vellum.addQuestion(className, position, refMug);
-            } catch (err) {
-                //window.console.log(err.message);
-            }
-            return;
+        var cmd = vellum.data.commander;
+        if (!cmd.dispatch) {
+            _.extend(cmd, configure(vellum));
         }
-        var mugPath = MUG_PATH.exec(command);
-        if (mugPath) {
-            // jump to question
-            var mug = vellum.getMugByPath(command);
-            if (mug) {
-                vellum.setCurrentMug(mug);
-                // TODO select first input field
-                return mug;
-            }
-        }
+        return cmd.dispatch(command);
     };
 
     fn.getQuestionMap = function (vellum) {

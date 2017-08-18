@@ -33,7 +33,6 @@ define([
             {cmd: "text after", type: "Text", index: 3, select: "group"},
             {cmd: "text before #form/group", type: "Text", index: 0},
             {cmd: "Text after #form/group", type: "Text", index: 3},
-            {cmd: "Text into #form/group", type: "Text", index: 3, indent: "  "},
             {cmd: "Text in #form/group", type: "Text", index: 3, indent: "  "},
             {cmd: "Text before #form/group/select", type: "Text", index: 1, indent: "  "},
             {cmd: "Text after #form/group/select", type: "Text", index: 3, indent: "  "},
@@ -41,8 +40,7 @@ define([
             //{cmd: "Choice after #form/group/select/item", type: "Choice", index: 3, indent: "    "},
             {cmd: "choice", type: "Choice", index: 3, indent: "    ", select: "group/select"},
             {cmd: "Choice in #form/group/select", type: "Choice", index: 3, indent: "    "},
-            {cmd: "Choice last #form/group/select", type: "Choice", index: 3, indent: "    "},
-            {cmd: "Choice first #form/group/select", type: "Choice", index: 2, indent: "    "},
+            {cmd: "Choice first in #form/group/select", type: "Choice", index: 2, indent: "    "},
         ], function (args) {
             it("should add a " + args.type + " question with '" + args.cmd + "'", function () {
                 util.paste([
@@ -125,6 +123,22 @@ define([
             it("should get completions for: " + cmd, function () {
                 var result = commander.getCompletions(cmd, vellum);
                 assert.deepEqual(result, expectedItems);
+            });
+        });
+
+        _.each([
+            ["txt", undefined],
+            ["Choice ", ["Choice", undefined, undefined]],
+            ["Choice in ", ["Choice", "in", undefined]],
+            ["choice in /data/blue", ["choice", "in", "/data/blue"]],
+            ["text first in #form/group", ["text", "first in", "#form/group"]],
+            ["#form/blue", ["#form/blue"]],
+        ], function (args) {
+            var cmd = args[0],
+                expected = args[1];
+            it("should tokenize: " + cmd, function () {
+                var result = commander.tokenize(cmd, vellum);
+                assert.deepEqual(result && result.tokens, expected);
             });
         });
 
