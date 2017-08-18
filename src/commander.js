@@ -114,6 +114,9 @@ define([
         }
 
         function literals(names, getArg) {
+            if (!getArg) {
+                throw new Error("getArg parameter is required");
+            }
             var source = _.map(names, RegExp.escape).join("|");
             return {regexp: source, names: names, getArg: getArg};
         }
@@ -186,7 +189,7 @@ define([
             commandConfigs = [
                 // command configurations
                 {
-                    name: "insert",
+                    // add question
                     args: [
                         literals(typeNames, getMugClassName),
                         literals(positions, getPosition),
@@ -200,8 +203,24 @@ define([
                         }
                     }
                 },
+                //{
+                //    // delete question
+                //    args: [
+                //        literals([":Delete"], function () {}),
+                //        // TODO implement {n: '*'} - varargs
+                //        _.extend({n: '*'}, questionRef),
+                //    ],
+                //    run: function (args) {
+                //        var mug = args[1];
+                //        if (mug) {
+                //            vellum.data.core.form.removeMugsFromForm([mug]);
+                //            vellum.refreshCurrentMug();
+                //            return mug;
+                //        }
+                //    }
+                //},
                 {
-                    name: "select",
+                    // select question
                     args: [questionRef],
                     run: function (args) {
                         var mug = args[0];
@@ -217,11 +236,12 @@ define([
 
         _.each(commandConfigs, function (commandConfig) {
             var seen = [],
-                args = [];
+                args = [],
+                index = forms.length;
             _.each(commandConfig.args, function (arg) {
                 if (arg.names) {
                     var parts = seen.concat(["(.*)$"]);
-                    forms.splice(0, 0, {
+                    forms.splice(index, 0, {
                         regexp: new RegExp("^" + parts.join("\\s+"), "i"),
                         items: _.map(arg.names, itemizer("")),
                     });

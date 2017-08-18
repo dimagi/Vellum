@@ -93,6 +93,31 @@ define([
             });
         });
 
+        // TODO decide if : is a good prefix for commands other than add or select
+        // TODO fix selection after delete
+        //  (two nodes selected in tree after delete non-adjacent to current)
+        // TODO delete multiple
+        //_.each([
+        //    ":delete",
+        //    ":delete #form/group",
+        //    ":Delete #form/group/select",
+        //    ":delete #form/text",
+        //], function (path) {
+        //    it("should delete " + path, function () {
+        //        util.paste([
+        //            ["id", "type", "labelItext:en-default"],
+        //            ["/group", "Group", "group"],
+        //            ["/group/select", "Select", "select"],
+        //            ["/group/select/item", "Choice", "item"],
+        //            ["/text", "Text", "text"],
+        //        ]);
+        //        var result = commander.doCommand(path, vellum);
+        //        assert.isOk(result, "question not deleted");
+        //        assert.isNotOk(vellum.data.core.form.getMugByUFID(result.ufid),
+        //            "mug not deleted");
+        //    });
+        //});
+
         _.each([
             "choice",
             "choice in #form/group",
