@@ -37,11 +37,11 @@ define([
             cmd.container.find(".fd-add-question-toggle").click(function (e) {
                 hideCommander(cmd);
                 e.preventDefault();
-                setTimeout(function () {
+                _.defer(function () {
                     // open add question menu after delay to allow atwo menu
                     // to hide. https://stackoverflow.com/a/29572644/10840
                     $(".fd-add-question-dropdown").addClass('open');
-                }, 0);
+                });
             });
             $(".fd-add-question-dropdown").append(cmd.container.hide());
         },
@@ -288,7 +288,7 @@ define([
     function onCommand(cmd) {
         if (cmd.input.atwho('isSelecting')) {
             // HACK delay until value has been inserted
-            setTimeout(function () { onCommand(cmd); }, 0);
+            _.defer(onCommand, cmd);
         } else {
             var text = cmd.input.val(),
                 ok = fn.doCommand(text, cmd.vellum);
