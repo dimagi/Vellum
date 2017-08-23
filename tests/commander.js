@@ -75,6 +75,23 @@ define([
         });
 
         _.each([
+            {cmd: "text", type: "Text"},
+            {cmd: "text before", type: "Text"},
+            {cmd: "text after", type: "Text"},
+            {cmd: "text in", type: "Text"},
+            {cmd: "text first in", type: "Text"},
+        ], function (args) {
+            it("should add a " + args.type + " question with '" + args.cmd + "' and empty tree", function () {
+                var result = commander.doCommand(args.cmd, vellum);
+                assert.isOk(result, "question not added");
+                $("[name=property-nodeID]").val("new").change();
+                vellum.ensureCurrentMugIsSaved();
+                util.assertJSTreeState("new");
+                assert.equal(result.__className, args.type);
+            });
+        });
+
+        _.each([
             "#form/group",
             "#form/group/select",
             "#form/text",

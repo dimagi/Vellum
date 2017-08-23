@@ -255,6 +255,11 @@ define([
                         questionRef,
                     ],
                     run: function (args) {
+                        if (!args[2] && /^(before|after)$/i.test(args[1])) {
+                            // Use default position if current mug not found.
+                            // Common: "<Qestion Type> after" in empty tree.
+                            args[1] = undefined;
+                        }
                         try {
                             return vellum.addQuestion.apply(vellum, args);
                         } catch (err) {
