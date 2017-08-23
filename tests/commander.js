@@ -70,7 +70,8 @@ define([
                     items.push("new");
                 }
                 util.assertJSTreeState.apply(null, items);
-                assert.equal(result.__className, args.type);
+                assert.equal(result.name, "add question");
+                assert.equal(result.value.__className, args.type);
             });
         });
 
@@ -87,7 +88,8 @@ define([
                 $("[name=property-nodeID]").val("new").change();
                 vellum.ensureCurrentMugIsSaved();
                 util.assertJSTreeState("new");
-                assert.equal(result.__className, args.type);
+                assert.equal(result.name, "add question");
+                assert.equal(result.value.__className, args.type);
             });
         });
 
@@ -106,6 +108,7 @@ define([
                 ]);
                 var result = commander.doCommand(path, vellum);
                 assert.isOk(result, "question not selected");
+                assert.equal(result.name, "select question");
                 var mug = vellum.getCurrentlySelectedMug();
                 assert.equal(mug.hashtagPath, path);
             });

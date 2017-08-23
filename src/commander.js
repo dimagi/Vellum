@@ -218,7 +218,8 @@ define([
             } catch (err) {
                 return;  // fail on bad argument
             }
-            return obj.config.run(args);
+            var value = obj.config.run(args);
+            return value && {name: obj.config.name, value: value};
         }
 
         var callbacks = $.fn.atwho["default"].callbacks,
@@ -249,6 +250,7 @@ define([
                 // first argument.
                 {
                     // add question: Type name [position [#question]]
+                    name: "add question",
                     args: [
                         literals(typeItems, getMugClassName),
                         literals(positions, getPosition),
@@ -285,6 +287,7 @@ define([
                 //},
                 {
                     // select question
+                    name: "select question",
                     args: [questionRef],
                     run: function (args) {
                         var mug = args[0];
@@ -366,13 +369,13 @@ define([
             _.defer(onCommand, cmd);
         } else {
             var text = cmd.input.val(),
-                ok = fn.doCommand(text, cmd.vellum);
-            if (ok) {
+                result = fn.doCommand(text, cmd.vellum);
+            if (result) {
                 hideCommander(cmd);
-                analytics.workflow("Commander success");
+                analytics.usage("Commander", result.name);
             } else {
                 cmd.input.addClass("alert-danger");
-                analytics.workflow("Commander fail");
+                analytics.usage("Commander", "bad command");
             }
         }
     }
