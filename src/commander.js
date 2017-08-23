@@ -34,14 +34,8 @@ define([
                     cmd.input.removeClass("alert-danger");
                 }
             });
-            cmd.container.find(".fd-add-question-toggle").click(function (e) {
+            cmd.container.find(".fd-commander-close").click(function (e) {
                 hideCommander(cmd);
-                e.preventDefault();
-                _.defer(function () {
-                    // open add question menu after delay to allow atwo menu
-                    // to hide. https://stackoverflow.com/a/29572644/10840
-                    $(".fd-add-question-dropdown").addClass('open');
-                });
             });
             $(".fd-add-question-dropdown").append(cmd.container.hide());
         },
