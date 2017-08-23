@@ -4,12 +4,14 @@
 define([
     'jquery',
     'underscore',
+    'vellum/analytics',
     'vellum/atwho',
     'vellum/util',
     'tpl!vellum/templates/commander',
 ], function (
     $,
     _,
+    analytics,
     atwho,
     util,
     commanderTemplate
@@ -362,8 +364,10 @@ define([
                 ok = fn.doCommand(text, cmd.vellum);
             if (ok) {
                 hideCommander(cmd);
+                analytics.workflow("Commander success");
             } else {
                 cmd.input.addClass("alert-danger");
+                analytics.workflow("Commander fail");
             }
         }
     }
