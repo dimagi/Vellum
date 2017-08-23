@@ -86,6 +86,12 @@ define([
         });
     }
 
+    /**
+     * Create a commander configuration for the given vellum instance
+     *
+     * A commander configuration contains an atwho configuration as well
+     * as `tokenize` and `dispatch` functions for processing commands.
+     */
     function configure(vellum) {
         function getMugClassName(typeName) {
             typeName = typeName.toLowerCase();
@@ -117,6 +123,9 @@ define([
             return refMug;
         }
 
+        /**
+         * Get an commander argument config for a list of literal names
+         */
         function literals(names, getArg) {
             if (!getArg) {
                 throw new Error("getArg parameter is required");
@@ -125,27 +134,49 @@ define([
             return {regexp: source, names: names, getArg: getArg};
         }
 
-        function xname(predicate) {
+        /**
+         * Make a function to call the given function with the "name"
+         * from an atwho item.
+         */
+        function xname(func) {
             return function (item) {
-                return predicate(item.name);
+                return func(item.name);
             };
         }
 
+        /**
+         * Make a function to construct an atwho item with a command prefix.
+         *
+         * The `name` is displayed to the user, and `full` is used
+         * for command completions (see `insertTpl`).
+         */
         function itemizer(prefix) {
             return function (name) {
                 return {name: name, full: prefix + name};
             };
         }
 
+        /**
+         * Atwho filter callback
+         *
+         * @param query - command query (from beginning of command input
+         * to caret.
+         * @param data - ignored.
+         * @param key - item key (searchKey) to use when matching.
+         * @returns array of items that complete the given command
+         * (query) string.
+         */
         function filter(query, data, key) {
             var items = [];
             _.each(forms, function (form) {
-                var match = form.regexp.exec(query);
+                var match = form.exec(query);
                 if (match) {
                     var lastMatch = match[match.length - 1],
                         prefix = lastMatch ? query.slice(0, -lastMatch.length) : query,
                         subquery = lastMatch.trimLeft(),
+                        // use default atwho filter to match items
                         matched = callbacks.filter(subquery, form.items, key);
+                    // add `prefix` to matched items' `full` member
                     matched = _.map(matched, xname(itemizer(prefix)));
                     Array.prototype.push.apply(items, matched);
                 }
@@ -153,6 +184,19 @@ define([
             return items;
         }
 
+        /**
+         * Tokenize a command string
+         *
+         * @param command - command string.
+         * @returns an object with two members:
+         *  ```
+         *  {
+         *      tokens: [argument strings array],
+         *      config: {command config object},
+         *  }
+         *  ```
+         *  or `undefined` if the command was not recognized.
+         */
         function tokenize(command) {
             var i, tokens;
             command = command.trim();
@@ -167,6 +211,13 @@ define([
             }
         }
 
+        /**
+         * Parse and execute a command using the command config of the
+         * first tokenizer that matches the given command string.
+         *
+         * @param command - command string.
+         * @returns the result of the command, `undefined` on failure.
+         */
         function dispatch(command) {
             var obj = tokenize(command), args;
             if (!obj) {
@@ -191,9 +242,21 @@ define([
             tokenizers = [],
             forms = [],
             commandConfigs = [
-                // command configurations
+                // The objects in this array define the structure of
+                // commands recognized by the commander.
+                //
+                // All arguments after the first are optional.
+                //
+                // The order of objects in this array is important:
+                // command auto-complete lists will be constructed with
+                // items of the first matching config first, items of
+                // the second matching config after those of the first,
+                // and so on. Normally this is only important for the
+                // first argument since it is unlikely (and probably
+                // undesirable) for two command forms to match the same
+                // first argument.
                 {
-                    // add question
+                    // add question: Type name [position [#question]]
                     args: [
                         literals(typeNames, getMugClassName),
                         literals(positions, getPosition),
@@ -238,17 +301,31 @@ define([
                 },
             ];
 
+        /**
+         * Construct command forms and tokenizers.
+         *
+         * A command form is a regular expression matching a potential
+         * command. Each form has an `items` attribute referencing an
+         * array of completion items for the command. Text matched by
+         * the last capturing group in the regular expression is used
+         * to match potential completions for the argument at that
+         * position.
+         *
+         * A tokenizer is a regular expression object that matches a
+         * valid command string. Its capturing groups correspond to
+         * argument tokens. Each tokenizer has a `config` attribute
+         * that references the original command configuration object.
+         */
         _.each(commandConfigs, function (commandConfig) {
             var seen = [],
                 args = [],
                 index = forms.length;
             _.each(commandConfig.args, function (arg) {
                 if (arg.names) {
-                    var parts = seen.concat(["(.*)$"]);
-                    forms.splice(index, 0, {
-                        regexp: new RegExp("^" + parts.join("\\s+"), "i"),
-                        items: _.map(arg.names, itemizer("")),
-                    });
+                    var parts = seen.concat(["(.*)$"]),
+                        form = new RegExp("^" + parts.join("\\s+"), "i");
+                    form.items = _.map(arg.names, itemizer(""));
+                    forms.splice(index, 0, form);
                 }
                 seen.push("(?:" + arg.regexp + ")");
                 if (args.length < 1) {
