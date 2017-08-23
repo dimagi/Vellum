@@ -125,35 +125,21 @@ define([
 
         /**
          * Get an commander argument config for a list of literal names
+         *
+         * @param items - array of atwho completion items. Each item
+         * must have a "name" property.
+         * @param getArg - function to get argument given parsed
+         * argument string.
+         * @returns argument config object.
          */
-        function literals(names, getArg) {
+        function literals(items, getArg) {
             if (!getArg) {
                 throw new Error("getArg parameter is required");
             }
-            var source = _.map(names, RegExp.escape).join("|");
-            return {regexp: source, names: names, getArg: getArg};
-        }
-
-        /**
-         * Make a function to call the given function with the "name"
-         * from an atwho item.
-         */
-        function xname(func) {
-            return function (item) {
-                return func(item.name);
-            };
-        }
-
-        /**
-         * Make a function to construct an atwho item with a command prefix.
-         *
-         * The `name` is displayed to the user, and `full` is used
-         * for command completions (see `insertTpl`).
-         */
-        function itemizer(prefix) {
-            return function (name) {
-                return {name: name, full: prefix + name};
-            };
+            var source = _.map(items, function (item) {
+                return RegExp.escape(item.name);
+            }).join("|");
+            return {regexp: source, items: items, getArg: getArg};
         }
 
         /**
@@ -177,7 +163,13 @@ define([
                         // use default atwho filter to match items
                         matched = callbacks.filter(subquery, form.items, key);
                     // add `prefix` to matched items' `full` member
-                    matched = _.map(matched, xname(itemizer(prefix)));
+                    matched = _.map(matched, function (item) {
+                        return {
+                            name: item.name,
+                            icon: item.icon,
+                            full: prefix + item.name,
+                        };
+                    });
                     Array.prototype.push.apply(items, matched);
                 }
             });
@@ -235,8 +227,12 @@ define([
 
         var callbacks = $.fn.atwho["default"].callbacks,
             mugTypes = fn.getQuestionMap(vellum),
-            typeNames = _.pluck(mugTypes, "typeName"),
-            positions = ["after", "before", "in", "first in"],
+            typeItems = _.map(mugTypes, function (type) {
+                return {name: type.typeName, icon: type.icon};
+            }),
+            positions = _.map(["after", "before", "in", "first in"], function (name) {
+                return {name: name};
+            }),
             positionMap = {"in": "into", "first in": "first"},
             questionRef = {regexp: /[#\/][^\s]+/.source, getArg: getMug},
             tokenizers = [],
@@ -258,7 +254,7 @@ define([
                 {
                     // add question: Type name [position [#question]]
                     args: [
-                        literals(typeNames, getMugClassName),
+                        literals(typeItems, getMugClassName),
                         literals(positions, getPosition),
                         questionRef,
                     ],
@@ -321,10 +317,10 @@ define([
                 args = [],
                 index = forms.length;
             _.each(commandConfig.args, function (arg) {
-                if (arg.names) {
+                if (arg.items) {
                     var parts = seen.concat(["(.*)$"]),
                         form = new RegExp("^" + parts.join("\\s+"), "i");
-                    form.items = _.map(arg.names, itemizer(""));
+                    form.items = arg.items;
                     forms.splice(index, 0, form);
                 }
                 seen.push("(?:" + arg.regexp + ")");
@@ -349,6 +345,7 @@ define([
                 data: [],
                 limit: 50,
                 maxLen: Infinity,
+                displayTpl: '<li><i class="${icon}" /> ${name}</li>',
                 insertTpl: "${full}",
                 suffix: " ",
                 searchKey: $.fn.atwho["default"].searchKey,
@@ -411,8 +408,8 @@ define([
         if (!cmd.hasOwnProperty("questions")) {
             cmd.questions = _.chain(vellum.data.core.QUESTIONS_IN_TOOLBAR)
                 .map(function (name) {
-                    var mug = types[name];
-                    return [mug.typeName.toLowerCase(), mug];
+                    var type = types[name];
+                    return [type.typeName.toLowerCase(), type];
                 })
                 .object()
                 .value();

@@ -14,12 +14,13 @@ define([
     var assert = chai.assert;
 
     describe("The commander plugin", function() {
-        var vellum;
+        var vellum, mugTypes;
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: function() {
                     vellum = this;
+                    mugTypes = commander.getQuestionMap(vellum);
                     done();
                 }},
             });
@@ -136,17 +137,23 @@ define([
             ["choice i", ["...in", "...first in"]],
         ], function (args) {
             var cmd = args[0],
-                expectedItems = _.map(args[1], function (name) {
-                    if (name.startsWith("...")) {
-                        return {
-                            name: name.slice(3),
-                            full: /^.+ /.exec(cmd)[0] + name.slice(3),
-                        };
-                    }
-                    return {name: name, full: name};
-                });
+                items = args[1];
             it("should get completions for: " + cmd, function () {
-                var result = commander.getCompletions(cmd, vellum);
+                var expectedItems = _.map(items, function (name) {
+                        if (name.startsWith("...")) {
+                            return {
+                                name: name.slice(3),
+                                icon: undefined,
+                                full: /^.+ /.exec(cmd)[0] + name.slice(3),
+                            };
+                        }
+                        return {
+                            name: name,
+                            icon: mugTypes[name.toLowerCase()].icon,
+                            full: name,
+                        };
+                    }),
+                    result = commander.getCompletions(cmd, vellum);
                 assert.deepEqual(result, expectedItems);
             });
         });
