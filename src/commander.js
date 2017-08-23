@@ -376,6 +376,7 @@ define([
     handlers.Enter = onCommand;
     handlers.Return = onCommand;
     handlers.Escape = hideCommander;
+    handlers.Esc = hideCommander;  // MS Edge
 
     /**
      * For testing internal atwho config
