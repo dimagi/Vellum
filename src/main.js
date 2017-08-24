@@ -181,7 +181,8 @@ define([
     'vellum/uploader',
     'vellum/window',
     'vellum/polyfills',
-    'vellum/copy-paste'
+    'vellum/copy-paste',
+    'vellum/commander'
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect

@@ -79,18 +79,17 @@ define([
         ], function () {});
     }, 0);
 
-    var isMac = /Mac/.test(navigator.platform);
-
-    var HOTKEY_UNICODE = {
-        ctrl: "Ctrl+",
-        alt: "Alt+",
-        shift: "Shift+",
-    };
+    var isMac = util.isMac,
+        HOTKEY_UNICODE = {
+            Ctrl: "Ctrl+",
+            Alt: "Alt+",
+            Shift: "Shift+",
+        };
     if (isMac) {
         HOTKEY_UNICODE = {
-            ctrl: "\u2318",
-            alt: "\u2325",
-            shift: "\u21E7",
+            Ctrl: "\u2318",
+            Alt: "\u2325",
+            Shift: "\u21E7",
         };
     }
 
@@ -205,26 +204,14 @@ define([
         var mainVars = _.extend({format: util.format}, HOTKEY_UNICODE);
         this.$f.empty().append(main_template(mainVars));
         $(document).on("keydown", function (e) {
-            var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
-                metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
-                key = (ctrlKey ? "Ctrl+" : "") +
-                      (e.altKey ? "Alt+" : "") +
-                      (e.shiftKey ? "Shift+" : "") +
-                      (metaKey ? "Meta+" : "") + e.keyCode;
-            (hotkeys[key] || _.identity).call(_this, e);
+            var key = util.getKeyChord(e);
+            (fn.hotkeys[key] || _.identity).call(_this, e);
         });
 
         $(document).on('click', '.jstree-hover', function(e) {
             e.preventDefault();
             var ufid = $(this).data("ufid");
-            // http://stackoverflow.com/a/30538877/10840
-            _this.jstree("_open_to", ufid);
-            _this.jstree("hover_node", ufid);
-            var $node = $(".jstree-hovered");
-            if ($node.length) {
-                var $scrollable = $node.closest(".fd-scrollable");
-                $scrollable.scrollTop($node.position().top - $scrollable.position().top);
-            }
+            _this.scrollTreeTo(ufid);
             analytics.fbUsage("Clicked link to show in tree");
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
@@ -251,15 +238,12 @@ define([
         });
     };
 
-    var hotkeys = {
-        "Ctrl+Alt+187" /* = */: function () {
+    fn.hotkeys = {
+        "Ctrl+Alt+=": function () {
             this.data.core.$tree.jstree("open_all");
         },
-        "Ctrl+Alt+189" /* - */: function () {
+        "Ctrl+Alt+-": function () {
             this.data.core.$tree.jstree("close_all");
-        },
-        "Ctrl+Shift+70" /* F */: function() {
-            this.toggleFullScreen();
         },
     };
 
@@ -399,18 +383,30 @@ define([
         var $lastItem = this.$f.find('.fd-tools-menu');
         $lastItem.nextUntil(".divider").remove();
         _(menuItems).each(function (menuItem) {
-            var $a = $("<a tabindex='-1' href='#'><i class='" + menuItem.icon + "'></i> " + menuItem.name + "</a>").click(
-                function (e) {
+            var hotkey = menuItem.hotkey || "",
+                key = "";
+            if (hotkey) {
+                fn.hotkeys[hotkey] = function () {
+                    menuItem.action.apply(_this, function () {});
+                };
+                key = hotkey.replace(/(Ctrl|Alt|Shift)\+/g, function (match, mod) {
+                    return HOTKEY_UNICODE[mod] || mod;
+                });
+                key = "<span class='hotkey'>" + key + "</span>";
+            }
+            var $a = $(util.format(
+                    "<a tabindex='-1' href='#'><i class='{icon}'></i> {name}{key}</a>",
+                    _.extend({key: key}, menuItem)
+                )).click(function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
                         analytics.fbUsage("Tools", menuItem.name);
-                        menuItem.action(function () {
+                        menuItem.action.apply(_this, function () {
                             _this.refreshVisibleData();
                         });
                     });
-                }
-            );
-            var $newItem = $("<li></li>").append($a);
+                }),
+                $newItem = $("<li></li>").append($a);
             $lastItem.after($newItem);
             $lastItem = $newItem;
         });
@@ -467,12 +463,12 @@ define([
     };
 
     fn.getToolsMenuItems = function () {
-        var _this = this,
-            shortcut = "<span class='hotkey'>" + HOTKEY_UNICODE.shift + HOTKEY_UNICODE.ctrl + "F</span>";
+        var _this = this;
         return [
             {
-                name: gettext('Expand Editor') + shortcut,
+                name: gettext('Expand Editor'),
                 icon: "fa fa-expand",
+                hotkey: "Ctrl+Alt+F",
                 action: function (done) {
                     _this.toggleFullScreen();
                 }
@@ -1037,6 +1033,25 @@ define([
         });
     });
 
+    fn.scrollTreeTo = function (ufid) {
+        // http://stackoverflow.com/a/30538877/10840
+        this.jstree("_open_to", ufid);
+        this.jstree("hover_node", ufid);
+        var $node = $(".jstree-hovered");
+        if ($node.length) {
+            var $scrollable = $node.closest(".fd-scrollable"),
+                treeTop = $scrollable.offset().top,
+                treeHeight = $scrollable.height(),
+                nodeTop = $node.offset().top,
+                nodeHeight = $node.height(),
+                nodesOffset = nodeTop - $node.closest(".fd-question-tree").offset().top;
+            if (nodeTop < treeTop || nodeTop + nodeHeight > treeTop + treeHeight) {
+                // scroll node to middle of tree viewport
+                $scrollable.scrollTop(nodesOffset - (treeHeight - nodeHeight) / 2);
+            }
+        }
+    };
+
     /**
      * Get relative position like "before", "after", "first", or "last"
      *
@@ -1457,35 +1472,52 @@ define([
         return true;
     };
         
-    fn.addQuestion = function (qType) {
+    fn.addQuestion = function (qType, position, refMug) {
         var _this = this,
             mug;
         this.ensureCurrentMugIsSaved(function () {
-            var foo = _this.getInsertTargetAndPosition(
-                _this.getCurrentlySelectedMug(), qType);
-            if (!foo) {
-                throw new Error("cannot add " + qType + " at the current position");
+            if (position) {
+                if (!/^(before|after|into|first|last)$/.test(position)) {
+                    throw new Error("bad position: " + position);
+                }
+                if (!_this.isInsertAllowed(qType, position, refMug)) {
+                    throw new Error("cannot insert " + qType + " " + position +
+                        " " + (refMug ? refMug.hashtagPath : "root node"));
+                }
+            } else {
+                var foo = _this.getInsertTargetAndPosition(
+                    _this.getCurrentlySelectedMug(), qType);
+                if (!foo) {
+                    throw new Error("cannot add " + qType + " at the current position");
+                }
+                position = foo.position;
+                refMug = foo.mug;
             }
             analytics.workflow("Added question in form builder");
-            mug = _this.data.core.form.createQuestion(foo.mug, foo.position, qType);
+            mug = _this.data.core.form.createQuestion(refMug, position, qType);
 
-            // Focus on first input, which might be a normal input or a rich text input
-            var $firstGroup = _this.$f.find(".fd-question-properties .form-group:first");
-            if ($firstGroup.length) {
-                var $input = $firstGroup.find("input, textarea");
-                if ($input.length) {
-                    // Rich text is off
-                    $input.focus();
-                } else {
-                    // Rich text is on
-                    $input = $firstGroup.find(".fd-textarea, .fd-input");
-                    richText.editor($input).focus();
-                }
-            }
+            _this.scrollTreeTo(mug.ufid);
+            _this.focusFirstInput();
         });
         // the returned value will be `undefined` if ensureCurrentMugIsSaved
         // had to defer for user feedback
         return mug;
+    };
+
+    fn.focusFirstInput = function () {
+        // Focus on first input, which might be a normal input or a rich text input
+        var $firstGroup = this.$f.find(".fd-question-properties .form-group:first");
+        if ($firstGroup.length) {
+            var $input = $firstGroup.find("input, textarea");
+            if ($input.length) {
+                // Rich text is off
+                $input.focus();
+            } else {
+                // Rich text is on
+                $input = $firstGroup.find(".fd-textarea, .fd-input");
+                richText.editor($input).focus();
+            }
+        }
     };
 
     fn.adjustToWindow = function() {
@@ -1553,12 +1585,11 @@ define([
         var parentType = "#"; // root type
         if (refMug) {
             if (position === "after" || position === "before") {
-                if (refMug.parent) {
-                    throw new Error("validation of insert " + position + " " +
-                                    refMug.__className + " not implemented");
-                    //parentType = refMug.parent.__className;
+                if (refMug.parentMug) {
+                    parentType = refMug.parentMug.__className;
                 }
-            //} else if (position === "into" || position === "first" || position === "last") {
+            } else if (position === "into" || position === "first" || position === "last") {
+                parentType = refMug.__className;
             } else {
                 throw new Error("validation of insert " + position + " " +
                                 refMug.__className + " not implemented");
@@ -1566,7 +1597,6 @@ define([
         } else if (position !== "into" && position !== "first" && position !== "last") {
             throw new Error("validation of insert " + position +
                             " root node not implemented");
-            //return false;
         }
         return typeData[parentType].valid_children.indexOf(type) !== -1;
     };

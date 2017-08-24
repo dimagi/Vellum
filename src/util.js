@@ -17,7 +17,42 @@ define([
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
 
-    var that = {};
+    var that = {isMac: /Mac/.test(navigator.platform)},
+        isMac = that.isMac,
+        KEY_CODES = {
+            // key codes used in vellum; add more as needed
+            "186": ';',
+            "187": '=',
+            "189": '-',
+        };
+
+    that.getKeyChord = function (e) {
+        var ctrlKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey),
+            metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
+            key = String(e.key),
+            code = e.which;
+        if (KEY_CODES.hasOwnProperty(code)) {
+            key = KEY_CODES[code];
+        } else if (key.length === 1 || key === "Unidentified") {
+            // Work around Alt+<key> on Mac produces strange e.key values.
+            // On MS Edge some keys are "Unidentified"
+            if (code >= 48 && code <= 57 || code >= 65 && code <= 90) {
+                // alphanumerics (0-9, A-Z)
+                key = String.fromCharCode(code);
+            } else if (code >= 96 && key <= 105) {
+                // number pad (0-9)
+                key = String.fromCharCode(code - 48);
+            } else {
+                // Fall back to numeric code. Not readable, but at least will
+                // not crash. Please update KEY_CODES rather than using this.
+                key = code;
+            }
+        }
+        return (ctrlKey ? "Ctrl+" : "") +
+               (e.altKey ? "Alt+" : "") +
+               (e.shiftKey ? "Shift+" : "") +
+               (metaKey ? "Meta+" : "") + key;
+    };
 
     // deep extend
     that.extend = function () {
