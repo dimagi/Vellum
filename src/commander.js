@@ -291,7 +291,7 @@ define([
                     args: [questionRef],
                     run: function (args) {
                         var mug = args[0];
-                        if (mug) {
+                        if (mug && vellum.ensureCurrentMugIsSaved()) {
                             vellum.setCurrentMug(mug);
                             vellum.scrollTreeTo(mug.ufid);
                             vellum.focusFirstInput();
