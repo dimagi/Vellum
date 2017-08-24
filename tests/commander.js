@@ -156,6 +156,7 @@ define([
             ["choice ", ["...after", "...before", "...in", "...first in",
                 "Multiple Choice Lookup Table"]],
             ["choice i", ["...in", "...first in"]],
+            ["Date and Time ", ["...after", "...before", "...in", "...first in"]],
         ], function (args) {
             var cmd = args[0],
                 items = args[1];
