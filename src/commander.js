@@ -132,9 +132,16 @@ define([
             if (!getArg) {
                 throw new Error("getArg parameter is required");
             }
-            var source = _.map(items, function (item) {
-                return RegExp.escape(item.name);
-            }).join("|");
+            var source = _.chain(items)
+                .map(function (item) {
+                    return RegExp.escape(item.name);
+                })
+                .sortBy(function (name) {
+                    // long items first -> greedy match (before shorter items)
+                    return -name.length;
+                })
+                .value()
+                .join("|");
             return {regexp: source, items: items, getArg: getArg};
         }
 
