@@ -78,20 +78,22 @@
 }
 
 .fd-commander {
-    display: flex;
     background-color: @cc-bg;
-    padding: 4px 1px 3px 3px;
-    margin-right: 1px;
+    padding: 5px;
 
     input {
         border: 1px solid @cc-neutral-hi;
-        flex: 1;
+        height: 19px;
+        width: calc(~"100% - 15px");
     }
 
     .fd-commander-close {
         background: none;
         border: none;
         color: @cc-neutral-low;
-        flex: 0 0 20px;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        cursor: pointer;
     }
 }
