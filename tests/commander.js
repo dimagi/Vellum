@@ -18,6 +18,7 @@ define([
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
+                features: {rich_text: false},
                 core: {onReady: function() {
                     vellum = this;
                     mugTypes = commander.getQuestionMap(vellum);
@@ -202,6 +203,27 @@ define([
 
         it("should not have 'itemset' in it's question map", function () {
             assert.doesNotHaveAnyKeys(commander.getQuestionMap(vellum), ["itemset"]);
+        });
+
+        it("select after add bug", function () {
+            util.paste([
+                ["id", "type", "labelItext:en-default"],
+                ["/text", "Text", "text"],
+            ]);
+            // add question with commander
+            var result = commander.doCommand("Text after", vellum),
+                mug = result && result.value;
+            assert.equal(result && result.name, "add question");
+            // set label
+            $("[name=itext-en-label]").val("text2").change();
+            assert.equal(mug.p.nodeID, undefined);
+            // select a different question with commander
+            result = commander.doCommand("#form/text", vellum);
+            assert.equal(result && result.name, "select question");
+            // original question should have nodeID assigned and can be selected
+            assert.equal(mug.p.nodeID, "text2");
+            result = commander.doCommand("#form/text2", vellum);
+            assert.equal(result && result.name, "select question");
         });
     });
 });
