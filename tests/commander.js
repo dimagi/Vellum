@@ -153,10 +153,10 @@ define([
         _.each([
             ["txt", []],
             ["cho", ["Choice", "Multiple Choice", "Multiple Choice Lookup Table"]],
-            ["choice ", ["...after", "...before", "...in", "...first in",
+            ["choice ", ["...after", "...before", "...first in", "...in",
                 "Multiple Choice Lookup Table"]],
             ["choice i", ["...in", "...first in"]],
-            ["Date and Time ", ["...after", "...before", "...in", "...first in"]],
+            ["Date and Time ", ["...after", "...before", "...first in", "...in"]],
         ], function (args) {
             var cmd = args[0],
                 items = args[1];
