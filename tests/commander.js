@@ -152,7 +152,7 @@ define([
 
         _.each([
             ["txt", []],
-            ["cho", ["Multiple Choice", "Multiple Choice Lookup Table", "Choice"]],
+            ["cho", ["Choice", "Multiple Choice", "Multiple Choice Lookup Table"]],
             ["choice ", ["...after", "...before", "...in", "...first in",
                 "Multiple Choice Lookup Table"]],
             ["choice i", ["...in", "...first in"]],

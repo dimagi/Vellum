@@ -173,6 +173,13 @@ define([
                             full: prefix + item.name,
                         };
                     });
+                    if (subquery) {
+                        subquery = subquery.toLowerCase();
+                        matched = _.sortBy(matched, function (item) {
+                            var index = item.name.toLowerCase().indexOf(subquery);
+                            return index >= 0 ? index : Infinity;
+                        });
+                    }
                     Array.prototype.push.apply(items, matched);
                 }
             });
