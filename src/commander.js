@@ -173,6 +173,13 @@ define([
                             full: prefix + item.name,
                         };
                     });
+                    if (subquery) {
+                        subquery = subquery.toLowerCase();
+                        matched = _.sortBy(matched, function (item) {
+                            var index = item.name.toLowerCase().indexOf(subquery);
+                            return index >= 0 ? index : Infinity;
+                        });
+                    }
                     Array.prototype.push.apply(items, matched);
                 }
             });
@@ -234,7 +241,7 @@ define([
             typeItems = _.map(mugTypes, function (type) {
                 return {name: type.typeName, icon: type.icon};
             }),
-            positions = _.map(["after", "before", "in", "first in"], function (name) {
+            positions = _.map(["after", "before", "first in", "in"], function (name) {
                 return {name: name};
             }),
             positionMap = {"in": "into", "first in": "first"},
