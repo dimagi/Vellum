@@ -1827,6 +1827,19 @@ define([
             });
     };
 
+    fn.alertUser = function(message, emphasis, append) {
+        var $container = this.$f.find("#alert-user"),
+            $content = $container.children("span");
+        if (emphasis) {
+            $container.addClass("alert-" + emphasis);
+        }
+        if (!append) {
+            $content.html('');
+        }
+        $content.append(message + "<br>");
+        $container.removeClass("hide");
+    };
+
     fn.setTreeValidationIcon = function (mug) {
         var node = mug.ufid && this.jstree("get_node", mug.ufid);
         if (node) {
