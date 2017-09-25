@@ -1856,7 +1856,6 @@ define([
 
     fn._resetMessages = function (errors) {
         var error, messages_div = this.$f.find('.fd-messages');
-        messages_div.empty();
 
         function asArray(value) {
             // TODO: I don't like this array business, should be refactored away
@@ -1875,12 +1874,18 @@ define([
             // default with a clickable indicator to show them?
 
             error = errors[errors.length - 1];
-            messages_div
-                .html(alert_global({
+            var showMessage = function() {
+                messages_div.html(alert_global({
                     messageType: MESSAGE_TYPES[error.level],
                     messages: asArray(error.message)
                 }))
-                .find('.alert').removeClass('hide').addClass('in');
+                .fadeIn(500);
+            };
+            if (messages_div.is(":visible")) {
+                messages_div.fadeOut(500, showMessage);
+            } else {
+                showMessage();
+            }
         }
     };
 
