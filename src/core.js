@@ -102,15 +102,20 @@ define([
             icon: "fa fa-exclamation-circle",
         },
         "parse-warning": {
-            cssClass: "",
+            cssClass: "alert-warning",
             title: gettext("Warning"),
             icon: "fa fa-warning",
         },
         "form-warning": {
-            cssClass: "",
+            cssClass: "alert-warning",
             title: gettext("Form Warning"),
             icon: "fa fa-info-circle",
-        }
+        },
+        "info": {
+            cssClass: "alert-info",
+            title: gettext("Notification"),
+            icon: "fa fa-info-circle",
+        },
     };
 
     var fn = {};
@@ -1827,17 +1832,11 @@ define([
             });
     };
 
-    fn.alertUser = function(message, emphasis, append) {
-        var $container = this.$f.find("#alert-user"),
-            $content = $container.children("span");
-        if (emphasis) {
-            $container.addClass("alert-" + emphasis);
-        }
-        if (!append) {
-            $content.html('');
-        }
-        $content.append(message + "<br>");
-        $container.removeClass("hide");
+    fn.alertUser = function(message) {
+        this._resetMessages([{
+            level: 'info',
+            message: message,
+        }]);
     };
 
     fn.setTreeValidationIcon = function (mug) {
