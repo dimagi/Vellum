@@ -1862,9 +1862,9 @@ define([
             var showMessage = function() {
                 messages_div.html(alert_global({
                     messageType: MESSAGE_TYPES[error.level],
-                    message: error.message,
-                }))
-                .fadeIn(500);
+                    messages: error.message instanceof Array ? error.message : [],
+                    message: error.message instanceof Array ? '' : '' + error.message,
+                })).fadeIn(500);
             };
             if (messages_div.is(":visible")) {
                 messages_div.fadeOut(500, showMessage);
