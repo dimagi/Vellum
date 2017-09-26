@@ -170,17 +170,21 @@ body.vellum-full-screen {
 
         // Vellum-level messages displayed across bottom of screen
         .fd-messages {
-            position: fixed;
-            bottom: 40px;
-            left: 0;
-            width: 100%;
+            max-width: calc(~"100% - 70px");   // account for save button
 
             .alert {
-                .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
-                margin: @gridGutterWidth;
                 height: auto;
                 overflow: auto;
                 max-height: 200px;
+                margin-left: 10px;
+                margin-bottom: 0;
+                padding: 6px 15px;
+
+                .close {
+                    position: relative;
+                    top: -3px;
+                    right: -3px;
+                }
             }
         }
 

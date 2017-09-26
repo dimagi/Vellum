@@ -98,22 +98,18 @@ define([
     var MESSAGE_TYPES = {
         "error": {
             cssClass: "alert-danger",
-            title: gettext("Error"),
             icon: "fa fa-exclamation-circle",
         },
         "parse-warning": {
             cssClass: "alert-warning",
-            title: gettext("Warning"),
             icon: "fa fa-warning",
         },
         "form-warning": {
             cssClass: "alert-warning",
-            title: gettext("Form Warning"),
             icon: "fa fa-info-circle",
         },
         "info": {
             cssClass: "alert-info",
-            title: gettext("Notification"),
             icon: "fa fa-info-circle",
         },
     };
@@ -1855,29 +1851,18 @@ define([
     };
 
     fn._resetMessages = function (errors) {
-        var error, messages_div = this.$f.find('.fd-messages');
+        // Show message(s) from the last error only because multiple errors
+        // fill up the screen and thus impede usability.  TODO ideally the
+        // other errors would be accessible in some way.  Maybe hidden by
+        // default with a clickable indicator to show them?
+        var error = errors.pop(),
+            messages_div = this.$f.find('.fd-messages');
 
-        function asArray(value) {
-            // TODO: I don't like this array business, should be refactored away
-            // to the callers.
-            if (typeof value === "string" || !(value instanceof Array)) {
-                // value is a string or not-an-array (so try turn it into a string)
-                value = ['' + value];
-            }
-            return value;
-        }
-
-        if (errors.length > 0) {
-            // Show message(s) from the last error only because multiple errors
-            // fill up the screen and thus impede usability.  TODO ideally the
-            // other errors would be accessible in some way.  Maybe hidden by
-            // default with a clickable indicator to show them?
-
-            error = errors[errors.length - 1];
+        if (error) {
             var showMessage = function() {
                 messages_div.html(alert_global({
                     messageType: MESSAGE_TYPES[error.level],
-                    messages: asArray(error.message)
+                    message: error.message,
                 }))
                 .fadeIn(500);
             };
