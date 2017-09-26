@@ -66,7 +66,7 @@ body.vellum-full-screen {
 
                 // Bar with save button
                 .fd-form-actions {
-                    background: @navbarBackground;
+                    background-color: @cc-brand-mid !important; // lazy
                     padding: 5px 8px 8px;
                 }
             }
@@ -155,7 +155,7 @@ body.vellum-full-screen {
         // Draggable separators between .fd-content blocks
         .fd-content-vertical-divider {
             width: 5px;
-            background: @navbarBackground;
+            background: @cc-brand-mid;
         }
 
         .fd-content-horizontal-divider {
@@ -179,7 +179,7 @@ body.vellum-full-screen {
                 .box-shadow(0px 0px 10px rgba(0, 0, 0, 0.4));
                 margin: @gridGutterWidth;
                 height: auto;
-                overflow: scroll;
+                overflow: auto;
                 max-height: 200px;
             }
         }
@@ -193,16 +193,6 @@ body.vellum-full-screen {
 
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
-        }
-    }
-
-    &.app-manager-v2 {
-        .fd-form-actions {
-            background-color: @cc-brand-mid !important; // lazy because this is temporary code
-        }
-
-        .fd-content-vertical-divider {
-            background: @cc-brand-mid;
         }
     }
 }

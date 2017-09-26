@@ -211,6 +211,13 @@ define([
     function init(opts) {
         opts = opts || {};
         var vellum_options = $.extend(true, {}, options.options, opts);
+
+        // Turn off animations for testing
+        var oldAnimate = $.fn.animate;
+        $.fn.animate = function(prop, speed, easing, callback) {
+            oldAnimate.apply(this, [prop, 0, easing, callback]);
+        };
+
         // $.extend merges arrays :(
         if (opts.javaRosa && opts.javaRosa.langs) {
             vellum_options.javaRosa.langs = opts.javaRosa.langs;
