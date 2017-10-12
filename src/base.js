@@ -23,6 +23,7 @@ define([
             'windowManager',
             'copyPaste',
             'commander',
+            'remoteRequest',
         ];
 
     function bindPluginMethod(pluginName, fn, fnName) {
