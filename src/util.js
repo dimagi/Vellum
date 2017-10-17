@@ -1,5 +1,5 @@
-/* global require */
 define([
+    'require',
     'json!langCodes',
     'underscore',
     'jsdiff',
@@ -7,6 +7,7 @@ define([
     'jquery',
     'vellum/jquery-extensions'
 ], function (
+    require,
     langCodes,
     _,
     jsdiff,
