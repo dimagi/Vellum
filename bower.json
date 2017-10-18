@@ -30,8 +30,8 @@
         "requirejs-tpl": "jfparadis/requirejs-tpl",
         "requirejs-plugins": "~1.0.2",
         "At.js": "millerdev/At.js#master",
-        "Caret.js": "0.2.2",
-        "fuse.js": "~2.5.0",
+        "Caret.js": "0.3.1",
+        "fuse.js": "~3.2.0",
 
         "bootstrap": "3.3.7",
         "jstree": "~3.3.3",
@@ -41,8 +41,8 @@
         "MediaUploader": "dimagi/MediaUploader#master",
         "xpath": "dimagi/js-xpath#v0.0.3",
         "jsdiff": ">=1",
-        "markdown-it": "~7.0.0",
-        "codemirror": "5.19.0"
+        "markdown-it": "~8.4.0",
+        "codemirror": "5.30.0"
     },
     "devDependencies": {
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
