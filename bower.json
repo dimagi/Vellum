@@ -1,52 +1,54 @@
 {
-    "name": "Vellum",
-    "authors": [
-        "Dimagi <dev@dimagi.com>",
-        "Mike White <m@mwhite.info>"
-    ],
-    "description": "A JavaRosa XForms designer",
-    "moduleType": [
-        "amd"
-    ],
-    "keywords": [
-        "XForms"
-    ],
-    "license": "MIT",
-    "private": true,
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "bower_components",
-        "test",
-        "tests"
-    ],
-    "dependencies": {
-        "underscore": "~1.8.3",
-        "jquery": "~3.2.1",
-        "requirejs": "~2.3.1",
-        "requirejs-text": "~2.0.12",
-        "require-less": "~0.1.2",
-        "require-css": "~0.1.5",
-        "requirejs-tpl": "jfparadis/requirejs-tpl",
-        "requirejs-plugins": "~1.0.2",
-        "At.js": "millerdev/At.js#master",
-        "Caret.js": "0.2.2",
-        "fuse.js": "~2.5.0",
-
-        "bootstrap": "3.3.7",
-        "jstree": "~3.3.3",
-        "jstree-actions": "alexandernst/jstree-actions#0.1.3",
-        "langcodes": "dimagi/langcodes",
-        "XMLWriter": "dimagi/XMLWriter#master",
-        "MediaUploader": "dimagi/MediaUploader#master",
-        "xpath": "dimagi/js-xpath#v0.0.3",
-        "jsdiff": ">=1",
-        "markdown-it": "~7.0.0",
-        "codemirror": "5.19.0"
-    },
-    "devDependencies": {
-        "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
-        "chai": "^4.0.0",
-        "xrayquire": "requirejs/xrayquire"
-    }
+  "name": "Vellum",
+  "authors": [
+    "Dimagi <dev@dimagi.com>",
+    "Mike White <m@mwhite.info>"
+  ],
+  "description": "A JavaRosa XForms designer",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "XForms"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "underscore": "~1.8.3",
+    "jquery": "~3.2.1",
+    "requirejs": "~2.3.1",
+    "requirejs-text": "~2.0.12",
+    "require-less": "~0.1.2",
+    "require-css": "~0.1.5",
+    "requirejs-tpl": "jfparadis/requirejs-tpl",
+    "requirejs-plugins": "~1.0.2",
+    "At.js": "millerdev/At.js#master",
+    "Caret.js": "0.3.1",
+    "fuse.js": "~2.7.4",
+    "bootstrap": "3.3.7",
+    "jstree": "~3.3.3",
+    "jstree-actions": "alexandernst/jstree-actions#0.1.3",
+    "langcodes": "dimagi/langcodes",
+    "XMLWriter": "dimagi/XMLWriter#master",
+    "MediaUploader": "dimagi/MediaUploader#master",
+    "xpath": "dimagi/js-xpath#v0.0.3",
+    "jsdiff": ">=1",
+    "markdown-it": "~8.4.0",
+    "codemirror": "5.30.0"
+  },
+  "devDependencies": {
+    "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
+    "chai": "^4.0.0",
+    "xrayquire": "requirejs/xrayquire"
+  },
+  "resolutions": {
+    "Caret.js": "0.3.1"
+  }
 }
