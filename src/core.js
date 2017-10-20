@@ -1670,7 +1670,7 @@ define([
 
         this.$f.find('.fd-props-toolbar').html(this.getMugToolbar(mug));
         for (var i = 0; i < sections.length; i++) {
-            var section = sections[i];
+            var section = _.clone(sections[i]);
 
             section.mug = mug;
             section.properties = _(section.properties)
