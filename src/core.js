@@ -406,7 +406,7 @@ define([
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
                         analytics.fbUsage("Tools", menuItem.name);
-                        menuItem.action.apply(_this, function () {
+                        menuItem.action.call(_this, function () {
                             _this.refreshVisibleData();
                         });
                     });
