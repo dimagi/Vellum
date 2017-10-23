@@ -59,7 +59,8 @@ define([
                     xpathType: "generic",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: gettext('A reference to a parameters node, "/data/request_params"'),
+                    help: gettext('Drag a question here. The value of that ' +
+                        'question will be used as request parameters.'),
                 },
             },
         });
