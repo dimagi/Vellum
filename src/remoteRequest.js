@@ -62,6 +62,7 @@ define([
                     help: gettext('Drag a question here. The value of that ' +
                         'question will be used as request parameters.'),
                 },
+                constraintMsgItext: { presence : "notallowed" },
             },
         });
 
