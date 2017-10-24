@@ -37,6 +37,9 @@ define([
             isDataOnly: true,
             isTypeChangeable: false,
             supportsDataNodeRole: true,
+            init: function (mug) {
+                mug.p.url = "";
+            },
             writeDataNodeXML: function (xmlWriter, mug) {
                 mug.form.vellum.data.remoteRequest.requestMugs.push(mug);
             },
@@ -44,7 +47,7 @@ define([
                 url: {
                     lstring: gettext('URL'),
                     visibility: 'visible',
-                    presence: 'optional',
+                    presence: 'required',
                     widget: widgets.text,
                     help: gettext('The URL to be requested on form load.'),
                 },
@@ -56,8 +59,10 @@ define([
                     xpathType: "generic",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    help: gettext('A reference to a parameters node, "/data/request_params"'),
+                    help: gettext('Drag a question here. The value of that ' +
+                        'question will be used as request parameters.'),
                 },
+                constraintMsgItext: { presence : "notallowed" },
             },
         });
 

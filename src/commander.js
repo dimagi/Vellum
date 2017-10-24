@@ -77,6 +77,11 @@ define([
             {form: cmd.vellum.data.core.form, on: _.identity},  // fake mug
             {useHashtags: true, tabSelectsMatch: true}          // options
         );
+        cmd.vellum.data.core.form.on("change-display-language", function() {
+            // NOTE this is tightly coupled with atwho.autocomplete(...), which
+            // calls $input.atwho('destroy') on change-display-language
+            cmd.input.atwho(cmd.atwhoConfig);
+        });
         cmd.input.on("inserted.atwho", function (event) {
             event.preventDefault();
         });

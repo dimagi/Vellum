@@ -37,5 +37,14 @@ define([
             var xml = REMOTE_REQUEST_XML.replace(/params/g, "query");
             util.assertXmlEqual(util.call("createXML"), xml);
         });
+
+        it("should require URL value", function () {
+            util.loadXML();
+            var mug = util.addQuestion("RemoteRequest", "remote");
+            assert(util.isTreeNodeValid(mug), "tree node should be initially valid");
+            util.addQuestion("Text", "text");
+            assert.equal(mug.p.url, "");
+            assert(!util.isTreeNodeValid(mug), "tree node should not be valid");
+        });
     });
 });
