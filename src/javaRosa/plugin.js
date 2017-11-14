@@ -60,7 +60,6 @@ define([
         displayLanguage: 'en'
     }, {
         init: function () {
-            // todo: plugin abstraction barrier
             this.data.javaRosa.ItextItem = itext.item;
             this.data.javaRosa.ItextForm = itext.form;
             this.data.javaRosa.ICONS = ICONS;
@@ -145,30 +144,14 @@ define([
                 var $el = $(el),
                     mug = form.getMugByUFID($el.prop('id'));
 
-                try {
-                    if (_this.data.core.currentItextDisplayLanguage === "_ids") {
-                        _this.jstree('rename_node', $el, mug.getNodeID());
-                    }
-                    else {
-                        if (mug.p.labelItext) {
-                            var text = _this.getMugDisplayName(mug);
-                            _this.jstree('rename_node', $el, text ||
-                                    _this.opts().core.noTextString);
-                        }
-                    }
-                } catch (e) {
-                    /* This happens immediately after question duplication when
-                     * we try to rename the duplicated node in the UI tree. The
-                     * form XML is correct and the inputs change the appropriate
-                     * strings in the XML and in the UI tree, so we're just
-                     * going to ignore the fact that this internal data
-                     * structure isn't initialized with the default language's
-                     * itext value for this field yet, and simply not rename the
-                     * UI node, which will produce the same behavior. */
-                    // todo: re-examine this comment since there's been a lot of
-                    // refactoring
-                    if (e !== "NoItextItemFound") {
-                        throw e;
+                if (_this.data.core.currentItextDisplayLanguage === "_ids") {
+                    _this.jstree('rename_node', $el, mug.getNodeID());
+                }
+                else {
+                    if (mug.p.labelItext) {
+                        var text = _this.getMugDisplayName(mug);
+                        _this.jstree('rename_node', $el, text ||
+                                _this.opts().core.noTextString);
                     }
                 }
             });
@@ -225,7 +208,6 @@ define([
                 }
 
                 if (langs && langs.indexOf(lang) === -1) {
-                    // todo: plugins!
                     _this.data.core.parseWarnings.push(gettext(
                         "You have languages in your form that are not specified " +
                         "in the \"Languages\" page of the application builder. " +

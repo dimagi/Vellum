@@ -51,7 +51,6 @@ define([
                 type: 'Trigger',
                 nodeId: 'question2',
                 inputs: {
-                    // TODO add more input counts for each question type
                     calculateAttr: 0,
                     constraintAttr: 1,
                     requiredAttr: 0,
@@ -67,7 +66,6 @@ define([
                 type: 'Select',
                 nodeId: 'question3',
                 inputs: {
-                    // TODO add more input counts for each question type
                     calculateAttr: 0,
                     constraintAttr: 1,
                     requiredAttr: 1,

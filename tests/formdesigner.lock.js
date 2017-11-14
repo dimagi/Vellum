@@ -93,26 +93,6 @@ define([
     });
 
 
-    // hack to make jstree drag and drop testing work. FML.
-    //var _simulateEvent = $.simulate.prototype.simulateEvent,
-        //currentEl;
-    //$.simulate.prototype.simulateEvent = function (elem, type, options) {
-        //var $el = $(document.elementFromPoint(options.clientX, options.clientY));
-        
-        //_simulateEvent.call(this, $el, type, options);
-        //_simulateEvent.call(this, $el, type + '.jstree', options);
-
-        //if (type === 'mousemove') {
-            //if ($el[0] !== currentEl) {
-                //currentEl = $el[0];
-                //this.simulateEvent($el, 'mouseenter', options);
-            //}
-        //} else if (type === 'mouseup') {
-            //currentEl = null;
-        //}
-    //};
-
-
     describe("The question locking functionality in the core and UI", function () {
         before(beforeFn);
 
@@ -173,80 +153,5 @@ define([
                 testEditButton(true);
             });
         });
-
-        return;
-        /* todo 
-        describe("The move locking", function () {
-            beforeEach(beforeFn);
-
-            // from jquery.simulate
-            function findCenter( elem ) {
-                var offset,
-                    document = $( elem.ownerDocument );
-                elem = $( elem );
-                offset = elem.offset();
-
-                return {
-                    x: offset.left + elem.outerWidth() / 2 - document.scrollLeft(),
-                    y: offset.top + elem.outerHeight() / 2 - document.scrollTop()
-                };
-            }
-
-            function doDrag(source, target) {
-                var $source = $("li[rel]:contains(" + source + ")").find('a'),
-                    sourceCenter = findCenter($source),
-                    targetCenter = findCenter(
-                        $("li[rel]:contains(" + target + ")").find('a'));
-
-                $source.simulate("drag", {
-                    dx: targetCenter.x - sourceCenter.x,
-                    // ensure the drop is attempted *after* the target question
-                    dy: targetCenter.y - sourceCenter.y + 1,  
-                    moves: 10
-                });
-            }
-
-            it("allows moving a non-locked question to a different parent", function () {
-                doDrag('normal', 'group');
-
-                assert.deepEqual(c.form.dataTree.getStructure(), {
-                    'data': [
-                        { 'question2': [] },
-                        { 'question7': [ 
-                            { 'question8': [] } ,
-                            { 'question1': [] }
-                        ] }
-                    ]
-                });
-            });
-            
-            it("disallows moving a locked question to a different parent", function () {
-                doDrag('node_locked', 'group');
-
-                assert.deepEqual(c.form.dataTree.getStructure(), {
-                    'data': [
-                        { 'question1': [] },
-                        { 'question2': [] },
-                        { 'question7': [ 
-                            { 'question8': [] } 
-                        ] }
-                    ]
-                });
-            });
-
-            it("allows moving a locked question within its parent", function () {
-                doDrag('node_locked', 'value_locked');
-
-                assert.deepEqual(c.form.dataTree.getStructure(), {
-                    'data': [
-                        { 'question2': [] },
-                        { 'question1': [] },
-                        { 'question7': [
-                            { 'question8': [] }
-                        ] }
-                    ]
-                });
-            });
-        }); */
     });
 });

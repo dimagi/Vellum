@@ -955,7 +955,6 @@ define([
             refMug = refMug || this.tree.getRootNode().getValue();
             this.insertMug(refMug, mug, position);
             this._updateMugPath(mug);
-            // todo: abstraction barrier
 
             this.fire({
                 type: 'question-create',

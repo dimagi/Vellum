@@ -224,7 +224,7 @@ define(["underscore"], function (_) {
                 audio: 'foo',
                 video: 'foo'
             },
-            objectMap: {}  // todo
+            objectMap: {}
         },
         plugins: [
             'databrowser',

@@ -42,7 +42,6 @@
 			<label ref="jr:itext('question1-label')"/>
 		</input>
 		<group vellum:ref="#form/question9a" ref="/data/question9a">
-			<!-- todo: renaming of itext IDs without requiring UI layer -->
 			<label ref="jr:itext('question9a-label')"/>
 			<input vellum:ignore="retain" ref="/data/question9a/question10">
 				<label ref="jr:itext('question10-label')"/>
