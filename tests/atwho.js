@@ -23,8 +23,10 @@ define([
                 structure: {
                     "case_id": {
                         reference: {
+                            hashtag: "#case/child",
                             source: "casedb",
                             subset: "child",
+                            subset_key: "@case_type",
                             key: "@case_id",
                         },
                     },

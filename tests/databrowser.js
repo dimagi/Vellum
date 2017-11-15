@@ -45,8 +45,10 @@ define([
             structure: {
                 "case_id": {
                     reference: {
+                        hashtag: "#case",
                         source: "casedb",
                         subset: "case",
+                        subset_key: "@case_type",
                         key: "@case_id",
                     },
                 },
@@ -75,7 +77,12 @@ define([
                     invalid: {}
                 },
                 related: {
-                    parent: "parent",
+                    parent: {
+                        hashtag: "#case/parent",
+                        subset: "parent",
+                        subset_key: "@case_type",
+                        key: "@case_id",
+                    },
                 },
             }],
         }];

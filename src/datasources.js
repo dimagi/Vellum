@@ -68,7 +68,7 @@
  *                          // same keys as structure.ref-element.reference
  *                          // plus one more:
  *                          index: string (optional index path, default: '/index'),
- *                      } or string (deprecated, related subset id),
+ *                      },
  *                      ...
  *                  },
  *              },
@@ -329,15 +329,6 @@ define([
                         _parent: info,
                         hashtag: ref.hashtag,
                     });
-                    if (!ref.hashtag && source.id === "casedb") {
-                        // legacy magic: case hashtags
-                        // TODO remove when HQ sends new schema format
-                        if (ref.subset === "case") {
-                            info.hashtag = '#case';
-                        } else {
-                            info.hashtag = '#case/' + ref.subset;
-                        }
-                    }
                     var keyPath = path;
                     path = "instance('" + source.id + "')" + source.path;
                     if (ref.subset_filter && ref.subset_key && ref.subset) {
@@ -388,15 +379,8 @@ define([
                 nodes = _.chain(source.related)
                     .map(function (ref, relation) {
                         var item, index;
-                        if (_.isObject(ref)) {
-                            item = {reference: ref};
-                            index = ref.index || "/index";
-                        } else {
-                            // legacy/magic
-                            // TODO remove when HQ sends new schema format
-                            item = {reference: {subset: ref, key: "@case_id"}};
-                            index = "/index";
-                        }
+                        item = {reference: ref};
+                        index = ref.index || "/index";
                         return node(source, path + index, info, true)(item, relation);
                     })
                     .sortBy("text")
