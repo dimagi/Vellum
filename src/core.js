@@ -683,8 +683,6 @@ define([
     };
 
     fn.showFormPropertiesModal = function () {
-        // moved over just for display purposes, apparently the original
-        // wasn't working perfectly, so this is a todo
         var _this = this,
             $modal = this.generateNewModal(gettext("Edit Form Properties"), []),
             $modalBody = $modal.find('.modal-body'),

@@ -26,14 +26,12 @@ _rjs:
 	   bower_components/jstree/dist/themes/default/*.gif \
 	   _build/bower_components/jstree/dist/themes/default
 # combine CSS files (and adjust location for relative image paths)
-	# TODO do we need a blank line between the files? doesn't seem like it after initial test
 	cat _build/src/local-deps.css _build/src/main-components.css > _build/style.css
 	rm _build/src/local-deps.css _build/src/main-components.css
 	mv _build/src/images _build/
 	echo "$(VERSION)" > _build/version.txt
 	(`npm bin`/bower list || `npm bin`/bower list --offline) | \
 		grep -Ev "^(Vellum|bower) " > _build/bower_components/manifest.txt
-# TODO auto-generate this file from build.js
 	python buildmain.py > _build/src/main.js
 
 _tar:

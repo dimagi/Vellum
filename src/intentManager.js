@@ -324,7 +324,6 @@ define([
                 lstring: gettext("Special Intent XMLNS attribute"),
             }
         },
-        // todo: move to spec system
         getAppearanceAttribute: function (mug) {
             return 'intent:' + mug.p.nodeID;
         }
