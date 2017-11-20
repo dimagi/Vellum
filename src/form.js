@@ -8,7 +8,8 @@ define([
     'vellum/xpath',
     'vellum/fuse',
     'vellum/undomanager',
-    'vellum/util'
+    'vellum/util',
+    'vellum/analytics',
 ], function (
     require,
     _,
@@ -19,7 +20,8 @@ define([
     xpath,
     Fuse,
     undomanager,
-    util
+    util,
+    analytics
 ) {
     // Load these dependencies in the background after all other run-time
     // dependencies have been resolved, since they shouldn't be necessary
@@ -831,7 +833,7 @@ define([
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
-            hqImport('analytics/js/google').track.event('Form Builder', 'Copy', duplicate.options.typeName);
+            analytics.workflow('Form Builder', 'Copy', duplicate.options.typeName);
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];
