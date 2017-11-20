@@ -1,8 +1,6 @@
 define([], function () {
     function workflow(message) {
-        if (window.analytics) {
-            window.analytics.workflow(message);
-        }
+        hqImport('analytics/js/kissmetrics').track.event(message);
     }
 
     function usage(label, group, message) {
