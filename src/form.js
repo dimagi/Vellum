@@ -831,9 +831,7 @@ define([
                 duplicate = foo[0],
                 pathReplacements = foo[1];
 
-            if (window.analytics) {
-                window.analytics.usage('Form Builder', 'Copy', duplicate.options.typeName);
-            }
+            hqImport('analytics/js/google').track.event('Form Builder', 'Copy', duplicate.options.typeName);
 
             for (var i = 0; i < pathReplacements.length; i++) {
                 var pr = pathReplacements[i];

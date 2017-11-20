@@ -6,9 +6,7 @@ define([], function () {
     }
 
     function usage(label, group, message) {
-        if (window.analytics) {
-            window.analytics.usage(label, group, message);
-        }
+        hqImport('analytics/js/google').track.event(label, group, message);
     }
 
     function fbUsage(group, message) {
