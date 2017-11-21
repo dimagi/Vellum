@@ -1,13 +1,18 @@
-define([], function () {
+define([
+    'hqAnalytics',
+], function (
+    hqAnalytics
+) {
+
     function workflow(message) {
-        if (hqImport !== undefined) {
-            hqImport('analytics/js/kissmetrics').track.event(message);
+        if (hqAnalytics.kissmetrics) {
+            hqAnalytics.kissmetrics.track.event(message);
         }
     }
 
     function usage(label, group, message) {
-        if (hqImport !== undefined) {
-            hqImport('analytics/js/google').track.event(label, group, message);
+        if (hqAnalytics.google) {
+            hqAnalytics.google.track.event(label, group, message);
         }
     }
 
