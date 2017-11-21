@@ -26,7 +26,7 @@ define([
     'vellum/datasources',
     'vellum/util',
     'vellum/javaRosa/util',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
     'vellum/atwho',
     'vellum/debugutil',
     'vellum/base',

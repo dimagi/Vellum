@@ -4,7 +4,7 @@
 define([
     'jquery',
     'underscore',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
     'vellum/atwho',
     'vellum/util',
     'tpl!vellum/templates/commander',

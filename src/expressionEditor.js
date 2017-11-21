@@ -4,7 +4,7 @@ define([
     'vellum/debugutil',
     'vellum/atwho',
     'vellum/richText',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',

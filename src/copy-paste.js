@@ -5,7 +5,7 @@ define([
     'vellum/mugs',
     'vellum/tsv',
     'vellum/util',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
     'vellum/core'
 ], function (
     $,

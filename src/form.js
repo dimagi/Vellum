@@ -9,7 +9,7 @@ define([
     'vellum/fuse',
     'vellum/undomanager',
     'vellum/util',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
 ], function (
     require,
     _,
