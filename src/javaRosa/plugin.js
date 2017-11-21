@@ -27,7 +27,7 @@ define([
     'vellum/dateformats',
     'vellum/util',
     'vellum/xml',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
     'vellum/javaRosa/itext',
     'vellum/javaRosa/itextBlock',
     'vellum/javaRosa/itextWidget',

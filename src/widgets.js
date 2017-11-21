@@ -7,7 +7,7 @@ define([
     'vellum/atwho',
     'vellum/util',
     'vellum/richText',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
 ], function (
     ui_element,
     widget_control_keyvalue,

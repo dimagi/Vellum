@@ -44,7 +44,7 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
     'ckeditor',
     'ckeditor-jquery'
 ], function(

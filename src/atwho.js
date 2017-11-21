@@ -2,7 +2,7 @@ define([
     'underscore',
     'jquery',
     'vellum/richText',
-    'vellum/analytics',
+    'vellum/hqAnalytics',
     'vellum/util',
     'tpl!vellum/templates/atwho_display',
     'vellum/core',
