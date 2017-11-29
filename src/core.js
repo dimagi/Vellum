@@ -2186,8 +2186,11 @@ define([
             success: function (data) {
                 if (saveType === 'patch') {
                     if (data.status === 'conflict') {
-                        if (_.isUndefined(data.xform)) {
+                        var force_full = _this.opts()
+                            .features.full_save_on_missing_conflict_xform;
+                        if (_.isUndefined(data.xform) && force_full) {
                             // unconditionally overwrite if no xform to compare
+                            // this codepath should never execute in production
                             _this.send(formText, 'full');
                         } else {
                             hidePageSpinner();
