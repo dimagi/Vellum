@@ -484,6 +484,50 @@ define([
             });
         });
 
+        describe("save conflict resolution logic", function() {
+            var SRV_FORM = " line one\n line two\n line three\n line four\n line five\n",
+                NEW_FORM = SRV_FORM.replace("two", "2"),
+                vellum, originalShowOverwriteWarning, onOverwrite, response;
+            before(function (done) {
+                util.init({
+                    core: {
+                        onReady: function () {
+                            originalShowOverwriteWarning = this.showOverwriteWarning;
+                            this.showOverwriteWarning = function (send, newForm, oldForm) {
+                                onOverwrite(send, newForm, oldForm);
+                            };
+                            this.data.core.lastSavedXForm = SRV_FORM;
+                            vellum = this;
+                            done();
+                        },
+                        patchUrl: function () { return response; },
+                    },
+                    features: {full_save_on_missing_conflict_xform: false},
+                });
+            });
+            after(function () {
+                vellum.showOverwriteWarning = originalShowOverwriteWarning;
+            });
+            beforeEach(function () {
+                onOverwrite = undefined;
+                response = {status: "conflict", xform: SRV_FORM};
+                vellum.data.core.saveButton.fire("change");
+            });
+
+            it("should re-enable save button before overwrite warning", function () {
+                onOverwrite = function (send, newForm, oldForm) {
+                    assert(util.saveButtonEnabled(), "save button is disabled");
+                    assert.equal(newForm, NEW_FORM);
+                    assert.equal(oldForm, SRV_FORM);
+                    didWarn = true;
+                };
+                var didWarn = false;
+                assert(util.saveButtonEnabled(), "save button is disabled (sanity check)");
+                vellum.send(NEW_FORM, "patch");
+                assert(didWarn, "overwrite warning not triggered");
+            });
+        });
+
         describe("with duplicate ID should", function () {
             var form, dup;
             before(function () {
