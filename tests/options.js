@@ -236,6 +236,7 @@ define(["underscore"], function (_) {
         ],
         features: {
             // 'remove_popvers': false, // disabled for most tests
+            'full_save_on_missing_conflict_xform': true,
             'lookup_tables': true,
             'group_in_field_list': true,
             'rich_text': true,
