@@ -23,6 +23,9 @@ define([
                 attr: "entryId",
                 path: "entry/@id"
             }, {
+                attr: "quantity",
+                path: "entry/@quantity"
+            }, {
                 attr: "src",
                 path: "@src"
             }, {
@@ -38,6 +41,9 @@ define([
                 {
                     attr: "entryId",
                     path: "entry/@id"
+                }, {
+                    attr: "quantity",
+                    path: "entry/@quantity"
                 }, {
                     attr: "entityId",
                     path: "@entity-id"
@@ -139,9 +145,6 @@ define([
                 var binds = [{
                     nodeset: mug.hashtagPath,
                     relevant: mug.p.relevantAttr,
-                }, {
-                    nodeset: mug.hashtagPath + "/entry/@quantity",
-                    calculate: mug.p.quantity,
                 }];
                 _.each(bindData[mug.__className], function (item) {
                     var value = mug.p[item.attr];
@@ -419,19 +422,12 @@ define([
             var mug = form.getMugByPath(path);
             if (!mug) {
                 var basePath = path.replace(bindPathSuffixRegex, "");
-                if (path === basePath) {
-                    basePath = path.replace(/\/entry\/@quantity$/, "");
-                }
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (isTransaction(mug)) {
-                        if (path.endsWith("/entry/@quantity")) {
-                            mug.p.quantity = el.attr("calculate");
-                        } else {
-                            var suffix = path.match(bindPathSuffixRegex)[1],
-                                attr = bindAttributes[mug.__className][suffix];
-                            mug.p[attr] = el.attr("calculate");
-                        }
+                        var suffix = path.match(bindPathSuffixRegex)[1],
+                            attr = bindAttributes[mug.__className][suffix];
+                        mug.p[attr] = el.attr("calculate");
                         return;
                     }
                 }

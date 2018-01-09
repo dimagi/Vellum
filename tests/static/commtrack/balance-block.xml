@@ -16,8 +16,8 @@
 			<instance id="products" src="jr://fixture/commtrack:products" />
 			<bind vellum:nodeset="#form/stock_amount" nodeset="/data/stock_amount" type="xsd:int" />
 			<bind nodeset="/data/balance[@type='bal-0']" vellum:relevant="#form/stock_amount != 0" relevant="/data/stock_amount != 0" />
-			<bind nodeset="/data/balance[@type='bal-0']/entry/@quantity" vellum:calculate="#form/stock_amount" calculate="/data/stock_amount" />
 			<bind nodeset="/data/balance[@type='bal-0']/entry/@id" calculate="instance('commcaresession')/session/data/product_id" />
+			<bind nodeset="/data/balance[@type='bal-0']/entry/@quantity" vellum:calculate="#form/stock_amount" calculate="/data/stock_amount" />
 			<bind nodeset="/data/balance[@type='bal-0']/@entity-id" calculate="instance('commcaresession')/session/data/case_id" />
 			<bind nodeset="/data/balance[@type='bal-0']/@date" calculate="now()" />
 			<itext>
