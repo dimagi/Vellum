@@ -23,6 +23,9 @@ define([
                 attr: "entryId",
                 path: "entry/@id"
             }, {
+                attr: "quantity",
+                path: "entry/@quantity"
+            }, {
                 attr: "src",
                 path: "@src"
             }, {
@@ -33,11 +36,14 @@ define([
                 path: "@date"
             }
         ],
-        setvalueData = {
+        bindData = {
             Balance: [
                 {
                     attr: "entryId",
                     path: "entry/@id"
+                }, {
+                    attr: "quantity",
+                    path: "entry/@quantity"
                 }, {
                     attr: "entityId",
                     path: "@entity-id"
@@ -50,6 +56,12 @@ define([
             Dispense: transferValues,
             Receive: transferValues,
         },
+        // {<question type>: {<path suffix>: <attr>, ...}, ...}
+        bindAttributes = _.mapObject(bindData, function (items) {
+            return _.object(_.map(items, function (item) {
+                return [item.path, item.attr];
+            }));
+        }),
         basicSection = {
             slug: "main",
             displayName: gettext("Basic"),
@@ -130,13 +142,20 @@ define([
                 })];
             },
             getBindList: function (mug) {
-                return [{
+                var binds = [{
                     nodeset: mug.hashtagPath,
                     relevant: mug.p.relevantAttr,
-                }, {
-                    nodeset: mug.hashtagPath + "/entry/@quantity",
-                    calculate: mug.p.quantity,
                 }];
+                _.each(bindData[mug.__className], function (item) {
+                    var value = mug.p[item.attr];
+                    if (value) {
+                        binds.push({
+                            nodeset: mug.hashtagPath + "/" + item.path,
+                            calculate: value,
+                        });
+                    }
+                });
+                return binds;
             },
             isHashtaggable: false,
             spec: {
@@ -187,25 +206,6 @@ define([
                     deserialize: mugs.deserializeXPath,
                     lstring: gettext('Display Condition')
                 },
-            },
-            getSetValues: function (mug) {
-                var path = mug.hashtagPath,
-                    event = mug.isInRepeat() ? "jr-insert" : "xforms-ready",
-                    ret = [];
-
-                _.each(setvalueData[mug.__className], function (data) {
-                    var value = mug.p[data.attr],
-                        ref = path + "/" + data.path;
-                    if (value) {
-                        ret.push({
-                            event: event,
-                            ref: ref,
-                            value: value
-                        });
-                    }
-                });
-
-                return ret;
             },
         }),
         balanceMugOptions = util.extend(baseTransactionOptions, {
@@ -373,13 +373,13 @@ define([
                 },
             }
         }),
-        setValuePaths = _.chain(setvalueData)
-            .map(function (mugSetValues, mugClass) {
-                return _.map(mugSetValues, function(attrs) {
+        bindPaths = _.chain(bindData)
+            .map(function (items) {
+                return _.map(items, function(attrs) {
                     return RegExp.escape(attrs.path);
                 });
             }).flatten().uniq().value(),
-        setValueDataRegex = new RegExp("/(" + setValuePaths.join('|') + ")$");
+        bindPathSuffixRegex = new RegExp("/(" + bindPaths.join('|') + ")$");
 
     $.vellum.plugin("commtrack", {}, {
         getAdvancedQuestions: function () {
@@ -421,11 +421,13 @@ define([
         parseBindElement: function (form, el, path) {
             var mug = form.getMugByPath(path);
             if (!mug) {
-                var basePath = path.replace(/\/entry\/@quantity$/, "");
+                var basePath = path.replace(bindPathSuffixRegex, "");
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (isTransaction(mug)) {
-                        mug.p.quantity = el.attr("calculate");
+                        var suffix = path.match(bindPathSuffixRegex)[1],
+                            attr = bindAttributes[mug.__className][suffix];
+                        mug.p[attr] = el.attr("calculate");
                         return;
                     }
                 }
@@ -438,14 +440,13 @@ define([
         parseSetValue: function (form, el, path) {
             var mug = form.getMugByPath(path);
             if (!mug) {
-                var basePath = path.replace(setValueDataRegex, "");
+                var basePath = path.replace(bindPathSuffixRegex, "");
                 if (path !== basePath) {
                     mug = form.getMugByPath(basePath);
                     if (isTransaction(mug)) {
-                        var setValue = _.find(setvalueData[mug.__className], function(sv) {
-                            return sv.path === path.match(setValueDataRegex)[1];
-                        }).attr;
-                        mug.p[setValue] = el.attr("value");
+                        var suffix = path.match(bindPathSuffixRegex)[1],
+                            attr = bindAttributes[mug.__className][suffix];
+                        mug.p[attr] = el.attr("value");
                         return;
                     }
                 }
@@ -463,7 +464,7 @@ define([
     });
 
     function isTransaction(mug) {
-        return mug && setvalueData.hasOwnProperty(mug.__className);
+        return mug && bindData.hasOwnProperty(mug.__className);
     }
 
     function addLedgerDBInstance(mug, form) {
