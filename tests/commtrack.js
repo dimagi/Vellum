@@ -5,8 +5,10 @@ define([
     'underscore',
     'vellum/commtrack',
     'text!static/commtrack/balance-block.xml',
+    'text!static/commtrack/balance-block-setvalues.xml',
     'text!static/commtrack/invalid-transfer.xml',
-    'text!static/commtrack/transfer-block.xml'
+    'text!static/commtrack/transfer-block.xml',
+    'text!static/commtrack/transfer-block-setvalues.xml',
 ], function (
     util,
     chai,
@@ -14,8 +16,10 @@ define([
     _,
     commtrack,
     BALANCE_BLOCK_XML,
+    BALANCE_BLOCK_SETVALUES_XML,
     INVALID_TRANSFER_XML,
-    TRANSFER_BLOCK_XML
+    TRANSFER_BLOCK_XML,
+    TRANSFER_BLOCK_SETVALUES_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -93,43 +97,6 @@ define([
                                 {normalize_xmlns: true});
         });
 
-        it("should create a transfer block in a repeat with jr-insert events", function () {
-            util.loadXML();
-            util.addQuestion("Repeat", "group");
-            var trans = util.addQuestion("Transfer", "trans");
-            trans.p.sectionId = "stock";
-            trans.p.quantity = "1";
-            trans.p.entryId = "3";
-            trans.p.src = "src";
-            trans.p.dest = "dst";
-            var xml = $(util.call("createXML")),
-                qty = xml.find("bind[calculate=1]"),
-                entry = xml.find("setvalue[value=3]"),
-                src = xml.find("setvalue[value=src]"),
-                dst = xml.find("setvalue[value=dst]"),
-                date = xml.find("setvalue[value='now()']");
-            assert.equal(qty.attr("nodeset"),
-                "/data/group/transfer[@type='trans']/entry/@quantity");
-            assert.equal(entry.attr("ref"),
-                "/data/group/transfer[@type='trans']/entry/@id");
-            assert.equal(entry.attr("event"), "jr-insert");
-            assert.equal(src.attr("event"), "jr-insert");
-            assert.equal(dst.attr("event"), "jr-insert");
-            assert.equal(date.attr("event"), "jr-insert");
-        });
-
-        it("should change setvalue events from xforms-ready to jr-insert on move into repeat", function () {
-            util.loadXML(TRANSFER_BLOCK_XML);
-            var group = util.addQuestion("Repeat", "group"),
-                trans = util.getMug("transfer[@type='trans-1']");
-            trans.form.moveMug(trans, "into", group);
-            var xml = util.call("createXML"),
-                $xml = $(xml);
-            assert.equal($xml.find("setvalue[event=jr-insert]").length, 4, xml);
-            assert.equal($xml.find("setvalue[event=xforms-ready]").length, 0, xml);
-            assert.equal($xml.find("setvalue").length, 4, xml);
-        });
-
         it("transfer question should not be valid when src and dest are both empty", function () {
             util.loadXML();
             var trans = util.addQuestion("Transfer", "t1");
@@ -163,8 +130,8 @@ define([
             var xml = util.call("createXML"),
                 $xml = $(xml);
             assert.equal($xml.find("transfer").length, 2, xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@src']").length, 1, xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t2\\']/@src']").length, 1, xml);
+            assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t1\\']/@src']").length, 1, xml);
+            assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t2\\']/@src']").length, 1, xml);
         });
 
         describe("transfer question", function () {
@@ -216,10 +183,10 @@ define([
                 "unexpected transfer src attribute\n" + xml);
             assert.isUndefined($xml.find("transfer[type='t1']").attr("dest"),
                 "unexpected transfer dest attribute\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@src']").length, 1,
-                "unexpected @src setvalue:\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@dest']").length, 0,
-                "unexpected @dest setvalue:\n" + xml);
+            assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t1\\']/@src']").length, 1,
+                "unexpected @src bind:\n" + xml);
+            assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t1\\']/@dest']").length, 0,
+                "unexpected @dest bind:\n" + xml);
         });
 
         it("receive question should omit src", function () {
@@ -232,10 +199,10 @@ define([
                 "unexpected transfer src attribute\n" + xml);
             assert.strictEqual($xml.find("transfer[type='t1']").attr("dest"), "",
                 "unexpected transfer dest attribute\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@src']").length, 0,
-                "unexpected @src setvalue:\n" + xml);
-            assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'t1\\']/@dest']").length, 1,
-                "unexpected @dest setvalue:\n" + xml);
+            assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t1\\']/@src']").length, 0,
+                "unexpected @src bind:\n" + xml);
+            assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t1\\']/@dest']").length, 1,
+                "unexpected @dest bind:\n" + xml);
         });
 
         it("transfer block with src and dest should load as Transfer question", function () {
@@ -247,7 +214,7 @@ define([
         it("transfer block with dest only should load as Receive question", function () {
             util.loadXML(TRANSFER_BLOCK_XML
                             .replace(' src=""', '')
-                            .replace(/<setvalue [^>]*@src[^>]*\/>/, ''));
+                            .replace(/<bind [^>]*@src[^>]*\/>/, ''));
             var mug = util.getMug("transfer[@type='trans-1']");
             assert.equal(mug.__className, "Receive");
         });
@@ -255,7 +222,7 @@ define([
         it("transfer block with src only should load as Dispense question", function () {
             util.loadXML(TRANSFER_BLOCK_XML
                             .replace(' dest=""', '')
-                            .replace(/<setvalue [^>]*@dest[^>]*\/>/, ''));
+                            .replace(/<bind [^>]*@dest[^>]*\/>/, ''));
             var mug = util.getMug("transfer[@type='trans-1']");
             assert.equal(mug.__className, "Dispense");
         });
@@ -294,6 +261,16 @@ define([
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
                              "ledger instance should be removed\n" + xml);
             });
+        });
+
+        _.each(["Balance", "Transfer"], function (type) {
+            it("should change " + type + " setvalues to binds on load+save", function () {
+                var trans = type === "Transfer";
+                util.loadXML(trans ? TRANSFER_BLOCK_SETVALUES_XML : BALANCE_BLOCK_SETVALUES_XML);
+                util.assertXmlEqual(call("createXML"),
+                    trans ? TRANSFER_BLOCK_XML : BALANCE_BLOCK_XML,
+                    {normalize_xmlns: true});
+            });
 
             it("should remove ledger instance on delete " + type + " loaded from XML", function () {
                 var trans = type === "Transfer";
@@ -308,15 +285,18 @@ define([
                              "ledger instance should be removed\n" + xml);
             });
 
-            it("should drop setvalue nodes on delete " + type + " question", function () {
+            it("should drop bind and setvalue nodes on delete " + type + " question", function () {
                 var trans = type === "Transfer";
-                util.loadXML(trans ? TRANSFER_BLOCK_XML : BALANCE_BLOCK_XML);
+                util.loadXML(trans ? TRANSFER_BLOCK_SETVALUES_XML : BALANCE_BLOCK_SETVALUES_XML);
                 var question = util.getMug(trans ?
                                             "transfer[@type='trans-1']" :
                                             "balance[@type='bal-0']");
                 util.deleteQuestion(question.absolutePath);
                 var xml = util.call("createXML"),
                     $xml = $(xml);
+                assert.equal($xml.find("bind").filter(function () {
+                    return /^\/data\/(balance|transfer)\[/.test($(this).attr("nodeset"));
+                }).length, 0, "bind nodes should be removed\n" + xml);
                 assert.equal($xml.find("setvalue").length, 0,
                              "setvalue nodes should be removed\n" + xml);
             });
@@ -344,10 +324,10 @@ define([
                     Transfer: TRANSFER_BLOCK_XML,
                     Dispense: TRANSFER_BLOCK_XML
                                 .replace(' dest=""', '')
-                                .replace(/<setvalue [^>]*@dest[^>]*\/>/, ''),
+                                .replace(/<bind [^>]*@dest[^>]*\/>/, ''),
                     Receive: TRANSFER_BLOCK_XML
                                 .replace(' src=""', '')
-                                .replace(/<setvalue [^>]*@src[^>]*\/>/, ''),
+                                .replace(/<bind [^>]*@src[^>]*\/>/, ''),
                 };
             _.each([
                 {from: "Transfer", to: "Dispense"},
@@ -371,25 +351,8 @@ define([
                         mug.p.dest = "instance('casedb')/casedb/case[@case_id=" +
                             "instance('commcaresession')/session/data/case_id]/index/parent";
                     }
-                    var xml = util.call("createXML"),
-                        $xml = $(xml);
-                    // Verifying by looking for values in XML rather than
-                    // comparing created XML to map[test.to] because order of
-                    // setvalues changes. This order changing thing may be a
-                    // problem because setvalue nodes are evaluated in document
-                    // order.
-                    assert.strictEqual($xml.find("transfer[type='trans-1']").attr("src"),
-                        hasSrc ? "" : undefined,
-                        "unexpected transfer src attribute\n" + xml);
-                    assert.strictEqual($xml.find("transfer[type='trans-1']").attr("dest"),
-                        hasDest ? "" : undefined,
-                        "unexpected transfer dest attribute\n" + xml);
-                    assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@src']").length,
-                        hasSrc ? 1 : 0,
-                        "unexpected @src setvalue:\n" + xml);
-                    assert.equal($xml.find("setvalue[ref='/data/transfer[@type=\\'trans-1\\']/@dest']").length,
-                        hasDest ? 1 : 0,
-                        "unexpected @dest setvalue:\n" + xml);
+                    var xml = util.call("createXML");
+                    util.assertXmlEqual(xml, map[test.to], {normalize_xmlns: true});
                     util.loadXML(xml);
                     mug = util.getMug("transfer[@type='trans-1']");
                     assert.equal(mug.__className, test.to);
