@@ -5,6 +5,7 @@ define([
     'underscore',
     'tests/utils',
     'vellum/parser',
+    'text!static/parser/accent-char-in-path.xml',
     'text!static/parser/other_item.xml',
     'text!static/parser/label-without-itext.xml',
     'text!static/parser/missing-bind.xml',
@@ -21,6 +22,7 @@ define([
     _,
     util,
     parser,
+    ACCENT_CHAR_IN_PATH_XML,
     OTHER_ITEM_XML,
     LABEL_WITHOUT_ITEXT_XML,
     MISSING_BIND_XML,
@@ -128,6 +130,12 @@ define([
 
         it("should load question without bind element", function () {
             util.loadXML(MISSING_BIND_XML);
+        });
+
+        it("should load question with accent char in path", function () {
+            util.loadXML(ACCENT_CHAR_IN_PATH_XML);
+            var mug = call("getMugByPath", "#form/tèxt");
+            assert.match(util.getMessages(mug), /tèxt is not a legal Question ID/);
         });
 
         it("should set undefined for data value", function () {
