@@ -1029,18 +1029,7 @@ define([
             },
             dataParent: {
                 lstring: gettext('Data Parent'),
-                visibility: function(mug) {
-                    function recFunc(mug) {
-                        if (!mug) {
-                            return true;
-                        } else if (!mug.options.possibleDataParent) {
-                            return false;
-                        }
-                        return recFunc(mug.parentMug);
-                    }
-
-                    return recFunc(mug.parentMug);
-                },
+                visibility: 'visible',
                 presence: 'optional',
                 setter: function (mug, attr, value) {
                     var oldPath = mug.hashtagPath;
@@ -1049,25 +1038,32 @@ define([
                 },
                 widget: widgets.droppableText,
                 validationFunc: function(mug) {
+                    function limitingParent(mug) {
+                        if (!mug) {
+                            return null;
+                        } else if (mug.options.possibleDataParent === 'limited') {
+                            return mug;
+                        }
+                        return limitingParent(mug.parentMug);
+                    }
                     var dataParent = mug.p.dataParent,
                         form = mug.form,
-                        dataParentMug;
+                        parent;
 
                     if (dataParent) {
-                        dataParentMug = form.getMugByPath(dataParent);
-
-                        if(!dataParentMug &&
-                           form.getBasePath().slice(0, -1) !== dataParent) {
-                            return gettext("Must be valid path");
-                        } else if (dataParentMug && (dataParentMug === mug ||
-                                !dataParentMug.options.possibleDataParent)) {
+                        parent = form.getMugByPath(dataParent);
+                        if (!parent) {
+                            if (form.getBasePath().slice(0, -1) !== dataParent) {
+                                return gettext("Must be valid path");
+                            }
+                        } else if (parent === mug || !parent.options.possibleDataParent) {
                             return util.format(
                                 gettext("{path} is not a valid data parent"),
-                                {path: dataParentMug.hashtagPath}
+                                {path: parent.hashtagPath}
                             );
-                        } else if (!mug.spec.dataParent.visibility(mug)) {
-                            return gettext("Children of repeat groups cannot " +
-                                "have a different data parent");
+                        } else if (limitingParent(mug) !== limitingParent(parent)) {
+                            return gettext("Data parent of question in repeat " +
+                                "group must be (in) the same repeat group");
                         }
                     }
 
@@ -1587,7 +1583,7 @@ define([
     var Repeat = util.extend(Group, {
         typeName: gettext('Repeat Group'),
         icon: 'fa fa-retweet',
-        possibleDataParent: false,
+        possibleDataParent: 'limited',
         controlNodeChildren: function ($node) {
             return $node.children('repeat').children();
         },
