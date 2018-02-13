@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/65D6BDD4-99E2-40CB-A8D0-71BE3CED64E7" uiVersion="1" version="1" name="Untitled Form">
+					<tèxt />
+				</data>
+			</instance>
+			<bind nodeset="#form/tèxt" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="tèxt-label">
+						<value>text</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="tèxt-label">
+						<value>text</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="#form/tèxt">
+			<label ref="jr:itext('tèxt-label')" />
+		</input>
+	</h:body>
+</h:html>

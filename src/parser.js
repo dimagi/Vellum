@@ -633,11 +633,15 @@ define([
      * @return absolute nodeset path.
      */
     function processPath (path, rootNodeName, form) {
-        var newPath;
-        var parsed = form.xpath.parse(path);
+        var newPath, parsed;
+        try {
+            parsed = form.xpath.parse(path);
+        } catch (ex) {
+            return path;
+        }
         if (!(parsed instanceof form.xpath.models.XPathPathExpr ||
               parsed instanceof form.xpath.models.HashtagExpr)) {
-            return null;
+            return path;
         }
 
         if (parsed.initial_context === form.xpath.models.XPathInitialContextEnum.RELATIVE) {
