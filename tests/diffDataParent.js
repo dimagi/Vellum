@@ -29,7 +29,7 @@ define([
             });
         });
 
-        it("should not allow repeat group children to have other data parents", function() {
+        it("should not allow repeat group children to have data parent outside of the repeat", function() {
             util.loadXML("");
             var repeat = util.addQuestion("Repeat", 'repeat1'),
                 text1 = util.addQuestion.bind({prevId: repeat.p.nodeID})("Text", 'text1'),
@@ -38,6 +38,29 @@ define([
             text2.p.dataParent = '#form';
             assert(util.isTreeNodeValid(text1), "text1 should be valid");
             assert(!util.isTreeNodeValid(text2), "text2 should not be valid");
+        });
+
+        it("should allow repeat group children to have data parent (in) the same repeat", function() {
+            util.loadXML("");
+            var repeat = util.addQuestion("Repeat", 'repeat'),
+                group = util.addQuestion.bind({prevId: 'repeat'})("Group", 'group'),
+                text = util.addQuestion.bind({prevId: 'repeat/group'})("Text", 'text');
+
+            text.p.dataParent = repeat.hashtagPath;
+            assert.equal(group, text.parentMug, "group should be control parent of text");
+            assert(util.isTreeNodeValid(text), "text should be valid");
+        });
+
+        it("should not allow nested repeat group children to have data parent in an outer repeat", function() {
+            util.loadXML("");
+            var repeat1 = util.addQuestion("Repeat", 'repeat1'),
+                repeat2 = util.addQuestion.bind({prevId: 'repeat1'})("Repeat", 'repeat2'),
+                text = util.addQuestion.bind({prevId: 'repeat1/repeat2'})("Text", 'text');
+
+            text.p.dataParent = repeat1.hashtagPath;
+            assert.equal(repeat2, text.parentMug, "repeat2 should be control parent of text");
+            assert.match(util.getMessages(text),
+                /Data parent of question in repeat group must be .... the same repeat group/);
         });
 
         it("should not allow a data parent to be an input", function() {
@@ -87,6 +110,33 @@ define([
             form.moveMug(text1, 'into', repeat1);
             assert(util.isTreeNodeValid(text1), text1.getErrors().join("\n"));
             assert.isUndefined(text1.p.dataParent);
+        });
+
+        it("should not clear the data parent when moving within a repeat group", function() {
+            var form = util.loadXML("");
+            var repeat1 = util.addQuestion("Repeat", 'repeat1'),
+                group = util.addQuestion.bind({prevId: 'repeat1'})("Group", 'group1'),
+                text1 = util.addQuestion.bind({prevId: 'repeat1'})("Text", 'text1');
+            text1.p.dataParent = '#form/repeat1';
+            assert.equal(text1.parentMug, repeat1, "repeat1 should be control parent of text");
+            form.moveMug(text1, 'into', group);
+            assert(util.isTreeNodeValid(text1), text1.getErrors().join("\n"));
+            assert.equal(text1.p.dataParent, repeat1.hashtagPath);
+            assert.equal(text1.parentMug, group, "group should be control parent of text");
+        });
+
+        it("should clear the data parent when moving into a nested repeat group", function() {
+            var form = util.loadXML("");
+            var repeat1 = util.addQuestion("Repeat", 'repeat1');
+            util.addQuestion.bind({prevId: 'repeat1'})("Repeat", 'repeat2');
+            var group = util.addQuestion.bind({prevId: 'repeat1/repeat2'})("Group", 'group1'),
+                text1 = util.addQuestion.bind({prevId: 'repeat1'})("Text", 'text1');
+            text1.p.dataParent = '#form/repeat1';
+            assert.equal(text1.parentMug, repeat1, "repeat1 should be control parent of text");
+            form.moveMug(text1, 'into', group);
+            assert(util.isTreeNodeValid(text1), text1.getErrors().join("\n"));
+            assert.isUndefined(text1.p.dataParent);
+            assert.equal(text1.parentMug, group, "group should be control parent of text");
         });
 
         it("should have proper data parent after reloading the form", function() {
