@@ -1,9 +1,12 @@
 <div class="alert alert-block <%=messageType.cssClass%>">
     <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <h4><% if (messageType.icon) { %><i class="<%=messageType.icon%>"></i> <% } %><%=messageType.title%></h4>
-    <ul>
-        <% _.each(messages, function (message) { %>
-        <li><%-message%></li>
-        <% }); %>
-    </ul>
+    <% if (messages.length) { %>
+        <ul>
+            <% _.each(messages, function (message) { %>
+            <li><i class="<%= messageType.icon %>"></i> <%- message %></li>
+            <% }); %>
+        </ul>
+    <% } else { %>
+        <i class="<%= messageType.icon %>"></i> <%- message %>
+    <% } %>
 </div>
