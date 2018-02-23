@@ -487,7 +487,9 @@ define([
         describe("save conflict resolution logic", function() {
             var SRV_FORM = " line one\n line two\n line three\n line four\n line five\n",
                 NEW_FORM = SRV_FORM.replace("two", "2"),
-                vellum, originalShowOverwriteWarning, onOverwrite, response;
+                conflictResponse = {status: "conflict", xform: SRV_FORM},
+                savedAs = null,
+                vellum, originalShowOverwriteWarning, onOverwrite;
             before(function (done) {
                 util.init({
                     core: {
@@ -496,11 +498,20 @@ define([
                             this.showOverwriteWarning = function (send, newForm, oldForm) {
                                 onOverwrite(send, newForm, oldForm);
                             };
-                            this.data.core.lastSavedXForm = SRV_FORM;
                             vellum = this;
                             done();
                         },
-                        patchUrl: function () { return response; },
+                        patchUrl: function () {
+                            savedAs = "patch";
+                            return conflictResponse;
+                        },
+                        saveUrl: function (data) {
+                            savedAs = "full";
+                            if (data.sha1) {
+                                return conflictResponse;
+                            }
+                            return {xform: data.xform};
+                        },
                     },
                     features: {full_save_on_missing_conflict_xform: false},
                 });
@@ -510,8 +521,8 @@ define([
             });
             beforeEach(function () {
                 onOverwrite = undefined;
-                response = {status: "conflict", xform: SRV_FORM};
                 vellum.data.core.saveButton.fire("change");
+                vellum.data.core.lastSavedXForm = SRV_FORM;
             });
 
             it("should re-enable save button before overwrite warning", function () {
@@ -525,6 +536,38 @@ define([
                 assert(util.saveButtonEnabled(), "save button is disabled (sanity check)");
                 vellum.send(NEW_FORM, "patch");
                 assert(didWarn, "overwrite warning not triggered");
+                assert.equal(savedAs, "patch");
+                assert.equal(vellum.data.core.lastSavedXForm, SRV_FORM);
+            });
+
+            it("should send sha1 checksum on patch switched to full form post", function () {
+                onOverwrite = function (send, newForm, oldForm) {
+                    assert(util.saveButtonEnabled(), "save button is disabled");
+                    assert.equal(newForm, newFormSrc);
+                    assert.equal(oldForm, SRV_FORM);
+                    didWarn = true;
+                };
+                var didWarn = false,
+                    // diff too long -> will do full save instead of patch
+                    newFormSrc = "abc";
+                assert(util.saveButtonEnabled(), "save button is disabled (sanity check)");
+                vellum.send(newFormSrc, null);
+                assert(didWarn, "overwrite warning not triggered");
+                assert.equal(savedAs, "full");
+                assert.equal(vellum.data.core.lastSavedXForm, SRV_FORM);
+            });
+
+            it("should not send sha1 checksum with full form post", function () {
+                onOverwrite = function (send, newForm, oldForm) {
+                    didWarn = true;
+                };
+                var didWarn = false;
+                assert(util.saveButtonEnabled(), "save button is disabled (sanity check)");
+                vellum.send(NEW_FORM, "full");
+                assert(!didWarn, "should not prompt to overwrite on full save");
+                assert(!util.saveButtonEnabled(), "save button should be disabled");
+                assert.equal(savedAs, "full");
+                assert.equal(vellum.data.core.lastSavedXForm, NEW_FORM);
             });
         });
 

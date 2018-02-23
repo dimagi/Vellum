@@ -235,7 +235,7 @@ define([
         vellum_options.core.saveUrl = function (data) {
             savedForm = data.xform;
             saveCount++;
-            originalSaveUrl(data);
+            return originalSaveUrl(data);
         };
         var vellum = $("#vellum"),
             old = vellum.vellum("get");
