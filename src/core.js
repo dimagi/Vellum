@@ -2144,6 +2144,7 @@ define([
         var CryptoJS = require('CryptoJS'),
             _this = this,
             opts = this.opts().core,
+            checkForConflict = false,
             patch, data;
         saveType = saveType || opts.saveType;
 
@@ -2152,6 +2153,7 @@ define([
         showPageSpinner();
 
         if (saveType === 'patch') {
+            checkForConflict = true;
             var diff_match_patch = require('diff-match-patch'),
                 dmp = new diff_match_patch();
             patch = dmp.patch_toText(
@@ -2164,16 +2166,11 @@ define([
             }
         }
 
-        if (saveType === 'patch') {
-            data = {
-                patch: patch,
-                sha1: CryptoJS.SHA1(this.data.core.lastSavedXForm).toString()
-            };
-        } else {
-            data = {xform: formText};
-        }
-
+        data = saveType === 'patch' ? {patch: patch} : {xform: formText};
         data.case_references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
+        if (checkForConflict) {
+            data.sha1 = CryptoJS.SHA1(this.data.core.lastSavedXForm).toString();
+        }
 
         this.data.core.saveButton.ajax({
             type: "POST",
@@ -2184,7 +2181,7 @@ define([
                 hidePageSpinner();
             },
             success: function (data) {
-                if (saveType === 'patch') {
+                if (checkForConflict) {
                     if (data.status === 'conflict') {
                         // reset save button to unsaved state
                         _this.data.core.saveButton.fire("change");
