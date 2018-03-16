@@ -21,7 +21,14 @@ define([
     var that = {isMac: /Mac/.test(navigator.platform)},
         isMac = that.isMac,
         KEY_CODES = {
-            // key codes used in vellum; add more as needed
+            // Firefox/Mac (maybe others?)
+            ";": ";",
+            "≠": "=",
+            "–": "-",
+            // add these for good measure, not sure if needed
+            "=": "=",
+            "-": "-",
+            // Chrome/Mac (maybe others?)
             "186": ';',
             "187": '=',
             "189": '-',
@@ -34,6 +41,8 @@ define([
             code = e.which;
         if (KEY_CODES.hasOwnProperty(code)) {
             key = KEY_CODES[code];
+        } else if (KEY_CODES.hasOwnProperty(key)) {
+            key = KEY_CODES[key];
         } else if (key.length === 1 || key === "Unidentified") {
             // Work around Alt+<key> on Mac produces strange e.key values.
             // On MS Edge some keys are "Unidentified"
