@@ -849,7 +849,7 @@ define([
         $(".fd-form-saving").remove();
     };
 
-    fn.handleDropFinish = function(target, path, mug) {
+    fn.handleDropFinish = function(target, path, mug, event) {
         var _this = this,
             ops = target.closest(".xpath-expression-row").find(".op-select");
 
@@ -1029,7 +1029,7 @@ define([
                 if (data.data.origin) {
                     var node = data.data.origin.get_node(data.data.nodes[0]);
                     if (node.data && node.data.handleDrop) {
-                        node.data.handleDrop(target.closest('.jstree-drop'));
+                        node.data.handleDrop(target.closest('.jstree-drop'), data.event);
                     }
                 }
             }
@@ -1625,9 +1625,9 @@ define([
                 type: mug.__className,
                 data: {
                     mug: mug,
-                    handleDrop: function (target) {
+                    handleDrop: function (target, event) {
                         var path = _this.mugToXPathReference(mug);
-                        _this.handleDropFinish(target, path, mug);
+                        _this.handleDropFinish(target, path, mug, event);
                     }
                 },
                 li_attr: {

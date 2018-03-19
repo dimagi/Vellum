@@ -64,7 +64,7 @@ define([
             this.data.javaRosa.ItextForm = itext.form;
             this.data.javaRosa.ICONS = ICONS;
         },
-        handleDropFinish: function (target, path, mug) {
+        handleDropFinish: function (target, path, mug, event) {
             var inItext = target &&
                 target.attr('name') &&
                 target.attr('name').lastIndexOf('itext-', 0) === 0,
@@ -73,8 +73,7 @@ define([
             if (inItext) {
                 var mugType = mug && mug.options.typeName;
                 if (mugType === 'Date') {
-                    var e = window.event;
-                    dateformats.showMenu(e.clientX, e.clientY, function (format) {
+                    dateformats.showMenu(event.clientX, event.clientY, function (format) {
                         jrUtil.insertOutputRef(_this, target, path, mug, format);
                     });
                 } else {

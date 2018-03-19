@@ -147,7 +147,7 @@ define([
                 }
             };
         }
-        function handleDrop(node, info, target) {
+        function handleDrop(node, info, target, event) {
             var widget = widgets.util.getWidget(target, vellum),
                 path = widget.mug.form.richText && node.hashtag ? node.hashtag : node.xpath,
                 id;
@@ -160,7 +160,7 @@ define([
                 }
                 info = info._parent;
             }
-            vellum.handleDropFinish(target, path);
+            vellum.handleDropFinish(target, path, undefined, event);
         }
         function flattenNode(node) {
             // data sources should be in a flat list instead of hierarchy
