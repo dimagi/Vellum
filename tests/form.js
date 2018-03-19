@@ -170,8 +170,8 @@ define([
         it("should warn about top-level question named 'case'", function () {
             util.loadXML("");
             var mug = util.addQuestion("Text", "case");
-            assert(mug.messages.get("nodeID", "mug-nodeID-case-warning"),
-                "mug-nodeID-case-warning was expected but not present");
+            assert(mug.messages.get("nodeID", "mug-nodeID-reserved-name-warning"),
+                "mug-nodeID-reserved-name-warning was expected but not present");
             mug.p.nodeID = "the-case";
             assert.equal(util.getMessages(mug), "");
         });
@@ -180,8 +180,18 @@ define([
             util.loadXML("");
             util.addQuestion("Group", "group");
             var mug = util.addQuestion("Text", "Case");
-            assert(mug.messages.get("nodeID", "mug-nodeID-case-warning"),
-                "mug-nodeID-case-warning was expected but not present");
+            assert(mug.messages.get("nodeID", "mug-nodeID-reserved-name-warning"),
+                "mug-nodeID-reserved-name-warning was expected but not present");
+            mug.p.nodeID = "the-case";
+            assert.equal(util.getMessages(mug), "");
+        });
+
+        it("should warn about question named 'registration'", function () {
+            util.loadXML("");
+            util.addQuestion("Group", "group");
+            var mug = util.addQuestion("Text", "registration");
+            assert(mug.messages.get("nodeID", "mug-nodeID-reserved-name-warning"),
+                "mug-nodeID-reserved-name-warning was expected but not present");
             mug.p.nodeID = "the-case";
             assert.equal(util.getMessages(mug), "");
         });
