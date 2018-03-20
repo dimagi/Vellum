@@ -790,6 +790,7 @@ define([
         mug.p.conflictedNodeId = null;
     }
 
+    var RESERVED_NAMES = {"case": true, "registration": true};
     var baseSpecs = {
         databind: {
             // DATA ELEMENT
@@ -811,16 +812,20 @@ define([
                 },
                 widget: widgets.identifier,
                 validationFunc: function (mug) {
-                    var caseWarning = {
-                            key: "mug-nodeID-case-warning",
+                    var lcid = mug.p.nodeID.toLowerCase(),
+                        nameWarning = {
+                            key: "mug-nodeID-reserved-name-warning",
                             level: mug.WARNING,
                         };
-                    if (mug.p.nodeID.toLowerCase() === "case") {
-                        caseWarning.message = gettext("The ID 'case' may " +
-                            "cause problems with case management. It is " +
-                            "recommended to pick a different Question ID.");
+                    if (RESERVED_NAMES.hasOwnProperty(lcid)) {
+                        nameWarning.message = util.format(
+                            gettext("The ID '{nodeID}' may cause problems " +
+                            "with form parsing. It is recommended to pick " +
+                            "a different Question ID."),
+                            {nodeID: mug.p.nodeID}
+                        );
                     }
-                    mug.addMessage("nodeID", caseWarning);
+                    mug.addMessage("nodeID", nameWarning);
                     if (!util.isValidElementName(mug.p.nodeID)) {
                         return util.format(gettext(
                             "{nodeID} is not a legal Question ID. " +
