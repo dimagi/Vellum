@@ -790,14 +790,7 @@ define([
         mug.p.conflictedNodeId = null;
     }
 
-    var RESERVED_NAMES = {
-        "case": gettext("The ID 'case' may cause problems with case " +
-            "management. It is recommended to pick a different Question ID."),
-        "registration": gettext("The ID 'registration' may cause problems " +
-            "with form parsing. It is recommended ot pick a different " +
-            "Question ID."),
-    };
-
+    var RESERVED_NAMES = {"case": true, "registration": true};
     var baseSpecs = {
         databind: {
             // DATA ELEMENT
@@ -825,7 +818,12 @@ define([
                             level: mug.WARNING,
                         };
                     if (RESERVED_NAMES.hasOwnProperty(lcid)) {
-                        nameWarning.message = RESERVED_NAMES[lcid];
+                        nameWarning.message = util.format(
+                            gettext("The ID '{nodeID}' may cause problems " +
+                            "with form parsing. It is recommended to pick " +
+                            "a different Question ID."),
+                            {nodeID: mug.p.nodeID}
+                        );
                     }
                     mug.addMessage("nodeID", nameWarning);
                     if (!util.isValidElementName(mug.p.nodeID)) {
