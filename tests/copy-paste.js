@@ -931,14 +931,14 @@ define([
             util.loadXML("");
             paste([
                 ["id", "type", "date", "entityId", "entryId", "quantity", "sectionId"],
-                ["/bal", "Balance", "now()", "/case", "/product", "/qty", "/balance-id"],
+                ["/bal", "Balance", "now()", "case", "product", "qty", "/balance-id"],
             ]);
             util.loadXML(call("createXML"));
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "date", "entityId", "entryId", "quantity",
                     "rawDataAttributes", "sectionId"],
-                ["/bal", "Balance", "now()", "/case", "/product", "/qty",
+                ["/bal", "Balance", "now()", "case", "product", "qty",
                     '{"entity-id":"","date":""}', "/balance-id"],
             ]);
             var id = "balance[@type='bal']";
@@ -949,15 +949,15 @@ define([
             util.loadXML("");
             paste([
                 ["id", "type", "date", "dest", "entryId", "quantity", "sectionId", "src"],
-                ["/tx", "Transfer", "now()", "/dst", "/product", "/qty", "/balance", "/src"],
+                ["/tx", "Transfer", "now()", "dst", "product", "qty", "/balance", "src"],
             ]);
             util.loadXML(call("createXML"));
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "date", "dest", "entryId", "quantity",
                     "rawDataAttributes", "sectionId", "src"],
-                ["/tx", "Transfer", "now()", "/dst", "/product", "/qty",
-                    '{"date":"","src":"","dest":""}', "/balance", "/src"],
+                ["/tx", "Transfer", "now()", "dst", "product", "qty",
+                    '{"date":"","src":"","dest":""}', "/balance", "src"],
             ]);
             var id = "transfer[@type='tx']";
             assert(util.isTreeNodeValid(id), util.getMessages(id));
