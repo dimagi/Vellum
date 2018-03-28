@@ -96,11 +96,6 @@ define([
                 util.addQuestion("Repeat", "repeat");
             });
 
-            it("the same set of xpath references as logic module", function () {
-                assert.deepEqual(logic.XPATH_REFERENCES, properties);
-                assert.deepEqual(logic.NO_SELF_REFERENCES, noSelfProps);
-            });
-
             function testReference(attr, value, bad) {
                 var mug = util.getMug(mugMap[attr] || "text");
                 assert(util.isTreeNodeValid(mug),

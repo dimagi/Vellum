@@ -242,6 +242,19 @@ define([
             });
         });
 
+        it("transfer quantity should update on reference rename", function () {
+            util.loadXML(TRANSFER_BLOCK_XML);
+            var rec = util.getMug("amount_received"),
+                trans = util.getMug("transfer[@type='trans-1']");
+
+            // HACK change quantity to hashtag path
+            // TODO remove this and fix the root issue in LogicManager
+            trans.p.quantity = "#form/amount_received";
+
+            rec.p.nodeID = "amount_received_x";
+            assert.equal(trans.p.quantity, rec.hashtagPath);
+        });
+
         _.each(["Balance", "Transfer", "Dispense", "Receive"], function (type) {
             it("should add ledger instance on add " + type + " question", function () {
                 util.loadXML("");
@@ -338,8 +351,8 @@ define([
                 {from: "Receive", to: "Dispense"},
             ], function (test) {
                 it(test.from + " changed to " + test.to, function () {
-                    util.loadXML(map[test.from]);
-                    var mug = util.getMug("transfer[@type='trans-1']"),
+                    var form = util.loadXML(map[test.from]),
+                        mug = util.getMug("transfer[@type='trans-1']"),
                         hasSrc = test.to === "Transfer" || test.to === "Dispense",
                         hasDest = test.to === "Transfer" || test.to === "Receive";
                     assert.equal(mug.__className, test.from);
@@ -350,6 +363,13 @@ define([
                     if (hasDest) {
                         mug.p.dest = "instance('casedb')/casedb/case[@case_id=" +
                             "instance('commcaresession')/session/data/case_id]/index/parent";
+                        var meta = form.instanceMetadata,
+                            i = meta.length - 1;
+                        if (meta[i].attributes.id === "casedb") {
+                            // swap last two instances to preserve order for XML comparison
+                            // https://stackoverflow.com/a/4011851/10840
+                            meta[i] = meta.splice(i - 1, 1, meta[i])[0];
+                        }
                     }
                     var xml = util.call("createXML");
                     util.assertXmlEqual(xml, map[test.to], {normalize_xmlns: true});

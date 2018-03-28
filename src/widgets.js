@@ -388,6 +388,7 @@ define([
 
         return widget;
     };
+    droppableText.trackLogicReferences = true;
 
     var checkbox = function (mug, options) {
         var widget = normal(mug, options),
@@ -465,6 +466,7 @@ define([
 
         return widget;
     };
+    xPath.trackLogicReferences = true;
 
     var baseKeyValue = function (mug, options) {
         // todo: make this inherit from normal
