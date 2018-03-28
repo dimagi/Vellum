@@ -246,13 +246,18 @@ define([
             util.loadXML(TRANSFER_BLOCK_XML);
             var rec = util.getMug("amount_received"),
                 trans = util.getMug("transfer[@type='trans-1']");
-
-            // HACK change quantity to hashtag path
-            // TODO remove this and fix the root issue in LogicManager
-            trans.p.quantity = "#form/amount_received";
-
             rec.p.nodeID = "amount_received_x";
             assert.equal(trans.p.quantity, rec.hashtagPath);
+        });
+
+        it("transfer quantity should update multiple refs on reference rename", function () {
+            util.loadXML(TRANSFER_BLOCK_XML);
+            var rec = util.getMug("amount_received"),
+                trans = util.getMug("transfer[@type='trans-1']");
+            assert.equal(trans.p.quantity, rec.absolutePath);
+            trans.p.quantity = [rec.absolutePath, rec.absolutePath].join(" + ");
+            rec.p.nodeID = "amount_rx";
+            assert.equal(trans.p.quantity, [rec.hashtagPath, rec.hashtagPath].join(" + "));
         });
 
         _.each(["Balance", "Transfer", "Dispense", "Receive"], function (type) {

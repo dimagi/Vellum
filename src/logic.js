@@ -131,12 +131,13 @@ define([
                 path, i;
 
             var replacePathInfo = function (source, destination) {
-                // copies information from source to destination in place,
-                // resulting in mutating destination while preserving the 
-                // original object reference.
-                destination.initial_context = source.initial_context;
-                destination.steps = source.steps;
-                destination.filter = source.filter;
+                // Copy methods from source to destination, resulting in
+                // mutating destination while preserving the original
+                // object reference. It is not enough to simply copy
+                // state variables since source and destination types
+                // may differ (HashtagExpr, XPathPathExpr).
+                destination.toHashtag = source.toHashtag.bind(source);
+                destination.toXPath = source.toXPath.bind(source);
             };
             
             for (i = 0; i < paths.length; i++) {
