@@ -670,8 +670,8 @@ define([
                 }
                 return 'pass';
             }
-            // hide non-itext constraint message unless it's present
-            databind.constraintMsgAttr.visibility = "visible_if_present";
+            // hide non-itext constraint message; overwritten by javaRosa
+            databind.constraintMsgAttr.visibility = "hidden";
             databind.constraintMsgItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mug) {
