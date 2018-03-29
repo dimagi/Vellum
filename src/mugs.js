@@ -77,10 +77,12 @@ define([
     Mug.prototype = {
         // set or change question type
         setOptionsAndProperties: function (options, properties) {
-            var currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
+            var _this = this,
+                currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
 
             // These could both be calculated once for each type instead of
             // each instance.
+            this.logicReferenceAttrs = [];
             this.options = util.extend(defaultOptions, options);
             this.__className = this.options.__className;
             this.spec = copyAndProcessSpec(this._baseSpec, this.options.spec, this.options);
@@ -90,6 +92,10 @@ define([
             _.each(this.spec, function (spec, name) {
                 if (spec.deleteOnCopy) {
                     delete currentAttrs[name];
+                }
+                var allowed = _this.getPresence(name) !== 'notallowed';
+                if (allowed && spec.widget && spec.widget.trackLogicReferences) {
+                    _this.logicReferenceAttrs.push(name);
                 }
             });
 
@@ -940,6 +946,7 @@ define([
                 },
                 widget: widgets.xPath,
                 xpathType: "bool",
+                mayReferenceSelf: true,
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 lstring: gettext('Validation Condition')

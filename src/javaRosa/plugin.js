@@ -657,6 +657,11 @@ define([
                 return options;
             }
 
+            function trackLogicRefs(widget) {
+                widget.trackLogicReferences = true;
+                return widget;
+            }
+
             function validateConstraintMsgAttr(mug) {
                 var itext = mug.p.constraintMsgItext;
                 if (!mug.p.constraintAttr && itext && !itext.isEmpty()) {
@@ -673,7 +678,7 @@ define([
                     return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: gettext('Validation Message'),
-                widget: function (mug, options) {
+                widget: trackLogicRefs(function (mug, options) {
                     return itextBlock.label(mug, $.extend(options, {
                         itextType: "constraintMsg",
                         messagesPath: "constraintMsgItext",
@@ -682,7 +687,7 @@ define([
                         },
                         displayName: gettext("Validation Message")
                     }));
-                },
+                }),
                 validationFunc: function (mug) {
                     var itext = mug.p.constraintMsgItext;
                     if (!mug.p.constraintAttr && itext && itext.id && !itext.autoId) {
@@ -735,7 +740,7 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: gettext("Display Text"),
-                widget: function (mug, options) {
+                widget: trackLogicRefs(function (mug, options) {
                     return itextBlock.label(mug, $.extend(options, {
                         itextType: "label",
                         messagesPath: "labelItext",
@@ -744,7 +749,7 @@ define([
                         },
                         displayName: gettext("Display Text")
                     }));
-                },
+                }),
                 validationFunc: itextValidator("labelItext", gettext("Display Text"))
             });
             // virtual property used to define a widget
@@ -762,7 +767,7 @@ define([
                     return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: gettext("Hint Message"),
-                widget: function (mug, options) {
+                widget: trackLogicRefs(function (mug, options) {
                     return itextBlock.label(mug, $.extend(options, {
                         itextType: "hint",
                         messagesPath: "hintItext",
@@ -771,7 +776,7 @@ define([
                         },
                         displayName: gettext("Hint Message")
                     }));
-                },
+                }),
                 validationFunc: itextValidator("hintItext", gettext("Hint Message"))
             });
             // virtual property used to get a widget
@@ -788,7 +793,7 @@ define([
                     return mug.options.isSpecialGroup ? 'notallowed' : 'optional';
                 },
                 lstring: gettext("Help Message"),
-                widget: function (mug, options) {
+                widget: trackLogicRefs(function (mug, options) {
                     var block = itextBlock.label(mug, $.extend(options, {
                             itextType: "help",
                             messagesPath: "helpItext",
@@ -799,7 +804,7 @@ define([
                         }));
 
                     return block;
-                },
+                }),
                 validationFunc: itextValidator("helpItext", gettext("Help Message"))
             });
             // virtual property used to get a widget

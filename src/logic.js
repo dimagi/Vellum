@@ -7,23 +7,7 @@ define([
     _,
     util
 ) {
-    var XPATH_REFERENCES = [
-            "relevantAttr",
-            "calculateAttr",
-            "constraintAttr",
-            "dataParent",
-            "repeat_count",
-            "filter",
-            "defaultValue",
-        ],
-        LABEL_REFERENCES = [
-            "helpItext",
-            "constraintMsgItext",
-            "labelItext",
-            "hintItext",
-        ],
-        NO_SELF_REFERENCES = _.without(XPATH_REFERENCES, 'constraintAttr'),
-        EXTERNAL_REF = "#";
+    var EXTERNAL_REF = "#";
 
     function LogicExpression (exprText, xpathParser) {
         this._text = exprText || "";
@@ -143,27 +127,21 @@ define([
             return this.hashtags;
         },
         updatePath: function (from, to) {
-            var paths = this.getPaths(),
-                hashtags = this.getHashtags(),
+            var paths = this.getPaths().concat(this.getHashtags()),
                 path, i;
 
             var replacePathInfo = function (source, destination) {
-                // copies information from source to destination in place,
-                // resulting in mutating destination while preserving the 
-                // original object reference.
-                destination.initial_context = source.initial_context;
-                destination.steps = source.steps;
-                destination.filter = source.filter;
+                // Copy methods from source to destination, resulting in
+                // mutating destination while preserving the original
+                // object reference. It is not enough to simply copy
+                // state variables since source and destination types
+                // may differ (HashtagExpr, XPathPathExpr).
+                destination.toHashtag = source.toHashtag.bind(source);
+                destination.toXPath = source.toXPath.bind(source);
             };
             
             for (i = 0; i < paths.length; i++) {
                 path = paths[i];
-                if (path.toHashtag() === from) {
-                    replacePathInfo(this._xpathParser.parse(to), path);
-                }
-            }
-            for (i = 0; i < hashtags.length; i++) {
-                path = hashtags[i];
                 if (path.toHashtag() === from) {
                     replacePathInfo(this._xpathParser.parse(to), path);
                 }
@@ -242,12 +220,13 @@ define([
                 unknowns = [],
                 messages = [],
                 warning = "",
-                propertyName = mug.spec[property] ? mug.spec[property].lstring : property,
+                spec = mug.spec[property],
+                propertyName = spec ? spec.lstring : property,
                 reverse = this.reverse,
                 refs;
 
             expr.analyze();
-            if (expr.referencesSelf && _.contains(NO_SELF_REFERENCES, property)) {
+            if (expr.referencesSelf && !(spec && spec.mayReferenceSelf)) {
                 warning = util.format(gettext("The {property} for a question " +
                     "is not allowed to reference the question itself. " +
                     "Please remove the . from the {property} " +
@@ -363,8 +342,7 @@ define([
             if (property) {
                 update(property);
             } else {
-                _.each(XPATH_REFERENCES, update);
-                _.each(LABEL_REFERENCES, update);
+                _.each(mug.logicReferenceAttrs, update);
             }
             mug.addMessages(messages);
         },
@@ -400,6 +378,9 @@ define([
                 form = this.form;
             function updatePath(mug, property, paths) {
                 function updateExpression(value) {
+                    if (!value) {
+                        return value;
+                    }
                     var expr = new LogicExpression(value, form.xpath),
                         orig = expr.getText();
                     expr.updatePath(paths[0], paths[1]);
@@ -614,7 +595,5 @@ define([
     return {
         LogicManager: LogicManager,
         LogicExpression: LogicExpression,
-        XPATH_REFERENCES: XPATH_REFERENCES,
-        NO_SELF_REFERENCES: NO_SELF_REFERENCES,
     };
 });
