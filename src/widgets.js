@@ -380,9 +380,10 @@ define([
         var widget = text(mug, options),
             prepInput = function($input) {
                 $input.css("margin-bottom", "5px");
+                var choices = mug.form && mug.form.fuse ? mug.form.fuse.search("#case") : [];
                 atwho.autocomplete($input, mug, {
                     insertTpl: '${displayLabel}',
-                    choices: _.map(mug.form.fuse.search("#case"), function(choice) {
+                    choices: _.map(choices, function(choice) {
                         choice.displayLabel = choice.name.replace("#case/", "");
                         return choice;
                     }),
