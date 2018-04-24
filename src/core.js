@@ -2239,6 +2239,19 @@ define([
                 }
             },
             {
+                slug: "cmitfb",
+                displayName: gettext("Data Sharing"),
+                properties: this.getCmitfbProperties(),
+                isCollapsed: false,
+                help: {
+                    title: gettext("App Properties"),
+                    text: gettext("Your form can share data with other parts of your application. Use the default " +
+                        "value to set this question's initial answer to a value from an app property. Use the outgoing " +
+                        "value to make this question's answer available to the rest of your application once the " +
+                        "user finishes the form."),
+                }
+            },
+            {
                 slug: "logic",
                 displayName: gettext("Logic"),
                 properties: this.getLogicProperties(),
@@ -2287,7 +2300,6 @@ define([
             "readOnlyControl",
             "itemsetData",
             "imageSize",
-            "cmitfb",
         ];
     };
 
@@ -2301,12 +2313,18 @@ define([
         ];
     };
 
+    fn.getCmitfbProperties = function () {
+        return [
+            "defaultValue",
+            "cmitfb",
+        ];
+    };
+
     fn.getLogicProperties = function () {
         return [
             "relevantAttr",
             "constraintAttr",
             "repeat_count",
-            'defaultValue',
         ];
     };
 

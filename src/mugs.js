@@ -881,8 +881,6 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 widget: widgets.cmitfb,
-                help: gettext("When this form is completed, the value of this question " +
-                    "will be saved to the case property (or properties) specified here."),
                 /*validationFunc: function (mug) {
                     // Validate that no two question update the same property
                 },*/

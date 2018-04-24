@@ -4,7 +4,7 @@
         <div class="fd-help pull-right">
             <a href="#" class="help" tabindex="-1"
                 data-title="<%=help.title%>"
-                data-content="<%=help.text%><p><a target='_blank' href='<%=help.link%>'>See More</a></p>"
+                data-content="<%=help.text%><% if (help.link) { %><p><a target='_blank' href='<%=help.link%>'>See More</a></p><% } %>"
                 data-placement="left">
             </a>
         </div>

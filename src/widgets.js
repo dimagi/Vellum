@@ -403,7 +403,7 @@ define([
                                 $button.before($newInput);
                                 $newInput.focus();
                             });
-            $button.append("<i class='fa fa-plus'></i> Add another outgoing property");
+            $button.append("<i class='fa fa-plus'></i> Add another");
             $el.find("input").after($button);
             return $el;
         };
