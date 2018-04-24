@@ -2287,6 +2287,7 @@ define([
             "readOnlyControl",
             "itemsetData",
             "imageSize",
+            "cmitfb",
         ];
     };
 

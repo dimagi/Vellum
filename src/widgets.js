@@ -376,6 +376,20 @@ define([
         return widget;
     };
 
+    var cmitfb = function(mug, options) {
+        var widget = text(mug, options);
+
+        atwho.autocomplete(widget.input, mug, {
+            insertTpl: '${displayLabel}',
+            choices: _.map(mug.form.fuse.search("#case"), function(choice) {
+                choice.displayLabel = choice.name.replace("#case/", "");
+                return choice;
+            }),
+        });
+
+        return widget;
+    }
+
     var droppableText = function (mug, options) {
         var widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
@@ -835,6 +849,7 @@ define([
         multilineText: multilineText,
         richTextarea: richTextarea,
         identifier: identifier,
+        cmitfb: cmitfb,
         droppableText: droppableText,
         checkbox: checkbox,
         dropdown: dropdown,

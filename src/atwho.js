@@ -33,7 +33,7 @@ define([
             return;
         }
         if (options && options.choices) {
-           that._dropdownAutocomplete($input, options.choices);
+           that._dropdownAutocomplete($input, options);
         } else {
             that._questionAutocomplete($input, mug, options);
         }
@@ -51,10 +51,10 @@ define([
      * @param $input - jQuery object, the input to turn into an autocomplete
      * @param choices - An array of strings with which to populate the autocomplete
      */
-    that._dropdownAutocomplete = function ($input, choices) {
-        var options = {
+    that._dropdownAutocomplete = function ($input, options) {
+        var options = _.defaults(options, {
             at: "",
-            data: choices,
+            data: options.choices,
             maxLen: Infinity,
             suffix: "",
             tabSelectsMatch: false,
@@ -71,7 +71,7 @@ define([
                     $input.data("selected-value", value);
                 },
             }
-        };
+        });
 
         $input.one('focus', function () {
             $input.atwho(options).on("inserted.atwho", function(event, $li, otherEvent) {

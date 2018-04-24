@@ -876,6 +876,14 @@ define([
                     });
                 }
             },
+            cmitfb: {
+                lstring: gettext('Outgoing Property'),
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.cmitfb,
+                help: gettext("When this form is completed, the value of this question " +
+                    "will be saved to the case property specified here."),
+            },
             conflictedNodeId: {
                 visibility: 'hidden',
                 presence: 'optional',
@@ -1505,6 +1513,7 @@ define([
         spec: {
             dataValue: { presence: 'optional' },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
+            cmitfb: { presence: "notallowed" },
             requiredAttr: {
                 deleteOnCopy: true,
                 visibility: function (mug) {
@@ -1573,6 +1582,7 @@ define([
             constraintMsgAttr: { presence: "notallowed" },
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
+            cmitfb: { presence: "notallowed" },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
