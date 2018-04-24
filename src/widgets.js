@@ -377,15 +377,36 @@ define([
     };
 
     var cmitfb = function(mug, options) {
-        var widget = text(mug, options);
+        var widget = text(mug, options),
+            prepInput = function($input) {
+                $input.css("margin-bottom", "5px");
+                atwho.autocomplete($input, mug, {
+                    insertTpl: '${displayLabel}',
+                    choices: _.map(mug.form.fuse.search("#case"), function(choice) {
+                        choice.displayLabel = choice.name.replace("#case/", "");
+                        return choice;
+                    }),
+                });
+            };
 
-        atwho.autocomplete(widget.input, mug, {
-            insertTpl: '${displayLabel}',
-            choices: _.map(mug.form.fuse.search("#case"), function(choice) {
-                choice.displayLabel = choice.name.replace("#case/", "");
-                return choice;
-            }),
-        });
+        widget.getUIElement = function () {
+            var $el = getUIElement(widget.getControl(), widget.getDisplayName(),
+                                !!widget.isDisabled(), widget.getHelp());
+            prepInput($el.find("input"));
+            var $button = $("<button />")
+                            .attr("type", "button")
+                            .addClass("btn btn-default btn-xs")
+                            .click(function() {
+                                var $button = $(this),
+                                    $newInput = text(mug, options).input;
+                                prepInput($newInput);
+                                $button.before($newInput);
+                                $newInput.focus();
+                            });
+            $button.append("<i class='fa fa-plus'></i> Add another outgoing property");
+            $el.find("input").after($button);
+            return $el;
+        };
 
         return widget;
     }
