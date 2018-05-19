@@ -76,7 +76,11 @@ define([
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
-                _.each(block.languages, function (lang) {
+                var langs_to_show = block.languages
+                if(options.vellum.data.core.showOnlyCurrentLang) {
+                    langs_to_show = [options.vellum.data.core.currentItextDisplayLanguage]
+                }
+                _.each(langs_to_show, function(lang){
                     var itextWidget = block.itextWidget(block.mug, lang, form,
                                                         _.extend(options, {parent: $blockUI}));
                     itextWidget.init();

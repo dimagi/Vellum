@@ -228,6 +228,7 @@ define([
             this.opts().core.dataSourcesEndpoint,
             this.opts().core.invalidCaseProperties
         );
+        this.data.core.showOnlyCurrentLang = this.opts().core.showOnlyCurrentLang;
     };
 
     fn.postInit = function () {
