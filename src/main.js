@@ -7,11 +7,6 @@ requirejs.config({
     // that should be reported.
     packages: [
         {
-            name: 'less',
-            location: '../bower_components/require-less',
-            main: 'less.js'
-        },
-        {
             name: 'css',
             location: '../bower_components/require-css',
             main: 'css.js'
@@ -145,9 +140,6 @@ requirejs.config({
             exports: 'fusejs'
         }
     },
-    less: {
-        logLevel: 1
-    }
 });
 
 // If jQuery was loaded before RequireJS, use the existing instance.

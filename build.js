@@ -122,8 +122,6 @@
                 'ckeditor-jquery',
 
                 // shim plugin dependencies don't automatically get included
-                // NOTE less! and css! cannot be combined in the same module
-                // https://github.com/guybedford/require-less/issues/48
                 'css/css!../bower_components/codemirror/lib/codemirror',
                 'css/css!../bower_components/jstree/dist/themes/default/style',
                 'css/css!yui-combo',

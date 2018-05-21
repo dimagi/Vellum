@@ -8,7 +8,6 @@ define([
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
-    'less!vellum/less-style/xpath-editor'
 ], function (
     $,
     _,
