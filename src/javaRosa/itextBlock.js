@@ -77,7 +77,7 @@ define([
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
                 var langs_to_show = block.languages
-                if(options.vellum.data.core.showOnlyCurrentLang) {
+                if(options.vellum.data.javaRosa.showOnlyCurrentLang) {
                     langs_to_show = _.uniq([
                     options.vellum.data.javaRosa.Itext.defaultLanguage,
                     options.vellum.data.core.currentItextDisplayLanguage])

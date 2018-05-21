@@ -63,6 +63,7 @@ define([
             this.data.javaRosa.ItextItem = itext.item;
             this.data.javaRosa.ItextForm = itext.form;
             this.data.javaRosa.ICONS = ICONS;
+            this.data.javaRosa.showOnlyCurrentLang = this.opts().javaRosa.showOnlyCurrentLang;
         },
         handleDropFinish: function (target, path, mug, event) {
             var inItext = target &&
