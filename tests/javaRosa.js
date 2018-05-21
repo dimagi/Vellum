@@ -1145,17 +1145,17 @@ define([
         });
 
         it("should change the property on javaRosa", function() {
-            assert.equal(util.call("getData").javaRosa.showOnlyCurrentLang, true)
+            assert.equal(util.call("getData").javaRosa.showOnlyCurrentLang, true);
         });
 
         describe("when current language same as default language", function() {
             it("should just show translation for the current display language", function() {
-                assert.equal(util.call("getData").core.currentItextDisplayLanguage, "en")
-                assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en")
+                assert.equal(util.call("getData").core.currentItextDisplayLanguage, "en");
+                assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
                 util.loadXML(TEST_XML_1);
                 util.clickQuestion("question1");
-                assert.equal($("[name='itext-en-label']").length, 1)
-                assert.equal($("[name='itext-hin-label']").length, 0)
+                assert.equal($("[name='itext-en-label']").length, 1);
+                assert.equal($("[name='itext-hin-label']").length, 0);
             });
         });
 
@@ -1169,13 +1169,13 @@ define([
             });
 
             it("should show translation for both current and default language", function() {
-                assert.equal(util.call("getData").core.currentItextDisplayLanguage, "tel")
-                assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en")
+                assert.equal(util.call("getData").core.currentItextDisplayLanguage, "tel");
+                assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
                 util.loadXML(TEST_XML_1);
                 util.clickQuestion("question1");
-                assert.equal($("[name='itext-en-label']").length, 1)
-                assert.equal($("[name='itext-hin-label']").length, 0)
-                assert.equal($("[name='itext-tel-label']").length, 1)
+                assert.equal($("[name='itext-en-label']").length, 1);
+                assert.equal($("[name='itext-hin-label']").length, 0);
+                assert.equal($("[name='itext-tel-label']").length, 1);
             });
         });
     });
