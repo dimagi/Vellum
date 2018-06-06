@@ -78,13 +78,13 @@ define([
                 var $formGroup = block.getFormGroupContainer(form);
                 var langs_to_show = block.languages;
                 if(options.vellum.data.javaRosa.showOnlyCurrentLang) {
-                    // show default and current display language and
+                    // show default and/or current display language and
                     // ensure they are in app languages
                     langs_to_show = _.intersection(
-                        [options.vellum.data.javaRosa.Itext.defaultLanguage],
-                        [options.vellum.data.core.currentItextDisplayLanguage],
+                        [options.vellum.data.javaRosa.Itext.defaultLanguage,
+                         options.vellum.data.core.currentItextDisplayLanguage],
                         block.languages
-                    )
+                    );
                 }
                 _.each(langs_to_show, function(lang){
                     var itextWidget = block.itextWidget(block.mug, lang, form,
