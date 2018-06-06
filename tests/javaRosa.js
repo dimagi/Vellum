@@ -1160,22 +1160,44 @@ define([
         });
 
         describe("when current display language not same as default language", function() {
-            before(function (done) {
-                util.init({
-                    features: {rich_text: false},
-                    javaRosa: {langs: ['en', 'hin', 'tel'], showOnlyCurrentLang: true, displayLanguage: 'tel'},
-                    core: {onReady: function () { done(); }}
+            describe("when current display language is one of the app langs", function() {
+                before(function (done) {
+                    util.init({
+                        features: {rich_text: false},
+                        javaRosa: {langs: ['en', 'hin', 'tel'], showOnlyCurrentLang: true, displayLanguage: 'tel'},
+                        core: {onReady: function () { done(); }}
+                    });
+                });
+
+                it("should show translation for both current and default language", function() {
+                    assert.equal(util.call("getData").core.currentItextDisplayLanguage, "tel");
+                    assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
+                    util.loadXML(TEST_XML_1);
+                    util.clickQuestion("question1");
+                    assert.equal($("[name='itext-en-label']").length, 1);
+                    assert.equal($("[name='itext-hin-label']").length, 0);
+                    assert.equal($("[name='itext-tel-label']").length, 1);
                 });
             });
 
-            it("should show translation for both current and default language", function() {
-                assert.equal(util.call("getData").core.currentItextDisplayLanguage, "tel");
-                assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
-                util.loadXML(TEST_XML_1);
-                util.clickQuestion("question1");
-                assert.equal($("[name='itext-en-label']").length, 1);
-                assert.equal($("[name='itext-hin-label']").length, 0);
-                assert.equal($("[name='itext-tel-label']").length, 1);
+            describe("when current display language is not one of the app langs", function() {
+                before(function (done) {
+                    util.init({
+                        features: {rich_text: false},
+                        javaRosa: {langs: ['en', 'hin', 'tel'], showOnlyCurrentLang: true, displayLanguage: '_ids'},
+                        core: {onReady: function () { done(); }}
+                    });
+                });
+
+                it("should just show translation for the default language", function() {
+                    assert.equal(util.call("getData").core.currentItextDisplayLanguage, "_ids");
+                    assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
+                    util.loadXML(TEST_XML_1);
+                    util.clickQuestion("question1");
+                    assert.equal($("[name='itext-en-label']").length, 1);
+                    assert.equal($("[name='itext-hin-label']").length, 0);
+                    assert.equal($("[name='itext-tel-label']").length, 0);
+                });
             });
         });
     });
