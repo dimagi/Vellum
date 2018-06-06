@@ -511,8 +511,9 @@ define([
 
         it("itext changes do not bleed back after copy", function () {
             util.loadXML("");
-            var mug = util.addQuestion("Text", "question"),
-                dup = mug.form.duplicateMug(mug);
+            var mug = util.addQuestion("Text", "question");
+            mug.p.labelItext.set('question');
+            var dup = mug.form.duplicateMug(mug);
             dup.p.labelItext.set("q2");
 
             util.saveAndReload(function () {
@@ -523,8 +524,9 @@ define([
 
         it("itext changes do not bleed back from copy of copy", function () {
             util.loadXML("");
-            var mug = util.addQuestion("Text", "question"),
-                dup = mug.form.duplicateMug(mug),
+            var mug = util.addQuestion("Text", "question");
+            mug.p.labelItext.set('question');
+            var dup = mug.form.duplicateMug(mug),
                 cpy = mug.form.duplicateMug(dup);
             cpy.p.labelItext.set("copy");
 
