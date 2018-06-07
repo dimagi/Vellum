@@ -509,7 +509,7 @@ define([
             assert.equal(label.p.labelItext.get(), '<output value="/data/load-one" />');
         });
 
-        it("itext changes do not bleed back after copy", function () {
+        it("itext changes do not bleed back after copy", function (done) {
             util.loadXML("");
             var mug = util.addQuestion("Text", "question"),
                 dup = mug.form.duplicateMug(mug);
@@ -517,11 +517,12 @@ define([
 
             util.saveAndReload(function () {
                 var mug = call("getMugByPath", "/data/question");
-                assert.equal(mug.p.labelItext.defaultValue(), "question");
+                assert.equal(mug.p.labelItext.defaultValue(), "");
+                done();
             });
         });
 
-        it("itext changes do not bleed back from copy of copy", function () {
+        it("itext changes do not bleed back from copy of copy", function (done) {
             util.loadXML("");
             var mug = util.addQuestion("Text", "question"),
                 dup = mug.form.duplicateMug(mug),
@@ -532,9 +533,10 @@ define([
                 var mug = call("getMugByPath", "/data/question"),
                     dup = call("getMugByPath", "/data/copy-1-of-question"),
                     cpy = call("getMugByPath", "/data/copy-2-of-question");
-                assert.equal(mug.p.labelItext.defaultValue(), "question");
-                assert.equal(dup.p.labelItext.defaultValue(), "question");
+                assert.equal(mug.p.labelItext.defaultValue(), "");
+                assert.equal(dup.p.labelItext.defaultValue(), "");
                 assert.equal(cpy.p.labelItext.defaultValue(), "copy");
+                done();
             });
         });
 
