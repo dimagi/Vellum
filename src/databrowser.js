@@ -65,7 +65,7 @@ define([
                 if (container && event.xhr.responseText) {
                     container.find(".fd-external-sources-error")
                         .removeClass("hide")
-                        .text(event.xhr.responseText);
+                        .text(gettext("Could not load app properties. If this error persists, please report an issue."));
                 }
             });
             var toggle = _.partial(toggleExternalDataTree, vellum);
