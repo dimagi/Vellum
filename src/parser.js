@@ -62,13 +62,13 @@ define([
         if (_.contains(ignore, 'markdown')) {
             form.noMarkdown = true;
         }
-        
+
         // set all instance metadatas
         form.instanceMetadata = instances.map(function (instance) {
             return InstanceMetadata(
                 getAttributes(instance),
                 $(instance).children()
-            ); 
+            );
         });
         form.updateKnownInstances();
 
@@ -86,7 +86,7 @@ define([
             form.parseErrors.push(
                 gettext('No Data block was found in the form. Please check that your form is valid!'));
         }
-       
+
         parseDataTree(form, data[0], title.length ? title.text() : "");
         parseBindList(form, binds);
 
@@ -209,7 +209,7 @@ define([
 
     function parseDataElement(form, el, parentMug, role) {
         var $el = $(el),
-            nodeID = el.nodeName, 
+            nodeID = el.nodeName,
             nodeVal = $el.children().length ? null : $el.text(),
             extraXMLNS = $el.popAttr('xmlns') || null,
             comment = $el.popAttr('vellum:comment') || null;
@@ -263,9 +263,9 @@ define([
 
     var lookForNamespaced = function (element, reference) {
         // due to the fact that FF and Webkit store namespaced
-        // values slightly differently, we have to look in 
+        // values slightly differently, we have to look in
         // a couple different places.
-        return element.popAttr("jr:" + reference) || 
+        return element.popAttr("jr:" + reference) ||
                element.popAttr("jr\\:" + reference) || null;
     };
 
@@ -687,10 +687,10 @@ define([
         var raw = attrs.rawBindAttributes = getAttributes(el);
 
         // normalize type ('int' and 'integer' are both valid).
-        if(raw.type && raw.type.toLowerCase() === 'xsd:integer') { 
+        if(raw.type && raw.type.toLowerCase() === 'xsd:integer') {
             raw.type = 'xsd:int';
         }
-      
+
         mug.p.setAttrs(attrs);
     }
 
