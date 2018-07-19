@@ -2305,7 +2305,8 @@ define([
             "relevantAttr",
             "constraintAttr",
             "repeat_count",
-            'defaultValue',
+            "defaultValue",
+            "requiredCondition",
         ];
     };
 

@@ -970,6 +970,15 @@ define([
                 lstring: gettext("Required"),
                 widget: widgets.checkbox
             },
+            requiredCondition: {
+                visibility: 'requiredAttr',
+                presence: 'optional',
+                lstring: gettext("Required Condition"),
+                widget: widgets.xPath,
+                xpathType: "bool",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath
+            },
             nodeset: {
                 visibility: 'hidden',
                 presence: 'optional' //if not present one will be generated... hopefully.
@@ -1183,7 +1192,7 @@ define([
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
                 relevant: mug.p.relevantAttr,
-                required: util.createXPathBoolFromJS(mug.p.requiredAttr),
+                required: mug.p.requiredCondition || util.createXPathBoolFromJS(mug.p.requiredAttr),
                 calculate: mug.p.calculateAttr,
             };
             _.each(mug.p.rawBindAttributes, function (value, key) {

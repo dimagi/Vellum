@@ -515,15 +515,15 @@ define([
             return undefined;
         }
         var str = attrString.toLowerCase().replace(/\s/g, '');
-        if (str === 'true()') {
-            return true;
-        } else if (str === 'false()') {
+        if (str === 'false()') {
             return false;
+        } else if (str) {
+            return true
         } else {
             return undefined;
         }
     }
-                
+
     /**
      * Figures out what the xpath is of a control element
      * by looking at the ref or nodeset attributes.
@@ -682,6 +682,7 @@ define([
             constraintAttr: parseVellumAttrs(form, el, 'constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
+            requiredCondition: el.popAttr('required'),
         };
 
         var raw = attrs.rawBindAttributes = getAttributes(el);
