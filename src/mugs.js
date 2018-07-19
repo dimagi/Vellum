@@ -977,7 +977,14 @@ define([
                 widget: widgets.xPath,
                 xpathType: "bool",
                 serialize: serializeXPath,
-                deserialize: deserializeXPath
+                deserialize: deserializeXPath,
+                validationFunc: function (mug) {
+                    if (mug.p.requiredCondition && !mug.p.requiredAttr) {
+                        return gettext('You cannot have a Required Condition if the question isn\'t required!');
+                    } else {
+                        return 'pass';
+                    }
+                }
             },
             nodeset: {
                 visibility: 'hidden',
