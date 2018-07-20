@@ -968,7 +968,10 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: gettext("Required"),
-                widget: widgets.checkbox
+                widget: widgets.checkbox,
+                validationFunc: function(mug) {
+                    return baseSpecs.databind.requiredCondition.validationFunc(mug);
+                }
             },
             requiredCondition: {
                 visibility: 'requiredAttr',
