@@ -81,6 +81,7 @@ define([
                 row["Display Condition"] = mug.p.relevantAttr;
                 row["Calculate Condition"] = mug.p.calculateAttr;
                 row.Required = mug.p.requiredAttr ? 'yes' : 'no';
+                row["Required Condition"] = mug.p.requiredCondition;
 
                 row["Validation Condition"] = mug.p.constraintAttr;
                 row["Validation Message"] = defaultOrNothing(
