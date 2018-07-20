@@ -15,25 +15,25 @@ define([
             "video-inline": "Video Inline",
             "expanded-audio": "Expanded Audio",
         };
-        
+
         var columnOrder = [
-            "Question", 
+            "Question",
             "Type"
         ];
-        
+
         for (var type in itextColumns) {
             var colName = itextColumns[type];
-            
+
             for (var i = 0; i < languages.length; i++) {
                 columnOrder.push(colName + " (" + languages[i] + ")");
             }
         }
 
         columnOrder = columnOrder.concat([
-            "Display Condition", 
-            "Validation Condition", 
-            "Validation Message", 
-            "Calculate Condition", 
+            "Display Condition",
+            "Validation Condition",
+            "Validation Message",
+            "Calculate Condition",
             "Required",
             "Hint Text",
             "Help Text",
@@ -47,7 +47,7 @@ define([
                 i;
 
             var defaultOrNothing = function (item, language, form) {
-                return (item && item.hasForm(form)) ? 
+                return (item && item.hasForm(form)) ?
                     item.getForm(form).getValueOrDefault(language) : "";
                 // TODO see newline treatment in javaRosa.js TSV logic
                 //return value.replace(/\r?\n/g, "&#10;");
@@ -76,7 +76,7 @@ define([
                     }
                 }
             }
-            
+
             if (mug.p.getDefinition('relevantAttr')) {
                 row["Display Condition"] = mug.p.relevantAttr;
                 row["Calculate Condition"] = mug.p.calculateAttr;
@@ -98,10 +98,10 @@ define([
                     row[prop] = row[prop] || "";
                 }
             }
-            
+
             return columnOrder.map(function (column) { return row[column]; });
         };
-     
+
         var rows = [columnOrder].concat(form.getMugList().map(mugToExportRow));
         return tsv.tabDelimit(rows);
     };

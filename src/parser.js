@@ -518,7 +518,7 @@ define([
         if (str === 'false()') {
             return false;
         } else if (str) {
-            return true
+            return true;
         } else {
             return undefined;
         }
