@@ -1204,13 +1204,22 @@ define([
             } else {
                 constraintMsg = mug.p.constraintMsgAttr;
             }
+
+            var required;
+            if (mug.p.requiredAttr) {
+                required = mug.p.requiredCondition || util.createXPathBoolFromJS(mug.p.requiredAttr);
+            } else {
+                required = util.createXPathBoolFromJS(mug.p.requiredAttr);
+            }
+
             var attrs = {
                 nodeset: mug.hashtagPath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
                 relevant: mug.p.relevantAttr,
-                required: mug.p.requiredCondition || util.createXPathBoolFromJS(mug.p.requiredAttr),
+                required: required,
+                requiredCondition: mug.p.requiredCondition,
                 calculate: mug.p.calculateAttr,
             };
             _.each(mug.p.rawBindAttributes, function (value, key) {

@@ -677,13 +677,15 @@ define([
         }
 
         var required = el.popAttr('required');
+
         var attrs = {
             relevantAttr: parseVellumAttrs(form, el, 'relevant'),
             calculateAttr: parseVellumAttrs(form, el, 'calculate'),
             constraintAttr: parseVellumAttrs(form, el, 'constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(required),
-            requiredCondition: required,
+            requiredCondition: (el.popAttr('requiredCondition') ||
+                                ['true()', 'false()'].indexOf(required) === -1 ? required : undefined),
         };
 
         var raw = attrs.rawBindAttributes = getAttributes(el);
