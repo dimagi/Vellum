@@ -985,7 +985,7 @@ define([
                     var warningKey = "mug-requiredCondition-warning",
                         warningAttrs = ["requiredAttr", "requiredCondition"];
                     if (mug.p.requiredCondition && !mug.p.requiredAttr) {
-                        message = gettext("The condition will be ignored unless you mark the question required.");
+                        var message = gettext("The condition will be ignored unless you mark the question required.");
                         _.each(warningAttrs, function (attr) {
                             mug.addMessage(attr, {
                                 key: warningKey,
