@@ -983,16 +983,20 @@ define([
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
                     var warningKey = "mug-requiredCondition-warning",
-                        warningAttr = "requiredCondition";
+                        warningAttrs = ["requiredAttr", "requiredCondition"];
                     if (mug.p.requiredCondition && !mug.p.requiredAttr) {
-                        message = gettext("Since this question isn't required, this condition will be ignored.");
-                        mug.addMessage(warningAttr, {
-                            key: warningKey,
-                            level: mug.WARNING,
-                            message: message
+                        message = gettext("The condition will be ignored unless you mark the question required.");
+                        _.each(warningAttrs, function (attr) {
+                            mug.addMessage(attr, {
+                                key: warningKey,
+                                level: mug.WARNING,
+                                message: message
+                            });
                         });
                     } else {
-                        mug.dropMessage(warningAttr, warningKey);
+                        _.each(warningAttrs, function (attr) {
+                            mug.dropMessage(attr, warningKey);
+                        });
                     }
                     return 'pass';
                 }
