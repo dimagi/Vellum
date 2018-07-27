@@ -982,11 +982,19 @@ define([
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
                 validationFunc: function (mug) {
+                    var warningKey = "mug-requiredCondition-warning",
+                        warningAttr = "requiredCondition";
                     if (mug.p.requiredCondition && !mug.p.requiredAttr) {
-                        return gettext('You cannot have a Required Condition if the question isn\'t required!');
+                        message = gettext("Since this question isn't required, this condition will be ignored.");
+                        mug.addMessage(warningAttr, {
+                            key: warningKey,
+                            level: mug.WARNING,
+                            message: message
+                        });
                     } else {
-                        return 'pass';
+                        mug.dropMessage(warningAttr, warningKey);
                     }
+                    return 'pass';
                 }
             },
             nodeset: {
