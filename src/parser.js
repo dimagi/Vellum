@@ -685,7 +685,7 @@ define([
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(required),
             requiredCondition: (el.popAttr('requiredCondition') ||
-                                ['true()', 'false()'].indexOf(required) === -1 ? required : undefined),
+                                required !== 'true()' && required !== 'false()' ? required : undefined),
         };
 
         var raw = attrs.rawBindAttributes = getAttributes(el);
