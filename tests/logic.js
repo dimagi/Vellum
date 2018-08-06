@@ -80,7 +80,8 @@ define([
                     "dataParent",
                     "repeat_count",
                     "filter",
-                    "defaultValue"
+                    "defaultValue",
+                    "requiredCondition"
                 ],
                 canSelfRef = ["constraintAttr"],
                 noSelfProps = _.difference(properties, canSelfRef),

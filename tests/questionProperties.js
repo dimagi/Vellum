@@ -91,4 +91,25 @@ define([
             assert.strictEqual($command.hasClass("selected"), visible);
         });
     });
+
+    describe("Required Condition", function() {
+        it("should mark mug invalid if it has a required condition without being required", function () {
+            var mug = util.getMug("text");
+            assert(util.isTreeNodeValid(mug),
+                    "precondition failed:\n" + util.getMessages(mug));
+            try {
+                mug.p["requiredCondition"] = "True()";
+                assert(mug.messages.get("requiredCondition").length === 1, "requiredCondition doesn't have error");
+                assert(mug.messages.get("requiredAttr").length === 1, "requiredAttr doesn't have error");
+
+                mug.p["requiredAttr"] = "True()";
+                assert(mug.messages.get("requiredCondition").length === 0, "requiredCondition has error");
+                assert(mug.messages.get("requiredAttr").length === 0, "requiredAttr has error");
+            } finally {
+                mug.p["requiredCondition"] = "";
+                mug.p["requiredAttr"] = "";
+            }
+        });
+
+    });
 });

@@ -16,6 +16,7 @@ define([
     'text!static/parser/first-time-hashtag.xml',
     'text!static/parser/repeat-with-count-as-question-only-form.xml',
     'text!static/writer/repeat-with-count-as-question.xml',
+    'text!static/parser/required.xml',
 ], function (
     chai,
     $,
@@ -32,7 +33,8 @@ define([
     OVERRIDDEN_XML,
     FIRST_TIME_HASHTAG_XML,
     REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML,
-    REPEAT_WITH_COUNT_AS_QUESTION_XML
+    REPEAT_WITH_COUNT_AS_QUESTION_XML,
+    REQUIRED_XML
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -71,7 +73,7 @@ define([
             util.init({
                 plugins: pluginsWithoutItemset,
                 core: {
-                    form: TEST_XML_1, 
+                    form: TEST_XML_1,
                     onReady: function () {
                         var mug = call("getMugByPath", "/data/state");
                         assert.equal(mug.__className, "Select");
@@ -142,6 +144,28 @@ define([
             util.loadXML(MISSING_BIND_XML);
             util.clickQuestion("text");
             assert(!$('[name=property-dataValue]').length);
+        });
+
+        it("should set required correctly", function() {
+            util.loadXML(REQUIRED_XML);
+
+            var q1 = util.getMug("question1");
+            assert(q1.p.required = "true()");
+            assert(q1.p.requiredCondition = "true()");
+            assert(q1.messages.get("requiredAttr").length === 0);
+            assert(q1.messages.get("requiredCondition").length === 0);
+
+            var q2 = util.getMug("question2");
+            assert(q2.p.required = "#form/question1 = 'hi'");
+            assert(q2.p.requiredCondition = "true()");
+            assert(q2.messages.get("requiredAttr").length === 0);
+            assert(q2.messages.get("requiredCondition").length === 0);
+
+            var q3 = util.getMug("question3");
+            assert(q3.p.required = "false()");
+            assert(q3.p.requiredCondition = "#form/question2 = 'hello'");
+            assert(q3.messages.get("requiredAttr").length === 1);
+            assert(q3.messages.get("requiredCondition").length === 1);
         });
 
         describe("override", function() {

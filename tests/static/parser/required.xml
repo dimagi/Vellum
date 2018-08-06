@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/D893A901-3F22-449C-B292-7D2BA95C3D59" uiVersion="1" version="1" name="Untitled Form">
+					<question1 />
+					<question2 />
+					<question3 />
+				</data>
+			</instance>
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string" required="true()" />
+			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:string" vellum:required="#form/question1 = 'hi'" required="/data/question1 = 'hi'" vellum:requiredCondition="#form/question1 = 'hi'" requiredCondition="/data/question1 = 'hi'" />
+			<bind vellum:nodeset="#form/question3" nodeset="/data/question3" type="xsd:string" vellum:requiredCondition="#form/question2 = 'hello'" requiredCondition="/data/question2 = 'hello'" />
+			<itext>
+				<translation lang="en" default="" />
+				<translation lang="hin" />
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input vellum:ref="#form/question1" ref="/data/question1" />
+		<input vellum:ref="#form/question2" ref="/data/question2" />
+		<input vellum:ref="#form/question3" ref="/data/question3" />
+	</h:body>
+</h:html>
