@@ -684,8 +684,8 @@ define([
             constraintAttr: parseVellumAttrs(form, el, 'constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
             requiredAttr: parseBoolAttributeValue(required),
-            requiredCondition: (el.popAttr('requiredCondition') ||
-                                required !== 'true()' && required !== 'false()' ? required : undefined),
+            requiredCondition: (parseVellumAttrs(form, el, 'requiredCondition') ||
+                                ((required !== 'true()' && required !== 'false()') ? required : undefined)),
         };
 
         var raw = attrs.rawBindAttributes = getAttributes(el);
