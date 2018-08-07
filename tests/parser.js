@@ -151,26 +151,20 @@ define([
             var q1 = util.getMug("question1");
             assert(q1.p.requiredAttr, "required is false");
             assert.equal(q1.p.requiredCondition, undefined);
-            assert(q1.messages.get("requiredAttr").length === 0,
-                   "requiredAttr has " + q1.messages.get("requiredAttr").length + " messages");
-            assert(q1.messages.get("requiredCondition").length === 0,
-                   "requiredCondition has " + q1.messages.get("requiredCondition").length + " messages");
+            assert.equal(q1.messages.get("requiredAttr").length, 0, "requiredAttr messages");
+            assert.equal(q1.messages.get("requiredCondition").length, 0, "requiredCondition messages");
 
             var q2 = util.getMug("question2");
             assert(q2.p.requiredAttr, "required is false");
             assert.equal(q2.p.requiredCondition, "#form/question1 = 'hi'");
-            assert(q2.messages.get("requiredAttr").length === 0,
-                   "requiredAttr has " + q2.messages.get("requiredAttr").length + " messages");
-            assert(q2.messages.get("requiredCondition").length === 0,
-                   "requiredCondition has " + q2.messages.get("requiredAttr").length === 0 + " messages");
+            assert.equal(q2.messages.get("requiredAttr").length, 0, "requiredAttr messages");
+            assert.equal(q2.messages.get("requiredCondition").length, 0, "requiredCondition messages");
 
             var q3 = util.getMug("question3");
             assert(!q3.p.requiredAttr, "requiredAttr is true");
             assert.equal(q3.p.requiredCondition, "#form/question2 = 'hello'");
-            assert(q3.messages.get("requiredAttr").length === 1,
-                   "requiredAttr has " + q3.messages.get("requiredAttr").length + " messages");
-            assert(q3.messages.get("requiredCondition").length === 1,
-                   "requiredCondition has " + q3.messages.get("requiredCondition").length + " messages");
+            assert.equal(q3.messages.get("requiredAttr").length, 1, "requiredAttr messages");
+            assert.equal(q3.messages.get("requiredCondition").length, 1, "requiredCondition messages");
         });
 
         describe("override", function() {
