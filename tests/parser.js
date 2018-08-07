@@ -149,7 +149,7 @@ define([
         it("should set required correctly", function() {
             util.loadXML(REQUIRED_XML);
             var q1 = util.getMug("question1");
-            assert(q1.p.requiredAttr, "required is false")
+            assert(q1.p.requiredAttr, "required is false");
             assert.equal(q1.p.requiredCondition, undefined);
             assert(q1.messages.get("requiredAttr").length === 0,
                    "requiredAttr has " + q1.messages.get("requiredAttr").length + " messages");
