@@ -968,7 +968,38 @@ define([
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: gettext("Required"),
-                widget: widgets.checkbox
+                widget: widgets.checkbox,
+                validationFunc: function(mug) {
+                    return baseSpecs.databind.requiredCondition.validationFunc(mug);
+                }
+            },
+            requiredCondition: {
+                visibility: 'requiredAttr',
+                presence: 'optional',
+                lstring: gettext("Required Condition"),
+                widget: widgets.xPath,
+                xpathType: "bool",
+                serialize: serializeXPath,
+                deserialize: deserializeXPath,
+                validationFunc: function (mug) {
+                    var warningKey = "mug-requiredCondition-warning",
+                        warningAttrs = ["requiredAttr", "requiredCondition"];
+                    if (mug.p.requiredCondition && !mug.p.requiredAttr) {
+                        var message = gettext("The condition will be ignored unless you mark the question required.");
+                        _.each(warningAttrs, function (attr) {
+                            mug.addMessage(attr, {
+                                key: warningKey,
+                                level: mug.WARNING,
+                                message: message
+                            });
+                        });
+                    } else {
+                        _.each(warningAttrs, function (attr) {
+                            mug.dropMessage(attr, warningKey);
+                        });
+                    }
+                    return 'pass';
+                }
             },
             nodeset: {
                 visibility: 'hidden',
@@ -1177,13 +1208,22 @@ define([
             } else {
                 constraintMsg = mug.p.constraintMsgAttr;
             }
+
+            var required;
+            if (mug.p.requiredAttr) {
+                required = mug.p.requiredCondition || util.createXPathBoolFromJS(mug.p.requiredAttr);
+            } else {
+                required = util.createXPathBoolFromJS(mug.p.requiredAttr);
+            }
+
             var attrs = {
                 nodeset: mug.hashtagPath,
                 type: mug.options.dataType,
                 constraint: mug.p.constraintAttr,
                 "jr:constraintMsg": constraintMsg,
                 relevant: mug.p.relevantAttr,
-                required: util.createXPathBoolFromJS(mug.p.requiredAttr),
+                required: required,
+                requiredCondition: mug.p.requiredCondition,
                 calculate: mug.p.calculateAttr,
             };
             _.each(mug.p.rawBindAttributes, function (value, key) {
@@ -1407,7 +1447,7 @@ define([
         }
     });
 
-    // Deprecated. Users may not add new longs to forms, 
+    // Deprecated. Users may not add new longs to forms,
     // but must be able to view forms already containing longs.
     var Long = util.extend(Int, {
         typeName: gettext('Long'),
@@ -1576,7 +1616,7 @@ define([
             defaultValue: { presence: 'optional', visibility: 'hidden' },
         }
     });
-    
+
     // This is just a group, but appearance = 'field-list' displays it as a list
     // of grouped questions.  It's a separate question type because it can't
     // nest other group types and it has a very different end-user functionality
@@ -1668,7 +1708,7 @@ define([
             }
         }
     });
-   
+
     function MugTypesManager(baseSpec, mugTypes, opts) {
         var _this = this,
             // Nestable Field List not supported in CommCare before v2.16
@@ -1680,7 +1720,7 @@ define([
         this.baseSpec = baseSpec;
 
         MugProperties.setBaseSpec(
-            util.extend.apply(null, 
+            util.extend.apply(null,
                 [baseSpec.databind, baseSpec.control].concat(_.filter(
                     _.pluck(
                         util.extend(this.normalTypes, this.auxiliaryTypes),
@@ -1690,7 +1730,7 @@ define([
         this.allTypes = $.extend({}, this.auxiliaryTypes, this.normalTypes);
 
         var allTypeNames = _.keys(this.allTypes),
-            innerChildTypeNames = _.without.apply(_, 
+            innerChildTypeNames = _.without.apply(_,
                   [allTypeNames].concat(_.keys(this.auxiliaryTypes)));
 
         if (!group_in_field_list) {

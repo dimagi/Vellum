@@ -801,7 +801,7 @@ define([
         }
         $modal.modal('hide');
     };
-    
+
     fn.generateNewModal = function (title, buttons, closeButtonTitle, headerIcon) {
         if (typeof closeButtonTitle === "undefined") {
             closeButtonTitle = gettext("Close");
@@ -1183,7 +1183,7 @@ define([
             return "'" + mug.p.nodeID + "'";
         } else {
             // for the currently selected mug, return a "."
-            return (mug.ufid === this.getCurrentlySelectedMug().ufid) ? 
+            return (mug.ufid === this.getCurrentlySelectedMug().ufid) ?
                 "." : (mug.form.richText ? mug.hashtagPath : mug.absolutePath);
         }
         // Instead of depending on the UI state (currently selected mug), it
@@ -1307,7 +1307,7 @@ define([
         });
         options = _.extend({
             mugTypes: this.data.core.mugTypes,
-            allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences, 
+            allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences,
             enableInstanceRefCounting: true
         }, options);
         if (this.data.core.form) {
@@ -1423,7 +1423,7 @@ define([
                      (!mug.p.constraintMsgItext.isEmpty() ||
                       mug.p.constraintAttr)),
             $constraintItext = $('.itext-block-constraintMsg');
-        
+
         if (state) {
             $constraintItext.removeClass('hide');
         } else {
@@ -1474,7 +1474,7 @@ define([
 
         return true;
     };
-        
+
     fn.addQuestion = function (qType, position, refMug) {
         var _this = this,
             mug;
@@ -2139,7 +2139,7 @@ define([
 
         this.send(formText, forceFullSave ? 'full' : null);
     };
-        
+
     fn.send = function (formText, saveType) {
         var CryptoJS = require('CryptoJS'),
             _this = this,
@@ -2305,7 +2305,8 @@ define([
             "relevantAttr",
             "constraintAttr",
             "repeat_count",
-            'defaultValue',
+            "defaultValue",
+            "requiredCondition",
         ];
     };
 
@@ -2421,7 +2422,7 @@ define([
 
     fn.contributeToModelXML = function (xmlWriter, form) {};
 
-    fn.contributeToHeadXML = function (xmlWriter, form) {}; 
+    fn.contributeToHeadXML = function (xmlWriter, form) {};
 
     fn.initMediaUploaderWidget = function (widget) {};
 

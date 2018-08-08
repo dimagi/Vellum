@@ -62,13 +62,13 @@ define([
         if (_.contains(ignore, 'markdown')) {
             form.noMarkdown = true;
         }
-        
+
         // set all instance metadatas
         form.instanceMetadata = instances.map(function (instance) {
             return InstanceMetadata(
                 getAttributes(instance),
                 $(instance).children()
-            ); 
+            );
         });
         form.updateKnownInstances();
 
@@ -86,7 +86,7 @@ define([
             form.parseErrors.push(
                 gettext('No Data block was found in the form. Please check that your form is valid!'));
         }
-       
+
         parseDataTree(form, data[0], title.length ? title.text() : "");
         parseBindList(form, binds);
 
@@ -209,7 +209,7 @@ define([
 
     function parseDataElement(form, el, parentMug, role) {
         var $el = $(el),
-            nodeID = el.nodeName, 
+            nodeID = el.nodeName,
             nodeVal = $el.children().length ? null : $el.text(),
             extraXMLNS = $el.popAttr('xmlns') || null,
             comment = $el.popAttr('vellum:comment') || null;
@@ -263,9 +263,9 @@ define([
 
     var lookForNamespaced = function (element, reference) {
         // due to the fact that FF and Webkit store namespaced
-        // values slightly differently, we have to look in 
+        // values slightly differently, we have to look in
         // a couple different places.
-        return element.popAttr("jr:" + reference) || 
+        return element.popAttr("jr:" + reference) ||
                element.popAttr("jr\\:" + reference) || null;
     };
 
@@ -515,15 +515,15 @@ define([
             return undefined;
         }
         var str = attrString.toLowerCase().replace(/\s/g, '');
-        if (str === 'true()') {
-            return true;
-        } else if (str === 'false()') {
+        if (str === 'false()') {
             return false;
+        } else if (str) {
+            return true;
         } else {
             return undefined;
         }
     }
-                
+
     /**
      * Figures out what the xpath is of a control element
      * by looking at the ref or nodeset attributes.
@@ -676,21 +676,25 @@ define([
             return;
         }
 
+        var required = el.popAttr('required');
+
         var attrs = {
             relevantAttr: parseVellumAttrs(form, el, 'relevant'),
             calculateAttr: parseVellumAttrs(form, el, 'calculate'),
             constraintAttr: parseVellumAttrs(form, el, 'constraint'),
             constraintMsgAttr: lookForNamespaced(el, "constraintMsg"),
-            requiredAttr: parseBoolAttributeValue(el.popAttr('required')),
+            requiredAttr: parseBoolAttributeValue(required),
+            requiredCondition: (parseVellumAttrs(form, el, 'requiredCondition') ||
+                                ((required !== 'true()' && required !== 'false()') ? required : undefined)),
         };
 
         var raw = attrs.rawBindAttributes = getAttributes(el);
 
         // normalize type ('int' and 'integer' are both valid).
-        if(raw.type && raw.type.toLowerCase() === 'xsd:integer') { 
+        if(raw.type && raw.type.toLowerCase() === 'xsd:integer') {
             raw.type = 'xsd:int';
         }
-      
+
         mug.p.setAttrs(attrs);
     }
 
