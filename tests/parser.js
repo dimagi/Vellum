@@ -137,7 +137,7 @@ define([
         it("should load question with accent char in path", function () {
             util.loadXML(ACCENT_CHAR_IN_PATH_XML);
             var mug = call("getMugByPath", "#form/tèxt");
-            assert.match(util.getMessages(mug), /tèxt is not a legal Question ID/);
+            assert.match(util.getMessages(mug), /tèxt is not a valid Question ID/);
         });
 
         it("should set undefined for data value", function () {
