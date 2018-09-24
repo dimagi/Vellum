@@ -834,7 +834,7 @@ define([
                     mug.addMessage("nodeID", nameWarning);
                     if (!util.isValidElementName(mug.p.nodeID)) {
                         return util.format(gettext(
-                            "{nodeID} is not a legal Question ID. " +
+                            "{nodeID} is not a valid Question ID. " +
                             "It must start with a letter and contain only " +
                             "letters, numbers, and '-' or '_' characters."),
                             {nodeID: mug.p.nodeID});
