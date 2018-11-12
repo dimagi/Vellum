@@ -170,15 +170,33 @@ define([
                 }
             }
 
-            return this.messages.update(attr, {
+            var changed = false;
+
+            if (attr === "nodeID" && mug.__originalNodeID) {
+                var info = "";
+                if (!message && mug.p.nodeID.toLowerCase() !== mug.__originalNodeID) {
+                    info = gettext(
+                        "Changing a Question ID will create a new Question ID (and a new data column). " +
+                        "It will NOT update the existing or previously submitted data.");
+                }
+                changed = this.messages.update(attr, {
+                    key: "mug-nodeID-info",
+                    level: this.INFO,
+                    message: util.format(info || "", {question: label})
+                }) || changed;
+            }
+
+            changed = this.messages.update(attr, {
                 key: "mug-" + attr + "-error",
                 level: this.ERROR,
                 message: util.format(message || "", {question: label})
-            });
+            }) || changed;
+            return changed;
         },
         // message levels
         ERROR: "error",
         WARNING: "warning",
+        INFO: "info",
         /**
          * Add a message for a property. Returns true if mug changed.
          *
@@ -253,10 +271,18 @@ define([
          * this to drop "info" messages.
          */
         getErrors: function () {
-            return _.uniq(this.messages.get());
+            var errors = [];
+            var messagesList = this.messages.messages.nodeID || [];
+            for (var i = 0; i < messagesList.length; i++) {
+                var messageObj = messagesList[i];
+                if (messageObj.level === 'error' || messageObj.level === 'warning') {
+                    errors.push(messageObj.message);
+                }
+            }
+            return _.uniq(errors);
         },
         hasErrors: function () {
-            return !this.messages.isEmpty();
+            return this.getErrors().length !== 0;
         },
         /**
          * Get a list of form serialization warnings

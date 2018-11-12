@@ -224,6 +224,8 @@ define([
 
         var mug = form.mugTypes.make(role, form);
         mug.p.nodeID = nodeID;
+        mug.__originalNodeID = nodeID;
+
         mug.p.dataValue = nodeVal || undefined;
 
         if (extraXMLNS && (extraXMLNS !== form.formUuid)) {
