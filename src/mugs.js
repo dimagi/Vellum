@@ -246,22 +246,15 @@ define([
             return changed;
         },
         /**
-         * Get a list of error message strings
-         *
-         * Currently there are only two message levels: "warning" and
-         * "error", and this function returns both. If a lower level
-         * message type such as "info" is added we may want to change
-         * this to drop "info" messages.
+         * Get a list of error and warning message strings
          */
         getErrors: function () {
             var errors = [];
-            var messagesList = this.messages.messages.nodeID || [];
-            for (var i = 0; i < messagesList.length; i++) {
-                var messageObj = messagesList[i];
-                if (messageObj.level === 'error' || messageObj.level === 'warning') {
-                    errors.push(messageObj.message);
+            this.messages.each(function(msg) {
+                if (msg.level !== "info") {
+                    errors.push(msg.message);
                 }
-            }
+            });
             return _.uniq(errors);
         },
         hasErrors: function () {
