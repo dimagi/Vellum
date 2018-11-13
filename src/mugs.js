@@ -170,28 +170,11 @@ define([
                 }
             }
 
-            var changed = false;
-
-            if (attr === "nodeID" && mug.__originalNodeID) {
-                var info = "";
-                if (!message && mug.p.nodeID.toLowerCase() !== mug.__originalNodeID) {
-                    info = gettext(
-                        "Changing a Question ID will create a new Question ID (and a new data column). " +
-                        "It will NOT update the existing or previously submitted data.");
-                }
-                changed = this.messages.update(attr, {
-                    key: "mug-nodeID-info",
-                    level: this.INFO,
-                    message: util.format(info || "", {question: label})
-                }) || changed;
-            }
-
-            changed = this.messages.update(attr, {
+            return this.messages.update(attr, {
                 key: "mug-" + attr + "-error",
                 level: this.ERROR,
                 message: util.format(message || "", {question: label})
-            }) || changed;
-            return changed;
+            });
         },
         // message levels
         ERROR: "error",
@@ -848,7 +831,13 @@ define([
                         nameWarning = {
                             key: "mug-nodeID-reserved-name-warning",
                             level: mug.WARNING,
-                        };
+                        },
+                        changedQuestionIDWarning = {
+                            key: "mug-nodeID-changed-warning",
+                            level: mug.INFO
+                        },
+                        return_value = "pass";
+
                     if (RESERVED_NAMES.hasOwnProperty(lcid)) {
                         nameWarning.message = util.format(
                             gettext("The ID '{nodeID}' may cause problems " +
@@ -858,16 +847,22 @@ define([
                         );
                     }
                     mug.addMessage("nodeID", nameWarning);
+
                     if (!util.isValidElementName(mug.p.nodeID)) {
-                        return util.format(gettext(
+                        return_value = util.format(gettext(
                             "{nodeID} is not a valid Question ID. " +
                             "It must start with a letter and contain only " +
                             "letters, numbers, and '-' or '_' characters."),
                             {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
-                        return gettext("'meta' is not a valid Question ID.");
+                        return_value = gettext("'meta' is not a valid Question ID.");
+                    } else if (mug.__originalNodeID && mug.p.nodeID.toLowerCase() !== mug.__originalNodeID) {
+                        changedQuestionIDWarning.message = gettext(
+                            "Changing a Question ID will create a new Question ID (and a new data column). " +
+                            "It will NOT update the existing or previously submitted data.");
                     }
-                    return "pass";
+                    mug.addMessage("nodeID", changedQuestionIDWarning);
+                    return return_value;
                 },
                 dropMessage: function (mug, attr, key) {
                     if (attr === "nodeID" && key === "mug-conflictedNodeId-warning") {
