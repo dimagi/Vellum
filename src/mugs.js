@@ -849,7 +849,7 @@ define([
                             {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
                         return_value = gettext("'meta' is not a valid Question ID.");
-                    } else if (mug.__originalNodeID && mug.p.nodeID.toLowerCase() !== mug.__originalNodeID) {
+                    } else if (mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID) {
                         changedQuestionIDWarning.message = gettext(
                             "Changing a Question ID will create a new Question ID (and a new data column). " +
                             "It will NOT update the existing or previously submitted data.");
