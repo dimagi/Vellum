@@ -179,6 +179,7 @@ define([
         // message levels
         ERROR: "error",
         WARNING: "warning",
+        INFO: "info",
         /**
          * Add a message for a property. Returns true if mug changed.
          *
@@ -245,18 +246,19 @@ define([
             return changed;
         },
         /**
-         * Get a list of error message strings
-         *
-         * Currently there are only two message levels: "warning" and
-         * "error", and this function returns both. If a lower level
-         * message type such as "info" is added we may want to change
-         * this to drop "info" messages.
+         * Get a list of error and warning message strings
          */
         getErrors: function () {
-            return _.uniq(this.messages.get());
+            var errors = [];
+            this.messages.each(function(msg) {
+                if (msg.level !== "info") {
+                    errors.push(msg.message);
+                }
+            });
+            return _.uniq(errors);
         },
         hasErrors: function () {
-            return !this.messages.isEmpty();
+            return this.getErrors().length !== 0;
         },
         /**
          * Get a list of form serialization warnings
@@ -822,7 +824,13 @@ define([
                         nameWarning = {
                             key: "mug-nodeID-reserved-name-warning",
                             level: mug.WARNING,
-                        };
+                        },
+                        changedQuestionIDWarning = {
+                            key: "mug-nodeID-changed-warning",
+                            level: mug.INFO
+                        },
+                        return_value = "pass";
+
                     if (RESERVED_NAMES.hasOwnProperty(lcid)) {
                         nameWarning.message = util.format(
                             gettext("The ID '{nodeID}' may cause problems " +
@@ -832,16 +840,22 @@ define([
                         );
                     }
                     mug.addMessage("nodeID", nameWarning);
+
                     if (!util.isValidElementName(mug.p.nodeID)) {
-                        return util.format(gettext(
+                        return_value = util.format(gettext(
                             "{nodeID} is not a valid Question ID. " +
                             "It must start with a letter and contain only " +
                             "letters, numbers, and '-' or '_' characters."),
                             {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
-                        return gettext("'meta' is not a valid Question ID.");
+                        return_value = gettext("'meta' is not a valid Question ID.");
+                    } else if (mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID) {
+                        changedQuestionIDWarning.message = gettext(
+                            "Changing a Question ID will create a new Question ID (and a new data column). " +
+                            "It will NOT update the existing or previously submitted data.");
                     }
-                    return "pass";
+                    mug.addMessage("nodeID", changedQuestionIDWarning);
+                    return return_value;
                 },
                 dropMessage: function (mug, attr, key) {
                     if (attr === "nodeID" && key === "mug-conflictedNodeId-warning") {

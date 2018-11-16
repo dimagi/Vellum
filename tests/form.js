@@ -397,6 +397,19 @@ define([
             assert(!util.isTreeNodeValid(q1), "q1 should not be valid");
         });
 
+        it("should warn about changing question ID", function () {
+            util.loadXML(SELECT_QUESTIONS);
+            var mug = util.getMug('question1');
+            assert.equal(util.getMessages(mug), "");
+
+            mug.p.nodeID = "question";
+            assert(mug.messages.get("nodeID", "mug-nodeID-changed-warning"),
+                "mug-nodeID-changed-warning was expected");
+
+            mug.p.nodeID = "question1";
+            assert.equal(util.getMessages(mug), "");
+        });
+
         describe("with async data sources", function() {
             var vellum, callback;
             before(function (done) {
