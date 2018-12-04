@@ -65,14 +65,15 @@ define([
                 if (container) {
                     // HQ will send a 400 (bad request) if it captures an error like an app build problem.
                     // Unexpected errors are likely to send an HTML-based response, so show a generic message for them.
-                    var error = gettext("Could not load app properties. ");
+                    var error = gettext("Could not load app properties.") + "<br>";
                     if (event.xhr.status === 400) {
-                        error += "<br>" + gettext("Details: ") + event.xhr.responseText;
+                        error += event.xhr.responseText;
                     } else {
                         error += gettext("If this error persists, please report an issue.");
                     }
                     container.find(".fd-external-sources-error")
                         .removeClass("hide")
+                        .find(".help-block")
                         .html(error);
 
                     container.find(".fd-external-sources-tree")
