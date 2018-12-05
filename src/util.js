@@ -411,7 +411,7 @@ define([
 
     that.isRightToLeftLanguage = function (lang) {
         return _.contains([
-            'ara', 'arc', 'div', 'fas', 'heb', 'pan', 'pus', 'snd', 'uig', 'urd', 'yid',
+            'ara', 'arc', 'div', 'fas', 'heb', 'pus', 'snd', 'uig', 'urd', 'yid',
         ], lang);
     };
 
