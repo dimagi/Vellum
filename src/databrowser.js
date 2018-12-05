@@ -62,10 +62,22 @@ define([
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
             vellum.datasources.on("error", function(event) {
                 var container = vellum.data.core.databrowser.errorContainer;
-                if (container && event.xhr.responseText) {
+                if (container) {
+                    // HQ will send a 400 (bad request) if it captures an error like an app build problem.
+                    // Unexpected errors are likely to send an HTML-based response, so show a generic message for them.
+                    var error = gettext("Could not load app properties.") + "<br>";
+                    if (event.xhr.status === 400) {
+                        error += event.xhr.responseText;
+                    } else {
+                        error += gettext("If this error persists, please report an issue.");
+                    }
                     container.find(".fd-external-sources-error")
                         .removeClass("hide")
-                        .text(gettext("Could not load app properties. If this error persists, please report an issue."));
+                        .find(".help-block")
+                        .html(error);
+
+                    container.find(".fd-external-sources-tree")
+                        .addClass("hide");
                 }
             });
             var toggle = _.partial(toggleExternalDataTree, vellum);
