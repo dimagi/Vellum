@@ -148,6 +148,12 @@ define([
                     analytics.workflow("Clicked Save in the form builder");
                     _this.validateAndSaveXForm(forceFullSave);
                 });
+                var mugMap = _this.data.core.form.mugMap;
+                for (var mugId in mugMap) {
+                    var mug = mugMap[mugId];
+                    mug.__originalNodeID = mug.p.nodeID;
+                    mug.validate();
+                }
             },
             unsavedMessage: gettext('Are you sure you want to exit? All unsaved changes will be lost!'),
             csrftoken: _this.opts().csrftoken
