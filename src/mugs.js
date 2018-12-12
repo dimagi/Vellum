@@ -124,6 +124,9 @@ define([
          */
         validate: function (attr) {
             var mug = this;
+
+            util.check_for_form_submissions(mug.form);
+
             return this._withMessages(function () {
                 var changed = false;
                 mug.form.updateLogicReferences(mug, attr);
@@ -849,7 +852,8 @@ define([
                             {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
                         return_value = gettext("'meta' is not a valid Question ID.");
-                    } else if (mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID && !mug.skip_changed_msg) {
+                    } else if (mug.form.warn_when_changed && !mug.skip_changed_msg &&
+                        mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID) {
                         changedQuestionIDWarning.message = gettext(
                             "Changing a Question ID will create a new Question ID (and a new data column). " +
                             "It will NOT update the existing or previously submitted data.");

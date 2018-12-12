@@ -1406,6 +1406,8 @@ define([
      * after parsing XML before tree population.
      */
     fn.onXFormLoaded = function (form) {
+        form.submission_url = this.opts().core.hasSubmissionsUrl;
+        util.check_for_form_submissions(form);
     };
 
     fn.refreshMugName = function (mug) {
@@ -2438,6 +2440,7 @@ define([
         form: null,
         loadDelay: 500,
         patchUrl: false,
+        hasSubmissionsUrl: false,
         saveUrl: false,
         saveType: 'full',
         staticPrefix: "",

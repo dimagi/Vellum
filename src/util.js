@@ -442,5 +442,24 @@ define([
         });
     };
 
+    that.check_for_form_submissions = function (form) {
+        if (!form.warn_when_changed) {
+            $.ajax({
+                url: form.submission_url,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if(data.form_has_submissions) {
+                        form.warn_when_changed = true;
+                        var mugMap = form.mugMap;
+                        for (var mugId in mugMap) {
+                            mugMap[mugId].validate();
+                        }
+                    }
+                }
+            });
+        }
+    };
+
     return that;
 });
