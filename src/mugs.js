@@ -855,8 +855,7 @@ define([
                     } else if (mug.form.warn_when_changed && !mug.skip_changed_msg &&
                         mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID) {
                         changedQuestionIDWarning.message = gettext(
-                            "Changing a Question ID will create a new Question ID (and a new data column). " +
-                            "It will NOT update the existing or previously submitted data.");
+                            "Making this change will create a new Question ID (and a new column in exports).");
                     }
                     mug.addMessage("nodeID", changedQuestionIDWarning);
                     return return_value;
