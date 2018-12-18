@@ -398,16 +398,43 @@ define([
         });
 
         it("should warn about changing question ID", function () {
-            util.loadXML(SELECT_QUESTIONS);
-            var mug = util.getMug('question1');
+            var form = util.loadXML(SELECT_QUESTIONS);
+            form.warn_when_changed = true;
+            var mug = util.getMug("question1");
             assert.equal(util.getMessages(mug), "");
 
-            mug.p.nodeID = "question";
+            mug.p.nodeID = "new-question-id";
             assert(mug.messages.get("nodeID", "mug-nodeID-changed-warning"),
                 "mug-nodeID-changed-warning was expected");
 
             mug.p.nodeID = "question1";
             assert.equal(util.getMessages(mug), "");
+        });
+
+        it("should not warn about changing question ID", function () {
+            var form = util.loadXML(SELECT_QUESTIONS);
+            form.warn_when_changed = false;
+            var mug = util.getMug("question1");
+            assert.equal(util.getMessages(mug), "");
+
+            mug.p.nodeID = "new-question-id";
+            assert(mug.messages.get("nodeID", ""),
+                "mug-nodeID-changed-warning was not expected");
+        });
+
+        it("should skip warning about changing question ID", function () {
+            var form = util.loadXML(SELECT_QUESTIONS);
+            form.warn_when_changed = true;
+            var mug = util.getMug("question1");
+            assert.equal(util.getMessages(mug), "");
+
+            mug.p.nodeID = "new-question-id";
+            assert(mug.messages.get("nodeID", "mug-nodeID-changed-warning"),
+                "mug-nodeID-changed-warning was expected");
+
+            mug.skip_changed_msg = true;
+            assert(mug.messages.get("nodeID", ""),
+                "mug-nodeID-changed-warning was not expected");
         });
 
         describe("with async data sources", function() {
