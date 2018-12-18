@@ -695,7 +695,7 @@ define([
          * Move a mug from its current place to
          * the position specified by the arguments.
          *
-         * NOTE the cannonical way to rename a mug is to set its
+         * NOTE the canonical way to rename a mug is to set its
          * `nodeID` property: `mug.p.nodeID = "name"`
          *
          * @param mug - The mug to be moved.
