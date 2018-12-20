@@ -443,7 +443,8 @@ define([
     };
 
     that.checkForFormSubmissions = function (form) {
-        if (!form.warnWhenChanged) {
+        if (!form.warnWhenChanged && !form.isCurrentlyCheckingForSubmissions) {
+            form.isCurrentlyCheckingForSubmissions = true;
             $.ajax({
                 url: form.submissionUrl,
                 type: 'GET',
@@ -455,6 +456,9 @@ define([
                             mug.validate();
                         });
                     }
+                },
+                complete: function() {
+                    form.isCurrentlyCheckingForSubmissions = false;
                 }
             });
         }
