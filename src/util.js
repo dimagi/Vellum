@@ -451,10 +451,9 @@ define([
                 success: function(data) {
                     if(data.form_has_submissions) {
                         form.warnWhenChanged = true;
-                        var mugMap = form.mugMap;
-                        for (var mugId in mugMap) {
-                            mugMap[mugId].validate();
-                        }
+                        form.walkMugs(function (mug) {
+                            mug.validate();
+                        });
                     }
                 }
             });
