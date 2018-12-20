@@ -442,7 +442,7 @@ define([
         });
     };
 
-    that.checkForFormSubmissions = function (form) {
+    that.checkForFormSubmissions = _.throttle(function (form) {
         if (!form.warnWhenChanged && !form.isCurrentlyCheckingForSubmissions) {
             form.isCurrentlyCheckingForSubmissions = true;
             $.ajax({
@@ -462,7 +462,7 @@ define([
                 }
             });
         }
-    };
+    }, 10000);
 
     return that;
 });
