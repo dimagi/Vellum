@@ -1404,8 +1404,8 @@ define([
      * after parsing XML before tree population.
      */
     fn.onXFormLoaded = function (form) {
+        form.warnWhenChanged = this.opts().core.hasSubmissions;
         form.submissionUrl = this.opts().core.hasSubmissionsUrl;
-        util.checkForFormSubmissions(form);
     };
 
     fn.refreshMugName = function (mug) {
@@ -2438,6 +2438,7 @@ define([
         form: null,
         loadDelay: 500,
         patchUrl: false,
+        hasSubmissions: false,
         hasSubmissionsUrl: false,
         saveUrl: false,
         saveType: 'full',
