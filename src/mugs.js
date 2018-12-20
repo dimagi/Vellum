@@ -85,6 +85,7 @@ define([
             this.logicReferenceAttrs = [];
             this.options = util.extend(defaultOptions, options);
             this.__className = this.options.__className;
+            this.showChangedMsg = true;
             this.spec = copyAndProcessSpec(this._baseSpec, this.options.spec, this.options);
 
             // Reset any properties that are part of the question type
@@ -852,7 +853,7 @@ define([
                             {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
                         return_value = gettext("'meta' is not a valid Question ID.");
-                    } else if (mug.form.warnWhenChanged && !mug.skip_changed_msg &&
+                    } else if (mug.form.warnWhenChanged && mug.showChangedMsg &&
                         mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID) {
                         changedQuestionIDWarning.message = gettext(
                             "Making this change will create a new Question ID (and a new column in exports).");

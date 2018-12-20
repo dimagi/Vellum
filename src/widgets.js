@@ -77,7 +77,7 @@ define([
 
         widget.handleChange = function () {
             widget.updateValue();
-            mug.skip_changed_msg = false;
+            mug.showChangedMsg = true;
             // TODO make all widgets that inherit from base set path
             if (widget.path) {
                 // Widget change events, in addition to mug property
@@ -806,7 +806,7 @@ define([
             html.find("button.close").click(function () {
                 mug.dropMessage(path, msg.key);
                 if (msg.key === "mug-nodeID-changed-warning") {
-                    mug.skip_changed_msg = true;
+                    mug.showChangedMsg = false;
                 }
             });
             $messages = $messages.add(html);

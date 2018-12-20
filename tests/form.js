@@ -432,7 +432,7 @@ define([
             assert(mug.messages.get("nodeID", "mug-nodeID-changed-warning"),
                 "mug-nodeID-changed-warning was expected");
 
-            mug.skip_changed_msg = true;
+            mug.showChangedMsg = false;
             assert(mug.messages.get("nodeID", ""),
                 "mug-nodeID-changed-warning was not expected");
         });
