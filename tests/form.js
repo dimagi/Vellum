@@ -399,7 +399,7 @@ define([
 
         it("should warn about changing question ID", function () {
             var form = util.loadXML(SELECT_QUESTIONS);
-            form.warn_when_changed = true;
+            form.warnWhenChanged = true;
             var mug = util.getMug("question1");
             assert.equal(util.getMessages(mug), "");
 
@@ -413,7 +413,7 @@ define([
 
         it("should not warn about changing question ID", function () {
             var form = util.loadXML(SELECT_QUESTIONS);
-            form.warn_when_changed = false;
+            form.warnWhenChanged = false;
             var mug = util.getMug("question1");
             assert.equal(util.getMessages(mug), "");
 
@@ -424,7 +424,7 @@ define([
 
         it("should skip warning about changing question ID", function () {
             var form = util.loadXML(SELECT_QUESTIONS);
-            form.warn_when_changed = true;
+            form.warnWhenChanged = true;
             var mug = util.getMug("question1");
             assert.equal(util.getMessages(mug), "");
 
