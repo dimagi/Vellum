@@ -148,6 +148,10 @@ define([
                     analytics.workflow("Clicked Save in the form builder");
                     _this.validateAndSaveXForm(forceFullSave);
                 });
+                _this.data.core.form.walkMugs(function (mug) {
+                    mug.__originalNodeID = mug.p.nodeID;
+                    mug.dropMessage("nodeID", "mug-nodeID-changed-warning");
+                });
             },
             unsavedMessage: gettext('Are you sure you want to exit? All unsaved changes will be lost!'),
             csrftoken: _this.opts().csrftoken
@@ -1400,6 +1404,8 @@ define([
      * after parsing XML before tree population.
      */
     fn.onXFormLoaded = function (form) {
+        form.warnWhenChanged = this.opts().core.hasSubmissions;
+        form.submissionUrl = this.opts().core.hasSubmissionsUrl;
     };
 
     fn.refreshMugName = function (mug) {
@@ -2432,6 +2438,8 @@ define([
         form: null,
         loadDelay: 500,
         patchUrl: false,
+        hasSubmissions: false,
+        hasSubmissionsUrl: false,
         saveUrl: false,
         saveType: 'full',
         staticPrefix: "",

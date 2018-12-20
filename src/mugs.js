@@ -85,6 +85,7 @@ define([
             this.logicReferenceAttrs = [];
             this.options = util.extend(defaultOptions, options);
             this.__className = this.options.__className;
+            this.showChangedMsg = true;
             this.spec = copyAndProcessSpec(this._baseSpec, this.options.spec, this.options);
 
             // Reset any properties that are part of the question type
@@ -124,6 +125,9 @@ define([
          */
         validate: function (attr) {
             var mug = this;
+
+            util.checkForFormSubmissions(mug.form);
+
             return this._withMessages(function () {
                 var changed = false;
                 mug.form.updateLogicReferences(mug, attr);
@@ -849,10 +853,10 @@ define([
                             {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
                         return_value = gettext("'meta' is not a valid Question ID.");
-                    } else if (mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID) {
+                    } else if (mug.form.warnWhenChanged && mug.showChangedMsg &&
+                        mug.__originalNodeID && mug.p.nodeID !== mug.__originalNodeID) {
                         changedQuestionIDWarning.message = gettext(
-                            "Changing a Question ID will create a new Question ID (and a new data column). " +
-                            "It will NOT update the existing or previously submitted data.");
+                            "Making this change will create a new Question ID (and a new column in exports).");
                     }
                     mug.addMessage("nodeID", changedQuestionIDWarning);
                     return return_value;

@@ -442,5 +442,27 @@ define([
         });
     };
 
+    that.checkForFormSubmissions = _.throttle(function (form) {
+        if (!form.warnWhenChanged && !form.isCurrentlyCheckingForSubmissions) {
+            form.isCurrentlyCheckingForSubmissions = true;
+            $.ajax({
+                url: form.submissionUrl,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if(data.form_has_submissions) {
+                        form.warnWhenChanged = true;
+                        form.walkMugs(function (mug) {
+                            mug.validate();
+                        });
+                    }
+                },
+                complete: function() {
+                    form.isCurrentlyCheckingForSubmissions = false;
+                }
+            });
+        }
+    }, 10000);
+
     return that;
 });
