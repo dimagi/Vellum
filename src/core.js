@@ -965,7 +965,7 @@ define([
             } else if (selected.length < 2) {
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
-                window.history.replaceState(null, null, mug.hashtagPath);
+                _this._setURLHash(mug);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -1719,6 +1719,18 @@ define([
         this.toggleConstraintItext(mug);
     };
 
+    fn._setURLHash = function (mug) {
+        if (mug && mug.absolutePathNoRoot
+            && mug.absolutePathNoRoot.indexOf('undefined') === -1
+            && !mug.absolutePathNoRoot.endsWith('/')) {
+            window.history.replaceState(null, null, "#form" + mug.absolutePathNoRoot);
+        }
+        else {
+            // If the mug doesn't have a question id yet, remove the hash from the url
+            window.history.replaceState(null, null, '/');
+        }
+    };
+
     fn._setPropertiesMug = function (mug) {
         if (this._propertiesMug) {
             this._propertiesMug.teardownProperties();
@@ -2373,7 +2385,7 @@ define([
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
         form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
-        window.history.replaceState(null, null, mug.hashtagPath);
+        this._setURLHash(mug);
     };
 
     fn.duplicateMugProperties = function(mug) {};
