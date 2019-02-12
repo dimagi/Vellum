@@ -100,6 +100,9 @@ define([
             assert.equal(index.p.user_id, "/data/meta/userID");
             assert.equal(index.p.case_id, "/data/meta/caseID");
             util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
+
+            // clean up from clickQuestion
+            window.history.replaceState(null, null, '/');
         });
 
         it("should load and save a attachment property", function () {
@@ -229,6 +232,9 @@ define([
             util.clickQuestion("save_to_case");
             $('#fd-question-edit-update').find('.fd-add-property').click();
             util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
+
+            // clean up from clickQuestion
+            window.history.replaceState(null, null, '/');
         });
 
         it("should have @case_id in bind for create when in repeat", function() {
