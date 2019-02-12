@@ -1720,9 +1720,9 @@ define([
     };
 
     fn._setURLHash = function (mug) {
-        if (mug && mug.absolutePathNoRoot
-            && mug.absolutePathNoRoot.indexOf('undefined') === -1
-            && !mug.absolutePathNoRoot.endsWith('/')) {
+        if (mug && mug.absolutePathNoRoot &&
+            mug.absolutePathNoRoot.indexOf('undefined') === -1 &&
+            !mug.absolutePathNoRoot.endsWith('/')) {
             window.history.replaceState(null, null, "#form" + mug.absolutePathNoRoot);
         }
         else {
