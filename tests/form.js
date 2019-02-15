@@ -132,6 +132,8 @@ define([
             blue.form.removeMugsFromForm([blue]);
             assert(util.isTreeNodeValid(green), "green should be valid");
             assert(!util.isTreeNodeValid(black), "black should not be valid");
+
+            util.cleanupClickQuestion();
         });
 
         it("should remove warnings when broken reference is fixed", function () {
@@ -303,6 +305,7 @@ define([
                 mugs = util.clickQuestion("group1", "group1/group2");
             form.removeMugsFromForm(mugs);
             util.assertJSTreeState("");
+            util.cleanupClickQuestion();
         });
 
         it("should delete nested groups v2", function() {
@@ -310,6 +313,7 @@ define([
                 mugs = util.clickQuestion("group1", "group1/group2/group3");
             form.removeMugsFromForm(mugs);
             util.assertJSTreeState("");
+            util.cleanupClickQuestion();
         });
 
         function assertInstanceSrc(id, form, expect, message) {
@@ -381,6 +385,8 @@ define([
             util.clickQuestion('output');
             $('[name=property-calculateAttr]').change();
             util.assertXmlEqual(call('createXML'), MANUAL_INSTANCE_REFERENCE_XML);
+
+            util.cleanupClickQuestion();
         });
 
         it ("should warn on delete question", function() {

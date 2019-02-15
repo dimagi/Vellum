@@ -299,6 +299,13 @@ define([
         return mugs;
     }
 
+    /**
+     * clean up from clickQuestion by restoring the URL hash
+     */
+    function cleanupClickQuestion(){
+        window.history.replaceState(null, null, '/');
+    }
+
     function selectAll() {
         call("jstree", "select_all");
     }
@@ -516,6 +523,7 @@ define([
         },
         paste: paste,
         clickQuestion: clickQuestion,
+        cleanupClickQuestion: cleanupClickQuestion,
         selectAll: selectAll,
         deleteQuestion: deleteQuestion,
         saveButtonEnabled: saveButtonEnabled,

@@ -58,6 +58,7 @@ define([
         var vellum;
         before(beforeFn);
         beforeEach(function () { vellum.datasources.reset(); });
+        afterEach(function () { util.cleanupClickQuestion(); });
 
         it("adds a new instance to the form", function () {
             util.loadXML(TEST_XML_1);
@@ -121,7 +122,7 @@ define([
             util.addQuestion("SelectDynamic", "select");
             // HACK must click on the itemset node to start async load, which
             // eventually sets the default value if everything goes well.
-            util.clickQuestion("select/itemset");
+            clickQuestion("select/itemset");
             var mug = util.getMug('select/itemset');
             mug.validate();
             assert.equal(util.getMessages(mug), "");
@@ -179,7 +180,7 @@ define([
             util.loadXML("");
             util.addQuestion("Text", 'state');
             util.addQuestion("SelectDynamic", 'district');
-            util.clickQuestion('district/itemset');
+            clickQuestion('district/itemset');
             var itemset = util.getMug("district/itemset");
             itemset.p.itemsetData = {
                 instance: itemset.p.itemsetData.instance,
@@ -367,7 +368,7 @@ define([
 
         it("should be able to configure Lookup Table Data", function() {
             util.addQuestion("SelectDynamic", "select");
-            util.clickQuestion("select/itemset");  // should not throw exception
+            clickQuestion("select/itemset");  // should not throw exception
             assert.equal($("[name=property-itemsetData]").length, 1);
         });
     });
