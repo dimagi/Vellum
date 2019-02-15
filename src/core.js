@@ -1720,10 +1720,11 @@ define([
     };
 
     fn._setURLHash = function (mug) {
-        if (mug && mug.absolutePathNoRoot &&
-            mug.absolutePathNoRoot.indexOf('undefined') === -1 &&
-            !mug.absolutePathNoRoot.endsWith('/')) {
-            window.history.replaceState(null, null, "#form" + mug.absolutePathNoRoot);
+        if (mug && mug.hashtagPath &&
+            mug.hashtagPath.startsWith("#") &&
+            mug.hashtagPath.indexOf('undefined') === -1 &&
+            !mug.hashtagPath.endsWith('/')) {
+            window.history.replaceState(null, null, mug.hashtagPath);
         }
         else {
             // If the mug doesn't have a question id yet, remove the hash from the url
