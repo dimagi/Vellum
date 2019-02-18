@@ -1728,7 +1728,7 @@ define([
         }
         else {
             // If the mug doesn't have a question id yet, remove the hash from the url
-            window.history.replaceState(null, null, '/');
+            window.history.replaceState(null, null, ' ');
         }
     };
 
