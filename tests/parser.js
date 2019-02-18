@@ -144,7 +144,6 @@ define([
             util.loadXML(MISSING_BIND_XML);
             util.clickQuestion("text");
             assert(!$('[name=property-dataValue]').length);
-            util.cleanupClickQuestion();
         });
 
         it("should set required correctly", function() {

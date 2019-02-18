@@ -105,7 +105,6 @@ define([
             assert.equal(header.text(), "q1");
             util.clickQuestion("q2");
             assert.equal(header.text(), "q2");
-            util.cleanupClickQuestion();
         });
 
         it("should show warning icons on invalid questions", function () {
@@ -123,7 +122,6 @@ define([
             util.clickQuestion("question1");
             var item = util.addQuestion("Choice");
             assert.equal(item.p.nodeID, "choice3");
-            util.cleanupClickQuestion();
         });
 
         it("should increment item value on insert new select item after sibling item", function () {
@@ -131,7 +129,6 @@ define([
             util.clickQuestion("question1/choice1");
             var item = util.addQuestion("Choice");
             assert.equal(item.p.nodeID, "choice3");
-            util.cleanupClickQuestion();
         });
 
         it("should add hidden value in repeat group", function () {
@@ -176,7 +173,6 @@ define([
                 "  text1",
                 "text2"
             );
-            util.cleanupClickQuestion();
         });
 
         it("should not be able to add choice to collapsed select", function () {
@@ -221,7 +217,6 @@ define([
             selected = call("getCurrentlySelectedMug");
             assert.equal(selected, text,
                 "wrong selected mug: " + (selected && selected.p.nodeID));
-            util.cleanupClickQuestion();
         });
 
         it("should not select group if external question is selected on collapse group", function () {
@@ -239,7 +234,6 @@ define([
             selected = call("getCurrentlySelectedMug");
             assert.equal(selected, text1,
                 "wrong selected mug: " + (selected && selected.p.nodeID));
-            util.cleanupClickQuestion();
         });
 
         it("should load hidden value in repeat group", function () {
@@ -586,7 +580,6 @@ define([
                 dup.p.labelItext.set("same");
                 util.clickQuestion(dup);
             });
-            after(function () { util.cleanupClickQuestion(); });
 
             beforeEach(function () {
                 dup.p.nodeID = "same";

@@ -148,8 +148,6 @@ define([
             });
         });
 
-        afterEach(function () { util.cleanupClickQuestion(); });
-
         it("displays nested structures", function() {
             util.loadXML("");
             util.addQuestion("SelectDynamic", "select1");

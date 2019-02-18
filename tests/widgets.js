@@ -44,8 +44,6 @@ define([
             });
         });
 
-        afterEach(function () { util.cleanupClickQuestion(); });
-
         it("xPath widget should allow drag/drop", function () {
             var spec = mugs.baseSpecs.databind;
             util.loadXML("");

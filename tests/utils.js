@@ -256,8 +256,11 @@ define([
     }
 
     // load XML syncronously
-    function loadXML(value, options, ignoreParseWarnings) {
+    function loadXML(value, options, ignoreParseWarnings, maintainUrlHash) {
         var warnings = [], data = call("getData");
+        if (!maintainUrlHash){
+            window.history.replaceState(null, null, " ");
+        }
         data.core.parseWarnings = [];
         call("loadXML", value, options || {});
         if (!ignoreParseWarnings) {
@@ -297,13 +300,6 @@ define([
         $(".collapse-toggle.collapsed").click();
 
         return mugs;
-    }
-
-    /**
-     * clean up from clickQuestion by restoring the URL hash
-     */
-    function cleanupClickQuestion(){
-        window.history.replaceState(null, null, '/');
     }
 
     function selectAll() {
@@ -523,7 +519,6 @@ define([
         },
         paste: paste,
         clickQuestion: clickQuestion,
-        cleanupClickQuestion: cleanupClickQuestion,
         selectAll: selectAll,
         deleteQuestion: deleteQuestion,
         saveButtonEnabled: saveButtonEnabled,
