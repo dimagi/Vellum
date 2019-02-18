@@ -1720,10 +1720,8 @@ define([
     };
 
     fn._setURLHash = function (mug) {
-        if (mug && mug.hashtagPath &&
-            mug.hashtagPath.startsWith("#") &&
-            mug.hashtagPath.indexOf('undefined') === -1 &&
-            !mug.hashtagPath.endsWith('/')) {
+        if (mug && mug.getNodeID() !== undefined &&
+            mug.hashtagPath && mug.hashtagPath.startsWith("#") && !mug.hashtagPath.endsWith('/')) {
             window.history.replaceState(null, null, mug.hashtagPath);
         }
         else {
