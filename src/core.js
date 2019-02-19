@@ -225,6 +225,10 @@ define([
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
+        $(window).on('hashchange', function () {
+            _this.selectSomethingOrHideProperties(true, window.location.hash);
+        });
+
         this._init_toolbar();
         this._init_add_question();
         this._createJSTree();
@@ -1306,7 +1310,7 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
-        var form, _this = this, qId = window.location.hash;
+        var form, _this = this, selectedHashtag = window.location.hash;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
@@ -1323,7 +1327,7 @@ define([
         this.onXFormLoaded(form);
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
-            _this._populateTree(qId);
+            _this._populateTree(selectedHashtag);
         }
 
         form.on('question-type-change', function (e) {
@@ -1438,7 +1442,7 @@ define([
         }
     };
 
-    fn._populateTree = function (qId) {
+    fn._populateTree = function (selectedHashtag) {
         // NOTE: this performs the final step in the mug parsing process.
         // It should only be called once after a new XForm is loaded.
         var _this = this,
@@ -1456,11 +1460,10 @@ define([
             }
         });
 
-        var mug = qId && _this.getMugByPath(qId) || undefined;
-        _this.selectSomethingOrHideProperties(true, mug && mug.ufid);
+        _this.selectSomethingOrHideProperties(true, selectedHashtag);
     };
 
-    fn.selectSomethingOrHideProperties = function (forceDeselect, ufid) {
+    fn.selectSomethingOrHideProperties = function (forceDeselect, questionPath) {
         if (forceDeselect) {
             this.jstree('deselect_all');
         }
@@ -1469,8 +1472,12 @@ define([
             // if there's any nodes in the tree, just select the first
             var all_nodes = this.data.core.$tree.find("li"),
                 selected;
-            if (ufid) {
-                selected = all_nodes.filter('[id= ' + ufid + ']');
+            if (questionPath) {
+                var mug = this.getMugByPath(questionPath) || undefined,
+                    ufid = mug && mug.ufid;
+                if (ufid) {
+                    selected = all_nodes.filter('[id= ' + ufid + ']');
+                }
             }
             if (selected && selected.length > 0) {
                 this.jstree('select_node', selected[0]);
