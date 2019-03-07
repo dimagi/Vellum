@@ -1481,9 +1481,11 @@ define([
             }
             if (selected && selected.length > 0) {
                 this.jstree('select_node', selected[0]);
+                selected[0].scrollIntoView();
                 return true;
             } else if (all_nodes.length > 0) {
                 this.jstree('select_node', all_nodes[0]);
+                all_nodes[0].scrollIntoView();
                 return true;
             } else {
                 // otherwise clear the Question Edit UI pane
