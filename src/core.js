@@ -225,6 +225,10 @@ define([
             analytics.workflow("Clicked on easy reference popover's link to show in tree");
         });
 
+        $(window).on('hashchange', function () {
+            _this.selectSomethingOrHideProperties(true, window.location.hash);
+        });
+
         this._init_toolbar();
         this._init_add_question();
         this._createJSTree();
@@ -965,6 +969,7 @@ define([
             } else if (selected.length < 2) {
                 var mug = _this.data.core.form.getMugByUFID(selected[0]);
                 _this.displayMugProperties(mug);
+                _this._setURLHash(mug);
             } else {
                 _this.displayMultipleSelectionView();
             }
@@ -1305,7 +1310,7 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
-        var form, _this = this;
+        var form, _this = this, selectedHashtag = window.location.hash;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
@@ -1322,7 +1327,7 @@ define([
         this.onXFormLoaded(form);
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
-            _this._populateTree();
+            _this._populateTree(selectedHashtag);
         }
 
         form.on('question-type-change', function (e) {
@@ -1437,7 +1442,7 @@ define([
         }
     };
 
-    fn._populateTree = function () {
+    fn._populateTree = function (selectedHashtag) {
         // NOTE: this performs the final step in the mug parsing process.
         // It should only be called once after a new XForm is loaded.
         var _this = this,
@@ -1454,19 +1459,33 @@ define([
                 _this.setTreeActions(mug);
             }
         });
-        this.selectSomethingOrHideProperties(true);
+
+        _this.selectSomethingOrHideProperties(true, selectedHashtag);
     };
 
-    fn.selectSomethingOrHideProperties = function (forceDeselect) {
+    fn.selectSomethingOrHideProperties = function (forceDeselect, questionPath) {
         if (forceDeselect) {
             this.jstree('deselect_all');
         }
         // ensure something is selected if possible
         if (!this.jstree('get_selected').length) {
             // if there's any nodes in the tree, just select the first
-            var all_nodes = this.data.core.$tree.find("li");
-            if (all_nodes.length > 0) {
+            var all_nodes = this.data.core.$tree.find("li"),
+                selected;
+            if (questionPath) {
+                var mug = this.getMugByPath(questionPath) || undefined,
+                    ufid = mug && mug.ufid;
+                if (ufid) {
+                    selected = all_nodes.filter('[id= ' + ufid + ']');
+                }
+            }
+            if (selected && selected.length > 0) {
+                this.jstree('select_node', selected[0]);
+                this.scrollTreeTo(selected[0].id);
+                return true;
+            } else if (all_nodes.length > 0) {
                 this.jstree('select_node', all_nodes[0]);
+                this.scrollTreeTo(all_nodes[0].id);
                 return true;
             } else {
                 // otherwise clear the Question Edit UI pane
@@ -1707,6 +1726,17 @@ define([
 
         this.refreshMugName(mug);
         this.toggleConstraintItext(mug);
+    };
+
+    fn._setURLHash = function (mug) {
+        if (mug && mug.getNodeID() !== undefined &&
+            mug.hashtagPath && mug.hashtagPath.startsWith("#") && !mug.hashtagPath.endsWith('/')) {
+            window.history.replaceState(null, null, mug.hashtagPath);
+        }
+        else {
+            // If the mug doesn't have a question id yet, remove the hash from the url
+            window.history.replaceState(null, null, ' ');
+        }
     };
 
     fn._setPropertiesMug = function (mug) {
@@ -2363,6 +2393,7 @@ define([
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
         form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
+        this._setURLHash(mug);
     };
 
     fn.duplicateMugProperties = function(mug) {};
