@@ -8,11 +8,11 @@
             <div class="col-sm-1 fd-kv-arrow"><i class="fa fa-arrow-right"></i></div>
             <div class="col-sm-7"><input class="fd-kv-val form-control jstree-drop" type="text" value="<%=v%>" placeholder="<%-gettext("value")%>" /></div>
             <div class="col-sm-1">
-                <a href="#" class="btn fd-kv-remove-pair btn-sm btn-danger<% if (k =='') { %> hide<% } %>">
+                <a class="btn fd-kv-remove-pair btn-sm btn-danger<% if (k =='') { %> hide<% } %>">
                     <i class="fa fa-remove"></i>
                 </a>
             </div>
         </div>
     <% }); }); %>
-    <a href="#" class="btn btn-default fd-kv-add-pair hide"><i class="fa fa-plus"></i> <%=gettext("Add Key&rarr;Value Pair")%></a>
+    <a class="btn btn-default fd-kv-add-pair hide"><i class="fa fa-plus"></i> <%=gettext("Add Key&rarr;Value Pair")%></a>
 </div>

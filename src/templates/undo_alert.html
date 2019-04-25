@@ -1,6 +1,6 @@
 <div class="fd-undo-delete alert alert-<%= errors.length ? "danger" : "success" %> fade in">
   <button type="button" class="close">&times;</button>
-  <%-gettext("You have deleted a question.")%> <a href="#" class="fd-undo"><%-gettext("Undo")%></a>
+  <%-gettext("You have deleted a question.")%> <a class="fd-undo"><%-gettext("Undo")%></a>
   <% if (errors.length) { %>
     <p><%
       print(format(

@@ -1,7 +1,7 @@
 <li class="divider language-selector"></li>
 <li class="dropdown-header language-selector"><%-gettext("Display")%></li>
 <% _.each(languages, function(language) { %>
-<li><a tabindex="-1" href="#" class="fd-display-item language-selector" data-code="<%-language.code%>"><i class="fa fa-check"></i><%-language.name%><%
+<li><a tabindex="-1" class="fd-display-item language-selector" data-code="<%-language.code%>"><i class="fa fa-check"></i><%-language.name%><%
     if (language.name !== language.code && language.code !== '_ids') {
         %> (<%-language.code%>)<%
     }

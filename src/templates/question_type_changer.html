@@ -1,6 +1,6 @@
 <div class="btn-group question-type-changer">
     <a class="btn btn-default dropdown-toggle current-question"
-        data-toggle="dropdown" href="#">
+        data-toggle="dropdown">
         <i class="<%=currentQuestionIcon%>"></i> 
         <%= currentTypeName %> <span class="caret"></span>
     </a>
@@ -11,7 +11,7 @@
             <li class="dropdown-header"><%-gettext("Change Question Type To")%></li>
             <% _.each(questions, function(question) { %>
             <li>
-                <a href="#" class="change-question" data-qtype="<%=question.slug%>">
+                <a class="change-question" data-qtype="<%=question.slug%>">
                     <i class="<%=question.icon%>"></i> <%=question.name%>
                 </a>
             </li>
