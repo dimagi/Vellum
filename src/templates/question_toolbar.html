@@ -8,7 +8,7 @@
         <% } %>
         <% if (sections.length) { %>
             <div class="btn-group fd-section-changer">
-                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                     <i class="fa fa-reorder"></i>
                     <i class="fa fa-caret-down"></i>
                 </a>
@@ -16,7 +16,7 @@
                     <li class="dropdown-header"><%-gettext("Show")%></li>
                     <% _.each(sections, function(section) { %>
                     <li>
-                        <a href="#" data-slug="<%= section.slug %>" <% if (section.show) { %>class="selected"<% } %>>
+                        <a data-slug="<%= section.slug %>" <% if (section.show) { %>class="selected"<% } %>>
                             <i class="fa fa-check"></i><%= section.displayName %>
                         </a>
                     </li>

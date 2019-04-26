@@ -6,14 +6,14 @@
   </thead>
   <% _.each(tableData, function(refs, question) { %>
      <tr>
-       <td><a class="link-to-question" href="#"><%- question %></a></td>
+       <td><a class="link-to-question"><%- question %></a></td>
        <td></td>
        <td></td>
      </tr>
      <% _.each(refs, function(propName, path) {%>
        <tr class="usage-row">
          <td></td>
-         <td><a class="link-to-question" href="#"><%- path %></a></td>
+         <td><a class="link-to-question"><%- path %></a></td>
          <td><%- propName %></td>
        </tr>
      <% }); %>
