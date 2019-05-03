@@ -12,6 +12,7 @@ define([
     'text!static/form/instance-reference.xml',
     'text!static/form/manual-instance-reference.xml',
     'text!static/form/mismatch-tree-order.xml',
+    'text!static/form/missing-value.xml',
     'text!static/form/name-template.xml',
     'text!static/form/nested-groups.xml',
     'text!static/form/question-referencing-other.xml',
@@ -30,6 +31,7 @@ define([
     INSTANCE_REFERENCE_XML,
     MANUAL_INSTANCE_REFERENCE_XML,
     MISMATCH_TREE_ORDER_XML,
+    MISSING_VALUE,
     NAME_TEMPLATE,
     NESTED_GROUPS_XML,
     QUESTION_REFERENCING_OTHER_XML,
@@ -435,6 +437,14 @@ define([
             mug.showChangedMsg = false;
             assert(mug.messages.get("nodeID", ""),
                 "mug-nodeID-changed-warning was not expected");
+        });
+
+        it("should load choice with missing value", function () {
+            util.loadXML(MISSING_VALUE);
+            var mug = util.getMug("choice/");
+            assert.equal(mug.p.nodeID, "");
+            assert(mug.messages.get("nodeID", "mug-nodeID-error"),
+                'mug-nodeID-error was expected');
         });
 
         describe("with async data sources", function() {

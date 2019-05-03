@@ -448,10 +448,7 @@ define([
             item: function ($cEl) {
                 var adapt = function (mug, form) {
                     mug = adaptItem(mug, form);
-                    var value = $cEl.children('value').text();
-                    if (value) {
-                        mug.p.nodeID = value;
-                    }
+                    mug.p.nodeID = $cEl.children('value').text();
                     return mug;
                 };
                 adapt.type = adaptItem.type;
