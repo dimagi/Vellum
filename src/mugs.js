@@ -802,7 +802,7 @@ define([
         mug.p.conflictedNodeId = null;
     }
 
-    var RESERVED_NAMES = {"case": true, "registration": true};
+    var RESERVED_NAMES = {"case": true, "registration": true, "script": true};
     var baseSpecs = {
         databind: {
             // DATA ELEMENT
