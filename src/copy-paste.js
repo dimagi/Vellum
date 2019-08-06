@@ -11,7 +11,7 @@ define([
     $,
     _,
     copy_paste_help,
-    mugs,
+    mugsModule,
     tsv,
     util,
     analytics
@@ -270,22 +270,14 @@ define([
         }
         var types = vellum.data.core.mugTypes.allTypes,
             form = vellum.data.core.form,
+            pasted = pasteContext(form),
+            context = pasted.context,
             selected = vellum.getCurrentlySelectedMug(true, true),
             mug = selected.length ? selected[selected.length - 1] : null,
             header = next(),
             row = next(),
-            errors = new mugs.MugMessages(),
             node = {id: null, mug: mug, parent: null},
-            later = [],
-            pasted = 0,
             values, pos;
-        errors.add = function (message) {
-            errors.update(null, {
-                key: message,
-                level: mugs.ERROR,
-                message: message
-            });
-        };
         vellum.beforeBulkInsert(form);
         for (; row; row = next()) {
             try {
@@ -293,34 +285,73 @@ define([
                     return valuify(str);
                 }));
             } catch (err) {
-                errors.add(gettext("Unsupported paste format:") + " " + row.join(", "));
+                context.addError(gettext("Unsupported paste format:") + " " + row.join(", "));
                 continue;
             }
             if (!types.hasOwnProperty(values.type)) {
-                errors.add(gettext("Unknown question type:") + " " + row.join(", "));
+                context.addError(gettext("Unknown question type:") + " " + row.join(", "));
                 continue;
             }
             pos = getInsertTargetAndPosition(node, values);
             if (pos.hasOwnProperty("error")) {
-                errors.add(pos.error);
+                context.addError(pos.error);
                 continue;
             }
             mug = form.createQuestion(pos.mug, pos.position, values.type, true);
-            later.push(mug.deserialize(values, errors));
+            mug.deserialize(values, context);
+            pasted.addMug(values.id, mug);
             node = {
                 id: values.id,
                 mug: mug,
                 parent: pos.parent,
             };
-            pasted++;
         }
-        _.each(_.flatten(later), function (f) { f.execute(); });
+        pasted.finish();
         vellum.afterBulkInsert(form);
         if (mug && pos) {
             vellum.setCurrentMug(mug);
         }
-        analytics.usage("Copy Paste", "Paste", pasted);
-        return errors.get();
+        analytics.usage("Copy Paste", "Paste", pasted.length);
+        return pasted.getErrors();
+    }
+
+    function pasteContext(form) {
+        function addError(message) {
+            errors.update(null, {
+                key: message,
+                level: mugsModule.ERROR,
+                message: message
+            });
+        }
+
+        function addMug(id, mug) {
+            self.length++;
+        }
+
+        function doLater(fn) {
+            later.push(fn);
+        }
+
+        function finish() {
+            _.each(later, function (fn) { fn(); });
+        }
+
+        var errors = new mugsModule.MugMessages(),
+            later = [],
+            context = {
+                addError: addError,
+                errors: errors,
+                later: doLater,
+            },
+            self = {
+                length: 0,
+                context: context,
+                addMug: addMug,
+                getErrors: errors.get.bind(errors),
+                finish: finish,
+            };
+
+        return self;
     }
 
     $.vellum.plugin('copyPaste', {

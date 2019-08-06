@@ -238,13 +238,13 @@ define([
                     .value();
                 return !_.isEmpty(value) ? value : undefined;
             },
-            deserialize: function (data, key, mug) {
+            deserialize: function (data, key, mug, context) {
                 _.each(data[key], function (value, i) {
                     var children = mug.form.getChildren(mug),
                         itemset = children[i] || afterDynamicSelectInsert(mug.form, mug),
                         dat = _.clone(data);
                     dat[key] = value;
-                    itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset);
+                    itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset, context);
                 });
             }
         };

@@ -554,7 +554,7 @@ define([
                         data[name + ':hasMarkdown'] = value.hasMarkdown;
                     }
                 };
-                options.deserialize = function (data, name, mug, errors) {
+                options.deserialize = function (data, name, mug, context) {
                     var item = mug.p[name],
                         found = false;
                     if (data[name]) {
@@ -638,13 +638,13 @@ define([
                             }
                         }), _.identity);
                     if (discardedLangs.length) {
-                        var msg = errors.get(null, WARNING_KEY);
+                        var msg = context.errors.get(null, WARNING_KEY);
                         if (msg) {
                             msg.langs = _.union(msg.langs, discardedLangs);
                             msg.message = gettext("Discarded languages:") +
                                 " " + msg.langs.join(", ");
                         } else {
-                            errors.update(null, {
+                            context.errors.update(null, {
                                 key: WARNING_KEY,
                                 level: mug.WARNING,
                                 langs: discardedLangs,
