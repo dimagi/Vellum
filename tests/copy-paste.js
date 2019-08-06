@@ -1165,6 +1165,30 @@ define([
             ]);
         });
 
+        it("should maintain reference in output value", function() {
+            util.loadXML("");
+            paste([
+                ['id', 'type', 'labelItext:en-default', 'appearance'],
+                ["/name", "Text", "Name", "null"],
+                ['/label', 'Trigger', '<output value="#form/name" />', 'minimal'],
+                ["/sub", "Group", "null"],
+            ]);
+            paste([
+                ["id", "type", "labelItext:en-default", "appearance"],
+                ["/name", "Text", "Name", "null"],
+                ['/label', 'Trigger', '<output value="#form/name" />', 'minimal'],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "appearance"],
+                ["/name", "Text", "Name", "Name", "null"],
+                ['/label', 'Trigger', '<output value="#form/name" />', '<output value="#form/name" />', 'minimal'],
+                ["/sub", "Group", "null", "null", "null"],
+                ["/sub/name", "Text", "Name", "Name", "null"],
+                ['/sub/label', 'Trigger', '<output value="#form/sub/name" />', '<output value="#form/sub/name" />', 'minimal'],
+            ]);
+        });
+
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({

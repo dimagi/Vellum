@@ -606,11 +606,22 @@ define([
                                 if (!seen.hasOwnProperty(form)) {
                                     seen[form] = true;
                                     // set default value(s) for this form
-                                    var dkey = name + ":" + dlang + "-" + form;
-                                    item.set(data.hasOwnProperty(dkey) ?
-                                             str(data[dkey]) : str(value), form);
+                                    var dkey = name + ":" + dlang + "-" + form,
+                                        dval = data.hasOwnProperty(dkey) ?
+                                             str(data[dkey]) : str(value);
+                                    item.set(dval, form);
+                                    if (!isMM && dval) {
+                                        context.later(function () {
+                                            item.set(hashtrans(dval, context), form);
+                                        });
+                                    }
                                 }
                                 item.set(str(value), form, lang);
+                                if (!isMM && value) {
+                                    context.later(function () {
+                                        item.set(hashtrans(value, context), form, lang);
+                                    });
+                                }
                                 if (isMM && !objectMap.hasOwnProperty(value)) {
                                     mug.addMessage(name, {
                                         key: "missing-multimedia-warning",
@@ -655,6 +666,24 @@ define([
                     }
                     mug.validate(name);
                 };
+
+                function hashtrans(val, context) {
+                    val = $('<div>').append(val);
+                    val.find('output').each(function() {
+                        transformOutputRef(this, context);
+                    });
+                    return xml.normalize(val.html());
+                }
+
+                function transformOutputRef(outputRef, context) {
+                    var output = $(outputRef),
+                        key = output.is("[value]") || !output.is("[ref]") ? "value" : "ref",
+                        value = output.attr(key);
+                    if (value) {
+                        output.attr(key, context.transformHashtags(value));
+                    }
+                }
+
                 return options;
             }
 
