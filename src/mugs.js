@@ -768,16 +768,19 @@ define([
     function deserializeXPath(data, key, mug, context) {
         updateInstances(data, mug);
         var value = data[key];
-        try {
-            if (value) {
-                value = mug.form.xpath.parse(value.toString()).toHashtag();
-            } else if (value === null) {
-                value = undefined;
+        if (value) {
+            try {
+                value = mug.form.xpath.parse(value).toHashtag();
+                context.later(function () {
+                    mug.p[key] = context.transformHashtags(value);
+                });
+            } catch (err) {
+                if (_.isString(value) && !value.startsWith('#invalid/')) {
+                    value = '#invalid/xpath ' + value;
+                }
             }
-        } catch (err) {
-            if (_.isString(value) && !value.startsWith('#invalid/')) {
-                value = '#invalid/xpath ' + value;
-            }
+        } else if (value === null) {
+            value = undefined;
         }
         return value;
     }
@@ -1852,5 +1855,6 @@ define([
         baseSpecs: baseSpecs,
         deserializeXPath: deserializeXPath,
         serializeXPath: serializeXPath,
+        updateInstances: updateInstances,
     };
 });

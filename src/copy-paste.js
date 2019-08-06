@@ -325,7 +325,17 @@ define([
         }
 
         function addMug(id, mug) {
+            mugs[id] = mug;
             self.length++;
+        }
+
+        function transform(hashtag) {
+            var path = hashtag.replace(/^#form/, "");
+            return mugs.hasOwnProperty(path) ? mugs[path].hashtagPath : hashtag;
+        }
+
+        function transformHashtags(value) {
+            return form.transformHashtags(value, transform);
         }
 
         function doLater(fn) {
@@ -337,11 +347,13 @@ define([
         }
 
         var errors = new mugsModule.MugMessages(),
+            mugs = {},
             later = [],
             context = {
                 addError: addError,
                 errors: errors,
                 later: doLater,
+                transformHashtags: transformHashtags,
             },
             self = {
                 length: 0,

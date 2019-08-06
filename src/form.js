@@ -6,6 +6,7 @@ define([
     'vellum/logic',
     'vellum/richText',
     'vellum/xpath',
+    'vellum/escapedHashtags',
     'vellum/fuse',
     'vellum/undomanager',
     'vellum/util',
@@ -18,6 +19,7 @@ define([
     logic,
     richText,
     xpath,
+    escapedHashtags,
     Fuse,
     undomanager,
     util,
@@ -144,6 +146,7 @@ define([
         this.shouldInferHashtags = this.richText;
         vellum.datasources.on("change", this._updateHashtags.bind(this), null, null, this);
         this._updateHashtags();
+        this.transformHashtags = escapedHashtags.makeHashtagTransform(this);
 
         this.tree = new Tree('data', 'control');
         // initalize #form as /data

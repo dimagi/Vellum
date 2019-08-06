@@ -603,10 +603,7 @@ define([
             text = text.slice(INVALID_PREFIX.length);
             transform = escapedHashtags.transform;
         } else {
-            if (form._richText_transform === undefined) {
-                form._richText_transform = escapedHashtags.makeHashtagTransform(form);
-            }
-            transform = form._richText_transform;
+            transform = form.transformHashtags;
         }
         function bubble(hashtag) {
             return makeBubble(form, hashtag).prop('outerHTML');

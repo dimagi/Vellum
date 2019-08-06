@@ -149,7 +149,8 @@ define([
                         }
                     },
                     deserialize: function (data, key, mug, context) {
-                        var value = mugs.deserializeXPath(data, key, mug, context) || {};
+                        var value = data[key] || {};
+                        mugs.updateInstances(data, mug);
                         if (value && value.instance &&
                                      value.instance.id && value.instance.src) {
                             // legacy serialization format
@@ -157,7 +158,10 @@ define([
                             instances[value.instance.id] = value.instance.src;
                             mug.form.updateKnownInstances(instances);
                         }
-                        return {idsQuery: value.idsQuery};
+                        var src = {},
+                            fakeMug = {form: mug.form, p: src};
+                        src.idsQuery = mugs.deserializeXPath(value, "idsQuery", fakeMug, context);
+                        return src;
                     }
                 }
             },
