@@ -1059,6 +1059,136 @@ define([
             assert(!mug.isVisible("calculateAttr"), "calculateAttr should not be visible");
         });
 
+        it("should maintain reference to pasted question", function() {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/group", "Group", "null"],
+                ["/group/number", "Int", "null"],
+                ["/group/hidden", "DataBindOnly", "#form/group/number + 1"],
+                ["/text", "Text", "null"],
+            ]);
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/group", "Group", "null"],
+                ["/group/number", "Int", "null"],
+                ["/group/hidden", "DataBindOnly", "#form/group/number + 1"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "calculateAttr"],
+                ["/group", "Group", "null"],
+                ["/group/number", "Int", "null"],
+                ["/group/hidden", "DataBindOnly", "#form/group/number + 1"],
+                ["/text", "Text", "null"],
+                ["/copy-1-of-group", "Group", "null"],
+                ["/copy-1-of-group/number", "Int", "null"],
+                ["/copy-1-of-group/hidden", "DataBindOnly", "#form/copy-1-of-group/number + 1"],
+            ]);
+        });
+
+        it("should maintain reference to question pasted in group", function() {
+            util.loadXML("");
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/one", "Int", "null"],
+                ["/two", "Int", "null"],
+                ["/hidden", "DataBindOnly", "#form/one + #form/two + 1"],
+                ["/sub", "Group", "null"],
+            ]);
+            paste([
+                ["id", "type", "calculateAttr"],
+                ["/two", "Int", "null"],
+                ["/hidden", "DataBindOnly", "#form/one + #form/two + 1"],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "calculateAttr"],
+                ["/one", "Int", "null"],
+                ["/two", "Int", "null"],
+                ["/hidden", "DataBindOnly", "#form/one + #form/two + 1"],
+                ["/sub", "Group", "null"],
+                ["/sub/two", "Int", "null"],
+                ["/sub/hidden", "DataBindOnly", "#form/one + #form/sub/two + 1"],
+            ]);
+        });
+
+        it("should maintain reference to question referenced by itemset", function() {
+            util.loadXML("");
+            paste([
+                ["id", "type", "labelItext:en-default", "itemsetData"],
+                ["/items", "DataBindOnly", "null", "null"],
+                ["/select", "SelectDynamic", "select",
+                 '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
+                ["/sub", "Group", "null", "null"],
+            ]);
+            paste([
+                ["id", "type", "labelItext:en-default", "itemsetData"],
+                ["/items", "DataBindOnly", "null", "null"],
+                ["/select", "SelectDynamic", "select",
+                 '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "itemsetData"],
+                ["/items", "DataBindOnly", "null", "null", "null"],
+                ["/select", "SelectDynamic", "select", "select",
+                 '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
+                ["/sub", "Group", "null", "null", "null"],
+                ["/sub/items", "DataBindOnly", "null", "null", "null"],
+                ["/sub/select", "SelectDynamic", "select", "select",
+                 '[{"instance":null,"nodeset":"#form/sub/items","labelRef":"@name","valueRef":"@id"}]'],
+            ]);
+        });
+
+        it("should maintain reference to question referenced by model iteration", function() {
+            util.loadXML("");
+            paste([
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
+                ['/ids', 'DataBindOnly', 'null', 'null', 'null'],
+                ['/repeat/item', 'Repeat', 'repeat', 'repeat', '{"idsQuery":"#form/ids"}'],
+                ['/sub', 'Group', 'null', 'null', 'null'],
+            ]);
+            paste([
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
+                ['/ids', 'DataBindOnly', 'null', 'null', 'null'],
+                ['/repeat/item', 'Repeat', 'repeat', 'repeat', '{"idsQuery":"#form/ids"}'],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
+                ['/ids', 'DataBindOnly', 'null', 'null', 'null'],
+                ['/repeat/item', 'Repeat', 'repeat', 'repeat', '{"idsQuery":"#form/ids"}'],
+                ['/sub', 'Group', 'null', 'null', 'null'],
+                ['/sub/ids', 'DataBindOnly', 'null', 'null', 'null'],
+                ['/sub/repeat/item', 'Repeat', 'repeat', 'repeat', '{"idsQuery":"#form/sub/ids"}'],
+            ]);
+        });
+
+        it("should maintain reference in output value", function() {
+            util.loadXML("");
+            paste([
+                ['id', 'type', 'labelItext:en-default', 'appearance'],
+                ["/name", "Text", "Name", "null"],
+                ['/label', 'Trigger', '<output value="#form/name" />', 'minimal'],
+                ["/sub", "Group", "null"],
+            ]);
+            paste([
+                ["id", "type", "labelItext:en-default", "appearance"],
+                ["/name", "Text", "Name", "null"],
+                ['/label', 'Trigger', '<output value="#form/name" />', 'minimal'],
+            ]);
+            util.selectAll();
+            eq(mod.copy(), [
+                ["id", "type", "labelItext:en-default", "labelItext:hin-default", "appearance"],
+                ["/name", "Text", "Name", "Name", "null"],
+                ['/label', 'Trigger', '<output value="#form/name" />', '<output value="#form/name" />', 'minimal'],
+                ["/sub", "Group", "null", "null", "null"],
+                ["/sub/name", "Text", "Name", "Name", "null"],
+                ['/sub/label', 'Trigger', '<output value="#form/sub/name" />', '<output value="#form/sub/name" />', 'minimal'],
+            ]);
+        });
+
         describe("with instances without src", function() {
             before(function (done) {
                 util.init({

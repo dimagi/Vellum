@@ -100,14 +100,17 @@ define([
                     value.nodeset = mugs.serializeXPath(value.nodeset, key, mug, data);
                     return value;
                 },
-                deserialize: function (data, key, mug) {
-                    var value = mugs.deserializeXPath(data, key, mug);
+                deserialize: function (data, key, mug, context) {
+                    var value = data[key];
                     if (value) {
+                        mugs.updateInstances(data, mug);
                         if (value.instance && value.instance.id && value.instance.src) {
                             var instances = {};
                             instances[value.instance.id] = value.instance.src;
                             mug.form.updateKnownInstances(instances);
                         }
+                        var fakeMug = {form: mug.form, p: value};
+                        value.nodeset = mugs.deserializeXPath(value, "nodeset", fakeMug, context);
                         //support old copy/paste
                         if (value.valueRef) {
                             mug.p.valueRef = value.valueRef;
@@ -238,13 +241,13 @@ define([
                     .value();
                 return !_.isEmpty(value) ? value : undefined;
             },
-            deserialize: function (data, key, mug) {
+            deserialize: function (data, key, mug, context) {
                 _.each(data[key], function (value, i) {
                     var children = mug.form.getChildren(mug),
                         itemset = children[i] || afterDynamicSelectInsert(mug.form, mug),
                         dat = _.clone(data);
                     dat[key] = value;
-                    itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset);
+                    itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset, context);
                 });
             }
         };

@@ -116,14 +116,14 @@ define([
             },
             spec: {
                 nodeID: {
-                    deserialize: function (data, key, mug) {
+                    deserialize: function (data, key, mug, context) {
                         var deserialize = mugs.baseSpecs.databind.nodeID.deserialize;
                         if (data.dataSource) {
                             var id = data.id.slice(0, data.id.lastIndexOf("/")) || data.id,
                                 copy = _.extend({}, data, {id: id});
-                            return deserialize(copy, key, mug);
+                            return deserialize(copy, key, mug, context);
                         }
-                        return deserialize(data, key, mug);
+                        return deserialize(data, key, mug, context);
                     }
                 },
                 repeat_count: _.extend({}, oldRepeat.spec.repeat_count, {
@@ -148,8 +148,9 @@ define([
                                 mugs.serializeXPath(value.idsQuery, key, mug, data)};
                         }
                     },
-                    deserialize: function (data, key, mug) {
-                        var value = mugs.deserializeXPath(data, key, mug) || {};
+                    deserialize: function (data, key, mug, context) {
+                        var value = data[key] || {};
+                        mugs.updateInstances(data, mug);
                         if (value && value.instance &&
                                      value.instance.id && value.instance.src) {
                             // legacy serialization format
@@ -157,7 +158,10 @@ define([
                             instances[value.instance.id] = value.instance.src;
                             mug.form.updateKnownInstances(instances);
                         }
-                        return {idsQuery: value.idsQuery};
+                        var src = {},
+                            fakeMug = {form: mug.form, p: src};
+                        src.idsQuery = mugs.deserializeXPath(value, "idsQuery", fakeMug, context);
+                        return src;
                     }
                 }
             },

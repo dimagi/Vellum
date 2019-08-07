@@ -443,31 +443,22 @@ define([
          * Deserialize mug property data
          *
          * @param data - An object containing mug property data.
-         * @param errors - A `MugMessages` object with a convenience
-         *      `add(message)` method for global errors.
-         * @returns - An array of `Later` objects to be executed as the
-         *      final step in deserializing a group of related mugs.
+         * @param context - Paste context.
          */
-        deserialize: function (data, errors) {
-            var mug = this,
-                later = [];
+        deserialize: function (data, context) {
+            var mug = this;
             _.each(mug.spec, function (spec, key) {
                 if (mug.getPresence(key) !== 'notallowed') {
                     if (spec.deserialize) {
-                        var value = spec.deserialize(data, key, mug, errors);
+                        var value = spec.deserialize(data, key, mug, context);
                         if (!_.isUndefined(value)) {
-                            if (value instanceof Later) {
-                                later.push(value);
-                            } else {
-                                mug.p[key] = value;
-                            }
+                            mug.p[key] = value;
                         }
                     } else if (data.hasOwnProperty(key)) {
                         mug.p[key] = data[key];
                     }
                 }
             });
-            return later;
         },
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
@@ -552,10 +543,6 @@ define([
         });
 
         return spec;
-    }
-
-    function Later(execute) {
-        this.execute = execute;
     }
 
     function MugMessages() {
@@ -778,23 +765,30 @@ define([
         return value || undefined;
     }
 
-    function deserializeXPath(data, key, mug) {
+    function deserializeXPath(data, key, mug, context) {
+        updateInstances(data, mug);
+        var value = data[key];
+        if (value) {
+            try {
+                value = mug.form.xpath.parse(value).toHashtag();
+                context.later(function () {
+                    mug.p[key] = context.transformHashtags(value);
+                });
+            } catch (err) {
+                if (_.isString(value) && !value.startsWith('#invalid/')) {
+                    value = '#invalid/xpath ' + value;
+                }
+            }
+        } else if (value === null) {
+            value = undefined;
+        }
+        return value;
+    }
+
+    function updateInstances(data, mug) {
         if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
             mug.form.updateKnownInstances(data.instances);
         }
-        var value = data[key];
-        try {
-            if (value) {
-                value = mug.form.xpath.parse(value.toString()).toHashtag();
-            } else if (value === null) {
-                value = undefined;
-            }
-        } catch (err) {
-            if (_.isString(value) && !value.startsWith('#invalid/')) {
-                value = '#invalid/xpath ' + value;
-            }
-        }
-        return value;
     }
 
     function resolveConflictedNodeId(mug) {
@@ -869,17 +863,17 @@ define([
                 serialize: function (value, key, mug, data) {
                     data.id = mug.absolutePathNoRoot;
                 },
-                deserialize: function (data, key, mug) {
+                deserialize: function (data, key, mug, context) {
                     if (data.id && data.id !== mug.p.nodeID) {
                         mug.p.nodeID = data.id.slice(data.id.lastIndexOf("/") + 1) ||
                                        mug.form.generate_question_id(null, mug);
                         if (data.conflictedNodeId) {
                             // Obscure edge case: if mug.p.nodeID conflicts with
                             // an existing question then expressions will be
-                            // associated with that question and this Later
+                            // associated with that question and this later
                             // assignment will not restore those connections to
                             // this mug.
-                            return new Later(function () {
+                            return context.later(function () {
                                 // after all other properties are deserialized,
                                 // assign conflicted ID to convert expressions
                                 // or setup new conflict
@@ -887,7 +881,7 @@ define([
                             });
                         }
                     }
-                    return new Later(function () {
+                    return context.later(function () {
                         if (mug.p.conflictedNodeId) {
                             resolveConflictedNodeId(mug);
                         }
@@ -1861,5 +1855,6 @@ define([
         baseSpecs: baseSpecs,
         deserializeXPath: deserializeXPath,
         serializeXPath: serializeXPath,
+        updateInstances: updateInstances,
     };
 });

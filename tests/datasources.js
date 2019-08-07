@@ -297,7 +297,7 @@ define([
                 callback([{
                     id: "bar",
                     uri: "jr://fixture/foo",
-                    path: "root",
+                    path: "/root",
                     name: "outer",
                     structure: {
                         "@id": {},
@@ -313,7 +313,7 @@ define([
                 clickQuestion('select/itemset');
                 var data = $('[name=property-itemsetData]');
                 assert.equal(data.val(),
-                    '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')root"}');
+                    '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')/root"}');
                 assert.equal(data.find("option:selected").text(), "outer");
                 assert.equal($('[name=property-valueRef]').val(), '@id');
                 assert.equal($('[name=property-labelRef]').val(), 'name');
@@ -325,14 +325,14 @@ define([
                     ["id", "type", "itemsetData"],
                     ["select", "SelectDynamic",
                      '[{"instance":{"id":"bar",' +
-                     '"src":"jr://fixture/foo","query":"instance(\'bar\')root/inner"},' +
-                     '"nodeset":"instance(\'bar\')root/inner","labelRef":"name","valueRef":"@id"}]'],
+                     '"src":"jr://fixture/foo","query":"instance(\'bar\')/root/inner"},' +
+                     '"nodeset":"instance(\'bar\')/root/inner","labelRef":"name","valueRef":"@id"}]'],
                 ]);
                 clickQuestion('select/itemset');
                 callback([{
                     id: "bar",
                     uri: "jr://fixture/foo",
-                    path: "root",
+                    path: "/root",
                     name: "outer",
                     structure: {
                         "@id": {},
@@ -347,7 +347,7 @@ define([
                 }]);
                 var data = $('[name=property-itemsetData]');
                 assert.equal(data.val(),
-                    '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')root/inner"}');
+                    '{"id":"bar","src":"jr://fixture/foo","query":"instance(\'bar\')/root/inner"}');
                 assert.equal(data.find("option:selected").text(), "outer - inner");
             });
 
