@@ -186,10 +186,13 @@ body.vellum-full-screen {
 
         // Let major content blocks scroll independently (i.e., tree versus expression editor)
         .fd-scrollable {
-            width: 100%;
             overflow-x: hidden;
             overflow-y: auto;
-            height: @containerHeight;
+            max-height: @containerHeight;
+
+            &:not(.dropdown-menu) {     // Protect scrolling dropdowns from also scrolling horizontally
+                width: 100%;
+            }
 
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
