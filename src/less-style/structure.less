@@ -185,17 +185,20 @@ body.vellum-full-screen {
         }
 
         // Let major content blocks scroll independently (i.e., tree versus expression editor)
-        .fd-scrollable {
+        // .fd-scrollable is for containers meant to take the full screen height (e.g., question properties panel)
+        // .fd-scrollable-minimal is for containers that should not grow taller than their content (e.g., menus)
+        .fd-scrollable, .fd-scrollable-minimal {
             overflow-x: hidden;
             overflow-y: auto;
             max-height: @containerHeight;
 
-            &:not(.dropdown-menu) {     // Protect scrolling dropdowns from also scrolling horizontally
-                width: 100%;
-            }
-
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
+        }
+
+        // If applied to .fd-scrollable-minimal too, this makes their content also scroll horizontally
+        .fd-scrollable {
+            width: 100%;
         }
     }
 }
