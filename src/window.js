@@ -107,6 +107,7 @@ define([
                         accessoryPane.find('.fd-head').outerHeight(true);
                 treeHeight -= 2 + accessoryHeight +
                     this.$f.find('.fd-content-left-divider').outerHeight(true);
+                console.log("Updating accessory scrollable height to " + accessoryScrollableHeight);
                 accessoryPane.find(".fd-scrollable")
                              .css('height', accessoryScrollableHeight + 'px');
                 accessoryPane.show();
@@ -116,11 +117,13 @@ define([
                 this.$f.find(".fd-content-left-divider").hide();
             }
             $tree.find('.fd-scrollable').css('height', treeHeight + 'px');
+            console.log("Updating tree scrollable height to " + treeHeight);
             $tree.find('.fd-scrollable-minimal').css('max-height', treeHeight + 'px');
 
             $fdc.find('.fd-content-right')
                 .css('width', availableHorizSpace - this.getLeftWidth() + 'px')
                 .find('.fd-scrollable.full').css('height', columnHeight + 'px');
+            console.log("Updating props scrollable height to " + columnHeight);
 
             $fdc.find('.fd-props-scrollable')
                 .css('height', columnHeight -
