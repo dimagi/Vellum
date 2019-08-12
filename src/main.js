@@ -177,7 +177,6 @@ define([
     'vellum/databrowser',
     'vellum/commtrack',
     'vellum/modeliteration',
-    'vellum/remoteRequest',
     'vellum/saveToCase',
     'vellum/uploader',
     'vellum/window',
