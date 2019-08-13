@@ -190,15 +190,18 @@ body.vellum-full-screen {
         .fd-scrollable, .fd-scrollable-minimal {
             overflow-x: hidden;
             overflow-y: auto;
-            max-height: @containerHeight;
 
             // Prevent scrollbars underneath the modal from bleeding through on OSX
             transform: translate3d(0, 0, 0);
         }
 
-        // If applied to .fd-scrollable-minimal too, this makes their content also scroll horizontally
         .fd-scrollable {
-            width: 100%;
+            height: @containerHeight;
+            width: 100%;    // If applied to .fd-scrollable-minimal too, this makes their content also scroll horizontally
+        }
+
+        .fd-scrollable-minimal {
+            max-height: @containerHeight;
         }
     }
 }
