@@ -1284,7 +1284,7 @@ define([
                 // hack: don't display the whole invalid XML block if it
                 // was a parse error
                 var msg = e.toString();
-                if (msg.indexOf("Invalid XML") === 0) {
+                if (msg.indexOf("Invalid XML") !== -1) {
                     msg = gettext("Parsing Error. Please check that your form is valid XML.");
                 }
 
