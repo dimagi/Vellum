@@ -32,7 +32,7 @@
     "At.js": "millerdev/At.js#master",
     "Caret.js": "0.3.1",
     "fuse.js": "~2.7.4",
-    "bootstrap": "3.3.7",
+    "bootstrap": "3.4.1",
     "jstree": "~3.3.3",
     "jstree-actions": "alexandernst/jstree-actions#0.1.4",
     "langcodes": "dimagi/langcodes",

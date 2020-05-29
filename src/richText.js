@@ -837,6 +837,7 @@ define([
                 placement: 'bottom',
                 title: getTitle,
                 html: true,
+                sanitize: false,  // bootstrap, don't remove data-ufid attribute
                 content: easy_reference_popover({
                     text: description.text(),
                     ufid: labelMug ? labelMug.ufid : "",
