@@ -198,6 +198,7 @@ define([
             placement: 'bottom',
             container: 'body',
             trigger: 'hover',
+            sanitize: false,
         });
         // Saving, and the associated modal, can interfere with the popover,
         // so make absolutely sure that the popover is removed on save.

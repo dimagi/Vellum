@@ -37,6 +37,7 @@ define([
                 trigger: 'focus',
                 html: true,
                 container: 'body',
+                sanitize: false,
             }).click(function(e) {
                 // If this help icon is inside a bigger click target, don't trigger the ancestor
                 e.stopPropagation();
