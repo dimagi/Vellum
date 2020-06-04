@@ -173,11 +173,11 @@ define([
 
             function eachLang() {
                 var el = $(this);
-                var lang = el.attr('lang');
+                var lang = el.xmlAttr('lang');
                 
                 function eachText() {
                     var textEl = $(this);
-                    var id = textEl.attr('id');
+                    var id = textEl.xmlAttr('id');
                     var item = itextMap[id];
                     if (!item || !itextMap.hasOwnProperty(id)) {
                         item = Itext.createItem(id);
@@ -187,7 +187,7 @@ define([
 
                     function eachValue() {
                         var valEl = $(this);
-                        var curForm = valEl.attr('form');
+                        var curForm = valEl.xmlAttr('form');
                         if(!curForm) {
                             curForm = "default";
                             if (item.hasMarkdown) {
@@ -272,8 +272,8 @@ define([
                                 key = output.is("[value]") ||
                                     !output.is("[ref]") ? "value" : "ref",
                                 vkey = "vellum:" + key,
-                                value = output.attr(key),
-                                hashval = output.attr(vkey);
+                                value = output.xmlAttr(key),
+                                hashval = output.xmlAttr(vkey);
                             if (hashval) {
                                 if (value) {
                                     form.inferHashtagMeanings(hashval, value);
@@ -288,7 +288,7 @@ define([
                                 value = _toHashtag(value);
                             }
                             // always use value attribute internally
-                            return $("<output />").attr("value", value);
+                            return $("<output />").xmlAttr("value", value);
                         });
                         itForm.setValue(lang, div.html());
                     });
@@ -334,7 +334,7 @@ define([
             }
 
             function parseItextRef($el, property) {
-                var ref = $el.attr('ref');
+                var ref = $el.xmlAttr('ref');
                 return getItextItem(ref ? getITextID(ref) : "", property);
             }
 
@@ -396,7 +396,7 @@ define([
                 var output = $(outputRef),
                     key = output.is("[value]") || !output.is("[ref]") ? "value" : "ref",
                     vkey = "vellum:" + key,
-                    value = output.attr(vkey) || output.attr(key),
+                    value = output.xmlAttr(vkey) || output.xmlAttr(key),
                     parsed, hashtag, xpath;
                 try {
                     parsed = xpathParser.parse(value);
@@ -409,9 +409,9 @@ define([
                     xpath = value;
                 }
                 if (!form_.richText || xpath === hashtag) {
-                    output.attr(key, xpath).removeAttr(vkey);
+                    output.xmlAttr(key, xpath).removeAttr(vkey);
                 } else {
-                    output.attr(key, xpath).attr(vkey, hashtag);
+                    output.xmlAttr(key, xpath).xmlAttr(vkey, hashtag);
                 }
             }
 
@@ -678,9 +678,9 @@ define([
                 function transformOutputRef(outputRef, context) {
                     var output = $(outputRef),
                         key = output.is("[value]") || !output.is("[ref]") ? "value" : "ref",
-                        value = output.attr(key);
+                        value = output.xmlAttr(key);
                     if (value) {
-                        output.attr(key, context.transformHashtags(value));
+                        output.xmlAttr(key, context.transformHashtags(value));
                     }
                 }
 

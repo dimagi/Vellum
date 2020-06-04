@@ -350,11 +350,11 @@ define([
                                     nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
                     };
-                    mug.p.labelRef = $element.children('label').attr('ref');
-                    mug.p.valueRef = $element.children('value').attr('ref');
+                    mug.p.labelRef = $element.children('label').xmlAttr('ref');
+                    mug.p.valueRef = $element.children('value').xmlAttr('ref');
                     var sortEl = $element.children('sort');
                     if (sortEl.length) {
-                        mug.p.sortRef = sortEl.attr('ref');
+                        mug.p.sortRef = sortEl.xmlAttr('ref');
                     }
                     return mug;
                 };

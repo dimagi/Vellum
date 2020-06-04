@@ -272,10 +272,10 @@ define([
                         output = $(output);
                         var key = !output.is("[ref]") ? "value" : "ref",
                             vkey = "vellum:" + key,
-                            value = output.attr(vkey) || output.attr(key),
+                            value = output.xmlAttr(vkey) || output.xmlAttr(key),
                             result = fn(value);
                         if (result !== undefined && result !== value) {
-                            output.attr(key, result).removeAttr(vkey);
+                            output.xmlAttr(key, result).removeAttr(vkey);
                             shouldReset = true;
                         }
                     });

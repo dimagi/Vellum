@@ -90,7 +90,7 @@ define([
                 head = $(xml).find("h\\:head, head");
             head.find("> model > submission").each(function (i, el) {
                 var sub = $(el);
-                submissions[sub.attr("id")] = sub;
+                submissions[sub.xmlAttr("id")] = sub;
             });
             this.__callOld();
         },
@@ -100,9 +100,9 @@ define([
             if (submissions.hasOwnProperty(mug.absolutePath)) {
                 sub = submissions[mug.absolutePath];
                 mug.form.changeMugType(mug, REMOTE_REQUEST_TYPE);
-                mug.p.url = sub.attr("resource");
+                mug.p.url = sub.xmlAttr("resource");
                 mug.p.parameters = mug.form.normalizeHashtag(
-                    sub.attr("vellum:ref") || sub.attr("ref"));
+                    sub.xmlAttr("vellum:ref") || sub.xmlAttr("ref"));
             }
             this.__callOld();
         },

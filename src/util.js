@@ -321,7 +321,7 @@ define([
         }
         opts = opts || {};
         if (opts.normalize_xmlns) {
-            var xmlns = $($.parseXML(serverForm)).find('data').attr('xmlns');
+            var xmlns = $($.parseXML(serverForm)).find('data').xmlAttr('xmlns');
             localForm = localForm.replace(/(data[^>]+xmlns=")(.+?)"/,
                                     '$1' + xmlns + '"');
         }

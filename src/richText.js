@@ -747,7 +747,9 @@ define([
      * @returns - object with value and maybe data-date-format
      */
     function extractXPathInfo(output) {
-        var value = output.attr('vellum:value') || output.attr('value') || output.attr('ref'),
+        var value = output.xmlAttr('vellum:value') ||
+                output.xmlAttr('value') ||
+                output.xmlAttr('ref'),
             dateMatch = /^format-date\(date\(([^)]+)\),\s*'([^']+)'\)$/.exec(value);
         if (dateMatch) {
             return {value: dateMatch[1], 'data-date-format': dateMatch[2]};

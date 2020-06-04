@@ -43,7 +43,7 @@ define([
 
         var xmlDoc = $.parseXML(xmlString),
             xml = $(xmlDoc),
-            ignore = xml.find('h\\:html, html').attr('vellum:ignore'),
+            ignore = xml.find('h\\:html, html').xmlAttr('vellum:ignore'),
             head = xml.find('h\\:head, head'),
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
@@ -179,13 +179,13 @@ define([
             recFunc.call(this, null);
         });
         //try to grab the JavaRosa XForm Attributes in the root data element...
-        form.formUuid = root.attr("xmlns");
-        form.formJRM = root.attr("xmlns:jrm");
-        form.formUIVersion = root.attr("uiVersion");
-        form.formVersion = root.attr("version");
+        form.formUuid = root.xmlAttr("xmlns");
+        form.formJRM = root.xmlAttr("xmlns:jrm");
+        form.formUIVersion = root.xmlAttr("uiVersion");
+        form.formVersion = root.xmlAttr("version");
 
         var optionsName = form.vellum.opts().core.formName,
-            formName = optionsName || root.attr("name") || titleText;
+            formName = optionsName || root.xmlAttr("name") || titleText;
         if (formName) {
             form.formName = formName;
         } else {
@@ -213,7 +213,7 @@ define([
             nodeVal = $el.children().length ? null : $el.text(),
             extraXMLNS = $el.popAttr('xmlns') || null,
             comment = $el.popAttr('vellum:comment') || null;
-        role = role || $el.attr('vellum:role');
+        role = role || $el.xmlAttr('vellum:role');
 
         if (role && form.mugTypes.allTypes.hasOwnProperty(role) &&
             form.mugTypes.allTypes[role].supportsDataNodeRole) {
@@ -251,7 +251,7 @@ define([
 
     function parseSetValue(form, el, path) {
         var mug = form.getMugByPath(path),
-            event = el.attr('event'),
+            event = el.xmlAttr('event'),
             ref = parseVellumAttrs(form, el, 'ref', true),
             value = parseVellumAttrs(form, el, 'value', true);
 
@@ -385,7 +385,7 @@ define([
             if ($cEl.length === 1 && $cEl[0].poppedAttributes) {
                 // restore attributes removed during parsing
                 _.each($cEl[0].poppedAttributes, function (val, key) {
-                    $cEl.attr(key, val);
+                    $cEl.xmlAttr(key, val);
                 });
             }
             mug.p.rawControlXML = $cEl;
@@ -698,7 +698,7 @@ define([
     }
 
     function parseVellumAttrs(form, el, key, noPop) {
-        var method = (noPop ? el.attr : el.popAttr).bind(el),
+        var method = (noPop ? el.xmlAttr : el.popAttr).bind(el),
             vellumAttr = method('vellum:' + key.replace(/:/g, "__")),
             xmlAttr = method(key);
         form.inferHashtagMeanings(vellumAttr, xmlAttr);
@@ -714,7 +714,7 @@ define([
         var ret = [];
         for (var i = 0; i < instances.length; i++) {
             // the main should be the one without an ID
-            if (!$(instances[i]).attr("id")) {
+            if (!$(instances[i]).xmlAttr("id")) {
                 if (foundMain) {
                     throw "multiple unnamed instance elements found in the form! this is not allowed. please add id's to all but 1 instance.";
                 }

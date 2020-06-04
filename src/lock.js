@@ -27,7 +27,7 @@ define([
         },
         parseBindElement: function (form, el, path) {
             this.__callOld();
-            var locked = el.attr('vellum:lock');
+            var locked = el.xmlAttr('vellum:lock');
             if (locked && locked !== 'none') {
                 this.data.lock.locks[path] = locked;
             }

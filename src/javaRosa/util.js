@@ -274,13 +274,13 @@ define([
                 text = $("<div />").append(text);
                 text.find('output').replaceWith(function() {
                     var $this = $(this),
-                        value = $this.attr('value') || $this.attr('ref'),
+                        value = $this.xmlAttr('value') || $this.xmlAttr('ref'),
                         parsedValue;
                     try {
                         parsedValue = xpathParser.parse(value);
-                        $this.attr('value', parsedValue[functionName]());
+                        $this.xmlAttr('value', parsedValue[functionName]());
                     } catch (e) {
-                        $this.attr('value', value);
+                        $this.xmlAttr('value', value);
                     }
                     return $this[0].outerHTML;
                 });
