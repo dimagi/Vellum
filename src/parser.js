@@ -44,7 +44,7 @@ define([
 
         var xmlDoc = parseXML(xmlString),
             xml = $(xmlDoc),
-            ignore = xml.find('h\\:html, html').xmlAttr('vellum:ignore'),
+            ignore = xml.find('h\\:xdoc').xmlAttr('vellum:ignore'),
             head = xml.find('h\\:head, head'),
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),

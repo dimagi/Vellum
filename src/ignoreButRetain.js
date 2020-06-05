@@ -57,9 +57,9 @@ define([
             options.enableInstanceRefCounting = false;
             this.data.ignore.ignoredMugs = [];
 
-            var model = xml.find('h\\:html > h\\:head > model:first'),
-                instance = model.find('instance:first'),
-                body = xml.find('h\\:html > h\\:body:first, h\\:html > body:first');
+            var model = xml.find('h\\:xdoc > h\\:head > model').first(),
+                instance = model.find('instance').first(),
+                body = xml.find('h\\:xdoc > h\\:body, h\\:xdoc > body').first();
             _.each([model, instance, body], function (el) {
                 if (!el.length) {
                     window.console.log("WARNING", el.tagName, "not found");
@@ -101,14 +101,14 @@ define([
             var xml = $(parseXML(xmlStr));
 
             _.each(ignoredNodes, function (node) {
-                if (node.path === "h\\:html > h\\:body") {
+                if (node.path === "h\\:xdoc > h\\:body") {
                     // Something weird happens involving body since it's an HTML
                     // tag, apparently.  But only when it's the terminal node in a
                     // selector. Also behaves differently in FF and Chrome.
-                    node.path = "h\\:html > body, h\\:html > h\\:body";
-                } else if (node.path === "h\\:html > h\\:head") {
+                    node.path = "h\\:xdoc > body, h\\:xdoc > h\\:body";
+                } else if (node.path === "h\\:xdoc > h\\:head") {
                     // same as above?
-                    node.path = "h\\:html > head, h\\:html > h\\:head";
+                    node.path = "h\\:xdoc > head, h\\:xdoc > h\\:head";
                 }
 
                 var parentNode = xml.find(node.path),

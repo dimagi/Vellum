@@ -12,11 +12,11 @@ define([
      * Parse XML string and return a document node
      */
     function parseXML(xmlStr) {
-        var xmlDoc = $.parseXML(xmlStr);
         // HACK convince jQuery Sizzle that this is XML, not HTML
-        // NOTE this does not work in PhantomJS (assignment has no effect there)
-        xmlDoc.namespaceURI = "xml-dammit";
-        return xmlDoc;
+        xmlStr = xmlStr
+            .replace(/<(h:)?html\b/, "<h:xdoc")
+            .replace(/<\/(h:)?html\b>/, "</h:xdoc>");
+        return $.parseXML(xmlStr);
     }
 
     /**
