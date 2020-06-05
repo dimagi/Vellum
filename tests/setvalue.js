@@ -2,12 +2,14 @@ define([
     'tests/utils',
     'chai',
     'jquery',
+    'vellum/xml',
     'text!static/setvalue/set-value.xml',
     'text!static/setvalue/set-value-special.xml'
 ], function (
     util,
     chai,
     $,
+    xml,
     SET_VALUE_XML,
     SET_VALUE_SPECIAL_XML
 ) {
@@ -38,7 +40,7 @@ define([
             text.p.defaultValue = 'blah';
 
             form = call("createXML");
-            setvalue = $($.parseXML(form)).find('setvalue');
+            setvalue = $(xml.parseXML(form)).find('setvalue');
 
             assert.strictEqual(setvalue.attr('event'), 'jr-insert');
             assert.strictEqual(setvalue.attr('ref'), '/data/repeat/text');
@@ -53,7 +55,7 @@ define([
             text.p.defaultValue = 'blah';
 
             form = call("createXML");
-            setvalue = $($.parseXML(form)).find('setvalue');
+            setvalue = $(xml.parseXML(form)).find('setvalue');
 
             assert.strictEqual(setvalue.attr('event'), 'xforms-ready');
             assert.strictEqual(setvalue.attr('ref'), '/data/text');
@@ -63,7 +65,7 @@ define([
         it("should not be associated with a question if event is not xforms-ready or jr-insert", function() {
             util.loadXML(SET_VALUE_SPECIAL_XML);
             var form = call("createXML"),
-                setvalue = $($.parseXML(form)).find('setvalue');
+                setvalue = $(xml.parseXML(form)).find('setvalue');
             assert.strictEqual(setvalue.attr('event'), 'special-snowflake');
             assert.strictEqual(setvalue.attr('ref'), '/data/text');
             assert.strictEqual(setvalue.attr('value'), 'blah');

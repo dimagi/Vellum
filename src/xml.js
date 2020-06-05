@@ -9,6 +9,17 @@ define([
     _
 ) {
     /**
+     * Parse XML string and return a document node
+     */
+    function parseXML(xmlStr) {
+        var xmlDoc = $.parseXML(xmlStr);
+        // HACK convince jQuery Sizzle that this is XML, not HTML
+        // NOTE this does not work in PhantomJS (assignment has no effect there)
+        xmlDoc.namespaceURI = "xml-dammit";
+        return xmlDoc;
+    }
+
+    /**
      * Normalize XML string
      *
      * Escapes < and > not used as tag delimiters as well as unescaped &.
@@ -95,6 +106,7 @@ define([
     }
 
     return {
+        parseXML: parseXML,
         normalize: normalize,
         humanize: humanize
     };

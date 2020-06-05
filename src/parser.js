@@ -11,7 +11,8 @@ define([
     $,
     _
 ) {
-    var DEFAULT_FORM_ID = 'data';
+    var DEFAULT_FORM_ID = 'data',
+        parseXML = xml.parseXML;
 
     function init (instance) {
         var data = instance.data.core;
@@ -41,7 +42,7 @@ define([
             return form;
         }
 
-        var xmlDoc = $.parseXML(xmlString),
+        var xmlDoc = parseXML(xmlString),
             xml = $(xmlDoc),
             ignore = xml.find('h\\:html, html').xmlAttr('vellum:ignore'),
             head = xml.find('h\\:head, head'),

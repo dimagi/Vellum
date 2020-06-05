@@ -5,6 +5,7 @@ define([
     'underscore',
     'tests/utils',
     'vellum/parser',
+    'vellum/xml',
     'text!static/parser/accent-char-in-path.xml',
     'text!static/parser/other_item.xml',
     'text!static/parser/label-without-itext.xml',
@@ -23,6 +24,7 @@ define([
     _,
     util,
     parser,
+    xml,
     ACCENT_CHAR_IN_PATH_XML,
     OTHER_ITEM_XML,
     LABEL_WITHOUT_ITEXT_XML,
@@ -38,6 +40,7 @@ define([
 ) {
     var assert = chai.assert,
         call = util.call,
+        parseXML = xml.parseXML,
         plugins = util.options.options.plugins || [],
         pluginsWithItemset = _.union(plugins, ["itemset"]),
         pluginsWithoutItemset = _(plugins).without("itemset");
@@ -78,7 +81,7 @@ define([
                         var mug = call("getMugByPath", "/data/state");
                         assert.equal(mug.__className, "Select");
                         var xml = call("createXML"),
-                            doc = $($.parseXML(xml));
+                            doc = $(parseXML(xml));
                         assert.equal(doc.find("instance[id=states]").length, 1, xml);
                         assert.equal(doc.find('itemset').attr('nodeset'),
                                      "instance('states')/state_list/state");

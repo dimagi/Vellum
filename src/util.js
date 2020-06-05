@@ -4,6 +4,7 @@ define([
     'underscore',
     'jsdiff',
     'vellum/markdown',
+    'vellum/xml',
     'jquery',
     'vellum/jquery-extensions'
 ], function (
@@ -12,6 +13,7 @@ define([
     _,
     jsdiff,
     markdown,
+    xml,
     $
 ) {
     RegExp.escape = function(s) {
@@ -321,7 +323,7 @@ define([
         }
         opts = opts || {};
         if (opts.normalize_xmlns) {
-            var xmlns = $($.parseXML(serverForm)).find('data').xmlAttr('xmlns');
+            var xmlns = $(xml.parseXML(serverForm)).find('data').xmlAttr('xmlns');
             localForm = localForm.replace(/(data[^>]+xmlns=")(.+?)"/,
                                     '$1' + xmlns + '"');
         }

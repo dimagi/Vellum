@@ -20,14 +20,17 @@
 define([
     'underscore',
     'jquery',
+    'vellum/xml',
     'vellum/parser',
     'vellum/core'
 ], function (
     _,
     $,
+    xml,
     parser
 ) {
     var xmls = new XMLSerializer(),
+        parseXML = xml.parseXML,
         MUG = "mug",
         PARENT = "parent";
 
@@ -40,7 +43,7 @@ define([
             }
             var _this = this,
                 ignoredEls = [],
-                xmlDoc = $.parseXML(xmlStr),
+                xmlDoc = parseXML(xmlStr),
                 xml = $(xmlDoc),
                 ignores = xml.find('[vellum\\:ignore="retain"]');
 
@@ -95,7 +98,7 @@ define([
                 return xmlStr;
             }
 
-            var xml = $($.parseXML(xmlStr));
+            var xml = $(parseXML(xmlStr));
 
             _.each(ignoredNodes, function (node) {
                 if (node.path === "h\\:html > h\\:body") {
@@ -109,7 +112,7 @@ define([
                 }
 
                 var parentNode = xml.find(node.path),
-                    ignored = $($.parseXML(node.nodeXML).childNodes[0]),
+                    ignored = $(parseXML(node.nodeXML).childNodes[0]),
                     prev = node.prev && parentNode.find(node.prev),
                     next = node.next && parentNode.find(node.next);
 

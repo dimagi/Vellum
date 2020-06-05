@@ -187,7 +187,7 @@ define([
             // This is a pretty arcane test. The XML in this test caused
             // an exponential performance degredation (more tags made
             // normalization slower) in Chrome and Firefox.
-            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+            var parsedXml = $(xml.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
                 value = parsedXml.find("value");
             eq(value, REGEXP_CRASHING_DEBUG_ITEXT_PARSED, false);
         });
@@ -195,7 +195,7 @@ define([
         it("should not cause regexp engine to hang on many output values in string", function () {
             // similar to above test, but also tests fixGTBug, which uses a similar regexp
             // NOTE this test fails on Firefox because attribute order is changed
-            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+            var parsedXml = $(xml.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
                 serializer = new XMLSerializer(),
                 wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
                 value = serializer.serializeToString(parsedXml.find("value")[0])
@@ -269,7 +269,7 @@ define([
         });
 
         it("should not cause regexp engine to hang on many output values", function () {
-            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+            var parsedXml = $(xml.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
                 value = parsedXml.find("value");
             eq(value, REGEXP_CRASHING_DEBUG_ITEXT_PARSED, false);
         });

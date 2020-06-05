@@ -233,7 +233,7 @@ define([
 
             var xmlDoc;
             if (xmlString) {
-                xmlDoc = $.parseXML(xmlString);
+                xmlDoc = xml.parseXML(xmlString);
                 var head = $(xmlDoc).find('h\\:head, head'),
                     itextBlock = head.find('itext');
             
