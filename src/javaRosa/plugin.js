@@ -266,8 +266,8 @@ define([
                     _.each(langs, function (lang) {
                         var text = itForm.getValue(lang);
                         if (!text) { return; }
-                        var div = $('<div>').append(text);
-                        div.find('output').replaceWith(function() {
+                        var xquery = xml.query(text);
+                        xquery.find('output').replaceWith(function() {
                             var output = $(this),
                                 key = output.is("[value]") ||
                                     !output.is("[ref]") ? "value" : "ref",
@@ -290,7 +290,7 @@ define([
                             // always use value attribute internally
                             return $("<output />").xmlAttr("value", value);
                         });
-                        itForm.setValue(lang, div.html());
+                        itForm.setValue(lang, xquery.toString());
                     });
                 });
             });
@@ -416,9 +416,9 @@ define([
             }
 
             function writeValue(xmlWriter, val) {
-                val = $('<div>').append(val);
+                val = xml.query(val);
                 val.find('output').each(function() { hashtags(this); });
-                xmlWriter.writeXML(xml.normalize(val.html()));
+                xmlWriter.writeXML(val.toString());
             }
 
             var xpathParser = form_.xpath,
@@ -668,11 +668,11 @@ define([
                 };
 
                 function hashtrans(val, context) {
-                    val = $('<div>').append(val);
-                    val.find('output').each(function() {
+                    var qry = xml.query(val);
+                    qry.find('output').each(function() {
                         transformOutputRef(this, context);
                     });
-                    return xml.normalize(val.html());
+                    return qry.toString();
                 }
 
                 function transformOutputRef(outputRef, context) {
