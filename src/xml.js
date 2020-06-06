@@ -53,6 +53,13 @@ define([
     }
 
     /**
+     * Convert XML string to HTML dom nodes to be manipulated with jQuery
+     */
+    function xhtml(xmlString) {
+        return $("<div>").html(fixEmptyTags(xmlString || ""));
+    }
+
+    /**
      * Normalize XML string
      *
      * Escapes < and > not used as tag delimiters as well as unescaped &.
@@ -155,5 +162,6 @@ define([
         normalize: normalize,
         parseXML: parseXML,
         query: query,
+        xhtml: xhtml,
     };
 });

@@ -568,7 +568,7 @@ define([
      * @param escape - If true, escape HTML except for bubble markup.
      */
     function bubbleOutputs(text, form, escape) {
-        var el = $('<div>').html(text),
+        var el = xml.xhtml(text),
             places = {},
             replacer, result;
         if (escape) {
@@ -612,7 +612,7 @@ define([
     }
 
     function unwrapBubbles(text, form, isExpression) {
-        var el = $('<div>').html(text),
+        var el = xml.xhtml(text),
             places = {},
             bubbles = el.find('.label-datanode'),
             replacer, result, expr;
@@ -824,7 +824,7 @@ define([
                 var datasources = widget.mug.form.vellum.datasources;
                 description = datasources.getNode(hashtag, {}).description || "";
             }
-            description = $('<div>').append(description);
+            description = xml.xhtml(description);
             description.find('output').replaceWith(function () {
                 var xpath = extractXPathInfo($(this)).value;
                 return widget.mug.form.normalizeHashtag(xpath);
