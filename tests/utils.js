@@ -44,7 +44,7 @@ define([
             not: false,
         });
         if (opts.normalize_xmlns) {
-            var xmlns = $(xml.parseXML(expected)).find('data').attr('xmlns');
+            var xmlns = xml.parseXML(expected).find('data').attr('xmlns');
             actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
                                     '$1' + xmlns + '"');
         }
@@ -538,5 +538,6 @@ define([
             return $node.children(".fd-valid-alert-icon").length === 0;
         },
         markdownVisible: markdownVisible,
+        parseXML: xml.parseXML,
     };
 });

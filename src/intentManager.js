@@ -13,6 +13,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/util',
+    'vellum/xml',
     'underscore',
     'jquery',
     'vellum/core'
@@ -20,6 +21,7 @@ define([
     mugs,
     widgets,
     util,
+    xml,
     _,
     $
 ) {
@@ -371,9 +373,11 @@ define([
                 return {value: temp.id, text: temp.name, type: temp.mime};
             });
         },
-        loadXML: function (xml) {
+        loadXML: function (xmlString) {
             this.data.intents.unmappedIntentTags = parseIntentTags(
-                $(xml).find('h\\:head, head').children("odkx\\:intent, intent")
+                xml.parseXML(xmlString)
+                    .find('h\\:head, head')
+                    .children("odkx\\:intent, intent")
             );
             this.__callOld();
         },

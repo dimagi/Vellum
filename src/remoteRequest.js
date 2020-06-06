@@ -7,6 +7,7 @@ define([
     'vellum/mugs',
     'vellum/tree',
     'vellum/util',
+    'vellum/xml',
     'vellum/widgets',
     'vellum/core'
 ], function (
@@ -15,6 +16,7 @@ define([
     mugs,
     Tree,
     util,
+    xml,
     widgets
 ) {
     var REMOTE_REQUEST_TYPE = "RemoteRequest",
@@ -85,9 +87,9 @@ define([
             }
             return this.__callOld();
         },
-        loadXML: function (xml) {
+        loadXML: function (xmlString) {
             var submissions = this.data.remoteRequest.submissions = {},
-                head = $(xml).find("h\\:head, head");
+                head = xml.parseXML(xmlString).find("h\\:head, head");
             head.find("> model > submission").each(function (i, el) {
                 var sub = $(el);
                 submissions[sub.xmlAttr("id")] = sub;

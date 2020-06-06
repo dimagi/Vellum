@@ -40,7 +40,7 @@ define([
             text.p.defaultValue = 'blah';
 
             form = call("createXML");
-            setvalue = $(xml.parseXML(form)).find('setvalue');
+            setvalue = xml.parseXML(form).find('setvalue');
 
             assert.strictEqual(setvalue.attr('event'), 'jr-insert');
             assert.strictEqual(setvalue.attr('ref'), '/data/repeat/text');
@@ -55,7 +55,7 @@ define([
             text.p.defaultValue = 'blah';
 
             form = call("createXML");
-            setvalue = $(xml.parseXML(form)).find('setvalue');
+            setvalue = xml.parseXML(form).find('setvalue');
 
             assert.strictEqual(setvalue.attr('event'), 'xforms-ready');
             assert.strictEqual(setvalue.attr('ref'), '/data/text');
@@ -65,7 +65,7 @@ define([
         it("should not be associated with a question if event is not xforms-ready or jr-insert", function() {
             util.loadXML(SET_VALUE_SPECIAL_XML);
             var form = call("createXML"),
-                setvalue = $(xml.parseXML(form)).find('setvalue');
+                setvalue = xml.parseXML(form).find('setvalue');
             assert.strictEqual(setvalue.attr('event'), 'special-snowflake');
             assert.strictEqual(setvalue.attr('ref'), '/data/text');
             assert.strictEqual(setvalue.attr('value'), 'blah');

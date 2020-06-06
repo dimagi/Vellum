@@ -9,14 +9,17 @@ define([
     _
 ) {
     /**
-     * Parse XML string and return a document node
+     * Parse XML string and return jQuery-wrapped document object.
      */
     function parseXML(xmlStr) {
+        if (!xmlStr) {
+            return $();
+        }
         // HACK convince jQuery Sizzle that this is XML, not HTML
         xmlStr = xmlStr
             .replace(/<(h:)?html\b/, "<h:xdoc")
             .replace(/<\/(h:)?html\b>/, "</h:xdoc>");
-        return $.parseXML(xmlStr);
+        return $($.parseXML(xmlStr));
     }
 
     /**

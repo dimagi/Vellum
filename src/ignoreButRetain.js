@@ -43,8 +43,7 @@ define([
             }
             var _this = this,
                 ignoredEls = [],
-                xmlDoc = parseXML(xmlStr),
-                xml = $(xmlDoc),
+                xml = parseXML(xmlStr),
                 ignores = xml.find('[vellum\\:ignore="retain"]');
 
             this.data.ignore.active = ignores.length;
@@ -112,7 +111,7 @@ define([
                 }
 
                 var parentNode = xml.find(node.path),
-                    ignored = $(parseXML(node.nodeXML).childNodes[0]),
+                    ignored = parseXML(node.nodeXML)[0].childNodes[0],
                     prev = node.prev && parentNode.find(node.prev),
                     next = node.next && parentNode.find(node.next);
 

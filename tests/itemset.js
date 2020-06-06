@@ -7,7 +7,6 @@ define([
     'vellum/datasources',
     'vellum/itemset',
     'vellum/form',
-    'vellum/xml',
     'text!static/itemset/test1.xml',
     'text!static/itemset/test1-with-constraint.xml',
     'text!static/itemset/test1-with-appearance.xml',
@@ -26,7 +25,6 @@ define([
     datasources,
     itemset,
     form,
-    xml,
     TEST_XML_1,
     TEST_XML_1_WITH_CONSTRAINT,
     TEST_XML_1_WITH_APPEARANCE,
@@ -40,7 +38,6 @@ define([
     var assert = chai.assert,
         call = util.call,
         clickQuestion = util.clickQuestion,
-        parseXML = xml.parseXML,
         plugins = _.union(util.options.options.plugins || [], ["itemset"]);
 
     describe("The Dynamic Itemset plugin", function () {
@@ -73,7 +70,7 @@ define([
             };
 
             var xml = call('createXML'),
-                $xml = $(parseXML(xml));
+                $xml = util.parseXML(xml);
             assert($xml.find("instance[id=somefixture]").length,
                    "somefixture instance not found:\n" + xml);
         });
@@ -89,7 +86,7 @@ define([
             };
 
             var xml = call('createXML'),
-                $xml = $(parseXML(xml));
+                $xml = util.parseXML(xml);
             assert($xml.find("instance[id=foo]").length,
                    "foo instance not found:\n" + xml);
             assert.equal($xml.find("instance[id=casedb]").length, 0,
@@ -112,7 +109,7 @@ define([
             assert.equal(data.instance.src, "jr://instance/casedb");
             assert.equal(data.nodeset, "instance('casedb')/cases/case[@case_id > 2]");
             var xml = call('createXML'),
-                $xml = $(parseXML(xml));
+                $xml = util.parseXML(xml);
             assert($xml.find("instance[id=casedb]").length,
                    "casedb instance not found:\n" + xml);
             assert($xml.find("instance[id=cases]").length === 0,
@@ -134,7 +131,7 @@ define([
             util.loadXML("");
             util.addQuestion("SelectDynamic", "select");
             var xml = call('createXML'),
-                $xml = $(parseXML(xml)),
+                $xml = util.parseXML(xml),
                 itemset = $xml.find("itemset");
             assert.equal(itemset.attr("nodeset"),
                 "instance('some-fixture')/some-fixture_list/some-fixture");
@@ -150,7 +147,7 @@ define([
             $("[name=property-sortRef]").val("@id").change();
             assert.equal(mug.p.sortRef, "@id");
             var xml = call('createXML'),
-                $xml = $(parseXML(xml)),
+                $xml = util.parseXML(xml),
                 itemset = $xml.find("itemset");
             assert.equal(itemset.find("sort").attr("ref"), "@id");
         });

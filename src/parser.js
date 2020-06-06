@@ -42,10 +42,9 @@ define([
             return form;
         }
 
-        var xmlDoc = parseXML(xmlString),
-            xml = $(xmlDoc),
+        var xml = parseXML(xmlString),
+            docNode = xml.find('h\\:xdoc'),
             head = xml.find('h\\:head, head'),
-            ignore = head.parent().xmlAttr('vellum:ignore'),
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
             instances = _getInstances(xml),
@@ -56,6 +55,10 @@ define([
             throw gettext('PARSE ERROR!:') + $(xml).find('parsererror').find('div').html();
         }
 
+        if (!docNode.length) {
+            docNode = head.parent();
+        }
+        var ignore = docNode.xmlAttr('vellum:ignore');
         ignore = ignore ? ignore.split(" ") : [];
         if (_.contains(ignore, 'richText')) {
             form.richText = false;

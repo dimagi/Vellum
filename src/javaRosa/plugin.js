@@ -231,10 +231,8 @@ define([
                 Itext.setDefaultLanguage(langs[0]);
             }
 
-            var xmlDoc;
             if (xmlString) {
-                xmlDoc = xml.parseXML(xmlString);
-                var head = $(xmlDoc).find('h\\:head, head'),
+                var head = xml.parseXML(xmlString).find('h\\:head, head'),
                     itextBlock = head.find('itext');
             
                 $(itextBlock).children().each(eachLang);
