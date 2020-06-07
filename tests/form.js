@@ -316,7 +316,7 @@ define([
 
         function assertInstanceSrc(id, form, expect, message) {
             var xml = _.isString(form) ? form : form.createXML(),
-                $xml = $(xml),
+                $xml = util.parseXML(xml),
                 result = $xml.find("model > instance[id='" + id + "']").attr("src");
             assert.equal(result, expect, message ? message + "\n" + xml : "");
         }
@@ -522,9 +522,9 @@ define([
 
             it('should use default name for empty form', function() {
                 var form = util.loadXML(""),
-                    xml = $(call('createXML'));
+                    xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "New Form");
-                assert.equal(xml.find("h\\:title").text(), "New Form", "title");
+                assert.equal(xml.find("title").text(), "New Form", "title");
                 assert.equal(xml.find("data").attr("name"), "New Form", "data");
             });
 
@@ -534,9 +534,9 @@ define([
                         null,
                         /^Form does not have a Name!/
                     ),
-                    xml = $(call('createXML'));
+                    xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "New Form");
-                assert.equal(xml.find("h\\:title").text(), "New Form", "title");
+                assert.equal(xml.find("title").text(), "New Form", "title");
                 assert.equal(xml.find("data").attr("name"), "New Form", "data");
             });
 
@@ -545,9 +545,9 @@ define([
                         title: '<h:title>Title</h:title>',
                         dataName: 'name="Data Name"',
                     })),
-                    xml = $(call('createXML'));
+                    xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "Data Name");
-                assert.equal(xml.find("h\\:title").text(), "Data Name", "title");
+                assert.equal(xml.find("title").text(), "Data Name", "title");
                 assert.equal(xml.find("data").attr("name"), "Data Name", "data");
             });
 
@@ -556,9 +556,9 @@ define([
                         title: '<h:title>Title</h:title>',
                         dataName: '',
                     })),
-                    xml = $(call('createXML'));
+                    xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "Title");
-                assert.equal(xml.find("h\\:title").text(), "Title", "title");
+                assert.equal(xml.find("title").text(), "Title", "title");
                 assert.equal(xml.find("data").attr("name"), "Title", "data");
             });
 
@@ -578,9 +578,9 @@ define([
                             title: '<h:title>Title</h:title>',
                             dataName: 'name="Data Name"',
                         })),
-                        xml = $(call('createXML'));
+                        xml = util.parseXML(call('createXML'));
                     assert.equal(form.formName, "Optional Name");
-                    assert.equal(xml.find("h\\:title").text(), "Optional Name", "title");
+                    assert.equal(xml.find("title").text(), "Optional Name", "title");
                     assert.equal(xml.find("data").attr("name"), "Optional Name", "data");
                 });
             });

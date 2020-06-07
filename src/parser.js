@@ -11,8 +11,7 @@ define([
     $,
     _
 ) {
-    var DEFAULT_FORM_ID = 'data',
-        parseXML = xml.parseXML;
+    var DEFAULT_FORM_ID = 'data';
 
     function init (instance) {
         var data = instance.data.core;
@@ -42,7 +41,7 @@ define([
             return form;
         }
 
-        var xml = parseXML(xmlString),
+        var xml = util.parseXML(xmlString),
             docNode = xml.find('h\\:xdoc'),
             head = xml.find('h\\:head, head'),
             title = head.children('h\\:title, title'),
@@ -51,8 +50,8 @@ define([
             data = $(instances[0]).children(),
             setValues = head.find('> model > setvalue');
 
-        if($(xml).find('parsererror').length > 0) {
-            throw gettext('PARSE ERROR!:') + $(xml).find('parsererror').find('div').html();
+        if(xml.find('parsererror').length > 0) {
+            throw gettext('PARSE ERROR!:') + xml.find('parsererror').find('div').html();
         }
 
         if (!docNode.length) {

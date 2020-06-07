@@ -119,7 +119,7 @@ define([
 
             it("should change default to first language on save", function() {
                 util.loadXML(NON_DEFAULT_LANG_FIRST_XML);
-                var xml = $(call('createXML'));
+                var xml = util.parseXML(call('createXML'));
                 assert(xml.find("translation[lang=en]").attr("default") === undefined,
                     "English should not be the default language");
                 assert(xml.find("translation[lang=hin]").attr("default") === "",
@@ -722,7 +722,7 @@ define([
         it("should not create duplicate <help> node on select", function () {
             util.loadXML(SELECT1_HELP_XML);
             var xml = call("createXML"),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert.strictEqual($xml.find("help").length, 1, "wrong <help> node count\n" + xml);
         });
 
@@ -731,7 +731,7 @@ define([
             var north = util.getMug("north");
             north.p.nodeID = "west";
             var xml = call("createXML"),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert.strictEqual($xml.find("text#north-label").length, 2,
                                "wrong <text> node count\n" + xml);
         });
@@ -748,7 +748,7 @@ define([
             assert.equal(util.getMug("north").p.labelItext.get(), "north");
             assert.equal(util.getMug("south").p.labelItext.get(), "south");
             var xml = call("createXML"),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert.equal($xml.find("text#north-label").length, 2,
                          "wrong <text#north> node count\n" + xml);
             assert.equal($xml.find("text#south-label").length, 2,
@@ -763,7 +763,7 @@ define([
                 itext.id = tag;
                 itext.autoId = true;
                 var xml = call("createXML"),
-                    $xml = $(xml);
+                    $xml = util.parseXML(xml);
                 if (tag === "constraintMsg") {
                     assert.strictEqual($xml.find("[jr\\:" + tag + "]").length, 0,
                                        "wrong " + tag + " count\n" + xml);

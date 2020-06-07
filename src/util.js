@@ -308,6 +308,7 @@ define([
         that.setCaretPosition(ctrl, start, pos);
     };
 
+    that.parseXML = xml.parseXML;
 
     that.xmlDiff = function (localForm, serverForm, opts) {
         function cleanForDiff (value) {
