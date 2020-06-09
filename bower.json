@@ -37,7 +37,7 @@
     "jstree-actions": "alexandernst/jstree-actions#0.1.4",
     "langcodes": "dimagi/langcodes",
     "XMLWriter": "dimagi/XMLWriter#master",
-    "MediaUploader": "dimagi/MediaUploader#bmb/js-upgrade",
+    "MediaUploader": "dimagi/MediaUploader#master",
     "xpath": "dimagi/js-xpath#v0.0.3",
     "jsdiff": ">=1",
     "markdown-it": "~8.4.0",
