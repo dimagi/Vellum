@@ -104,6 +104,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/formdesigner.lock',
         'tests/itemset',
         'tests/advancedItemsets',
+        'tests/jquery-extensions',
         'tests/tsv',
         'tests/xml',
         'tests/saveToCase',

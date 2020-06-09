@@ -23,7 +23,7 @@ fi
 temp="/tmp/test-$$.tmp"
 
 # run the tests
-phantomjs node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js 'index.html' spec "{\"grep\":\"$qs\",\"useColors\":true}" | tee $temp
+phantomjs node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js 'index.html' spec "{\"grep\":\"$qs\",\"useColors\":true,\"bail\":false}" | tee $temp
 
 RESULT="${PIPESTATUS[0]}"
 if grep -q "Parse error" $temp; then

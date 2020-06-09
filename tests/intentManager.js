@@ -111,7 +111,7 @@ define([
                 mug = util.addQuestion("AndroidIntent", "intent");
                 mug.p.androidIntentResponse = {name: ["/data/node1", "/data/node2"]};
                 xml = util.call("createXML");
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             });
 
             it("should show all pairs in UI", function () {
@@ -192,7 +192,7 @@ define([
             it("should write the mime/type if supplied", function() {
                 $("[name=property-androidIntentAppId]").val("com.simprints.id.REGISTER").change();
                 var xml = util.call("createXML"),
-                    $xml = $($.parseXML(xml)),
+                    $xml = util.parseXML(xml),
                     type = $xml.find('h\\:head, head').children("odkx\\:intent, intent").attr('type');
                 assert.strictEqual(type, 'text/plain');
             });

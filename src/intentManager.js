@@ -13,6 +13,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/util',
+    'vellum/xml',
     'underscore',
     'jquery',
     'vellum/core'
@@ -20,6 +21,7 @@ define([
     mugs,
     widgets,
     util,
+    xml,
     _,
     $
 ) {
@@ -73,9 +75,9 @@ define([
         var store = {};
         _.each(tagObj.find(innerTag), function (inner) {
             var $innerTag = $(inner),
-                key = $innerTag.attr('key'),
+                key = $innerTag.xmlAttr('key'),
                 value;
-            value = $innerTag.attr('ref');
+            value = $innerTag.xmlAttr('ref');
             if (store.hasOwnProperty(key)) {
                 if (_.isArray(store[key])) {
                     store[key].push(value);
@@ -137,10 +139,10 @@ define([
             var $tag, tagId, newTag;
             $tag = $(tagXML);
 
-            tagId = $tag.attr('id');
-            newTag = makeODKXIntentTag(tagId, $tag.attr('class'));
+            tagId = $tag.xmlAttr('id');
+            newTag = makeODKXIntentTag(tagId, $tag.xmlAttr('class'));
 
-            newTag.xmlns = $tag.attr('xmlns:odkx') || newTag.intentXmlns;
+            newTag.xmlns = $tag.xmlAttr('xmlns:odkx') || newTag.intentXmlns;
             newTag.androidIntentExtra = parseInnerTags($tag, 'extra');
             newTag.androidIntentResponse = parseInnerTags($tag, 'response');
 
@@ -371,9 +373,11 @@ define([
                 return {value: temp.id, text: temp.name, type: temp.mime};
             });
         },
-        loadXML: function (xml) {
+        loadXML: function (xmlString) {
             this.data.intents.unmappedIntentTags = parseIntentTags(
-                $(xml).find('h\\:head, head').children("odkx\\:intent, intent")
+                xml.parseXML(xmlString)
+                    .find('h\\:head, head')
+                    .children("odkx\\:intent, intent")
             );
             this.__callOld();
         },

@@ -49,7 +49,7 @@ define([
             };
 
             var xml = call('createXML'),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert($xml.find("instance[id=somefixture]").length,
                    "somefixture instance not found:\n" + xml);
         });
@@ -70,7 +70,7 @@ define([
             assert.equal(data.instance.src, "jr://instance/casedb");
             assert.equal(data.nodeset, "instance('casedb')/cases/case[@case_id > 2]");
             var xml = call('createXML'),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert($xml.find("instance[id=casedb]").length,
                    "casedb instance not found:\n" + xml);
             assert($xml.find("instance[id=cases]").length === 0,

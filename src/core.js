@@ -23,6 +23,7 @@ define([
     'vellum/widgets',
     'vellum/richText',
     'vellum/parser',
+    'vellum/xml',
     'vellum/datasources',
     'vellum/util',
     'vellum/javaRosa/util',
@@ -60,6 +61,7 @@ define([
     widgets,
     richText,
     parser,
+    xml,
     datasources,
     util,
     jrUtil,
@@ -198,6 +200,7 @@ define([
             placement: 'bottom',
             container: 'body',
             trigger: 'hover',
+            sanitize: false,
         });
         // Saving, and the associated modal, can interfere with the popover,
         // so make absolutely sure that the popover is removed on save.
@@ -2141,7 +2144,7 @@ define([
         var formText = this.createXML();
         try {
             // ensure that form is valid XML; throws an error if not
-            $.parseXML(formText);
+            xml.parseXML(formText);
         } catch (err) {
             // something went wrong parsing, but maybe the user wants to save anyway
             // let's ask them with a scary message encouraging them not to.

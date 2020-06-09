@@ -128,7 +128,7 @@ define([
             util.addQuestion("Transfer", "t1").p.src = "value";
             util.addQuestion("Transfer", "t2").p.src = "value";
             var xml = util.call("createXML"),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert.equal($xml.find("transfer").length, 2, xml);
             assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t1\\']/@src']").length, 1, xml);
             assert.equal($xml.find("bind[nodeset='/data/transfer[@type=\\'t2\\']/@src']").length, 1, xml);
@@ -178,7 +178,7 @@ define([
             var mug = util.addQuestion("Dispense", "t1");
             mug.p.src = "something";
             var xml = util.call("createXML"),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert.strictEqual($xml.find("transfer[type='t1']").attr("src"), "",
                 "unexpected transfer src attribute\n" + xml);
             assert.isUndefined($xml.find("transfer[type='t1']").attr("dest"),
@@ -194,7 +194,7 @@ define([
             var mug = util.addQuestion("Receive", "t1");
             mug.p.dest = "something";
             var xml = util.call("createXML"),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert.isUndefined($xml.find("transfer[type='t1']").attr("src"),
                 "unexpected transfer src attribute\n" + xml);
             assert.strictEqual($xml.find("transfer[type='t1']").attr("dest"), "",
@@ -265,7 +265,7 @@ define([
                 util.loadXML("");
                 util.addQuestion(type, "question");
                 var xml = util.call("createXML"),
-                    $xml = $(xml);
+                    $xml = util.parseXML(xml);
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
                              "wrong ledger instance count\n" + xml);
             });
@@ -275,7 +275,7 @@ define([
                 var question = util.addQuestion(type, "question");
                 util.deleteQuestion(question.absolutePath);
                 var xml = util.call("createXML"),
-                    $xml = $(xml);
+                    $xml = util.parseXML(xml);
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
                              "ledger instance should be removed\n" + xml);
             });
@@ -298,7 +298,7 @@ define([
                                             "balance[@type='bal-0']");
                 util.deleteQuestion(question.absolutePath);
                 var xml = util.call("createXML"),
-                    $xml = $(xml);
+                    $xml = util.parseXML(xml);
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
                              "ledger instance should be removed\n" + xml);
             });
@@ -311,7 +311,7 @@ define([
                                             "balance[@type='bal-0']");
                 util.deleteQuestion(question.absolutePath);
                 var xml = util.call("createXML"),
-                    $xml = $(xml);
+                    $xml = util.parseXML(xml);
                 assert.equal($xml.find("bind").filter(function () {
                     return /^\/data\/(balance|transfer)\[/.test($(this).attr("nodeset"));
                 }).length, 0, "bind nodes should be removed\n" + xml);
@@ -326,7 +326,7 @@ define([
             var question = util.addQuestion("Transfer", "question");
             util.deleteQuestion(question.absolutePath);
             var xml = util.call("createXML"),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
                          "ledger instance should be removed\n" + xml);
         });

@@ -9,6 +9,60 @@ define([
     _
 ) {
     /**
+     * Parse XML string and return jQuery-wrapped document object.
+     */
+    function parseXML(xmlStr) {
+        if (!xmlStr) {
+            return $();
+        }
+        // HACK convince jQuery Sizzle that this is XML, not HTML
+        xmlStr = xmlStr
+            .replace(/<(h:)?html\b/, "<h:xdoc")
+            .replace(/<\/(h:)?html\b>/, "</h:xdoc>");
+        return $($.parseXML(xmlStr));
+    }
+
+    /**
+     * DOM-ify and wrap XML fragment (string) with jQuery
+     *
+     * Use jQuery in XML mode when possible. Fall back to HTML mode when
+     * fragment is not valid XML.
+     *
+     * Use this to convert XML string to jQuery/DOM, manipulate, then
+     * convert back to XML string.
+     */
+    function query(fragment) {
+        var xopen = '<xml xmlns="http://www.w3.org/1999/xhtml"' +
+                    ' xmlns:vellum="http://commcarehq.org/xforms/vellum">',
+            doc = xopen + fragment + "</xml>",
+            xquery;
+        try {
+            xquery = $($.parseXML(doc));
+        } catch (e) {
+            // fall back to HTML, which deals with all kinds of malformed stuff
+            xquery = $("<xml></xml>").html(fragment);
+        }
+        xquery.toString = function () {
+            var xml = new XMLSerializer(),
+                emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g;
+            return xml.serializeToString(xquery[0])
+                .replace(/^<xml\b[^>]*>/, "")   // remove <xml ...>
+                .replace(/<\/xml>$/, "")        // remove </xml>
+                .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
+                .replace(/"\/>/g, '" />')       // space before />
+                .replace(/&nbsp;|\xa0/g, " ");  // &nbsp; is not a valid XML entity
+        };
+        return xquery;
+    }
+
+    /**
+     * Convert XML string to HTML dom nodes to be manipulated with jQuery
+     */
+    function xhtml(xmlString) {
+        return $("<div>").html(fixEmptyTags(xmlString || ""));
+    }
+
+    /**
      * Normalize XML string
      *
      * Escapes < and > not used as tag delimiters as well as unescaped &.
@@ -29,7 +83,8 @@ define([
             if (!/[<>&]/.test(value)) {
                 return value; // value contains no XML tags
             }
-            value = inner ? $(value) : $("<div />").append(fixGTBug(value));
+            value = fixGTBug(fixEmptyTags(value));
+            value = inner ? $(value) : $("<div />").append(value);
         }
         var xml = new XMLSerializer(),
             xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ \/>])/g,
@@ -80,7 +135,7 @@ define([
      * '<tag attr="a > b"></tag>tail' => '<tag attr="a > b"></tag>tail'
      *
      * For the examples above, assume => is a funciton that does
-     * $("<div/>").append(value).html()
+     * xml.query(value).toString()
      *
      * NOTE: there are still edge cases (mainly malformed XML) that will not be
      * fixed by this. For example:
@@ -94,8 +149,22 @@ define([
         return value.replace(empty, "<$1></$2>");
     }
 
+    /**
+     * Convert self-closing tag to empty tag
+     *
+     * HTML5 interprets self-closing tags as unclosed tags.
+     *
+     * Replace <tag.../> with <tag...></tag>
+     */
+    function fixEmptyTags(xmlString) {
+        return xmlString.replace(/<(([\w:.-]+)(?:\s[^>]*|))\/>/g, "<$1></$2>");
+    }
+
     return {
+        humanize: humanize,
         normalize: normalize,
-        humanize: humanize
+        parseXML: parseXML,
+        query: query,
+        xhtml: xhtml,
     };
 });

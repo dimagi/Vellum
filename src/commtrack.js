@@ -401,12 +401,12 @@ define([
         parseDataElement: function (form, el, parentMug, role) {
             var tag = el.nodeName;
             if (!role && (tag === "transfer" || tag === "balance") &&
-                    $(el).attr("xmlns") === LEDGER_XMLNS) {
+                    $(el).xmlAttr("xmlns") === LEDGER_XMLNS) {
                 if (tag === "transfer") {
                     var $el = $(el);
-                    if (_.isUndefined($el.attr("src"))) {
+                    if (_.isUndefined($el.xmlAttr("src"))) {
                         role = "Receive";
-                    } else if (_.isUndefined($el.attr("dest"))) {
+                    } else if (_.isUndefined($el.xmlAttr("dest"))) {
                         role = "Dispense";
                     } else {
                         role = "Transfer";
@@ -427,12 +427,12 @@ define([
                     if (isTransaction(mug)) {
                         var suffix = path.match(bindPathSuffixRegex)[1],
                             attr = bindAttributes[mug.__className][suffix];
-                        mug.p[attr] = el.attr("calculate");
+                        mug.p[attr] = el.xmlAttr("calculate");
                         return;
                     }
                 }
             } else if (isTransaction(mug)) {
-                mug.p.relevantAttr = el.attr("relevant");
+                mug.p.relevantAttr = el.xmlAttr("relevant");
                 return;
             }
             this.__callOld();
@@ -446,7 +446,7 @@ define([
                     if (isTransaction(mug)) {
                         var suffix = path.match(bindPathSuffixRegex)[1],
                             attr = bindAttributes[mug.__className][suffix];
-                        mug.p[attr] = el.attr("value");
+                        mug.p[attr] = el.xmlAttr("value");
                         return;
                     }
                 }

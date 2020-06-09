@@ -8,6 +8,7 @@ define([
     'vellum/copy-paste',
     'vellum/tsv',
     'vellum/widgets',
+    'vellum/xml',
     'jquery.jstree',
     'jquery.vellum'
 ], function (
@@ -19,7 +20,8 @@ define([
     $,
     copypaste,
     tsv,
-    widgets
+    widgets,
+    xml
 ) {
     var assert = chai.assert,
         savedForm = null,
@@ -42,7 +44,7 @@ define([
             not: false,
         });
         if (opts.normalize_xmlns) {
-            var xmlns = $($.parseXML(expected)).find('data').attr('xmlns');
+            var xmlns = xml.parseXML(expected).find('data').attr('xmlns');
             actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
                                     '$1' + xmlns + '"');
         }
@@ -536,5 +538,6 @@ define([
             return $node.children(".fd-valid-alert-icon").length === 0;
         },
         markdownVisible: markdownVisible,
+        parseXML: xml.parseXML,
     };
 });

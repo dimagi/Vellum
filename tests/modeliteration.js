@@ -170,7 +170,7 @@ define([
             repeat.p.dataSource = {};
             repeat.p.repeat_count = "";
             xml = call("createXML");
-            assert($(xml).find("instance[id=products]").length === 1,
+            assert(util.parseXML(xml).find("instance[id=products]").length === 1,
                    "products instance not found in XML\n\n" + xml);
         });
 
@@ -183,10 +183,10 @@ define([
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             };
             var xml = call("createXML"),
-                firstCount = $(xml).find("setvalue").length;
+                firstCount = util.parseXML(xml).find("setvalue").length;
             repeat.p.nodeID = "group";
             xml = call("createXML");
-            assert.equal($(xml).find("setvalue").length, firstCount,
+            assert.equal(util.parseXML(xml).find("setvalue").length, firstCount,
                          "wrong number of <setvalue> nodes\n\n" + xml);
         });
 
@@ -195,7 +195,7 @@ define([
             util.loadXML(FIXTURE_REPEAT_XML);
             util.deleteQuestion("product/item");
             var xml = call("createXML");
-            assert.equal($(xml).find("setvalue").length, 0,
+            assert.equal(util.parseXML(xml).find("setvalue").length, 0,
                          "wrong number of <setvalue> nodes\n\n" + xml);
         });
 
@@ -214,7 +214,7 @@ define([
                 instance: {id: "casedb", src: "jr://instance/casedb"},
                 idsQuery: "instance('casedb')/mother/child/@case_id"
             };
-            var xml = $(call("createXML"));
+            var xml = util.parseXML(call("createXML"));
             assert.equal(blue.hashtagPath, "#form/product/item/blue");
             assert.equal(text.hashtagPath, "#form/product/item/text");
             var textBind = xml.find("bind[nodeset='" + getPath(text) + "']");
@@ -249,7 +249,7 @@ define([
             repeat.p.dataSource = {};
             assert.equal(blue.hashtagPath, "#form/product/blue");
             assert.equal(text.hashtagPath, "#form/product/text");
-            var xml = $(call("createXML")),
+            var xml = util.parseXML(call("createXML")),
                 textBind = xml.find("bind[nodeset='" + text.absolutePath + "']");
             assert.equal(
                 textBind.attr("calculate"),
@@ -303,7 +303,7 @@ define([
                 idsQuery: "instance('foo')/products/product/@id"
             };
             var xml = call('createXML'),
-                $xml = $(xml);
+                $xml = util.parseXML(xml);
             assert($xml.find("instance[id=foo]").length,
                    "foo instance not found:\n" + xml);
             assert.equal($xml.find("instance[id=products]").length, 0,
@@ -344,7 +344,7 @@ define([
                 idsQuery: "instance('products')/products/product/@id"
             };
             var xml = call('createXML'),
-                $xml = $(xml),
+                $xml = util.parseXML(xml),
                 ref = "setvalue[ref='/data/product/";
             assert.equal($xml.find(ref + "@ids']").attr("event"), "xforms-ready",
                    "wrong setvalue event for outer repeat: " + xml);

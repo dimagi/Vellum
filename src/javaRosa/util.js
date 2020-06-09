@@ -271,20 +271,18 @@ define([
     function _outputToXPathOrHashtag (functionName) {
         return function (text, xpathParser, escape) {
             if (text) {
-                text = $("<div />").append(text);
-                text.find('output').replaceWith(function() {
+                var xquery = xml.query(text);
+                xquery.find('output').each(function() {
                     var $this = $(this),
-                        value = $this.attr('value') || $this.attr('ref'),
-                        parsedValue;
+                        value = $this.xmlAttr('value') || $this.xmlAttr('ref');
                     try {
-                        parsedValue = xpathParser.parse(value);
-                        $this.attr('value', parsedValue[functionName]());
+                        var parsedValue = xpathParser.parse(value);
+                        $this.xmlAttr('value', parsedValue[functionName]());
                     } catch (e) {
-                        $this.attr('value', value);
+                        $this.xmlAttr('value', value);
                     }
-                    return $this[0].outerHTML;
                 });
-                text = xml.normalize(text.html());
+                text = xquery.toString();
                 if (escape) {
                     text = text.replace(/(<)|>/g, function (match, lt) {
                         return lt ? "&lt;" : "&gt;";

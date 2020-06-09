@@ -20,14 +20,17 @@
 define([
     'underscore',
     'jquery',
+    'vellum/xml',
     'vellum/parser',
     'vellum/core'
 ], function (
     _,
     $,
+    xml,
     parser
 ) {
     var xmls = new XMLSerializer(),
+        parseXML = xml.parseXML,
         MUG = "mug",
         PARENT = "parent";
 
@@ -40,8 +43,7 @@ define([
             }
             var _this = this,
                 ignoredEls = [],
-                xmlDoc = $.parseXML(xmlStr),
-                xml = $(xmlDoc),
+                xml = parseXML(xmlStr),
                 ignores = xml.find('[vellum\\:ignore="retain"]');
 
             this.data.ignore.active = ignores.length;
@@ -54,9 +56,9 @@ define([
             options.enableInstanceRefCounting = false;
             this.data.ignore.ignoredMugs = [];
 
-            var model = xml.find('h\\:html > h\\:head > model:first'),
-                instance = model.find('instance:first'),
-                body = xml.find('h\\:html > h\\:body:first, h\\:html > body:first');
+            var model = xml.find('h\\:xdoc > h\\:head > model').first(),
+                instance = model.find('instance').first(),
+                body = xml.find('h\\:xdoc > h\\:body, h\\:xdoc > body').first();
             _.each([model, instance, body], function (el) {
                 if (!el.length) {
                     window.console.log("WARNING", el.tagName, "not found");
@@ -95,21 +97,21 @@ define([
                 return xmlStr;
             }
 
-            var xml = $($.parseXML(xmlStr));
+            var xml = $(parseXML(xmlStr));
 
             _.each(ignoredNodes, function (node) {
-                if (node.path === "h\\:html > h\\:body") {
+                if (node.path === "h\\:xdoc > h\\:body") {
                     // Something weird happens involving body since it's an HTML
                     // tag, apparently.  But only when it's the terminal node in a
                     // selector. Also behaves differently in FF and Chrome.
-                    node.path = "h\\:html > body, h\\:html > h\\:body";
-                } else if (node.path === "h\\:html > h\\:head") {
+                    node.path = "h\\:xdoc > body, h\\:xdoc > h\\:body";
+                } else if (node.path === "h\\:xdoc > h\\:head") {
                     // same as above?
-                    node.path = "h\\:html > head, h\\:html > h\\:head";
+                    node.path = "h\\:xdoc > head, h\\:xdoc > h\\:head";
                 }
 
                 var parentNode = xml.find(node.path),
-                    ignored = $($.parseXML(node.nodeXML).childNodes[0]),
+                    ignored = parseXML(node.nodeXML)[0].childNodes[0],
                     prev = node.prev && parentNode.find(node.prev),
                     next = node.next && parentNode.find(node.next);
 
@@ -140,7 +142,7 @@ define([
         parseDataElement: function (form, el, parentMug) {
             if (this.data.ignore.active) {
                 var $el = $(el);
-                if ($el.attr("vellum:ignore") === "retain") {
+                if ($el.xmlAttr("vellum:ignore") === "retain") {
                     var mug = form.mugTypes.make("Ignored", form);
                     mug.p.nodeID = el.nodeName;
                     mug.p.rawDataAttributes = parser.getAttributes(el);
@@ -165,7 +167,7 @@ define([
                     mug = findParent(path, form);
                 }
                 if ((mug && mug.__className === "Ignored") ||
-                    el.attr("vellum:ignore") === "retain")
+                    el.xmlAttr("vellum:ignore") === "retain")
                 {
                     var basePath, relativeTo;
                     if (mug && mug.__className === "Ignored") {
@@ -203,7 +205,7 @@ define([
                     mug = findParent(path, form);
                 }
                 if ((mug && mug.__className === "Ignored") ||
-                    el.attr("vellum:ignore") === "retain")
+                    el.xmlAttr("vellum:ignore") === "retain")
                 {
                     var basePath, relativeTo;
                     if (mug && mug.__className === "Ignored") {
@@ -223,9 +225,9 @@ define([
                         this.data.ignore.ignoredMugs.push(mug);
                     }
                     mug.p.setValues.push({
-                        ref: el.attr('ref'),
-                        event: el.attr('event'),
-                        value: el.attr('value')
+                        ref: el.xmlAttr('ref'),
+                        event: el.xmlAttr('event'),
+                        value: el.xmlAttr('value')
                     });
                     return;
                 }
@@ -250,7 +252,7 @@ define([
                     var path = parser.getPathFromControlElement(
                                         $cEl, form, parentMug, true),
                         mug = form.getMugByPath(path);
-                    if ($cEl.attr("vellum:ignore") === "retain") {
+                    if ($cEl.xmlAttr("vellum:ignore") === "retain") {
                         adapt.ignoreDataNode = mug && mug.__className !== "Ignored";
                         return adapt;
                     }
@@ -393,7 +395,7 @@ define([
 
     function restoreAttributes(el) {
         if (el.length && el[0].poppedAttributes) {
-            el.attr(el[0].poppedAttributes);
+            el.xmlAttr(el[0].poppedAttributes);
         }
     }
 
@@ -446,13 +448,13 @@ define([
             return null;
         }
         var $node = $(node),
-            nodeset = $node.attr('nodeset'),
-            ref = $node.attr('ref'),
-            id = $node.attr('id'),
+            nodeset = $node.xmlAttr('nodeset'),
+            ref = $node.xmlAttr('ref'),
+            id = $node.xmlAttr('id'),
             tagName = ($node.prop('tagName') || '').toLowerCase();
 
         if (tagName === 'setvalue') {
-            return '[event="' + $node.attr('event') + '"]' +
+            return '[event="' + $node.xmlAttr('event') + '"]' +
                    '[ref="' + ref + '"]';
         } else if (nodeset) {
             return '[nodeset="' + nodeset + '"]';

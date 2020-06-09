@@ -263,24 +263,24 @@ define([
          */
         forEachExpression: function (fn) {
             var change = false,
-                shouldReset, div;
+                shouldReset, xquery;
             for (var lang in this.data) {
                 if (this.data.hasOwnProperty(lang) && this.data[lang]) {
                     shouldReset = false;
-                    div = $('<div>').append(this.data[lang]);
-                    _.each(div.find('output'), function (output) {
+                    xquery = xml.query(this.data[lang]);
+                    _.each(xquery.find('output'), function (output) {
                         output = $(output);
                         var key = !output.is("[ref]") ? "value" : "ref",
                             vkey = "vellum:" + key,
-                            value = output.attr(vkey) || output.attr(key),
+                            value = output.xmlAttr(vkey) || output.xmlAttr(key),
                             result = fn(value);
                         if (result !== undefined && result !== value) {
-                            output.attr(key, result).removeAttr(vkey);
+                            output.xmlAttr(key, result).removeAttr(vkey);
                             shouldReset = true;
                         }
                     });
                     if (shouldReset) {
-                        this.setValue(lang, div.html());
+                        this.setValue(lang, xquery.toString());
                         change = true;
                     }
                 }

@@ -517,7 +517,7 @@ define([
                 return ret;
             },
             parseDataNode: function (mug, $node) {
-                var case_type = $node.attr('vellum:case_type'),
+                var case_type = $node.xmlAttr('vellum:case_type'),
                     case_ = $node.children(),
                     create = case_.find('create'),
                     close = case_.find('close'),
@@ -542,8 +542,8 @@ define([
                     _.each(index.children(), function(child) {
                         var prop = $(child);
                         mug.p.indexProperty[prop.prop('tagName')] = {
-                            case_type: prop.attr('case_type'),
-                            relationship: prop.attr('relationship')
+                            case_type: prop.xmlAttr('case_type'),
+                            relationship: prop.xmlAttr('relationship')
                         };
                     });
                 }
@@ -555,8 +555,8 @@ define([
                     _.each(attach.children(), function(child) {
                         var prop = $(child);
                         mug.p.attachmentProperty[prop.prop('tagName')] = {
-                            from: prop.attr('from'),
-                            name: prop.attr('name')
+                            from: prop.xmlAttr('from'),
+                            name: prop.xmlAttr('name')
                         };
                     });
                 }
@@ -720,9 +720,9 @@ define([
                             if (!mug.p[pKey][prop]) {
                                 mug.p[pKey][prop] = {};
                             }
-                            mug.p[pKey][prop].calculate =  el.attr("calculate");
-                            if (el.attr('relevant')) {
-                                mug.p[pKey][prop].relevant =  el.attr("relevant");
+                            mug.p[pKey][prop].calculate =  el.xmlAttr("calculate");
+                            if (el.xmlAttr('relevant')) {
+                                mug.p[pKey][prop].relevant =  el.xmlAttr("relevant");
                             }
                             return;
                         } else {
@@ -745,7 +745,7 @@ define([
                                 },
                             }[matchRet[3]];
 
-                            mug.p[attr.mugProp] = el.attr(attr.elAttr);
+                            mug.p[attr.mugProp] = el.xmlAttr(attr.elAttr);
                             return;
                         }
                         form.parseWarnings.push(util.format(
@@ -768,7 +768,7 @@ define([
                         if (!attachProperties[nodeName]) {
                             attachProperties[nodeName] = {};
                         }
-                        mug.p.attachmentProperty[nodeName].calculate = el.attr('calculate');
+                        mug.p.attachmentProperty[nodeName].calculate = el.xmlAttr('calculate');
                         return;
                     }
                 }

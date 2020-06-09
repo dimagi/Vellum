@@ -6,7 +6,7 @@ define([
 
     $.fn.popAttr = function (name) {
         var removed = false,
-            val = this.attr(name);
+            val = this.xmlAttr(name);
         try {
             this.removeAttr(name);
             removed = true;
@@ -20,6 +20,51 @@ define([
             this[0].poppedAttributes[name] = val;
         }
         return val;
+    };
+
+    /**
+     * Get or set XML attribute value
+     *
+     * This should always be used instead of `$node.attr(...)` when getting
+     * or setting form XML attributes. jQuery's `$.fn.attr()` returns the
+     * wrong value for "Boolean Attributes" like "required".
+     *
+     * Supported forms:
+     * - get: .xmlAttr(name)
+     * - set: .xmlAttr(name, value)
+     * - set: .xmlAttr(attributes)
+     *
+     * https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes#Boolean_Attributes
+     */
+    $.fn.xmlAttr = function (name, value) {
+        if (_.isObject(name)) {
+            var $node = this;
+            _.each(name, function (value, key) {
+                $node.xmlAttr(key, value);
+            });
+            return this;
+        }
+        var isSet = arguments.length > 1;
+        if (name && name.indexOf(":") > -1) {
+            return isSet ? this.attr(name, value) : this.attr(name);
+        }
+        var node = this.get(0),
+            attr;
+        if (node) {
+            if (isSet) {
+                if (value !== undefined) {
+                    attr = document.createAttribute(name);
+                    attr.value = value;
+                    node.setAttributeNode(attr);
+                }
+                return this;
+            }
+            attr = node.attributes.getNamedItem(name);
+            if (attr) {
+                return attr.value;
+            }
+        }
+        return isSet ? this : undefined;
     };
 
     $.fn.stopLink = function() {
@@ -37,6 +82,7 @@ define([
                 trigger: 'focus',
                 html: true,
                 container: 'body',
+                sanitize: false,
             }).click(function(e) {
                 // If this help icon is inside a bigger click target, don't trigger the ancestor
                 e.stopPropagation();

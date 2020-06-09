@@ -152,12 +152,8 @@ define([
             eq('<output attr=value />', '<output attr="value" />', false);
         });
 
-        it("should fail on escape unquoted attribute value with <", function () {
-            // known failure; output is semantically correct:
-            //   <output value="2&lt;3"><!--3--></output>
-            chai.expect(function () {
-                eq('<output value=2<3 />', '<output value="2&lt;3" />', false);
-            }).to.throw(Error);
+        it("should escape unquoted attribute value with <", function () {
+            eq('<output value=2<3 />', '<output value="2&lt;3" />', false);
         });
 
         it("should fail on escape attribute value with />", function () {
@@ -187,7 +183,7 @@ define([
             // This is a pretty arcane test. The XML in this test caused
             // an exponential performance degredation (more tags made
             // normalization slower) in Chrome and Firefox.
-            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+            var parsedXml = xml.parseXML(REGEXP_CRASHING_DEBUG_ITEXT),
                 value = parsedXml.find("value");
             eq(value, REGEXP_CRASHING_DEBUG_ITEXT_PARSED, false);
         });
@@ -195,7 +191,7 @@ define([
         it("should not cause regexp engine to hang on many output values in string", function () {
             // similar to above test, but also tests fixGTBug, which uses a similar regexp
             // NOTE this test fails on Firefox because attribute order is changed
-            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+            var parsedXml = xml.parseXML(REGEXP_CRASHING_DEBUG_ITEXT),
                 serializer = new XMLSerializer(),
                 wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
                 value = serializer.serializeToString(parsedXml.find("value")[0])
@@ -269,9 +265,37 @@ define([
         });
 
         it("should not cause regexp engine to hang on many output values", function () {
-            var parsedXml = $($.parseXML(REGEXP_CRASHING_DEBUG_ITEXT)),
+            var parsedXml = xml.parseXML(REGEXP_CRASHING_DEBUG_ITEXT),
                 value = parsedXml.find("value");
             eq(value, REGEXP_CRASHING_DEBUG_ITEXT_PARSED, false);
+        });
+    });
+
+    describe("The XML query", function () {
+        var eq = assert.strictEqual;
+
+        it("should round-trip XML", function () {
+            eq(xml.query("<value>\n</value>").toString(), "<value>\n</value>");
+        });
+
+        it("should round-trip XML fragment with leading text", function () {
+            eq(xml.query("def <value>abc</value>").toString(), "def <value>abc</value>");
+        });
+
+        it("should round-trip XML fragment with trailing text", function () {
+            eq(xml.query("<value>abc</value> def").toString(), "<value>abc</value> def");
+        });
+
+        it("should escape invalid XML", function () {
+            eq(xml.query("<h1>a > & < b</h1>").toString(), "<h1>a &gt; &amp; &lt; b</h1>");
+        });
+
+        it("should round-trip empty string", function () {
+            eq(xml.query("").toString(), "");
+        });
+
+        it("should round-trip newline", function () {
+            eq(xml.query("\n").toString(), "\n");
         });
     });
 });

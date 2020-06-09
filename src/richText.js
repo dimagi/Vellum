@@ -568,7 +568,7 @@ define([
      * @param escape - If true, escape HTML except for bubble markup.
      */
     function bubbleOutputs(text, form, escape) {
-        var el = $('<div>').html(text),
+        var el = xml.xhtml(text),
             places = {},
             replacer, result;
         if (escape) {
@@ -612,7 +612,7 @@ define([
     }
 
     function unwrapBubbles(text, form, isExpression) {
-        var el = $('<div>').html(text),
+        var el = xml.xhtml(text),
             places = {},
             bubbles = el.find('.label-datanode'),
             replacer, result, expr;
@@ -747,7 +747,9 @@ define([
      * @returns - object with value and maybe data-date-format
      */
     function extractXPathInfo(output) {
-        var value = output.attr('vellum:value') || output.attr('value') || output.attr('ref'),
+        var value = output.xmlAttr('vellum:value') ||
+                output.xmlAttr('value') ||
+                output.xmlAttr('ref'),
             dateMatch = /^format-date\(date\(([^)]+)\),\s*'([^']+)'\)$/.exec(value);
         if (dateMatch) {
             return {value: dateMatch[1], 'data-date-format': dateMatch[2]};
@@ -822,7 +824,7 @@ define([
                 var datasources = widget.mug.form.vellum.datasources;
                 description = datasources.getNode(hashtag, {}).description || "";
             }
-            description = $('<div>').append(description);
+            description = xml.xhtml(description);
             description.find('output').replaceWith(function () {
                 var xpath = extractXPathInfo($(this)).value;
                 return widget.mug.form.normalizeHashtag(xpath);
@@ -837,6 +839,7 @@ define([
                 placement: 'bottom',
                 title: getTitle,
                 html: true,
+                sanitize: false,  // bootstrap, don't remove data-ufid attribute
                 content: easy_reference_popover({
                     text: description.text(),
                     ufid: labelMug ? labelMug.ufid : "",

@@ -378,7 +378,11 @@ define([
         before(setupGlobalForm);
 
         describe("", function() {
-            var el = $("<div id='cktestparent'><div contenteditable /><div contenteditable /></div>"),
+            var el = $(
+                    "<div id='cktestparent'>" +
+                        "<div contenteditable></div>" +
+                        "<div contenteditable></div>" +
+                    "</div>"),
                 options = {isExpression: false},
                 input, editor, exprInput, exprEditor;
             before(function (done) {
@@ -808,8 +812,8 @@ define([
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
-                                var $popover = $('.popover-content:last');
-                                assert.strictEqual($popover.find('p:first').text(),
+                                var $popover = $('.popover-content').last();
+                                assert.strictEqual($popover.find('p').first().text(),
                                                    "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                                 var $link = $popover.find("a");
                                 assert($link.length);
