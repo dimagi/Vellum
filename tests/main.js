@@ -107,7 +107,6 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/jquery-extensions',
         'tests/tsv',
         'tests/xml',
-        'tests/remoteRequest',
         'tests/saveToCase',
         'tests/urlHash',
         'tests/markdown',
