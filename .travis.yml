@@ -4,6 +4,9 @@ sudo: false
 node_js:
  - stable
 
+before_install:
+    - chmod +x start-server.sh
+
 before_script:
     - ./start-server.sh
 
