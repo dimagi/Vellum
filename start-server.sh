@@ -1,3 +1,3 @@
 #!/bin/bash
-npm run testserver &
+http-server -p 8088 &
 sleep 10
