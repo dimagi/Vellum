@@ -28,18 +28,6 @@ module.exports = function(grunt)  {
             interrupt: true,
         }
     },
-    mocha_phantomjs: {
-        all: {
-            options: {
-                urls: ['http://localhost:8081/index.html'],
-                reporter: 'nyan', // the only one that gives # of tests completed
-                config: {
-                    'bail': true,
-                    'grep': grunt.option('grep') || "",
-                }
-            }
-        }
-    },
     connect: {
         server: {
             options: {
@@ -54,8 +42,6 @@ module.exports = function(grunt)  {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-mocha-phantomjs');
 
   grunt.registerTask('default', ['test', 'jshint']);
-  grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
 };

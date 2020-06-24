@@ -1,14 +1,6 @@
 /* global console, mocha */
 mocha.reporter('html');
 
-// PhantomJS doesn't support bind yet
-Function.prototype.bind = Function.prototype.bind || function (thisp) {
-  var fn = this;
-  return function () {
-    return fn.apply(thisp, arguments);
-  };
-};
-
 (function () { // begin local scope
 
 var useBuilt = window.useBuilt, baseUrl, testBase;
