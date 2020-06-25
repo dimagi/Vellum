@@ -1101,7 +1101,7 @@ define([
             util.init({
                 features: {rich_text: false},
                 javaRosa: { langs: ['en'] },
-                core: {onReady: done}
+                core: {onReady: function () { done (); }},
             });
         });
 
