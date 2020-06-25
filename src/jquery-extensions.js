@@ -52,7 +52,9 @@ define([
             attr;
         if (node) {
             if (isSet) {
-                if (value !== undefined) {
+                if (value === null) {
+                    this.removeAttr(name);
+                } else if (value !== undefined) {
                     attr = document.createAttribute(name);
                     attr.value = value;
                     node.setAttributeNode(attr);
