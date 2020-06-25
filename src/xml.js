@@ -96,7 +96,8 @@ define([
             .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
             .replace(/&nbsp;|\xa0/g, " ")   // &nbsp; is not a valid XML entity
             // HACK xmlns could match and remove text that is not XML (unlikely)
-            .replace(xmlns, "$1");          // remove vellum namespace
+            .replace(xmlns, "$1")          // remove vellum namespace
+            .replace('&#10;', '\n');  // preserve newlines in attribute values
     }
 
     /**
