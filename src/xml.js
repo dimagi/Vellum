@@ -49,8 +49,7 @@ define([
                 .replace(/^<xml\b[^>]*>/, "")   // remove <xml ...>
                 .replace(/<\/xml>$/, "")        // remove </xml>
                 .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
-                .replace(/"\/>/g, '" />')       // space before />
-                .replace(/&nbsp;|\xa0/g, " ");  // &nbsp; is not a valid XML entity
+                .replace(/"\/>/g, '" />');      // space before />
         };
         return xquery;
     }
