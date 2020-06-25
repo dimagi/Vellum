@@ -538,7 +538,7 @@ define([
                 var form = util.loadXML(""),
                     xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "New Form");
-                assert.equal(xml.find("title").text(), "New Form", "title");
+                assert.equal($(xml[0].getElementsByTagName('h:title')).text(), "New Form", "title");
                 assert.equal(xml.find("data").attr("name"), "New Form", "data");
             });
 
@@ -550,7 +550,7 @@ define([
                     ),
                     xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "New Form");
-                assert.equal(xml.find("title").text(), "New Form", "title");
+                assert.equal($(xml[0].getElementsByTagName('h:title')).text(), "New Form", "title");
                 assert.equal(xml.find("data").attr("name"), "New Form", "data");
             });
 
@@ -561,7 +561,7 @@ define([
                     })),
                     xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "Data Name");
-                assert.equal(xml.find("title").text(), "Data Name", "title");
+                assert.equal($(xml[0].getElementsByTagName('h:title')).text(), "Data Name", "title");
                 assert.equal(xml.find("data").attr("name"), "Data Name", "data");
             });
 
@@ -572,7 +572,7 @@ define([
                     })),
                     xml = util.parseXML(call('createXML'));
                 assert.equal(form.formName, "Title");
-                assert.equal(xml.find("title").text(), "Title", "title");
+                assert.equal($(xml[0].getElementsByTagName('h:title')).text(), "Title", "title");
                 assert.equal(xml.find("data").attr("name"), "Title", "data");
             });
 
@@ -596,7 +596,7 @@ define([
                         })),
                         xml = util.parseXML(call('createXML'));
                     assert.equal(form.formName, "Optional Name");
-                    assert.equal(xml.find("title").text(), "Optional Name", "title");
+                    assert.equal($(xml[0].getElementsByTagName('h:title')).text(), "Optional Name", "title");
                     assert.equal(xml.find("data").attr("name"), "Optional Name", "data");
                 });
             });
