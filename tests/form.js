@@ -44,7 +44,11 @@ define([
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
-                core: {onReady: done},
+                core: {
+                    onReady: function () {
+                        done();
+                    },
+                },
             });
         });
 
@@ -103,7 +107,11 @@ define([
             before(function (done) {
                 util.init({
                     javaRosa: {langs: ['en']},
-                    core: {onReady: done},
+                    core: {
+                        onReady: function () {
+                            done();
+                        }
+                    },
                     features: {rich_text: false},
                 });
             });
@@ -486,7 +494,11 @@ define([
             before(function (done) {
                 util.init({
                     javaRosa: {langs: ['en']},
-                    core: {onReady: done},
+                    core: {
+                        onReady: function () {
+                            done();
+                        },
+                    },
                     features: {rich_text: false},
                 });
             });
@@ -515,7 +527,9 @@ define([
                     javaRosa: {langs: ['en']},
                     core: {
                         formName: null,
-                        onReady: done,
+                        onReady: function () {
+                            done();
+                        },
                     },
                 });
             });
@@ -568,7 +582,9 @@ define([
                         javaRosa: {langs: ['en']},
                         core: {
                             formName: "Optional Name",
-                            onReady: done,
+                            onReady: function () {
+                                done();
+                            },
                         },
                     });
                 });
