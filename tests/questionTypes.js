@@ -712,7 +712,7 @@ define([
         before(function (done) {
             util.init({
                 core: {
-                    onReady: done,
+                    onReady: function () { done(); },
                 },
             });
         });

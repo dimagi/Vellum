@@ -70,7 +70,7 @@ define([
             before(function(done) {
                 util.init({
                     javaRosa: {langs: ['en']},
-                    core: { form: TEST1_XML, onReady: done },
+                    core: { form: TEST1_XML, onReady: function () { done(); } },
                     features: {rich_text: false},
                     plugins: ['atwho','modeliteration'],
                 });

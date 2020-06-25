@@ -222,7 +222,7 @@ define([
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (callback) { callback([]); },
-                        onReady: done
+                        onReady: function () { done(); }
                     },
                     features: {rich_text: false},
                 });

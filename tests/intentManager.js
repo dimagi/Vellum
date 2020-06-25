@@ -60,7 +60,7 @@ define([
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
-                core: {onReady: done},
+                core: {onReady: function () { done(); }},
                 features: {
                     custom_intents: true,
                     templated_intents: true,
@@ -284,7 +284,7 @@ define([
                         custom_intents: false,
                         templated_intents: false,
                     },
-                    core: { onReady: done }
+                    core: { onReady: function () { done(); } }
                 });
             });
 

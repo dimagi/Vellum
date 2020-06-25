@@ -53,7 +53,7 @@ define([
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
-                core: {onReady: done},
+                core: {onReady: function () { done(); }},
             });
         });
 

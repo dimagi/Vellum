@@ -20,7 +20,7 @@ define([
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
-                core: {onReady: done},
+                core: {onReady: function () { done(); }},
                 features: {rich_text: false},
             });
         });
@@ -75,7 +75,7 @@ define([
             before(function (done) {
                 util.init({
                     javaRosa: {langs: ['en']},
-                    core: {onReady: done},
+                    core: {onReady: function () { done(); }},
                     features: {
                         rich_text: false,
                         allow_data_reference_in_setvalue: true,
@@ -111,7 +111,7 @@ define([
             before(function (done) {
                 util.init({
                     javaRosa: {langs: ['en']},
-                    core: {onReady: done},
+                    core: {onReady: function () { done(); }},
                     features: {
                         rich_text: false,
                         allow_data_reference_in_setvalue: false,
