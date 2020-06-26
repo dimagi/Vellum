@@ -4,7 +4,7 @@
 export PATH=`npm bin`:$PATH
 
 if [[ "$1" == "--help" ]]; then
-    echo "USAGE: $0 [TEST_GREP] [--no-jshint] [mocha-phantomjs-options]"
+    echo "USAGE: $0 [TEST_GREP] [--no-jshint]"
     exit
 fi
 
@@ -23,7 +23,7 @@ fi
 temp="/tmp/test-$$.tmp"
 
 # run the tests
-phantomjs node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js 'index.html' spec "{\"grep\":\"$qs\",\"useColors\":true,\"bail\":false}" | tee $temp
+node_modules/mocha-headless-chrome/bin/start -f http://localhost:8088/?grep="$qs" -t 500000 | tee $temp
 
 RESULT="${PIPESTATUS[0]}"
 if grep -q "Parse error" $temp; then
@@ -31,7 +31,7 @@ if grep -q "Parse error" $temp; then
 else
     rm $temp
     if [ "$RESULT" -ne 0 ]; then
-        # stop on mocha-phantomjs non-zero exit status (except parse error)
+        # stop on mocha-headless-chrome non-zero exit status (except parse error)
         # NOTE there may be edge cases where grep exits with non-zero
         # causing this script to exit prematurely
         exit 1

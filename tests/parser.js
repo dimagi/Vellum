@@ -175,7 +175,7 @@ define([
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
-                        onReady: done
+                        onReady: function () { done(); }
                     }
                 });
             });
@@ -210,7 +210,7 @@ define([
                         plugins: plugins,
                         javaRosa: {langs: ['en', 'hin']},
                         core: {
-                            onReady: done
+                            onReady: function () { done(); }
                         }
                     });
                 });

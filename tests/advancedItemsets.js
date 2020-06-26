@@ -30,7 +30,7 @@ define([
             util.init({
                 plugins: plugins,
                 javaRosa: {langs: ['en']},
-                core: {onReady: done},
+                core: {onReady: function () { done(); }},
                 features: {
                     advanced_itemsets: true,
                 }

@@ -713,10 +713,9 @@ define([
             enLabel.focus();
             hinLabel.val("hin test string").change();
             hinLabel.focus();
-            assert.equal(enLabel[0].selectionStart, 0);
-            assert.equal(enLabel[0].selectionEnd, 0);
-            assert.equal(hinLabel[0].selectionStart, 0);
-            assert.equal(hinLabel[0].selectionEnd, 0);
+            // if selectionStart and selectionEnd are the same, then no highlight is present
+            assert.equal(enLabel[0].selectionStart, enLabel[0].selectionEnd);
+            assert.equal(hinLabel[0].selectionStart, hinLabel[0].selectionEnd);
         });
 
         it("should not create duplicate <help> node on select", function () {
@@ -1102,7 +1101,7 @@ define([
             util.init({
                 features: {rich_text: false},
                 javaRosa: { langs: ['en'] },
-                core: {onReady: done}
+                core: {onReady: function () { done (); }},
             });
         });
 

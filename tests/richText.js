@@ -784,7 +784,7 @@ define([
                     util.init({
                         javaRosa: {langs: ['en']},
                         form: "",
-                        core: { onReady: done },
+                        core: { onReady: function () { done(); } },
                         features: {
                             rich_text: true,
                             disable_popovers: false,

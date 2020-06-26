@@ -41,7 +41,7 @@ define([
         function beforeFn(done) {
             util.init({
                 javaRosa: {langs: ['en', 'hin']},
-                core: {onReady: done},
+                core: {onReady: function () { done(); }},
                 features: {rich_text: false},
             });
         }

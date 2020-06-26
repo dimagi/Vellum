@@ -1,13 +1,7 @@
-/* global console, mocha */
-mocha.reporter('html');
-
-// PhantomJS doesn't support bind yet
-Function.prototype.bind = Function.prototype.bind || function (thisp) {
-  var fn = this;
-  return function () {
-    return fn.apply(thisp, arguments);
-  };
-};
+/* global console, mocha, navigator */
+if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
+    mocha.reporter('html');
+}
 
 (function () { // begin local scope
 
@@ -169,11 +163,8 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         $('#load-saved').click(function () {
             load(session.getItem("vellum.tests.main.lastSavedForm") || "");
         });
-
-
-        // mocha.env is an object when invoked by mocha-phantomjs
-        if (mocha.env) {
-            // ensure the first instance is fully loaded before running tests
+        
+        if (navigator.userAgent.indexOf('HeadlessChrome') >= 0) {
             load("", function () { mocha.run(); });
         } else if (/[?&]load=saved(&|#|$)/.test(window.location.href)) {
             // Use Chrome dev tools to preset form XML

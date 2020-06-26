@@ -220,7 +220,7 @@ define([
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
-                    core: {onReady: done},
+                    core: {onReady: function () { done(); }},
                     features: {
                         lookup_tables: false,
                         advanced_itemsets: false,

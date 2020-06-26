@@ -128,10 +128,6 @@ define([
     }
 
     function colorDiff(patch) {
-        if (!window.mochaPhantomJS) {
-            // patch colors not supported in browser yet
-            return patch;
-        }
         var colors = {
                 "-": 31, // red
                 "+": 32  // green

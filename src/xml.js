@@ -49,7 +49,7 @@ define([
                 .replace(/^<xml\b[^>]*>/, "")   // remove <xml ...>
                 .replace(/<\/xml>$/, "")        // remove </xml>
                 .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
-                .replace(/"\/>/g, '" />')       // space before />
+                .replace(/"\/>/g, '" />')      // space before />
                 .replace(/&nbsp;|\xa0/g, " ");  // &nbsp; is not a valid XML entity
         };
         return xquery;
@@ -96,7 +96,7 @@ define([
             .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
             .replace(/&nbsp;|\xa0/g, " ")   // &nbsp; is not a valid XML entity
             // HACK xmlns could match and remove text that is not XML (unlikely)
-            .replace(xmlns, "$1");          // remove vellum namespace
+            .replace(xmlns, "$1");         // remove vellum namespace
     }
 
     /**
