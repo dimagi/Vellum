@@ -1,9 +1,14 @@
-/* global console, mocha, navigator */
+/* global console, mocha, navigator, URLSearchParams */
 if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
     mocha.reporter('html');
 }
 
 (function () { // begin local scope
+
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('useBuilt')) {
+    window.useBuilt = true;
+}
 
 var useBuilt = window.useBuilt, baseUrl, testBase;
 
