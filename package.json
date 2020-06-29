@@ -33,6 +33,6 @@
     "scripts": {
         "install": "bower install",
         "testserver": "`npm bin`/http-server -p 8088",
-        "test": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:8088 -t 500000"
+        "test": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:8088/?useBuilt=true -t 500000"
     }
 }
