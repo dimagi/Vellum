@@ -8,32 +8,32 @@ requirejs.config({
     packages: [
         {
             name: 'less',
-            location: '../bower_components/require-less',
+            location: '../node_modules/require-less',
             main: 'less.js'
         },
         {
             name: 'css',
-            location: '../bower_components/require-css',
+            location: '../node_modules/require-css',
             main: 'css.js'
         },
         {
             name: 'text',
-            location: '../bower_components/requirejs-text',
+            location: '../node_modules/requirejs-text',
             main: 'text.js'
         },
         {
             name: 'tpl',
-            location: '../bower_components/requirejs-tpl',
+            location: '../node_modules/requirejs-undertemplate',
             main: 'tpl.js'
         },
         {
             name: 'json',
-            location: '../bower_components/requirejs-plugins/src',
+            location: '../node_modules/requirejs-plugins/src',
             main: 'json.js'
         },
         {
             name: "codemirror",
-            location: "../bower_components/codemirror",
+            location: "../node_modules/codemirror",
             main: "lib/codemirror",
         },
     ],
@@ -42,33 +42,33 @@ requirejs.config({
 
         'CryptoJS': '../lib/sha1',
         'diff-match-patch': '../lib/diff_match_patch',
-        'jquery': '../bower_components/jquery/dist/jquery',
-        'jquery.jstree': '../bower_components/jstree/dist/jstree',
-        'jstree-actions': '../bower_components/jstree-actions/jstree-actions',
-        'jquery.bootstrap': '../bower_components/bootstrap/dist/js/bootstrap',
-        'underscore': '../bower_components/underscore/underscore',
-        'XMLWriter': '../bower_components/XMLWriter/XMLWriter',
+        'jquery': '../node_modules/jquery/dist/jquery',
+        'jquery.jstree': '../node_modules/jstree/dist/jstree',
+        'jstree-actions': '../node_modules/jstree-actions/jstree-actions',
+        'jquery.bootstrap': '../node_modules/bootstrap/dist/js/bootstrap',
+        'underscore': '../node_modules/underscore/underscore',
+        'XMLWriter': '../node_modules/XMLWriter/XMLWriter',
 
         // todo: should convert xpath submodule to AMD
-        'xpath': '../bower_components/xpath/xpath',
+        'xpath': '../node_modules/xpath/xpath',
 
-        'langCodes': '../bower_components/langcodes/langs.json',
+        'langCodes': '../node_modules/langcodes/langs.json',
 
         'save-button': '../lib/SaveButton',
 
-        'yui-base': '../bower_components/MediaUploader/yui-base',
-        'yui-combo': '../bower_components/MediaUploader/yui-combo',
-        'yui-loader': '../bower_components/MediaUploader/yui-loader',
-        'yui-uploader': '../bower_components/MediaUploader/yui-uploader',
+        'yui-base': '../node_modules/MediaUploader/yui-base',
+        'yui-combo': '../node_modules/MediaUploader/yui-combo',
+        'yui-loader': '../node_modules/MediaUploader/yui-loader',
+        'yui-uploader': '../node_modules/MediaUploader/yui-uploader',
 
-        'file-uploader': '../bower_components/MediaUploader/hqmedia.upload_controller',
-        'jsdiff': '../bower_components/jsdiff/diff',
-        'markdown-it': '../bower_components/markdown-it/dist/markdown-it',
-        'caretjs': '../bower_components/Caret.js/dist/jquery.caret',
-        'atjs': '../bower_components/At.js/dist/js/jquery.atwho',
+        'file-uploader': '../node_modules/MediaUploader/hqmedia.upload_controller',
+        'jsdiff': '../node_modules/jsdiff/diff',
+        'markdown-it': '../node_modules/markdown-it/dist/markdown-it',
+        'caretjs': '../node_modules/Caret.js/dist/jquery.caret',
+        'atjs': '../node_modules/At.js/dist/js/jquery.atwho',
         'ckeditor': '../lib/ckeditor/ckeditor',
         'ckeditor-jquery': '../lib/ckeditor/adapters/jquery',
-        'fusejs': '../bower_components/fuse.js/src/fuse'
+        'fusejs': '../node_modules/fuse.js/src/fuse'
     },
     shim: {
         'CryptoJS': {
@@ -79,7 +79,7 @@ requirejs.config({
         },
 
         'jquery.jstree': {
-            deps: ['jquery', 'css!../bower_components/jstree/dist/themes/default/style'],
+            deps: ['jquery', 'css!../node_modules/jstree/dist/themes/default/style'],
             exports: '$.fn.jstree'
         },
         'jstree-actions': {
@@ -131,7 +131,7 @@ requirejs.config({
             exports: 'caretjs'
         },
         'atjs': {
-            deps: ['jquery', 'caretjs', 'css!../bower_components/At.js/dist/css/jquery.atwho'],
+            deps: ['jquery', 'caretjs', 'css!../node_modules/At.js/dist/css/jquery.atwho'],
             exports: 'atjs'
         },
         'ckeditor': {

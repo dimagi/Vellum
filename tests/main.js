@@ -22,9 +22,9 @@ if (useBuilt) {
 console.log("loading Vellum from " + baseUrl);
 
 // comment these to use built versions
-define("jquery", [testBase + 'bower_components/jquery/dist/jquery'], function () { return window.jQuery; });
-define("jquery.bootstrap", ["jquery", testBase + 'bower_components/bootstrap/dist/js/bootstrap'], function () {});
-define("underscore", [testBase + 'bower_components/underscore/underscore'], function () { return window._; });
+define("jquery", [testBase + 'node_modules/jquery/dist/jquery'], function () { return window.jQuery; });
+define("jquery.bootstrap", ["jquery", testBase + 'node_modules/bootstrap/dist/js/bootstrap'], function () {});
+define("underscore", [testBase + 'node_modules/underscore/underscore'], function () { return window._; });
 
 requirejs.config({
     baseUrl: baseUrl,
@@ -46,8 +46,8 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         waitSeconds: 60,
         paths: {
             'static': testBase + 'tests/static',
-            'chai': testBase + 'bower_components/chai/chai',
-            'equivalent-xml': testBase + 'bower_components/equivalent-xml-js/src/equivalent-xml'
+            'chai': testBase + 'node_modules/chai/chai',
+            'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml'
         },
         shim: {
             'equivalent-xml': {
@@ -60,10 +60,10 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
     if (useBuilt) {
         requirejs.config({
             paths: {
-                'text': '../bower_components/requirejs-text',
+                'text': '../node_modules/requirejs-text',
                 // for some reason this is necessary in firefox only for built
                 // version test page.  It shouldn't be
-                'tpl': '../bower_components/requirejs-tpl',
+                'tpl': '../node_modules/requirejs-tpl',
                 // https://github.com/guybedford/require-css/issues/133 
                 //'css': 'error',
                 'less': 'error',
