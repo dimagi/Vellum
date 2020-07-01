@@ -1,10 +1,9 @@
 {
-    "name": "Vellum",
+    "name": "vellum",
     "version": "1.6.0",
     "description": "A JavaRosa XForms designer",
     "authors": [
-        "Dimagi <dev@dimagi.com>",
-        "Michael White <m@mwhite.info>"
+        "Dimagi <dev@dimagi.com>"
     ],
     "license": "MIT",
     "homepage": "https://github.com/dimagi/Vellum",
