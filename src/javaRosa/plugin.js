@@ -52,7 +52,6 @@ define([
         audio: 'fa fa-volume-up',
         video: 'fa fa-video-camera',
         'video-inline': 'fa fa-play',
-        'expanded-audio': 'fa fa-volume-up',
     };
 
     $.vellum.plugin("javaRosa", {

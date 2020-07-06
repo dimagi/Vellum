@@ -13,7 +13,6 @@ define([
             "image": "Image",
             "video": "Video",
             "video-inline": "Video Inline",
-            "expanded-audio": "Expanded Audio",
         };
 
         var columnOrder = [
