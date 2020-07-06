@@ -57,6 +57,12 @@ define([
                 'extensions': '*.3gp;*.mp4'
             }
         ],
+        'expanded-audio': [
+            {
+                'description': gettext('Audio with a Seekbar'),
+                'extensions': '*.mp3;*.wav'
+            }
+        ],
         text: [
             {
                 'description': gettext('HTML'),
@@ -69,6 +75,7 @@ define([
         audio: multimedia_existing_audio,
         video: multimedia_existing_video,
         'video-inline': multimedia_existing_video,
+        'expanded-audio': multimedia_existing_audio,
         text:  multimedia_existing_text,
     },
     SLUG_TO_CLASS = {
@@ -76,6 +83,7 @@ define([
         audio: 'CommCareAudio',
         video: 'CommCareVideo',
         'video-inline': 'CommCareVideo',
+        'expanded-audio': 'CommCareAudio',
         text:  'CommCareMultimedia',
     },
     SLUG_TO_UPLOADER_SLUG = {
@@ -83,6 +91,7 @@ define([
         audio: 'fd_hqaudio',
         video: 'fd_hqvideo',
         'video-inline': 'fd_hqInlineVideo',
+        'expanded-audio': 'fd_hqExpandedAudio',
         text:  'fd_hqtext',
     },
     EXT = /(\.[^\/.]+)?$/;
@@ -278,6 +287,7 @@ define([
             audio: false,
             video: false,
             'video-inline': false,
+            'expanded-audio': false,
             text: false
         },
     }, {
@@ -319,6 +329,12 @@ define([
                         mediaType: 'video-inline',
                         sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
+                    }),
+                    'expanded-audio': this.initUploadController({
+                        uploaderSlug: 'fd_hqExpandedAudio',
+                        mediaType: 'expanded-audio',
+                        sessionid: sessionid,
+                        uploadUrl: uploadUrls.audio,
                     }),
                     'text': this.initUploadController({
                         uploaderSlug: 'fd_hqtext',

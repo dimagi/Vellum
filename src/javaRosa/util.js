@@ -13,8 +13,8 @@ define([
     xml,
     util
 ) {
-    var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
-        ITEXT_TYPES = ['default', 'audio', 'image', 'video', 'video-inline'],
+    var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline', 'expanded-audio'],
+        ITEXT_TYPES = ['default', 'audio', 'image', 'video', 'video-inline', 'expanded-audio'],
         ITEXT_PROPERTIES = [
             'labelItext',
             'hintItext',
