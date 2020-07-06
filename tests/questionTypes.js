@@ -261,7 +261,7 @@ define([
                         });
 
                         function addAllForms() {
-                            _.each(['image', 'audio', 'video', 'video-inline', 'expanded-audio'], function (i) {
+                            _.each(['image', 'audio', 'video', 'video-inline'], function (i) {
                                 $(".btn.itext-block-label-add-form-" + i).click();
                                 $(".btn.itext-block-constraintMsg-add-form-" + i).click();
                                 $(".btn.itext-block-help-add-form-" + i).click();
