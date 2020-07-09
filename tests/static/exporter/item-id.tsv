@@ -1,5 +1,5 @@
-Question	Type	Text (en)	Text (hin)	Audio (en)	Audio (hin)	Image (en)	Image (hin)	Video (en)	Video (hin)	Video Inline (en)	Video Inline (hin)	Expanded Audio (en)	Expanded Audio (hin)	Display Condition	Validation Condition	Validation Message	Calculate Condition	Required	Hint Text	Help Text	Comment
-/group	Group	group	group															no			
-/group/question1	Multiple Choice	question1	question1															no			
-/group/question1-1x	Choice	item1	item1																		
-/group/question1-2x	Choice	item2	item2																		
+Question	Type	Text (en)	Text (hin)	Audio (en)	Audio (hin)	Image (en)	Image (hin)	Video (en)	Video (hin)	Video Inline (en)	Video Inline (hin)	Display Condition	Validation Condition	Validation Message	Calculate Condition	Required	Hint Text	Help Text	Comment
+/group	Group	group	group													no			
+/group/question1	Multiple Choice	question1	question1													no			
+/group/question1-1x	Choice	item1	item1																
+/group/question1-2x	Choice	item2	item2																
