@@ -644,9 +644,9 @@ define([
             assert.equal(jr.generateItextXLS(form, Itext),
                          'label\tdefault_en\tdefault_hin\t' +
                          'audio_en\taudio_hin\timage_en\timage_hin\t' +
-                         'video_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\t' +
+                         'video_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
-                         'Hindu trans\t\t\t\t\t\t\t\t\t\t');
+                         'Hindu trans\t\t\t\t\t\t\t\t');
         });
 
         it("should escape all languages when generating bulk translations", function () {
@@ -654,8 +654,8 @@ define([
                 Itext = util.call("getData").javaRosa.Itext;
             assert.equal(jr.generateItextXLS(form, Itext),
                          'label\tdefault_en\tdefault_hin\taudio_en\taudio_hin\t' +
-                         'image_en\timage_hin\tvideo_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\t' +
-                         'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t');
+                         'image_en\timage_hin\tvideo_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\n' +
+                         'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t');
         });
 
         it("bulk translation tool should not create empty itext forms", function () {
