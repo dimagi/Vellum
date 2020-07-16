@@ -11,27 +11,27 @@ tar: rjs _tar
 test: tar _test
 
 deps:
-	npm install
+	yarn install
 
 _rjs:
 	rm -rf _build
 	PATH=$$(npm bin):$$PATH r.js -o build.js
 # r.js removeCombined option doesn't handle plugin resources
 	rm -r _build/src/exclude.js _build/src/templates _build/src/less-style
-	find _build/ -maxdepth 1 -mindepth 1 -not -name src -not -name lib -not -name README.md -not -name bower_components | xargs rm -rf
+	find _build/ -maxdepth 1 -mindepth 1 -not -name src -not -name lib -not -name README.md -not -name node_modules | xargs rm -rf
 # https://github.com/guybedford/require-css/issues/133 
-	cd _build/bower_components && ls . | grep -v MediaUploader | xargs rm -r
-	mkdir -p _build/bower_components/jstree/dist/themes/default
-	cp bower_components/jstree/dist/themes/default/*.png \
-	   bower_components/jstree/dist/themes/default/*.gif \
-	   _build/bower_components/jstree/dist/themes/default
+	cd _build/node_modules && ls . | grep -v MediaUploader | xargs rm -r
+	mkdir -p _build/node_modules/jstree/dist/themes/default
+	cp node_modules/jstree/dist/themes/default/*.png \
+	   node_modules/jstree/dist/themes/default/*.gif \
+	   _build/node_modules/jstree/dist/themes/default
 # combine CSS files (and adjust location for relative image paths)
 	cat _build/src/local-deps.css _build/src/main-components.css > _build/style.css
 	rm _build/src/local-deps.css _build/src/main-components.css
 	mv _build/src/images _build/
 	echo "$(VERSION)" > _build/version.txt
-	(`npm bin`/bower list || `npm bin`/bower list --offline) | \
-		grep -Ev "^(Vellum|bower) " > _build/bower_components/manifest.txt
+	(yarn list || yarn list --offline) | \
+		grep -Ev "^(Vellum|yarn) " > _build/node_modules/manifest.txt
 	python buildmain.py > _build/src/main.js
 
 _tar:

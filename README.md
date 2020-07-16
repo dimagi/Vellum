@@ -93,8 +93,7 @@ Tests
 Make sure everything is up to date:
 
 ```
-$ bower update
-$ npm update
+$ yarn upgrade
 ```
 
 Test in a browser:
@@ -123,7 +122,7 @@ Follow the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript)
 
 Install dependencies:
 ```
-$ npm install
+$ yarn install
 ```
 
 Build optimized version (test locally by changing `useBuilt` in `tests/main.js`):
