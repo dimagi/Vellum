@@ -56,5 +56,14 @@
     "scripts": {
         "testserver": "`npm bin`/http-server -p 8088",
         "test": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:8088/?useBuilt=true -t 500000"
+    },
+    "resolutions": {
+        "grunt": "1.2.0",
+        "jshint": "^2.12.0",
+        "lodash": "^4.17.19",
+        "mime": "^1.4.1",
+        "minimatch": "^3.0.2",
+        "qs": "^6.0.4",
+        "request": "^2.68.0"
     }
 }
