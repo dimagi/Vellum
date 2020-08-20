@@ -275,7 +275,7 @@ define([
             var value = "<value>&amp; <output value='/path' /> " +
                 "text-after *should* remain. ~&amp; not #disrupt the\nflow" +
                 "</value>";
-            eq($(value),"& <output value=\"/path\" /> text-after " +
+            eq($(value), "& <output value=\"/path\" /> text-after " +
                 "*should* remain. ~& not #disrupt the\nflow");
         });
     });
@@ -308,6 +308,9 @@ define([
         });
 
         it("should not insert text inside output refs", function () {
+            // this test is verifying a quirk of jQuery 3.5.0 that results in
+            // invalid XML transformations. It is not necessary to preserve
+            // the behavior if/when jQuery no longer mangles XML this way.
             eq(xml.query(
                 "& <output value=\"/data/question1\" " +
                 "vellum:value=\"#form/question1\"> " +
