@@ -270,6 +270,14 @@ define([
                 value = parsedXml.find("value");
             eq(value, REGEXP_CRASHING_DEBUG_ITEXT_PARSED, false);
         });
+
+        it("should not wrap trailing text in output refs", function () {
+            var value = "<value>&amp; <output value='/path' /> " +
+                "text-after *should* remain. ~&amp; not #disrupt the\nflow" +
+                "</value>";
+            eq($(value), "& <output value=\"/path\" /> text-after " +
+                "*should* remain. ~& not #disrupt the\nflow");
+        });
     });
 
     describe("The XML query", function () {
@@ -297,6 +305,21 @@ define([
 
         it("should round-trip newline", function () {
             eq(xml.query("\n").toString(), "\n");
+        });
+
+        it("should not insert text inside output refs", function () {
+            // this test is verifying a quirk of jQuery 3.5.0 that results in
+            // invalid XML transformations. It is not necessary to preserve
+            // the behavior if/when jQuery no longer mangles XML this way.
+            eq(xml.query(
+                "& <output value=\"/data/question1\" " +
+                "vellum:value=\"#form/question1\"> " +
+                "text-after *should* remain. ~& not #disrupt the\nflow</output>"
+            ).toString(),
+                "&amp; <output value=\"/data/question1\" " +
+                "vellum:value=\"#form/question1\" /> " +
+                "text-after *should* remain. ~&amp; not #disrupt the\nflow"
+            );
         });
     });
 });

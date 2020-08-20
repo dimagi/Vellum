@@ -32,6 +32,9 @@ define([
      * convert back to XML string.
      */
     function query(fragment) {
+        // This is needed to avoid inconsistent parsing with parseXML
+        fragment = fixEmptyTags(fragment);
+
         var xopen = '<xml xmlns="http://www.w3.org/1999/xhtml"' +
                     ' xmlns:vellum="http://commcarehq.org/xforms/vellum">',
             doc = xopen + fragment + "</xml>",
@@ -44,11 +47,13 @@ define([
         }
         xquery.toString = function () {
             var xml = new XMLSerializer(),
-                emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g;
+                emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g,
+                badOutput = /(<(output)(?:\s[^>]*|))>([\w\W]+)<\/output>/g;
             return xml.serializeToString(xquery[0])
                 .replace(/^<xml\b[^>]*>/, "")   // remove <xml ...>
                 .replace(/<\/xml>$/, "")        // remove </xml>
                 .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
+                .replace(badOutput, "$1 />$3")   // <output> text</output> to <output /> text
                 .replace(/"\/>/g, '" />')      // space before />
                 .replace(/&nbsp;|\xa0/g, " ");  // &nbsp; is not a valid XML entity
         };
@@ -90,10 +95,12 @@ define([
             xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ \/>])/g,
             wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
             // emptytag does not match <tag attr="a > b"></tag>
-            emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g;
+            emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g,
+            badOutput = /(<(output)(?:\s[^>]*|))>([\w\W]+)<\/output>/g;
         return xml.serializeToString(value[0]) // pure magic
             .replace(wrapper, "$3")         // remove outer tag
             .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
+            .replace(badOutput, "$1 />$3")   // <output> text</output> to <output /> text
             .replace(/&nbsp;|\xa0/g, " ")   // &nbsp; is not a valid XML entity
             // HACK xmlns could match and remove text that is not XML (unlikely)
             .replace(xmlns, "$1");         // remove vellum namespace
