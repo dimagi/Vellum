@@ -1079,6 +1079,7 @@ define([
         _.each([
             "**Word!**",
             "**a bold phrase**",
+            "| col1    | col2    | col3 |\n|:----:|:----:|:----:|\n| r1c1 | r1c2 | r1c3 |",
         ], function (text) {
             it("should recognize " + JSON.stringify(text), function() {
                 assert(jr.looksLikeMarkdown(text), "fail");
