@@ -57,11 +57,12 @@ define([
          * links
          * tables (regex written after ||)
          */
+        var hasMarkdown = /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val),
+            hasTable = false;
         if (supportTables) {
-            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val) || /^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val);
-        } else {
-            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val);
+            hasTable = /^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val);
         }
+        return hasMarkdown || hasTable;
     };
 
     /**
