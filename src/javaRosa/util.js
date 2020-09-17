@@ -47,7 +47,7 @@ define([
         return getDefaultItextRoot(mug) + "-" + property;
     };
 
-    var looksLikeMarkdown = function(val, supportTables = false) {
+    var looksLikeMarkdown = function(val, supportTables) {
         /* Regex checks (in order):
          * ordered lists
          * unordered lists
@@ -55,12 +55,12 @@ define([
          * headings
          * italics/bold/bold italics
          * links
-         * tables (second regex)
+         * tables (regex written after ||)
          */
         if (supportTables) {
-            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val) || /^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val)
+            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val) || /^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val);
         } else {
-            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val)
+            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val);
         }
     };
 
