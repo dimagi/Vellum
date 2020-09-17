@@ -47,7 +47,7 @@ define([
         return getDefaultItextRoot(mug) + "-" + property;
     };
 
-    var looksLikeMarkdown = function(val) {
+    var looksLikeMarkdown = function(val, supportTables = false) {
         /* Regex checks (in order):
          * ordered lists
          * unordered lists
@@ -56,8 +56,12 @@ define([
          * italics/bold/bold italics
          * links
          * tables (second regex)
-         */  
-        return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val) || /^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val)
+         */
+        if (supportTables) {
+            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val) || /^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val)
+        } else {
+            return /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val)
+        }
     };
 
     /**

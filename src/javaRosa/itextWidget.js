@@ -341,6 +341,7 @@ define([
             super_getUIElement = widget.getUIElement,
             super_handleChange = widget.handleChange,
             wantsMarkdown = true,
+            supportMarkDownTables = options.vellum.opts().features.markdown_tables,
             markdownOff, markdownOn, markdownOutput;
 
         widget.toggleMarkdown = function() {
@@ -358,7 +359,7 @@ define([
             super_handleChange();
             var val = widget.getValue(),
                 item = widget.getItextItem();
-            if (jrUtil.looksLikeMarkdown(val)) {
+            if (jrUtil.looksLikeMarkdown(val, supportMarkDownTables)) {
                 if (wantsMarkdown) {
                     parent.removeClass("markdown-ignorant");
                     parent.addClass("has-markdown");
@@ -407,7 +408,7 @@ define([
 
             if (widget.getItextItem().hasMarkdown) {
                 parent.addClass("has-markdown");
-            } else if (jrUtil.looksLikeMarkdown(val)) {
+            } else if (jrUtil.looksLikeMarkdown(val, supportMarkDownTables)) {
                 markdownOutput.html(util.markdown(val));
                 markdownOff.removeClass('hide');
             } else {
