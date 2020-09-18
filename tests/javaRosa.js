@@ -1081,15 +1081,21 @@ define([
             "**a bold phrase**",
         ], function (text) {
             it("should recognize " + JSON.stringify(text), function() {
-                assert(jr.looksLikeMarkdown(text), "fail");
+                assert(jr.looksLikeMarkdown(text, false), "fail");
             });
         });
-
+        var markdownTable = "| col1    | col2    | col3 |\n|:----:|:----:|:----:|\n| r1c1 | r1c2 | r1c3 |";
+        it("should detect a markdown table" + JSON.stringify(markdownTable), function(){
+            assert(jr.looksLikeMarkdown(markdownTable, true), "fail");
+        });
+        it("should not detect a markdown table since supportMarkdown is false" + JSON.stringify(markdownTable), function(){
+            assert(!jr.looksLikeMarkdown(markdownTable, false), "fail");
+        });
         _.each([
             "**not\nbold**",
         ], function (text) {
             it("should NOT recognize " + JSON.stringify(text), function() {
-                assert(!jr.looksLikeMarkdown(text), "fail");
+                assert(!jr.looksLikeMarkdown(text, false), "fail");
             });
         });
     });

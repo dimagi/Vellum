@@ -6,7 +6,7 @@ define([
     _
 ) {
     var md = markdownIt('zero')
-             .enable(['link', 'emphasis', 'strikethrough', 'heading', 'list']),
+             .enable(['link', 'emphasis', 'strikethrough', 'heading', 'list', 'table']),
         defaultRender = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
             return self.renderToken(tokens, idx, options);
         };
