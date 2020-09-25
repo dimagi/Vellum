@@ -55,12 +55,12 @@ define([
          * headings
          * italics/bold/bold italics
          * links
-         * tables (regex written after ||)
+         * tables (hasTable regex) 
          */
         var hasMarkdown = /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val),
             hasTable = false;
         if (supportTables) {
-            hasTable = /^(\|[^\n]+\|\r?\n)((?:\|:?[-]+:?)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val);
+            hasTable = /^(\|[^\n]+\|\r?\n)((?:\|\s*:?[-]+:?\s*)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val);
         }
         return hasMarkdown || hasTable;
     };
