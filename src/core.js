@@ -247,6 +247,7 @@ define([
             // Allow onReady to access vellum instance (mostly for tests)
             _this.opts().core.onReady.apply(_this);
         }
+        this._init_bulk_update_questions();
         this._init_extra_tools();
         parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
@@ -390,6 +391,71 @@ define([
             "Barcode",
             "Secret",
         ];
+    };
+
+    fn._init_bulk_update_questions = function () {
+        var _this = this,
+            menuItems = this.getBulkUpdateMenuItems();
+
+        var $lastItem = this.$f.find('.fd-bulk-update-header');
+        $lastItem.nextUntil(".divider").remove();
+        _(menuItems).each(function (menuItem) {
+            var $menuLink = $(util.format(
+                    "<a tabindex='-1' href='#'>{name}</a>",
+                    _.extend(menuItem)
+                )).click(function (e) {
+                    e.preventDefault();
+                    _this.showConfirmBulkActionModal(menuItem.confirmMessage, menuItem.confirmAction);
+                }),
+                $newItem = $("<li></li>").append($menuLink);
+            $lastItem.after($newItem);
+            $lastItem = $newItem;
+        });
+
+    };
+
+    fn.getBulkUpdateMenuItems = function () {
+        var _this = this;
+        return [
+            {
+                name: gettext('Make Required'),
+                confirmMessage: gettext("You are about to make all existing " +
+                    "questions on this form required. This action will overwrite " +
+                    "the current configuration of this form and can only be " +
+                    "undone by editing individual questions."),
+                confirmAction: function () {
+                    // todo
+                }
+            },
+            {
+                name: gettext('Load Default Values'),
+                confirmMessage: gettext("You are about to set matching case " +
+                    "properties as Default Values for all existing questions. " +
+                    "This action will overwrite existing Default Values for " +
+                    "all questions with matching case properties and can only " +
+                    "be undone by editing individual questions."),
+                confirmAction: function () {
+                    // todo
+                },
+            },
+        ];
+    };
+
+    fn.showConfirmBulkActionModal = function (confirmMessage, confirmActionFn) {
+        var _this = this,
+            $modal;
+        $modal = this.generateNewModal(gettext("Are you sure you want to perform this action?"), [
+            {
+                title: gettext('Continue'),
+                cssClasses: "btn-primary",
+                action: function () {
+                    _this.closeModal();
+                    confirmActionFn();
+                }
+            }
+        ], gettext("Cancel"));
+        $modal.find('.modal-body').html($('<p></p>').text(confirmMessage));
+        $modal.modal('show');
     };
 
     fn._init_extra_tools = function () {
