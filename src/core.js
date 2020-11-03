@@ -415,19 +415,22 @@ define([
     };
 
     fn.getBulkUpdateMenuItems = function () {
-        var _this = this;
-        return [
-            {
-                name: gettext('Make Required'),
-                confirmMessage: gettext("You are about to make all existing " +
-                    "questions on this form required. This action will overwrite " +
-                    "the current configuration of this form and can only be " +
-                    "undone by editing individual questions."),
-                confirmAction: function () {
-                    // todo
-                }
-            },
-            {
+        var _this = this,
+            menuItems =  [
+                {
+                    name: gettext('Make Required'),
+                    confirmMessage: gettext("You are about to make all existing " +
+                        "questions on this form required. This action will overwrite " +
+                        "the current configuration of this form and can only be " +
+                        "undone by editing individual questions."),
+                    confirmAction: function () {
+                        _this.makeAllQuestionsRequired();
+                    },
+                },
+            ];
+
+        if (_this.data.core.databrowser) {
+            menuItems.push({
                 name: gettext('Load Default Values'),
                 confirmMessage: gettext("You are about to set matching case " +
                     "properties as Default Values for all existing questions. " +
@@ -435,10 +438,35 @@ define([
                     "all questions with matching case properties and can only " +
                     "be undone by editing individual questions."),
                 confirmAction: function () {
-                    // todo
+                    _this.defaultMatchingQuestionsToCaseProperties();
                 },
-            },
-        ];
+            });
+        }
+        return menuItems;
+    };
+
+    fn.makeAllQuestionsRequired = function () {
+        var _this = this;
+        _this.data.core.form.walkMugs(function (mug) {
+            if (mug.spec.requiredAttr && mug.isVisible('requiredAttr')) {
+                mug.p.requiredAttr = true;
+            }
+        });
+        _this.refreshCurrentMug();
+    };
+
+    fn.defaultMatchingQuestionsToCaseProperties = function () {
+        var _this = this,
+            caseProperties = _.keys(_this.datasources.getHashtagMap());
+        _this.data.core.form.walkMugs(function (mug) {
+            if (mug.isVisible('defaultValue')) {
+                var caseProp = '#case/' + mug.p.nodeID;
+                if (caseProperties.indexOf(caseProp) !== -1) {
+                    mug.p.defaultValue = caseProp;
+                }
+            }
+        });
+        _this.refreshCurrentMug();
     };
 
     fn.showConfirmBulkActionModal = function (confirmMessage, confirmActionFn) {
