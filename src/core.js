@@ -457,11 +457,11 @@ define([
 
     fn.defaultMatchingQuestionsToCaseProperties = function () {
         var _this = this,
-            caseProperties = _.keys(_this.datasources.getHashtagMap());
+            caseProperties = _this.datasources.getHashtagMap({});
         _this.data.core.form.walkMugs(function (mug) {
             if (mug.isVisible('defaultValue')) {
                 var caseProp = '#case/' + mug.p.nodeID;
-                if (caseProperties.indexOf(caseProp) !== -1) {
+                if (caseProperties.hasOwnProperty(caseProp)) {
                     mug.p.defaultValue = caseProp;
                 }
             }
