@@ -247,7 +247,9 @@ define([
             // Allow onReady to access vellum instance (mostly for tests)
             _this.opts().core.onReady.apply(_this);
         }
-        this._init_bulk_update_questions();
+        if (_this.opts().features.allow_bulk_form_actions) {
+            this._init_bulk_update_questions();
+        }
         this._init_extra_tools();
         parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
