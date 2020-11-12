@@ -117,6 +117,7 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/questionProperties',
         'tests/atwho',
         'tests/escapedHashtags',
+        'tests/bulkActions',
         'tests/undomanager',
     ], function (
         options
