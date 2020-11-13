@@ -18,13 +18,33 @@ define([
             path: "/session",
             name: "Session",
             structure: {
-                "case_id": {
-                    reference: {
-                        hashtag: "#case",
-                        source: "casedb",
-                        subset: "case",
-                        subset_key: "@case_type",
-                        key: "@case_id",
+                data: {
+                    merge: true,
+                    structure: {
+                        "case_id": {
+                            reference: {
+                                hashtag: "#case",
+                                source: "casedb",
+                                subset: "case",
+                                subset_key: "@case_type",
+                                key: "@case_id",
+                            },
+                        },
+                    },
+                },
+                context: {
+                    merge: true,
+                    structure: {
+                        "userid": {
+                            reference: {
+                                hashtag: "#user",
+                                source: "casedb",
+                                subset: "commcare-user",
+                                subset_key: "@case_type",
+                                subset_filter: true,
+                                key: "hq_user_id",
+                            },
+                        },
                     },
                 },
             },
@@ -48,6 +68,15 @@ define([
                     genres: {},
                     case_name: {},
                     quantity: {},
+                    footnote: {},
+                },
+            }, {
+                id: "commcare-user",
+                name: "user",
+                key: "@case_type",
+                structure: {
+                    role: {},
+                    footnote: {},
                 },
             }],
         }];
@@ -130,6 +159,8 @@ define([
                             map.MatchingHiddenValueInGroup = util.addQuestion.bind({prevId: "groupA"})("DataBindOnly", 'genres');
                             map.TextInGroup = util.addQuestion.bind({prevId: "groupA"})("Text", 'no_match_04', {defaultValue: "already set"});
                             map.HiddenValueInGroup = util.addQuestion.bind({prevId: "groupA"})("DataBindOnly", 'no_match_05', {defaultValue: "already set"});
+                            map.userCaseProp = util.addQuestion("DataBindOnly", "role");
+                            map.similarCaseProp = util.addQuestion("DataBindOnly", "footnote");
                             form = this.data.core.form;
                             form.vellum.defaultMatchingQuestionsToCaseProperties();
                             done();
@@ -151,6 +182,11 @@ define([
             test("MatchingHiddenValueInGroup", true);
             test("TextInGroup", false, "already set");
             test("HiddenValueInGroup", false, "already set");
+
+            it("user case properties are also matched with priority given to case properties", function () {
+                assert(map.userCaseProp.p.defaultValue === '#user/' + map.userCaseProp.p.nodeID, "user case property was not set as default");
+                assert(map.similarCaseProp.p.defaultValue === '#case/' + map.similarCaseProp.p.nodeID, "case property was not given priority over user case property");
+            });
 
         });
 

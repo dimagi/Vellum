@@ -462,9 +462,12 @@ define([
             caseProperties = _this.datasources.getHashtagMap({});
         _this.data.core.form.walkMugs(function (mug) {
             if (mug.isVisible('defaultValue')) {
-                var caseProp = '#case/' + mug.p.nodeID;
+                var caseProp = '#case/' + mug.p.nodeID,
+                    userCaseProp = '#user/' + mug.p.nodeID;
                 if (caseProperties.hasOwnProperty(caseProp)) {
                     mug.p.defaultValue = caseProp;
+                } else if (caseProperties.hasOwnProperty(userCaseProp)) {
+                    mug.p.defaultValue = userCaseProp;
                 }
             }
         });
