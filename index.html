@@ -16,7 +16,12 @@
     <script src="tests/typoglycemia.js"></script>
     <script data-main="tests/main" src="node_modules/requirejs/require.js"></script>
     <script src="node_modules/xrayquire/xrayquire.js"></script>
-    <script>mocha.setup('bdd');</script>
+    <script>
+      mocha.setup({
+        ui: 'bdd',
+        timeout: '10000',
+      });
+    </script>
 
     <style>
       .container-fluid {

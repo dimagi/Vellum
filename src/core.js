@@ -247,6 +247,9 @@ define([
             // Allow onReady to access vellum instance (mostly for tests)
             _this.opts().core.onReady.apply(_this);
         }
+        if (_this.opts().features.allow_bulk_form_actions) {
+            this._init_bulk_update_questions();
+        }
         this._init_extra_tools();
         parser.init(this);
         this.loadXFormOrError(this.opts().core.form, function () {
@@ -390,6 +393,102 @@ define([
             "Barcode",
             "Secret",
         ];
+    };
+
+    fn._init_bulk_update_questions = function () {
+        var _this = this,
+            menuItems = this.getBulkUpdateMenuItems();
+
+        var $lastItem = this.$f.find('.fd-bulk-update-header');
+        $lastItem.nextUntil(".divider").remove();
+        _(menuItems).each(function (menuItem) {
+            var $menuLink = $(util.format(
+                    "<a tabindex='-1' href='#'>{name}</a>",
+                    _.extend(menuItem)
+                )).click(function (e) {
+                    e.preventDefault();
+                    _this.showConfirmBulkActionModal(menuItem.confirmMessage, menuItem.confirmAction);
+                }),
+                $newItem = $("<li></li>").append($menuLink);
+            $lastItem.after($newItem);
+            $lastItem = $newItem;
+        });
+
+    };
+
+    fn.getBulkUpdateMenuItems = function () {
+        var _this = this,
+            menuItems =  [
+                {
+                    name: gettext('Make Required'),
+                    confirmMessage: gettext("You are about to make all existing " +
+                        "questions on this form required. This action will overwrite " +
+                        "the current configuration of this form and can only be " +
+                        "undone by editing individual questions."),
+                    confirmAction: function () {
+                        _this.makeAllQuestionsRequired();
+                    },
+                },
+            ];
+
+        if (_this.data.core.databrowser) {
+            menuItems.push({
+                name: gettext('Load Default Values'),
+                confirmMessage: gettext("You are about to set matching case " +
+                    "properties as Default Values for all existing questions. " +
+                    "This action will overwrite existing Default Values for " +
+                    "all questions with matching case properties and can only " +
+                    "be undone by editing individual questions."),
+                confirmAction: function () {
+                    _this.defaultMatchingQuestionsToCaseProperties();
+                },
+            });
+        }
+        return menuItems;
+    };
+
+    fn.makeAllQuestionsRequired = function () {
+        var _this = this;
+        _this.data.core.form.walkMugs(function (mug) {
+            if (mug.spec.requiredAttr && mug.isVisible('requiredAttr')) {
+                mug.p.requiredAttr = true;
+            }
+        });
+        _this.refreshCurrentMug();
+    };
+
+    fn.defaultMatchingQuestionsToCaseProperties = function () {
+        var _this = this,
+            caseProperties = _this.datasources.getHashtagMap({});
+        _this.data.core.form.walkMugs(function (mug) {
+            if (mug.isVisible('defaultValue')) {
+                var caseProp = '#case/' + mug.p.nodeID,
+                    userCaseProp = '#user/' + mug.p.nodeID;
+                if (caseProperties.hasOwnProperty(caseProp)) {
+                    mug.p.defaultValue = caseProp;
+                } else if (caseProperties.hasOwnProperty(userCaseProp)) {
+                    mug.p.defaultValue = userCaseProp;
+                }
+            }
+        });
+        _this.refreshCurrentMug();
+    };
+
+    fn.showConfirmBulkActionModal = function (confirmMessage, confirmActionFn) {
+        var _this = this,
+            $modal;
+        $modal = this.generateNewModal(gettext("Are you sure you want to perform this action?"), [
+            {
+                title: gettext('Continue'),
+                cssClasses: "btn-primary",
+                action: function () {
+                    _this.closeModal();
+                    confirmActionFn();
+                }
+            }
+        ], gettext("Cancel"));
+        $modal.find('.modal-body').html($('<p></p>').text(confirmMessage));
+        $modal.modal('show');
     };
 
     fn._init_extra_tools = function () {

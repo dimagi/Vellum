@@ -248,6 +248,7 @@ define(["underscore"], function (_) {
             'image_resize': true,
             'markdown_in_groups': true,
             'allow_data_reference_in_setvalue': true,
+            'allow_bulk_form_actions': true,
         }
     };
 
