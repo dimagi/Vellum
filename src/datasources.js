@@ -299,11 +299,13 @@ define([
                 }
 
                 var path = parentPath ? parentPath + "/" + id : id,
-                    tree = getTree(item, id, path, info);
+                    tree = getTree(item, id, path, info),
+                    name = tree.name;
+
                 return {
-                    name: tree.name,
+                    name: name,
                     description: tree.description,
-                    hashtag: info.hashtag && !index ? info.hashtag + '/' + id : null,
+                    hashtag: info.hashtag && !index ? info.hashtag + '/' + name : null,
                     parentPath: parentPath,
                     xpath: path,
                     index: index || false,

@@ -90,6 +90,7 @@ define([
                 structure: {
                     dob: {},
                     parent: {},
+                    realName: {name: "anAlias"}
                 },
                 related: {
                     parent: {
@@ -189,6 +190,14 @@ define([
 
             it("should construct #case hashtag with reference.subset", function() {
                 assert.equal(nodes.child.nodes.dob.hashtag, "#case/dob");
+            });
+
+            it("should use aliases for hashtags", function() {
+                assert.equal(nodes.child.nodes.anAlias.hashtag, "#case/anAlias");
+            });
+
+            it("should reference an aliased property by its original id in its xpath", function() {
+                assert.match(nodes.child.nodes.anAlias.xpath, /\/realName$/);
             });
 
             it("should construct #case/parent hashtag with related subset", function() {
