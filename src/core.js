@@ -2343,6 +2343,7 @@ define([
                 hidePageSpinner();
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
+                _this._setURLHash(_this._propertiesMug);
             }
         });
     };
@@ -2495,7 +2496,6 @@ define([
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
         form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
-        this._setURLHash(mug);
     };
 
     fn.duplicateMugProperties = function(mug) {};
