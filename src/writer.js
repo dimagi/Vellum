@@ -10,8 +10,20 @@ define([
     util
 ) {
     var createXForm = function (form) {
+        if(window.Worker){
+            try {
+                var xformWorker=new Worker('createXForm.js')
+                xformWorker.postMessage([1])
+                xformWorker.onmessage= function(e){
+                console.log(e.data)
+            }    
+            } catch (error) {
+                console.log(error)
+            }
+            
+        }
         var xmlWriter = new XMLWriter('UTF-8', '1.0');
-        form.vellum.beforeSerialize();
+        form.vellum.beforeSerialize(); // it has to do something with dom
 
         xmlWriter.writeStartDocument();
         //Generate header boilerplate up to instance level
