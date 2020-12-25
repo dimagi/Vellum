@@ -29,19 +29,28 @@ requirejs([
             assert.equal(mug.absolutePath, "/data/group");
         });
 
-        it("should change the hash when you add a question", function() {
+        it("should change the hash when you add a question", function(done) {
             util.loadXML("");
             util.addQuestion("Text", "text");
-            assert.equal(window.location.hash, '#form/text');
+            util.saveAndReload(function(){
+                assert.equal(window.location.hash, '#form/text');
+                done();
+            })
         });
 
-        it("should change the hash when you delete a question", function() {
+        it("should change the hash when you delete a question", function(done) {
             util.loadXML("");
             util.addQuestion("Text", "text");
             util.addQuestion("Text", "text2");
-            assert.equal(window.location.hash, '#form/text2');
-            util.deleteQuestion("/data/text2");
-            assert.equal(window.location.hash, '#form/text');
+            util.saveAndReload(function(){
+                // saveAndReload selects the first question by default
+                // so we need to click on question 2 to set the correct url hash
+                util.clickQuestion('/data/text2')
+                assert.equal(window.location.hash, '#form/text2');
+                util.deleteQuestion("/data/text2");
+                assert.equal(window.location.hash, '#form/text');
+                done()
+            })
         });
     });
 });
