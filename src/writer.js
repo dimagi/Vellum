@@ -13,7 +13,12 @@ define([
         if(window.Worker){
             try {
                 var xformWorker=new Worker('createXForm.js')
-                xformWorker.postMessage([1])
+                var dataTree = form.dataTree();
+                var meta = form.instanceMetadata[0]
+                //meta is having some dome related stuff TODO - remove it
+                //form.vellum.beforeSerialize(); // it has to do
+                console.log(dataTree, meta)
+                xformWorker.postMessage([form.mayDisableRichText, form.richText, form.noMarkdown, form.formName, meta ])
                 xformWorker.onmessage= function(e){
                 console.log(e.data)
             }    
@@ -22,64 +27,64 @@ define([
             }
             
         }
-        var xmlWriter = new XMLWriter('UTF-8', '1.0');
-        form.vellum.beforeSerialize(); // it has to do something with dom
+        // var xmlWriter = new XMLWriter('UTF-8', '1.0');
+        // form.vellum.beforeSerialize(); // it has to do something with dom
 
-        xmlWriter.writeStartDocument();
-        //Generate header boilerplate up to instance level
-        xmlWriter.writeStartElement('h:html');
-        write_html_tag_boilerplate(xmlWriter, form);
-        xmlWriter.writeStartElement('h:head');
-        xmlWriter.writeStartElement('h:title');
-        xmlWriter.writeString(form.formName);
-        xmlWriter.writeEndElement();       //CLOSE TITLE
+        // xmlWriter.writeStartDocument();
+        // //Generate header boilerplate up to instance level
+        // xmlWriter.writeStartElement('h:html');
+        // write_html_tag_boilerplate(xmlWriter, form);
+        // xmlWriter.writeStartElement('h:head');
+        // xmlWriter.writeStartElement('h:title');
+        // xmlWriter.writeString(form.formName);
+        // xmlWriter.writeEndElement();       //CLOSE TITLE
 
-        xmlWriter.writeStartElement('model');
-        xmlWriter.writeStartElement('instance');
-        _writeInstanceAttributes(xmlWriter, form.instanceMetadata[0]);
+        // xmlWriter.writeStartElement('model');
+        // xmlWriter.writeStartElement('instance');
+        // _writeInstanceAttributes(xmlWriter, form.instanceMetadata[0]);
 
-        var dataTree = form.dataTree();
-        createDataBlock(form, dataTree, xmlWriter);
-        xmlWriter.writeEndElement(); //CLOSE MAIN INSTANCE
+        // var dataTree = form.dataTree();
+        // createDataBlock(form, dataTree, xmlWriter);
+        // xmlWriter.writeEndElement(); //CLOSE MAIN INSTANCE
         
-        // other instances
-        for (var i = 1; i < form.instanceMetadata.length; i++) {
-            _writeInstance(xmlWriter, form.instanceMetadata[i]);
-        }
+        // // other instances
+        // for (var i = 1; i < form.instanceMetadata.length; i++) {
+        //     _writeInstance(xmlWriter, form.instanceMetadata[i]);
+        // }
         
-        createBindList(dataTree, xmlWriter);
+        // createBindList(dataTree, xmlWriter);
         
-        createSetValues(dataTree, form, xmlWriter);
+        // createSetValues(dataTree, form, xmlWriter);
 
-        form.vellum.contributeToModelXML(xmlWriter, form);
+        // form.vellum.contributeToModelXML(xmlWriter, form);
         
-        xmlWriter.writeEndElement(); //CLOSE MODEL
+        // xmlWriter.writeEndElement(); //CLOSE MODEL
 
-        var hashtags = form.knownExternalReferences();
-        if (form.richText && !_.isEmpty(hashtags)) {
-            xmlWriter.writeStartElement('vellum:hashtags');
-            xmlWriter.writeString(JSON.stringify(hashtags));
-            xmlWriter.writeEndElement();
-        }
-        var transforms = form.knownHashtagTransforms();
-        if (form.richText && !_.isEmpty(hashtags)) {
-            xmlWriter.writeStartElement('vellum:hashtagTransforms');
-            xmlWriter.writeString(JSON.stringify(transforms));
-            xmlWriter.writeEndElement();
-        }
+        // var hashtags = form.knownExternalReferences();
+        // if (form.richText && !_.isEmpty(hashtags)) {
+        //     xmlWriter.writeStartElement('vellum:hashtags');
+        //     xmlWriter.writeString(JSON.stringify(hashtags));
+        //     xmlWriter.writeEndElement();
+        // }
+        // var transforms = form.knownHashtagTransforms();
+        // if (form.richText && !_.isEmpty(hashtags)) {
+        //     xmlWriter.writeStartElement('vellum:hashtagTransforms');
+        //     xmlWriter.writeString(JSON.stringify(transforms));
+        //     xmlWriter.writeEndElement();
+        // }
 
-        form.vellum.contributeToHeadXML(xmlWriter, form);
+        // form.vellum.contributeToHeadXML(xmlWriter, form);
 
-        xmlWriter.writeEndElement(); //CLOSE HEAD
+        // xmlWriter.writeEndElement(); //CLOSE HEAD
 
-        xmlWriter.writeStartElement('h:body');
-        createControlBlock(form, xmlWriter);
-        xmlWriter.writeEndElement(); //CLOSE BODY
-        xmlWriter.writeEndElement(); //CLOSE HTML
-        xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
-        form.vellum.afterSerialize();
+        // xmlWriter.writeStartElement('h:body');
+        // createControlBlock(form, xmlWriter);
+        // xmlWriter.writeEndElement(); //CLOSE BODY
+        // xmlWriter.writeEndElement(); //CLOSE HTML
+        // xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
+        // form.vellum.afterSerialize();
 
-        return xmlWriter.flush();
+        // return xmlWriter.flush();
     };
 
     var createModelHeader = function (form, xmlWriter) {
