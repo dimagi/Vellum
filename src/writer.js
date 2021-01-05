@@ -14,11 +14,16 @@ define([
             try {
                 var xformWorker=new Worker('createXForm.js')
                 var dataTree = form.dataTree();
-                var meta = form.instanceMetadata[0]
+                var dt = JSON.parse(JSON.stringify(dataTree))
+                var meta = JSON.parse(JSON.stringify(form.instanceMetadata))
+                var metaToSend = {
+                    attributes:meta.attributes,
+                    children:meta.children
+                }
                 //meta is having some dome related stuff TODO - remove it
                 //form.vellum.beforeSerialize(); // it has to do
-                console.log(dataTree, meta)
-                xformWorker.postMessage([form.mayDisableRichText, form.richText, form.noMarkdown, form.formName, meta ])
+                console.log(dataTree, metaToSend)
+                xformWorker.postMessage([form.mayDisableRichText, form.richText, form.noMarkdown, form.formName, meta, dt ])
                 xformWorker.onmessage= function(e){
                 console.log(e.data)
             }    
