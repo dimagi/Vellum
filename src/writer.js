@@ -14,7 +14,7 @@ define([
             try {
                 var xformWorker=new Worker('createXForm.js')
                 var dataTree = form.dataTree();
-                var dt = JSON.parse(JSON.stringify(dataTree))
+                var dt = {}//JSON.parse(JSON.stringify(dataTree))
                 var meta = JSON.parse(JSON.stringify(form.instanceMetadata))
                 var metaToSend = {
                     attributes:meta.attributes,

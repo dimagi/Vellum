@@ -24,7 +24,7 @@ onmessage = function(e) {
     for (var i = 1; i < meta.length; i++) {
       _writeInstance(xmlWriter, meta[i]);
     }
-    createBindList(dataTree, xmlWriter);
+    //createBindList(dataTree, xmlWriter);
         
     postMessage("work");
     
