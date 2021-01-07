@@ -29,13 +29,27 @@ requirejs([
             assert.equal(mug.absolutePath, "/data/group");
         });
 
-        it("should change the hash when you add a question", function(done) {
+        it("should change the hash when you add a question", function() {
             util.loadXML("");
-            util.addQuestion("Text", "text");
-            util.saveAndReload(function(){
-                assert.equal(window.location.hash, '#form/text');
-                done();
-            })
+            util.addQuestion("Text", "initial");
+            util.clickQuestion("initial");
+            assert.equal(window.location.hash, "#form/initial");
+        });
+
+        it("should change the hash when you delete a question", function() {
+            util.loadXML("");
+            
+            util.addQuestion("Text", "first");
+            util.clickQuestion("first");
+
+            util.addQuestion("Text", "second");
+            util.clickQuestion("second");
+            
+            assert.equal(window.location.hash, "#form/second");
+            
+            util.deleteQuestion("/data/second");
+            
+            assert.equal(window.location.hash, "#form/first");
         });
 
         it("should change the hash when you delete a question", function(done) {
