@@ -350,7 +350,7 @@ define([
             super_updateValue();
         };
 
-        widget._setURLHash = _.debounce(function(){
+        widget._setURLHash = _.debounce(function(mug){
                 mug.form.vellum._setURLHash(mug)
             }, 500);
         
