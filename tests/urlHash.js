@@ -52,18 +52,26 @@ requirejs([
             assert.equal(window.location.hash, "#form/first");
         });
 
-        it("should change the hash when you delete a question", function(done) {
+        it("should call setURLHash only once when multiple questions are loaded", function(done){
+            
+            var count = 0;
             util.loadXML("");
-            util.addQuestion("Text", "text");
-            util.addQuestion("Text", "text2");
+            
+            var q1 = util.addQuestion("Text", "first");
+            util.clickQuestion("first");
+            
+            var q2 = util.addQuestion("Text", "second");
+            util.clickQuestion("second");
+            var prevFn = q1.form.vellum._setURLHash;
+            q1.form.vellum._setURLHash = function(){
+                count++;
+            }
             util.saveAndReload(function(){
-                // saveAndReload selects the first question by default
-                // so we need to click on question 2 to set the correct url hash
-                util.clickQuestion('/data/text2')
-                assert.equal(window.location.hash, '#form/text2');
-                util.deleteQuestion("/data/text2");
-                assert.equal(window.location.hash, '#form/text');
-                done()
+                assert.equal(count, 1);
+                done();
+            })
+            after(function(){
+                q1.form.vellum._setURLHash = prevFn;
             })
         });
     });
