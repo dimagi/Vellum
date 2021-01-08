@@ -54,25 +54,26 @@ requirejs([
 
         it("should call setURLHash only once when multiple questions are loaded", function(done){
             
-            var count = 0;
+            var fnCallCount = 0;
             util.loadXML("");
             
             var q1 = util.addQuestion("Text", "first");
             util.clickQuestion("first");
             
-            var q2 = util.addQuestion("Text", "second");
+            util.addQuestion("Text", "second");
             util.clickQuestion("second");
-            var prevFn = q1.form.vellum._setURLHash;
+            
+            // Patching _setURLHash with a custom function
+            // which will tell how many times it was called
+            var originalFn = q1.form.vellum._setURLHash;
             q1.form.vellum._setURLHash = function(){
-                count++;
+                fnCallCount++;
             }
             util.saveAndReload(function(){
-                assert.equal(count, 1);
+                q1.form.vellum._setURLHash = originalFn;
+                assert.equal(fnCallCount, 1);
                 done();
-            })
-            after(function(){
-                q1.form.vellum._setURLHash = prevFn;
-            })
+            });
         });
     });
 });
