@@ -350,8 +350,13 @@ define([
             super_updateValue();
         };
 
+        widget._setURLHash = _.debounce(function(mug){
+                mug.form.vellum._setURLHash(mug)
+            }, 500);
+        
         widget.handleChange = function () {
             super_handleChange();
+            widget._setURLHash(mug);            
             if (!mug.p.nodeID) {
                 // HACK drop errors; nodeID will be set automatically on save
                 mug.dropMessage("nodeID", "mug-nodeID-error");

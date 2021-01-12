@@ -31,17 +31,49 @@ requirejs([
 
         it("should change the hash when you add a question", function() {
             util.loadXML("");
-            util.addQuestion("Text", "text");
-            assert.equal(window.location.hash, '#form/text');
+            util.addQuestion("Text", "initial");
+            util.clickQuestion("initial");
+            assert.equal(window.location.hash, "#form/initial");
         });
 
         it("should change the hash when you delete a question", function() {
             util.loadXML("");
-            util.addQuestion("Text", "text");
-            util.addQuestion("Text", "text2");
-            assert.equal(window.location.hash, '#form/text2');
-            util.deleteQuestion("/data/text2");
-            assert.equal(window.location.hash, '#form/text');
+            
+            util.addQuestion("Text", "first");
+            util.clickQuestion("first");
+
+            util.addQuestion("Text", "second");
+            util.clickQuestion("second");
+            
+            assert.equal(window.location.hash, "#form/second");
+            
+            util.deleteQuestion("/data/second");
+            
+            assert.equal(window.location.hash, "#form/first");
+        });
+
+        it("should call setURLHash only once when multiple questions are loaded", function(done){
+            
+            var fnCallCount = 0;
+            util.loadXML("");
+            
+            var q1 = util.addQuestion("Text", "first");
+            util.clickQuestion("first");
+            
+            util.addQuestion("Text", "second");
+            util.clickQuestion("second");
+            
+            // Patching _setURLHash with a custom function
+            // which will tell how many times it was called
+            var originalFn = q1.form.vellum._setURLHash;
+            q1.form.vellum._setURLHash = function(){
+                fnCallCount++;
+            }
+            util.saveAndReload(function(){
+                q1.form.vellum._setURLHash = originalFn;
+                assert.equal(fnCallCount, 1);
+                done();
+            });
         });
     });
 });
