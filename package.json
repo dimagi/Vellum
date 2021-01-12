@@ -27,7 +27,7 @@
         "jstree": "3.3.10",
         "jstree-actions": "0.2.1",
         "langcodes": "dimagi/langcodes",
-        "markdown-it": "8.4.2",
+        "markdown-it": "12.0.4",
         "require-css": "0.1.10",
         "require-less": "npm:requirejs-less",
         "requirejs": "2.3.6",
