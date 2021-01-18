@@ -24,7 +24,7 @@
         "fuse.js": "2.7.4",
         "jquery": "3.5.1",
         "jsdiff": "components/jsdiff#master",
-        "jstree": "3.3.10",
+        "jstree": "3.3.11",
         "jstree-actions": "0.2.1",
         "langcodes": "dimagi/langcodes",
         "markdown-it": "12.0.4",
