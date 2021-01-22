@@ -15,6 +15,7 @@
         "url": "https://github.com/dimagi/Vellum.git"
     },
     "dependencies": {
+        "@bracken/require-less": "0.1.6",
         "At.js": "millerdev/At.js#master",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
         "MediaUploader": "dimagi/MediaUploader#master",
@@ -29,7 +30,6 @@
         "langcodes": "dimagi/langcodes",
         "markdown-it": "12.0.4",
         "require-css": "0.1.10",
-        "require-less": "npm:requirejs-less",
         "requirejs": "2.3.6",
         "requirejs-plugins": "1.0.2",
         "requirejs-text": "2.0.15",
@@ -40,7 +40,7 @@
     },
     "devDependencies": {
         "chai": "4.2.0",
-        "csso": ">=1.3.11 <2.0.0",
+        "csso": ">=1.3.11",
         "equivalent-xml-js": "mwhite/equivalent-xml-js#master",
         "grunt": "1.2.0",
         "grunt-contrib-connect": "1.0.2",
@@ -48,7 +48,7 @@
         "grunt-contrib-watch": "1.1.0",
         "http-server": "0.12.3",
         "jshint": "2.12.0",
-        "less": "1.7.5",
+        "less": "2",
         "mocha": "7.2.0",
         "mocha-headless-chrome": "3.1.0",
         "yarn": "^1.22.10"

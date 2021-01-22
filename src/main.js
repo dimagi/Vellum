@@ -8,7 +8,7 @@ requirejs.config({
     packages: [
         {
             name: 'less',
-            location: '../node_modules/require-less',
+            location: '../node_modules/@bracken/require-less',
             main: 'less.js'
         },
         {
