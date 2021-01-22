@@ -54,8 +54,8 @@
     },
     "main": "src/main.js",
     "scripts": {
-        "testserver": "`npm bin`/http-server -p 8088",
-        "test:mocha": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:8088/?useBuilt=true -t 500000",
+        "testserver": "`npm bin`/http-server -p ${VELLUM_PORT:-8088}",
+        "test:mocha": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/?useBuilt=true -t 500000",
         "test:lint": "jshint src && jshint --config tests/.jshintrc tests",
         "test": "npm run test:mocha && npm run test:lint"
     },

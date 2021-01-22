@@ -99,7 +99,7 @@ $ yarn upgrade
 Test in a browser:
 ```
 $ npm run testserver
-$ chromium-browser http://localhost:8088
+$ chromium-browser http://localhost:${VELLUM_PORT:-8088}
 ```
 
 By default, the test page will load the non-built version unless a `built`
