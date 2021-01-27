@@ -11,7 +11,7 @@ tar: rjs _tar
 test: tar _test
 
 deps:
-	yarn install
+	`npm bin`/yarn install
 
 _rjs:
 	rm -rf _build
