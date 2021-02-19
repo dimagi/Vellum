@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DB593648-07B6-4C6A-A8DB-D71E826DA82D" uiVersion="1" version="1" name="Untitled Form">
+					<question1 />
+					<select />
+				</data>
+			</instance>
+			<bind vellum:nodeset="#form/select" nodeset="/data/select" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="select-label">
+						<value>select</value>
+					</text>
+					<text id="select-help">
+						<value>**help**</value>
+						<value form="markdown">**help**</value>
+					</text>
+					<text id="select-choice-label">
+						<value>choice</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input vellum:ref="#form/question1" ref="/data/question1">
+			<label ref="jr:itext('select-label')" />
+		</input>
+		<select1 vellum:ref="#form/select" ref="/data/select">
+			<label ref="jr:itext('select-label')" />
+			<help ref="jr:itext('select-help')" />
+			<item>
+				<label ref="jr:itext('select-choice-label')" />
+				<value>choice</value>
+			</item>
+		</select1>
+	</h:body>
+</h:html>
