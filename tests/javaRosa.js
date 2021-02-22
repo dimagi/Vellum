@@ -21,6 +21,7 @@ define([
     'text!static/javaRosa/itext-item-non-auto-id.xml',
     'text!static/javaRosa/select1-help.xml',
     'text!static/javaRosa/single-lang-select.xml',
+    'text!static/javaRosa/single-lang-second-select-with-help.xml',
     'text!static/javaRosa/no-label-text-one-lang.xml',
     'text!static/javaRosa/test-xml-1.xml',
     'text!static/javaRosa/test-xml-2.xml',
@@ -52,6 +53,7 @@ define([
     ITEXT_ITEM_NON_AUTO_ID_XML,
     SELECT1_HELP_XML,
     SINGLE_LANG_SELECT_XML,
+    SINGLE_LANG_SECOND_SELECT_WITH_HELP_XML,
     NO_LABEL_TEXT_ONE_LANG_XML,
     TEST_XML_1,
     TEST_XML_2,
@@ -236,6 +238,13 @@ define([
                         done();
                     });
                 });
+            });
+
+            it("should not error on save question with markdown and missing language", function () {
+                util.loadXML(SINGLE_LANG_SECOND_SELECT_WITH_HELP_XML);
+                var xml = util.parseXML(call('createXML')),
+                    value = xml.find("translation[lang=hin]>text#select-help>value[form=markdown]");
+                assert.equal(value.html(), "**help**");
             });
         });
 

@@ -448,7 +448,7 @@ define([
                             xmlWriter.writeEndElement();
                         }
                         if (item.hasMarkdown && !this.data.core.form.noMarkdown) {
-                            val = item.get('default', lang);
+                            val = item.getForm('default').getValueOrDefault(lang);
                             xmlWriter.writeStartElement("value");
                             xmlWriter.writeAttributeString('form', 'markdown');
                             writeValue(xmlWriter, val);
