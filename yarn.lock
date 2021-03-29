@@ -1910,10 +1910,10 @@ jstree-actions@0.2.1:
   resolved "https://registry.yarnpkg.com/jstree-actions/-/jstree-actions-0.2.1.tgz#7601e2f9ce1eb69be227211b59b979bed0375fd3"
   integrity sha512-bbX7mvgzz9XBclSydd6KPSACfc5EVC4UGrDdTF3kCw0dMh9QzMJWm94x71gYT4v0fqiqjtg8UJyBfjABEdzTuA==
 
-jstree@3.3.10:
-  version "3.3.10"
-  resolved "https://registry.yarnpkg.com/jstree/-/jstree-3.3.10.tgz#28d5b464a6bd4b5a93ccc2e978d005845596a408"
-  integrity sha512-TDhwTy24ZKCVei0gLRxnH5PQuX77nqlG7bhQh+UDTeOxC2xdhDrS1x7YtbjLVlSxmH7USnA/WIeVOGN/m3D0QA==
+jstree@3.3.11:
+  version "3.3.11"
+  resolved "https://registry.yarnpkg.com/jstree/-/jstree-3.3.11.tgz#da2f12bcab6af61839586c81db46e8f2e19160aa"
+  integrity sha512-9ZJKroPjCyjb6JLPuAbBrLJKT6pS1f4m5gkwoEagG5oQWtvzm0IiDsntXTxeFtz7AmqrKfij+gLfF9MgWriNxg==
   dependencies:
     jquery ">=1.9.1"
 
@@ -3331,9 +3331,10 @@ ws@^7.2.3:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.2.tgz#782100048e54eb36fe9843363ab1c68672b261dd"
   integrity sha512-T4tewALS3+qsrpGI/8dqNMLIVdq/g/85U98HPMa6F0m6xTbvhXU6RCQLqPH3+SlomNV/LdY6RXEbBpMH6EOJnA==
 
-xpath@dimagi/js-xpath#v0.0.3:
-  version "0.0.3"
-  resolved "https://codeload.github.com/dimagi/js-xpath/tar.gz/f9a249581249c2fda914cc2483291dac1f815d87"
+xpath@dimagi/js-xpath#0.0.4:
+  version "0.0.4"
+  uid "3a152a7bc5cd1f88a5d1da0055cb9d32e389003d"
+  resolved "https://codeload.github.com/dimagi/js-xpath/tar.gz/3a152a7bc5cd1f88a5d1da0055cb9d32e389003d"
   dependencies:
     biginteger "^1.0.3"
 
