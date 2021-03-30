@@ -50,7 +50,7 @@ requirejs.config({
         'XMLWriter': '../node_modules/XMLWriter/XMLWriter',
 
         // todo: should convert xpath submodule to AMD
-        'xpath': '../node_modules/xpath/xpath',
+        'xpath': '../node_modules/xpath/dist/js-xpath',
 
         'langCodes': '../node_modules/langcodes/langs.json',
 
