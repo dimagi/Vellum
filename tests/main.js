@@ -47,12 +47,6 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
             'static': testBase + 'tests/static',
             'chai': testBase + 'node_modules/chai/chai',
             'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml'
-        },
-        shim: {
-            'equivalent-xml': {
-                deps: ['underscore'],
-                exports: 'EquivalentXml'
-            }
         }
     });
 
