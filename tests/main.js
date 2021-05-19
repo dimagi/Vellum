@@ -54,9 +54,6 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         requirejs.config({
             paths: {
                 'text': '../node_modules/requirejs-text',
-                // for some reason this is necessary in firefox only for built
-                // version test page.  It shouldn't be
-                'tpl': '../node_modules/requirejs-tpl',
                 // https://github.com/guybedford/require-css/issues/133 
                 //'css': 'error',
                 'less': 'error',

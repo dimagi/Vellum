@@ -33,7 +33,7 @@
         "requirejs": "2.3.6",
         "requirejs-plugins": "1.0.2",
         "requirejs-text": "2.0.15",
-        "requirejs-undertemplate": "0.0.4",
+        "requirejs-undertemplate": "dimagi/requirejs-tpl#v0.0.5",
         "underscore": "1.13.1",
         "xpath": "dimagi/js-xpath#v0.0.4",
         "xrayquire": "npm:xrayquire-for-npm#^0.1.1"
