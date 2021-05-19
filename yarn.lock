@@ -794,9 +794,11 @@ entities@^2.0.0, entities@~2.1.0:
   resolved "https://registry.yarnpkg.com/entities/-/entities-2.1.0.tgz#992d3129cf7df6870b96c57858c249a120f8b8b5"
   integrity sha512-hCx1oky9PFrJ611mf0ifBLBRW8lUUVRlFolb5gWRfIELabBlbp9xZvrqZLZAs+NxFnbfQoeGd8wDkygjg7U85w==
 
-equivalent-xml-js@dimagi/equivalent-xml-js#master:
-  version "0.0.0"
-  resolved "https://codeload.github.com/dimagi/equivalent-xml-js/tar.gz/9fbcbf920ec8628264ab94f8e55bc5772bb76911"
+equivalent-xml-js@dimagi/equivalent-xml-js#v0.1.0:
+  version "0.1.0"
+  resolved "https://codeload.github.com/dimagi/equivalent-xml-js/tar.gz/054c06e50f42452512dd555c828d08e87e76f6b5"
+  dependencies:
+    underscore "^1.13.1"
 
 errno@^0.1.1:
   version "0.1.8"
@@ -3185,7 +3187,7 @@ underscore.string@~3.3.4, underscore.string@~3.3.5:
     sprintf-js "^1.0.3"
     util-deprecate "^1.0.2"
 
-underscore@1.13.1, underscore@^1.8.3:
+underscore@1.13.1, underscore@^1.13.1, underscore@^1.8.3:
   version "1.13.1"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.1.tgz#0c1c6bd2df54b6b69f2314066d65b6cde6fcf9d1"
   integrity sha512-hzSoAVtJF+3ZtiFX0VgfFPHEDRm7Y/QPjGyNo4TVdnDTdft3tr8hEkD25a1jC+TjTuE7tkHGKkhwCgs9dgBB2g==
