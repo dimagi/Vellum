@@ -794,9 +794,9 @@ entities@^2.0.0, entities@~2.1.0:
   resolved "https://registry.yarnpkg.com/entities/-/entities-2.1.0.tgz#992d3129cf7df6870b96c57858c249a120f8b8b5"
   integrity sha512-hCx1oky9PFrJ611mf0ifBLBRW8lUUVRlFolb5gWRfIELabBlbp9xZvrqZLZAs+NxFnbfQoeGd8wDkygjg7U85w==
 
-equivalent-xml-js@mwhite/equivalent-xml-js#master:
+equivalent-xml-js@dimagi/equivalent-xml-js#master:
   version "0.0.0"
-  resolved "https://codeload.github.com/mwhite/equivalent-xml-js/tar.gz/7de21be29567a06535309b9ee969b97abcfbcb21"
+  resolved "https://codeload.github.com/dimagi/equivalent-xml-js/tar.gz/9fbcbf920ec8628264ab94f8e55bc5772bb76911"
 
 errno@^0.1.1:
   version "0.1.8"
@@ -2698,24 +2698,23 @@ requirejs-text@2.0.15, requirejs-text@~2.0.12:
   resolved "https://registry.yarnpkg.com/requirejs-text/-/requirejs-text-2.0.15.tgz#13138733613fc4457b7e1247e8cb751df7aa5429"
   integrity sha1-ExOHM2E/xEV7fhJH6Mt1HfeqVCk=
 
-requirejs-undertemplate@0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/requirejs-undertemplate/-/requirejs-undertemplate-0.0.4.tgz#c206453dcb5fa3d396399d2e3cf2e9f1c298209b"
-  integrity sha1-wgZFPctfo9OWOZ0uPPLp8cKYIJs=
+requirejs-undertemplate@dimagi/requirejs-tpl#v0.0.5:
+  version "0.0.5"
+  resolved "https://codeload.github.com/dimagi/requirejs-tpl/tar.gz/e2e00a613c7dccff092bfd48bd58d4f949a5dfb4"
   dependencies:
-    requirejs "~2.2.0"
+    requirejs "2.3.3"
     requirejs-text "~2.0.12"
     underscore "^1.8.3"
+
+requirejs@2.3.3:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/requirejs/-/requirejs-2.3.3.tgz#aa59fd3a0287eaf407959a138228044b5dd6a6a3"
+  integrity sha1-qln9OgKH6vQHlZoTgigES13WpqM=
 
 requirejs@2.3.6:
   version "2.3.6"
   resolved "https://registry.yarnpkg.com/requirejs/-/requirejs-2.3.6.tgz#e5093d9601c2829251258c0b9445d4d19fa9e7c9"
   integrity sha512-ipEzlWQe6RK3jkzikgCupiTbTvm4S0/CAU5GlgptkN5SO6F3u0UD0K18wy6ErDqiCyP4J4YYe1HuAShvsxePLg==
-
-requirejs@~2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/requirejs/-/requirejs-2.2.0.tgz#0f2b1538af2b8d0a4fffffde5d367aa9cd4cfe84"
-  integrity sha1-DysVOK8rjQpP///eXTZ6qc1M/oQ=
 
 requires-port@^1.0.0:
   version "1.0.0"
@@ -3186,15 +3185,10 @@ underscore.string@~3.3.4, underscore.string@~3.3.5:
     sprintf-js "^1.0.3"
     util-deprecate "^1.0.2"
 
-underscore@1.8.3:
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.8.3.tgz#4f3fb53b106e6097fcf9cb4109f2a5e9bdfa5022"
-  integrity sha1-Tz+1OxBuYJf8+ctBCfKl6b36UCI=
-
-underscore@^1.8.3:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.12.0.tgz#4814940551fc80587cef7840d1ebb0f16453be97"
-  integrity sha512-21rQzss/XPMjolTiIezSu3JAjgagXKROtNrYFEOWK109qY1Uv2tVjPTZ1ci2HgvQDA16gHYSthQIJfB+XId/rQ==
+underscore@1.13.1, underscore@^1.8.3:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.1.tgz#0c1c6bd2df54b6b69f2314066d65b6cde6fcf9d1"
+  integrity sha512-hzSoAVtJF+3ZtiFX0VgfFPHEDRm7Y/QPjGyNo4TVdnDTdft3tr8hEkD25a1jC+TjTuE7tkHGKkhwCgs9dgBB2g==
 
 union-value@^1.0.0:
   version "1.0.1"

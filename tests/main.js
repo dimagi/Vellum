@@ -21,11 +21,6 @@ if (useBuilt) {
 }
 console.log("loading Vellum from " + baseUrl);
 
-// comment these to use built versions
-define("jquery", [testBase + 'node_modules/jquery/dist/jquery'], function () { return window.jQuery; });
-define("jquery.bootstrap", ["jquery", testBase + 'node_modules/bootstrap/dist/js/bootstrap'], function () {});
-define("underscore", [testBase + 'node_modules/underscore/underscore'], function () { return window._; });
-
 requirejs.config({
     baseUrl: baseUrl,
     paths: {
@@ -37,7 +32,7 @@ requirejs.config({
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
-requirejs(['jquery', 'jquery.vellum'], function ($) {
+requirejs(['jquery.vellum'], function () {
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
@@ -48,12 +43,6 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
             'static': testBase + 'tests/static',
             'chai': testBase + 'node_modules/chai/chai',
             'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml'
-        },
-        shim: {
-            'equivalent-xml': {
-                deps: ['underscore'],
-                exports: 'EquivalentXml'
-            }
         }
     });
 
@@ -61,19 +50,16 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         requirejs.config({
             paths: {
                 'text': '../node_modules/requirejs-text',
-                // for some reason this is necessary in firefox only for built
-                // version test page.  It shouldn't be
-                'tpl': '../node_modules/requirejs-tpl',
                 // https://github.com/guybedford/require-css/issues/133 
                 //'css': 'error',
                 'less': 'error',
                 'json': 'error'
             }
         });
-        $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
     }
 
     requirejs([
+        'jquery',
         'tests/options',
 
         // tests for profiling load times
@@ -119,10 +105,12 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/escapedHashtags',
         'tests/bulkActions',
         'tests/undomanager',
-    ], function (
-        options
-    ) {
+    ], function ($, options) {
         var session = window.sessionStorage;
+
+        if (useBuilt) {
+            $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
+        }
 
         function runTests() {
             function showTestResults() {
