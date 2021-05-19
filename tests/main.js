@@ -21,10 +21,6 @@ if (useBuilt) {
 }
 console.log("loading Vellum from " + baseUrl);
 
-// comment these to use built versions
-define("jquery", [testBase + 'node_modules/jquery/dist/jquery'], function () { return window.jQuery; });
-define("jquery.bootstrap", ["jquery", testBase + 'node_modules/bootstrap/dist/js/bootstrap'], function () {});
-
 requirejs.config({
     baseUrl: baseUrl,
     paths: {
@@ -36,7 +32,7 @@ requirejs.config({
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
-requirejs(['jquery', 'jquery.vellum'], function ($) {
+requirejs(['jquery.vellum'], function () {
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
@@ -60,10 +56,10 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
                 'json': 'error'
             }
         });
-        $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
     }
 
     requirejs([
+        'jquery',
         'tests/options',
 
         // tests for profiling load times
@@ -109,10 +105,12 @@ requirejs(['jquery', 'jquery.vellum'], function ($) {
         'tests/escapedHashtags',
         'tests/bulkActions',
         'tests/undomanager',
-    ], function (
-        options
-    ) {
+    ], function ($, options) {
         var session = window.sessionStorage;
+
+        if (useBuilt) {
+            $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
+        }
 
         function runTests() {
             function showTestResults() {
