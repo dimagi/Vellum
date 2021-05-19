@@ -89,9 +89,6 @@ requirejs.config({
             deps: ['jquery'],
             exports: '$.fn.popover'
         },
-        'underscore': {
-            exports: '_'
-        },
         'XMLWriter': {
             exports: 'XMLWriter'
         },
