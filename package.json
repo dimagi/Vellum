@@ -21,7 +21,7 @@
         "MediaUploader": "dimagi/MediaUploader#master",
         "XMLWriter": "dimagi/XMLWriter#master",
         "bootstrap": "3.4.1",
-        "codemirror": "5.30.0",
+        "codemirror": "5.61.1",
         "fuse.js": "2.7.4",
         "jquery": "3.5.1",
         "jsdiff": "components/jsdiff#master",
