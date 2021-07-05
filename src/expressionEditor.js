@@ -450,6 +450,8 @@ define([
                 advancedInput.on('change keyup', handleChange);
             }
 
+            getTopLevelJoinSelect().change(handleChange);
+
             var done = function (val) {
                 options.done(val);
                 editorContent.empty();
