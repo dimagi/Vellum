@@ -458,6 +458,16 @@ define([
                     '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
                 assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
             });
+
+            it("should not escape & char in the question tree when without space after", function () {
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/html-label-second", "Text", "a&b > & < a"],
+                ]);
+                var mug = util.getMug("html-label-second");
+                assert.equal(mug.p.labelItext.get(), "a&b > & < a");
+            });
+
         });
 
         describe("with rich text enabled", function() {
@@ -482,6 +492,16 @@ define([
                     '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
                 assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
             });
+
+            it("should not escape & char in the question tree when without space after", function () {
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/html-label-other", "Text", "a&b > & < a"],
+                ]);
+                var mug = util.getMug("html-label-other");
+                assert.equal(mug.p.labelItext.get(), "a&b > & < a");
+            });
+
         });
 
         describe("save conflict resolution logic", function() {

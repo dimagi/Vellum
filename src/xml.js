@@ -126,9 +126,9 @@ define([
             return value; // value contains no character entity references or empty tags.
         }
         var xml = normalize(value, inner),
-            refs = /(?:&lt;(=?\s)|(\s)&gt;|&amp;(\s))/g;
+            refs = /(?:&lt;(=?\s)|(\s)&gt;|&amp;)/g;
         return xml.replace(refs, function (match, lt, gt, amp) {
-            return lt ? ("<" + lt) : (gt ? (gt + ">") : ("&" + amp));
+            return lt ? ("<" + lt) : (gt ? (gt + ">") : ("&"));
         });
     }
 
