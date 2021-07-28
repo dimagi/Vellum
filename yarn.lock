@@ -1936,16 +1936,16 @@ jsdiff@components/jsdiff#master:
   version "0.0.0"
   resolved "https://codeload.github.com/components/jsdiff/tar.gz/7e83f72e95b818cf26bb80f1c752b7eb7a79ce0d"
 
-jshint@2.12.0, jshint@^2.12.0, jshint@~2.12.0:
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/jshint/-/jshint-2.12.0.tgz#52e75bd058d587ef81a0e2f95e5cf18eb5dc5c37"
-  integrity sha512-TwuuaUDmra0JMkuqvqy+WGo2xGHSNjv1BA1nTIgtH2K5z1jHuAEeAgp7laaR+hLRmajRjcrM71+vByBDanCyYA==
+jshint@2.13.0, jshint@^2.12.0, jshint@~2.12.0:
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/jshint/-/jshint-2.13.0.tgz#3855e7a2c73695ae0ef7ea2a9d3b1f47b9877884"
+  integrity sha512-Nd+md9wIeyfDK+RGrbOBzwLONSTdihGMtyGYU/t7zYcN2EgUa4iuY3VK2oxtPYrW5ycTj18iC+UbhNTxe4C66g==
   dependencies:
     cli "~1.0.0"
     console-browserify "1.1.x"
     exit "0.1.x"
     htmlparser2 "3.8.x"
-    lodash "~4.17.19"
+    lodash "~4.17.21"
     minimatch "~3.0.2"
     shelljs "0.3.x"
     strip-json-comments "1.0.x"
