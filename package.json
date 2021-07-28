@@ -61,7 +61,7 @@
         "test": "npm run test:mocha && npm run test:lint"
     },
     "resolutions": {
-        "grunt": "1.2.0",
+        "grunt": "^1.3.0",
         "jshint": "^2.12.0",
         "lodash": "^4.17.19",
         "mime": "^1.4.1",
