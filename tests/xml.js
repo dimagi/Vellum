@@ -239,6 +239,14 @@ define([
                '<output value="1 & 2 < 3" />', true);
         });
 
+        it("should not unescape '&amp;' when part of a double escaped character", function () {
+            eq('&amp;amp;', '&amp;amp;', true);
+        });
+
+        it("should unescape escaped characters in the question tree", function () {
+            eq('&amp;ab xyz&gt; &lt;123 &lt; &gt; &lt;', '&ab xyz> <123 < > <', true);
+        });
+
         it("should convert empty tag", function () {
             eq('<tag attr="value"></tag>', '<tag attr="value" />');
         });
