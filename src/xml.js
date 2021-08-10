@@ -126,25 +126,11 @@ define([
             return value; // value contains no character entity references or empty tags.
         }
         var xml = normalize(value, inner),
-            //character entity reference matching regex
-            ltref = /(?:&lt;([^;&\s]+(&gt;)|.|$))/g,
-            gtref = /(?:(&lt;[^;&\s]+|\s|)&gt;)/g,
-            ampref = /(?:&amp;([^&;\s]+;|.|$))/g;
+            refs = /(?:&lt;(=?\s)|(\s)&gt;|&amp;([^&;\s]+;|.|$))/g;
 
-        xml = xml.replace(ltref, function(match, lt){
-            return (lt.slice(lt.length - 3) == "gt;" ? match : ("<" + lt));
+        return xml.replace(refs, function (match, lt, gt, amp) {
+            return lt ? ("<" + lt) : (gt ? (gt + ">") : amp.slice(amp.length-1) === ";" ? match : ("&" + amp));
         });
-
-        xml = xml.replace(gtref, function(match, gt){
-            return (gt.slice(0, 3) == "&lt" ? match : (gt + ">"));;
-        });
-
-        xml = xml.replace(ampref, function(match, amp) {
-            return (amp.slice(amp.length-1) == ";" ? match : ("&" + amp));
-        });
-
-        return xml
-        //<<< and &&& can't appear unescaped since one captures the next's '&'
     }
 
     /**

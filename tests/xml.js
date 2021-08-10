@@ -243,8 +243,8 @@ define([
             eq('&amp;amp;', '&amp;amp;', true);
         });
 
-        it("should unescape escaped characters in the question tree", function () {
-            eq('&amp;ab xyz&gt; &lt;123 &lt; &gt; &lt;', '&ab xyz> <123 < > <', true);
+        it("should not convert escaped tag with attribute", function () {
+            eq('&lt;div class="injection"&gt;', '&lt;div class="injection"&gt;', true);
         });
 
         it("should convert empty tag", function () {

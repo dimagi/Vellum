@@ -492,11 +492,7 @@ define([
                 assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
             });
 
-<<<<<<< HEAD
-            it("should not escape & char in the question tree when without space after", function () {
-=======
             it("should not escape & char in the question tree", function () {
->>>>>>> ef71cd11... moved tests to tests/xml.js
                 util.paste([
                     ["id", "type", "labelItext:en-default"],
                     ["/html-label-other", "Text", "a&b > & < a"],
@@ -504,10 +500,6 @@ define([
                 var mug = util.getMug("html-label-other");
                 assert.equal(mug.p.labelItext.get(), "a&b > & < a");
             });
-<<<<<<< HEAD
-
-=======
->>>>>>> ef71cd11... moved tests to tests/xml.js
         });
 
         describe("save conflict resolution logic", function() {
