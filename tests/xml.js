@@ -239,6 +239,14 @@ define([
                '<output value="1 & 2 < 3" />', true);
         });
 
+        it("should not unescape '&amp;' when part of a double escaped character", function () {
+            eq('&amp;amp;', '&amp;amp;', true);
+        });
+
+        it("should not convert escaped tag with attribute", function () {
+            eq('&lt;div class="injection"&gt;', '&lt;div class="injection"&gt;', true);
+        });
+
         it("should convert empty tag", function () {
             eq('<tag attr="value"></tag>', '<tag attr="value" />');
         });

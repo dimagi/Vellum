@@ -458,6 +458,15 @@ define([
                     '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
                 assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
             });
+
+            it("should not escape & char in the question tree", function () {
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/html-label-second", "Text", "a&b"],
+                ]);
+                var mug = util.getMug("html-label-second");
+                assert.equal(mug.p.labelItext.get(), "a&b");
+            });
         });
 
         describe("with rich text enabled", function() {
@@ -481,6 +490,15 @@ define([
                 assert.equal(vellum.getMugDisplayName(mug),
                     '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
                 assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
+            });
+
+            it("should not escape & char in the question tree", function () {
+                util.paste([
+                    ["id", "type", "labelItext:en-default"],
+                    ["/html-label-other", "Text", "a&b > & < a"],
+                ]);
+                var mug = util.getMug("html-label-other");
+                assert.equal(mug.p.labelItext.get(), "a&b > & < a");
             });
         });
 
