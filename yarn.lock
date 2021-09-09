@@ -1936,16 +1936,16 @@ jsdiff@components/jsdiff#master:
   version "0.0.0"
   resolved "https://codeload.github.com/components/jsdiff/tar.gz/7e83f72e95b818cf26bb80f1c752b7eb7a79ce0d"
 
-jshint@2.12.0, jshint@^2.12.0, jshint@~2.12.0:
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/jshint/-/jshint-2.12.0.tgz#52e75bd058d587ef81a0e2f95e5cf18eb5dc5c37"
-  integrity sha512-TwuuaUDmra0JMkuqvqy+WGo2xGHSNjv1BA1nTIgtH2K5z1jHuAEeAgp7laaR+hLRmajRjcrM71+vByBDanCyYA==
+jshint@2.13.1, jshint@^2.12.0, jshint@~2.12.0:
+  version "2.13.1"
+  resolved "https://registry.yarnpkg.com/jshint/-/jshint-2.13.1.tgz#16bbbecdbb4564d3758d9de4f24926f8c7f8f835"
+  integrity sha512-vymzfR3OysF5P774x6zYv0bD4EpH6NWRxpq54wO9mA9RuY49yb1teKSICkLx2Ryx+mfzlVVNNbTBtsRtg78t7g==
   dependencies:
     cli "~1.0.0"
     console-browserify "1.1.x"
     exit "0.1.x"
     htmlparser2 "3.8.x"
-    lodash "~4.17.19"
+    lodash "~4.17.21"
     minimatch "~3.0.2"
     shelljs "0.3.x"
     strip-json-comments "1.0.x"
@@ -2827,10 +2827,10 @@ requirejs-plugins@1.0.2:
   resolved "https://registry.yarnpkg.com/requirejs-plugins/-/requirejs-plugins-1.0.2.tgz#693b5589d97f8598462fc71826353262aafda836"
   integrity sha1-aTtVidl/hZhGL8cYJjUyYqr9qDY=
 
-requirejs-text@2.0.15, requirejs-text@~2.0.12:
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/requirejs-text/-/requirejs-text-2.0.15.tgz#13138733613fc4457b7e1247e8cb751df7aa5429"
-  integrity sha1-ExOHM2E/xEV7fhJH6Mt1HfeqVCk=
+requirejs-text@2.0.16, requirejs-text@~2.0.12:
+  version "2.0.16"
+  resolved "https://registry.yarnpkg.com/requirejs-text/-/requirejs-text-2.0.16.tgz#b6f3e20689aa998e36641bc4f8bd11b7964ac872"
+  integrity sha512-XrzjeTb1pwzIWmkz8qnUiM20gENgiwB+66IciNuziwlaPAJsYQsQPSYyQ1kD4tGKGZxTisIfDbOHk02DpI/76Q==
 
 requirejs-undertemplate@dimagi/requirejs-tpl#v0.0.5:
   version "0.0.5"
