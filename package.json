@@ -23,7 +23,7 @@
         "bootstrap": "3.4.1",
         "codemirror": "5.61.1",
         "fuse.js": "2.7.4",
-        "jquery": "3.5.1",
+        "jquery": "3.6.0",
         "jsdiff": "components/jsdiff#master",
         "jstree": "3.3.11",
         "jstree-actions": "0.2.1",
