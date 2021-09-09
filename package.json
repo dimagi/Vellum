@@ -51,7 +51,7 @@
         "less": "2",
         "mocha": "7.2.0",
         "mocha-headless-chrome": "3.1.0",
-        "yarn": "^1.22.10"
+        "yarn": "^1.22.11"
     },
     "main": "src/main.js",
     "scripts": {
