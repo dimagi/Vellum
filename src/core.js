@@ -648,7 +648,7 @@ define([
         }
         mug._core_cachedDisplayNameKey = val;
         if (mug.form.richText) {
-            val = richText.bubbleOutputs(val, this.data.core.form, true);
+            val = richText.bubbleOutputs(val, this.data.core.form, false);
         } else {
             val = jrUtil.outputToXPath(val, mug.form.xpath, true);
         }

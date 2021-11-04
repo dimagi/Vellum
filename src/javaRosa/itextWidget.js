@@ -5,6 +5,7 @@ define([
     'tpl!vellum/templates/markdown_help',
     'vellum/javaRosa/util',
     'vellum/widgets',
+    'vellum/richText',
     'vellum/util',
     'vellum/atwho',
     'vellum/core'
@@ -15,6 +16,7 @@ define([
     markdown_help,
     jrUtil,
     widgets,
+    richText,
     util,
     atwho
 ) {
@@ -213,6 +215,9 @@ define([
         };
 
         widget.setItextValue = function (value) {
+            if(value && !value.includes("&lt;")){
+                value = richText.bubbleOutputs(value, widget.mug.form, true, bubble=false)
+            }
             var itextItem = widget.getItextItem();
             // TODO should not be using hashtags when rich text is off
             //if (mug.form.richText) {

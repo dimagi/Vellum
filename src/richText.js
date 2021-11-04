@@ -567,23 +567,31 @@ define([
      *
      * @param escape - If true, escape HTML except for bubble markup.
      */
-    function bubbleOutputs(text, form, escape) {
-        var el = xml.xhtml(text),
-            places = {},
+    function bubbleOutputs(text, form, escape, bubble=true) {
+        var places = {},
             replacer, result;
-        if (escape) {
-            replacer = function () {
-                var id = util.get_guid();
-                places[id] = outputToBubble(form, this);
-                return "{" + id + "}";
-            };
+        if (bubble) {
+            if (escape) {
+                replacer = function (match, output) {
+                    var id = util.get_guid();
+                    places[id] = outputToBubble(form, output);
+                    return "{" + id + "}";
+                };
+            } else {
+                replacer = function(match, output) {
+                    return outputToBubble(form, output);
+                };
+            }
         } else {
-            replacer = function() {
-                return outputToBubble(form, this);
-            };
+            replacer = function(match, output) {
+                var id = util.get_guid();
+                places[id] = output
+                return "{" + id + "}";
+            }
         }
-        el.find('output').replaceWith(replacer);
-        result = el.html();
+
+        regex = /(<output.*?>)/g;
+        var result = text.replace(regex, replacer)
         if (escape) {
             result = $('<div />').text(xml.humanize(result)).html();
             result = result.replace(/{(.+?)}/g, function (match, id) {
