@@ -481,17 +481,6 @@ define([
                 });
             });
 
-            it("should not double-escape > & < chars in the question tree", function () {
-                util.paste([
-                    ["id", "type", "labelItext:en-default"],
-                    ["/html-label", "Text", "<h1>a > & < b</h1>"],
-                ]);
-                var mug = util.getMug("html-label");
-                assert.equal(vellum.getMugDisplayName(mug),
-                    '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
-                assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
-            });
-
             it("should not escape & char in the question tree", function () {
                 util.paste([
                     ["id", "type", "labelItext:en-default"],

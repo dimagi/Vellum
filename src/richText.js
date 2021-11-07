@@ -557,7 +557,7 @@ define([
             containsWhitespace = /\s/.test(xpath);
 
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
-            return $('<span>').text(xml.normalize(output.outerHTML)).html();
+            return $('<span>').text(xml.normalize(output)).html();
         }
         return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
     }
@@ -585,13 +585,15 @@ define([
         } else {
             replacer = function(match, output) {
                 var id = util.get_guid();
-                places[id] = output
+                places[id] = output;
                 return "{" + id + "}";
-            }
+            };
         }
-
-        regex = /(<output.*?>)/g;
-        var result = text.replace(regex, replacer)
+        var outputRegex = /(<output.*?>)/g,
+            outputEndRegex = /(<\/output>)/g;
+        if (text) {
+            result = text.replace(outputRegex, replacer).replace(outputEndRegex, "");
+        }
         if (escape) {
             result = $('<div />').text(xml.humanize(result)).html();
             result = result.replace(/{(.+?)}/g, function (match, id) {
