@@ -175,9 +175,9 @@ define([
                 widget.setItextValue(itext);
                 var itextItem = widget.getItextItem();
                 var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage;
-                var setAs = '<output value="#form/question1" /> test string ' +
-                            '&lt;img src="x" onerror="alert("XSSinbrokenimg")"/&gt';
-                assert.strictEqual(setAs, itextItem.getForm(widget.form).getValue(defaultLang));
+                var expected = '<output value="#form/question1" /> test string ' +
+                            '&lt;img src="x" onerror="alert("XSSinbrokenimg")"/&gt;';
+                assert.strictEqual(itextItem.getForm(widget.form).getValue(defaultLang), expected);
             });
 
             it("should only update exact output ref matches when question ids change", function (done) {
