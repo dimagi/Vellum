@@ -567,9 +567,11 @@ define([
      *
      * @param escape - If true, escape HTML except for bubble markup.
      */
-    function bubbleOutputs(text, form, escape, bubble=true) {
+    function bubbleOutputs(text, form, escape, bubble) {
         var places = {},
             replacer, result;
+        bubble = typeof bubble !== 'undefined' ? bubble : true;
+
         if (bubble) {
             if (escape) {
                 replacer = function (match, output) {

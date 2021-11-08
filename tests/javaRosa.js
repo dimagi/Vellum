@@ -171,13 +171,12 @@ define([
                 util.addQuestion("Text", "question1");
                 var widget = util.getWidget('itext-en-label');
                 var itext = '<output value="/data/question1" /> test string ' +
-                            '<img src="x" onerror="alert("XSSinbrokenimg")"/>'
+                            '<img src="x" onerror="alert("XSSinbrokenimg")"/>';
                 widget.setItextValue(itext);
-                //widget.setValue(itext);
                 var itextItem = widget.getItextItem();
-                var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage
+                var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage;
                 var setAs = '<output value="#form/question1" /> test string ' +
-                            '&lt;img src="x" onerror="alert("XSSinbrokenimg")"/&gt;'
+                            '&lt;img src="x" onerror="alert("XSSinbrokenimg")"/&gt';
                 assert.strictEqual(setAs, itextItem.getForm(widget.form).getValue(defaultLang));
             });
 
