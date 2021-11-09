@@ -567,12 +567,11 @@ define([
      *
      * @param escape - If true, escape HTML except for bubble markup.
      */
-    function bubbleOutputs(text, form, escape, bubble) {
+    function bubbleOutputs(text, form, escape, shouldBubble=true) {
         var places = {},
             replacer, result;
-        bubble = typeof bubble !== 'undefined' ? bubble : true;
 
-        if (bubble) {
+        if (shouldBubble) {
             if (escape) {
                 replacer = function (match, output) {
                     var id = util.get_guid();

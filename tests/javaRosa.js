@@ -165,18 +165,27 @@ define([
                 });
             });
 
-             it("should escape HTML before setting ItextValue, excluding bubble text", function () {
-                //testing
+             it("should escape HTML before setting Itext value", function () {
                 util.loadXML("");
                 util.addQuestion("Text", "question1");
                 var widget = util.getWidget('itext-en-label');
-                var itext = '<output value="/data/question1" /> test string ' +
-                            '<img src="x" onerror="alert("XSSinbrokenimg")"/>';
+                var itext = '<img src="x" onerror="alert("XSSinbrokenimg")"/>';
                 widget.setItextValue(itext);
                 var itextItem = widget.getItextItem();
                 var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage;
-                var expected = '<output value="#form/question1" /> test string ' +
-                            '&lt;img src="x" onerror="alert("XSSinbrokenimg")"/&gt;';
+                var expected = '&lt;img src="x" onerror="alert("XSSinbrokenimg")"/&gt;';
+                assert.strictEqual(itextItem.getForm(widget.form).getValue(defaultLang), expected);
+            });
+
+            it("should preserve output tags when setting Itext value", function () {
+                util.loadXML("");
+                util.addQuestion("Text", "question1");
+                var widget = util.getWidget('itext-en-label');
+                var itext = '<output value="/data/question1" />';
+                widget.setItextValue(itext);
+                var itextItem = widget.getItextItem();
+                var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage;
+                var expected = '<output value="#form/question1" />';
                 assert.strictEqual(itextItem.getForm(widget.form).getValue(defaultLang), expected);
             });
 
@@ -574,7 +583,6 @@ define([
             vellumUtil.setCaretPosition(target[0], 4);
             call("handleDropFinish", target, mug1.absolutePath, mug1);
             var val = mug2.p.labelItext.get('default', 'en');
-            // wtf?? rich text is off
             assert.equal(val, 'test<output value="#form/question1" /> string');
             assert.equal(target.val(), 'test<output value="/data/question1" /> string');
         });
