@@ -165,28 +165,38 @@ define([
                 });
             });
 
-             it("should escape HTML before setting Itext value", function () {
+            it("should escape HTML before setting Itext value", function () {
                 util.loadXML("");
                 util.addQuestion("Text", "question1");
                 var widget = util.getWidget('itext-en-label');
-                var itext = '<img src="x" onerror="alert("XSSinbrokenimg")"/>';
+                var itext = '<img src="x" onerror="alert(\'XSSinbrokenimg\')"/>';
                 widget.setItextValue(itext);
                 var itextItem = widget.getItextItem();
                 var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage;
-                var expected = '&lt;img src="x" onerror="alert("XSSinbrokenimg")"/&gt;';
+                var expected = '&lt;img src="x" onerror="alert(\'XSSinbrokenimg\')"&gt;';
                 assert.strictEqual(itextItem.getForm(widget.form).getValue(defaultLang), expected);
             });
 
-            it("should preserve output tags when setting Itext value", function () {
-                util.loadXML("");
-                util.addQuestion("Text", "question1");
-                var widget = util.getWidget('itext-en-label');
-                var itext = '<output value="/data/question1" />';
-                widget.setItextValue(itext);
-                var itextItem = widget.getItextItem();
-                var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage;
-                var expected = '<output value="#form/question1" />';
-                assert.strictEqual(itextItem.getForm(widget.form).getValue(defaultLang), expected);
+            describe("should preserve output tags when setting Itext value", function () {
+                var items = [
+                    ['<output />', '<output value="#form/question1" />',
+                    '<output value="#form/question1" />'],
+                    ['<output></output>', '<output value="#form/question1" ></output>',
+                    '<output value="#form/question1" />']
+                ]
+
+                _.each(items, function (item) {
+                    it("for: " + item[0], function () {
+                        util.loadXML("");
+                        util.addQuestion("Text", "question1");
+                        var widget = util.getWidget('itext-en-label');
+                        var itext = item[1];
+                        widget.setItextValue(itext);
+                        var itextItem = widget.getItextItem();
+                        var defaultLang = util.call("getData").javaRosa.Itext.defaultLanguage;
+                        assert.strictEqual(itextItem.getForm(widget.form).getValue(defaultLang), item[2]);
+                    });
+                });
             });
 
             it("should only update exact output ref matches when question ids change", function (done) {

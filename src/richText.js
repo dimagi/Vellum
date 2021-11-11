@@ -566,6 +566,7 @@ define([
      * Replace <output> tags with bubble markup
      *
      * @param escape - If true, escape HTML except for bubble markup.
+     * @param shouldBubble - If false, preserves <output> tags instead of converting them to bubble markup.
      */
     function bubbleOutputs(text, form, escape, shouldBubble=true) {
         var places = {},
@@ -573,28 +574,28 @@ define([
 
         if (shouldBubble) {
             if (escape) {
-                replacer = function (match, output) {
+                replacer = function() {
                     var id = util.get_guid();
-                    places[id] = outputToBubble(form, output);
+                    places[id] = outputToBubble(form, this);
                     return "{" + id + "}";
                 };
             } else {
-                replacer = function(match, output) {
-                    return outputToBubble(form, output);
+                replacer = function() {
+                    return outputToBubble(form, this);
                 };
             }
         } else {
-            replacer = function(match, output) {
+            replacer = function() {
                 var id = util.get_guid();
-                places[id] = output;
+                places[id] = this;
                 return "{" + id + "}";
             };
         }
-        var outputRegex = /(<output.*?>)/g,
-            outputEndRegex = /(<\/output>)/g;
-        if (text) {
-            result = text.replace(outputRegex, replacer).replace(outputEndRegex, "");
-        }
+        var newDoc = document.implementation.createHTMLDocument();
+        var temp = newDoc.createElement('div');
+        var el = $(temp).html(xml.xhtml(text, true));
+        el.find('output').replaceWith(replacer);
+        result = el.html();
         if (escape) {
             result = $('<div />').text(xml.humanize(result)).html();
             result = result.replace(/{(.+?)}/g, function (match, id) {

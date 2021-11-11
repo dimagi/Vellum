@@ -68,9 +68,6 @@ define([
 
     function assertJSTreeState() {
         function repr(node, level) {
-            if (node.text === undefined) {
-                node.text = "";
-            }
             var i, len, child, items = [];
             if (node.id === "#") {
                 level = -1;
