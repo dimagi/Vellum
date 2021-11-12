@@ -566,44 +566,55 @@ define([
      * Replace <output> tags with bubble markup
      *
      * @param escape - If true, escape HTML except for bubble markup.
-     * @param shouldBubble - If false, preserves <output> tags instead of converting them to bubble markup.
      */
-    function bubbleOutputs(text, form, escape, shouldBubble=true) {
-        var places = {},
+    function bubbleOutputs(text, form, escape) {
+        var el = xml.xhtml(text),
+            places = {},
             replacer, result;
 
-        if (shouldBubble) {
-            if (escape) {
-                replacer = function() {
-                    var id = util.get_guid();
-                    places[id] = outputToBubble(form, this);
-                    return "{" + id + "}";
-                };
-            } else {
-                replacer = function() {
-                    return outputToBubble(form, this);
-                };
-            }
-        } else {
+        if (escape) {
             replacer = function() {
                 var id = util.get_guid();
-                places[id] = this;
+                places[id] = outputToBubble(form, this);
                 return "{" + id + "}";
             };
+        } else {
+            replacer = function() {
+                return outputToBubble(form, this);
+            };
         }
-        var newDoc = document.implementation.createHTMLDocument();
-        var temp = newDoc.createElement('div');
-        var el = $(temp).html(xml.xhtml(text, true));
         el.find('output').replaceWith(replacer);
         result = el.html();
         if (escape) {
-            result = $('<div />').text(xml.humanize(result)).html();
-            result = result.replace(/{(.+?)}/g, function (match, id) {
-                return places.hasOwnProperty(id) ?
-                        $("<div>").append(places[id]).html() : match;
-            });
+            result = escapeReplace(result, places);
         }
         return result;
+    }
+
+    /**
+     * Preserve <output> tag while encoding other HTML before saving to source XML
+     * Similar to bubbleOutputs (without converting to bubble markup)
+     */
+    function sanitizeInput (text, form) {
+        var el = xml.xhtml(text),
+            places = {};
+
+        function replacer() {
+            var id = util.get_guid();
+            places[id] = this;
+            return "{" + id + "}";
+        }
+        el.find('output').replaceWith(replacer);
+        return escapeReplace(el.html(), places);
+    }
+
+    function escapeReplace(text, places) {
+        text = $('<div />').text(xml.humanize(text)).html();
+        text = text.replace(/{(.+?)}/g, function (match, id) {
+            return places.hasOwnProperty(id) ?
+                    $("<div>").append(places[id]).html() : match;
+        });
+        return text;
     }
 
     /**
@@ -898,6 +909,7 @@ define([
     return {
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
+        sanitizeInput: sanitizeInput,
         editor: editor,
         fromRichText: fromRichText,
         toRichText: toRichText,

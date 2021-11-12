@@ -215,8 +215,9 @@ define([
         };
 
         widget.setItextValue = function (value) {
-            if(value && (!value.includes('&lt;') || !value.includes('&gt;'))){
-                value = richText.bubbleOutputs(value, widget.mug.form, true, false);
+            var regex = /<(?!output)/g;
+            if (regex.test(value)) {
+                value = richText.sanitizeInput(value, widget.mug.form);
             }
             var itextItem = widget.getItextItem();
             // TODO should not be using hashtags when rich text is off

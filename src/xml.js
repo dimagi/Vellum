@@ -63,12 +63,13 @@ define([
     /**
      * Convert XML string to HTML dom nodes to be manipulated with jQuery
      */
-    function xhtml(xmlString, fixOnly=false) {
-        var fixed = fixEmptyTags(xmlString || "");
-        if (fixOnly) {
-            return fixed;
+    function xhtml(xmlString, append=false) {
+        var fixed = fixEmptyTags(xmlString || ""),
+            node = document.implementation.createHTMLDocument().createElement('div');
+        if (append) {
+            return $(node).append(fixed);
         }
-        return $("<div>").html(fixed);
+        return $(node).html(fixed);
     }
 
     /**
@@ -93,7 +94,7 @@ define([
                 return value; // value contains no XML tags
             }
             value = fixGTBug(fixEmptyTags(value));
-            value = inner ? $(value) : $("<div />").append(value);
+            value = inner ? $(value) : xhtml(value, true);
         }
         var xml = new XMLSerializer(),
             xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ \/>])/g,
