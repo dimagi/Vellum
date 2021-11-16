@@ -183,7 +183,7 @@ define([
                     '<output value="#form/question1" />'],
                     ['<output></output>', '<output value="#form/question1" ></output>',
                     '<output value="#form/question1" />']
-                ]
+                ];
 
                 _.each(items, function (item) {
                     it("for: " + item[0], function () {
