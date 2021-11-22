@@ -573,13 +573,13 @@ define([
             replacer, result;
 
         if (escape) {
-            replacer = function() {
+            replacer = function () {
                 var id = util.get_guid();
                 places[id] = outputToBubble(form, this);
                 return "{" + id + "}";
             };
         } else {
-            replacer = function() {
+            replacer = function () {
                 return outputToBubble(form, this);
             };
         }
@@ -593,9 +593,18 @@ define([
 
     /**
      * Preserve <output> tag while encoding other HTML before saving to source XML
-     * Similar to bubbleOutputs (without converting to bubble markup)
+     * Similar to bubbleOutputs, without converting to bubble markup
+     *
+     * Regex matches any tags EXCEPT if it's an output tag (e.g. <output/>),
+     * or if the '<' character is followed by a space (to avoid matching with
+     * '<' or '>' characters used as attributes)
      */
-    function sanitizeInput (text, form) {
+    function sanitizeInput (text) {
+        var regex = /<(?!output| )/g;
+        if (!regex.test(text)) {
+            return text;
+        }
+
         var el = xml.xhtml(text),
             places = {};
 
