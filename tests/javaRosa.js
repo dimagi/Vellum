@@ -182,6 +182,11 @@ define([
                     ['<output />', '<output value="#form/question1" />',
                     '<output value="#form/question1" />'],
                     ['<output></output>', '<output value="#form/question1" ></output>',
+                    '<output value="#form/question1" />'],
+                    ['<output /><img /><output></output>',
+                    '<output value="#form/question1" /><img src="x" onerror="alert(\'XSSinbrokenimg\')"/>' +
+                    '<output value="#form/question1" ></output>',
+                    '<output value="#form/question1" />&lt;img src="x" onerror="alert(\'XSSinbrokenimg\')"&gt;' +
                     '<output value="#form/question1" />']
                 ];
 
