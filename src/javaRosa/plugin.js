@@ -31,6 +31,7 @@ define([
     'vellum/javaRosa/itext',
     'vellum/javaRosa/itextBlock',
     'vellum/javaRosa/itextWidget',
+    'vellum/richText',
     'vellum/javaRosa/util',
     'vellum/core'
 ], function (
@@ -45,6 +46,7 @@ define([
     itext,
     itextBlock,
     itextWidget,
+    richText,
     jrUtil
 ) {
     var ICONS = {
@@ -263,6 +265,7 @@ define([
                     _.each(langs, function (lang) {
                         var text = itForm.getValue(lang);
                         if (!text) { return; }
+                        text = richText.sanitizeInput(text);
                         var xquery = xml.query(text);
                         xquery.find('output').replaceWith(function() {
                             var output = $(this),

@@ -456,7 +456,6 @@ define([
                 var mug = util.getMug("html-label");
                 assert.equal(vellum.getMugDisplayName(mug),
                     '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
-                assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
             });
 
             it("should not escape & char in the question tree", function () {
@@ -489,7 +488,6 @@ define([
                 var mug = util.getMug("html-label");
                 assert.equal(vellum.getMugDisplayName(mug),
                     '&lt;h1&gt;a &gt; &amp; &lt; b&lt;/h1&gt;');
-                assert.equal(mug.p.labelItext.get(), "<h1>a > & < b</h1>");
             });
 
             it("should not escape & char in the question tree", function () {

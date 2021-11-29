@@ -557,7 +557,7 @@ define([
             containsWhitespace = /\s/.test(xpath);
 
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
-            return $('<span>').text(xml.normalize(output.outerHTML)).html();
+            return $('<span>').text(xml.normalize(output)).html();
         }
         return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
     }
@@ -571,6 +571,7 @@ define([
         var el = xml.xhtml(text),
             places = {},
             replacer, result;
+
         if (escape) {
             replacer = function () {
                 var id = util.get_guid();
@@ -578,20 +579,51 @@ define([
                 return "{" + id + "}";
             };
         } else {
-            replacer = function() {
+            replacer = function () {
                 return outputToBubble(form, this);
             };
         }
         el.find('output').replaceWith(replacer);
         result = el.html();
         if (escape) {
-            result = $('<div />').text(xml.humanize(result)).html();
-            result = result.replace(/{(.+?)}/g, function (match, id) {
-                return places.hasOwnProperty(id) ?
-                        $("<div>").append(places[id]).html() : match;
-            });
+            result = escapeReplace(result, places);
         }
         return result;
+    }
+
+    /**
+     * Preserve <output> tag while encoding other HTML before saving to source XML
+     * Similar to bubbleOutputs, without converting to bubble markup
+     *
+     * Regex matches any tags EXCEPT if it's an output tag (e.g. <output/>),
+     * or if the '<' character is followed by a space (to avoid matching with
+     * '<' or '>' characters used as attributes)
+     */
+    function sanitizeInput (text) {
+        var regex = /<(?!output| )/g;
+        if (!regex.test(text)) {
+            return text;
+        }
+
+        var el = xml.xhtml(text),
+            places = {};
+
+        function replacer() {
+            var id = util.get_guid();
+            places[id] = this;
+            return "{" + id + "}";
+        }
+        el.find('output').replaceWith(replacer);
+        return escapeReplace(el.html(), places);
+    }
+
+    function escapeReplace(text, places) {
+        text = $('<div />').text(xml.humanize(text)).html();
+        text = text.replace(/{(.+?)}/g, function (match, id) {
+            return places.hasOwnProperty(id) ?
+                    $("<div>").append(places[id]).html() : match;
+        });
+        return text;
     }
 
     /**
@@ -886,6 +918,7 @@ define([
     return {
         applyFormats: applyFormats,
         bubbleOutputs: bubbleOutputs,
+        sanitizeInput: sanitizeInput,
         editor: editor,
         fromRichText: fromRichText,
         toRichText: toRichText,

@@ -63,8 +63,13 @@ define([
     /**
      * Convert XML string to HTML dom nodes to be manipulated with jQuery
      */
-    function xhtml(xmlString) {
-        return $("<div>").html(fixEmptyTags(xmlString || ""));
+    function xhtml(xmlString, append=false) {
+        var fixed = fixEmptyTags(xmlString || ""),
+            node = document.implementation.createHTMLDocument().createElement('div');
+        if (append) {
+            return $(node).append(fixed);
+        }
+        return $(node).html(fixed);
     }
 
     /**
@@ -89,15 +94,25 @@ define([
                 return value; // value contains no XML tags
             }
             value = fixGTBug(fixEmptyTags(value));
-            value = inner ? $(value) : $("<div />").append(value);
+            value = inner ? $(value) : xhtml(value, true);
         }
         var xml = new XMLSerializer(),
             xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ \/>])/g,
             wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
             // emptytag does not match <tag attr="a > b"></tag>
             emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g,
-            badOutput = /(<(output)(?:\s[^>]*|))>([\w\W]+)<\/output>/g;
-        return xml.serializeToString(value[0]) // pure magic
+            badOutput = /(<(output)(?:\s[^>]*|))>([\w\W]+)<\/output>/g,
+            extra = / xmlns="http:\/\/www.w3.org\/1999\/xhtml"/g;
+        var output = value[0];
+        if (output === undefined) {
+                output = value;
+        }
+        var serialized = xml.serializeToString(output);
+        if (serialized.startsWith('<output')) {
+            serialized = "<div>" + serialized + "</div>";
+        }
+        return serialized
+            .replace(extra, "")             // remove xmlns from output tag
             .replace(wrapper, "$3")         // remove outer tag
             .replace(emptytag, "$1 />")     // <tag></tag> to <tag />
             .replace(badOutput, "$1 />$3")   // <output> text</output> to <output /> text

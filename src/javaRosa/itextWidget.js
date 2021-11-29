@@ -5,6 +5,7 @@ define([
     'tpl!vellum/templates/markdown_help',
     'vellum/javaRosa/util',
     'vellum/widgets',
+    'vellum/richText',
     'vellum/util',
     'vellum/atwho',
     'vellum/core'
@@ -15,6 +16,7 @@ define([
     markdown_help,
     jrUtil,
     widgets,
+    richText,
     util,
     atwho
 ) {
@@ -213,6 +215,7 @@ define([
         };
 
         widget.setItextValue = function (value) {
+            value = richText.sanitizeInput(value);
             var itextItem = widget.getItextItem();
             // TODO should not be using hashtags when rich text is off
             //if (mug.form.richText) {
