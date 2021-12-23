@@ -1159,10 +1159,10 @@ function-bind@^1.1.1:
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
   integrity sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==
 
-fuse.js@2.7.4:
-  version "2.7.4"
-  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-2.7.4.tgz#96e420fde7ef011ac49c258a621314fe576536f9"
-  integrity sha1-luQg/efvARrEnCWKYhMU/ldlNvk=
+fuse.js@6.5.2:
+  version "6.5.2"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-6.5.2.tgz#3c775c456b888bc8b3a0ca10aeadef507a2790d0"
+  integrity sha512-FTJXjzNg/HqEceelMCmQgDSuZ2HPpxlgV8YZc6ptuC51DiEHhc7H1E17XnH52WUPs8wdMAbG+PQwAMFnsI9ysA==
 
 gaze@^1.1.0:
   version "1.1.3"
