@@ -4,7 +4,7 @@ VERSION=$(shell git rev-parse HEAD)$(_FILES)$(_INDEX)
 
 all:  tar
 
-rjs: deps _rjs
+rjs: _rjs
 
 tar: rjs _tar
 
