@@ -10,9 +10,6 @@ tar: rjs _tar
 
 test: tar _test
 
-deps:
-	`npm bin`/yarn install
-
 _rjs:
 	rm -rf _build
 	PATH=$$(npm bin):$$PATH r.js -o build.js
