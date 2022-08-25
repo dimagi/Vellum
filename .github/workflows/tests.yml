@@ -17,5 +17,10 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm run testserver &
-    - run: make test
+    - uses: borales/actions-yarn@v1.1.0
+      with:
+        cmd: install
+    - name: Run Test Server
+      run: npm run testserver &
+    - name: Run Tests
+      run: make test
