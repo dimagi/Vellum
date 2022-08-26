@@ -4,11 +4,14 @@ VERSION=$(shell git rev-parse HEAD)$(_FILES)$(_INDEX)
 
 all:  tar
 
-rjs: _rjs
+rjs: deps _rjs
 
 tar: rjs _tar
 
 test: tar _test
+
+deps:
+	`npm bin`/yarn install
 
 _rjs:
 	rm -rf _build
