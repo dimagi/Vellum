@@ -7,20 +7,10 @@ jobs:
   tests:
     runs-on: ubuntu-18.04
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [12.x, 14.x]
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+    - uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
-    - uses: borales/actions-yarn@1.1.0
-      with:
-        cmd: install
-    - name: Run Test Server
-      run: npm run testserver &
-    - name: Run Tests
-      run: make test
+        node-version: 14
+    - run: npm install yarn==1.22.18
+    - run: yarn install
