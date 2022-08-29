@@ -12,9 +12,12 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 14
+    - name: Install dependencies
     - run: |
         yarn_version=$(grep -Eo '^yarn@[^:]+' ./yarn.lock)
         npm install "$yarn_version"
         yarn install
+    - name: Run tests
+    - run: |
         npm run testserver &
         make test
