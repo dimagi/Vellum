@@ -1,0 +1,30 @@
+name: vellum metrics
+on:
+  pull_request:
+    branches:
+    - master
+jobs:
+  tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    env:
+      DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+      DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 14
+    - uses: actions/setup-python@v4
+      with:
+        python-version: |
+          3.9
+    - name: Install dependencies
+      run: |
+        yarn_version=$(grep -Eo '^yarn@[^:]+' ./yarn.lock)
+        echo "lock file requires: $yarn_version"
+        npm install "$yarn_version"
+        yarn install
+    - name: Analyze metrics and push to Datadog
+      run: |
+        scripts/track-dependency-status.sh
