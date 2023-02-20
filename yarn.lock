@@ -1463,10 +1463,15 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-jquery@3.6.0, jquery@>=1.9.1:
+jquery@3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.0.tgz#c72a09f15c1bdce142f49dbf1170bdf8adac2470"
   integrity sha512-JVzAR/AjBvVt2BmYhxRCSYysDsPcssdmTFnzyLEts9qNwmjmu4JTAMYubEfwVOSwpQ1I1sKKFcxhZCI2buerfw==
+
+jquery@^3.5.0:
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.3.tgz#23ed2ffed8a19e048814f13391a19afcdba160e6"
+  integrity sha512-bZ5Sy3YzKo9Fyc8wH2iIQK4JImJ6R0GWI9kL1/k7Z91ZBNgkRXE6U0JfHIizZbort8ZunhSI3jw9I6253ahKfg==
 
 js-yaml@4.1.0:
   version "4.1.0"
@@ -1535,12 +1540,12 @@ jstree-actions@0.2.1:
   resolved "https://registry.yarnpkg.com/jstree-actions/-/jstree-actions-0.2.1.tgz#7601e2f9ce1eb69be227211b59b979bed0375fd3"
   integrity sha512-bbX7mvgzz9XBclSydd6KPSACfc5EVC4UGrDdTF3kCw0dMh9QzMJWm94x71gYT4v0fqiqjtg8UJyBfjABEdzTuA==
 
-jstree@3.3.11:
-  version "3.3.11"
-  resolved "https://registry.yarnpkg.com/jstree/-/jstree-3.3.11.tgz#da2f12bcab6af61839586c81db46e8f2e19160aa"
-  integrity sha512-9ZJKroPjCyjb6JLPuAbBrLJKT6pS1f4m5gkwoEagG5oQWtvzm0IiDsntXTxeFtz7AmqrKfij+gLfF9MgWriNxg==
+jstree@3.3.15:
+  version "3.3.15"
+  resolved "https://registry.yarnpkg.com/jstree/-/jstree-3.3.15.tgz#364bfa0fc4c0b1b7b5bc122cda44a0f09e59eba4"
+  integrity sha512-fNK2EBgGjaJQ3cJuINX/80vDeAufYWtM0csudgYl3eJG+eRAH/1r1IJVUOvAlJIa+uSgg+Fi8uGrt+Xbs92eKg==
   dependencies:
-    jquery ">=1.9.1"
+    jquery "^3.5.0"
 
 kind-of@^6.0.2:
   version "6.0.3"
