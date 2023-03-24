@@ -119,6 +119,10 @@ define([
     CKEDITOR.config.title = false;
     CKEDITOR.config.extraPlugins = 'bubbles';
     CKEDITOR.config.disableNativeSpellChecker = false;
+    // We don't use Toolbar, however it is required by clipboard.
+    // Once https://github.com/ckeditor/ckeditor4/issues/654 is resolved,
+    // toolbar can be removed from the source(build).
+    CKEDITOR.config.toolbar = [];
 
     /**
      * Get or create a rich text editor for the given element
