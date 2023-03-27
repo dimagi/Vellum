@@ -735,6 +735,9 @@ define([
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
                    .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
+                   // While copying widgets with text, CKEditor adds these html elements
+                   .replace(/<span\b[^>]*?id="?cke_bm_\d+(\w)"?\b[^>]*?>.*?<\/span>/ig, "")
+                   .replace(/<span\b[^>]*?data-cke-copybin-(start|end)[^<]*?<\/span>/ig, "")
                    // CKEditor uses zero-width spaces as markers
                    // and sometimes they leak out (on copy/paste?)
                    .replace(/\u200b+/ig, " ")
