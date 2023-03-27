@@ -481,7 +481,7 @@ define([
                 assert.equal(editor.getValue(), 'A');
             });
 
-            function assertCKCopy($editor, value) {
+            function assertCKCopy($editor, value, callback) {
                 // WARNING this is heavily dependent on CKEditor internals
                 var domObject = new CKEDITOR.dom.domObject($editor[0]),
                     realDataTransfer = CKEDITOR.plugins.clipboard.dataTransfer,
@@ -499,6 +499,10 @@ define([
                 }
                 assert.equal(data.Text, value, 'text/plain');
                 assert.strictEqual(data["text/html"], undefined, 'text/html');
+                // Wait for CK Editor Async handler (copybin) to complete
+                setTimeout(function(){
+                        callback();
+                },100);
             }
 
             function ckPaste($editor, data, callback) {
@@ -589,17 +593,21 @@ define([
             var TEST_LABEL = 'Weight: <output value="#form/text" /> grams',
                 TEST_XPATH = "if(today() + (#case/dob - 3), #form/text, 0)";
 
-            it("should copy output tag from rich text editor", function () {
+            it("should copy output tag from rich text editor", function (done) {
                 editor.setValue(TEST_LABEL, function () {
                     editor.select(6, 3);
-                    assertCKCopy(input, ': <output value="#form/text" />');
+                    assertCKCopy(input, ': <output value="#form/text" />', function () {
+                        done();
+                    });
                 });
             });
 
-            it("should copy expression with hashtags from expression editor", function () {
+            it("should copy expression with hashtags from expression editor", function (done) {
                 exprEditor.setValue(TEST_XPATH, function () {
                     exprEditor.select(11, 4);
-                    assertCKCopy(exprInput, "+ (#case/dob");
+                    assertCKCopy(exprInput, "+ (#case/dob", function () {
+                        done();
+                    });
                 });
             });
 
