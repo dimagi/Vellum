@@ -273,6 +273,32 @@ define([
                 ["   ", " \xa0 "],
                 ["   ", " &nbsp; "],
                 ["' ,", "'\u200B,"],
+
+            ];
+
+            var prefix_html_1 = '<span data-cke-copybin-start="1">​</span><p>',
+                prefix_html_2 = '<span id="cke_bm_909S" style="display: none;">&nbsp;</span>',
+                prefix_html = prefix_html_1 + prefix_html_2,
+                widget_html = '<span tabindex="-1" contenteditable="false" data-cke-widget-wrapper="1" data-cke-filter="off" ' +
+                    'class="cke_widget_wrapper cke_widget_inline cke_widget_bubbles cke_widget_wrapper_label-datanode-external ' +
+                    'cke_widget_wrapper_label-datanode cke_widget_wrapper_label cke_widget_selected" data-cke-display-name="span" ' +
+                    'data-cke-widget-id="0" role="region" aria-label="span widget"><span class="label label-datanode label-datanode-external ' +
+                    'cke_widget_element" data-value="#case/dob" data-cke-widget-data="%7B%22classes%22%3A%7B%22label-datanode-external' +
+                    '%22%3A1%2C%22label-datanode%22%3A1%2C%22label%22%3A1%7D%7D" data-cke-widget-upcasted="1" data-cke-widget-keep-attr="0" ' +
+                    'data-widget="bubbles"><i class="fcc fcc-fd-case-property">&nbsp;</i>dob</span><span class="cke_reset ' +
+                    'cke_widget_drag_handler_container" style="background: url(&quot;http://localhost:8088/src/../lib/ckeditor/plugins/' +
+                    'widget/images/handle.png&quot;) rgba(220, 220, 220, 0.5); width: 43px; height: 16px; left: 2px; top: -14px;">' +
+                    '<img class="cke_reset cke_widget_drag_handler" data-cke-widget-drag-handler="1" src="data:image/gif;base64,R0lGODlhAQABAPABAP' +
+                    '///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" width="15" title="Click and drag to move" height="15" role="presentation" ' +
+                    'draggable="true"></span></span>',
+                suffix_html = '</p><span data-cke-copybin-end="1">​</span>';
+
+            var text_widgets_outputs = [
+                ['This dob: <output value="#case/dob" /> is of child', prefix_html + 'This dob:&nbsp;' + widget_html + ' is of child' + suffix_html],
+                ['This dob: <output value="#case/dob" />', prefix_html + 'This dob:&nbsp;' + widget_html +  suffix_html],
+                ['<output value="#case/dob" /> is of child', prefix_html + widget_html + ' is of child' + suffix_html],
+                ['<output value="#case/dob" />', prefix_html_1 + widget_html + suffix_html],
+                ['This dob: <output value="#case/dob" /> is of child', 'This dob: &lt;output value="#case/dob" /&gt; is of child']
             ];
 
             _.each(text, function(val){
@@ -285,6 +311,21 @@ define([
                 it("(text -> html -> text): " + JSON.stringify(val[0]), function() {
                     assert.strictEqual(
                         richText.fromRichText(richText.toRichText(val[0])),
+                        val[0]
+                    );
+                });
+            });
+
+            _.each(text_widgets_outputs, function(val){
+                it("from html to text: " + JSON.stringify(val[1]), function() {
+                    assert.strictEqual(richText.fromRichText(val[1]), val[0]);
+                });
+            });
+
+            _.each(text_widgets_outputs, function(val){
+                it("(text -> html -> text): " + JSON.stringify(val[0]), function() {
+                    assert.strictEqual(
+                        richText.fromRichText(richText.toRichText(val[0], form)),
                         val[0]
                     );
                 });
