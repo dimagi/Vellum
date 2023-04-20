@@ -119,6 +119,10 @@ define([
     CKEDITOR.config.title = false;
     CKEDITOR.config.extraPlugins = 'bubbles';
     CKEDITOR.config.disableNativeSpellChecker = false;
+    // We don't use Toolbar, however it is required by clipboard.
+    // Once https://github.com/ckeditor/ckeditor4/issues/654 is resolved,
+    // toolbar can be removed from the source(build).
+    CKEDITOR.config.toolbar = [];
 
     /**
      * Get or create a rich text editor for the given element
@@ -731,6 +735,9 @@ define([
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
                    .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
+                   // While copying widgets with text, CKEditor adds these html elements
+                   .replace(/<span\b[^>]*?id="?cke_bm_\d+\w"?\b[^>]*?>.*?<\/span>/ig, "")
+                   .replace(/<span\b[^>]*?data-cke-copybin-(start|end)[^<]*?<\/span>/ig, "")
                    // CKEditor uses zero-width spaces as markers
                    // and sometimes they leak out (on copy/paste?)
                    .replace(/\u200b+/ig, " ")

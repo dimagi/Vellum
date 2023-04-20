@@ -250,6 +250,23 @@ define([
         });
 
         describe("text conversions", function() {
+            var prefix_html_1 = '<span data-cke-copybin-start="1">​</span><p>',
+                prefix_html_2 = '<span id="cke_bm_909S" style="display: none;">&nbsp;</span>',
+                prefix_html = prefix_html_1 + prefix_html_2,
+                widget_html = '<span tabindex="-1" contenteditable="false" data-cke-widget-wrapper="1" data-cke-filter="off" ' +
+                    'class="cke_widget_wrapper cke_widget_inline cke_widget_bubbles cke_widget_wrapper_label-datanode-external ' +
+                    'cke_widget_wrapper_label-datanode cke_widget_wrapper_label cke_widget_selected" data-cke-display-name="span" ' +
+                    'data-cke-widget-id="0" role="region" aria-label="span widget"><span class="label label-datanode label-datanode-external ' +
+                    'cke_widget_element" data-value="#case/dob" data-cke-widget-data="%7B%22classes%22%3A%7B%22label-datanode-external' +
+                    '%22%3A1%2C%22label-datanode%22%3A1%2C%22label%22%3A1%7D%7D" data-cke-widget-upcasted="1" data-cke-widget-keep-attr="0" ' +
+                    'data-widget="bubbles"><i class="fcc fcc-fd-case-property">&nbsp;</i>dob</span><span class="cke_reset ' +
+                    'cke_widget_drag_handler_container" style="background: url(&quot;http://localhost:8088/src/../lib/ckeditor/plugins/' +
+                    'widget/images/handle.png&quot;) rgba(220, 220, 220, 0.5); width: 43px; height: 16px; left: 2px; top: -14px;">' +
+                    '<img class="cke_reset cke_widget_drag_handler" data-cke-widget-drag-handler="1" src="data:image/gif;base64,R0lGODlhAQABAPABAP' +
+                    '///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" width="15" title="Click and drag to move" height="15" role="presentation" ' +
+                    'draggable="true"></span></span>',
+                suffix_html = '</p><span data-cke-copybin-end="1">​</span>';
+
             var text = [
                 ["blah\nblah", "<p>blah</p><p>blah</p>"],
                 ["blah\nblah\n", "<p>blah</p><p>blah</p><p>&nbsp;</p>"],
@@ -273,6 +290,11 @@ define([
                 ["   ", " \xa0 "],
                 ["   ", " &nbsp; "],
                 ["' ,", "'\u200B,"],
+                ['This dob: <output value="#case/dob" /> is of child', prefix_html + 'This dob:&nbsp;' + widget_html + ' is of child' + suffix_html],
+                ['This dob: <output value="#case/dob" />', prefix_html + 'This dob:&nbsp;' + widget_html +  suffix_html],
+                ['<output value="#case/dob" /> is of child', prefix_html + widget_html + ' is of child' + suffix_html],
+                ['<output value="#case/dob" />', prefix_html_1 + widget_html + suffix_html],
+                ['This dob: <output value="#case/dob" /> is of child', 'This dob: &lt;output value="#case/dob" /&gt; is of child'],
             ];
 
             _.each(text, function(val){
@@ -284,7 +306,7 @@ define([
             _.each(text, function(val){
                 it("(text -> html -> text): " + JSON.stringify(val[0]), function() {
                     assert.strictEqual(
-                        richText.fromRichText(richText.toRichText(val[0])),
+                        richText.fromRichText(richText.toRichText(val[0], form)),
                         val[0]
                     );
                 });
@@ -481,7 +503,7 @@ define([
                 assert.equal(editor.getValue(), 'A');
             });
 
-            function assertCKCopy($editor, value) {
+            function assertCKCopy($editor, value, callback) {
                 // WARNING this is heavily dependent on CKEditor internals
                 var domObject = new CKEDITOR.dom.domObject($editor[0]),
                     realDataTransfer = CKEDITOR.plugins.clipboard.dataTransfer,
@@ -499,6 +521,8 @@ define([
                 }
                 assert.equal(data.Text, value, 'text/plain');
                 assert.strictEqual(data["text/html"], undefined, 'text/html');
+                // Wait for CK Editor Async handler (copybin) to complete
+                setTimeout(callback, 100);
             }
 
             function ckPaste($editor, data, callback) {
@@ -589,17 +613,21 @@ define([
             var TEST_LABEL = 'Weight: <output value="#form/text" /> grams',
                 TEST_XPATH = "if(today() + (#case/dob - 3), #form/text, 0)";
 
-            it("should copy output tag from rich text editor", function () {
+            it("should copy output tag from rich text editor", function (done) {
                 editor.setValue(TEST_LABEL, function () {
                     editor.select(6, 3);
-                    assertCKCopy(input, ': <output value="#form/text" />');
+                    assertCKCopy(input, ': <output value="#form/text" />', function () {
+                        done();
+                    });
                 });
             });
 
-            it("should copy expression with hashtags from expression editor", function () {
+            it("should copy expression with hashtags from expression editor", function (done) {
                 exprEditor.setValue(TEST_XPATH, function () {
                     exprEditor.select(11, 4);
-                    assertCKCopy(exprInput, "+ (#case/dob");
+                    assertCKCopy(exprInput, "+ (#case/dob", function () {
+                        done();
+                    });
                 });
             });
 
