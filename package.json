@@ -49,7 +49,7 @@
         "http-server": "^14.1.0",
         "jshint": "^2.13.6",
         "less": "2",
-        "minimist": "^1.2.6",
+        "minimist": "^1.2.8",
         "mocha": "10.2.0",
         "mocha-headless-chrome": "4.0.0",
         "yarn": "^1.22.19"
