@@ -65,7 +65,7 @@ requirejs.config({
         'jsdiff': '../node_modules/jsdiff/diff',
         'markdown-it': '../node_modules/markdown-it/dist/markdown-it',
         'caretjs': '../node_modules/Caret.js/dist/jquery.caret',
-        'atjs': '../node_modules/At.js/dist/js/jquery.atwho',
+        'atjs': '../node_modules/at.js/dist/js/jquery.atwho',
         'ckeditor': '../lib/ckeditor/ckeditor',
         'ckeditor-jquery': '../lib/ckeditor/adapters/jquery',
         'fusejs': '../node_modules/fuse.js/src/fuse'
@@ -128,7 +128,7 @@ requirejs.config({
             exports: 'caretjs'
         },
         'atjs': {
-            deps: ['jquery', 'caretjs', 'css!../node_modules/At.js/dist/css/jquery.atwho'],
+            deps: ['jquery', 'caretjs', 'css!../node_modules/at.js/dist/css/jquery.atwho'],
             exports: 'atjs'
         },
         'ckeditor': {

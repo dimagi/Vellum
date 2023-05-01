@@ -21,10 +21,6 @@
   dependencies:
     "@types/node" "*"
 
-At.js@millerdev/At.js#master:
-  version "1.5.3"
-  resolved "https://codeload.github.com/millerdev/At.js/tar.gz/d1ed42f66d33cdf54b681cb026664d847ca0637d"
-
 Caret.js@INTELOGIE/Caret.js#0.3.1:
   version "0.3.1"
   resolved "https://codeload.github.com/INTELOGIE/Caret.js/tar.gz/3bc79e41834fa96b54f52c4276562488de82e581"
@@ -183,6 +179,11 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
+
+at.js@1.5.4:
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/at.js/-/at.js-1.5.4.tgz#8fc60cc80eadbe4874449b166a818e7ae1d784c1"
+  integrity sha512-G8mgUb/PqShPoH8AyjuxsTGvIr1o716BtQUKDM44C8qN2W615y7KGJ68MlTGamd0J0D/m28emUkzagaHTdrGZw==
 
 aws-sign2@~0.7.0:
   version "0.7.0"

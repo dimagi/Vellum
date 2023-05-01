@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "@bracken/require-less": "0.1.6",
-        "At.js": "millerdev/At.js#master",
+        "at.js": "1.5.4",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
         "MediaUploader": "dimagi/MediaUploader#master",
         "XMLWriter": "dimagi/XMLWriter#master",
