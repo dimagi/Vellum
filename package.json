@@ -16,7 +16,7 @@
     },
     "dependencies": {
         "@bracken/require-less": "0.1.6",
-        "At.js": "millerdev/At.js#master",
+        "at.js": "1.5.4",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
         "MediaUploader": "dimagi/MediaUploader#master",
         "XMLWriter": "dimagi/XMLWriter#master",
@@ -63,13 +63,15 @@
     },
     "resolutions": {
         "ansi-regex": "^4.1.1",
+        "async": "^3.2.2",
         "getobject": "^1.0.0",
         "grunt": "^1.3.0",
+        "json-schema": "^0.4.0",
         "lodash": "^4.17.19",
         "mime": "^1.4.1",
         "minimatch": "^3.0.2",
         "qs": "^6.0.4",
-        "request": "^2.68.0",
+        "request": "^2.88.2",
         "set-value": "^4.0.1",
         "ws": "^5.2.3"
     }
