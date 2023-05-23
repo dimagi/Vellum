@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     env:
+      REPO: vellum
       DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
       DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
     steps:
@@ -28,6 +29,7 @@ jobs:
         echo "lock file requires: $yarn_version"
         npm install "$yarn_version"
         yarn install
-    - name: Analyze metrics and push to Datadog
-      run: |
-        scripts/track-dependency-status.sh
+    - name: Install dependency-metrics
+      run: pip install dependency-metrics
+    - name: run metrics for yarn
+      run: metrics yarn --send
