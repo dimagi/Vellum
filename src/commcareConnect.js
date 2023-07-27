@@ -38,7 +38,6 @@ define([
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
-            icon: 'fa fa-compress',
             getExtraDataAttributes: function (mug) {
                 return {
                     // allows the parser to know which mug to associate with this node
@@ -83,7 +82,7 @@ define([
                 return mugConfig.childNodes.map((childName) => {
                     return {
                         nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
-                        calculate: wrapString(mug.p[childName]),
+                        calculate: mug.p[childName],
                     }
                 });
             },
@@ -98,6 +97,7 @@ define([
                 ],
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Learn Module',
+                    icon: 'fa fa-graduation-cap',
                     init: (mug, form) => {
                         mug.p.name = "";
                         mug.p.description = "";
@@ -114,7 +114,7 @@ define([
                             lstring: gettext("Description"),
                             visibility: 'visible',
                             presence: 'required',
-                            widget: widgets.text,
+                            widget: widgets.richTextarea,
                         },
                         time_estimate: {
                             lstring: gettext("Time Estimate"),
@@ -135,6 +135,36 @@ define([
                         "name",
                         "description",
                         "time_estimate",
+                    ],
+                })],
+            },
+            ConnectAssessment: {
+                rootName: "assessment",
+                childNodes: [
+                    "user_score",
+                ],
+                mugOptions: util.extend(baseMugOptions, {
+                    typeName: 'Assessment Score',
+                    icon: 'fa fa-leanpub',
+                    init: (mug, form) => {
+                        mug.p.user_score = "";
+                    },
+                    spec: util.extend(baseSpec, {
+                        user_score: {
+                            lstring: gettext("User Score"),
+                            visibility: 'visible',
+                            presence: 'required',
+                            widget: widgets.xPath,
+                            serialize: mugs.serializeXPath,
+                            deserialize: mugs.deserializeXPath,
+                            help: gettext('XPath expression for the users assessment score.'),
+                        },
+                    })
+                }),
+                sections: [_.extend({}, baseSection, {
+                    properties: [
+                        "nodeID",
+                        "user_score",
                     ],
                 })],
             }
@@ -171,7 +201,7 @@ define([
                         let attr = matchRet[1];
                         mug = form.getMugByPath(path.replace(regex, ""));
                         if (mug && mug.__className === mugName) {
-                            mug.p[attr] = unwrapString(el.xmlAttr("calculate"));
+                            mug.p[attr] = el.xmlAttr("calculate");
                             return true;
                         }
                     }
@@ -183,12 +213,4 @@ define([
             this.__callOld();
         },
     });
-
-    function wrapString(val) {
-        return `'${val}'`;
-    }
-
-    function unwrapString(val) {
-        return val.replace(/^'(.*)'$/, '$1');
-    }
 });
