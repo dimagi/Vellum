@@ -33,6 +33,7 @@ intuitive items first.
   [JSTree](https://www.jstree.com/plugins/) plugin system. Many very important
   components are implemented as plugins, so just because something is a plugin
   does not mean it is a second-rate feature.
+  For more details on plugins, see [PLUGIN_DEVELOPMENT.md](PLUGIN_DEVELOPMENT.md).
 
 Usage
 -----

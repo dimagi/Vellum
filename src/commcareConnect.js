@@ -1,10 +1,16 @@
+/**
+ * CommCare Connect plugin for Vellum
+ *
+ * This plugin adds two new mug types:
+ * - Learn Module
+ * - Assessment Score
+ */
 define([
     'jquery',
     'underscore',
     'vellum/mugs',
     'vellum/tree',
     'vellum/util',
-    'vellum/atwho',
     'vellum/widgets',
     'vellum/core'
 ], function (
@@ -13,7 +19,6 @@ define([
     mugs,
     Tree,
     util,
-    atwho,
     widgets
 ) {
     let CCC_XMLNS = 'http://commcareconnect.com/data/v1/learn',
