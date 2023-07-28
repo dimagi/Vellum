@@ -97,7 +97,6 @@ requirejs(['jquery.vellum'], function () {
         'tests/markdown',
         'tests/datasources',
         'tests/databrowser',
-        'tests/saveToCase',
         'tests/setvalue',
         'tests/richText',
         'tests/questionProperties',
