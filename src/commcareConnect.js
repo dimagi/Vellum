@@ -98,14 +98,14 @@ define([
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Learn Module',
                     icon: 'fa fa-graduation-cap',
-                    init: (mug, form) => {
+                    init: (mug) => {
                         mug.p.name = "";
                         mug.p.description = "";
                         mug.p.time_estimate = "";
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {
-                             lstring: gettext('Module ID'),
+                            lstring: gettext('Module ID'),
                         },
                         name: {
                             lstring: gettext("Name"),
@@ -149,12 +149,12 @@ define([
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Assessment Score',
                     icon: 'fa fa-leanpub',
-                    init: (mug, form) => {
+                    init: (mug) => {
                         mug.p.user_score = "";
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {
-                             lstring: gettext('Assessment ID'),
+                            lstring: gettext('Assessment ID'),
                         },
                         user_score: {
                             lstring: gettext("User Score"),
@@ -189,7 +189,7 @@ define([
             return types;
         },
         getSections: function (mug) {
-            if (mugConfigs.hasOwnProperty(mug.__className)) {
+            if (Object.hasOwn(mugConfigs, mug.__className)) {
                 return _.map(mugConfigs[mug.__className].sections, function (section) {
                     return _.clone(section);
                 });
