@@ -105,6 +105,7 @@ requirejs(['jquery.vellum'], function () {
         'tests/escapedHashtags',
         'tests/bulkActions',
         'tests/undomanager',
+        'tests/commcareConnect',
     ], function ($, options) {
         var session = window.sessionStorage;
 
