@@ -104,6 +104,9 @@ define([
                         mug.p.time_estimate = "";
                     },
                     spec: util.extend(baseSpec, {
+                        nodeID: {
+                             lstring: gettext('Module ID'),
+                        },
                         name: {
                             lstring: gettext("Name"),
                             visibility: 'visible',
@@ -150,6 +153,9 @@ define([
                         mug.p.user_score = "";
                     },
                     spec: util.extend(baseSpec, {
+                        nodeID: {
+                             lstring: gettext('Assessment ID'),
+                        },
                         user_score: {
                             lstring: gettext("User Score"),
                             visibility: 'visible',
