@@ -1,0 +1,31 @@
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+  <h:head>
+    <h:title>Untitled Form</h:title>
+    <model>
+      <instance>
+        <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E1B03643-109D-4DC6-9737-815E4401DE79" uiVersion="1" version="1" name="Untitled Form">
+          <score />
+          <test_assessment vellum:role="ConnectAssessment">
+            <assessment xmlns="http://commcareconnect.com/data/v1/learn" id="test_assessment">
+              <user_score />
+            </assessment>
+          </test_assessment>
+        </data>
+      </instance>
+      <bind vellum:nodeset="#form/score" nodeset="/data/score" type="xsd:int" required="true()" />
+      <bind nodeset="/data/test_assessment/assessment/user_score" vellum:calculate="#form/score"  calculate="/data/score" />
+      <itext>
+        <translation lang="en" default="">
+          <text id="score-label">
+            <value>score</value>
+          </text>
+        </translation>
+      </itext>
+    </model>
+  </h:head>
+  <h:body>
+    <input vellum:ref="#form/score" ref="/data/score">
+      <label ref="jr:itext('score-label')" />
+    </input>
+  </h:body>
+</h:html>
