@@ -14,7 +14,7 @@ define([
     Tree,
     util,
     atwho,
-    widgets,
+    widgets
 ) {
     let CCC_XMLNS = 'http://commcareconnect.com/data/v1/learn',
         baseSection = {
@@ -48,7 +48,7 @@ define([
                 // Extract values from the data node
                 // Return an empty list of child nodes since children are handled
                 // by this plugin directly.
-                return $([])
+                return $([]);
             },
             dataChildFilter: (children, mug) => {
                 // called during write
@@ -83,7 +83,7 @@ define([
                     return {
                         nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
                         calculate: mug.p[childName],
-                    }
+                    };
                 });
             },
         },
