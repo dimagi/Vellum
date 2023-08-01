@@ -77,7 +77,7 @@ Get the list of sections to display in the editor window for the given mug.
 ### - parseBindElement
 
 This is called when loading a form and is used to extract data from the bind elements in a form.
-If the bind element was created by a plugin, the plugin should return use this hook
+If the bind element was created by a plugin, the plugin should use this hook
 to read the data from the bind element.
 
 If the bind element does not belong to the plugin, the `__callOld` function should be called to

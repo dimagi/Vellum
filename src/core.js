@@ -2541,7 +2541,7 @@ define([
      * Parse data from a `bind` element during form loading.
      *
      * @param {Form} form - The form instance being loaded.
-     * @param {jQuery} el - JQuery object represent the bind element being processed.
+     * @param {jQuery} el - JQuery object representing the bind element being processed.
      * @param {String} path - The path of the element within the form.
      */
     fn.parseBindElement = function (form, el, path) {
@@ -2552,7 +2552,7 @@ define([
      * Parse data from a `setvalue` element during form loading.
      *
      * @param {Form} form - The form instance being loaded.
-     * @param {jQuery} el - JQuery object represent the bind element being processed.
+     * @param {jQuery} el - JQuery object representing the bind element being processed.
      * @param {String} path - The path of the element within the form.
      */
     fn.parseSetValue = function (form, el, path) {
