@@ -43,12 +43,10 @@ define([
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
-            getExtraDataAttributes: function (mug) {
-                return {
-                    // allows the parser to know which mug to associate with this node
-                    "vellum:role": mug.__className,
-                };
-            },
+            getExtraDataAttributes: mug => ({
+                // allows the parser to know which mug to associate with this node
+                "vellum:role": mug.__className,
+            }),
             parseDataNode: () => {
                 // Extract values from the data node
                 // Return an empty list of child nodes since children are handled
@@ -58,15 +56,12 @@ define([
             dataChildFilter: (children, mug) => {
                 // called during write
                 // return a list nodes to add to the forms data node
-                children = mugConfigs[mug.__className].childNodes.map((childName) => {
+                children = mugConfigs[mug.__className].childNodes.map(childName => {
                     return new Tree.Node([], {
-                        getNodeID: function () {
-                            return childName;
-                        },
+                        getNodeID: () => childName,
                         p: {rawDataAttributes: null},
                         options: {
-                            getExtraDataAttributes: () => {
-                            }
+                            getExtraDataAttributes: () => {}
                         }
                     });
                 });
@@ -81,10 +76,10 @@ define([
                     }
                 })];
             },
-            getBindList: (mug) => {
+            getBindList: mug => {
                 // return list of bind elements to add to the form
                 let mugConfig = mugConfigs[mug.__className];
-                return mugConfig.childNodes.map((childName) => {
+                return mugConfig.childNodes.map(childName => {
                     return {
                         nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
                         calculate: mug.p[childName],
@@ -103,7 +98,7 @@ define([
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Learn Module',
                     icon: 'fa fa-graduation-cap',
-                    init: (mug) => {
+                    init: mug => {
                         mug.p.name = "";
                         mug.p.description = "";
                         mug.p.time_estimate = "";
@@ -129,7 +124,7 @@ define([
                             visibility: 'visible',
                             presence: 'required',
                             widget: widgets.text,
-                            validationFunc: (mug) => {
+                            validationFunc: mug => {
                                 let val = mug.p.time_estimate;
                                 return val && val.match(/^\d+$/) ? "pass" : gettext("Must be an integer");
                             },
@@ -154,7 +149,7 @@ define([
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Assessment Score',
                     icon: 'fa fa-leanpub',
-                    init: (mug) => {
+                    init: mug => {
                         mug.p.user_score = "";
                     },
                     spec: util.extend(baseSpec, {
@@ -195,9 +190,7 @@ define([
         },
         getSections: function (mug) {
             if (Object.hasOwn(mugConfigs, mug.__className)) {
-                return _.map(mugConfigs[mug.__className].sections, function (section) {
-                    return _.clone(section);
-                });
+                return _.map(mugConfigs[mug.__className].sections, section => _.clone(section));
             }
             return this.__callOld();
         },
