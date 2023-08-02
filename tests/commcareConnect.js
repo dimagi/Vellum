@@ -31,8 +31,8 @@ define([
                 util.loadXML(LEARN_MODULE_XML);
                 var module = util.getMug("module_1");
                 assert.equal(module.__className, "ConnectLearnModule");
-                assert.equal(module.p.name, "'module 1'");
-                assert.equal(module.p.description, "'Module 1 is fun\nLearning is fun'");
+                assert.equal(module.p.name, "module 1");
+                assert.equal(module.p.description, "Module 1 is fun\nLearning is fun");
                 assert.equal(module.p.time_estimate, "2");
                 util.assertXmlEqual(call("createXML"), LEARN_MODULE_XML);
             });

@@ -8,17 +8,14 @@
 					<name />
 					<module_1 vellum:role="ConnectLearnModule">
 						<module xmlns="http://commcareconnect.com/data/v1/learn" id="module_1">
-							<name />
-							<description />
-							<time_estimate />
+							<name>module 1</name>
+							<description>Module 1 is fun&#10;Learning is fun</description>
+							<time_estimate>2</time_estimate>
 						</module>
 					</module_1>
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
-			<bind nodeset="/data/module_1/module/name" calculate="'module 1'" />
-			<bind nodeset="/data/module_1/module/description" calculate="'Module 1 is fun&#10;Learning is fun'" />
-			<bind nodeset="/data/module_1/module/time_estimate" calculate="2" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">

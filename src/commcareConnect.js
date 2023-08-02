@@ -43,6 +43,11 @@ define([
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
+            /**
+             * If true, the mug will write its values to the data node instead of
+             * using bind elements.
+             */
+            writeValuesToDataNode: false,
             getExtraDataAttributes: mug => ({
                 // allows the parser to know which mug to associate with this node
                 "vellum:role": mug.__className,
@@ -56,10 +61,15 @@ define([
             dataChildFilter: (children, mug) => {
                 // called during write
                 // return a list nodes to add to the forms data node
+                let writeData = mug.options.writeValuesToDataNode;
                 children = mugConfigs[mug.__className].childNodes.map(childName => {
+                    let p = {rawDataAttributes: null};
+                    if (writeData) {
+                        p.dataValue = mug.p[childName];
+                    }
                     return new Tree.Node([], {
                         getNodeID: () => childName,
-                        p: {rawDataAttributes: null},
+                        p: p,
                         options: {
                             getExtraDataAttributes: () => {}
                         }
@@ -76,16 +86,6 @@ define([
                     }
                 })];
             },
-            getBindList: mug => {
-                // return list of bind elements to add to the form
-                let mugConfig = mugConfigs[mug.__className];
-                return mugConfig.childNodes.map(childName => {
-                    return {
-                        nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
-                        calculate: mug.p[childName],
-                    };
-                });
-            },
         },
         mugConfigs = {
             ConnectLearnModule: {
@@ -98,11 +98,26 @@ define([
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Learn Module',
                     icon: 'fa fa-graduation-cap',
+                    writeValuesToDataNode: true,
                     init: mug => {
                         mug.p.name = "";
                         mug.p.description = "";
                         mug.p.time_estimate = "";
                     },
+                    parseDataNode: (mug, node) => {
+                        let children = node.children(),
+                            mugConfig = mugConfigs[mug.__className];
+                        if (children.length === 1) {
+                            let child = children[0];
+                            if (child.nodeName === mugConfig.rootName && child.getAttribute("xmlns") === CCC_XMLNS) {
+                                $(child).children().each((i, el) => {
+                                    mug.p[el.nodeName] = $(el).text();
+                                });
+                            }
+                        }
+                        return $([]);
+                    },
+                    getBindList: () => [],
                     spec: util.extend(baseSpec, {
                         nodeID: {
                             lstring: gettext('Module ID'),
@@ -151,6 +166,16 @@ define([
                     icon: 'fa fa-leanpub',
                     init: mug => {
                         mug.p.user_score = "";
+                    },
+                    getBindList: mug => {
+                        // return list of bind elements to add to the form
+                        let mugConfig = mugConfigs[mug.__className];
+                        return mugConfig.childNodes.map(childName => {
+                            return {
+                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
+                                calculate: mug.p[childName],
+                            };
+                        });
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {
