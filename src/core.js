@@ -266,6 +266,11 @@ define([
         },
     };
 
+    /**
+     * Get all Mug types.
+     *
+     * @returns {Object} - Object with `normal` and `auxiliary` properties containing mug definitions.
+     */
     fn.getMugTypes = function () {
         return mugs.baseMugTypes;
     };
@@ -326,6 +331,14 @@ define([
         this.data.core.saveButton.ui.appendTo($saveButtonContainer);
     };
 
+    /**
+     * Get question groups to display.
+     *
+     * @returns {Object} - List of group configurations. Each group configuration is an object with the
+     *              following properties:
+     *              - group: [groupName, groupDisplayName]
+     *              - questions: [mugType, ...]
+     */
     fn.getQuestionGroups = function () {
         return [
             {
@@ -2348,6 +2361,18 @@ define([
         });
     };
 
+    /**
+     * Get UI sections for the mug. This controls the UI for the mug.
+     *
+     * @param {Mug} mug - The mug to get sections for.
+     * @return {Array<Object>} List of sections to display for the given mug.
+     *      Each section is an object with the following properties:
+     *      - slug: The slug of the section.
+     *      - displayName: The display name of the section. Should be tagged for translation with `gettext`.
+     *      - properties: List of mug properties to display.
+     *      - help: Help configuration with `title`, `text` and `link` properties.
+     *      - isCollapsed: Boolean indicating whether the section should be collapsed by default.
+     */
     fn.getSections = function (mug) {
         return [
             {
@@ -2512,12 +2537,26 @@ define([
         return parser.parseDataElement(form, el, parentMug, role);
     };
 
+    /**
+     * Parse data from a `bind` element during form loading.
+     *
+     * @param {Form} form - The form instance being loaded.
+     * @param {jQuery} el - JQuery object representing the bind element being processed.
+     * @param {String} path - The path of the element within the form.
+     */
     fn.parseBindElement = function (form, el, path) {
-        return parser.parseBindElement(form, el, path);
+        parser.parseBindElement(form, el, path);
     };
 
+    /**
+     * Parse data from a `setvalue` element during form loading.
+     *
+     * @param {Form} form - The form instance being loaded.
+     * @param {jQuery} el - JQuery object representing the bind element being processed.
+     * @param {String} path - The path of the element within the form.
+     */
     fn.parseSetValue = function (form, el, path) {
-        return parser.parseSetValue(form, el, path);
+        parser.parseSetValue(form, el, path);
     };
 
     fn.getControlNodeAdaptorFactory = function (tagName) {

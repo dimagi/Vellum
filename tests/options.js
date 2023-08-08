@@ -232,6 +232,7 @@ define(["underscore"], function (_) {
             'modeliteration',
             'commtrack',
             'saveToCase',
+            'commcareConnect',
             'atwho',
         ],
         features: {

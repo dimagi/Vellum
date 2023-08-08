@@ -1173,7 +1173,7 @@ define([
          *
          * @param mug - The mug object.
          * @param node - This mug's data node, a jQuery object.
-         * @returns - A jquery collection of child nodes.
+         * @returns - A jquery collection of child nodes which will be passed through the parser in turn.
          */
         parseDataNode: function (mug, $node) {
             return $node.children();
@@ -1181,7 +1181,9 @@ define([
         controlNodeChildren: null,
 
         /**
-         * Get data node path name
+         * Get data node path name.
+         *
+         * Use this to override the default path name.
          *
          * @param mug - The mug.
          * @param name - The default path name.
@@ -1190,7 +1192,9 @@ define([
          */
         getPathName: null,
         /**
-         * Get data node tag name
+         * Get data node tag name.
+         *
+         * Use this to override the default tag name.
          *
          * @param mug - The mug.
          * @param name - The default tag name.
@@ -1198,19 +1202,34 @@ define([
          */
         getTagName: null,
 
-        // XForm writer integration:
-        //  `childFilter(treeNodes, parentMug) -> treeNodes`
-        // The writer passes these filter functions to `processChildren` of
-        // `Tree.walk`. See `Tree.walk` documentation for more details.
+        /**
+         * Filter function for data node children.
+         *
+         * This allows integration into the XForm writer. It can be used to filter out
+         * child elements or generate additional child elements.
+         *
+         * The writer passes these filter functions to `processChildren` of
+         * `Tree.walk`. See `Tree.walk` documentation for more details.
+         *
+         *  @param treeNodes - The list of child nodes.
+         *  @param parentMug - The parent mug.
+         *  @returns {Array<Tree.Node>} - The list of child nodes to add to the form XML data element.
+         */
         dataChildFilter: null,
         controlChildFilter: null,
 
-        // data node writer options
-        getExtraDataAttributes: null, // function (mug) { return {...}; }
+        /**
+         * Get extra data node attributes to write to the XML.
+         *
+         * @param {Mug} mug - The mug.
+         * @returns {Object} - An object containing extra attributes to write to the XML.
+         */
+        getExtraDataAttributes: null,
         writeDataNodeXML: null,       // function (xmlWriter, mug) { ... }
 
         /**
-         * Returns a list of objects containing bind element attributes
+         * Returns a list of objects containing bind element attributes which will
+         * be written to the form XML.
          */
         getBindList: function (mug) {
             var constraintMsgItext = mug.p.constraintMsgItext,
@@ -1246,6 +1265,10 @@ define([
             return attrs.nodeset ? [attrs] : [];
         },
 
+        /**
+         * Returns a list of objects containing `setvalue` element attributes which will
+         * be written to the form XML.
+         */
         getSetValues: function (mug) {
             var ret = [];
 
@@ -1278,7 +1301,33 @@ define([
             return mug.options.icon;
         },
         isHashtaggable: true,
+        /**
+         * Init function called when adding a mug to a form. Typically used ot initialize
+         * mug properties.
+         *
+         * @param {Mug} mug
+         * @param {Form} form
+         */
         init: function (mug, form) {},
+
+        /**
+         * Attribute spec for the mug. Each attribute on the object
+         * defines the attribute spec for that attribute. The attribute
+         * spec is an object with the following properties:
+         * - visibility: 'visible', 'hidden', 'visible_if_present', 'visible_if_not_present'
+         * - presence: 'required', 'optional', 'notallowed'
+         * - lstring: The label string to use for the attribute on the UI
+         * - widget: The widget to use for the attribute. See `widgets.js`.
+         * - defaultOptions: The default options for the widget
+         * - validationFunc: A function to validate the attribute.
+         *      // (mug) => isValid ? "pass" : gettext("Error message")
+         * - mayReferenceSelf: Whether the attribute may reference the mug itself
+         * - enabled: A function to determine whether the attribute is enabled
+         *      // (mug) => true/false
+         * - help: Help text for the attribute
+         * - serialize: A function to serialize the attribute e.g. `mug.serializeXPath`
+         * - deserialize: A function to deserialize the attribute e.g. `mug.deserializeXPath`
+         */
         spec: {}
     };
 

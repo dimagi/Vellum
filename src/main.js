@@ -179,7 +179,8 @@ define([
     'vellum/window',
     'vellum/polyfills',
     'vellum/copy-paste',
-    'vellum/commander'
+    'vellum/commander',
+    'vellum/commcareConnect',
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect
