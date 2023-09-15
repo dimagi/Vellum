@@ -198,6 +198,46 @@ define([
                         "user_score",
                     ],
                 })],
+            },
+            ConnectDeliverUnit: {
+                rootName: "deliver",
+                childNodes: [
+                    "name",
+                ],
+                mugOptions: util.extend(baseMugOptions, {
+                    typeName: 'Deliver Unit',
+                    icon: 'fa fa-briefcase',
+                    init: mug => {
+                        mug.p.name = "";
+                    },
+                    getBindList: mug => {
+                        // return list of bind elements to add to the form
+                        let mugConfig = mugConfigs[mug.__className];
+                        return mugConfig.childNodes.map(childName => {
+                            return {
+                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
+                                calculate: mug.p[childName],
+                            };
+                        });
+                    },
+                    spec: util.extend(baseSpec, {
+                        nodeID: {
+                            lstring: gettext('Delivery Unit ID'),
+                        },
+                        name: {
+                            lstring: gettext("Name"),
+                            visibility: 'visible',
+                            presence: 'required',
+                            widget: widgets.text,
+                        },
+                    })
+                }),
+                sections: [_.extend({}, baseSection, {
+                    properties: [
+                        "nodeID",
+                        "name",
+                    ],
+                })],
             }
         };
 
