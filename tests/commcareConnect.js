@@ -6,6 +6,7 @@ define([
     'vellum/commcareConnect',
     'text!static/commcareConnect/learn_module.xml',
     'text!static/commcareConnect/assessment.xml',
+    'text!static/commcareConnect/deliver.xml',
 ], function (
     util,
     chai,
@@ -13,7 +14,8 @@ define([
     _,
     commcareConnect,
     LEARN_MODULE_XML,
-    ASSESSMENT_XML
+    ASSESSMENT_XML,
+    DELIVER_XML
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -50,7 +52,19 @@ define([
                 var module = util.getMug("test_assessment");
                 assert.equal(module.__className, "ConnectAssessment");
                 assert.equal(module.p.user_score, "/data/score");
+                assert.equal(module.p.relevantAttr, "x = 1");
                 util.assertXmlEqual(call("createXML"), ASSESSMENT_XML);
+            });
+        });
+
+        describe("deliver unit", function () {
+            it("should load and save", function () {
+                util.loadXML(DELIVER_XML);
+                var module = util.getMug("unit_one");
+                assert.equal(module.__className, "ConnectDeliverUnit");
+                assert.equal(module.p.name, "unit 1");
+                assert.equal(module.p.relevantAttr, "x = 1");
+                util.assertXmlEqual(call("createXML"), DELIVER_XML);
             });
         });
     });

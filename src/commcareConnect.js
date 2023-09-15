@@ -29,6 +29,20 @@ define([
                 "nodeID",
             ],
         },
+        logicSection = {
+            slug: "logic",
+            displayName: gettext("Logic"),
+            help: {
+                title: gettext("Logic"),
+                text: gettext("Use logic to control when questions are asked and what answers are valid. " +
+                    "You can add logic to display a question based on a previous answer, to make " +
+                    "the question required or ensure the answer is in a valid range."),
+                link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
+            },
+            properties: [
+                'relevantAttr',
+            ]
+        },
         baseSpec = {
             xmlnsAttr: {
                 presence: "optional",
@@ -52,10 +66,21 @@ define([
                 // allows the parser to know which mug to associate with this node
                 "vellum:role": mug.__className,
             }),
-            parseDataNode: () => {
-                // Extract values from the data node
-                // Return an empty list of child nodes since children are handled
-                // by this plugin directly.
+            parseDataNode: (mug, node) => {
+                let children = node.children(),
+                    mugConfig = mugConfigs[mug.__className];
+                if (!mugConfig.mugOptions.writeValuesToDataNode) {
+                    // no need to parse the data node
+                    return $([]);
+                }
+                if (children.length === 1) {
+                    let child = children[0];
+                    if (child.nodeName === mugConfig.rootName && child.getAttribute("xmlns") === CCC_XMLNS) {
+                        $(child).children().each((i, el) => {
+                            mug.p[el.nodeName] = $(el).text();
+                        });
+                    }
+                }
                 return $([]);
             },
             dataChildFilter: (children, mug) => {
@@ -104,19 +129,6 @@ define([
                         mug.p.description = "";
                         mug.p.time_estimate = "";
                     },
-                    parseDataNode: (mug, node) => {
-                        let children = node.children(),
-                            mugConfig = mugConfigs[mug.__className];
-                        if (children.length === 1) {
-                            let child = children[0];
-                            if (child.nodeName === mugConfig.rootName && child.getAttribute("xmlns") === CCC_XMLNS) {
-                                $(child).children().each((i, el) => {
-                                    mug.p[el.nodeName] = $(el).text();
-                                });
-                            }
-                        }
-                        return $([]);
-                    },
                     getBindList: () => [],
                     spec: util.extend(baseSpec, {
                         nodeID: {
@@ -144,7 +156,7 @@ define([
                                 return val && val.match(/^\d+$/) ? "pass" : gettext("Must be an integer");
                             },
                             help: gettext('Estimated time to complete the module in hours.'),
-                        },
+                        }
                     })
                 }),
                 sections: [_.extend({}, baseSection, {
@@ -170,12 +182,16 @@ define([
                     getBindList: mug => {
                         // return list of bind elements to add to the form
                         let mugConfig = mugConfigs[mug.__className];
-                        return mugConfig.childNodes.map(childName => {
+                        let binds = [{
+                            nodeset: mug.hashtagPath,
+                            relevant: mug.p.relevantAttr,
+                        }];
+                        return binds.concat(mugConfig.childNodes.map(childName => {
                             return {
                                 nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
                                 calculate: mug.p[childName],
                             };
-                        });
+                        }));
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {
@@ -190,14 +206,26 @@ define([
                             deserialize: mugs.deserializeXPath,
                             help: gettext('XPath expression for the users assessment score.'),
                         },
+                        relevantAttr: {
+                            visibility: 'visible',
+                            presence: 'optional',
+                            widget: widgets.xPath,
+                            xpathType: "bool",
+                            serialize: mugs.serializeXPath,
+                            deserialize: mugs.deserializeXPath,
+                            lstring: gettext('Display Condition')
+                        }
                     })
                 }),
-                sections: [_.extend({}, baseSection, {
-                    properties: [
-                        "nodeID",
-                        "user_score",
-                    ],
-                })],
+                sections: [
+                    _.extend({}, baseSection, {
+                        properties: [
+                            "nodeID",
+                            "user_score",
+                        ],
+                    }),
+                    _.clone(logicSection),
+                ],
             },
             ConnectDeliverUnit: {
                 rootName: "deliver",
@@ -207,18 +235,16 @@ define([
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Deliver Unit',
                     icon: 'fa fa-briefcase',
+                    writeValuesToDataNode: true,
                     init: mug => {
                         mug.p.name = "";
                     },
                     getBindList: mug => {
                         // return list of bind elements to add to the form
-                        let mugConfig = mugConfigs[mug.__className];
-                        return mugConfig.childNodes.map(childName => {
-                            return {
-                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
-                                calculate: mug.p[childName],
-                            };
-                        });
+                        return [{
+                            nodeset: mug.hashtagPath,
+                            relevant: mug.p.relevantAttr,
+                        }];
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {
@@ -230,14 +256,26 @@ define([
                             presence: 'required',
                             widget: widgets.text,
                         },
+                        relevantAttr: {
+                            visibility: 'visible',
+                            presence: 'optional',
+                            widget: widgets.xPath,
+                            xpathType: "bool",
+                            serialize: mugs.serializeXPath,
+                            deserialize: mugs.deserializeXPath,
+                            lstring: gettext('Display Condition')
+                        }
                     })
                 }),
-                sections: [_.extend({}, baseSection, {
-                    properties: [
-                        "nodeID",
-                        "name",
-                    ],
-                })],
+                sections: [
+                    _.extend({}, baseSection, {
+                        properties: [
+                            "nodeID",
+                            "name",
+                        ],
+                    }),
+                    _.clone(logicSection),
+                ],
             }
         };
 
@@ -262,7 +300,9 @@ define([
         parseBindElement: function (form, el, path) {
             let mug = form.getMugByPath(path);
             if (!mug) {
+                // check each mugConfig to see if this is path matches
                 let matched = Object.entries(mugConfigs).some(([mugName, mugConfig]) => {
+                    // construct regex to match any of the child nodes
                     let children = mugConfig.childNodes.join('|'),
                         regex = new RegExp(`/${mugConfig.rootName}/(${children})`),
                         matchRet = path.match(regex);
@@ -276,6 +316,11 @@ define([
                     }
                 });
                 if (matched) {
+                    return;
+                }
+            } else {
+                if (Object.hasOwn(mugConfigs, mug.__className)) {
+                    mug.p.relevantAttr = el.xmlAttr("relevant");
                     return;
                 }
             }
