@@ -63,6 +63,8 @@ define([
                 var module = util.getMug("unit_one");
                 assert.equal(module.__className, "ConnectDeliverUnit");
                 assert.equal(module.p.name, "unit 1");
+                assert.equal(module.p.entity_id, "instance('commcaresession')/session/data/value");
+                assert.equal(module.p.entity_name, "/data/name");
                 assert.equal(module.p.relevantAttr, "x = 1");
                 util.assertXmlEqual(call("createXML"), DELIVER_XML);
             });

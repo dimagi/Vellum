@@ -4,6 +4,7 @@
  * This plugin adds two new mug types:
  * - Learn Module
  * - Assessment Score
+ * - Delivery Unit
  */
 define([
     'jquery',
@@ -57,11 +58,6 @@ define([
             isTypeChangeable: false,
             isDataOnly: true,
             supportsDataNodeRole: true,
-            /**
-             * If true, the mug will write its values to the data node instead of
-             * using bind elements.
-             */
-            writeValuesToDataNode: false,
             getExtraDataAttributes: mug => ({
                 // allows the parser to know which mug to associate with this node
                 "vellum:role": mug.__className,
@@ -69,15 +65,14 @@ define([
             parseDataNode: (mug, node) => {
                 let children = node.children(),
                     mugConfig = mugConfigs[mug.__className];
-                if (!mugConfig.mugOptions.writeValuesToDataNode) {
-                    // no need to parse the data node
-                    return $([]);
-                }
                 if (children.length === 1) {
                     let child = children[0];
                     if (child.nodeName === mugConfig.rootName && child.getAttribute("xmlns") === CCC_XMLNS) {
                         $(child).children().each((i, el) => {
-                            mug.p[el.nodeName] = $(el).text();
+                            let childConfig = mugConfig.childNodes.find(child => child.id === el.nodeName);
+                            if (childConfig && childConfig.writeToData) {
+                                mug.p[el.nodeName] = $(el).text();
+                            }
                         });
                     }
                 }
@@ -86,14 +81,13 @@ define([
             dataChildFilter: (children, mug) => {
                 // called during write
                 // return a list nodes to add to the forms data node
-                let writeData = mug.options.writeValuesToDataNode;
-                children = mugConfigs[mug.__className].childNodes.map(childName => {
+                children = mugConfigs[mug.__className].childNodes.map(child => {
                     let p = {rawDataAttributes: null};
-                    if (writeData) {
-                        p.dataValue = mug.p[childName];
+                    if (child.writeToData) {
+                        p.dataValue = mug.p[child.id];
                     }
                     return new Tree.Node([], {
-                        getNodeID: () => childName,
+                        getNodeID: () => child.id,
                         p: p,
                         options: {
                             getExtraDataAttributes: () => {}
@@ -116,14 +110,13 @@ define([
             ConnectLearnModule: {
                 rootName: "module",
                 childNodes: [
-                    "name",
-                    "description",
-                    "time_estimate",
+                    {id: "name", writeToData: true},
+                    {id: "description", writeToData: true},
+                    {id: "time_estimate", writeToData: true},
                 ],
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Learn Module',
                     icon: 'fa fa-graduation-cap',
-                    writeValuesToDataNode: true,
                     init: mug => {
                         mug.p.name = "";
                         mug.p.description = "";
@@ -171,7 +164,7 @@ define([
             ConnectAssessment: {
                 rootName: "assessment",
                 childNodes: [
-                    "user_score",
+                    {id: "user_score"},
                 ],
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Assessment Score',
@@ -186,10 +179,10 @@ define([
                             nodeset: mug.hashtagPath,
                             relevant: mug.p.relevantAttr,
                         }];
-                        return binds.concat(mugConfig.childNodes.map(childName => {
+                        return binds.concat(mugConfig.childNodes.map(child => {
                             return {
-                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${childName}`,
-                                calculate: mug.p[childName],
+                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${child.id}`,
+                                calculate: mug.p[child.id],
                             };
                         }));
                     },
@@ -230,21 +223,31 @@ define([
             ConnectDeliverUnit: {
                 rootName: "deliver",
                 childNodes: [
-                    "name",
+                    {id: "name", writeToData: true},
+                    {id: "entity_id"},
+                    {id: "entity_name"},
                 ],
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Deliver Unit',
                     icon: 'fa fa-briefcase',
-                    writeValuesToDataNode: true,
                     init: mug => {
                         mug.p.name = "";
+                        mug.p.entity_id = "";
+                        mug.p.entity_name = "";
                     },
                     getBindList: mug => {
                         // return list of bind elements to add to the form
-                        return [{
+                        let mugConfig = mugConfigs[mug.__className];
+                        let binds = [{
                             nodeset: mug.hashtagPath,
                             relevant: mug.p.relevantAttr,
                         }];
+                        return binds.concat(mugConfig.childNodes.filter(child => !child.writeToData).map(child => {
+                            return {
+                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${child.id}`,
+                                calculate: mug.p[child.id],
+                            };
+                        }));
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {
@@ -255,6 +258,24 @@ define([
                             visibility: 'visible',
                             presence: 'required',
                             widget: widgets.text,
+                        },
+                        entity_id: {
+                            lstring: gettext("Entity ID"),
+                            visibility: 'visible',
+                            presence: 'optional',
+                            widget: widgets.xPath,
+                            serialize: mugs.serializeXPath,
+                            deserialize: mugs.deserializeXPath,
+                            help: gettext('XPath expression for the entity ID associated with this Delivery Unit e.g. the case ID.'),
+                        },
+                        entity_name: {
+                            lstring: gettext("Entity Name"),
+                            visibility: 'visible',
+                            presence: 'optional',
+                            widget: widgets.xPath,
+                            serialize: mugs.serializeXPath,
+                            deserialize: mugs.deserializeXPath,
+                            help: gettext('XPath expression for the name of the entity associated with this Delivery Unit.'),
                         },
                         relevantAttr: {
                             visibility: 'visible',
@@ -272,6 +293,8 @@ define([
                         properties: [
                             "nodeID",
                             "name",
+                            "entity_id",
+                            "entity_name",
                         ],
                     }),
                     _.clone(logicSection),
@@ -303,7 +326,7 @@ define([
                 // check each mugConfig to see if this is path matches
                 let matched = Object.entries(mugConfigs).some(([mugName, mugConfig]) => {
                     // construct regex to match any of the child nodes
-                    let children = mugConfig.childNodes.join('|'),
+                    let children = mugConfig.childNodes.map(child => child.id).join('|'),
                         regex = new RegExp(`/${mugConfig.rootName}/(${children})`),
                         matchRet = path.match(regex);
                     if (matchRet && matchRet.length > 0) {

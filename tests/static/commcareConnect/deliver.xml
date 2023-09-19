@@ -8,13 +8,18 @@
 					<name />
 					<unit_one vellum:role="ConnectDeliverUnit">
 						<deliver xmlns="http://commcareconnect.com/data/v1/learn" id="unit_one">
-							<name>unit 1</name>
+                            <name>unit 1</name>
+                            <entity_id/>
+                            <entity_name/>
 						</deliver>
 					</unit_one>
 				</data>
 			</instance>
+			<instance src="jr://instance/session" id="commcaresession" />
 			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
 			<bind vellum:nodeset="#form/unit_one" nodeset="/data/unit_one" relevant="x = 1" />
+			<bind nodeset="/data/unit_one/deliver/entity_id" calculate="instance('commcaresession')/session/data/value" />
+			<bind nodeset="/data/unit_one/deliver/entity_name" vellum:calculate="#form/name" calculate="/data/name" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">
