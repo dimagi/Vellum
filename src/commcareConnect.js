@@ -323,7 +323,7 @@ define([
         parseBindElement: function (form, el, path) {
             let mug = form.getMugByPath(path);
             if (!mug) {
-                // check each mugConfig to see if this is path matches
+                // check each mugConfig to see if this path matches
                 let matched = Object.entries(mugConfigs).some(([mugName, mugConfig]) => {
                     // construct regex to match any of the child nodes
                     let children = mugConfig.childNodes.map(child => child.id).join('|'),
