@@ -296,8 +296,8 @@ define([
             if (inStr.length <= maxLength) {
                 return inStr;
             }
-            outStr = "";
-            bufferStr = inStr;
+            let outStr = "",
+                bufferStr = inStr;
             while (bufferStr.length > maxLength) {
                 outStr += bufferStr.slice(0, maxLength) + "\n";
                 bufferStr = bufferStr.slice(maxLength, bufferStr.length);
@@ -307,9 +307,9 @@ define([
         }
 
         function insertWordBreaks(inStr, maxLength) {
-            let words = inStr.split(" ");
-            let outStr = "";
-            for (word of words) {
+            let words = inStr.split(" "),
+                outStr = "";
+            for (let word of words) {
                 outStr += wordWrap(word, maxLength);
                 outStr += " ";
             }
