@@ -13,6 +13,7 @@
         </data>
       </instance>
       <bind vellum:nodeset="#form/score" nodeset="/data/score" type="xsd:int" required="true()" />
+      <bind vellum:nodeset="#form/test_assessment" nodeset="/data/test_assessment" relevant="x = 1" />
       <bind nodeset="/data/test_assessment/assessment/user_score" vellum:calculate="#form/score"  calculate="/data/score" />
       <itext>
         <translation lang="en" default="">
