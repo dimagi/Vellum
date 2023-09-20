@@ -313,7 +313,7 @@ define([
                 outStr += wordWrap(word, maxLength);
                 outStr += " ";
             }
-            return outStr;
+            return outStr.trim();
         }
 
         function node(source, parentPath, info, index) {
