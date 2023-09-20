@@ -909,6 +909,29 @@ define([
                     });
                 });
 
+                it("should split long text in case property descriptions", function (done) {
+                    util.loadXML();
+                    var mug = util.addQuestion("Text", "text");
+                    mug.p.calculateAttr = "#case/long";
+                    let expected = "Property with a_very_long_word_in_the_description_that_ex\n\nceeds_43_chars";
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.equal($popover.find('p:first').text(), expected);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        bubble.mouseenter();
+                    });
+                });
+
                 it("should destroy popover on destroy widget", function (done) {
                     util.loadXML(BURPEE_XML);
                     util.clickQuestion("total_num_burpees");

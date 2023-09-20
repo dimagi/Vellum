@@ -80,6 +80,7 @@ define(["underscore"], function (_) {
                 key: "@case_type",
                 structure: {
                     dob: {description: "Date of Birth"},
+                    long: {description: "Property with a_very_long_word_in_the_description_that_exceeds_43_chars"},
                     f_0762: {},
                     f_1065: {},
                     f_1089: {},
