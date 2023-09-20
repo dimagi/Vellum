@@ -292,6 +292,30 @@ define([
      * hashtag and/or xpath expression.
      */
     builders.dataNodes = function (that) {
+        function wordWrap(inStr, maxLength) {
+            if (inStr.length <= maxLength) {
+                return inStr;
+            }
+            let outStr = "",
+                bufferStr = inStr;
+            while (bufferStr.length > maxLength) {
+                outStr += bufferStr.slice(0, maxLength) + "\n";
+                bufferStr = bufferStr.slice(maxLength, bufferStr.length);
+            }
+            outStr += "\n" + bufferStr;
+            return outStr;
+        }
+
+        function insertWordBreaks(inStr, maxLength) {
+            let words = inStr.split(" "),
+                outStr = "";
+            for (let word of words) {
+                outStr += wordWrap(word, maxLength);
+                outStr += " ";
+            }
+            return outStr.trim();
+        }
+
         function node(source, parentPath, info, index) {
             return function (item, id) {
                 if (_.contains(that.invalidCaseProperties, id)) {
@@ -304,7 +328,7 @@ define([
 
                 return {
                     name: name,
-                    description: tree.description,
+                    description: insertWordBreaks(tree.description, 43),
                     hashtag: info.hashtag && !index ? info.hashtag + '/' + name : null,
                     parentPath: parentPath,
                     xpath: path,
