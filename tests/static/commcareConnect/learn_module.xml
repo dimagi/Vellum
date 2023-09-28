@@ -16,7 +16,7 @@
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
-			<bind vellum:nodeset="#form/module_1" nodeset="/data/module_1" />
+			<bind vellum:nodeset="#form/module_1" nodeset="/data/module_1" relevant="x = 2" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">
