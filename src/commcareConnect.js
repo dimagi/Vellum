@@ -62,6 +62,20 @@ define([
                 // allows the parser to know which mug to associate with this node
                 "vellum:role": mug.__className,
             }),
+            getBindList: mug => {
+                // return list of bind elements to add to the form
+                let mugConfig = mugConfigs[mug.__className];
+                let binds = [{
+                    nodeset: mug.hashtagPath,
+                    relevant: mug.p.relevantAttr,
+                }];
+                return binds.concat(mugConfig.childNodes.filter(child => !child.writeToData).map(child => {
+                    return {
+                        nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${child.id}`,
+                        calculate: mug.p[child.id],
+                    };
+                }));
+            },
             parseDataNode: (mug, node) => {
                 let children = node.children(),
                     mugConfig = mugConfigs[mug.__className];
@@ -122,7 +136,6 @@ define([
                         mug.p.description = "";
                         mug.p.time_estimate = "";
                     },
-                    getBindList: () => [],
                     spec: util.extend(baseSpec, {
                         nodeID: {
                             lstring: gettext('Module ID'),
@@ -149,17 +162,29 @@ define([
                                 return val && val.match(/^\d+$/) ? "pass" : gettext("Must be an integer");
                             },
                             help: gettext('Estimated time to complete the module in hours.'),
+                        },
+                        relevantAttr: {
+                            visibility: 'visible',
+                            presence: 'optional',
+                            widget: widgets.xPath,
+                            xpathType: "bool",
+                            serialize: mugs.serializeXPath,
+                            deserialize: mugs.deserializeXPath,
+                            lstring: gettext('Display Condition'),
                         }
                     })
                 }),
-                sections: [_.extend({}, baseSection, {
-                    properties: [
-                        "nodeID",
-                        "name",
-                        "description",
-                        "time_estimate",
-                    ],
-                })],
+                sections: [
+                    _.extend({}, baseSection, {
+                        properties: [
+                            "nodeID",
+                            "name",
+                            "description",
+                            "time_estimate",
+                        ],
+                    }),
+                    _.clone(logicSection),
+                ],
             },
             ConnectAssessment: {
                 rootName: "assessment",
@@ -171,20 +196,6 @@ define([
                     icon: 'fa fa-leanpub',
                     init: mug => {
                         mug.p.user_score = "";
-                    },
-                    getBindList: mug => {
-                        // return list of bind elements to add to the form
-                        let mugConfig = mugConfigs[mug.__className];
-                        let binds = [{
-                            nodeset: mug.hashtagPath,
-                            relevant: mug.p.relevantAttr,
-                        }];
-                        return binds.concat(mugConfig.childNodes.map(child => {
-                            return {
-                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${child.id}`,
-                                calculate: mug.p[child.id],
-                            };
-                        }));
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {
@@ -234,20 +245,6 @@ define([
                         mug.p.name = "";
                         mug.p.entity_id = "";
                         mug.p.entity_name = "";
-                    },
-                    getBindList: mug => {
-                        // return list of bind elements to add to the form
-                        let mugConfig = mugConfigs[mug.__className];
-                        let binds = [{
-                            nodeset: mug.hashtagPath,
-                            relevant: mug.p.relevantAttr,
-                        }];
-                        return binds.concat(mugConfig.childNodes.filter(child => !child.writeToData).map(child => {
-                            return {
-                                nodeset: `${mug.absolutePath}/${mugConfig.rootName}/${child.id}`,
-                                calculate: mug.p[child.id],
-                            };
-                        }));
                     },
                     spec: util.extend(baseSpec, {
                         nodeID: {

@@ -36,6 +36,7 @@ define([
                 assert.equal(module.p.name, "module 1");
                 assert.equal(module.p.description, "Module 1 is fun\nLearning is fun");
                 assert.equal(module.p.time_estimate, "2");
+                assert.equal(module.p.relevantAttr, "x = 2");
                 util.assertXmlEqual(call("createXML"), LEARN_MODULE_XML);
             });
 
