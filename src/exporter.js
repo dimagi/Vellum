@@ -1,7 +1,9 @@
 define([
-    'vellum/tsv'
+    'vellum/tsv',
+    'vellum/richText'
 ], function (
-    tsv
+    tsv,
+    richText
 ) {
     // todo: abstract out IText stuff into part of the plugin interface
     var generateExportTSV = function (form) {
@@ -90,7 +92,7 @@ define([
 
             row["Hint Text"] = defaultOrNothing(mug.p.hintItext, defaultLanguage, 'default');
             row["Help Text"] = defaultOrNothing(mug.p.helpItext, defaultLanguage, 'default');
-            row.Comment = mug.p.comment;
+            row.Comment = richText.sanitizeInput(mug.p.comment);
 
             // make sure there aren't any null values
             for (var prop in row) {
