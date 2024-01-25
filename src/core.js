@@ -603,7 +603,7 @@ define([
             },
             {
                 name: gettext("Export Form Contents"),
-                icon: "fa fa-file-excel-o",
+                icon: "fa-regular fa-file-excel",
                 action: function (done) {
                     _this.showExportModal(done);
                 }
