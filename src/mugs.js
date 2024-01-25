@@ -1503,7 +1503,7 @@ define([
     var Time = util.extend(defaultOptions, {
         typeName: gettext('Time'),
         dataType: 'xsd:time',
-        icon: 'fa fa-clock-o',
+        icon: 'fa-regular fa-clock',
         init: function (mug, form) {
         }
     });
