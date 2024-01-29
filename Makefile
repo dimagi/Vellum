@@ -15,7 +15,7 @@ deps:
 
 _rjs:
 	rm -rf _build
-	PATH=$$(npm bin):$$PATH r.js -o build.js
+	node_modules/requirejs/bin/r.js -o build.js
 # r.js removeCombined option doesn't handle plugin resources
 	rm -r _build/src/exclude.js _build/src/templates _build/src/less-style
 	find _build/ -maxdepth 1 -mindepth 1 -not -name src -not -name lib -not -name README.md -not -name node_modules | xargs rm -rf
