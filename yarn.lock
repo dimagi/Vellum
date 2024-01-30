@@ -29,7 +29,6 @@ Caret.js@INTELOGIE/Caret.js#0.3.1:
 
 MediaUploader@dimagi/MediaUploader#master:
   version "0.0.0"
-  uid "1038b486ecfca4251bb5c85bc427a92df35cf8d7"
   resolved "https://codeload.github.com/dimagi/MediaUploader/tar.gz/1038b486ecfca4251bb5c85bc427a92df35cf8d7"
 
 XMLWriter@dimagi/XMLWriter#master:
@@ -1564,9 +1563,9 @@ kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-langcodes@dimagi/langcodes:
+langcodes@dimagi/langcodes#master:
   version "0.0.0"
-  resolved "https://codeload.github.com/dimagi/langcodes/tar.gz/a8797d2898aa56a148271136d4219c740018cc9e"
+  resolved "https://codeload.github.com/dimagi/langcodes/tar.gz/c970bb75f219a743e8e7837be2c0830477f9f677"
 
 less@2:
   version "2.7.3"
@@ -2824,6 +2823,7 @@ xpath@dimagi/js-xpath#v0.0.7:
   resolved "https://codeload.github.com/dimagi/js-xpath/tar.gz/cc482ce3cd8635ce311d9b4c82dba24998492a46"
   dependencies:
     biginteger "^1.0.3"
+    yarn "1.22.10"
 
 "xrayquire@npm:xrayquire-for-npm#^0.1.1":
   version "0.1.1"
