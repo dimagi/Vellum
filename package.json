@@ -27,7 +27,7 @@
         "jsdiff": "components/jsdiff#master",
         "jstree": "3.3.11",
         "jstree-actions": "0.2.1",
-        "langcodes": "dimagi/langcodes",
+        "langcodes": "dimagi/langcodes#master",
         "markdown-it": "12.3.2",
         "require-css": "0.1.10",
         "requirejs": "2.3.6",
