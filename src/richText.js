@@ -524,7 +524,7 @@ define([
                     };
                 } else if (form.hasValidHashtagPrefix(form.normalizeHashtag(xpath))) {
                     return {
-                        classes: ['label-datanode-external-unknown', 'fa fa-exclamation-triangle']
+                        classes: ['label-datanode-external-unknown', 'fa-solid fa-triangle-exclamation']
                     };
                 }
             }

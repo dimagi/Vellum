@@ -109,7 +109,7 @@ define([
     }
 
     function externalIcon () { return icon('fcc-fd-case-property'); }
-    function externalUnknownIcon () { return icon('fa-exclamation-triangle'); }
+    function externalUnknownIcon () { return icon('fa-solid fa-triangle-exclamation'); }
 
     function makeBubble(xpath, dispValue, icon, internal) {
         var span = $('<span>').addClass('label label-datanode').attr({
@@ -187,7 +187,7 @@ define([
                         xmlValue: "format-date(date(#form/date), '%d/%n/%y')",
                         valueInBubble: '#form/date',
                         bubbleDispValue: 'date',
-                        icon: icon('fa-calendar-days'),
+                        icon: icon('fa-solid fa-calendar-days'),
                         internalRef: true,
                         extraAttrs: {
                             'data-date-format': '%d/%n/%y',
