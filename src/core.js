@@ -340,6 +340,19 @@ define([
      *              - questions: [mugType, ...]
      */
     fn.getQuestionGroups = function () {
+        let mediaGroup = {
+            group: ["Image", gettext('Multimedia Capture')],
+            questions: [
+                "Image",
+                "Audio",
+                "Video",
+                "Signature"
+            ]
+        };
+        if (this.opts().features['case_micro_image']) {
+            mediaGroup.questions.push("MicroImage");
+        }
+
         return [
             {
                 group: ["Text"],
