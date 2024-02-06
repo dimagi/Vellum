@@ -617,7 +617,7 @@ define([
             },
             {
                 name: gettext("Form Properties"),
-                icon: "fa fa-list-alt",
+                icon: "fa-regular fa-rectangle-list",
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
                 }
