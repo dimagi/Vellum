@@ -583,7 +583,7 @@ define([
             _this.data.windowManager.fullscreen = true;
             $fullScreenMenuItem.html(html.replace(new RegExp(RegExp.escape(expand)), shrink));
         }
-        $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
+        $fullScreenMenuItem.find("i").toggleClass("fa-down-left-and-up-right-to-center").toggleClass("fa-up-right-and-down-left-from-center");
         _this.adjustToWindow();
         if (_this.opts().windowManager.toggleFullScreenCallback) {
             _this.opts().windowManager.toggleFullScreenCallback(_this.data.windowManager.fullscreen);
@@ -595,7 +595,7 @@ define([
         return [
             {
                 name: gettext('Expand Editor'),
-                icon: "fa fa-expand",
+                icon: "fa-solid fa-up-right-and-down-left-from-center",
                 hotkey: "Ctrl+Alt+F",
                 action: function (done) {
                     _this.toggleFullScreen();
