@@ -193,7 +193,7 @@ define([
                 ],
                 mugOptions: util.extend(baseMugOptions, {
                     typeName: 'Assessment Score',
-                    icon: 'fa fa-leanpub',
+                    icon: 'fa-brands fa-leanpub',
                     init: mug => {
                         mug.p.user_score = "";
                     },
