@@ -103,7 +103,7 @@ define([
 
     function icon(iconClass) { 
         if (iconClass.startsWith("fa-")) {
-            return $('<i>').addClass('fa ' + iconClass).html('&nbsp;');
+            return $('<i>').addClass(iconClass).html('&nbsp;');
         }
         return $('<i>').addClass('fcc ' + iconClass).html('&nbsp;');
     }
