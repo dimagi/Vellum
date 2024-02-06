@@ -297,7 +297,7 @@ define([
                 }
                 return attrs;
             },
-            icon: 'fa fa-exchange',
+            icon: 'fa-solid fa-right-left',
             init: function (mug, form) {
                 mug.p.src = "";
                 mug.p.dest = "";
