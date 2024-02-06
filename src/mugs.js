@@ -1487,7 +1487,7 @@ define([
     var Date = util.extend(defaultOptions, {
         typeName: gettext('Date'),
         dataType: 'xsd:date',
-        icon: 'fa fa-calendar',
+        icon: 'fa-solid fa-calendar-days',
         init: function (mug, form) {
         }
     });

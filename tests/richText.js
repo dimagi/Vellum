@@ -187,7 +187,7 @@ define([
                         xmlValue: "format-date(date(#form/date), '%d/%n/%y')",
                         valueInBubble: '#form/date',
                         bubbleDispValue: 'date',
-                        icon: icon('fa-calendar'),
+                        icon: icon('fa-calendar-days'),
                         internalRef: true,
                         extraAttrs: {
                             'data-date-format': '%d/%n/%y',
