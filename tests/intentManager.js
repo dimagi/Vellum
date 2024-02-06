@@ -25,7 +25,7 @@ define([
         call = util.call,
         templates =  [
             {
-                icon: "fa fa-map-marker",
+                icon: "fa-solid fa-location-dot",
                 name: "Area Mapper",
                 id: "com.richard.lu.areamapper",
                 extra: {ext: "value"},

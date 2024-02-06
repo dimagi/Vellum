@@ -1471,7 +1471,7 @@ define([
     var Geopoint = util.extend(defaultOptions, {
         typeName: gettext('GPS'),
         dataType: 'geopoint',
-        icon: 'fa fa-map-marker',
+        icon: 'fa-solid fa-location-dot',
         init: function (mug, form) {
         }
     });
