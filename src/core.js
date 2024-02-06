@@ -349,7 +349,7 @@ define([
                 "Signature"
             ]
         };
-        if (this.opts().features['case_micro_image']) {
+        if (this.opts().features.case_micro_image) {
             mediaGroup.questions.push("MicroImage");
         }
 

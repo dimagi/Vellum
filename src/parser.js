@@ -443,7 +443,7 @@ define([
                                 return makeMugAdaptor('PhoneNumber')(mug, form);
                             }
                             return inputAdaptors[dataType](mug, form);
-                        } else if (appearance === 'micro-image' && form.vellum.opts().features['case_micro_image']) {
+                        } else if (appearance === 'micro-image' && form.vellum.opts().features.case_micro_image) {
                             return makeMugAdaptor('MicroImage')(mug, form);
                         }
                     }
