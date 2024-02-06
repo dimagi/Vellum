@@ -50,7 +50,7 @@ define([
     jrUtil
 ) {
     var ICONS = {
-        image: 'fa fa-photo',
+        image: 'fa-regular fa-image',
         audio: 'fa fa-volume-up',
         video: 'fa fa-video-camera',
         'video-inline': 'fa fa-play',
