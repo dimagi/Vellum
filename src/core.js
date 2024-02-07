@@ -386,15 +386,7 @@ define([
                     "FieldList"
                 ]
             },
-            {
-                group: ["Image", gettext('Multimedia Capture')],
-                questions: [
-                    "Image",
-                    "Audio",
-                    "Video",
-                    "Signature"
-                ]
-            },
+            mediaGroup,
             {
                 group: ["Trigger"],
                 questions: ["Trigger"],
