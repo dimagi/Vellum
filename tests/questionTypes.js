@@ -172,6 +172,9 @@ define([
                 attrs: {
                     repeat_count: 2
                 }
+            }, {
+                type: 'MicroImage',
+                nodeId: 'question35'
             }
         ];
 
@@ -720,6 +723,16 @@ define([
         it("should not write the type", function () {
             util.loadXML(SELECT1_HELP_WITH_TYPE_XML);
             util.assertXmlEqual(util.call('createXML'), SELECT1_HELP_XML);
+        });
+    });
+
+    describe("Micro-Image question", function () {
+        it("should have correct options set", function () {
+            util.loadXML("");
+            var microImage = util.addQuestion("MicroImage", "microimage");
+            assert.strictEqual(microImage.options.mediaType, 'image/*');
+            assert.strictEqual(microImage.options.tagName, 'input');
+            assert.strictEqual(microImage.p.appearance, 'micro-image');
         });
     });
 });

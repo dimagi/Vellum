@@ -36,6 +36,7 @@
 					</question22>
 					<question20 />
 					<question32 />
+					<question35 />
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb"></instance>
@@ -67,6 +68,7 @@
 			<bind nodeset="/data/question22/question23/question7" type="intent" />
 			<bind nodeset="/data/question20" />
 			<bind nodeset="/data/question32" calculate="1 + 2" />
+			<bind nodeset="/data/question35" />
 			<!-- setvalues -->
 			<setvalue event="xforms-ready" ref="/data/question1" value="2" />
 			<itext>
@@ -168,8 +170,8 @@
 			<help ref="jr:itext('question1-help')" />
 			<alert ref="jr:itext('question1-constraintMsg')" />
 		</input>
-		<trigger ref="/data/question2" appearance="minimal"/>
-		<trigger ref="/data/question30"/>
+		<trigger ref="/data/question2" appearance="minimal" />
+		<trigger ref="/data/question30" />
 		<select1 ref="/data/question3">
 			<item>
 				<label ref="jr:itext('question3-choice1-label')" />
@@ -183,13 +185,13 @@
 		<!-- arbitrary control attributes -->
 		<select ref="/data/question6" foo="baz">
 		</select>
-		<input ref="/data/question13"/>
-		<input ref="/data/question14" appearance="numeric"/>
-		<input ref="/data/question15"/>
-		<input ref="/data/question16"/>
-		<input ref="/data/question17"/>
-		<input ref="/data/question18"/>
-		<input ref="/data/question19"/>
+		<input ref="/data/question13" />
+		<input ref="/data/question14" appearance="numeric" />
+		<input ref="/data/question15" />
+		<input ref="/data/question16" />
+		<input ref="/data/question17" />
+		<input ref="/data/question18" />
+		<input ref="/data/question19" />
 		<group ref="/data/question21">
 			<group>
 				<repeat jr:noAddRemove="true()"  nodeset="/data/question21/question31" jr:count="2" />
