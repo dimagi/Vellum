@@ -162,6 +162,11 @@ define([
                 path: 'question22/question23/',
                 nodeId: 'question7'
             }, {
+                //clickBeforeAdd: "question32",
+                type: 'MicroImage',
+                path: 'question22/question23/',
+                nodeId: 'question35',
+            }, {
                 clickBeforeAdd: "question19", // insert before question22
                 type: 'Group',
                 nodeId: 'question21'
@@ -172,9 +177,6 @@ define([
                 attrs: {
                     repeat_count: 2
                 }
-            }, {
-                type: 'MicroImage',
-                nodeId: 'question35'
             }
         ];
 

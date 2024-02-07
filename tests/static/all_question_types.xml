@@ -32,11 +32,11 @@
 							<question28 />
 							<question29 />
 							<question7 />
+							<question35 />
 						</question23>
 					</question22>
 					<question20 />
 					<question32 />
-					<question35 />
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb"></instance>
@@ -66,9 +66,9 @@
 			<bind nodeset="/data/question22/question23/question28" type="xsd:string" />
 			<bind nodeset="/data/question22/question23/question29" type="binary" />
 			<bind nodeset="/data/question22/question23/question7" type="intent" />
+			<bind nodeset="/data/question22/question23/question35" type="binary" />
 			<bind nodeset="/data/question20" />
 			<bind nodeset="/data/question32" calculate="1 + 2" />
-			<bind nodeset="/data/question35" />
 			<!-- setvalues -->
 			<setvalue event="xforms-ready" ref="/data/question1" value="2" />
 			<itext>
@@ -204,13 +204,14 @@
 					<group>
 						<repeat nodeset="/data/question22/question23/question41" />
 					</group>
-					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px"/>
-					<upload ref="/data/question22/question23/question25" mediatype="audio/*"/>
-					<upload ref="/data/question22/question23/question26" mediatype="video/*"/>
-					<input ref="/data/question22/question23/question27"/>
-					<secret ref="/data/question22/question23/question28"/>
-					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature"/>
-					<input ref="/data/question22/question23/question7" appearance="intent:question7"/>
+					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px" />
+					<upload ref="/data/question22/question23/question25" mediatype="audio/*" />
+					<upload ref="/data/question22/question23/question26" mediatype="video/*" />
+					<input ref="/data/question22/question23/question27" />
+					<secret ref="/data/question22/question23/question28" />
+					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature" />
+					<input ref="/data/question22/question23/question7" appearance="intent:question7" />
+					<input ref="/data/question22/question23/question35" mediatype="image/*" appearance="micro-image" />
 				</group>
 			</repeat>
 		</group>
