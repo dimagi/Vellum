@@ -188,6 +188,7 @@ define([
                             done();
                         }
                     },
+                    features: { case_micro_image: true }
                 });
             });
 
