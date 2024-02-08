@@ -162,7 +162,6 @@ define([
                 path: 'question22/question23/',
                 nodeId: 'question7'
             }, {
-                //clickBeforeAdd: "question32",
                 type: 'MicroImage',
                 path: 'question22/question23/',
                 nodeId: 'question35',
