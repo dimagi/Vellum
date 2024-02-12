@@ -32,6 +32,7 @@
 							<question28 />
 							<question29 />
 							<question7 />
+							<question35 />
 						</question23>
 					</question22>
 					<question20 />
@@ -65,6 +66,7 @@
 			<bind nodeset="/data/question22/question23/question28" type="xsd:string" />
 			<bind nodeset="/data/question22/question23/question29" type="binary" />
 			<bind nodeset="/data/question22/question23/question7" type="intent" />
+			<bind nodeset="/data/question22/question23/question35" type="binary" />
 			<bind nodeset="/data/question20" />
 			<bind nodeset="/data/question32" calculate="1 + 2" />
 			<!-- setvalues -->
@@ -168,8 +170,8 @@
 			<help ref="jr:itext('question1-help')" />
 			<alert ref="jr:itext('question1-constraintMsg')" />
 		</input>
-		<trigger ref="/data/question2" appearance="minimal"/>
-		<trigger ref="/data/question30"/>
+		<trigger ref="/data/question2" appearance="minimal" />
+		<trigger ref="/data/question30" />
 		<select1 ref="/data/question3">
 			<item>
 				<label ref="jr:itext('question3-choice1-label')" />
@@ -183,13 +185,13 @@
 		<!-- arbitrary control attributes -->
 		<select ref="/data/question6" foo="baz">
 		</select>
-		<input ref="/data/question13"/>
-		<input ref="/data/question14" appearance="numeric"/>
-		<input ref="/data/question15"/>
-		<input ref="/data/question16"/>
-		<input ref="/data/question17"/>
-		<input ref="/data/question18"/>
-		<input ref="/data/question19"/>
+		<input ref="/data/question13" />
+		<input ref="/data/question14" appearance="numeric" />
+		<input ref="/data/question15" />
+		<input ref="/data/question16" />
+		<input ref="/data/question17" />
+		<input ref="/data/question18" />
+		<input ref="/data/question19" />
 		<group ref="/data/question21">
 			<group>
 				<repeat jr:noAddRemove="true()"  nodeset="/data/question21/question31" jr:count="2" />
@@ -202,13 +204,14 @@
 					<group>
 						<repeat nodeset="/data/question22/question23/question41" />
 					</group>
-					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px"/>
-					<upload ref="/data/question22/question23/question25" mediatype="audio/*"/>
-					<upload ref="/data/question22/question23/question26" mediatype="video/*"/>
-					<input ref="/data/question22/question23/question27"/>
-					<secret ref="/data/question22/question23/question28"/>
-					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature"/>
-					<input ref="/data/question22/question23/question7" appearance="intent:question7"/>
+					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px" />
+					<upload ref="/data/question22/question23/question25" mediatype="audio/*" />
+					<upload ref="/data/question22/question23/question26" mediatype="video/*" />
+					<input ref="/data/question22/question23/question27" />
+					<secret ref="/data/question22/question23/question28" />
+					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature" />
+					<input ref="/data/question22/question23/question7" appearance="intent:question7" />
+					<input ref="/data/question22/question23/question35" mediatype="image/*" appearance="micro-image" />
 				</group>
 			</repeat>
 		</group>

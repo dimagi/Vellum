@@ -1445,6 +1445,18 @@ define([
         }
     });
 
+    var MicroImage = util.extend(Audio, {
+        typeName: gettext('Micro-Image'),
+        isTypeChangeable: false,
+        icon: 'fa fa-camera',
+        tagName: 'input',
+        mediaType: "image/*", /* */
+        init: function (mug, form) {
+            Audio.init(mug, form);
+            mug.p.appearance = "micro-image";
+        }
+    });
+
     var Video = util.extend(Audio, {
         typeName: gettext('Video Capture'),
         icon: 'fa fa-video-camera',
@@ -1879,6 +1891,7 @@ define([
                 "Geopoint": Geopoint,
                 "Group": Group,
                 "Image": Image,
+                "MicroImage": MicroImage,
                 "Int": Int,
                 "Long": Long,
                 "MSelect": MSelect,

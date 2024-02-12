@@ -42,7 +42,10 @@ define([
                         done();
                     }
                 },
-                features: {rich_text: false},
+                features: {
+                    rich_text: false,
+                    case_micro_image: true
+                },
             });
         });
 
