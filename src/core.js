@@ -588,7 +588,7 @@ define([
             _this.data.windowManager.fullscreen = true;
             $fullScreenMenuItem.html(html.replace(new RegExp(RegExp.escape(expand)), shrink));
         }
-        $fullScreenMenuItem.find("i").toggleClass("fa-compress").toggleClass("fa-expand");
+        $fullScreenMenuItem.find("i").toggleClass("fa-down-left-and-up-right-to-center").toggleClass("fa-up-right-and-down-left-from-center");
         _this.adjustToWindow();
         if (_this.opts().windowManager.toggleFullScreenCallback) {
             _this.opts().windowManager.toggleFullScreenCallback(_this.data.windowManager.fullscreen);
@@ -600,7 +600,7 @@ define([
         return [
             {
                 name: gettext('Expand Editor'),
-                icon: "fa fa-expand",
+                icon: "fa-solid fa-up-right-and-down-left-from-center",
                 hotkey: "Ctrl+Alt+F",
                 action: function (done) {
                     _this.toggleFullScreen();
@@ -608,7 +608,7 @@ define([
             },
             {
                 name: gettext("Export Form Contents"),
-                icon: "fa fa-file-excel-o",
+                icon: "fa-regular fa-file-excel",
                 action: function (done) {
                     _this.showExportModal(done);
                 }
@@ -622,7 +622,7 @@ define([
             },
             {
                 name: gettext("Form Properties"),
-                icon: "fa fa-list-alt",
+                icon: "fa-regular fa-rectangle-list",
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
                 }

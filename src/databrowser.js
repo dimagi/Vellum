@@ -199,8 +199,8 @@ define([
         if (pane.height() > headHeight) {
             pane.css("height", headHeight + "px");
             pane.find('.fd-head-external-sources .fd-head-max-indicator i')
-                .removeClass('fa-arrow-circle-o-down')
-                .addClass('fa-arrow-circle-o-up');
+                .removeClass('fa-circle-down')
+                .addClass('fa-circle-up');
             $(window).resize();
         } else {
             var tree = vellum.$f.find(".fd-tree"),
@@ -208,8 +208,8 @@ define([
                 height = panelHeight || tree.height() * DATABROWSER_HEIGHT;
             pane.css("height", height + "px");
             pane.find('.fd-head-external-sources .fd-head-max-indicator i')
-                .removeClass('fa-arrow-circle-o-up')
-                .addClass('fa-arrow-circle-o-down');
+                .removeClass('fa-circle-up')
+                .addClass('fa-circle-down');
             $(window).resize();
             fn.initDataBrowser(vellum);
         }

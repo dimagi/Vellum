@@ -1483,7 +1483,7 @@ define([
     var Geopoint = util.extend(defaultOptions, {
         typeName: gettext('GPS'),
         dataType: 'geopoint',
-        icon: 'fa fa-map-marker',
+        icon: 'fa-solid fa-location-dot',
         init: function (mug, form) {
         }
     });
@@ -1499,7 +1499,7 @@ define([
     var Date = util.extend(defaultOptions, {
         typeName: gettext('Date'),
         dataType: 'xsd:date',
-        icon: 'fa fa-calendar',
+        icon: 'fa-solid fa-calendar-days',
         init: function (mug, form) {
         }
     });
@@ -1515,7 +1515,7 @@ define([
     var Time = util.extend(defaultOptions, {
         typeName: gettext('Time'),
         dataType: 'xsd:time',
-        icon: 'fa fa-clock-o',
+        icon: 'fa-regular fa-clock',
         init: function (mug, form) {
         }
     });
