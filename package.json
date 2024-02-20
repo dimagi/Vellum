@@ -51,8 +51,7 @@
         "less": "2",
         "minimist": "^1.2.8",
         "mocha": "10.2.0",
-        "mocha-headless-chrome": "4.0.0",
-        "yarn": "^1.22.19"
+        "mocha-headless-chrome": "4.0.0"
     },
     "main": "src/main.js",
     "scripts": {
