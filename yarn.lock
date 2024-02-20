@@ -2818,12 +2818,11 @@ ws@8.5.0, ws@^3.2.0, ws@^5.2.3:
   dependencies:
     async-limiter "~1.0.0"
 
-xpath@dimagi/js-xpath#v0.0.7:
-  version "0.0.7"
-  resolved "https://codeload.github.com/dimagi/js-xpath/tar.gz/cc482ce3cd8635ce311d9b4c82dba24998492a46"
+xpath@dimagi/js-xpath#v0.0.8:
+  version "0.0.8"
+  resolved "https://codeload.github.com/dimagi/js-xpath/tar.gz/54f9c68235a84de3cbd1360d840c51d013ddb110"
   dependencies:
     biginteger "^1.0.3"
-    yarn "1.22.10"
 
 "xrayquire@npm:xrayquire-for-npm#^0.1.1":
   version "0.1.1"
@@ -2872,11 +2871,6 @@ yargs@16.2.0:
     string-width "^4.2.0"
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
-
-yarn@1.22.10:
-  version "1.22.10"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.22.10.tgz#c99daa06257c80f8fa2c3f1490724e394c26b18c"
-  integrity sha512-IanQGI9RRPAN87VGTF7zs2uxkSyQSrSPsju0COgbsKQOOXr5LtcVPeyXWgwVa0ywG3d8dg6kSYKGBuYK021qeA==
 
 yauzl@^2.10.0:
   version "2.10.0"
