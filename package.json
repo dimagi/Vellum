@@ -35,7 +35,7 @@
         "requirejs-text": "2.0.16",
         "requirejs-undertemplate": "dimagi/requirejs-tpl#v0.0.5",
         "underscore": "1.13.1",
-        "xpath": "dimagi/js-xpath#v0.0.7",
+        "xpath": "dimagi/js-xpath#v0.0.8",
         "xrayquire": "npm:xrayquire-for-npm#^0.1.1"
     },
     "devDependencies": {
@@ -51,8 +51,7 @@
         "less": "2",
         "minimist": "^1.2.8",
         "mocha": "10.2.0",
-        "mocha-headless-chrome": "4.0.0",
-        "yarn": "^1.22.19"
+        "mocha-headless-chrome": "4.0.0"
     },
     "main": "src/main.js",
     "scripts": {

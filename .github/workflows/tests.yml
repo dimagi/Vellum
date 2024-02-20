@@ -14,9 +14,7 @@ jobs:
         node-version: 14
     - name: Install dependencies
       run: |
-        yarn_version=$(grep -Eo '^yarn@[^:]+' ./yarn.lock)
-        echo "lock file requires: $yarn_version"
-        npm install "$yarn_version"
+        npm install "yarn@^1"
         yarn install
     - name: Run tests
       run: |
