@@ -7,6 +7,7 @@ define([
     'vellum/parser',
     'vellum/xml',
     'text!static/parser/accent-char-in-path.xml',
+    'text!static/parser/body-group.xml',
     'text!static/parser/other_item.xml',
     'text!static/parser/label-without-itext.xml',
     'text!static/parser/missing-bind.xml',
@@ -26,6 +27,7 @@ define([
     parser,
     xml,
     ACCENT_CHAR_IN_PATH_XML,
+    BODY_GROUP,
     OTHER_ITEM_XML,
     LABEL_WITHOUT_ITEXT_XML,
     MISSING_BIND_XML,
@@ -167,6 +169,14 @@ define([
             assert.equal(q3.p.requiredCondition, "#form/question2 = 'hello'");
             assert.equal(q3.messages.get("requiredAttr").length, 1, "requiredAttr messages");
             assert.equal(q3.messages.get("requiredCondition").length, 1, "requiredCondition messages");
+        });
+
+        it("should not create read-only mug for child of group named 'body'", function () {
+            util.loadXML(BODY_GROUP);
+            util.assertJSTreeState(
+                "body",
+                "  text"
+            );
         });
 
         describe("override", function() {

@@ -43,7 +43,7 @@ define([
 
         var xml = util.parseXML(xmlString),
             docNode = xml.find('h\\:xdoc'),
-            head = xml.find('h\\:head, head'),
+            head = xml.find(':root > h\\:head, :root > head'),
             title = head.children('h\\:title, title'),
             binds = head.find('bind'),
             instances = _getInstances(xml),
@@ -95,7 +95,7 @@ define([
 
         parseSetValues(form, setValues);
 
-        var controls = xml.find('h\\:body, body').children();
+        var controls = xml.find(':root > h\\:body, :root > body').children();
         parseControlTree(form, controls);
 
         var i;
