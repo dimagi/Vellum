@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/8730E8C4-2374-47E4-B293-7BA3936D0A4A" uiVersion="1" version="1" name="Untitled Form">
+					<body>
+						<text />
+					</body>
+				</data>
+			</instance>
+			<bind vellum:nodeset="#form/body" nodeset="/data/body" />
+			<bind vellum:nodeset="#form/body/text" nodeset="/data/body/text" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="body-label">
+						<value>body</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<group vellum:ref="#form/body" ref="/data/body">
+			<label ref="jr:itext('body-label')" />
+			<input vellum:ref="#form/body/text" ref="/data/body/text">
+				<label ref="jr:itext('body/text-label')" />
+			</input>
+		</group>
+	</h:body>
+</h:html>
