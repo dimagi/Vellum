@@ -1,3 +1,5 @@
+'use strict';
+
 /*
  * A Vellum plugin to support JavaRosa extensions to the XForm spec,
  * particularly IText.
@@ -333,6 +335,10 @@ define([
                 return Itext.createItem(id, auto);
             }
 
+            function mugPresence($el, propertyName) {
+                return $el.length && mug.getPresence(propertyName) !== 'notallowed';
+            }
+
             function parseItextRef($el, property) {
                 var ref = $el.xmlAttr('ref');
                 return getItextItem(ref ? getITextID(ref) : "", property);
@@ -341,7 +347,9 @@ define([
             var labelEl = controlElement.children('label'),
                 hintEl = controlElement.children('hint'),
                 helpEl = controlElement.children('help'),
-                alertEl = controlElement.children('alert');
+                alertEl = controlElement.children('alert'),
+                addNewEl = controlElement.children('add-new'),
+                addAnotherEl = controlElement.children('add-another');
             if (labelEl.length && mug.getPresence("label") !== 'notallowed') {
                 var labelItext = parseItextRef(labelEl, "label"),
                     labelVal = xml.humanize(labelEl) || mug.getLabelValue();
@@ -361,6 +369,14 @@ define([
                 if (id) {
                     mug.p.constraintMsgItext = getItextItem(id, "constraintMsg");
                     mug.p.constraintMsgAttr = null;
+                }
+            }
+            if (mug.options.isRepeat) {
+                if (addNewEl.length) {
+                    mug.p.addNewItext = parseItextRef(addNewEl, "add-new");
+                }
+                if (addAnotherEl.length) {
+                    mug.p.addAnotherItext = parseItextRef(addNewEl, "add-another");
                 }
             }
         },
@@ -825,13 +841,13 @@ define([
                 lstring: gettext("Help Message"),
                 widget: trackLogicRefs(function (mug, options) {
                     var block = itextBlock.label(mug, $.extend(options, {
-                            itextType: "help",
-                            messagesPath: "helpItext",
-                            getItextByMug: function (mug) {
-                                return mug.p.helpItext;
-                            },
-                            displayName: gettext("Help Message")
-                        }));
+                        itextType: "help",
+                        messagesPath: "helpItext",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItext;
+                        },
+                        displayName: gettext("Help Message"),
+                    }));
 
                     return block;
                 }),
@@ -843,6 +859,60 @@ define([
                 lstring: gettext("Help Itext ID"),
                 widget: itextWidget.id,
                 widgetValuePath: "helpItext"
+            };
+
+            control.addNewItext = addSerializer({
+                visibility: 'visible',
+                presence: function (mug) {
+                    return mug.options.isRepeat ? 'optional' : 'notallowed';
+                },
+                lstring: gettext("Add New Item Button Text"),
+                widget: trackLogicRefs(function (mug, options) {
+                    var block = itextBlock.label(mug, $.extend(options, {
+                        itextType: "addNew",
+                        messagesPath: "addNewItext",
+                        getItextByMug: function (mug) {
+                            return mug.p.addNewItext;
+                        },
+                        displayName: gettext("Add New Item Button Text"),
+                    }));
+                    return block;
+                }),
+                validationFunc: itextValidator("addNewItext", gettext("Add New Item Button Text")),
+            });
+            // virtual property used to get a widget
+            control.addNewItextID = {
+                visibility: 'addNewItext',
+                lstring: gettext("Add New Itext ID"),
+                widget: itextWidget.id,
+                widgetValuePath: "addNewItext",
+            };
+
+            control.addAnotherItext = addSerializer({
+                visibility: 'visible',
+                presence: function (mug) {
+                    return mug.options.isRepeat ? 'optional' : 'notallowed';
+                },
+                lstring: gettext("Add Another Item Button Text"),
+                widget: trackLogicRefs(function (mug, options) {
+                    var block = itextBlock.label(mug, $.extend(options, {
+                        itextType: "addAnother",
+                        messagesPath: "addAnotherItext",
+                        getItextByMug: function (mug) {
+                            return mug.p.addAnotherItext;
+                        },
+                        displayName: gettext("Add Another Item Button Text"),
+                    }));
+                    return block;
+                }),
+                validationFunc: itextValidator("addAnotherItext", gettext("Add Another Item Button Text")),
+            });
+            // virtual property used to get a widget
+            control.addAnotherItextID = {
+                visibility: 'addAnotherItext',
+                lstring: gettext("Add Another Itext ID"),
+                widget: itextWidget.id,
+                widgetValuePath: "addAnotherItext",
             };
 
             // virtual property used to get a widget
@@ -931,6 +1001,10 @@ define([
                 'hintItext',
                 'helpItextID',
                 'helpItext',
+                'addNewItextID',
+                'addNewItext',
+                'addAnotherItextID',
+                'addAnotherItext',
                 'helpMediaIText',
             ]);
 

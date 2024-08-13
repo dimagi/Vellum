@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * A mug is a question, containing data, bind, and control elements.
  *

@@ -255,6 +255,9 @@ define([
             if (opts.writeControlAlert) {
                 createAlert(xmlWriter, mug);
             }
+            if (opts.isRepeat) {
+                createRepeatButtonLabels(xmlWriter, mug);
+            }
             // Write custom attributes first
             var attributes = mug.p.rawControlAttributes;
             for (var k in attributes) {
@@ -341,6 +344,24 @@ define([
             xmlWriter.writeEndElement();
         }
     }
+
+    function createRepeatButtonLabels(xmlWriter, mug) {
+        var addNewItext = mug.p.addNewItext;
+        if (addNewItext && !addNewItext.isEmpty()) {
+            xmlWriter.writeStartElement('add-new');
+            var addNewRef = "jr:itext('" + addNewItext.id + "')";
+            xmlWriter.writeAttributeString('ref', addNewRef);
+            xmlWriter.writeEndElement();
+        }
+        var addAnotherItext = mug.p.addAnotherItext;
+        if (addAnotherItext && !addAnotherItext.isEmpty()) {
+            xmlWriter.writeStartElement('add-another');
+            var addAnotherRef = "jr:itext('" + addAnotherItext.id + "')";
+            xmlWriter.writeAttributeString('ref', addAnotherRef);
+            xmlWriter.writeEndElement();
+        }
+    }
+
 
     return {
         createXForm: createXForm

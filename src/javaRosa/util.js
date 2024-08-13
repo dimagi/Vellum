@@ -1,3 +1,5 @@
+'use strict';
+
 define([
     'underscore',
     'jquery',
@@ -19,7 +21,9 @@ define([
             'labelItext',
             'hintItext',
             'helpItext',
-            'constraintMsgItext'
+            'constraintMsgItext',
+            'addNewItext',
+            'addAnotherItext',
         ];
 
     var getDefaultItextRoot = function(mug) {

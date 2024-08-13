@@ -1,3 +1,5 @@
+'use strict';
+
 define([
     'underscore',
     'jquery',
@@ -365,6 +367,14 @@ define([
                 }
                 if (!mug.p.helpItext && mug.getPresence("helpItext") !== "notallowed") {
                     mug.p.helpItext = this.createItem();
+                }
+                if (mug.options.isRepeat) {
+                    if (!mug.p.addNewItext && mug.getPresence("addNewItext") !== "notallowed") {
+                        mug.p.addNewItext = this.createItem();
+                    }
+                    if (!mug.p.addAnotherItext && mug.getPresence("addAnotherItext") !== "notallowed") {
+                        mug.p.addAnotherItext = this.createItem();
+                    }
                 }
             }
             if (!mug.options.isControlOnly) {
