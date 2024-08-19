@@ -33,7 +33,7 @@ define([
             currentValue = null;
 
         function autoGenerateId() {
-            return jrUtil.getDefaultItextId(mug, widget.path);
+            return jrUtil.getDefaultItextId(mug, widget.path.replace(/Itext$/, ""));
         }
 
         function updateAutoId() {

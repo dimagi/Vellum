@@ -824,7 +824,7 @@ define([
             util.addQuestion("Choice", "choice1");
             util.clickQuestion('select/choice1');
             $("[name='property-nodeID']").val("blah ' blah").change();
-            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-label');
         });
 
         it("should not allow > in item labels", function() {
@@ -833,7 +833,7 @@ define([
             util.addQuestion("Choice", "choice1");
             util.clickQuestion('select/choice1');
             $("[name='property-nodeID']").val("blah > blah").change();
-            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-labelItext');
+            assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-label');
         });
 
         it("should not change with node id when blank", function() {
