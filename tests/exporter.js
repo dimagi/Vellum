@@ -5,6 +5,7 @@
  * Edit the TSV files in VI with the following settings:
     * :set list  # display invisible chars
     * :set noeol  # don't add a trailing newline character when saving the file
+ * If you're still having problems with the last line, maybe try another editor, like VSCode.
  */
 define([
     'chai',
