@@ -363,6 +363,21 @@ define([
                     mug.p.constraintMsgAttr = null;
                 }
             }
+
+            function parseRepeatItexts(mug, controlElement) {
+                var repeatEl = controlElement.children('repeat');
+                var addEmptyCaptionEl = repeatEl.children('jr\\:addEmptyCaption'),
+                    addCaptionEl = repeatEl.children('jr\\:addCaption');
+                if (addEmptyCaptionEl.length) {
+                    mug.p.addEmptyCaptionItext = parseItextRef(addEmptyCaptionEl, "addEmptyCaption");
+                }
+                if (addCaptionEl.length) {
+                    mug.p.addCaptionItext = parseItextRef(addCaptionEl, "addCaption");
+                }
+            }
+            if (mug.options.isRepeat) {
+                parseRepeatItexts(mug, controlElement);
+            }
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();

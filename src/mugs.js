@@ -1710,7 +1710,8 @@ define([
         icon: 'fa fa-retweet',
         possibleDataParent: 'limited',
         controlNodeChildren: function ($node) {
-            return $node.children('repeat').children();
+            var repeatChildren = $node.children('repeat').children();
+            return repeatChildren.not('jr\\:addEmptyCaption, jr\\:addCaption');
         },
         getExtraDataAttributes: function (mug) {
             return {"jr:template": ""};
@@ -1726,10 +1727,13 @@ define([
                 getAppearanceAttribute: function () {},
                 form: mug.form,
                 p: {
-                    rawControlAttributes: attrs
+                    rawControlAttributes: attrs,
+                    addEmptyCaptionItext: mug.p.addEmptyCaptionItext,
+                    addCaptionItext: mug.p.addCaptionItext,
                 },
                 options: {
                     tagName: 'repeat',
+                    writeRepeatItexts: true,
                     writeControlLabel: false,
                     writeControlHint: false,
                     writeControlHelp: false,

@@ -334,6 +334,12 @@ define([
                         $("[name='itext-hin-label-custom']")
                             .val("choice1 custom hin").change();
 
+                        clickQuestion("question22");
+                        $("[name='itext-en-addEmptyCaption']")
+                        .val("add new").change();
+                        $("[name='itext-en-addCaption']")
+                        .val("add another").change();
+
                         clickQuestion("question22/question23/question7");
                         $("[name='property-androidIntentAppId']").val("").change();
                         $("[name='property-androidIntentAppId-text']").val("app_id").change();
