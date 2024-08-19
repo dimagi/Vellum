@@ -890,6 +890,7 @@ define([
                         var form = util.loadXML(""),
                             Itext = form.vellum.data.javaRosa.Itext;
                         mug = util.addQuestion("Text");
+                        repeatMug = util.addQuestion("Repeat");
                         // trigger itext id population
                         jr.parseXLSItext(form, "", Itext);
                         done();
@@ -897,7 +898,7 @@ define([
                 }
             });
         });
-        var mug;
+        var mug, repeatMug, itext, spec;
 
         it ("should detect whether or not readable itext labels are present", function() {
             var model = new jrItext.model(),
@@ -916,94 +917,94 @@ define([
         });
 
         function testItextIdValidation(property) {
-            it("should not display " + property + " validation error for autoId itext", function() {
-                var itext = mug.p[property],
-                    spec = mug.spec[property],
-                    before = itext.id;
-                itext.autoId = true;
 
-                assert(itext.id, property + ".id should have a value");
-                assert.equal(spec.validationFunc(mug), "pass");
+            describe("itext id validation", function () {
+                before(function () {
+                    itextValidationMug = ['addCaptionItext', 'addEmptyCaptionItext'].indexOf(property) > -1 ? repeatMug : mug;
+                    itext = itextValidationMug.p[property];
+                    spec = itextValidationMug.spec[property];
+                });
+                var itextValidationMug;
 
-                itext.id = "";
-                try {
-                    assert.equal(spec.validationFunc(mug), "pass");
-                } finally {
-                    itext.id = before;
-                }
-            });
+                it("should not display " + property + " validation error for autoId itext", function () {
+                    var before = itext.id;
+                    itext.autoId = true;
 
-            it("should display " + property + " validation error for non-autoId non-empty itext with blank ID", function() {
-                var itext = mug.p[property],
-                    spec = mug.spec[property],
-                    before = [itext.id, itext.get()];
-                itext.autoId = false;
-                itext.id = "";
-                itext.set("not empty");
-                try {
-                    assert.notEqual(spec.validationFunc(mug), "pass", property);
-                } finally {
-                    itext.id = before[0];
-                    itext.set(before[1]);
-                }
-            });
+                    assert(itext.id, property + ".id should have a value");
+                    assert.equal(spec.validationFunc(itextValidationMug), "pass");
 
-            it("should not display " + property + " validation error for non-autoId empty itext with blank ID", function() {
-                var itext = mug.p[property],
-                    spec = mug.spec[property],
-                    before = [itext.id, itext.get()];
-                itext.autoId = false;
-                itext.id = "";
-                itext.set("");
-                try {
-                    assert.equal(spec.validationFunc(mug), "pass");
-                } finally {
-                    itext.id = before[0];
-                    itext.set(before[1]);
-                }
-            });
+                    itext.id = "";
+                    try {
+                        assert.equal(spec.validationFunc(itextValidationMug), "pass");
+                    } finally {
+                        itext.id = before;
+                    }
+                });
 
-            it("should not display " + property + " validation error for non-autoId valid itext id", function() {
-                var itext = mug.p[property],
-                    spec = mug.spec[property],
-                    before = [itext.id, itext.get(), mug.p.constraintAttr];
-                if (property === "constraintMsgItext") {
-                    mug.p.constraintAttr = "x = y";
-                }
-                itext.autoId = false;
-                itext.id = "node-id-label-itext";
-                itext.set("node-id-label-itext");
-                try {
-                    assert.equal(spec.validationFunc(mug), "pass");
-                } finally {
-                    itext.id = before[0];
-                    itext.set(before[1]);
-                    mug.p.constraintAttr = before[2];
-                }
-            });
+                it("should display " + property + " validation error for non-autoId non-empty itext with blank ID", function () {
+                    var before = [itext.id, itext.get()];
+                    itext.autoId = false;
+                    itext.id = "";
+                    itext.set("not empty");
+                    try {
+                        assert.notEqual(spec.validationFunc(itextValidationMug), "pass", property);
+                    } finally {
+                        itext.id = before[0];
+                        itext.set(before[1]);
+                    }
+                });
 
-            it("should display " + property + " validation error for non-autoId invalid itext id", function() {
-                var itext = mug.p[property],
-                    spec = mug.spec[property],
-                    before = [itext.id, itext.get(), mug.p.constraintAttr];
-                if (property === "constraintMsgItext") {
-                    mug.p.constraintAttr = "x = y";
-                }
-                itext.autoId = false;
-                itext.id = "node-id-label-itext'&";
-                itext.set("node-id-label-itext'&");
-                try {
-                    assert.notEqual(spec.validationFunc(mug), "pass", property);
-                } finally {
-                    itext.id = before[0];
-                    itext.set(before[1]);
-                    mug.p.constraintAttr = before[2];
-                }
-            });
+                it("should not display " + property + " validation error for non-autoId empty itext with blank ID", function () {
+                    var before = [itext.id, itext.get()];
+                    itext.autoId = false;
+                    itext.id = "";
+                    itext.set("");
+                    try {
+                        assert.equal(spec.validationFunc(itextValidationMug), "pass");
+                    } finally {
+                        itext.id = before[0];
+                        itext.set(before[1]);
+                    }
+                });
 
-            it("should not have " + property + "ID validator (it will not be invoked)", function() {
-                assert(!mug.spec[property + "ID"].validationFunc,
-                       property + "ID virtual property validator will not be invoked");
+                it("should not display " + property + " validation error for non-autoId valid itext id", function () {
+                    var before = [itext.id, itext.get(), itextValidationMug.p.constraintAttr];
+                    if (property === "constraintMsgItext") {
+                        itextValidationMug.p.constraintAttr = "x = y";
+                    }
+                    itext.autoId = false;
+                    itext.id = "node-id-label-itext";
+                    itext.set("node-id-label-itext");
+                    try {
+                        assert.equal(spec.validationFunc(itextValidationMug), "pass");
+                    } finally {
+                        itext.id = before[0];
+                        itext.set(before[1]);
+                        itextValidationMug.p.constraintAttr = before[2];
+                    }
+                });
+
+                it("should display " + property + " validation error for non-autoId invalid itext id", function () {
+                    var before = [itext.id, itext.get(), itextValidationMug.p.constraintAttr];
+                    if (property === "constraintMsgItext") {
+                        itextValidationMug.p.constraintAttr = "x = y";
+                    }
+                    itext.autoId = false;
+                    itext.id = "node-id-label-itext'&";
+                    itext.set("node-id-label-itext'&");
+                    try {
+                        assert.notEqual(spec.validationFunc(itextValidationMug), "pass", property);
+                    } finally {
+                        itext.id = before[0];
+                        itext.set(before[1]);
+                        itextValidationMug.p.constraintAttr = before[2];
+                    }
+                });
+
+                it("should not have " + property + "ID validator (it will not be invoked)", function () {
+                    assert(!itextValidationMug.spec[property + "ID"].validationFunc,
+                        property + "ID virtual property validator will not be invoked");
+                });
             });
         }
 
@@ -1011,6 +1012,8 @@ define([
         testItextIdValidation("hintItext");
         testItextIdValidation("helpItext");
         testItextIdValidation("constraintMsgItext");
+        testItextIdValidation("addEmptyCaptionItext");
+        testItextIdValidation("addCaptionItext");
 
         it("should display constraintMsgItext validation error for non-autoId itext without validation condition", function() {
             var itext = mug.p.constraintMsgItext,

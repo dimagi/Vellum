@@ -46,6 +46,7 @@ define([
         modelRepeatMugOptions = {
             //typeName: 'Model Repeat',
             supportsDataNodeRole: true,
+            isRepeat: true,
             getPathName: function (mug, name) {
                 if (mug.p.dataSource.idsQuery) {
                     name += "/item";
