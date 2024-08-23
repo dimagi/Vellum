@@ -336,9 +336,9 @@ define([
 
                         clickQuestion("question22");
                         $("[name='itext-en-addEmptyCaption']")
-                        .val("add new").change();
+                            .val("add new").change();
                         $("[name='itext-en-addCaption']")
-                        .val("add another").change();
+                            .val("add another").change();
 
                         clickQuestion("question22/question23/question7");
                         $("[name='property-androidIntentAppId']").val("").change();
