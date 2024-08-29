@@ -883,7 +883,7 @@ define([
     describe("The javaRosa plugin itext widgets", function() {
         before(function(done) {
             util.init({
-                features: {rich_text: false},
+                features: {rich_text: false, use_custom_repeat_button_text: true},
                 javaRosa: { langs: ['en'] },
                 core: {
                     onReady: function () {

@@ -114,6 +114,7 @@ define([
                 mug.p.originalPath = null;
                 mug.p.dataSource = {};
                 mug.p.dataSourceChanged = false;
+                mug.options.customRepeatButtonText = form.vellum.opts().features.use_custom_repeat_button_text;
             },
             spec: {
                 nodeID: {

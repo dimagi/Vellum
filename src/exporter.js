@@ -41,7 +41,7 @@ define([
             "Comment",
         ]);
         const formContainsRepeatGroup = Boolean(form.getMugList().find(mug => mug.options.isRepeat));
-        if (formContainsRepeatGroup) {
+        if (formContainsRepeatGroup && form.vellum.opts().features.use_custom_repeat_button_text) {
             columnOrder = columnOrder.concat(["'Add New' Button Text", "'Add Another' Button Text"]);
         }
 
@@ -96,7 +96,7 @@ define([
 
             row["Hint Text"] = defaultOrNothing(mug.p.hintItext, defaultLanguage, 'default');
             row["Help Text"] = defaultOrNothing(mug.p.helpItext, defaultLanguage, 'default');
-            if (formContainsRepeatGroup) {
+            if (formContainsRepeatGroup && mug.options.customRepeatButtonText) {
                 row["'Add New' Button Text"] = defaultOrNothing(mug.p.addEmptyCaptionItext, defaultLanguage, 'default');
                 row["'Add Another' Button Text"] = defaultOrNothing(mug.p.addCaptionItext, defaultLanguage, 'default');
             }

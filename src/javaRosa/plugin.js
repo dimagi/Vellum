@@ -375,7 +375,7 @@ define([
                     mug.p.addCaptionItext = parseItextRef(addCaptionEl, "addCaption");
                 }
             }
-            if (mug.options.isRepeat) {
+            if (mug.options.isRepeat && mug.options.customRepeatButtonText) {
                 parseRepeatItexts(mug, controlElement);
             }
         },
@@ -863,7 +863,7 @@ define([
             control.addEmptyCaptionItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mug) {
-                    return mug.options.isRepeat ? 'optional' : 'notallowed';
+                    return mug.options.isRepeat && mug.options.customRepeatButtonText ? 'optional' : 'notallowed';
                 },
                 lstring: gettext("Add New Item Button Text"),
                 widget: trackLogicRefs(function (mug, options) {
@@ -890,7 +890,7 @@ define([
             control.addCaptionItext = addSerializer({
                 visibility: 'visible',
                 presence: function (mug) {
-                    return mug.options.isRepeat ? 'optional' : 'notallowed';
+                    return mug.options.isRepeat && mug.options.customRepeatButtonText ? 'optional' : 'notallowed';
                 },
                 lstring: gettext("Add Another Item Button Text"),
                 widget: trackLogicRefs(function (mug, options) {

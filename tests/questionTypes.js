@@ -189,7 +189,9 @@ define([
                             done();
                         }
                     },
-                    features: { case_micro_image: true }
+                    features: { case_micro_image: true,
+                                use_custom_repeat_button_text: true,
+                     }
                 });
             });
 
@@ -253,6 +255,7 @@ define([
                 features: {
                     templated_intents: true,
                     custom_intents: true,
+                    use_custom_repeat_button_text: true,
                 },
                 core: {
                     form: null,

@@ -1733,7 +1733,7 @@ define([
                 },
                 options: {
                     tagName: 'repeat',
-                    writeRepeatItexts: true,
+                    writeRepeatItexts: mug.options.customRepeatButtonText,
                     writeControlLabel: false,
                     writeControlHint: false,
                     writeControlHelp: false,

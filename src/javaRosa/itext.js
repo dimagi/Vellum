@@ -366,7 +366,7 @@ define([
                 if (!mug.p.helpItext && mug.getPresence("helpItext") !== "notallowed") {
                     mug.p.helpItext = this.createItem();
                 }
-                if (mug.options.isRepeat) {
+                if (mug.options.isRepeat && mug.options.customRepeatButtonText) {
                     if (!mug.p.addEmptyCaptionItext) {
                         mug.p.addEmptyCaptionItext = this.createItem();
                     }

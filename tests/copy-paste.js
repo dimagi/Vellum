@@ -50,6 +50,7 @@ define([
             util.init({
                 features: {
                     custom_intents: true,
+                    use_custom_repeat_button_text: true,
                 },
                 javaRosa: { langs: ['en', 'hin'] },
                 core: {
