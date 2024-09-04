@@ -50,6 +50,7 @@ define([
             util.init({
                 features: {
                     custom_intents: true,
+                    use_custom_repeat_button_text: true,
                 },
                 javaRosa: { langs: ['en', 'hin'] },
                 core: {
@@ -840,8 +841,9 @@ define([
 
         it("should paste and copy a model iteration repeat group", function () {
             var data = [
-                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource', 'instances'],
-                ['/repeat/item', 'Repeat', 'repeat', 'repeat',
+                ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'addCaptionItext:en-default', 'addCaptionItext:hin-default',
+                    'addEmptyCaptionItext:en-default', 'addEmptyCaptionItext:hin-default', 'dataSource', 'instances'],
+                ['/repeat/item', 'Repeat', 'repeat', 'repeat', 'add another', 'add another', 'add new', 'add new',
                     '{"idsQuery":"instance(\'products\')/products/product/@id"}',
                     '{"products":{"src":"jr://commtrack:products"}}'],
             ];

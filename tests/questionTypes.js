@@ -189,7 +189,9 @@ define([
                             done();
                         }
                     },
-                    features: { case_micro_image: true }
+                    features: { case_micro_image: true,
+                                use_custom_repeat_button_text: true,
+                     }
                 });
             });
 
@@ -253,6 +255,7 @@ define([
                 features: {
                     templated_intents: true,
                     custom_intents: true,
+                    use_custom_repeat_button_text: true,
                 },
                 core: {
                     form: null,
@@ -333,6 +336,12 @@ define([
                             .val("choice1 custom en").change();
                         $("[name='itext-hin-label-custom']")
                             .val("choice1 custom hin").change();
+
+                        clickQuestion("question22");
+                        $("[name='itext-en-addEmptyCaption']")
+                            .val("add new").change();
+                        $("[name='itext-en-addCaption']")
+                            .val("add another").change();
 
                         clickQuestion("question22/question23/question7");
                         $("[name='property-androidIntentAppId']").val("").change();

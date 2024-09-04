@@ -113,6 +113,12 @@
 					<text id="question3-choice2-label">
 						<value>choice2</value>
 					</text>
+					<text id="question22-addEmptyCaption">
+						<value>add new</value>
+					</text>
+					<text id="question22-addCaption">
+						<value>add another</value>
+					</text>
 				</translation>
 				<translation lang="hin">
 					<text id="question1-label">
@@ -154,6 +160,12 @@
 					</text>
 					<text id="question3-choice2-label">
 						<value>choice2</value>
+					</text>
+					<text id="question22-addEmptyCaption">
+						<value>add new</value>
+					</text>
+					<text id="question22-addCaption">
+						<value>add another</value>
 					</text>
 				</translation>
 			</itext>
@@ -199,6 +211,8 @@
 		</group>
 		<group>
 			<repeat nodeset="/data/question22">
+				<jr:addEmptyCaption ref="jr:itext('question22-addEmptyCaption')" />
+				<jr:addCaption ref="jr:itext('question22-addCaption')" />
 				<group ref="/data/question22/question23" appearance="field-list">
 					<group ref="/data/question22/question23/question40"/>
 					<group>

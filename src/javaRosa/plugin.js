@@ -363,6 +363,21 @@ define([
                     mug.p.constraintMsgAttr = null;
                 }
             }
+
+            function parseRepeatItexts(mug, controlElement) {
+                var repeatEl = controlElement.children('repeat');
+                var addEmptyCaptionEl = repeatEl.children('jr\\:addEmptyCaption'),
+                    addCaptionEl = repeatEl.children('jr\\:addCaption');
+                if (addEmptyCaptionEl.length) {
+                    mug.p.addEmptyCaptionItext = parseItextRef(addEmptyCaptionEl, "addEmptyCaption");
+                }
+                if (addCaptionEl.length) {
+                    mug.p.addCaptionItext = parseItextRef(addCaptionEl, "addCaption");
+                }
+            }
+            if (mug.options.isRepeat && mug.options.customRepeatButtonText) {
+                parseRepeatItexts(mug, controlElement);
+            }
         },
         handleMugParseFinish: function (mug) {
             this.__callOld();
@@ -825,13 +840,13 @@ define([
                 lstring: gettext("Help Message"),
                 widget: trackLogicRefs(function (mug, options) {
                     var block = itextBlock.label(mug, $.extend(options, {
-                            itextType: "help",
-                            messagesPath: "helpItext",
-                            getItextByMug: function (mug) {
-                                return mug.p.helpItext;
-                            },
-                            displayName: gettext("Help Message")
-                        }));
+                        itextType: "help",
+                        messagesPath: "helpItext",
+                        getItextByMug: function (mug) {
+                            return mug.p.helpItext;
+                        },
+                        displayName: gettext("Help Message"),
+                    }));
 
                     return block;
                 }),
@@ -843,6 +858,60 @@ define([
                 lstring: gettext("Help Itext ID"),
                 widget: itextWidget.id,
                 widgetValuePath: "helpItext"
+            };
+
+            control.addEmptyCaptionItext = addSerializer({
+                visibility: 'visible',
+                presence: function (mug) {
+                    return mug.options.isRepeat && mug.options.customRepeatButtonText ? 'optional' : 'notallowed';
+                },
+                lstring: gettext("Add New Item Button Text"),
+                widget: trackLogicRefs(function (mug, options) {
+                    var block = itextBlock.label(mug, $.extend(options, {
+                        itextType: "addEmptyCaption",
+                        messagesPath: "addEmptyCaptionItext",
+                        getItextByMug: function (mug) {
+                            return mug.p.addEmptyCaptionItext;
+                        },
+                        displayName: gettext("Add New Item Button Text"),
+                    }));
+                    return block;
+                }),
+                validationFunc: itextValidator("addEmptyCaptionItext", gettext("Add New Item Button Text")),
+            });
+            // virtual property used to get a widget
+            control.addEmptyCaptionItextID = {
+                visibility: 'addEmptyCaptionItext',
+                lstring: gettext("Add New Itext ID"),
+                widget: itextWidget.id,
+                widgetValuePath: "addEmptyCaptionItext",
+            };
+
+            control.addCaptionItext = addSerializer({
+                visibility: 'visible',
+                presence: function (mug) {
+                    return mug.options.isRepeat && mug.options.customRepeatButtonText ? 'optional' : 'notallowed';
+                },
+                lstring: gettext("Add Another Item Button Text"),
+                widget: trackLogicRefs(function (mug, options) {
+                    var block = itextBlock.label(mug, $.extend(options, {
+                        itextType: "addCaption",
+                        messagesPath: "addCaptionItext",
+                        getItextByMug: function (mug) {
+                            return mug.p.addCaptionItext;
+                        },
+                        displayName: gettext("Add Another Item Button Text"),
+                    }));
+                    return block;
+                }),
+                validationFunc: itextValidator("addCaptionItext", gettext("Add Another Item Button Text")),
+            });
+            // virtual property used to get a widget
+            control.addCaptionItextID = {
+                visibility: 'addCaptionItext',
+                lstring: gettext("Add Another Itext ID"),
+                widget: itextWidget.id,
+                widgetValuePath: "addCaptionItext",
             };
 
             // virtual property used to get a widget
@@ -931,6 +1000,10 @@ define([
                 'hintItext',
                 'helpItextID',
                 'helpItext',
+                'addEmptyCaptionItextID',
+                'addEmptyCaptionItext',
+                'addCaptionItextID',
+                'addCaptionItext',
                 'helpMediaIText',
             ]);
 

@@ -19,7 +19,9 @@ define([
             'labelItext',
             'hintItext',
             'helpItext',
-            'constraintMsgItext'
+            'constraintMsgItext',
+            'addEmptyCaptionItext',
+            'addCaptionItext',
         ];
 
     var getDefaultItextRoot = function(mug) {

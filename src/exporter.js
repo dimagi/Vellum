@@ -38,8 +38,12 @@ define([
             "Required",
             "Hint Text",
             "Help Text",
-            "Comment"
+            "Comment",
         ]);
+        const formContainsRepeatGroup = Boolean(form.getMugList().find(mug => mug.options.isRepeat));
+        if (formContainsRepeatGroup && form.vellum.opts().features.use_custom_repeat_button_text) {
+            columnOrder = columnOrder.concat(["'Add New' Button Text", "'Add Another' Button Text"]);
+        }
 
         var mugToExportRow = function (mug) {
             var row = {},
@@ -92,6 +96,10 @@ define([
 
             row["Hint Text"] = defaultOrNothing(mug.p.hintItext, defaultLanguage, 'default');
             row["Help Text"] = defaultOrNothing(mug.p.helpItext, defaultLanguage, 'default');
+            if (formContainsRepeatGroup && mug.options.customRepeatButtonText) {
+                row["'Add New' Button Text"] = defaultOrNothing(mug.p.addEmptyCaptionItext, defaultLanguage, 'default');
+                row["'Add Another' Button Text"] = defaultOrNothing(mug.p.addCaptionItext, defaultLanguage, 'default');
+            }
             row.Comment = richText.sanitizeInput(mug.p.comment);
 
             // make sure there aren't any null values
