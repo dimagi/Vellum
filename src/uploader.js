@@ -112,7 +112,7 @@ define([
         ref.updateController = function (widget) {
             // see note about poor man's promise below
             var uploadController = uploadControls[ref.mediaType].value;
-            uploadController.resetUploader();
+            //uploadController.resetUploader(); // TODO: restore this - check against resetUploader in MediaUploader, does stuff like clears allowClose and resets button states
             uploadController.currentReference = ref;
             uploadController.updateMediaPath = function () {
                 var params = uploadController.uploadParams;
@@ -125,7 +125,7 @@ define([
                 old_ref: (ref.isMediaMatched()) ? ref.linkedObj.m_id : "",
                 replace_attachment: true
             };
-            uploadController.updateUploadFormUI();
+            //uploadController.updateUploadFormUI();        // TODO: restore this - it updates the UI within the modal with the newly-uploaded file preview
         };
 
         return ref;
@@ -341,8 +341,8 @@ define([
                 deferredInit.apply(this);
             }
 
-            addUploaderToWidget(widget, 
-                                this.data.uploader.objectMap, 
+            addUploaderToWidget(widget,
+                                this.data.uploader.objectMap,
                                 this.data.uploader.uploadControls);
         },
         initUploadController: function (options) {
@@ -352,6 +352,57 @@ define([
             }));
             this.$f.find('.fd-multimedia-modal-container').append($uploaderModal);
 
+            var $fileInput = $uploaderModal.find("input[type='file']"),
+                $uploadButton = $uploaderModal.find(".hqm-upload-confirm");
+
+            $fileInput.change(function () {
+                var MEGABYTE = 1048576,
+                    $queueContainer = $uploaderModal.find(".hqm-queue");
+
+                if ($fileInput.get(0).files.length) {
+                    var file = $fileInput.get(0).files[0];
+                    $queueContainer.html(_.template(multimedia_queue)({
+                        unique_id: self.marker + file.name,
+                        file_size: (file.size / MEGABYTE).toFixed(3),
+                        file_name: file.name,
+                    }));
+                    $uploadButton.addClass('btn-success').removeClass('disabled');
+                } else {
+                    $queueContainer.empty()
+                    $uploadButton.addClass('disabled').removeClass('btn-success');
+                }
+            });
+
+            // Clear file input's value on click so that change event will fire on re-selecting the same file
+            $fileInput.on('click' , function() {
+                $(this).val('');
+            });
+
+            var uploadController = {value: null};
+            $uploadButton.click(function () {
+                $uploadButton.addClass('disabled').removeClass('btn-success');
+
+                var file = $fileInput.get(0).files[0],
+                    data = new FormData();
+                data.append("Filedata", file);
+                uploadController.value.updateMediaPath();
+                _.each(uploadController.value.uploadParams, function (value, key) {
+                    data.append(key, value);
+                });
+
+                $.ajax({
+                    url: uploadController.value.uploadURL,
+                    type: 'POST',
+                    data: data,
+                    contentType: false,
+                    processData: false,
+                    enctype: 'multipart/form-data',
+                    success: function (response) {},    // TODO
+                    error: function () {},  // TODO
+                });
+            });
+
+            // TODO: clean up usage of uploadController, remove `value` key
             // Load the uploader and its dependencies in the background after
             // core dependencies are already loaded, since it's not necessary at
             // page load.
@@ -359,45 +410,33 @@ define([
             // path, but never actually used until the upload button is clicked.
             // We use an object here as a poor man's promise.
             // Feel free to undo this if it's not worth it.
-          
-            var uploadController = {value: null};
 
-            require(['file-uploader'], function (HQMediaFileUploadController) {
-                if (uploadController.value !== null) {
-                    return;
-                }
-                uploadController.value = new HQMediaFileUploadController(
-                    options.uploaderSlug, 
-                    options.mediaType, 
-                    {
-                        fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
-                        uploadURL: options.uploadUrl,
-                        isMultiFileUpload: false,
-                        queueTemplate: multimedia_queue,
-                        errorsTemplate: multimedia_errors,
-                        existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
-                        licensingParams: [
-                            'shared', 'license', 'author', 'attribution-notes'],
-                        uploadParams: {},
-                        sessionid: options.sessionid
-                    }
-                );
-                var super_startUpload = uploadController.value.startUpload;
-                uploadController.value.startUpload = function (event) {
-                    uploadController.value.updateMediaPath();
-                    return super_startUpload.call(this, event);
-                };
-                uploadController.value.init();
-            });
+            if (uploadController.value !== null) {
+                return;
+            }
+            uploadController.value = {
+                    fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
+                    uploadURL: options.uploadUrl,
+                    isMultiFileUpload: false,
+                    queueTemplate: multimedia_queue,
+                    errorsTemplate: multimedia_errors,
+                    existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
+                    licensingParams: [
+                        'shared', 'license', 'author', 'attribution-notes'],
+                    uploadParams: {},
+                    sessionid: options.sessionid
+            };
+            // TODO: restore this behavior?
+            /*var super_startUpload = uploadController.value.startUpload;
+            uploadController.value.startUpload = function (event) {
+                uploadController.value.updateMediaPath();
+                return super_startUpload.call(this, event);
+            };*/
+
             return uploadController;
         },
         destroy: function () {
             _.each(this.data.uploader.uploadControls, function (control, key) {
-                if (control.value) {
-                    // HACK deep reach
-                    // HQMediaFileUploadController should have a destroy method
-                    control.value.uploader.destroy();
-                }
                 delete control.value;
             });
             this.__callOld();
