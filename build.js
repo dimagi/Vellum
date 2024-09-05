@@ -76,38 +76,6 @@
                 'exclude'
             ]
         },
-        // Components (and their dependencies) that can be requested
-        // asynchronously after Vellum has already finished loading, because
-        // they're not necessary for initial operation.
-
-//        // At the moment, this bundle doesn't get used as expected.
-//        {
-//            create: true,
-//            name: 'deferred-components',
-//            include: [
-//                // core
-//                'codemirror',
-//                'diff-match-patch',
-//                'CryptoJS',
-//                'vellum/expressionEditor',
-//
-//                // uploader
-//                'file-uploader',
-//
-//                // form
-//                'vellum/writer',
-//                'vellum/exporter'
-//            ],
-//            exclude: [
-//                'exclude',
-//                'global-deps',
-//                // required by things other than the expression editor, ensure
-//                // that they're not bundled here, otherwise separate bundles
-//                // is useless
-//                'xpath',
-//                'vellum/util'
-//            ]
-//        },
 
         // Local dependencies that don't change often, except for new ones being
         // added.
