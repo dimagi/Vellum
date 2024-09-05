@@ -2,19 +2,14 @@
     <div class="alert alert-success" style="margin-bottom: 2px; margin-top: 10px;">
         <i class="fa fa-check"></i> <%= file_name %> <strong>[<%= file_size %> MB]</strong>
     </div>
-    <div class="hqm-progress">
-        <div class="progress progress-striped active" style="margin-bottom: 5px;">
-            <div class="progress-bar" style="width: 0%;"></div>
-        </div>
-        <p class="text-success hqm-begin">
-          <%=gettext("Ready to upload. Click <strong>Begin Upload</strong> below to start.")%>
-        </p>
-        <p class="text-danger hqm-error hide">
-            <span class="label label-danger"><%-gettext("There were errors.")%></span>
-        </p>
-        <a class="btn btn-danger btn-xs pull-right hqm-cancel hide">
-            <i class="fa fa-remove"></i> <%-gettext("Cancel Upload")%>
-        </a>
-    </div>
+    <p class="text-success hqm-begin">
+      <%=gettext("Ready to upload. Click <strong>Begin Upload</strong> below to start.")%>
+    </p>
+    <p class="text-danger hqm-error hide">
+        <span class="label label-danger"><%-gettext("There were errors.")%></span>
+    </p>
+    <a class="btn btn-danger btn-xs pull-right hqm-cancel hide">
+        <i class="fa fa-remove"></i> <%-gettext("Cancel Upload")%>
+    </a>
     <div class="hqm-status"></div>
 </div>
