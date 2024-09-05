@@ -7,11 +7,7 @@
             <div class="progress-bar" style="width: 0%;"></div>
         </div>
         <p class="text-success hqm-begin">
-        <%
-            var msg = gettext("Ready to upload. Click {btn} below to start."),
-                btn = "<strong>" + gettext("Begin Upload") + "</strong>";
-            print(msg.replace(/\{btn\}/g, btn));
-        %>
+          <%=gettext("Ready to upload. Click <strong>Begin Upload</strong> below to start.")%>
         </p>
         <p class="text-danger hqm-error hide">
             <span class="label label-danger"><%-gettext("There were errors.")%></span>
