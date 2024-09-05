@@ -5,7 +5,7 @@ define([
     'jquery',
     'tpl!vellum/templates/multimedia_modal',
     'tpl!vellum/templates/multimedia_upload_trigger',
-    'text!vellum/templates/multimedia_queue.html',
+    'text!vellum/templates/multimedia_upload_status.html',
     'text!vellum/templates/multimedia_errors.html',
     'text!vellum/templates/multimedia_existing_image.html',
     'text!vellum/templates/multimedia_existing_audio.html',
@@ -21,7 +21,7 @@ define([
     $,
     multimedia_modal,
     multimedia_upload_trigger,
-    multimedia_queue,
+    multimedia_upload_status,
     multimedia_errors,
     multimedia_existing_image,
     multimedia_existing_audio,
@@ -357,18 +357,18 @@ define([
 
             $fileInput.change(function () {
                 var MEGABYTE = 1048576,
-                    $queueContainer = $uploaderModal.find(".hqm-queue");
+                    $uploadStatusContainer = $uploaderModal.find(".hqm-upload-status");
 
                 if ($fileInput.get(0).files.length) {
                     var file = $fileInput.get(0).files[0];
-                    $queueContainer.html(_.template(multimedia_queue)({
+                    $uploadStatusContainer.html(_.template(multimedia_upload_status)({
                         unique_id: self.marker + file.name,
                         file_size: (file.size / MEGABYTE).toFixed(3),
                         file_name: file.name,
                     }));
                     $uploadButton.addClass('btn-success').removeClass('disabled');
                 } else {
-                    $queueContainer.empty()
+                    $uploadStatusContainer.empty()
                     $uploadButton.addClass('disabled').removeClass('btn-success');
                 }
             });
@@ -418,7 +418,6 @@ define([
                     fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
                     uploadURL: options.uploadUrl,
                     isMultiFileUpload: false,
-                    queueTemplate: multimedia_queue,
                     errorsTemplate: multimedia_errors,
                     existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
                     licensingParams: [
