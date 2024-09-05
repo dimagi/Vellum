@@ -94,7 +94,6 @@
                 // https://github.com/guybedford/require-less/issues/48
                 'css/css!../node_modules/codemirror/lib/codemirror',
                 'css/css!../node_modules/jstree/dist/themes/default/style',
-                'css/css!yui-combo',
                 'css/css!../node_modules/at.js/dist/css/jquery.atwho'
             ],
             exclude: [

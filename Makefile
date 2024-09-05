@@ -20,7 +20,7 @@ _rjs:
 	rm -r _build/src/exclude.js _build/src/templates _build/src/less-style
 	find _build/ -maxdepth 1 -mindepth 1 -not -name src -not -name lib -not -name README.md -not -name node_modules | xargs rm -rf
 # https://github.com/guybedford/require-css/issues/133 
-	cd _build/node_modules && ls . | grep -v MediaUploader | xargs rm -r
+	cd _build/node_modules && ls . | xargs rm -r
 	mkdir -p _build/node_modules/jstree/dist/themes/default
 	cp node_modules/jstree/dist/themes/default/*.png \
 	   node_modules/jstree/dist/themes/default/*.gif \

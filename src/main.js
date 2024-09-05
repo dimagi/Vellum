@@ -49,19 +49,12 @@ requirejs.config({
         'underscore': '../node_modules/underscore/underscore',
         'XMLWriter': '../node_modules/XMLWriter/XMLWriter',
 
-        // todo: should convert xpath submodule to AMD
         'xpath': '../node_modules/xpath/dist/js-xpath',
 
         'langCodes': '../node_modules/langcodes/langs.json',
 
         'save-button': '../lib/SaveButton',
 
-        'yui-base': '../node_modules/MediaUploader/yui-base',
-        'yui-combo': '../node_modules/MediaUploader/yui-combo',
-        'yui-loader': '../node_modules/MediaUploader/yui-loader',
-        'yui-uploader': '../node_modules/MediaUploader/yui-uploader',
-
-        'file-uploader': '../node_modules/MediaUploader/hqmedia.upload_controller',
         'jsdiff': '../node_modules/jsdiff/diff',
         'markdown-it': '../node_modules/markdown-it/dist/markdown-it',
         'caretjs': '../node_modules/Caret.js/dist/jquery.caret',
@@ -96,22 +89,6 @@ requirejs.config({
         'save-button': {
             deps: ['jquery'],
             exports: 'SaveButton'
-        },
-
-        'yui-base': {
-            exports: 'YUI'
-        },
-        'yui-loader': {
-            deps: ['yui-base'],
-            exports: 'YUI'
-        },
-        'yui-uploader': {
-            deps: ['yui-base', 'yui-loader', 'css!yui-combo'],
-            exports: 'YUI'
-        },
-        'file-uploader': {
-            deps: ['yui-uploader', 'underscore', 'jquery'],
-            exports: 'HQMediaFileUploadController'
         },
 
         'xpath': {
