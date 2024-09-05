@@ -26,43 +26,6 @@
                     <div class="col-sm-8 hqm-existing-controls">
                     </div>
                 </div>
-                <div class="hqm-upload-form">
-                    <fieldset class="hqm-sharing hide">
-                        <legend><%-gettext("Multimedia Sharing Options")%></legend>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4" for="fd-mm-<%= mediaType %>-license"><%-gettext("License")%></label>
-                            <div class="col-sm-8">
-                                <select name="license" id="fd-mm-<%= mediaType %>-license">
-                                    <option value="cc-nc"><%-gettext("Creative Commons Attribution, Non-Commercial")%></option>
-                                    <option value="cc-nd"><%-gettext("Creative Commons Attribution, No Derivatives")%></option>
-                                    <option value="cc" selected="selected"><%-gettext("Creative Commons Attribution")%></option>
-                                    <option value="cc-nc-sa"><%-gettext("Creative Commons Attribution, Non-Commercial, and Share Alike")%></option>
-                                    <option value="cc-nc-nd"><%-gettext("Creative Commons Attribution, Non-Commercial, and No Derivatives")%></option>
-                                    <option value="cc-sa"><%-gettext("Creative Commons Attribution, Share Alike")%></option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label" for="fd-mm-<%= mediaType %>-author"><%-gettext("Author")%></label>
-                            <div class="col-sm-8">
-                                <input type="text"
-                                       name="author"
-                                       id="fd-mm-<%= mediaType %>-author"
-                                       placeholder="<%-gettext("Enter the name of the author.")%>" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-4 control-label" for="fd-mm-<%= mediaType %>-attribution">
-                                <%-gettext("Attribution Notes")%>
-                            </label>
-                            <div class="col-sm-8">
-                                <textarea name="attribution-notes"
-                                       id="fd-mm-<%= mediaType %>-attribution"
-                                       rows="2"></textarea>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-default" data-dismiss="modal"><%-gettext("Close")%></a>
