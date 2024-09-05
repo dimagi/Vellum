@@ -352,8 +352,13 @@ define([
             }));
             this.$f.find('.fd-multimedia-modal-container').append($uploaderModal);
 
-            var $fileInput = $uploaderModal.find("input[type='file']"),
+            var $fileInputTrigger = $uploaderModal.find(".btn-primary"),
+                $fileInput = $uploaderModal.find("input[type='file']"),
                 $uploadButton = $uploaderModal.find(".hqm-upload-confirm");
+
+            $fileInputTrigger.click(function () {
+                $fileInput.click();
+            });
 
             $fileInput.change(function () {
                 var MEGABYTE = 1048576,
