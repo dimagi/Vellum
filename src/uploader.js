@@ -111,7 +111,6 @@ define([
         ref.updateController = function (widget) {
             // see note about poor man's promise below
             var uploadController = uploadControls[ref.mediaType].value;
-            //uploadController.resetUploader(); // TODO: restore this - check against resetUploader in MediaUploader, does stuff like clears allowClose and resets button states
             uploadController.currentReference = ref;
             uploadController.updateMediaPath = function () {
                 var params = uploadController.uploadParams;
@@ -367,6 +366,14 @@ define([
             }));
             this.$f.find('.fd-multimedia-modal-container').append($uploaderModal);
 
+            // Don't allow user to close modal while server is processing upload
+            var allowClose = true;
+            $uploaderModal.on('hide.bs.modal', function (event) {
+                if (!allowClose) {
+                    event.preventDefault();
+                }
+            });
+
             var $fileInputTrigger = $uploaderModal.find(".btn-primary"),
                 $fileInput = $uploaderModal.find("input[type='file']"),
                 $uploadButton = $uploaderModal.find(".hqm-upload-confirm"),
@@ -415,6 +422,7 @@ define([
             var uploadController = {value: null};
             $uploadButton.click(function () {
                 _updateUploadButton(false, true);
+                allowClose = false;
 
                 var file = $fileInput.get(0).files[0],
                     data = new FormData();
@@ -437,6 +445,7 @@ define([
                         $('[data-hqmediapath^="' + response.ref.path.replace(/\.\w+$/, ".") + '"]').trigger('mediaUploadComplete', response);
                         $uploadStatusContainer.find(".hqm-begin").hide();
                         _updateUploadButton(false, false);
+                        allowClose = true;
                     },
                     error: function (response) {
                         response = JSON.parse(response.responseText);
@@ -446,6 +455,7 @@ define([
                         }));
                         $uploadStatusContainer.find(".hqm-begin").hide();
                         _updateUploadButton(false, false);
+                        allowClose = true;
                     },
                 });
             });
