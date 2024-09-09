@@ -32,37 +32,12 @@ define([
 ) {
     "use strict";
 
-    var SUPPORTED_EXTENSIONS = {
-        image: [
-            {
-                'description': gettext('Image'),
-                'extensions': '*.jpg;*.png;*.gif'
-            }
-        ],
-        audio: [
-            {
-                'description': gettext('Audio'),
-                'extensions': '*.mp3;*.wav'
-            }
-        ],
-        video: [
-            {
-                'description': gettext('Video'),
-                'extensions': '*.3gp;*.mp4'
-            }
-        ],
-        'video-inline': [
-            {
-                'description': gettext('Inline Video'),
-                'extensions': '*.3gp;*.mp4'
-            }
-        ],
-        text: [
-            {
-                'description': gettext('HTML'),
-                'extensions': '*.html'
-            }
-        ],
+    var SLUG_TO_DESCRIPTION = {
+        image: gettext('Image'),
+        audio: gettext('Audio'),
+        video: gettext('Video'),
+        'video-inline': gettext('Inline Video'),
+        text: gettext('HTML'),
     },
     PREVIEW_TEMPLATES = {
         image: multimedia_existing_image,
@@ -285,7 +260,7 @@ define([
         $uploadBtn = $(multimedia_upload_trigger({
             multimediaExists: currentPath in objectMap,
             uploaderId: SLUG_TO_UPLOADER_SLUG[widget.form],
-            mediaType: SUPPORTED_EXTENSIONS[widget.form][0].description
+            mediaType: SLUG_TO_DESCRIPTION[widget.form],
         }));
         $uploadBtn.click(function () {
             widget.mediaRef.updateController(widget);
