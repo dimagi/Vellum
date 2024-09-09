@@ -299,12 +299,12 @@ define([
         $uploadBtn.click(function () {
             widget.mediaRef.updateController(widget);
         });
+
         return $uploadBtn;
     };
 
     $.vellum.plugin("uploader", {
         objectMap: false,
-        sessionid: false,
         uploadUrls: {
             image: false,
             audio: false,
@@ -317,8 +317,7 @@ define([
             var opts = this.opts().uploader,
                 uploadUrls = opts.uploadUrls,
                 uploadEnabled = opts.objectMap && opts.uploadUrls && 
-                    opts.uploadUrls.image,
-                sessionid = opts.sessionid;
+                    opts.uploadUrls.image;
 
             this.data.uploader.uploadEnabled = uploadEnabled;
             this.data.uploader.objectMap = opts.objectMap;
@@ -331,31 +330,26 @@ define([
                     'image': this.initUploadController({
                         uploaderSlug: 'fd_hqimage',
                         mediaType: 'image',
-                        sessionid: sessionid,
                         uploadUrl: uploadUrls.image,
                     }),
                     'audio': this.initUploadController({
                         uploaderSlug: 'fd_hqaudio',
                         mediaType: 'audio',
-                        sessionid: sessionid,
                         uploadUrl: uploadUrls.audio,
                     }),
                     'video': this.initUploadController({
                         uploaderSlug: 'fd_hqvideo',
                         mediaType: 'video',
-                        sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
                     }),
                     'video-inline': this.initUploadController({
                         uploaderSlug: 'fd_hqInlineVideo',
                         mediaType: 'video-inline',
-                        sessionid: sessionid,
                         uploadUrl: uploadUrls.video,
                     }),
                     'text': this.initUploadController({
                         uploaderSlug: 'fd_hqtext',
                         mediaType: 'text',
-                        sessionid: sessionid,
                         uploadUrl: uploadUrls.text,
                     })
                 };
@@ -497,8 +491,7 @@ define([
                     existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
                     licensingParams: [
                         'shared', 'license', 'author', 'attribution-notes'],
-                    uploadParams: {},
-                    sessionid: options.sessionid
+                    uploadParams: {}
             };
 
             return uploadController;
