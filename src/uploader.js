@@ -322,46 +322,38 @@ define([
                 return;
             }
 
-            this.data.uploader.deferredInit = function () {
-                this.data.uploader.uploadControls = {
-                    'image': this.initUploadController({
-                        uploaderSlug: 'fd_hqimage',
-                        mediaType: 'image',
-                        uploadUrl: uploadUrls.image,
-                    }),
-                    'audio': this.initUploadController({
-                        uploaderSlug: 'fd_hqaudio',
-                        mediaType: 'audio',
-                        uploadUrl: uploadUrls.audio,
-                    }),
-                    'video': this.initUploadController({
-                        uploaderSlug: 'fd_hqvideo',
-                        mediaType: 'video',
-                        uploadUrl: uploadUrls.video,
-                    }),
-                    'video-inline': this.initUploadController({
-                        uploaderSlug: 'fd_hqInlineVideo',
-                        mediaType: 'video-inline',
-                        uploadUrl: uploadUrls.video,
-                    }),
-                    'text': this.initUploadController({
-                        uploaderSlug: 'fd_hqtext',
-                        mediaType: 'text',
-                        uploadUrl: uploadUrls.text,
-                    })
-                };
+            this.data.uploader.uploadControls = {
+                'image': this.initUploadController({
+                    uploaderSlug: 'fd_hqimage',
+                    mediaType: 'image',
+                    uploadUrl: uploadUrls.image,
+                }),
+                'audio': this.initUploadController({
+                    uploaderSlug: 'fd_hqaudio',
+                    mediaType: 'audio',
+                    uploadUrl: uploadUrls.audio,
+                }),
+                'video': this.initUploadController({
+                    uploaderSlug: 'fd_hqvideo',
+                    mediaType: 'video',
+                    uploadUrl: uploadUrls.video,
+                }),
+                'video-inline': this.initUploadController({
+                    uploaderSlug: 'fd_hqInlineVideo',
+                    mediaType: 'video-inline',
+                    uploadUrl: uploadUrls.video,
+                }),
+                'text': this.initUploadController({
+                    uploaderSlug: 'fd_hqtext',
+                    mediaType: 'text',
+                    uploadUrl: uploadUrls.text,
+                })
             };
         },
         initMediaUploaderWidget: function (widget) {
             this.__callOld();
             if (!this.data.uploader.uploadEnabled) {
                 return;
-            }
-
-            var deferredInit = this.data.uploader.deferredInit;
-            if (deferredInit !== null) {
-                this.data.uploader.deferredInit = null;
-                deferredInit.apply(this);
             }
 
             addUploaderToWidget(widget,
