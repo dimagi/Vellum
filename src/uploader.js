@@ -472,12 +472,6 @@ define([
                     uploadParams: {},
                     sessionid: options.sessionid
             };
-            // TODO: restore this behavior?
-            /*var super_startUpload = uploadController.value.startUpload;
-            uploadController.value.startUpload = function (event) {
-                uploadController.value.updateMediaPath();
-                return super_startUpload.call(this, event);
-            };*/
 
             return uploadController;
         },
