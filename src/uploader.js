@@ -90,8 +90,8 @@ define([
     // These functions were extracted out when separating the uploader code from
     // the JavaRosa Itext media widget code.  They could easily be made part of
     // the plugin interface in order to avoid passing around objectMap and
-    // uploadControls, but it seems fine either way.
-    var multimediaReference = function (mediaType, objectMap, uploadControls) {
+    // uploadControllers, but it seems fine either way.
+    var multimediaReference = function (mediaType, objectMap, uploadControllers) {
         var ref = {};
         ref.mediaType = mediaType;
 
@@ -109,7 +109,7 @@ define([
         };
 
         ref.updateController = function (widget) {
-            var uploadController = uploadControls[ref.mediaType];
+            var uploadController = uploadControllers[ref.mediaType];
             uploadController.currentReference = ref;
             uploadController.updateMediaPath = function () {
                 var params = uploadController.uploadParams;
@@ -127,9 +127,8 @@ define([
         return ref;
     };
 
-    var addUploaderToWidget = function (widget, objectMap, uploadControls) {
-        widget.mediaRef = multimediaReference(
-            widget.form, objectMap, uploadControls);
+    var addUploaderToWidget = function (widget, objectMap, uploadControllers) {
+        widget.mediaRef = multimediaReference(widget.form, objectMap, uploadControllers);
 
         if (!widget.getBaseMediaPath) {
             throw new Error("required method not found: widget.getBaseMediaPath()");
@@ -321,7 +320,7 @@ define([
                 return;
             }
 
-            this.data.uploader.uploadControls = {
+            this.data.uploader.uploadControllers = {
                 'image': this.initUploadController({
                     uploaderSlug: 'fd_hqimage',
                     mediaType: 'image',
@@ -357,7 +356,7 @@ define([
 
             addUploaderToWidget(widget,
                                 this.data.uploader.objectMap,
-                                this.data.uploader.uploadControls);
+                                this.data.uploader.uploadControllers);
         },
         initUploadController: function (options) {
             var $uploaderModal = $(multimedia_modal({
