@@ -439,7 +439,7 @@ define([
 
                 var $uploadStatusContainer = $uploaderModal.find(".hqm-upload-status");
                 $.ajax({
-                    url: uploadController.value.uploadURL,
+                    url: options.uploadUrl,
                     type: 'POST',
                     data: data,
                     contentType: false,
@@ -478,13 +478,7 @@ define([
                 return;
             }
             uploadController.value = {
-                    fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
-                    uploadURL: options.uploadUrl,
-                    isMultiFileUpload: false,
-                    existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
-                    licensingParams: [
-                        'shared', 'license', 'author', 'attribution-notes'],
-                    uploadParams: {}
+                    uploadParams: {},
             };
 
             return uploadController;
