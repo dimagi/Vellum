@@ -466,11 +466,5 @@ define([
 
             return uploadController;
         },
-        destroy: function () {
-            _.each(this.data.uploader.uploadControls, function (control, key) {
-                delete control.value;
-            });
-            this.__callOld();
-        }
     });
 });
