@@ -109,8 +109,7 @@ define([
         };
 
         ref.updateController = function (widget) {
-            // see note about poor man's promise below
-            var uploadController = uploadControls[ref.mediaType].value;
+            var uploadController = uploadControls[ref.mediaType];
             uploadController.currentReference = ref;
             uploadController.updateMediaPath = function () {
                 var params = uploadController.uploadParams;
@@ -420,7 +419,7 @@ define([
                 $(this).val('');
             });
 
-            var uploadController = {value: null};
+            var uploadController = {};
             $uploadButton.click(function () {
                 _updateUploadButton(false, true);
                 allowClose = false;
@@ -428,12 +427,12 @@ define([
                 var file = $fileInput.get(0).files[0],
                     data = new FormData();
                 data.append("Filedata", file);
-                uploadController.value.updateMediaPath();
+                uploadController.updateMediaPath();
 
                 var newExtension = '.' + file.name.split('.').pop().toLowerCase();
-                uploadController.value.uploadParams.path = uploadController.value.uploadParams.path.replace(/(\.[^/.]+)?$/, newExtension);
+                uploadController.uploadParams.path = uploadController.uploadParams.path.replace(/(\.[^/.]+)?$/, newExtension);
 
-                _.each(uploadController.value.uploadParams, function (value, key) {
+                _.each(uploadController.uploadParams, function (value, key) {
                     data.append(key, value);
                 });
 
@@ -464,22 +463,6 @@ define([
                     },
                 });
             });
-
-            // TODO: clean up usage of uploadController, remove `value` key
-            // Load the uploader and its dependencies in the background after
-            // core dependencies are already loaded, since it's not necessary at
-            // page load.
-            // uploadControls is referenced in the initMediaUploaderWidget call
-            // path, but never actually used until the upload button is clicked.
-            // We use an object here as a poor man's promise.
-            // Feel free to undo this if it's not worth it.
-
-            if (uploadController.value !== null) {
-                return;
-            }
-            uploadController.value = {
-                    uploadParams: {},
-            };
 
             return uploadController;
         },
