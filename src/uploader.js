@@ -369,7 +369,21 @@ define([
 
             var $fileInputTrigger = $uploaderModal.find(".btn-primary"),
                 $fileInput = $uploaderModal.find("input[type='file']"),
-                $uploadButton = $uploaderModal.find(".hqm-upload-confirm");
+                $uploadButton = $uploaderModal.find(".hqm-upload-confirm"),
+                _updateUploadButton = function (enable, spin) {
+                    if (enable) {
+                        $uploadButton.removeClass('disabled');
+                    } else {
+                        $uploadButton.addClass('disabled');
+                    }
+                    if (spin) {
+                        $uploadButton.find(".fa-spin").removeClass("hide");
+                        $uploadButton.find(".fa-cloud-arrow-up").addClass("hide");
+                    } else {
+                        $uploadButton.find(".fa-spin").addClass("hide");
+                        $uploadButton.find(".fa-cloud-arrow-up").removeClass("hide");
+                    }
+                };
 
             $fileInputTrigger.click(function () {
                 $fileInput.click();
@@ -386,10 +400,10 @@ define([
                         file_size: (file.size / MEGABYTE).toFixed(3),
                         file_name: file.name,
                     }));
-                    $uploadButton.addClass('btn-success').removeClass('disabled');
+                    _updateUploadButton(true, false);
                 } else {
                     $uploadStatusContainer.empty()
-                    $uploadButton.addClass('disabled').removeClass('btn-success');
+                    _updateUploadButton(false, false);
                 }
             });
 
@@ -400,7 +414,7 @@ define([
 
             var uploadController = {value: null};
             $uploadButton.click(function () {
-                $uploadButton.addClass('disabled').removeClass('btn-success');
+                _updateUploadButton(false, true);
 
                 var file = $fileInput.get(0).files[0],
                     data = new FormData();
@@ -422,6 +436,7 @@ define([
                         response = JSON.parse(response);
                         $('[data-hqmediapath^="' + response.ref.path.replace(/\.\w+$/, ".") + '"]').trigger('mediaUploadComplete', response);
                         $uploadStatusContainer.find(".hqm-begin").hide();
+                        _updateUploadButton(false, false);
                     },
                     error: function (response) {
                         response = JSON.parse(response.responseText);
@@ -430,6 +445,7 @@ define([
                             errors: response.errors,
                         }));
                         $uploadStatusContainer.find(".hqm-begin").hide();
+                        _updateUploadButton(false, false);
                     },
                 });
             });
