@@ -151,6 +151,29 @@ define([
                 .addClass('fd-mm-preview-container'),
             ICONS = widget.mug.form.vellum.data.javaRosa.ICONS;
 
+        widget.getUploaderModal = function () {
+            return $("#" + SLUG_TO_UPLOADER_SLUG[widget.form]);
+        };
+
+        widget.updateModalExistingFile = function (objectMap, isNew) {
+            var ICONS = widget.mug.form.vellum.data.javaRosa.ICONS,
+                $uploaderModal = widget.getUploaderModal(),
+                $existingFile = $uploaderModal.find(".hqm-existing");
+            if (widget.mediaRef.getUrl() && widget.mediaRef.isMediaMatched()) {
+                $existingFile.removeClass('hide');
+                $existingFile.find('.hqm-existing-controls').html(getPreviewUI(widget, objectMap, ICONS));
+                if (isNew) {
+                    $uploaderModal.find(".hqm-upload-completed").removeClass('hide');
+                }
+            } else {
+                $existingFile.addClass('hide');
+                $existingFile.find('.hqm-existing-controls').empty();
+            }
+            $('.existing-media').tooltip({
+                placement: 'bottom',
+            });
+        };
+
         widget.getUIElement = function () {
             $uiElem = _getParentUIElement();
             var $controlBlock = $uiElem.find('.controls'),
@@ -166,22 +189,9 @@ define([
 
             $uploadContainer.html(multimedia_block());
 
-            var $uploaderModal = $("#" + SLUG_TO_UPLOADER_SLUG[widget.form]);
+            var $uploaderModal = widget.getUploaderModal();
             $uploaderModal.on('show.bs.modal', function (event) {
-                var ICONS = widget.mug.form.vellum.data.javaRosa.ICONS,
-                    $existingFile = $uploaderModal.find(".hqm-existing");
-
-                // TODO: DRY up with the other place that has this code
-                if (widget.mediaRef.getUrl() && widget.mediaRef.isMediaMatched()) {
-                    $existingFile.removeClass('hide');
-                    $existingFile.find('.hqm-existing-controls').html(getPreviewUI(widget, objectMap, ICONS));
-                } else {
-                    $existingFile.addClass('hide');
-                    $existingFile.find('.hqm-existing-controls').empty();
-                }
-                $('.existing-media').tooltip({
-                    placement: 'bottom',
-                });
+                widget.updateModalExistingFile(objectMap);
             });
 
             $uploadContainer.find('.fd-mm-upload-trigger')
@@ -227,21 +237,7 @@ define([
             }
 
             widget.updateMultimediaBlockUI(objectMap);
-
-            // Show the newly uploaded file preview in modal
-            var $uploaderModal = $(".fd-multimedia-modal-container .modal:visible"),
-                $existingFile = $uploaderModal.find(".hqm-existing");
-            if (widget.mediaRef.getUrl() && widget.mediaRef.isMediaMatched()) {
-                $existingFile.removeClass('hide');
-                $existingFile.find('.hqm-existing-controls').html(getPreviewUI(widget, objectMap, ICONS));
-                $uploaderModal.find(".hqm-upload-completed").removeClass('hide');
-            } else {
-                $existingFile.addClass('hide');
-                $existingFile.find('.hqm-existing-controls').empty();
-            }
-            $('.existing-media').tooltip({
-                placement: 'bottom',
-            });
+            widget.updateModalExistingFile(objectMap, true);
         };
 
         widget.updateMultimediaBlockUI = function (objectMap) {
