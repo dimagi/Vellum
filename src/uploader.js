@@ -104,9 +104,8 @@ define([
             return _.isObject(ref.linkedObj);
         };
 
-        // gets called by uploadController
         ref.getUrl = function () {
-            return ref.linkedObj.url;
+            return ref.linkedObj ? ref.linkedObj.url : undefined;
         };
 
         ref.updateController = function (widget) {
@@ -214,9 +213,25 @@ define([
                 }
                 objectMap[data.ref.path] = data.ref;
             }
+
             widget.updateMultimediaBlockUI(objectMap);
+
+            // Show the newly uploaded file preview in modal
+            var $uploaderModal = $(".fd-multimedia-modal-container .modal:visible"),
+                $existingFile = $uploaderModal.find(".hqm-existing");
+            if (widget.mediaRef.getUrl() && widget.mediaRef.isMediaMatched()) {
+                $existingFile.removeClass('hide');
+                $existingFile.find('.hqm-existing-controls').html(getPreviewUI(widget, objectMap, ICONS));
+                $uploaderModal.find(".hqm-upload-completed").removeClass('hide');
+            } else {
+                $existingFile.addClass('hide');
+                $existingFile.find('.hqm-existing-controls').empty();
+            }
+            $('.existing-media').tooltip({
+                placement: 'bottom',
+            });
         };
-        
+
         widget.updateMultimediaBlockUI = function (objectMap) {
             $previewContainer.html(getPreviewUI(widget, objectMap, ICONS))
                 .find('.existing-media').tooltip();
@@ -395,6 +410,7 @@ define([
                     data.append(key, value);
                 });
 
+                var $uploadStatusContainer = $uploaderModal.find(".hqm-upload-status");
                 $.ajax({
                     url: uploadController.value.uploadURL,
                     type: 'POST',
@@ -402,8 +418,19 @@ define([
                     contentType: false,
                     processData: false,
                     enctype: 'multipart/form-data',
-                    success: function (response) {},    // TODO
-                    error: function () {},  // TODO
+                    success: function (response) {
+                        response = JSON.parse(response);
+                        $('[data-hqmediapath^="' + response.ref.path.replace(/\.\w+$/, ".") + '"]').trigger('mediaUploadComplete', response);
+                        $uploadStatusContainer.find(".hqm-begin").hide();
+                    },
+                    error: function (response) {
+                        response = JSON.parse(response.responseText);
+                        $uploadStatusContainer.find(".hqm-error").show();
+                        $uploadStatusContainer.find(".hqm-errors").html(_.template(multimedia_errors)({
+                            errors: response.errors,
+                        }));
+                        $uploadStatusContainer.find(".hqm-begin").hide();
+                    },
                 });
             });
 
@@ -423,7 +450,6 @@ define([
                     fileFilters: SUPPORTED_EXTENSIONS[options.mediaType],
                     uploadURL: options.uploadUrl,
                     isMultiFileUpload: false,
-                    errorsTemplate: multimedia_errors,
                     existingFileTemplate: PREVIEW_TEMPLATES[options.mediaType],
                     licensingParams: [
                         'shared', 'license', 'author', 'attribution-notes'],

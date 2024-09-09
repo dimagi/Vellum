@@ -1,6 +1,5 @@
 <% if (errors.length > 0) { %>
     <div class="alert alert-danger">
-        <h5><%-gettext("Errors found")%></h5>
         <% for (var e = 0; e < errors.length; e++) {
             var error = errors[e]; %>
             <p><%- error %></p>
