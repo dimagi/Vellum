@@ -138,10 +138,7 @@ define([
 
         widget.getRandomizedMediaPath = function (oldPath) {
             // The file type extension of the path returned here is replaced by
-            // the extension of the uploaded file, so it is not strictly
-            // necessary to pass in oldPath. However, the returned path must
-            // have an extension because of the way
-            // BaseHQMediaUploadController.startUpload() replaces it.
+            // the extension of the uploaded file.
             var extension = EXT.exec(oldPath)[0].toLowerCase() || ".xyz",
                 // generates 1 or 2 duplicates in 100K samples (probably random enough)
                 rand6 = Math.random().toString(36).slice(2, 8);
@@ -440,6 +437,10 @@ define([
                     data = new FormData();
                 data.append("Filedata", file);
                 uploadController.value.updateMediaPath();
+
+                var newExtension = '.' + file.name.split('.').pop().toLowerCase();
+                uploadController.value.uploadParams.path = uploadController.value.uploadParams.path.replace(/(\.[^/.]+)?$/, newExtension);
+
                 _.each(uploadController.value.uploadParams, function (value, key) {
                     data.append(key, value);
                 });
