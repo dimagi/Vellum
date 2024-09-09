@@ -123,7 +123,6 @@ define([
                 old_ref: (ref.isMediaMatched()) ? ref.linkedObj.m_id : "",
                 replace_attachment: true
             };
-            //uploadController.updateUploadFormUI();        // TODO: restore this - it updates the UI within the modal with the newly-uploaded file preview
         };
 
         return ref;
@@ -171,6 +170,25 @@ define([
             $controlBlock.append($previewContainer);
 
             $uploadContainer.html(multimedia_block());
+
+            var $uploaderModal = $("#" + SLUG_TO_UPLOADER_SLUG[widget.form]);
+            $uploaderModal.on('show.bs.modal', function (event) {
+                var ICONS = widget.mug.form.vellum.data.javaRosa.ICONS,
+                    $existingFile = $uploaderModal.find(".hqm-existing");
+
+                // TODO: DRY up with the other place that has this code
+                if (widget.mediaRef.getUrl() && widget.mediaRef.isMediaMatched()) {
+                    $existingFile.removeClass('hide');
+                    $existingFile.find('.hqm-existing-controls').html(getPreviewUI(widget, objectMap, ICONS));
+                } else {
+                    $existingFile.addClass('hide');
+                    $existingFile.find('.hqm-existing-controls').empty();
+                }
+                $('.existing-media').tooltip({
+                    placement: 'bottom',
+                });
+            });
+
             $uploadContainer.find('.fd-mm-upload-trigger')
                 .append(getUploadButtonUI(widget, objectMap));
             $uploadContainer.find('.fd-mm-path-input')
