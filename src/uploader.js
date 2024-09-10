@@ -164,12 +164,6 @@ define([
 
             $uploadContainer.html(multimedia_block());
 
-            var $uploaderModal = widget.getUploaderModal();
-            $uploaderModal.on('show.bs.modal', function (event) {
-                $uploaderModal.find(".hqm-upload-status").empty();
-                widget.updateModalExistingFile(objectMap);
-            });
-
             $uploadContainer.find('.fd-mm-upload-trigger')
                 .append(getUploadButtonUI(widget, objectMap));
             $uploadContainer.find('.fd-mm-path-input')
@@ -265,6 +259,9 @@ define([
         }));
         $uploadBtn.click(function () {
             widget.mediaRef.updateController(widget);
+            var $uploaderModal = widget.getUploaderModal();
+            $uploaderModal.find(".hqm-upload-status").empty();
+            widget.updateModalExistingFile(objectMap);
         });
 
         return $uploadBtn;
