@@ -371,13 +371,12 @@ define([
                 if ($fileInput.get(0).files.length) {
                     var file = $fileInput.get(0).files[0];
                     $uploadStatusContainer.html(_.template(multimedia_upload_status)({
-                        unique_id: self.marker + file.name,
                         file_size: (file.size / MEGABYTE).toFixed(3),
                         file_name: file.name,
                     }));
                     _updateUploadButton(true, false);
                 } else {
-                    $uploadStatusContainer.empty()
+                    $uploadStatusContainer.empty();
                     _updateUploadButton(false, false);
                 }
             });
