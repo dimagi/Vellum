@@ -130,14 +130,14 @@ define([
             return $("#" + SLUG_TO_UPLOADER_SLUG[widget.form]);
         };
 
-        widget.updateModalExistingFile = function (objectMap, isNew) {
+        widget.updateModalExistingFile = function (objectMap, isComplete) {
             var ICONS = widget.mug.form.vellum.data.javaRosa.ICONS,
                 $uploaderModal = widget.getUploaderModal(),
                 $existingFile = $uploaderModal.find(".hqm-existing");
             if (widget.mediaRef.getUrl() && widget.mediaRef.isMediaMatched()) {
                 $existingFile.removeClass('hide');
                 $existingFile.find('.hqm-existing-controls').html(getPreviewUI(widget, objectMap, ICONS));
-                if (isNew) {
+                if (isComplete) {
                     $uploaderModal.find(".hqm-upload-completed").removeClass('hide');
                 }
             } else {
