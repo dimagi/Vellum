@@ -166,6 +166,7 @@ define([
 
             var $uploaderModal = widget.getUploaderModal();
             $uploaderModal.on('show.bs.modal', function (event) {
+                $uploaderModal.find(".hqm-upload-status").empty();
                 widget.updateModalExistingFile(objectMap);
             });
 
@@ -417,7 +418,7 @@ define([
                     success: function (response) {
                         response = JSON.parse(response);
                         $('[data-hqmediapath^="' + response.ref.path.replace(/\.\w+$/, ".") + '"]').trigger('mediaUploadComplete', response);
-                        $uploadStatusContainer.find(".hqm-begin").hide();
+                        $uploadStatusContainer.empty();
                         _updateUploadButton(false, false);
                         allowClose = true;
                     },
