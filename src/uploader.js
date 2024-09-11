@@ -381,11 +381,6 @@ define([
                 }
             });
 
-            // Clear file input's value on click so that change event will fire on re-selecting the same file
-            $fileInput.on('click' , function() {
-                $(this).val('');
-            });
-
             var uploadController = {};
             $uploadButton.click(function () {
                 _updateUploadButton(false, true);
