@@ -30,7 +30,7 @@
         "langcodes": "dimagi/langcodes#master",
         "markdown-it": "12.3.2",
         "require-css": "0.1.10",
-        "requirejs": "2.3.6",
+        "requirejs": "2.3.7",
         "requirejs-plugins": "1.0.2",
         "requirejs-text": "2.0.16",
         "requirejs-undertemplate": "dimagi/requirejs-tpl#v0.0.5",
