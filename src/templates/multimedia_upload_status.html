@@ -1,0 +1,12 @@
+<div style="clear: both;">
+    <div class="alert alert-success" style="margin-bottom: 2px; margin-top: 10px;">
+        <i class="fa fa-check"></i> <%= file_name %> <strong>[<%= file_size %> MB]</strong>
+    </div>
+    <p class="text-success hqm-begin">
+      <%=gettext("Ready to upload. Click <strong>Begin Upload</strong> below to start.")%>
+    </p>
+    <p class="text-danger hqm-error hide">
+        <span class="label label-danger"><%-gettext("There were errors.")%></span>
+    </p>
+    <div class="hqm-errors"></div>
+</div>

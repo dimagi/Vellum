@@ -18,7 +18,6 @@
         "@bracken/require-less": "0.1.6",
         "at.js": "1.5.4",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
-        "MediaUploader": "dimagi/MediaUploader#master",
         "XMLWriter": "dimagi/XMLWriter#master",
         "bootstrap": "3.4.1",
         "codemirror": "5.61.1",
@@ -55,7 +54,7 @@
     },
     "main": "src/main.js",
     "scripts": {
-        "testserver": "`npm bin`/http-server -p ${VELLUM_PORT:-8088}",
+        "testserver": "http-server -p ${VELLUM_PORT:-8088}",
         "test:mocha": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/?useBuilt=true -t 500000",
         "test:lint": "jshint src && jshint --config tests/.jshintrc tests",
         "test": "npm run test:mocha && npm run test:lint"

@@ -27,10 +27,6 @@ Caret.js@INTELOGIE/Caret.js#0.3.1:
   dependencies:
     grunt "~0.4.1"
 
-MediaUploader@dimagi/MediaUploader#master:
-  version "0.0.0"
-  resolved "https://codeload.github.com/dimagi/MediaUploader/tar.gz/1038b486ecfca4251bb5c85bc427a92df35cf8d7"
-
 XMLWriter@dimagi/XMLWriter#master:
   version "1.1.0"
   resolved "https://codeload.github.com/dimagi/XMLWriter/tar.gz/ab8760d6e03925c67e3405123648291e1258ef40"
