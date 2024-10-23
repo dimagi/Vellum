@@ -1,5 +1,5 @@
-/* global requirejs */
-requirejs.config({
+// TODO: restore allllll this stuff
+/*requirejs.config({
     // For some reason when using the map config as suggested by some of the
     // plugins' documentation, and only when including vellum in another
     // app, it tries to get requirejs-promise instead of
@@ -160,4 +160,6 @@ define([
     // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect
-});
+});*/
+
+export default function () { }

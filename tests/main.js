@@ -3,8 +3,6 @@ if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
     mocha.reporter('html');
 }
 
-(function () { // begin local scope
-
 var urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('useBuilt')) {
     window.useBuilt = true;
@@ -12,7 +10,8 @@ if (urlParams.get('useBuilt')) {
 
 var useBuilt = window.useBuilt, baseUrl, testBase;
 
-if (useBuilt) {
+// TODO: restore baseUrl functionality
+if (useBuilt) {     // TODO: support built files
     baseUrl = '_build/src';
     testBase = "../../";
 } else {
@@ -21,22 +20,23 @@ if (useBuilt) {
 }
 console.log("loading Vellum from " + baseUrl);
 
-requirejs.config({
+/*requirejs.config({        // TODO: remove
     baseUrl: baseUrl,
     paths: {
         "jquery.vellum": "main",
         "tests": testBase + "tests"
     }
-});
+});*/
 
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
-requirejs(['jquery.vellum'], function () {
+//requirejs(['jquery.vellum'], function () {    // TODO: restore
+import _ from "../src/main.js";
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
-    requirejs.config({
+    /*requirejs.config({    // TODO: remove/replace
         // handle potential slow free heroku dynos
         waitSeconds: 60,
         paths: {
@@ -44,10 +44,10 @@ requirejs(['jquery.vellum'], function () {
             'chai': testBase + 'node_modules/chai/chai',
             'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml'
         }
-    });
+    });*/
 
     if (useBuilt) {
-        requirejs.config({
+        /*requirejs.config({    // TODO: replace
             paths: {
                 'text': '../node_modules/requirejs-text',
                 // https://github.com/guybedford/require-css/issues/133 
@@ -55,10 +55,11 @@ requirejs(['jquery.vellum'], function () {
                 'less': 'error',
                 'json': 'error'
             }
-        });
+        });*/
     }
 
-    requirejs([
+    // TODO: add back all the test modules
+    /*requirejs([
         'jquery',
         'tests/options',
 
@@ -105,12 +106,13 @@ requirejs(['jquery.vellum'], function () {
         'tests/bulkActions',
         'tests/undomanager',
         'tests/commcareConnect',
-    ], function ($, options) {
+    ], function ($, options) {*/
+    const options = {};     // TODO: restore options
         var session = window.sessionStorage;
 
-        if (useBuilt) {
+        /*if (useBuilt) {   // TODO: restore
             $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
-        }
+        }*/
 
         function runTests() {
             function showTestResults() {
@@ -134,7 +136,8 @@ requirejs(['jquery.vellum'], function () {
         $('#run-tests').click(runTests);
 
         function load(form, ready) {
-            $('#vellum').empty().vellum($.extend(true, {}, options.options, {
+            // TODO: restore $.vellum!
+            /*$('#vellum').empty().vellum($.extend(true, {}, options.options, {
                 core: {
                     onReady: ready,
                     saveUrl: function (data) {
@@ -146,7 +149,7 @@ requirejs(['jquery.vellum'], function () {
                     },
                     form: form
                 }
-            }));
+            }));*/
 
             // trigger vellum resizing
             setTimeout(function () {
@@ -157,7 +160,7 @@ requirejs(['jquery.vellum'], function () {
         $('#load-saved').click(function () {
             load(session.getItem("vellum.tests.main.lastSavedForm") || "");
         });
-        
+
         if (navigator.userAgent.indexOf('HeadlessChrome') >= 0) {
             load("", function () { mocha.run(); });
         } else if (/[?&]load=saved(&|#|$)/.test(window.location.href)) {
@@ -184,7 +187,5 @@ requirejs(['jquery.vellum'], function () {
 
             reader.readAsText(file);
         });
-    });
-});
-
-})(); // end local scope
+    //});
+//});

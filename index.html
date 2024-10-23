@@ -3,19 +3,20 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>Vellum Test</title>
-    
+
     <link href="tests/lib/font-awesome.css" type="text/css" rel="stylesheet" />
     <link href="tests/lib/font-commcare.css" type="text/css" rel="stylesheet" />
     <link href="tests/lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
     <link href="node_modules/codemirror/lib/codemirror.css" type="text/css" rel="stylesheet" />
-    
+
     <!-- Mocha and test-only dependencies -->
     <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
     <script src="node_modules/mocha/mocha.js"></script>
 
-    <script src="tests/typoglycemia.js"></script>
-    <script data-main="tests/main" src="node_modules/requirejs/require.js"></script>
-    <script src="node_modules/xrayquire/xrayquire.js"></script>
+    <script src="tests/typoglycemia.js"></script><!-- TODO: remove? -->
+    <!--script src="node_modules/xrayquire/xrayquire.js"></script--><!-- TODO: remove -->
+    <script src="node_modules/jquery/dist/jquery.js"></script><!-- TODO: load via webpack -->
+    <script src="tests/main.js" type="module"><script>
     <script>
       mocha.setup({
         ui: 'bdd',
