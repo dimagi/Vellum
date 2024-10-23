@@ -34,6 +34,8 @@
         "requirejs-text": "2.0.16",
         "requirejs-undertemplate": "dimagi/requirejs-tpl#v0.0.5",
         "underscore": "1.13.1",
+        "webpack": "5.95.0",
+        "webpack-cli": "5.1.4",
         "xpath": "dimagi/js-xpath#v0.0.8"
     },
     "devDependencies": {
