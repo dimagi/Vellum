@@ -13,9 +13,11 @@
     <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
     <script src="node_modules/mocha/mocha.js"></script>
 
-    <script src="tests/typoglycemia.js"></script>
-    <script data-main="tests/main" src="node_modules/requirejs/require.js"></script>
-    <script src="node_modules/xrayquire/xrayquire.js"></script>
+    <script src="tests/typoglycemia.js"></script><!-- TODO: remove? -->
+    <!--script data-main="tests/main" src="node_modules/requirejs/require.js"></script--><!-- TODO: remove -->
+    <!--script src="node_modules/xrayquire/xrayquire.js"></script--><!-- TODO: remove -->
+    <script src="node_modules/jquery/dist/jquery.js"></script><!-- TODO: load via webpack -->
+    <script src="tests/main.js" type="module"><script>
     <script>
       mocha.setup({
         ui: 'bdd',
