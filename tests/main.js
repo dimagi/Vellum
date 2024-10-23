@@ -1,24 +1,7 @@
-/* global console, mocha, navigator, URLSearchParams */
+/* global console, mocha, navigator */
 if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
     mocha.reporter('html');
 }
-
-var urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('useBuilt')) {
-    window.useBuilt = true;
-}
-
-var useBuilt = window.useBuilt, baseUrl, testBase;
-
-// TODO: restore baseUrl functionality
-if (useBuilt) {     // TODO: support built files
-    baseUrl = '_build/src';
-    testBase = "../../";
-} else {
-    baseUrl = 'src';
-    testBase = "../";
-}
-console.log("loading Vellum from " + baseUrl);
 
 /*requirejs.config({        // TODO: remove
     baseUrl: baseUrl,
@@ -45,18 +28,6 @@ import _ from "../src/main.js";
             'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml'
         }
     });*/
-
-    if (useBuilt) {
-        /*requirejs.config({    // TODO: replace
-            paths: {
-                'text': '../node_modules/requirejs-text',
-                // https://github.com/guybedford/require-css/issues/133 
-                //'css': 'error',
-                'less': 'error',
-                'json': 'error'
-            }
-        });*/
-    }
 
     // TODO: add back all the test modules
     /*requirejs([
@@ -109,10 +80,6 @@ import _ from "../src/main.js";
     ], function ($, options) {*/
     const options = {};     // TODO: restore options
         var session = window.sessionStorage;
-
-        /*if (useBuilt) {   // TODO: restore
-            $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
-        }*/
 
         function runTests() {
             function showTestResults() {
