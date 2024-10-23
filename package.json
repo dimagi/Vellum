@@ -34,8 +34,7 @@
         "requirejs-text": "2.0.16",
         "requirejs-undertemplate": "dimagi/requirejs-tpl#v0.0.5",
         "underscore": "1.13.1",
-        "xpath": "dimagi/js-xpath#v0.0.8",
-        "xrayquire": "npm:xrayquire-for-npm#^0.1.1"
+        "xpath": "dimagi/js-xpath#v0.0.8"
     },
     "devDependencies": {
         "chai": "4.2.0",
