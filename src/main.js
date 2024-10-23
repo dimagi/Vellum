@@ -154,7 +154,6 @@ define([
     'vellum/saveToCase',
     'vellum/uploader',
     'vellum/window',
-    'vellum/polyfills',
     'vellum/copy-paste',
     'vellum/commander',
     'vellum/commcareConnect',
