@@ -15,6 +15,7 @@ if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
 //requirejs(['jquery.vellum'], function () {    // TODO: restore
+import $ from 'jquery';
 import _ from "../src/main.js";
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
