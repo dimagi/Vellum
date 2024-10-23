@@ -2820,11 +2820,6 @@ xpath@dimagi/js-xpath#v0.0.8:
   dependencies:
     biginteger "^1.0.3"
 
-"xrayquire@npm:xrayquire-for-npm#^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/xrayquire-for-npm/-/xrayquire-for-npm-0.1.1.tgz#c5c4f6f070dd8ac8439fd4895f9e7e9e40c6746f"
-  integrity sha1-xcT28HDdishDn9SJX55+nkDGdG8=
-
 xtend@^4.0.0:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.2.tgz#bb72779f5fa465186b1f438f674fa347fdb5db54"
