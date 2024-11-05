@@ -17,6 +17,10 @@ if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
 //requirejs(['jquery.vellum'], function () {    // TODO: restore
 import $ from 'jquery';
 import _ from "../src/main.js";
+
+// TODO: this is just testing, remove it
+import html from "../src/templates/add_question.html";
+console.log("html: " + html);
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly

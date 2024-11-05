@@ -16,9 +16,9 @@
     },
     "dependencies": {
         "@bracken/require-less": "0.1.6",
-        "at.js": "1.5.4",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
         "XMLWriter": "dimagi/XMLWriter#master",
+        "at.js": "1.5.4",
         "bootstrap": "3.4.1",
         "codemirror": "5.61.1",
         "fuse.js": "2.7.4",
@@ -46,6 +46,7 @@
         "grunt-contrib-connect": "3.0.0",
         "grunt-contrib-jshint": "3.1.0",
         "grunt-contrib-watch": "1.1.0",
+        "html-loader": "^5.1.0",
         "http-server": "^14.1.0",
         "jshint": "^2.13.6",
         "less": "2",
