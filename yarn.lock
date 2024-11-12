@@ -2259,20 +2259,15 @@ requirejs-text@2.0.16, requirejs-text@~2.0.12:
   resolved "https://registry.yarnpkg.com/requirejs-text/-/requirejs-text-2.0.16.tgz#b6f3e20689aa998e36641bc4f8bd11b7964ac872"
   integrity sha512-XrzjeTb1pwzIWmkz8qnUiM20gENgiwB+66IciNuziwlaPAJsYQsQPSYyQ1kD4tGKGZxTisIfDbOHk02DpI/76Q==
 
-requirejs-undertemplate@dimagi/requirejs-tpl#v0.0.5:
-  version "0.0.5"
-  resolved "https://codeload.github.com/dimagi/requirejs-tpl/tar.gz/e2e00a613c7dccff092bfd48bd58d4f949a5dfb4"
+requirejs-undertemplate@dimagi/requirejs-tpl#v0.0.6:
+  version "0.0.6"
+  resolved "https://codeload.github.com/dimagi/requirejs-tpl/tar.gz/1bce63e7db7d81c91f4d93871fbc766d9a572405"
   dependencies:
-    requirejs "2.3.3"
+    requirejs "^2.3.3"
     requirejs-text "~2.0.12"
     underscore "^1.8.3"
 
-requirejs@2.3.3:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/requirejs/-/requirejs-2.3.3.tgz#aa59fd3a0287eaf407959a138228044b5dd6a6a3"
-  integrity sha1-qln9OgKH6vQHlZoTgigES13WpqM=
-
-requirejs@2.3.7:
+requirejs@2.3.7, requirejs@^2.3.3:
   version "2.3.7"
   resolved "https://registry.yarnpkg.com/requirejs/-/requirejs-2.3.7.tgz#0b22032e51a967900e0ae9f32762c23a87036bd0"
   integrity sha512-DouTG8T1WanGok6Qjg2SXuCMzszOo0eHeH9hDZ5Y4x8Je+9JB38HdTLT4/VA8OaUhBa0JPVHJ0pyBkM1z+pDsw==
