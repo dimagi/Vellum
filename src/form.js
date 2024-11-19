@@ -491,8 +491,8 @@ define([
         updateInstanceQuery: function (query, instanceId, oldId) {
             var regexp = INSTANCE_REGEXP;
             if (oldId) {
-                regexp = new RegExp("(^|\W)instance\\((['\"])" +
-                                    RegExp.escape(oldId) + "\2\\)", "ig");
+                regexp = new RegExp("(^|\\W)instance\\((['\"])" +
+                                    RegExp.escape(oldId) + "\\2\\)", "ig");
             }
             return query.replace(regexp, "$1instance('" + instanceId + "')");
         },
