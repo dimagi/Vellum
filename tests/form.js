@@ -713,5 +713,45 @@ define([
                 });
             });
         });
+
+        describe("updateInstanceQuery", function () {
+
+
+            it('should not replace ids if name closes with a 2', function() {
+                // This is just to test the previous behavior does not happen anymore
+                const form = util.loadXML("");
+                const query = "instance('oldId\2)/session/data/case_id";
+                const instanceId = "newId";
+                const oldInstanceId = "oldId";
+                const updatedQuery = form.updateInstanceQuery(query, instanceId, oldInstanceId);
+                assert.equal(updatedQuery, query);
+            });
+
+            it('should replace ids if old instance Id is provided', function() {
+                const form = util.loadXML("");
+                const query = "instance('oldId')/session/data/case_id";
+                const instanceId = "newId";
+                const oldInstanceId = "oldId";
+                const updatedQuery = form.updateInstanceQuery(query, instanceId, oldInstanceId);
+                assert.equal(updatedQuery, "instance('newId')/session/data/case_id");
+            });
+
+            it('should replace ids if there is leading white space', function() {
+                const form = util.loadXML("");
+                const query = "word instance('oldId')/session/data/case_id";
+                const instanceId = "newId";
+                const oldInstanceId = "oldId";
+                const updatedQuery = form.updateInstanceQuery(query, instanceId, oldInstanceId);
+                assert.equal(updatedQuery, "word instance('newId')/session/data/case_id");
+            });
+
+            it('should replace ids if there is no old', function() {
+                const form = util.loadXML("");
+                const query = "instance('oldId')/session/data/case_id";
+                const instanceId = "newId";
+                const updatedQuery = form.updateInstanceQuery(query, instanceId);
+                assert.equal(updatedQuery, "instance('newId')/session/data/case_id");
+            });
+        });
     });
 });
