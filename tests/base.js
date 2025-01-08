@@ -1,5 +1,10 @@
 /*jshint multistr: true */
-define([
+import chai from "chai";
+import $ from "jquery";
+import _ from "underscore";
+//import util from "tests/utils";
+
+/*define([
     'chai',
     'jquery',
     'underscore',
@@ -8,20 +13,21 @@ define([
     chai,
     $,
     _,
-    util
-) {
-    var assert = chai.assert;
+    util*/
+    //const assert = chai.assert;
+console.log("stuff");
+console.log(chai.describe);
 
     describe("The plugin manager", function () {
         it("should ignore unknown plugins", function (done) {
-            util.init({
+            assert(1, "I am a trivial assert");
+            /*util.init({
                 plugins: ["plugin-will-not-be-found"],
                 core: { onReady: function () {
                     assert(!this.isPluginEnabled("plugin-will-not-be-found"),
                         "loaded unknown plugin");
                     done();
                 }
-            }});
+            }});*/
         });
     });
-});

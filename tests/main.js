@@ -34,17 +34,16 @@ console.log("html: " + html);
         }
     });*/
 
+import "../tests/options";
+import "../tests/base";
+
+// tests for profiling load times
+// (disabled by default because they take a long time)
+//'tests/profiling',    // TODO: deal with
+
     // TODO: add back all the test modules
     /*requirejs([
-        'jquery',
-        'tests/options',
-
-        // tests for profiling load times
-        // (disabled by default because they take a long time)
-        //'tests/profiling',
-
         // register tests on global mocha instance as side-effect
-        'tests/base',
         'tests/core',
         'tests/form',
         'tests/logic',
