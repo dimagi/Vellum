@@ -55,6 +55,7 @@ define([
         var options = {
             at: "",
             data: choices,
+            limit: 10,
             maxLen: Infinity,
             suffix: "",
             tabSelectsMatch: false,
