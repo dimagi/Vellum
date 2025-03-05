@@ -40,6 +40,13 @@ define([
             assert.equal(mug.p.relevantAttr, "#form/question = #case/dob");
         });
 
+        it("should display error for invalid xpath expression", function () {
+            util.loadXML(MOTHER_REF_XML);
+            var mug = util.getMug("/data/mug");
+            mug.p.calculateAttr = "#invalid/xpath dob`#case/dob`";
+            assert(!util.isTreeNodeValid(mug), "mug should not be valid");
+        });
+
         it("should not update expressions for model iteration", function () {
             util.loadXML("");
             var repeat = util.addQuestion("Repeat", "product");
