@@ -7,12 +7,16 @@ define([
     _,
     util
 ) {
-    var EXTERNAL_REF = "#";
+    var EXTERNAL_REF = "#",
+        INVALID_XPATH = "#invalid/xpath ";
 
     function LogicExpression (exprText, xpathParser) {
         this._text = exprText || "";
         this._xpathParser = xpathParser;
-        if ($.trim(exprText)) {
+        if (typeof this._text === "string" && this._text.startsWith(INVALID_XPATH)) {
+            this.parsed = null;
+            this.error = INVALID_XPATH;
+        } else if ($.trim(exprText)) {
             try {
                 this.parsed = this._xpathParser.parse(exprText);
             } catch (err) {
@@ -225,6 +229,12 @@ define([
                 reverse = this.reverse,
                 refs;
 
+            messages.push({
+                key: "logic-invalid-xpath-warning",
+                level: mug.WARNING,
+                message: expr.error === INVALID_XPATH ? gettext("Invalid XPath expression.") : "",
+            });
+
             expr.analyze();
             if (expr.referencesSelf && !(spec && spec.mayReferenceSelf)) {
                 warning = util.format(gettext("The {property} for a question " +
@@ -233,7 +243,6 @@ define([
                     "or your form will have errors."),
                     {property: propertyName});
             }
-
             messages.push({
                 key: "core-circular-reference-warning",
                 level: mug.WARNING,
