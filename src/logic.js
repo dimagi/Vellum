@@ -218,9 +218,10 @@ define([
             }
         },
         _addReferences: function (mug, property, value) {
+            value = this.form.getLogicalXPath(value || mug.p[property]);
             var _this = this,
                 form = _this.form,
-                expr = new LogicExpression(value || mug.p[property], form.xpath),
+                expr = new LogicExpression(value, form.xpath),
                 unknowns = [],
                 messages = [],
                 warning = "",

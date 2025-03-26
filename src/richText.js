@@ -714,6 +714,23 @@ define([
     }
 
     /**
+     * Get unescaped hashtag expression
+     *
+     * @return - expression with hashtags as they were
+     *      originally typed if the given value is marked with the
+     *      invalid xpath prefix, otherwise the given value
+     */
+    function unescapeHashtags(value, form) {
+        if (isInvalid(value)) {
+            value = escapedHashtags.transform(
+                value.slice(INVALID_PREFIX.length),
+                form.normalizeHashtag.bind(form)
+            );
+        }
+        return value;
+    }
+
+    /**
      * Convert plain text to HTML to be edited in CKEditor
      *
      * Replace line breaks with <p> tags and preserve contiguous spaces.
@@ -932,5 +949,6 @@ define([
         toRichText: toRichText,
         isInvalid: isInvalid,
         unescapeXPath: unescapeXPath,
+        unescapeHashtags: unescapeHashtags,
     };
 });
