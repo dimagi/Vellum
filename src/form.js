@@ -279,6 +279,37 @@ define([
                 return [];
             }
         },
+        getLogicalXPath: function (expr) {
+            // Work around js-xpath limitation that fails to parse hashtag
+            // nodes with filters by converting hashtags to xpath.
+            function hasHashtagFilter(expr) {
+                if (!richText.isInvalid(expr)) return false;
+                var unescaped = richText.unescapeHashtags(expr, form);
+                if (unescaped) {
+                    try {
+                        form.xpath.parse(unescaped);
+                    } catch (err) {
+                        if (/\bExpecting '.+', got 'LBRACK'$/.test(String(err))) {
+                            return /`#[\w/]+`\s*\[.+\]/.test(expr);
+                        }
+                    }
+                }
+                return false;
+            }
+
+            var original = expr,
+                form = this;
+            expr = String(expr);
+            if (original && form.richText && hasHashtagFilter(expr)) {
+                expr = richText.unescapeXPath(expr, form);
+                try {
+                    form.xpath.parse(expr);
+                    // return unescaped xpath only when it parses
+                    return expr;
+                } catch (err) { }
+            }
+            return original;
+        },
         knownExternalReferences: function () {
             return this._logicManager.knownExternalReferences();
         },

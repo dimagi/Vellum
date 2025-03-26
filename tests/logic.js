@@ -8,6 +8,7 @@ define([
     'vellum/xpath',
     'text!tests/static/logic/test-xml-1.xml',
     'text!tests/static/databrowser/mother-ref.xml',
+    'text!tests/static/logic/hashtag-filter.xml',
 ], function (
     chai,
     $,
@@ -16,7 +17,8 @@ define([
     logic,
     xpath,
     TEST_XML_1,
-    MOTHER_REF_XML
+    MOTHER_REF_XML,
+    HASHTAG_FILTER
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -45,6 +47,12 @@ define([
             var mug = util.getMug("/data/mug");
             mug.p.calculateAttr = "#invalid/xpath dob`#case/dob`";
             assert(!util.isTreeNodeValid(mug), "mug should not be valid");
+        });
+
+        it("should not display invalid xpath error for hashtag filter expression", function () {
+            util.loadXML(HASHTAG_FILTER);
+            var calc = util.getMug("/data/calc");
+            assert(util.isTreeNodeValid(calc), "calc xpath should be valid");
         });
 
         it("should not update expressions for model iteration", function () {
