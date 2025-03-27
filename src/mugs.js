@@ -1480,6 +1480,13 @@ define([
         },
     });
 
+    var Document = util.extend(Audio, {
+        typeName: gettext('Document Upload'),
+        isTypeChangeable: false,
+        icon: 'fa fa-file',
+        mediaType: "application/*,text/*", /* */
+    });
+
     var Geopoint = util.extend(defaultOptions, {
         typeName: gettext('GPS'),
         dataType: 'geopoint',
@@ -1890,6 +1897,7 @@ define([
                 "DataBindOnly": DataBindOnly,
                 "Date": Date,
                 "DateTime": DateTime,
+                "Document": Document,
                 "Double": Double,
                 "FieldList": FieldList,
                 "Geopoint": Geopoint,
