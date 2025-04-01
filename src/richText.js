@@ -76,6 +76,7 @@ define([
             return element.name === 'span' && element.hasClass('label-datanode');
         },
         init: function() {
+            console.log('init');
             // TODO: PR to ckeditor to make changing drag ui supported
             var $this = $(this.element.$),
                 width = $this.innerWidth(),
@@ -148,10 +149,60 @@ define([
      *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
+        var inputElement = input[0];
         // HACK use 1/4 em space to fix cursor movement/hiding near bubble
         var TRAILING_SPACE = "\u2005";
+
+        let x, y;
+        inputElement.addEventListener('mousemove', e => {
+            x = e.clientX;
+            y = e.clientY;
+            // console.log(`${x}, ${y}`);
+        });
+
+        function htmlToElement(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            doc.body.firstChild.contentEditable = false;
+            return doc.body.firstChild;
+        }
+
         function insertHtmlWithSpace(content) {
-            editor.insertHtml(content + TRAILING_SPACE);
+            console.log(`insertHtmlWithSpace: ${content}`);
+            const elementAtDrop = document.elementFromPoint(x, y);
+            const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
+
+
+            let range;
+            if (existingBubble) {
+                // If dropping on an existing bubble, position after it
+                range = document.createRange();
+                range.setStartAfter(existingBubble);
+                range.setEndAfter(existingBubble);
+            } else {
+                const position = document.caretPositionFromPoint(x, y);
+                if (position) {
+                    range = document.createRange();
+                    range.setStart(position.offsetNode, position.offset);
+                    range.collapse(true);
+                }
+            }
+
+            console.log(`range: ${range}`)
+            if (range) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                // Create and insert the appropriate bubble based on type
+                const element = htmlToElement(content);
+                range.deleteContents();
+                range.insertNode(element);
+            }
+
+            // need to figure out how to insert at right position using selection and range api.
+            // ckeditor use removed
+            // editor.insertHtml(content + TRAILING_SPACE);
         }
         var wrapper = input.data("ckwrapper");
         if (wrapper) {
@@ -169,25 +220,39 @@ define([
         if (!options.createPopover && !form.vellum.opts().features.disable_popovers) {
             options.createPopover = createPopover;
         }
+        let resolveEditorPromise;
+        input.promise = new Promise((resolve) => {
+          resolveEditorPromise = resolve;
+        });
         var NOTSET = {},
             newval = NOTSET,  // HACK work around async get/set
-            editor = input.ckeditor({
-                contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
-                disableNativeSpellChecker: options.disableNativeSpellChecker,
-                placeholder: ' ',
-            }).editor;
+            // editor = input.ckeditor({
+            //     contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
+            //     disableNativeSpellChecker: options.disableNativeSpellChecker,
+            //     placeholder: ' ',
+            // }).editor;
         wrapper = {
             getValue: function (callback) {
+                console.log(`getValue ${inputElement.getAttribute('name')}`);
                 if (callback) {
                     input.promise.then(function() {
-                        callback(fromRichText(editor.getData()));
+                        // ckeditor use removed
+                        // callback(fromRichText(editor.getData()));
+
+                        // replacement code
+                        callback(fromRichText(inputElement.innerHTML));
                     });
                 } else if (newval !== NOTSET) {
                     return newval;
                 } else {
                     var data;
                     try {
-                        data = editor.getData();
+                        // ckeditor use removed
+                        // data = editor.getData();
+                        // console.log(`ckeditor: ${fromRichText(data, form, options.isExpression)}`);
+                        // replacement code
+                        data = inputElement.innerHTML;
+                        console.log(`input:    ${fromRichText(inputElement.innerHTML, form, options.isExpression)}`);
                     } catch (err) {
                         if (err.name !== "IndexSizeError") {
                             throw err;
@@ -201,18 +266,28 @@ define([
                 }
             },
             setValue: function (value, callback) {
+                console.log(`setValue ${inputElement.getAttribute('name')}`);
                 newval = value;
                 value = toRichText(value, form, options);
-                editor.setData(value, {
-                    callback: function () {
-                        newval = NOTSET;
-                        if (callback) { callback(); }
-                    },
-                    noSnapshot: true,
-                });
+                console.log(`rich text value: ${value}`);
+                // replacement code
+                inputElement.innerHTML = value;
+                newval = NOTSET;
+                if (callback) {
+                    setTimeout(callback, 0);
+                }
+                // ckeditor use removed
+                // editor.setData(value, {
+                //     callback: function () {
+                //         newval = NOTSET;
+                //         if (callback) { callback(); }
+                //     },
+                //     noSnapshot: true,
+                // });
                 return wrapper;
             },
             insertExpression: function (xpath) {
+                console.log(`insertExpression ${inputElement.getAttribute('name')}`);
                 if (options.isExpression) {
                     insertHtmlWithSpace(bubbleExpression(xpath, form));
                 } else {
@@ -222,6 +297,7 @@ define([
                 return wrapper;
             },
             insertOutput: function (xpath) {
+                console.log(`insertOutput ${inputElement.getAttribute('name')}`);
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
@@ -229,104 +305,125 @@ define([
                 return wrapper;
             },
             change: function () {
+                console.log(`change ${editor.id}`);
                 editor.fire("saveSnapshot");
                 return wrapper;
             },
             focus: function() {
-                if (editor.status === "ready") {
-                    editor.focus();
-                } else {
-                    editor.removeListener('instanceReady', editor.focus);
-                    editor.on('instanceReady', editor.focus);
-                }
+                console.log(`focus ${inputElement.getAttribute('name')}`);
+                inputElement.focus();
+                // if (editor.status === "ready") {
+                //     editor.focus();
+                // } else {
+                //     editor.removeListener('instanceReady', editor.focus);
+                //     editor.on('instanceReady', editor.focus);
+                // }
             },
             select: function (index, length) {
+                console.log(`select ${inputElement.getAttribute('name')}`);
                 ckSelect.call(null, editor, index, length);
                 return wrapper;
             },
             on: function () {
+                console.log(`on ${inputElement.getAttribute('name')}`);
                 var args = Array.prototype.slice.call(arguments);
-                editor.on.apply(editor, args);
+                if (args.length === 2 && args[0] === 'change' && typeof args[1] === 'function') {
+                    const handleContentChange = function(e) {
+                      console.log('handle change: ${e.target.value}');
+                      // replacement code
+                      args[1].apply(); // callee in widgets.js does not take any arguments
+                    };
+
+                    inputElement.addEventListener('input', handleContentChange);
+                    inputElement.addEventListener('paste', handleContentChange);
+                    inputElement.addEventListener('cut', handleContentChange);
+
+                }
+
+                // ckeditor use removed
+                // editor.on.apply(editor, args);
                 return wrapper;
             },
             destroy: function () {
+                console.log(`destroy ${inputElement.getAttribute('name')}`);
                 if (input !== null) {
                     input.removeData("ckwrapper");
-                    input.promise.then(function () {
-                        editor.destroy();
-                        editor = null;
-                    });
+                    // input.promise.then(function () {
+                    //     editor.destroy();
+                    //     editor = null;
+                    // });
                     input = null;
                 }
             },
         };
 
-        editor.on('focus', function (e) {
-            // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
-            editor.setReadOnly(false);
-            // remove any placeholder text that may be in the text area
-            var editable = e.editor.editable();
-            if (editable.hasClass('placeholder')) {
-                editable.removeClass('placeholder');
-                editable.setHtml('');
-            }
-            // set the cursor to the end of text
-            var selection = editor.getSelection();
-            var range = selection.getRanges()[0];
-            if (range) {
-                var pCon = range.startContainer.getAscendant({p:2},true);
-                if (pCon) {
-                    var newRange = new CKEDITOR.dom.range(range.document);
-                    newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-                    newRange.select();
-                }
-            }
-        });
+        // editor.on('focus', function (e) {
+        //     // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
+        //     editor.setReadOnly(false);
+        //     // remove any placeholder text that may be in the text area
+        //     var editable = e.editor.editable();
+        //     if (editable.hasClass('placeholder')) {
+        //         editable.removeClass('placeholder');
+        //         editable.setHtml('');
+        //     }
+        //     // set the cursor to the end of text
+        //     var selection = editor.getSelection();
+        //     var range = selection.getRanges()[0];
+        //     if (range) {
+        //         var pCon = range.startContainer.getAscendant({p:2},true);
+        //         if (pCon) {
+        //             var newRange = new CKEDITOR.dom.range(range.document);
+        //             newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
+        //             newRange.select();
+        //         }
+        //     }
+        // });
 
-        editor._vellum_fromRichText = function (html) {
-            return fromRichText(html, form, options.isExpression);
-        };
+        // editor._vellum_fromRichText = function (html) {
+        //     return fromRichText(html, form, options.isExpression);
+        // };
 
-        editor.on('paste', function(event) {
-            var data = event.data;
-            if (data.dataTransfer && data.dataTransfer.getData("Text")) {
-                // Get plain text instead of HTML because HTML encoded
-                // content from applications like Word or your text
-                // editor often contains unwanted styling information.
-                //
-                // Insert HTML-ified plain text rather than HTML with
-                // bubbles because we cannot reliably find hashtags in
-                // text fragments that are not valid XPath expressions.
-                // We need to know where the text is being pasted (is it
-                // inside a string?), and finally put the cursor at the
-                // end of the pasted content. It's hard, but maybe
-                // possible? For now this tries to follow the law of
-                // least surprise by inserting plain text. Unfortunately
-                // a surprising thing happens later: hashtags are
-                // automatically converted to bubbles the next time the
-                // expression is loaded in a rich text editor.
-                var text = data.dataTransfer.getData("Text");
-                data.type = 'html';
-                data.dataValue = $('<div />').text(text).html()
-                    .replace(/\n/g, "<br />")
-                    .replace(/  /g, " &nbsp;");
-            } else {
-                // fall back to HTML
-                // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
-                var style = /<style type="text\/css">.*?<\/style>/g;
-                data.dataValue = data.dataValue.replace(style, "");
-            }
-        }, null, null, 2);
+        // editor.on('paste', function(event) {
+        //     var data = event.data;
+        //     if (data.dataTransfer && data.dataTransfer.getData("Text")) {
+        //         // Get plain text instead of HTML because HTML encoded
+        //         // content from applications like Word or your text
+        //         // editor often contains unwanted styling information.
+        //         //
+        //         // Insert HTML-ified plain text rather than HTML with
+        //         // bubbles because we cannot reliably find hashtags in
+        //         // text fragments that are not valid XPath expressions.
+        //         // We need to know where the text is being pasted (is it
+        //         // inside a string?), and finally put the cursor at the
+        //         // end of the pasted content. It's hard, but maybe
+        //         // possible? For now this tries to follow the law of
+        //         // least surprise by inserting plain text. Unfortunately
+        //         // a surprising thing happens later: hashtags are
+        //         // automatically converted to bubbles the next time the
+        //         // expression is loaded in a rich text editor.
+        //         var text = data.dataTransfer.getData("Text");
+        //         data.type = 'html';
+        //         data.dataValue = $('<div />').text(text).html()
+        //             .replace(/\n/g, "<br />")
+        //             .replace(/  /g, " &nbsp;");
+        //     } else {
+        //         // fall back to HTML
+        //         // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
+        //         var style = /<style type="text\/css">.*?<\/style>/g;
+        //         data.dataValue = data.dataValue.replace(style, "");
+        //     }
+        // }, null, null, 2);
 
         if (_.isFunction(options.createPopover)) {
-            editor.addCommand('createPopover', {
-                exec: options.createPopover,
-                editorFocus: false,
-                canUndo: false,
-            });
+            // editor.addCommand('createPopover', {
+            //     exec: options.createPopover,
+            //     editorFocus: false,
+            //     canUndo: false,
+            // });
         }
 
         input.data("ckwrapper", wrapper);
+        resolveEditorPromise()
         return wrapper;
     };
 
