@@ -23,7 +23,7 @@ define([
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
-    //'vellum/parser',
+    'vellum/parser',
     'vellum/xml',
     'vellum/datasources',
     'vellum/util',
