@@ -1,7 +1,7 @@
 define([
     "jquery",
     "underscore",
-    "jquery.bootstrap"
+    "bootstrap"
 ], function ($, _) {
 
     $.fn.popAttr = function (name) {
