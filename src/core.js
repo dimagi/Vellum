@@ -22,7 +22,7 @@ define([
     'vellum/templates/find_usages_search.html',
     //'vellum/mugs',
     //'vellum/widgets',
-    //'vellum/richText',
+    'vellum/richText',
     //'vellum/parser',
     'vellum/xml',
     'vellum/datasources',
