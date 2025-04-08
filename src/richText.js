@@ -29,7 +29,9 @@
 
 (function () {
     // set CKEditor base path before loading ckeditor
-    var path = window.requirejs.toUrl("vellum/../lib/ckeditor/").replace(/\?.*/, "");
+    // TODO: restore?
+    //var path = window.requirejs.toUrl("vellum/../lib/ckeditor/").replace(/\?.*/, "");
+    var path = 'src/../lib/ckeditor/';
     window.CKEDITOR_BASEPATH = path;
 })();
 
@@ -45,8 +47,9 @@ define([
     'vellum/util',
     'vellum/xml',
     'vellum/hqAnalytics',
-    'ckeditor',
-    'ckeditor-jquery'
+    // TODO: uncomment
+    //'ckeditor',
+    //'ckeditor-jquery'
 ], function(
     require,
     _,
@@ -61,6 +64,7 @@ define([
     analytics,
     CKEDITOR
 ){
+return;     // TODO: restore behavior
     var FORM_REF_REGEX = /^#form\//,
         INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
@@ -844,7 +848,8 @@ define([
     }
 
     function createPopover(editor, ckwidget) {
-        var $this = $(ckwidget.element.$),
+        // TODO: uncomment
+        /*var $this = $(ckwidget.element.$),
             dragContainer = ckwidget.dragHandlerContainer;
         // Setup popover
         var xpath = $this.data('value'),
@@ -937,7 +942,7 @@ define([
                     // sometimes these are already destroyed
                 }
             });
-        }
+        }*/
     }
 
     return {

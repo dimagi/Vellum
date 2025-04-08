@@ -35,6 +35,8 @@ module.exports = {
     ],
     resolve: {
         alias: {
+            'ckeditor': path.resolve(BASE_PATH, 'lib/ckeditor/ckeditor.js'),
+            'ckeditor-jquery': path.resolve(BASE_PATH, 'lib/ckeditor/adapters/jquery.js'),
             'save-button': path.resolve(BASE_PATH, 'lib', 'SaveButton.js'),
             'jquery.vellum': path.resolve(BASE_PATH, 'src', 'main'),
             'vellum': path.resolve(BASE_PATH, 'src'),
