@@ -16,6 +16,10 @@ module.exports = {
                 loader: path.resolve('src/template-loader.js'),
             },
             {
+                test: /\.json$/,
+                type: 'json',
+            },
+            {
                 test: /\.less$/,
                 use: ["style-loader", "css-loader", "less-loader"],
             },

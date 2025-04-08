@@ -1,6 +1,6 @@
 define([
     'require',
-    'json!langCodes',
+    'langcodes/langs.json',
     'underscore',
     'diff-match-patch',
     'vellum/markdown',
@@ -386,13 +386,14 @@ define([
             // (do not convert hand-typed xpaths to hashtags)
             hashtag = expr.toHashtag();
         } catch (err) {
-            if (form.richText) {
+            // TODO: uncomment
+            /*if (form.richText) {
                 var richText = require('vellum/richText');
                 hashtag = hashtagOrXPath;
                 xpath_ = richText.unescapeXPath(hashtagOrXPath, form);
             } else {
                 hashtag = xpath_ = hashtagOrXPath;
-            }
+            }*/
         }
 
         if (hashtag !== xpath_) {
