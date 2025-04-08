@@ -1,7 +1,7 @@
 define([
     'jquery',
     'underscore',
-    'XMLWriter',
+    'XMLWriter/XMLWriter',
     'vellum/util',
 ], function (
     $,

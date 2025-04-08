@@ -1,10 +1,11 @@
 define([
     'underscore',
-    'xpath',
+    'xpath/dist/js-xpath',
 ], function (
     _,
     xpath
 ) {
+return;     // TODO: restore
     return {
         // hashtagInfo properties:
         //   hashtagMap: {hashtag expression: XPath expression}
