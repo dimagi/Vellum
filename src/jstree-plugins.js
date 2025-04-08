@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'jquery.jstree'
+    'jstree'
 ], function (
     $
 ) {
