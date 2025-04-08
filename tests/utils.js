@@ -1,15 +1,15 @@
 define([
     './options',
     'chai',
-    'equivalent-xml',
-    'jsdiff',
+    'equivalent-xml-js/src/equivalent-xml',
+    'jsdiff/diff',
     'underscore',
     'jquery',
     'vellum/copy-paste',
     'vellum/tsv',
     'vellum/widgets',
     'vellum/xml',
-    'jquery.jstree',
+    'jstree',
     'jquery.vellum'
 ], function (
     options,
