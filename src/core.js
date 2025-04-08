@@ -29,7 +29,7 @@ define([
     'vellum/util',
     //'vellum/javaRosa/util',
     'vellum/hqAnalytics',
-    //'vellum/atwho',
+    'vellum/atwho',
     'vellum/debugutil',
     //'vellum/base',
     'vellum/jstree-plugins',
