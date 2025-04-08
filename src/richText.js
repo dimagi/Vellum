@@ -383,36 +383,40 @@ define([
         //     return fromRichText(html, form, options.isExpression);
         // };
 
-        // editor.on('paste', function(event) {
-        //     var data = event.data;
-        //     if (data.dataTransfer && data.dataTransfer.getData("Text")) {
-        //         // Get plain text instead of HTML because HTML encoded
-        //         // content from applications like Word or your text
-        //         // editor often contains unwanted styling information.
-        //         //
-        //         // Insert HTML-ified plain text rather than HTML with
-        //         // bubbles because we cannot reliably find hashtags in
-        //         // text fragments that are not valid XPath expressions.
-        //         // We need to know where the text is being pasted (is it
-        //         // inside a string?), and finally put the cursor at the
-        //         // end of the pasted content. It's hard, but maybe
-        //         // possible? For now this tries to follow the law of
-        //         // least surprise by inserting plain text. Unfortunately
-        //         // a surprising thing happens later: hashtags are
-        //         // automatically converted to bubbles the next time the
-        //         // expression is loaded in a rich text editor.
-        //         var text = data.dataTransfer.getData("Text");
-        //         data.type = 'html';
-        //         data.dataValue = $('<div />').text(text).html()
-        //             .replace(/\n/g, "<br />")
-        //             .replace(/  /g, " &nbsp;");
-        //     } else {
-        //         // fall back to HTML
-        //         // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
-        //         var style = /<style type="text\/css">.*?<\/style>/g;
-        //         data.dataValue = data.dataValue.replace(style, "");
-        //     }
-        // }, null, null, 2);
+        inputElement.addEventListener('paste', function(event) {
+            const text = event.clipboardData.getData('text/plain');
+            console.log("plaintext: " + text);
+            const pastedHTML = (event.clipboardData || window.clipboardData).getData('text/html');
+            console.log("pastedHTML: " + pastedHTML);
+            // var data = event.data;
+            // if (data.dataTransfer && data.dataTransfer.getData("Text")) {
+            //     // Get plain text instead of HTML because HTML encoded
+            //     // content from applications like Word or your text
+            //     // editor often contains unwanted styling information.
+            //     //
+            //     // Insert HTML-ified plain text rather than HTML with
+            //     // bubbles because we cannot reliably find hashtags in
+            //     // text fragments that are not valid XPath expressions.
+            //     // We need to know where the text is being pasted (is it
+            //     // inside a string?), and finally put the cursor at the
+            //     // end of the pasted content. It's hard, but maybe
+            //     // possible? For now this tries to follow the law of
+            //     // least surprise by inserting plain text. Unfortunately
+            //     // a surprising thing happens later: hashtags are
+            //     // automatically converted to bubbles the next time the
+            //     // expression is loaded in a rich text editor.
+            //     var text = data.dataTransfer.getData("Text");
+            //     data.type = 'html';
+            //     data.dataValue = $('<div />').text(text).html()
+            //         .replace(/\n/g, "<br />")
+            //         .replace(/  /g, " &nbsp;");
+            // } else {
+            //     // fall back to HTML
+            //     // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
+            //     var style = /<style type="text\/css">.*?<\/style>/g;
+            //     data.dataValue = data.dataValue.replace(style, "");
+            // }
+        });
 
         if (_.isFunction(options.createPopover)) {
             // editor.addCommand('createPopover', {
