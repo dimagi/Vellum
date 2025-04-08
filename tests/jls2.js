@@ -2,6 +2,7 @@
 define([
     "jquery",
     "underscore",
+    "tests/tsv",
     "tests/xml",
     "jstree",
 ], function (
