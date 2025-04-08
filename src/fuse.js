@@ -1,6 +1,6 @@
 define([
     'underscore',
-    'fusejs',
+    'fuse.js',
     'vellum/util',
 ], function (
     _,
