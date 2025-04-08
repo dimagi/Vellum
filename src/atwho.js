@@ -225,6 +225,7 @@ define([
         };
     }
 
+return;     // TODO: restore
     $.vellum.plugin("atwho", {}, {});
 
     return that;
