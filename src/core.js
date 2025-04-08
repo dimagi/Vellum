@@ -20,6 +20,7 @@ define([
     'vellum/templates/modal_button.html',
     'vellum/templates/find_usages.html',
     'vellum/templates/find_usages_search.html',
+    'vellum/base',  // This sets up $.vellum, so it much be included before modules that add plugins, notably atwho and modules that depend on it, which include mugs.js
     //'vellum/mugs',
     //'vellum/widgets',
     'vellum/richText',
@@ -29,9 +30,8 @@ define([
     'vellum/util',
     //'vellum/javaRosa/util',
     'vellum/hqAnalytics',
-    //'vellum/atwho',
     'vellum/debugutil',
-    //'vellum/base',
+    'vellum/atwho',
     'vellum/jstree-plugins',
     'vellum/less-style/main.less',
     'jstree',
@@ -58,6 +58,7 @@ define([
     modal_button,
     find_usages,
     find_usages_search,
+    base,
     mugs,
     widgets,
     richText,
@@ -67,8 +68,8 @@ define([
     util,
     jrUtil,
     analytics,
+    debug,
     atwho,
-    debug
 ) {
 return;     // TODO: let this file run
     // Load these modules in the background after all runtime dependencies have

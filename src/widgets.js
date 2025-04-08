@@ -4,20 +4,20 @@ define([
     'vellum/templates/widget_control_message.html',
     'underscore',
     'jquery',
-    'vellum/atwho',
     'vellum/util',
     'vellum/richText',
     'vellum/hqAnalytics',
+    'vellum/atwho',
 ], function (
     ui_element,
     widget_control_keyvalue,
     widget_control_message,
     _,
     $,
-    atwho,
     util,
     richTextUtils,
-    analytics
+    analytics,
+    atwho
 ) {
     var base = function(mug, options) {
         // set properties shared by all widgets
