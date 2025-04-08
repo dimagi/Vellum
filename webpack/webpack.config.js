@@ -31,6 +31,7 @@ module.exports = {
     ],
     resolve: {
         alias: {
+            'save-button': path.resolve(BASE_PATH, 'lib', 'SaveButton.js'),
             'jquery.vellum': path.resolve(BASE_PATH, 'src', 'main'),
             'vellum': path.resolve(BASE_PATH, 'src'),
             'tests': path.resolve(BASE_PATH, 'tests'),
