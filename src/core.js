@@ -3,7 +3,7 @@
 // TODO: uncomment these
 define([
     'require',
-    //'save-button',
+    'save-button',
     'underscore',
     'jquery',
     'vellum/templates/main.html',
@@ -41,7 +41,7 @@ define([
     'at.js'
 ], function (
     require,
-    //SaveButton,
+    SaveButton,
     _,
     $,
     main_template,
