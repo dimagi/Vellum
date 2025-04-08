@@ -33,7 +33,7 @@ define([
     //'vellum/debugutil',
     //'vellum/base',
     //'vellum/jstree-plugins',
-    //'less!vellum/less-style/main',
+    'vellum/less-style/main.less',
     'jstree',
     'jstree-actions',
     'bootstrap',
