@@ -11,17 +11,17 @@
     
     <!-- Mocha and test-only dependencies -->
     <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
-    <script src="node_modules/mocha/mocha.js"></script>
+    <!--script src="node_modules/mocha/mocha.js"></script-->
 
     <script src="tests/typoglycemia.js"></script>
-    <script data-main="tests/main" src="node_modules/requirejs/require.js"></script>
-    <script src="node_modules/xrayquire/xrayquire.js"></script>
-    <script>
+    <!--script src="node_modules/xrayquire/xrayquire.js"></script-->
+    <!--script>
       mocha.setup({
         ui: 'bdd',
         timeout: '10000',
       });
-    </script>
+    </script-->
+    <script src="dist/vellum.bundle.js"></script>
 
     <style>
       .container-fluid {
