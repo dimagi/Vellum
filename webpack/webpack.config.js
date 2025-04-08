@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 BASE_PATH = path.resolve(__dirname, '..')
 
 module.exports = {
@@ -10,11 +11,20 @@ module.exports = {
                 test: /\.xml$/,
                 type: 'asset/source',
             },
+            {
+                test: /\.html$/,
+                loader: path.resolve('src/template-loader.js'),
+            },
         ],
     },
     output: {
         filename: 'vellum.bundle.js',
     },
+    plugins: [
+        new webpack.ProvidePlugin({
+            'jQuery': 'jquery',
+        }),
+    ],
     resolve: {
         alias: {
             'jquery.vellum': path.resolve(BASE_PATH, 'src', 'main'),

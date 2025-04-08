@@ -1,46 +1,47 @@
 // the UI/ViewModel
 
+// TODO: uncomment these
 define([
     'require',
-    'save-button',
+    //'save-button',
     'underscore',
     'jquery',
-    'tpl!vellum/templates/main',
-    'tpl!vellum/templates/add_question',
-    'tpl!vellum/templates/edit_source',
-    'tpl!vellum/templates/confirm_overwrite',
-    'tpl!vellum/templates/control_group_stdInput',
-    'tpl!vellum/templates/form_errors_template',
-    'tpl!vellum/templates/question_fieldset',
-    'tpl!vellum/templates/question_type_changer',
-    'tpl!vellum/templates/question_toolbar',
-    'tpl!vellum/templates/alert_global',
-    'tpl!vellum/templates/modal_content',
-    'tpl!vellum/templates/modal_button',
-    'tpl!vellum/templates/find_usages',
-    'tpl!vellum/templates/find_usages_search',
-    'vellum/mugs',
-    'vellum/widgets',
-    'vellum/richText',
-    'vellum/parser',
+    'vellum/templates/main.html',
+    'vellum/templates/add_question.html',
+    'vellum/templates/edit_source.html',
+    'vellum/templates/confirm_overwrite.html',
+    'vellum/templates/control_group_stdInput.html',
+    'vellum/templates/form_errors_template.html',
+    'vellum/templates/question_fieldset.html',
+    'vellum/templates/question_type_changer.html',
+    'vellum/templates/question_toolbar.html',
+    'vellum/templates/alert_global.html',
+    'vellum/templates/modal_content.html',
+    'vellum/templates/modal_button.html',
+    'vellum/templates/find_usages.html',
+    'vellum/templates/find_usages_search.html',
+    //'vellum/mugs',
+    //'vellum/widgets',
+    //'vellum/richText',
+    //'vellum/parser',
     'vellum/xml',
-    'vellum/datasources',
-    'vellum/util',
-    'vellum/javaRosa/util',
-    'vellum/hqAnalytics',
-    'vellum/atwho',
-    'vellum/debugutil',
-    'vellum/base',
-    'vellum/jstree-plugins',
-    'less!vellum/less-style/main',
-    'jquery.jstree',
+    //'vellum/datasources',
+    //'vellum/util',
+    //'vellum/javaRosa/util',
+    //'vellum/hqAnalytics',
+    //'vellum/atwho',
+    //'vellum/debugutil',
+    //'vellum/base',
+    //'vellum/jstree-plugins',
+    //'less!vellum/less-style/main',
+    'jstree',
     'jstree-actions',
-    'jquery.bootstrap',
-    'caretjs',
-    'atjs'
+    'bootstrap',
+    'Caret.js',
+    'at.js'
 ], function (
     require,
-    SaveButton,
+    //SaveButton,
     _,
     $,
     main_template,
@@ -69,9 +70,11 @@ define([
     atwho,
     debug
 ) {
+return;     // TODO: let this file run
     // Load these modules in the background after all runtime dependencies have
     // been resolved, since they're not needed initially.
-    setTimeout(function () {
+    // TODO: uncomment
+    /*setTimeout(function () {
         require([
             'codemirror',
             'codemirror/mode/xml/xml',
@@ -79,7 +82,7 @@ define([
             'CryptoJS',
             'vellum/expressionEditor',
         ], function () {});
-    }, 0);
+    }, 0);*/
 
     var isMac = util.isMac,
         HOTKEY_UNICODE = {
@@ -734,7 +737,8 @@ define([
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
+        // TODO: uncomment
+        /*codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
             mode: 'xml',
             lineNumbers: true,
             viewportMargin: Infinity,
@@ -748,7 +752,7 @@ define([
             codeMirror.setSize('100%', bodyHeight - pHeight);
             codeMirror.refresh();
             codeMirror.focus();
-        });
+        });*/
     };
 
     fn.showExportModal = function(done) {
@@ -1949,9 +1953,10 @@ define([
     fn.displayXPathEditor = function(options) {
         options.headerText = gettext("Expression Editor");
         options.loadEditor = function($div, options) {
-            require(['vellum/expressionEditor'], function (expressionEditor) {
+            // TODO: uncomment
+            /*require(['vellum/expressionEditor'], function (expressionEditor) {
                 expressionEditor.showXPathEditor($div, options);
-            });
+            });*/
         };
         this.displaySecondaryEditor(options);
     };
@@ -2300,7 +2305,8 @@ define([
     };
 
     fn.send = function (formText, saveType) {
-        var CryptoJS = require('CryptoJS'),
+        // TODO: uncomment
+        /*var CryptoJS = require('CryptoJS'),
             _this = this,
             opts = this.opts().core,
             checkForConflict = false,
@@ -2366,7 +2372,7 @@ define([
                 _this.data.core.lastSavedXForm = formText;
                 _this._setURLHash(_this._propertiesMug);
             }
-        });
+        });*/
     };
 
     /**

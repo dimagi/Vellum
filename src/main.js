@@ -8,7 +8,7 @@ if (!window.gettext) {
 define([
     // TODO: uncomment these
     // begin buildmain.py delimiter
-    //'vellum/core',
+    'vellum/core',
     //'vellum/ignoreButRetain',
     //'vellum/intentManager',
     //'vellum/itemset',
