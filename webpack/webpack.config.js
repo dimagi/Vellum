@@ -15,6 +15,10 @@ module.exports = {
                 test: /\.html$/,
                 loader: path.resolve('src/template-loader.js'),
             },
+            {
+                test: /\.less$/,
+                use: ["style-loader", "css-loader", "less-loader"],
+            },
         ],
     },
     output: {
