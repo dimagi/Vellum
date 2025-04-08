@@ -16,6 +16,10 @@ module.exports = {
                 type: 'asset/source',
             },
             {
+                test: /\.json$/,
+                type: 'json',
+            },
+            {
                 test: /\.less$/,
                 use: ["style-loader", "css-loader", "less-loader"],
             },
