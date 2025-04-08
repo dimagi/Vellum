@@ -8,7 +8,7 @@ define([
     'vellum/templates/xpath_validation_errors.html',
     'vellum/templates/xpath_expression.html',
     'vellum/templates/xpath.html',
-    'less!vellum/less-style/xpath-editor'
+    'vellum/less-style/xpath-editor.less'
 ], function (
     $,
     _,

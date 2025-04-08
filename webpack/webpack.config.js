@@ -15,6 +15,10 @@ module.exports = {
                 test: /\.html$/,
                 type: 'asset/source',
             },
+            {
+                test: /\.less$/,
+                use: ["style-loader", "css-loader", "less-loader"],
+            },
         ],
     },
     output: {
