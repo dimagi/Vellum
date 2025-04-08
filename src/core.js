@@ -1,46 +1,47 @@
 // the UI/ViewModel
 
+// TODO: uncomment these
 define([
     'require',
-    'save-button',
+    //'save-button',
     'underscore',
     'jquery',
-    'tpl!vellum/templates/main',
-    'tpl!vellum/templates/add_question',
-    'tpl!vellum/templates/edit_source',
-    'tpl!vellum/templates/confirm_overwrite',
-    'tpl!vellum/templates/control_group_stdInput',
-    'tpl!vellum/templates/form_errors_template',
-    'tpl!vellum/templates/question_fieldset',
-    'tpl!vellum/templates/question_type_changer',
-    'tpl!vellum/templates/question_toolbar',
-    'tpl!vellum/templates/alert_global',
-    'tpl!vellum/templates/modal_content',
-    'tpl!vellum/templates/modal_button',
-    'tpl!vellum/templates/find_usages',
-    'tpl!vellum/templates/find_usages_search',
-    'vellum/mugs',
-    'vellum/widgets',
-    'vellum/richText',
-    'vellum/parser',
+    'vellum/templates/main.html',
+    'vellum/templates/add_question.html',
+    'vellum/templates/edit_source.html',
+    'vellum/templates/confirm_overwrite.html',
+    'vellum/templates/control_group_stdInput.html',
+    'vellum/templates/form_errors_template.html',
+    'vellum/templates/question_fieldset.html',
+    'vellum/templates/question_type_changer.html',
+    'vellum/templates/question_toolbar.html',
+    'vellum/templates/alert_global.html',
+    'vellum/templates/modal_content.html',
+    'vellum/templates/modal_button.html',
+    'vellum/templates/find_usages.html',
+    'vellum/templates/find_usages_search.html',
+    //'vellum/mugs',
+    //'vellum/widgets',
+    //'vellum/richText',
+    //'vellum/parser',
     'vellum/xml',
-    'vellum/datasources',
-    'vellum/util',
-    'vellum/javaRosa/util',
-    'vellum/hqAnalytics',
-    'vellum/atwho',
-    'vellum/debugutil',
-    'vellum/base',
-    'vellum/jstree-plugins',
-    'less!vellum/less-style/main',
-    'jquery.jstree',
+    //'vellum/datasources',
+    //'vellum/util',
+    //'vellum/javaRosa/util',
+    //'vellum/hqAnalytics',
+    //'vellum/atwho',
+    //'vellum/debugutil',
+    //'vellum/base',
+    //'vellum/jstree-plugins',
+    //'less!vellum/less-style/main',
+    'jstree',
     'jstree-actions',
-    'jquery.bootstrap',
-    'caretjs',
-    'atjs'
+    'bootstrap',
+    'Caret.js',
+    'at.js'
 ], function (
     require,
-    SaveButton,
+    //SaveButton,
     _,
     $,
     main_template,
@@ -69,9 +70,11 @@ define([
     atwho,
     debug
 ) {
+return;     // TODO: let this file run
     // Load these modules in the background after all runtime dependencies have
     // been resolved, since they're not needed initially.
-    setTimeout(function () {
+    // TODO: uncomment
+    /*setTimeout(function () {
         require([
             'codemirror',
             'codemirror/mode/xml/xml',
@@ -79,7 +82,7 @@ define([
             'CryptoJS',
             'vellum/expressionEditor',
         ], function () {});
-    }, 0);
+    }, 0);*/
 
     var isMac = util.isMac,
         HOTKEY_UNICODE = {
@@ -214,7 +217,7 @@ define([
 
         this.$f.addClass('formdesigner');
         var mainVars = _.extend({format: util.format}, HOTKEY_UNICODE);
-        this.$f.empty().append(main_template(mainVars));
+        this.$f.empty().append(_.template(main_template)(mainVars));
         $(document).on("keydown", function (e) {
             var key = util.getKeyChord(e);
             (fn.hotkeys[key] || _.identity).call(_this, e);
@@ -296,7 +299,7 @@ define([
             groupData.questions = _.map(groupData.questions, getQuestionData);
         });
 
-        $dropdown.find(".fd-add-question").after($(add_question({
+        $dropdown.find(".fd-add-question").after($(_.template(add_question)({
             groups: _.map(_this.getQuestionGroups(), function(groupData) {
                 var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
                 return {
@@ -709,7 +712,7 @@ define([
                 }
             }
         ]);
-        $updateForm = $(edit_source({
+        $updateForm = $(_.template(edit_source)({
             description: gettext("This is the raw XML. You can edit or paste " +
                 "into this box to make changes to your form. Press 'Update " +
                 "Source' to save changes, or 'Close' to cancel.")
@@ -730,7 +733,8 @@ define([
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
+        // TODO: uncomment
+        /*codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
             mode: 'xml',
             lineNumbers: true,
             viewportMargin: Infinity,
@@ -744,7 +748,7 @@ define([
             codeMirror.setSize('100%', bodyHeight - pHeight);
             codeMirror.refresh();
             codeMirror.focus();
-        });
+        });*/
     };
 
     fn.showExportModal = function(done) {
@@ -752,7 +756,7 @@ define([
             $exportForm;
 
         $modal = this.generateNewModal(gettext("Export Form Contents"), []);
-        $exportForm = $(edit_source({
+        $exportForm = $(_.template(edit_source)({
             description: gettext("Copy and paste this content into a " +
                 "spreadsheet program like Excel to easily share your " +
                 "form with others.")
@@ -797,7 +801,7 @@ define([
             }
         ], gettext("Cancel"), "fa fa-warning");
 
-        $overwriteForm = $(confirm_overwrite({
+        $overwriteForm = $(_.template(confirm_overwrite)({
             description: gettext("Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
                          "to overwrite their work?"),
@@ -836,7 +840,7 @@ define([
         }
 
         _.each(formProperties, function (prop) {
-            var $propertyInput = $(control_group_stdInput({
+            var $propertyInput = $(_.template(control_group_stdInput)({
                 label: prop.label,
                 type: prop.type || 'text',
             }));
@@ -871,8 +875,8 @@ define([
             tableData = form.findUsages();
 
         $modal.addClass('fd-full-screen-modal');
-        $modalBody.append($(find_usages_search()));
-        $modalBody.append($(find_usages({tableData: tableData})));
+        $modalBody.append($(_.template(find_usages_search)()));
+        $modalBody.append($(_.template(find_usages)({tableData: tableData})));
 
         this._resizeFullScreenModal($modal);
         $modal.modal('show');
@@ -906,7 +910,7 @@ define([
                 });
             }
             $modalBody.find('table').remove();
-            $modalBody.append($(find_usages({tableData: filteredData})));
+            $modalBody.append($(_.template(find_usages)({tableData: filteredData})));
         }, 250));
 
         atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
@@ -945,7 +949,7 @@ define([
         // Close any existing modal - multiple modals is a bad state
         _this.closeModal(undefined, true);
 
-        var $modal = $(modal_content({
+        var $modal = $(_.template(modal_content)({
                 title: title,
                 closeButtonTitle: closeButtonTitle,
                 headerIcon: headerIcon,
@@ -960,7 +964,7 @@ define([
                 _this.closeModal();
             };
             $modal.find('.modal-footer').prepend(
-                $(modal_button(button)).click(button.action));
+                $(_.template(modal_button)(button)).click(button.action));
         });
         $modalContainer.html($modal);
         return $modal;
@@ -1945,9 +1949,10 @@ define([
     fn.displayXPathEditor = function(options) {
         options.headerText = gettext("Expression Editor");
         options.loadEditor = function($div, options) {
-            require(['vellum/expressionEditor'], function (expressionEditor) {
+            // TODO: uncomment
+            /*require(['vellum/expressionEditor'], function (expressionEditor) {
                 expressionEditor.showXPathEditor($div, options);
-            });
+            });*/
         };
         this.displaySecondaryEditor(options);
     };
@@ -2028,7 +2033,7 @@ define([
 
             error = errors[errors.length - 1];
             var showMessage = function() {
-                messages_div.html(alert_global({
+                messages_div.html(_.template(alert_global)({
                     messageType: MESSAGE_TYPES[error.level],
                     messages: asArray(error.message)
                 }))
@@ -2069,7 +2074,7 @@ define([
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
             isCollapsed = _this.sectionIsCollapsed(options),
-            $sec = $(question_fieldset({
+            $sec = $(_.template(question_fieldset)({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
                 fieldsetSlug: options.slug,
@@ -2101,7 +2106,7 @@ define([
         var _this = this,
             form = this.data.core.form,
             mugs = multiselect ? mug : [mug],
-            $baseToolbar = $(question_toolbar({
+            $baseToolbar = $(_.template(question_toolbar)({
                 comment: multiselect ? '' : richText.sanitizeInput(mug.p.comment),
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
@@ -2165,7 +2170,7 @@ define([
         };
         var changeable = this.isMugTypeChangeable(mug, mug.hashtagPath);
 
-        var $questionTypeChanger = $(question_type_changer({
+        var $questionTypeChanger = $(_.template(question_type_changer)({
             currentQuestionIcon: mug.getIcon(),
             currentTypeName: mug.options.typeName,
             questions: changeable ? getQuestionList(mug) : []
@@ -2221,7 +2226,7 @@ define([
             displayLanguage = this.data.core.currentItextDisplayLanguage,
             warnings = form.getSerializationWarnings();
         if (warnings.length) {
-            var message = $(form_errors_template({
+            var message = $(_.template(form_errors_template)({
                     errors: warnings,
                     displayLanguage: displayLanguage
                 }));
@@ -2296,7 +2301,8 @@ define([
     };
 
     fn.send = function (formText, saveType) {
-        var CryptoJS = require('CryptoJS'),
+        // TODO: uncomment
+        /*var CryptoJS = require('CryptoJS'),
             _this = this,
             opts = this.opts().core,
             checkForConflict = false,
@@ -2362,7 +2368,7 @@ define([
                 _this.data.core.lastSavedXForm = formText;
                 _this._setURLHash(_this._propertiesMug);
             }
-        });
+        });*/
     };
 
     /**
