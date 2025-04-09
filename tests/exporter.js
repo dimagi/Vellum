@@ -12,13 +12,13 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/all_question_types.xml',
-    'text!static/all_question_types.tsv',
-    'text!static/exporter/item-id.xml',
-    'text!static/exporter/item-id.tsv',
-    'text!static/javaRosa/multi-lang-trans.xml',
-    'text!static/exporter/vid-ref.xml',
-    'text!static/exporter/vid-ref.tsv'
+    'static/all_question_types.xml',
+    'static/all_question_types.tsv',
+    'static/exporter/item-id.xml',
+    'static/exporter/item-id.tsv',
+    'static/javaRosa/multi-lang-trans.xml',
+    'static/exporter/vid-ref.xml',
+    'static/exporter/vid-ref.tsv'
 ], function (
     chai,
     $,
