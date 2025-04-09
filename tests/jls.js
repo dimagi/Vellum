@@ -11,7 +11,7 @@ require(["jquery.vellum"], function () {
     require([
         "jquery",
         "tests/options",
-        "underscore",
+        "tests/utils",
         "tests/tsv",
         "tests/xml",
     ], function ($, options) {
