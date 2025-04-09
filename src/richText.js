@@ -848,8 +848,7 @@ return;     // TODO: restore behavior
     }
 
     function createPopover(editor, ckwidget) {
-        // TODO: uncomment
-        /*var $this = $(ckwidget.element.$),
+        var $this = $(ckwidget.element.$),
             dragContainer = ckwidget.dragHandlerContainer;
         // Setup popover
         var xpath = $this.data('value'),
@@ -942,7 +941,7 @@ return;     // TODO: restore behavior
                     // sometimes these are already destroyed
                 }
             });
-        }*/
+        }
     }
 
     return {
