@@ -1,8 +1,8 @@
 define([
     'underscore',
     'jquery',
-    'tpl!vellum/templates/auto_box',
-    'tpl!vellum/templates/markdown_help',
+    'vellum/templates/auto_box.html',
+    'vellum/templates/markdown_help.html',
     'vellum/javaRosa/util',
     'vellum/widgets',
     'vellum/richText',
@@ -88,7 +88,7 @@ define([
         var _getUIElement = widget.getUIElement;
         widget.getUIElement = function () {
             var $uiElem = _getUIElement().css('position', 'relative'),
-                $autoBoxContainer = $(auto_box());
+                $autoBoxContainer = $(_.template(auto_box)());
 
             $autoBoxContainer.find("label").prepend($autoBox);
             $uiElem.find('.controls')
@@ -394,7 +394,7 @@ define([
             markdownContainer.append(markdownOutput);
             markdownRow.append(markdownContainer);
             elem.append(markdownRow);
-            elem.find('.control-label').append(markdown_help({title:options.lstring }));
+            elem.find('.control-label').append(_.template(markdown_help)({title:options.lstring }));
 
             markdownOff = elem.find('.turn-markdown-off').click(function() {
                 wantsMarkdown = false;

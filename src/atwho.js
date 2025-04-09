@@ -4,7 +4,7 @@ define([
     'vellum/richText',
     'vellum/hqAnalytics',
     'vellum/util',
-    'tpl!vellum/templates/atwho_display',
+    'vellum/templates/atwho_display.html',
     'vellum/core',
 ], function (
     _,
@@ -156,7 +156,7 @@ define([
 
         return {
             at: atKey,
-            displayTpl: atwhoDisplay,
+            displayTpl: _.template(atwhoDisplay),
             insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,

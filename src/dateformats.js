@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'tpl!vellum/templates/date_format_menu'
+    'vellum/templates/date_format_menu.html'
 ], function(
     $,
     date_format_menu
@@ -11,7 +11,7 @@ define([
                 "%e/%n/%y": "d/m/yy e.g. 30/1/14",
                 "%a, %b %e, %Y": "ddd, mmm d, yyyy e.g. Thu, Jan 30, 2014"
             };
-        var menu = $(date_format_menu({formats: formats}));
+        var menu = $(_.template(date_format_menu)({formats: formats}));
         $('body').append(menu);
         menu.find('li a').click(function () {
             var format = $(this).data("format");
