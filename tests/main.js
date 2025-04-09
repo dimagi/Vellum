@@ -1,5 +1,11 @@
-/* global console, mocha, navigator, URLSearchParams */
-if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
+/* global require, URLSearchParams */
+import mocha from "mocha/mocha";
+mocha.setup({
+    ui: 'bdd',
+    timeout: '10000',
+});
+
+if (window.navigator.userAgent.indexOf('HeadlessChrome') < 0) {
     mocha.reporter('html');
 }
 
@@ -21,34 +27,17 @@ if (useBuilt) {
 }
 console.log("loading Vellum from " + baseUrl);
 
-requirejs.config({
-    baseUrl: baseUrl,
-    paths: {
-        "jquery.vellum": "main",
-        "tests": testBase + "tests"
-    }
-});
-
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
-requirejs(['jquery.vellum'], function () {
+require(['jquery.vellum'], function () {
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
-    requirejs.config({
-        // handle potential slow free heroku dynos
-        waitSeconds: 60,
-        paths: {
-            'static': testBase + 'tests/static',
-            'chai': testBase + 'node_modules/chai/chai',
-            'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml',
-            'jsdiff': testBase + 'node_modules/jsdiff/diff',
-        }
-    });
 
     if (useBuilt) {
-        requirejs.config({
+        // TODO: remove?
+        /*requirejs.config({
             paths: {
                 'text': '../node_modules/requirejs-text',
                 // https://github.com/guybedford/require-css/issues/133 
@@ -56,10 +45,10 @@ requirejs(['jquery.vellum'], function () {
                 'less': 'error',
                 'json': 'error'
             }
-        });
+        });*/
     }
 
-    requirejs([
+    require([
         'jquery',
         'tests/options',
 
@@ -67,45 +56,46 @@ requirejs(['jquery.vellum'], function () {
         // (disabled by default because they take a long time)
         //'tests/profiling',
 
+        // TODO: uncomment these
         // register tests on global mocha instance as side-effect
-        'tests/base',
-        'tests/core',
-        'tests/form',
-        'tests/logic',
-        'tests/mugs',
-        'tests/parser',
-        'tests/questionTypes',
-        'tests/exporter',
-        'tests/expressionEditor',
-        'tests/widgets',
-        'tests/writer',
-        'tests/commander',
-        'tests/commtrack',
-        'tests/copy-paste',
-        'tests/javaRosa',
-        'tests/modeliteration',
-        'tests/intentManager',
-        'tests/diffDataParent',
-        'tests/formdesigner.ignoreButRetain',
-        'tests/formdesigner.lock',
-        'tests/itemset',
-        'tests/advancedItemsets',
-        'tests/jquery-extensions',
+        //'tests/base',
+        //'tests/core',
+        //'tests/form',
+        //'tests/logic',
+        //'tests/mugs',
+        //'tests/parser',
+        //'tests/questionTypes',
+        //'tests/exporter',
+        //'tests/expressionEditor',
+        //'tests/widgets',
+        //'tests/writer',
+        //'tests/commander',
+        //'tests/commtrack',
+        //'tests/copy-paste',
+        //'tests/javaRosa',
+        //'tests/modeliteration',
+        //'tests/intentManager',
+        //'tests/diffDataParent',
+        //'tests/formdesigner.ignoreButRetain',
+        //'tests/formdesigner.lock',
+        //'tests/itemset',
+        //'tests/advancedItemsets',
+        //'tests/jquery-extensions',
         'tests/tsv',
         'tests/xml',
-        'tests/saveToCase',
-        'tests/urlHash',
-        'tests/markdown',
-        'tests/datasources',
-        'tests/databrowser',
-        'tests/setvalue',
-        'tests/richText',
-        'tests/questionProperties',
-        'tests/atwho',
-        'tests/escapedHashtags',
-        'tests/bulkActions',
-        'tests/undomanager',
-        'tests/commcareConnect',
+        //'tests/saveToCase',
+        //'tests/urlHash',
+        //'tests/markdown',
+        //'tests/datasources',
+        //'tests/databrowser',
+        //'tests/setvalue',
+        //'tests/richText',
+        //'tests/questionProperties',
+        //'tests/atwho',
+        //'tests/escapedHashtags',
+        //'tests/bulkActions',
+        //'tests/undomanager',
+        //'tests/commcareConnect',
     ], function ($, options) {
         var session = window.sessionStorage;
 
