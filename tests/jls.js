@@ -8,9 +8,14 @@ mocha.setup({
 });
 
 require(["jquery.vellum"], function () {
-    require(["jquery", "tests/jls2"], function ($, jls2) {
+    require([
+        "jquery",
+        "tests/options",
+        "underscore",
+        "tests/tsv",
+        "tests/xml",
+    ], function ($, options) {
         console.log("required something");
-        jls2.logSomething();
 
         // TODO: copied from tests/main.js
         function runTests() {
