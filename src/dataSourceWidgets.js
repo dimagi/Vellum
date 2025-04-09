@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'vellum/widgets',
-    'tpl!vellum/templates/data_source_editor'
+    'vellum/templates/data_source_editor.html'
 ], function (
     $,
     _,
@@ -25,7 +25,7 @@ define([
      *      }
      */
     function loadDataSourceEditor($div, options) {
-        var $ui = $(edit_source()),
+        var $ui = $(_.template(edit_source)()),
             $instanceId = $ui.find("[name=instance-id]"),
             $instanceSrc = $ui.find("[name=instance-src]"),
             $query = $ui.find("[name=query]");
