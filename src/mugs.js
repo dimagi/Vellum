@@ -1400,7 +1400,7 @@ define([
         dataType: 'binary',
         tagName: 'upload',
         icon: 'fcc fcc-fd-audio-capture',
-        mediaType: "audio/*", /* */
+        mediaType: "audio/*",
         canOutputValue: false,
         writeCustomXML: function (xmlWriter, mug) {
             xmlWriter.writeAttributeString("mediatype", mug.options.mediaType);
@@ -1410,7 +1410,7 @@ define([
     var Image = util.extend(Audio, {
         typeName: gettext('Image Capture'),
         icon: 'fa fa-camera',
-        mediaType: "image/*", /* */
+        mediaType: "image/*",
         spec: {
             imageSize: {
                 lstring: gettext("Image Size"),
@@ -1450,7 +1450,7 @@ define([
         isTypeChangeable: false,
         icon: 'fa fa-camera',
         tagName: 'input',
-        mediaType: "image/*", /* */
+        mediaType: "image/*",
         init: function (mug, form) {
             Audio.init(mug, form);
             mug.p.appearance = "micro-image";
@@ -1460,7 +1460,7 @@ define([
     var Video = util.extend(Audio, {
         typeName: gettext('Video Capture'),
         icon: 'fa fa-video-camera',
-        mediaType: "video/*", /* */
+        mediaType: "video/*",
     });
 
     var Signature = util.extend(Image, {
@@ -1484,7 +1484,7 @@ define([
         typeName: gettext('Document Upload'),
         isTypeChangeable: false,
         icon: 'fa fa-file',
-        mediaType: "application/*,text/*", /* */
+        mediaType: "application/*,text/*",
     });
 
     var Geopoint = util.extend(defaultOptions, {
