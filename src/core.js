@@ -911,9 +911,10 @@ define([
             $modalBody.append($(_.template(find_usages)({tableData: filteredData})));
         }, 250));
 
-        atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
+        // TODO: support atwho
+        /*atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
             useRichText: true,
-        });
+        });*/
     };
 
     fn.closeModal = function (done, immediate) {

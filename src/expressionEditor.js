@@ -128,12 +128,14 @@ define([
                 if (_.isFunction(choices)) {
                     choices = choices();
                 }
-                atwho.autocomplete(input, options.mug, {choices: choices});
+                // TODO: support atwho
+                //atwho.autocomplete(input, options.mug, {choices: choices});
             } else {
-                atwho.autocomplete(input, options.mug, {
+                // TODO: support atwho
+                /*atwho.autocomplete(input, options.mug, {
                     property: options.path,
                     useRichText: options.mug.form.richText,
-                });
+                });*/
             }
         };
 

@@ -463,10 +463,11 @@ define([
             }, !!widget.isDisabled());
         };
 
-        atwho.autocomplete(widget.input, mug, {
+        // TODO: support atwho
+        /*atwho.autocomplete(widget.input, mug, {
             property: options.path,
             useRichText: mug.form.richText,
-        });
+        });*/
 
         widget.hasLogicReferences = true;
 
