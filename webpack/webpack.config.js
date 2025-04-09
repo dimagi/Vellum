@@ -34,6 +34,17 @@ module.exports = {
                     },
                 },
             },
+            {
+                test: /XMLWriter/,
+                loader: "exports-loader",
+                options: {
+                    type: "commonjs",
+                    exports: {
+                        syntax: "single",
+                        name: "XMLWriter",
+                    },
+                },
+            },
         ],
     },
     output: {
