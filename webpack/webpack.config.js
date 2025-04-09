@@ -16,6 +16,10 @@ module.exports = {
                 type: 'asset/source',
             },
             {
+                test: /\.tsv$/,
+                type: 'asset/source',
+            },
+            {
                 test: /\.json$/,
                 type: 'json',
             },
