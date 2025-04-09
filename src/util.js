@@ -386,14 +386,13 @@ define([
             // (do not convert hand-typed xpaths to hashtags)
             hashtag = expr.toHashtag();
         } catch (err) {
-            // TODO: uncomment
-            /*if (form.richText) {
+            if (form.richText) {
                 var richText = require('vellum/richText');
                 hashtag = hashtagOrXPath;
                 xpath_ = richText.unescapeXPath(hashtagOrXPath, form);
             } else {
                 hashtag = xpath_ = hashtagOrXPath;
-            }*/
+            }
         }
 
         if (hashtag !== xpath_) {
