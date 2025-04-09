@@ -22,6 +22,7 @@
         "XMLWriter": "dimagi/XMLWriter#master",
         "bootstrap": "3.4.1",
         "codemirror": "5.61.1",
+        "exports-loader": "5.0.0",
         "fuse.js": "2.7.4",
         "jquery": "3.6.0",
         "jsdiff": "components/jsdiff#master",
