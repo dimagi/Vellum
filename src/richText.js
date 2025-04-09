@@ -47,9 +47,8 @@ define([
     'vellum/util',
     'vellum/xml',
     'vellum/hqAnalytics',
-    // TODO: uncomment
-    //'ckeditor',
-    //'ckeditor-jquery'
+    'ckeditor',
+    'ckeditor-jquery'
 ], function(
     require,
     _,
@@ -64,7 +63,6 @@ define([
     analytics,
     CKEDITOR
 ){
-return;     // TODO: restore behavior
     var FORM_REF_REGEX = /^#form\//,
         INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
