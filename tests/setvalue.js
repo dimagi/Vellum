@@ -3,8 +3,8 @@ define([
     'chai',
     'jquery',
     'vellum/xml',
-    'text!static/setvalue/set-value.xml',
-    'text!static/setvalue/set-value-special.xml'
+    'static/setvalue/set-value.xml',
+    'static/setvalue/set-value-special.xml'
 ], function (
     util,
     chai,

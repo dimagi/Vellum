@@ -3,12 +3,12 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/copy-paste/four-questions.xml',
-    'text!static/copy-paste/many-itext-forms.xml',
-    'text!static/copy-paste/text-question.xml',
-    'text!static/copy-paste/two-choices.xml',
-    'text!static/copy-paste/two-questions.xml',
-    'text!static/form/manual-instance-reference.xml',
+    'static/copy-paste/four-questions.xml',
+    'static/copy-paste/many-itext-forms.xml',
+    'static/copy-paste/text-question.xml',
+    'static/copy-paste/two-choices.xml',
+    'static/copy-paste/two-questions.xml',
+    'static/form/manual-instance-reference.xml',
     'vellum/copy-paste',
     'vellum/tsv'
 ], function (

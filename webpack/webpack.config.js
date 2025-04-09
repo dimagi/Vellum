@@ -7,7 +7,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.xml/,
+                test: /\.xml$/,
                 type: 'asset/source',
             },
         ],

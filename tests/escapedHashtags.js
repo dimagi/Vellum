@@ -3,7 +3,7 @@ define([
     'chai',
     'vellum/escapedHashtags',
     'tests/utils',
-    'text!static/escapedHashtags/invalid-xpath.xml',
+    'static/escapedHashtags/invalid-xpath.xml',
 ], function (
     _,
     chai,

@@ -4,9 +4,9 @@ define([
     'jquery',
     'underscore',
     'vellum/commcareConnect',
-    'text!static/commcareConnect/learn_module.xml',
-    'text!static/commcareConnect/assessment.xml',
-    'text!static/commcareConnect/deliver.xml',
+    'static/commcareConnect/learn_module.xml',
+    'static/commcareConnect/assessment.xml',
+    'static/commcareConnect/deliver.xml',
 ], function (
     util,
     chai,
