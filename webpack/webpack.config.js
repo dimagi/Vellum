@@ -23,6 +23,17 @@ module.exports = {
                 test: /\.less$/,
                 use: ["style-loader", "css-loader", "less-loader"],
             },
+            {
+                test: /lib\/ckeditor\/ckeditor/,
+                loader: "exports-loader",
+                options: {
+                    type: "commonjs",
+                    exports: {
+                        syntax: "single",
+                        name: "CKEDITOR",
+                    },
+                },
+            },
         ],
     },
     output: {
@@ -31,6 +42,8 @@ module.exports = {
     plugins: [
         new webpack.ProvidePlugin({
             'jQuery': 'jquery',
+            'window.jQuery': 'jquery',
+            '$': 'jquery',
         }),
     ],
     resolve: {
