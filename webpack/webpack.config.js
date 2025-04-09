@@ -4,7 +4,7 @@ BASE_PATH = path.resolve(__dirname, '..')
 
 module.exports = {
     mode: 'development',
-    entry: './tests/jls.js',
+    entry: './tests/main.js',
     module: {
         rules: [
             {
