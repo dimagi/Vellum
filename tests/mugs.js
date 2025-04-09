@@ -3,7 +3,7 @@ define([
     'chai',
     'jquery',
     'underscore',
-    'text!static/mugs/blank-choice.xml',
+    'static/mugs/blank-choice.xml',
 ], function (
     util,
     chai,

@@ -4,13 +4,13 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/core/test1.xml',
-    'text!static/core/group-rename.xml',
-    'text!static/core/invalid-questions.xml',
-    'text!static/core/increment-item.xml',
-    'text!static/core/hidden-value-in-repeat.xml',
-    'text!static/core/hidden-among-questions.xml',
-    'text!static/core/insert-questions.xml'
+    'static/core/test1.xml',
+    'static/core/group-rename.xml',
+    'static/core/invalid-questions.xml',
+    'static/core/increment-item.xml',
+    'static/core/hidden-value-in-repeat.xml',
+    'static/core/hidden-among-questions.xml',
+    'static/core/insert-questions.xml'
 ], function (
     chai,
     $,
