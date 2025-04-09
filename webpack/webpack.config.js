@@ -16,6 +16,10 @@ module.exports = {
                 loader: path.resolve('src/template-loader.js'),
             },
             {
+                test: /\.tsv$/,
+                type: 'asset/source',
+            },
+            {
                 test: /\.json$/,
                 type: 'json',
             },
