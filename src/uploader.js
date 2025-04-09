@@ -3,16 +3,16 @@ define([
     'module',
     'underscore',
     'jquery',
-    'tpl!vellum/templates/multimedia_modal',
-    'tpl!vellum/templates/multimedia_upload_trigger',
+    'vellum/templates/multimedia_modal.html',
+    'vellum/templates/multimedia_upload_trigger.html',
     'vellum/templates/multimedia_upload_status.html',
     'vellum/templates/multimedia_errors.html',
     'vellum/templates/multimedia_existing_image.html',
     'vellum/templates/multimedia_existing_audio.html',
     'vellum/templates/multimedia_existing_video.html',
     'vellum/templates/multimedia_existing_text.html',
-    'tpl!vellum/templates/multimedia_nomedia',
-    'tpl!vellum/templates/multimedia_block',
+    'vellum/templates/multimedia_nomedia.html',
+    'vellum/templates/multimedia_block.html',
     'vellum/core'
 ], function (
     require,
@@ -162,7 +162,7 @@ define([
             $previewContainer.html(getPreviewUI(widget, objectMap, ICONS));
             $controlBlock.append($previewContainer);
 
-            $uploadContainer.html(multimedia_block());
+            $uploadContainer.html(_.template(multimedia_block)());
 
             $uploadContainer.find('.fd-mm-upload-trigger')
                 .append(getUploadButtonUI(widget, objectMap));
@@ -242,7 +242,7 @@ define([
                 url: linkedObject.url
             });
         } else {
-            previewHtml = multimedia_nomedia({
+            previewHtml = _.template(multimedia_nomedia)({
                 iconClass: ICONS[widget.form]
             });
         }
@@ -252,7 +252,7 @@ define([
     var getUploadButtonUI = function (widget, objectMap) {
         var currentPath = widget.getItextValue ? widget.getItextValue() : widget.getValue(),
             $uploadBtn;
-        $uploadBtn = $(multimedia_upload_trigger({
+        $uploadBtn = $(_.template(multimedia_upload_trigger)({
             multimediaExists: currentPath in objectMap,
             uploaderId: SLUG_TO_UPLOADER_SLUG[widget.form],
             mediaType: SLUG_TO_DESCRIPTION[widget.form],
@@ -328,7 +328,7 @@ define([
                                 this.data.uploader.uploadControllers);
         },
         initUploadController: function (options) {
-            var $uploaderModal = $(multimedia_modal({
+            var $uploaderModal = $(_.template(multimedia_modal)({
                 mediaType: options.mediaType,
                 modalId: options.uploaderSlug
             }));

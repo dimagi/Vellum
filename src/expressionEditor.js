@@ -5,9 +5,9 @@ define([
     'vellum/atwho',
     'vellum/richText',
     'vellum/hqAnalytics',
-    'tpl!vellum/templates/xpath_validation_errors',
-    'tpl!vellum/templates/xpath_expression',
-    'tpl!vellum/templates/xpath',
+    'vellum/templates/xpath_validation_errors.html',
+    'vellum/templates/xpath_expression.html',
+    'vellum/templates/xpath.html',
     'less!vellum/less-style/xpath-editor'
 ], function (
     $,
@@ -201,7 +201,7 @@ define([
                     tagArgs = 'contenteditable="true"';
                 }
 
-                var $expUI = $(xpath_expression({
+                var $expUI = $(_.template(xpath_expression)({
                     operationOpts: operationOpts,
                     leftPlaceholder: options.leftPlaceholder,
                     rightPlaceholder: options.rightPlaceholder,
@@ -417,7 +417,7 @@ define([
                 tagArgs = 'contenteditable="true"';
             }
 
-            var $xpathUI = $(xpath_tpl({
+            var $xpathUI = $(_.template(xpath_tpl)({
                 topLevelJoinOpts: [
                     [gettext("True when ALL of the expressions are true."), expTypes.AND],
                     [gettext("True when ANY of the expressions are true."), expTypes.OR]
@@ -465,7 +465,7 @@ define([
                     done(uiExpression);
                 } else {
                     getValidationSummary()
-                        .html($(xpath_validation_errors({
+                        .html($(_.template(xpath_validation_errors)({
                             errors: results[1].message
                         })))
                         .removeClass("hide");

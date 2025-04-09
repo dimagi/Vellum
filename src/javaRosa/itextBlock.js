@@ -2,7 +2,7 @@ define([
     'underscore',
     'jquery',
     'vellum/templates/button_remove.html',
-    'tpl!vellum/templates/control_group',
+    'vellum/templates/control_group.html',
     'vellum/widgets',
     'vellum/util',
     'vellum/javaRosa/itextWidget',
@@ -192,7 +192,7 @@ define([
                     }
                 ]);
 
-                $newItemForm = $(control_group({
+                $newItemForm = $(_.template(control_group)({
                     label: gettext("Content Type")
                 }));
 
@@ -289,7 +289,7 @@ define([
         block.getUIElement = function () {
             $blockUI = _getParentUIElement();
 
-            var $addFormControls = $(control_group({
+            var $addFormControls = $(_.template(control_group)({
                 label: block.displayName,
             }));
             $addFormControls.addClass('new-itext-form-group')
