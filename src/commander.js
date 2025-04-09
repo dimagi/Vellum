@@ -72,11 +72,12 @@ define([
         }
         _.extend(cmd, configure(cmd.vellum));
         cmd.input.atwho(cmd.atwhoConfig);
-        atwho.autocomplete(
+        // TODO: support atwho
+        /*atwho.autocomplete(
             cmd.input,
             {form: cmd.vellum.data.core.form, on: _.identity},  // fake mug
             {useHashtags: true, tabSelectsMatch: true}          // options
-        );
+        );*/
         cmd.vellum.data.core.form.on("change-display-language", function() {
             // NOTE this is tightly coupled with atwho.autocomplete(...), which
             // calls $input.atwho('destroy') on change-display-language
