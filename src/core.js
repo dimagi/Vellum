@@ -1,6 +1,5 @@
 // the UI/ViewModel
 
-// TODO: uncomment these
 define([
     'require',
     'save-button',
@@ -71,11 +70,9 @@ define([
     atwho,
     debug
 ) {
-return;     // TODO: let this file run
     // Load these modules in the background after all runtime dependencies have
     // been resolved, since they're not needed initially.
-    // TODO: uncomment
-    /*setTimeout(function () {
+    setTimeout(function () {
         require([
             'codemirror',
             'codemirror/mode/xml/xml',
@@ -83,7 +80,7 @@ return;     // TODO: let this file run
             'CryptoJS',
             'vellum/expressionEditor',
         ], function () {});
-    }, 0);*/
+    }, 0);
 
     var isMac = util.isMac,
         HOTKEY_UNICODE = {
@@ -738,8 +735,7 @@ return;     // TODO: let this file run
             $textarea.val(this.data.core.failedLoadXML);
         }
 
-        // TODO: uncomment
-        /*codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
+        codeMirror = require('codemirror').fromTextArea($textarea.get(0), {
             mode: 'xml',
             lineNumbers: true,
             viewportMargin: Infinity,
@@ -753,7 +749,7 @@ return;     // TODO: let this file run
             codeMirror.setSize('100%', bodyHeight - pHeight);
             codeMirror.refresh();
             codeMirror.focus();
-        });*/
+        });
     };
 
     fn.showExportModal = function(done) {
@@ -1954,10 +1950,9 @@ return;     // TODO: let this file run
     fn.displayXPathEditor = function(options) {
         options.headerText = gettext("Expression Editor");
         options.loadEditor = function($div, options) {
-            // TODO: uncomment
-            /*require(['vellum/expressionEditor'], function (expressionEditor) {
+            require(['vellum/expressionEditor'], function (expressionEditor) {
                 expressionEditor.showXPathEditor($div, options);
-            });*/
+            });
         };
         this.displaySecondaryEditor(options);
     };
@@ -2306,8 +2301,7 @@ return;     // TODO: let this file run
     };
 
     fn.send = function (formText, saveType) {
-        // TODO: uncomment
-        /*var CryptoJS = require('CryptoJS'),
+        var CryptoJS = require('CryptoJS'),
             _this = this,
             opts = this.opts().core,
             checkForConflict = false,
@@ -2373,7 +2367,7 @@ return;     // TODO: let this file run
                 _this.data.core.lastSavedXForm = formText;
                 _this._setURLHash(_this._propertiesMug);
             }
-        });*/
+        });
     };
 
     /**

@@ -6,7 +6,6 @@ if (!window.gettext) {
 }
 
 define([
-    // TODO: uncomment these
     // begin buildmain.py delimiter
     'vellum/core',
     'vellum/ignoreButRetain',

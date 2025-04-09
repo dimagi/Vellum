@@ -5,7 +5,6 @@ define([
     _,
     xpath
 ) {
-return;     // TODO: restore
     return {
         // hashtagInfo properties:
         //   hashtagMap: {hashtag expression: XPath expression}
