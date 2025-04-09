@@ -3,11 +3,11 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/diffDataParent/parse.xml',
-    'text!static/diffDataParent/sibling-as-child.xml',
-    'text!static/diffDataParent/data-parent-mug-after.xml',
-    'text!static/diffDataParent/data-parent-mug-before.xml',
-    'text!static/diffDataParent/data-parent-mug-in-between.xml'
+    'static/diffDataParent/parse.xml',
+    'static/diffDataParent/sibling-as-child.xml',
+    'static/diffDataParent/data-parent-mug-after.xml',
+    'static/diffDataParent/data-parent-mug-before.xml',
+    'static/diffDataParent/data-parent-mug-in-between.xml'
 ], function (
     chai, $,
     _,

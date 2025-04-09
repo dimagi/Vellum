@@ -3,7 +3,7 @@ requirejs([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/core/group-rename.xml'
+    'static/core/group-rename.xml'
 ], function (
     chai,
     $,

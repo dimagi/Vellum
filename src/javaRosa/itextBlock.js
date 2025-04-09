@@ -1,7 +1,7 @@
 define([
     'underscore',
     'jquery',
-    'text!vellum/templates/button_remove.html',
+    'vellum/templates/button_remove.html',
     'tpl!vellum/templates/control_group',
     'vellum/widgets',
     'vellum/util',
