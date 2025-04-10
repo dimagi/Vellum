@@ -1,4 +1,5 @@
-requirejs([
+/* global require */
+require([
     'chai',
     'jquery',
     'underscore',
