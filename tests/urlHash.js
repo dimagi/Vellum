@@ -1,4 +1,4 @@
-requirejs([
+require([
     'chai',
     'jquery',
     'underscore',
