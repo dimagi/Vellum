@@ -41,8 +41,7 @@
         "underscore": "1.13.1",
         "webpack": "5.94.0",
         "webpack-cli": "5.1.4",
-        "xpath": "dimagi/js-xpath#v0.0.8",
-        "xrayquire": "npm:xrayquire-for-npm#^0.1.1"
+        "xpath": "dimagi/js-xpath#v0.0.8"
     },
     "devDependencies": {
         "chai": "4.2.0",
