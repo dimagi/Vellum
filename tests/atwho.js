@@ -82,15 +82,17 @@ define([
                 var input = $('[name=property-relevantAttr]');
                 input.focus();
                 input.val('/data/').keyup();
-                assert.strictEqual(getDisplayedAtwhoViews().length, 1);
-                try {
-                    callback(mug);
-                } catch (err) {
-                    throw err;
-                } finally {
-                    mug.fire('teardown-mug-properties');
-                }
-                assert(!getDisplayedAtwhoViews().length);
+                _.delay(function () {
+                    assert.strictEqual(getDisplayedAtwhoViews().length, 1);
+                    try {
+                        callback(mug);
+                    } catch (err) {
+                        throw err;
+                    } finally {
+                        mug.fire('teardown-mug-properties');
+                    }
+                    assert(!getDisplayedAtwhoViews().length);
+                });
             }
 
             it("should truncate the display label", function() {
