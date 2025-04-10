@@ -109,7 +109,8 @@ define([
         }
     };
 
-    CKEDITOR.plugins.add('bubbles', {
+    // TODO: restore (this breaks vellum in HQ)
+    /*CKEDITOR.plugins.add('bubbles', {
         requires: 'widget',
         init: function (editor) {
             editor.widgets.add('bubbles', bubbleWidgetDefinition);
@@ -119,7 +120,7 @@ define([
     CKEDITOR.config.allowedContent = true;
     CKEDITOR.config.customConfig = '';
     CKEDITOR.config.title = false;
-    CKEDITOR.config.extraPlugins = 'bubbles';
+    CKEDITOR.config.extraPlugins = 'bubbles';*/
     CKEDITOR.config.disableNativeSpellChecker = false;
     // We don't use Toolbar, however it is required by clipboard.
     // Once https://github.com/ckeditor/ckeditor4/issues/654 is resolved,
