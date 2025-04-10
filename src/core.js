@@ -35,6 +35,7 @@ define([
     'vellum/less-style/main.less',
     'jstree',
     'jstree-actions',
+    'jstree-styles',
     'bootstrap',
     'Caret.js',
     'at.js'
