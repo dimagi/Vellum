@@ -4,7 +4,17 @@ BASE_PATH = path.resolve(__dirname, '..')
 
 module.exports = {
     mode: 'development',
-    entry: './tests/main.js',
+    entry: {
+        tests: {
+            import: './tests/main.js',
+            filename: '[name].vellum.bundle.js',
+        },
+        main: {
+            import: './src/main.js',
+            filename: '[name].vellum.bundle.js',
+            chunkLoading: false,
+        },
+    },
     module: {
         rules: [
             {
@@ -56,7 +66,7 @@ module.exports = {
         ],
     },
     output: {
-        filename: 'vellum.bundle.js',
+        clean: true,
     },
     plugins: [
         new webpack.ProvidePlugin({
