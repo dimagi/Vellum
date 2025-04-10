@@ -24,6 +24,10 @@ module.exports = {
                 type: 'json',
             },
             {
+                test: /\.css$/,
+                use: ["style-loader", "css-loader"],
+            },
+            {
                 test: /\.less$/,
                 use: ["style-loader", "css-loader", "less-loader"],
             },
@@ -69,6 +73,7 @@ module.exports = {
             'diff-match-patch': path.resolve(BASE_PATH, 'lib/diff_match_patch'),
             'save-button': path.resolve(BASE_PATH, 'lib', 'SaveButton.js'),
             'jquery.vellum': path.resolve(BASE_PATH, 'src', 'main'),
+            'jstree-styles': path.resolve(BASE_PATH, 'node_modules/jstree/dist/themes/default/style.css'),
             'vellum': path.resolve(BASE_PATH, 'src'),
             'tests': path.resolve(BASE_PATH, 'tests'),
             'static': path.resolve(BASE_PATH, 'tests', 'static'),
