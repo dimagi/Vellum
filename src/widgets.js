@@ -4,7 +4,6 @@ define([
     'vellum/templates/widget_control_message.html',
     'underscore',
     'jquery',
-    'vellum/atwho',
     'vellum/util',
     'vellum/richText',
     'vellum/hqAnalytics',
@@ -14,7 +13,6 @@ define([
     widget_control_message,
     _,
     $,
-    atwho,
     util,
     richTextUtils,
     analytics
@@ -463,11 +461,12 @@ define([
             }, !!widget.isDisabled());
         };
 
-        // TODO: support atwho
-        /*atwho.autocomplete(widget.input, mug, {
-            property: options.path,
-            useRichText: mug.form.richText,
-        });*/
+        require(['vellum/atwho'], function (atwho) {
+            atwho.autocomplete(widget.input, mug, {
+                property: options.path,
+                useRichText: mug.form.richText,
+            });
+        });
 
         widget.hasLogicReferences = true;
 

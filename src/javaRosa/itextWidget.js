@@ -176,14 +176,13 @@ define([
         }
 
         if (_.contains(jrUtil.ITEXT_PROPERTIES, options.path)) {
-            // TODO: support atwho
-            /*atwho.autocomplete($input, mug, {
+            atwho.autocomplete($input, mug, {
                 category: "Output Value",
                 insertTpl: '<output value="${name}" />',
                 property: "labelItext",
                 outputValue: true,
                 useRichText: mug.form.richText,
-            });*/
+            });
         }
 
         widget.displayName = options.displayName;

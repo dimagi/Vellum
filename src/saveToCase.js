@@ -74,8 +74,7 @@ define([
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
                 widget.input.find('input').addClass('jstree-drop');
                 widget.input.find('input').each(function() {
-                    // TODO: support atwho
-                    //atwho.autocomplete($(this), mug);
+                    atwho.autocomplete($(this), mug);
                 });
             };
 

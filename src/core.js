@@ -28,9 +28,9 @@ define([
     'vellum/util',
     'vellum/javaRosa/util',
     'vellum/hqAnalytics',
-    'vellum/atwho',
     'vellum/debugutil',
     'vellum/base',
+    'vellum/atwho',     // must come after vellum/base so that $.vellum is available
     'vellum/jstree-plugins',
     'vellum/less-style/main.less',
     'jstree',
@@ -67,7 +67,6 @@ define([
     util,
     jrUtil,
     analytics,
-    atwho,
     debug
 ) {
     // Load these modules in the background after all runtime dependencies have
@@ -911,10 +910,9 @@ define([
             $modalBody.append($(_.template(find_usages)({tableData: filteredData})));
         }, 250));
 
-        // TODO: support atwho
-        /*atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
+        atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
             useRichText: true,
-        });*/
+        });
     };
 
     fn.closeModal = function (done, immediate) {
