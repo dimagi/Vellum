@@ -172,7 +172,6 @@ define([
             const elementAtDrop = document.elementFromPoint(x, y);
             const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
 
-
             let range;
             if (existingBubble) {
                 // If dropping on an existing bubble, position after it
@@ -187,8 +186,6 @@ define([
                     range.collapse(true);
                 }
             }
-
-            console.log(`range: ${range}`)
             if (range) {
                 const selection = window.getSelection();
                 selection.removeAllRanges();
@@ -198,11 +195,13 @@ define([
                 const element = htmlToElement(content);
                 range.deleteContents();
                 range.insertNode(element);
-            }
 
-            // need to figure out how to insert at right position using selection and range api.
-            // ckeditor use removed
-            // editor.insertHtml(content + TRAILING_SPACE);
+                const inputEvent = new Event('input', {
+                  bubbles: true,
+                  cancelable: true
+                });
+                inputElement.dispatchEvent(inputEvent);
+            }
         }
         var wrapper = input.data("ckwrapper");
         if (wrapper) {
@@ -224,66 +223,33 @@ define([
         input.promise = new Promise((resolve) => {
           resolveEditorPromise = resolve;
         });
-        var NOTSET = {},
-            newval = NOTSET,  // HACK work around async get/set
-            // editor = input.ckeditor({
-            //     contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
-            //     disableNativeSpellChecker: options.disableNativeSpellChecker,
-            //     placeholder: ' ',
-            // }).editor;
+        var NOTSET = {};
+        var newval = NOTSET,  // HACK work around async get/set
         wrapper = {
             getValue: function (callback) {
-                console.log(`getValue ${inputElement.getAttribute('name')}`);
                 if (callback) {
                     input.promise.then(function() {
-                        // ckeditor use removed
-                        // callback(fromRichText(editor.getData()));
-
-                        // replacement code
-                        callback(fromRichText(inputElement.innerHTML));
+                        callback(fromRichText(inputElement.innerHTML));// ??? why not data, form here?
                     });
                 } else if (newval !== NOTSET) {
+                    console.log(`getValue: newval: ${newval}`);
                     return newval;
                 } else {
-                    var data;
-                    try {
-                        // ckeditor use removed
-                        // data = editor.getData();
-                        // console.log(`ckeditor: ${fromRichText(data, form, options.isExpression)}`);
-                        // replacement code
-                        data = inputElement.innerHTML;
-                        console.log(`input:    ${fromRichText(inputElement.innerHTML, form, options.isExpression)}`);
-                    } catch (err) {
-                        if (err.name !== "IndexSizeError") {
-                            throw err;
-                        }
-                        // HACK work around Chrome/CKEditor bug
-                        // https://dev.ckeditor.com/ticket/13903
-                        wrapper.select(0);
-                        data = editor.getData();
-                    }
-                    return fromRichText(data, form, options.isExpression);
+                    var data = inputElement.innerHTML;
+                    var value = fromRichText(data, form, options.isExpression);
+                    console.log(`getValue: ${value}`)
+                    return value;
                 }
             },
             setValue: function (value, callback) {
-                console.log(`setValue ${inputElement.getAttribute('name')}`);
                 newval = value;
-                value = toRichText(value, form, options);
-                console.log(`rich text value: ${value}`);
-                // replacement code
-                inputElement.innerHTML = value;
+                var richTextValue = toRichText(value, form, options);
+                console.log(`setValue: ${value}, ${richTextValue}`);
+                inputElement.innerHTML = richTextValue;
                 newval = NOTSET;
                 if (callback) {
                     setTimeout(callback, 0);
                 }
-                // ckeditor use removed
-                // editor.setData(value, {
-                //     callback: function () {
-                //         newval = NOTSET;
-                //         if (callback) { callback(); }
-                //     },
-                //     noSnapshot: true,
-                // });
                 return wrapper;
             },
             insertExpression: function (xpath) {
@@ -306,18 +272,10 @@ define([
             },
             change: function () {
                 console.log(`change ${editor.id}`);
-                editor.fire("saveSnapshot");
                 return wrapper;
             },
             focus: function() {
-                console.log(`focus ${inputElement.getAttribute('name')}`);
                 inputElement.focus();
-                // if (editor.status === "ready") {
-                //     editor.focus();
-                // } else {
-                //     editor.removeListener('instanceReady', editor.focus);
-                //     editor.on('instanceReady', editor.focus);
-                // }
             },
             select: function (index, length) {
                 console.log(`select ${inputElement.getAttribute('name')}`);
@@ -325,13 +283,11 @@ define([
                 return wrapper;
             },
             on: function () {
-                console.log(`on ${inputElement.getAttribute('name')}`);
                 var args = Array.prototype.slice.call(arguments);
                 if (args.length === 2 && args[0] === 'change' && typeof args[1] === 'function') {
                     const handleContentChange = function(e) {
-                      console.log('handle change: ${e.target.value}');
-                      // replacement code
-                      args[1].apply(); // callee in widgets.js does not take any arguments
+                        console.log(`editor change event`);
+                        args[1].apply(); // callee in widgets.js does not take any arguments
                     };
 
                     inputElement.addEventListener('input', handleContentChange);
@@ -339,9 +295,6 @@ define([
                     inputElement.addEventListener('cut', handleContentChange);
 
                 }
-
-                // ckeditor use removed
-                // editor.on.apply(editor, args);
                 return wrapper;
             },
             destroy: function () {
@@ -427,7 +380,7 @@ define([
         }
 
         input.data("ckwrapper", wrapper);
-        resolveEditorPromise()
+        resolveEditorPromise()// probably can just set it to a resolved promise to beging with or remove the code that waits for it.
         return wrapper;
     };
 
@@ -639,16 +592,19 @@ define([
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
 
-        var xpathInfo = _parseXPath(xpath, form),
-            bubbleClasses = xpathInfo.classes[0],
-            iconClasses = xpathInfo.classes[1],
-            dispValue = getBubbleDisplayValue(xpath, form.xpath),
-            icon = $('<i>').addClass(iconClasses).html('&nbsp;');
-        return $('<span>')
+        var xpathInfo = _parseXPath(xpath, form);
+        var bubbleClasses = xpathInfo.classes[0];
+        var iconClasses = xpathInfo.classes[1];
+        var dispValue = getBubbleDisplayValue(xpath, form.xpath);
+        var icon = $('<i>').addClass(iconClasses).html('&nbsp;');
+        var $bubble = $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
             .attr('data-value', xpath)
+            .attr('contenteditable', 'false')
             .append(icon)
             .append(dispValue);
+
+        return $bubble;
     }
 
     /**
