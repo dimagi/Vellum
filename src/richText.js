@@ -46,9 +46,7 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
-    'vellum/hqAnalytics',
-    'ckeditor',
-    'ckeditor-jquery'
+    'vellum/hqAnalytics'
 ], function(
     require,
     _,
@@ -60,8 +58,7 @@ define([
     logic,
     util,
     xml,
-    analytics,
-    CKEDITOR
+    analytics
 ){
     var FORM_REF_REGEX = /^#form\//,
         INVALID_PREFIX = "#invalid/xpath ",
@@ -109,23 +106,6 @@ define([
             }
         }
     };
-
-    CKEDITOR.plugins.add('bubbles', {
-        requires: 'widget',
-        init: function (editor) {
-            editor.widgets.add('bubbles', bubbleWidgetDefinition);
-        }
-    });
-
-    CKEDITOR.config.allowedContent = true;
-    CKEDITOR.config.customConfig = '';
-    CKEDITOR.config.title = false;
-    CKEDITOR.config.extraPlugins = 'bubbles';
-    CKEDITOR.config.disableNativeSpellChecker = false;
-    // We don't use Toolbar, however it is required by clipboard.
-    // Once https://github.com/ckeditor/ckeditor4/issues/654 is resolved,
-    // toolbar can be removed from the source(build).
-    CKEDITOR.config.toolbar = [];
 
     /**
      * Get or create a rich text editor for the given element
@@ -279,7 +259,7 @@ define([
             },
             select: function (index, length) {
                 console.log(`select ${inputElement.getAttribute('name')}`);
-                ckSelect.call(null, editor, index, length);
+                // used in test???
                 return wrapper;
             },
             on: function () {
@@ -403,95 +383,6 @@ define([
                 this.setData('text/plain', text);
             }
         }
-    }
-    // monkeypatch clipboard plugin to transform easy reference
-    // bubbles to hashtags on copy/cut.
-    var realDataTransfer = CKEDITOR.plugins.clipboard.dataTransfer;
-    richTextDataTransfer.prototype = realDataTransfer.prototype;
-    CKEDITOR.plugins.clipboard.dataTransfer = richTextDataTransfer;
-
-    /**
-     * Set selection in CKEditor
-     */
-    function ckSelect(editor, index, length) {
-        function iterNodes(parent) {
-            var i = 0,
-                children = parent.getChildren(),
-                count = children.count(),
-                inner = null;
-            function next() {
-                var child;
-                if (inner) {
-                    child = inner();
-                    if (child !== null) {
-                        return child;
-                    }
-                    inner = null;
-                }
-                if (i >= count) {
-                    return null;
-                }
-                child = children.getItem(i);
-                i++;
-                if (child.type === CKEDITOR.NODE_ELEMENT) {
-                    var name = child.getName().toLowerCase();
-                    if (name === "p") {
-                        inner = iterNodes(child);
-                        return next();
-                    }
-                    if (name === "span" || name === "br") {
-                        return {node: child, length: 1, isText: false};
-                    }
-                    throw new Error("not implemented: " + name);
-                } else if (child.type === CKEDITOR.NODE_TEXT) {
-                    return {
-                        node: child,
-                        length: child.getText().length,
-                        isText: true,
-                    };
-                }
-                throw new Error("unhandled element type: " + child.type);
-            }
-            return next;
-        }
-        function getNodeOffset(index, nextNode) {
-            var offset = index,
-                node = nextNode();
-            while (node) {
-                if (node.length >= offset) {
-                    return {
-                        node: node.node,
-                        offset: offset,
-                        isText: node.isText,
-                    };
-                }
-                offset -= node.length;
-                node = nextNode();
-            }
-            throw new Error("index is larger than content: " + index);
-        }
-        editor.focus();
-        var sel = editor.getSelection(),
-            nextNode = iterNodes(sel.root),
-            node = getNodeOffset(index, nextNode),
-            range = sel.getRanges()[0];
-        if (node.isText) {
-            range.setStart(node.node, node.offset);
-        } else {
-            range.setStartAfter(node.node);
-        }
-        if (length) {
-            nextNode = iterNodes(sel.root);
-            node = getNodeOffset(index + length, nextNode);
-            if (node.isText) {
-                range.setEnd(node.node, node.offset);
-            } else {
-                range.setEndAfter(node.node);
-            }
-        } else {
-            range.collapse(true);
-        }
-        sel.selectRanges([range]);
     }
 
     /*
