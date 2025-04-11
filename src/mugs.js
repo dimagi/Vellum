@@ -1482,7 +1482,6 @@ define([
 
     var Document = util.extend(Audio, {
         typeName: gettext('Document Upload'),
-        isTypeChangeable: false,
         icon: 'fa fa-file',
         mediaType: "application/*,text/*",
     });
