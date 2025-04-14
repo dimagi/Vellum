@@ -176,6 +176,11 @@ define([
                 range.deleteContents();
                 range.insertNode(element);
 
+                if (element.getAttribute('data-toggle')) {
+                    // $(element).popover();
+                    createPopover(element);
+                }
+
                 const inputEvent = new Event('input', {
                   bubbles: true,
                   cancelable: true
@@ -212,19 +217,16 @@ define([
                         callback(fromRichText(inputElement.innerHTML));// ??? why not data, form here?
                     });
                 } else if (newval !== NOTSET) {
-                    console.log(`getValue: newval: ${newval}`);
                     return newval;
                 } else {
                     var data = inputElement.innerHTML;
                     var value = fromRichText(data, form, options.isExpression);
-                    console.log(`getValue: ${value}`)
                     return value;
                 }
             },
             setValue: function (value, callback) {
                 newval = value;
                 var richTextValue = toRichText(value, form, options);
-                console.log(`setValue: ${value}, ${richTextValue}`);
                 inputElement.innerHTML = richTextValue;
                 newval = NOTSET;
                 if (callback) {
@@ -488,10 +490,17 @@ define([
         var iconClasses = xpathInfo.classes[1];
         var dispValue = getBubbleDisplayValue(xpath, form.xpath);
         var icon = $('<i>').addClass(iconClasses).html('&nbsp;');
+        var uniqueId = 'bubble-' + Math.random().toString(36).substr(2, 9);
+        console.log(`adding bubble with id ${uniqueId}`);
         var $bubble = $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
             .attr('data-value', xpath)
             .attr('contenteditable', 'false')
+            .attr('data-toggle', 'popover')
+            // .attr('data-trigger', 'hover')
+            // .attr('title', 'popover')
+            // .attr('data-content', 'popover')
+            .attr('id', uniqueId)
             .append(icon)
             .append(dispValue);
 
@@ -793,39 +802,37 @@ define([
         });
     }
 
-    function createPopover(editor, ckwidget) {
-        var $this = $(ckwidget.element.$),
-            dragContainer = ckwidget.dragHandlerContainer;
-        // Setup popover
-        var xpath = $this.data('value'),
-            getWidget = require('vellum/widgets').util.getWidget,
-            // TODO find out why widget is sometimes null (tests only?)
-            widget = getWidget($this);
+    function createPopover(element) {
+        console.log("createPopover called");
+        var $element = $(element);
+        var $widget = $element .closest('.form-control')
+        var xpath = element.getAttribute('data-value');
+        var getWidget = require('vellum/widgets').util.getWidget;
+        // TODO find out why widget is sometimes null (tests only?)
+        var widget = getWidget($widget);
         if (widget) {
-            var isFormRef = FORM_REF_REGEX.test(xpath),
-                isText = function () { return this.nodeType === 3; },
-                displayId = $this.contents().filter(isText)[0].nodeValue,
-                hashtag = widget.mug.form.normalizeHashtag(xpath),
-                title = util.escape(hashtag),
-                labelMug = widget.mug.form.getMugByPath(xpath),
-                description = labelMug && labelMug.p.labelItext ?
-                            labelMug.p.labelItext.get() : "",
-                isDate = labelMug && labelMug.__className.indexOf("Date") === 0,
-                $dragContainer = $(dragContainer.$),
-                $imgs = $dragContainer.children("img"),
-                dateFormatID = util.get_guid(),
-                getTitle = function () {
-                    var title_ = title,
-                        format = $this.attr("data-date-format");
-                    if (isDate || format) {
-                        title_ += date_format_popover({
-                            guid: dateFormatID,
-                            text: util.escape(getHumanReadableDateFormat(format)),
-                        });
-                    }
-                    return '<h3>' + util.escape(displayId) + '</h3>' +
-                        '<div class="text-muted">' + title_ + '</div>';
-                };
+            var isFormRef = FORM_REF_REGEX.test(xpath);
+            var isText = function () { return this.nodeType === 3; };
+            var displayId = element.textContent.trim();
+            var hashtag = widget.mug.form.normalizeHashtag(xpath);
+            var title = util.escape(hashtag);
+            var labelMug = widget.mug.form.getMugByPath(xpath);
+            var description = labelMug && labelMug.p.labelItext ?
+                labelMug.p.labelItext.get() : "";
+            var isDate = labelMug && labelMug.__className.indexOf("Date") === 0;
+            var dateFormatID = util.get_guid();
+            var getTitle = function () {
+                var title_ = title,
+                    format = $widget.attr("data-date-format");
+                if (isDate || format) {
+                    title_ += date_format_popover({
+                        guid: dateFormatID,
+                        text: util.escape(getHumanReadableDateFormat(format)),
+                    });
+                }
+                return '<h3>' + util.escape(displayId) + '</h3>' +
+                    '<div class="text-muted">' + title_ + '</div>';
+            };
             if (!labelMug) {
                 var datasources = widget.mug.form.vellum.datasources;
                 description = datasources.getNode(hashtag, {}).description || "";
@@ -837,16 +844,13 @@ define([
             });
             description = xml.normalize(description);
 
-            // Remove ckeditor-supplied title attributes, which will otherwise override popover title
-            $imgs.removeAttr("title");
-
-            $imgs.popover({
+            $element.popover({
                 trigger: 'hover',
                 container: 'body',
                 placement: 'bottom',
-                title: getTitle,
+                title: getTitle(), // only needs to be called once
                 html: true,
-                sanitize: false,  // bootstrap, don't remove data-ufid attribute
+                sanitize: false, // bootstrap, don't remove data-ufid attribute
                 content: easy_reference_popover({
                     text: description,
                     ufid: labelMug ? labelMug.ufid : "",
@@ -865,24 +869,25 @@ define([
                 var type = isFormRef ? 'form' : 'case';
                 analytics.fbUsage("Hovered over easy " + type + " reference");
                 analytics.workflow("Hovered over easy reference");
-                if (isDate || $this.attr("data-date-format")) {
+                if (isDate || $widget.attr("data-date-format")) {
                     var pos = $(this).offset(),
                         x = pos.left,
                         y = pos.top + $(this).height();
                     $("#" + dateFormatID).click(function () {
-                        $imgs.popover('hide');
+                        $element.popover('hide');
                         dateformats.showMenu(x, y, function (format) {
-                            $this.attr("data-date-format", format);
-                            editor.fire("saveSnapshot");
+                            $widget.attr("data-date-format", format);
+                            // editor.fire("saveSnapshot");
+                            // todo: save snapshot
                         }, true);
                         return false;
                     });
                 }
             });
 
-            ckwidget.on('destroy', function (e)  {
+            $element.on('destroy', function (e)  {
                 try {
-                    $imgs.popover('destroy');
+                    $element.popover('destroy');
                 } catch(err) {
                     // sometimes these are already destroyed
                 }
