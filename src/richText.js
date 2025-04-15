@@ -58,52 +58,8 @@ define([
     xml,
     analytics
 ){
-    var FORM_REF_REGEX = /^#form\//,
-        INVALID_PREFIX = "#invalid/xpath ",
-        // http://stackoverflow.com/a/16459606/10840
-        bubbleWidgetDefinition = {
-        template:
-            '<span class="label label-datanode label-datanode-internal">' +
-              '<i class="fa fa-question-circle">&nbsp;</i>' +
-              'example widget, not used' +
-            '</span>',
-        upcast: function ( element ) {
-            return element.name === 'span' && element.hasClass('label-datanode');
-        },
-        init: function() {
-            console.log('init');
-            // TODO: PR to ckeditor to make changing drag ui supported
-            var $this = $(this.element.$),
-                width = $this.innerWidth(),
-                height = $this.outerHeight(),
-                dragContainer = this.dragHandlerContainer,
-                editor = this.editor;
-            dragContainer.setStyles({
-                width: width + 'px',
-                height: height + 'px',
-                left: '0px'
-            });
-
-            if (editor.commands.createPopover) {
-                var _this = this;
-
-                // Look for deleted bubbles
-                editor.on('change', function(e) {
-                    editor.widgets.checkWidgets({ initOnlyNew: 1 });
-                });
-
-                // if the editor is still being initialized then this command
-                // won't be enabled until it is ready
-                if (editor.status === "ready") {
-                    editor.execCommand('createPopover', _this);
-                } else {
-                    editor.on('instanceReady', function () {
-                        editor.execCommand('createPopover', _this);
-                    });
-                }
-            }
-        }
-    };
+    var FORM_REF_REGEX = /^#form\//;
+    var INVALID_PREFIX = "#invalid/xpath ";
 
     /**
      * Get or create a rich text editor for the given element
@@ -135,7 +91,6 @@ define([
         inputElement.addEventListener('mousemove', e => {
             x = e.clientX;
             y = e.clientY;
-            // console.log(`${x}, ${y}`);
         });
 
         function htmlToElement(html) {
@@ -146,7 +101,6 @@ define([
         }
 
         function insertHtmlWithSpace(content) {
-            console.log(`insertHtmlWithSpace: ${content}`);
             const elementAtDrop = document.elementFromPoint(x, y);
             const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
 
@@ -186,6 +140,22 @@ define([
                 inputElement.dispatchEvent(inputEvent);
             }
         }
+        var getWidget = require('vellum/widgets').util.getWidget;
+
+        function onVellumWidgetSet(element, callback, attempts = 0) {
+            const maxAttempts = 5;
+            const intervalTime = 500;
+
+            if (attempts < maxAttempts) {
+                var widget = getWidget($(element));
+                if (widget !== null && widget !== undefined) {
+                    callback();
+                } else {
+                    setTimeout(() => onVellumWidgetSet(element, callback, attempts + 1), intervalTime);
+                }
+            }
+        }
+
         var wrapper = input.data("ckwrapper");
         if (wrapper) {
             return wrapper;
@@ -225,7 +195,14 @@ define([
             setValue: function (value, callback) {
                 newval = value;
                 var richTextValue = toRichText(value, form, options);
+                // console.log(`setValue: ${richTextValue}`);
                 inputElement.innerHTML = richTextValue;
+                onVellumWidgetSet(inputElement, () => {
+                    inputElement
+                        .querySelectorAll('[data-toggle="popover"]')
+                        .forEach(element => createPopover(element));
+                });
+
                 newval = NOTSET;
                 if (callback) {
                     setTimeout(callback, 0);
@@ -233,7 +210,6 @@ define([
                 return wrapper;
             },
             insertExpression: function (xpath) {
-                console.log(`insertExpression ${inputElement.getAttribute('name')}`);
                 if (options.isExpression) {
                     insertHtmlWithSpace(bubbleExpression(xpath, form));
                 } else {
@@ -243,7 +219,6 @@ define([
                 return wrapper;
             },
             insertOutput: function (xpath) {
-                console.log(`insertOutput ${inputElement.getAttribute('name')}`);
                 if (options.isExpression) {
                     throw new Error("cannot insert output into expression editor");
                 }
@@ -251,7 +226,6 @@ define([
                 return wrapper;
             },
             change: function () {
-                console.log(`change ${editor.id}`);
                 return wrapper;
             },
             focus: function() {
@@ -278,13 +252,8 @@ define([
                 return wrapper;
             },
             destroy: function () {
-                console.log(`destroy ${inputElement.getAttribute('name')}`);
                 if (input !== null) {
                     input.removeData("ckwrapper");
-                    // input.promise.then(function () {
-                    //     editor.destroy();
-                    //     editor = null;
-                    // });
                     input = null;
                 }
             },
@@ -495,9 +464,6 @@ define([
             .attr('data-value', xpath)
             .attr('contenteditable', 'false')
             .attr('data-toggle', 'popover')
-            // .attr('data-trigger', 'hover')
-            // .attr('title', 'popover')
-            // .attr('data-content', 'popover')
             .attr('id', uniqueId)
             .append(icon)
             .append(dispValue);
