@@ -3,7 +3,6 @@ const webpack = require('webpack');
 BASE_PATH = path.resolve(__dirname, '..')
 
 module.exports = {
-    mode: 'development',
     entry: {
         tests: {
             import: './tests/main.js',
@@ -64,9 +63,6 @@ module.exports = {
                 },
             },
         ],
-    },
-    output: {
-        clean: true,
     },
     plugins: [
         new webpack.ProvidePlugin({
