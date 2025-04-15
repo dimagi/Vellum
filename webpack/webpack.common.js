@@ -3,7 +3,6 @@ const webpack = require('webpack');
 BASE_PATH = path.resolve(__dirname, '..')
 
 module.exports = {
-    mode: 'development',
     entry: {
         tests: {
             import: './tests/main.js',
@@ -12,6 +11,10 @@ module.exports = {
             import: './src/main.js',
             chunkLoading: false,
         },
+    },
+    output: {
+        clean: true,
+        path: path.resolve(BASE_PATH, '_build'),
     },
     module: {
         rules: [
@@ -62,9 +65,6 @@ module.exports = {
                 },
             },
         ],
-    },
-    output: {
-        clean: true,
     },
     plugins: [
         new webpack.ProvidePlugin({

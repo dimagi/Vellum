@@ -52,10 +52,13 @@
         "mocha-headless-chrome": "4.0.0",
         "style-loader": "4.0.0",
         "webpack": "5.94.0",
-        "webpack-cli": "5.1.4"
+        "webpack-cli": "5.1.4",
+        "webpack-merge": "6.0.1"
     },
     "main": "src/main.js",
     "scripts": {
+        "dev": "webpack --mode development --config webpack/webpack.dev.js --watch",
+        "build": "webpack --mode production --config webpack/webpack.prod.js",
         "testserver": "http-server -p ${VELLUM_PORT:-8088}",
         "test:mocha": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/ -t 500000",
         "test:lint": "jshint src && jshint --config tests/.jshintrc tests",
