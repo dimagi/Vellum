@@ -6,7 +6,6 @@ if (!window.gettext) {
 }
 
 define([
-    // begin buildmain.py delimiter
     'vellum/core',
     'vellum/ignoreButRetain',
     'vellum/intentManager',
@@ -23,7 +22,6 @@ define([
     'vellum/copy-paste',
     'vellum/commander',
     'vellum/commcareConnect',
-    // end buildmain.py delimiter
 ], function () {
     // adds $.vellum as a side-effect
 });
