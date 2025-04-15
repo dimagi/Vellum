@@ -12,12 +12,11 @@
 name: "CodeQL Advanced"
 
 on:
-  # push:
-  #   branches: [ "master" ]
-  pull_request:
+  # We need to run on push too (when things are merged to master) so CodeQL has
+  # an appropriate base for comparison and can tell when issues are introduced.
+  push:
     branches: [ "master" ]
-  schedule:
-    - cron: '43 16 * * 1'
+  pull_request:
 
 jobs:
   analyze:
