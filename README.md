@@ -40,7 +40,7 @@ Usage
 
 Checkout the source from [GitHub](https://github.com/dimagi/Vellum)
 
-Optionally, build an optimized version
+Run `yarn dev` to watch and continuously bundle files during development. To bundle for production:
 
 ```sh
 $ make # artifacts will be in _build dir and also vellum.tar.gz
@@ -50,6 +50,7 @@ Then load it on a page using [RequireJS](http://requirejs.org), optionally with
 an existing jQuery instance:
 
 ```html
+<!-- TODO: update -->
 <link rel="stylesheet" href="path/to/bootstrap.css"></link>
 <link rel="stylesheet" href="path/to/vellum/style.css"></link>
 <!-- optional, if using bundled jquery et al -->
