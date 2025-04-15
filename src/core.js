@@ -38,7 +38,10 @@ define([
     'jstree-styles',
     'bootstrap',
     'Caret.js',
-    'at.js'
+    'at.js',
+    'at.js/dist/css/jquery.atwho.min.css',
+    'codemirror/lib/codemirror.css',
+    'jstree/dist/themes/default/style.min.css',
 ], function (
     require,
     SaveButton,
