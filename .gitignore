@@ -2,6 +2,7 @@
 /dist/*
 /lib/ckeditor/un-minified-ckeditor.js
 /_build
+/_dev
 vellum.tar.gz
 
 npm-debug.log
