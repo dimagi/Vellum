@@ -153,7 +153,7 @@ $ npm install --no-package-lock yarn  # if yarn is not installed globally
 $ `npm bin`/yarn install
 ```
 
-Build optimized version (test locally by changing `useBuilt` in `tests/main.js`):
+Build optimized version:
 ```
 $ make
 ```
