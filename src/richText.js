@@ -125,14 +125,12 @@ define([
                 selection.removeAllRanges();
                 selection.addRange(range);
 
-                // Create and insert the appropriate bubble based on type
-                const element = htmlToElement(content);
-                range.deleteContents();
-                range.insertNode(element);
+                inputElement.focus();
+                document.execCommand('insertHTML', false, content);
 
-                if (element.getAttribute('data-toggle')) {
-                    // $(element).popover();
-                    createPopover(element);
+                const insertedElement = inputElement.querySelector('[data-toggle]:not(.popover-initialized)');
+                if (insertedElement && insertedElement.getAttribute('data-toggle')) {
+                    createPopover(insertedElement);
                 }
 
                 const inputEvent = new Event('input', {
@@ -460,7 +458,6 @@ define([
         var dispValue = getBubbleDisplayValue(xpath, form.xpath);
         var icon = $('<i>').addClass(iconClasses).html('&nbsp;');
         var uniqueId = 'bubble-' + Math.random().toString(36).substr(2, 9);
-        console.log(`adding bubble with id ${uniqueId}`);
         var $bubble = $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
             .attr('data-value', xpath)
@@ -769,7 +766,6 @@ define([
     }
 
     function createPopover(element) {
-        console.log("createPopover called");
         var $element = $(element);
         var $widget = $element .closest('.form-control')
         var xpath = element.getAttribute('data-value');
@@ -850,6 +846,8 @@ define([
                     });
                 }
             });
+
+            element.classList.add('popover-initialized');
 
             $element.on('destroy', function (e)  {
                 try {
