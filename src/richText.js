@@ -93,13 +93,6 @@ define([
             y = e.clientY;
         });
 
-        function htmlToElement(html) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            doc.body.firstChild.contentEditable = false;
-            return doc.body.firstChild;
-        }
-
         function insertHtmlWithSpace(content) {
             const elementAtDrop = document.elementFromPoint(x, y);
             const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
@@ -116,6 +109,14 @@ define([
                     range = document.createRange();
                     range.setStart(position.offsetNode, position.offset);
                     range.collapse(true);
+
+                    // Remove the paragraph so the inserted text does not create a new one.
+                    const parentNode = position.offsetNode.parentNode;
+                    if (parentNode && parentNode.tagName === 'P' &&
+                        position.offsetNode.nodeType === Node.TEXT_NODE &&
+                        position.offset === position.offsetNode.nodeValue.length) {
+                        content = content.replace(/^<p>/i, '').replace(/<\/p>$/i, '');
+                    }
                 }
             }
             if (range) {
@@ -138,6 +139,7 @@ define([
                 inputElement.dispatchEvent(inputEvent);
             }
         }
+
         var getWidget = require('vellum/widgets').util.getWidget;
 
         function onVellumWidgetSet(element, callback, attempts = 0) {
@@ -257,31 +259,6 @@ define([
             },
         };
 
-        // editor.on('focus', function (e) {
-        //     // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
-        //     editor.setReadOnly(false);
-        //     // remove any placeholder text that may be in the text area
-        //     var editable = e.editor.editable();
-        //     if (editable.hasClass('placeholder')) {
-        //         editable.removeClass('placeholder');
-        //         editable.setHtml('');
-        //     }
-        //     // set the cursor to the end of text
-        //     var selection = editor.getSelection();
-        //     var range = selection.getRanges()[0];
-        //     if (range) {
-        //         var pCon = range.startContainer.getAscendant({p:2},true);
-        //         if (pCon) {
-        //             var newRange = new CKEDITOR.dom.range(range.document);
-        //             newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-        //             newRange.select();
-        //         }
-        //     }
-        // });
-
-        // editor._vellum_fromRichText = function (html) {
-        //     return fromRichText(html, form, options.isExpression);
-        // };
 
         inputElement.addEventListener('paste', function(event) {
             const text = event.clipboardData.getData('text/plain');
@@ -318,39 +295,10 @@ define([
             // }
         });
 
-        if (_.isFunction(options.createPopover)) {
-            // editor.addCommand('createPopover', {
-            //     exec: options.createPopover,
-            //     editorFocus: false,
-            //     canUndo: false,
-            // });
-        }
-
         input.data("ckwrapper", wrapper);
         resolveEditorPromise()// probably can just set it to a resolved promise to beging with or remove the code that waits for it.
         return wrapper;
     };
-
-    function richTextDataTransfer(nativeDataTransfer, editor) {
-        realDataTransfer.call(this, nativeDataTransfer);
-
-        if (editor) {
-            this.sourceEditor = editor;
-
-            var html = editor.getSelectedHtml(1);
-            if (html) {
-                var text = editor._vellum_fromRichText(html);
-                if (isInvalid(text)) {
-                    text = escapedHashtags.transform(
-                        text.slice(INVALID_PREFIX.length),
-                        function (v) { return v; }
-                    );
-                }
-                // always copy plain text, not HTML
-                this.setData('text/plain', text);
-            }
-        }
-    }
 
     /*
      * formats specifies the serialization for different formats that can be
@@ -634,7 +582,7 @@ define([
     }
 
     /**
-     * Convert plain text to HTML to be edited in CKEditor
+     * Convert plain text to HTML
      *
      * Replace line breaks with <p> tags and preserve contiguous spaces.
      */
@@ -645,7 +593,7 @@ define([
     }
 
     /**
-     * Convert CKEditor HTML to plain text
+     * Convert HTML to plain text
      *
      * Replace <p> tags with newlines.
      */
