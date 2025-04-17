@@ -158,6 +158,10 @@ define([
                 path: 'question22/question23/',
                 nodeId: 'question29'
             }, {
+                type: 'Document',
+                path: 'question22/question23/',
+                nodeId: 'question33'
+            }, {
                 type: 'AndroidIntent',
                 path: 'question22/question23/',
                 nodeId: 'question7'
@@ -410,7 +414,7 @@ define([
                     //["FieldList", "Text"]
                 ],
                 questionWithoutDefaultAppearance = [
-                    "Text", "Select", "MSelect", "Audio", "Video", "Image",
+                    "Text", "Select", "MSelect", "Audio", "Video", "Image", "Document",
                 ],
                 questionWithDefaultAppearance = {
                     Trigger: "minimal",

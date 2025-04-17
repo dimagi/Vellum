@@ -346,7 +346,8 @@ define([
                 "Image",
                 "Audio",
                 "Video",
-                "Signature"
+                "Signature",
+                "Document"
             ]
         };
         if (this.opts().features.case_micro_image) {

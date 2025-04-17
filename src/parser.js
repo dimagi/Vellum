@@ -503,6 +503,8 @@ define([
                     }
                 } else if (mediaType === 'audio/*') { /* fix eclipse syntax highlighter */
                     type = 'Audio';
+                } else if (mediaType === 'application/*,text/*') {
+                    type = 'Document';
                 } else {
                     // Why throw?! This will kill form parsing.
                     // TODO create a parser warning instead?
