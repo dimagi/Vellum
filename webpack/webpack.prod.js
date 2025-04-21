@@ -10,5 +10,8 @@ module.exports = merge(common, {
 
         // Necessary for jquery-extensions to have proper access to $.fn.popover.Constructor
         "jquery.bootstrap": 'window.jQuery',
+
+        // Necessary to allow HQ to override hqAnalytics
+        "vellum/hqAnalytics": "require('vellum/hqAnalytics')",
     },
 });
