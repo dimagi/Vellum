@@ -29,6 +29,8 @@ define([
     'vellum/javaRosa/util',
     'vellum/hqAnalytics',
     'vellum/debugutil',
+    'diff-match-patch',
+    'CryptoJS',
     'vellum/base',
     'vellum/atwho',     // must come after vellum/base so that $.vellum is available
     'vellum/jstree-plugins',
@@ -67,16 +69,17 @@ define([
     util,
     jrUtil,
     analytics,
-    debug
+    debug,
+    diff_match_patch,
+    CryptoJS,
 ) {
+    // TODO: remove? No longer relevant now that module loads aren't async.
     // Load these modules in the background after all runtime dependencies have
     // been resolved, since they're not needed initially.
     setTimeout(function () {
         require([
             'codemirror',
             'codemirror/mode/xml/xml',
-            'diff-match-patch',
-            'CryptoJS',
             'vellum/expressionEditor',
         ], function () {});
     }, 0);
@@ -2298,8 +2301,7 @@ define([
     };
 
     fn.send = function (formText, saveType) {
-        var CryptoJS = require('CryptoJS'),
-            _this = this,
+        var _this = this,
             opts = this.opts().core,
             checkForConflict = false,
             patch, data;
@@ -2311,8 +2313,7 @@ define([
 
         if (saveType === 'patch') {
             checkForConflict = true;
-            var diff_match_patch = require('diff-match-patch'),
-                dmp = new diff_match_patch();
+            var dmp = new diff_match_patch();
             patch = dmp.patch_toText(
                 dmp.patch_make(this.data.core.lastSavedXForm, formText)
             );
