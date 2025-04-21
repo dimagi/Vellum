@@ -52,6 +52,28 @@ module.exports = {
                 },
             },
             {
+                test: /lib\/sha1/,
+                loader: "exports-loader",
+                options: {
+                    type: "commonjs",
+                    exports: {
+                        syntax: "single",
+                        name: "CryptoJS",
+                    },
+                },
+            },
+            {
+                test: /diff_match_patch/,
+                loader: "exports-loader",
+                options: {
+                    type: "commonjs",
+                    exports: {
+                        syntax: "single",
+                        name: "diff_match_patch",
+                    },
+                },
+            },
+            {
                 test: /XMLWriter/,
                 loader: "exports-loader",
                 options: {
