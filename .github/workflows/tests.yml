@@ -14,7 +14,10 @@ jobs:
         node-version: 20
     - name: Install dependencies
       run: |
+        mv package.json package.json.save
         npm install "yarn@^1"
+        rm package-lock.json
+        mv package.json.save package.json
         yarn install
     - name: Run tests
       run: |
