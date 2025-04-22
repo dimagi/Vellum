@@ -15,7 +15,6 @@
         "url": "https://github.com/dimagi/Vellum.git"
     },
     "dependencies": {
-        "@bracken/require-less": "0.1.6",
         "at.js": "1.5.4",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
         "css-loader": "7.1.2",
@@ -32,11 +31,6 @@
         "less": "3.10.3",
         "less-loader": "12.2.0",
         "markdown-it": "12.3.2",
-        "require-css": "0.1.10",
-        "requirejs": "2.3.7",
-        "requirejs-plugins": "1.0.2",
-        "requirejs-text": "2.0.16",
-        "requirejs-undertemplate": "dimagi/requirejs-tpl#v0.0.6",
         "style-loader": "4.0.0",
         "underscore": "1.13.1",
         "webpack": "5.94.0",
