@@ -4,7 +4,11 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
+    'vellum/util',
     'text!static/core/test1.xml',
+    'text!static/core/diff1.xml',
+    'text!static/core/diff2.xml',
+    'text!static/core/diff-result.html',
     'text!static/core/group-rename.xml',
     'text!static/core/invalid-questions.xml',
     'text!static/core/increment-item.xml',
@@ -16,7 +20,11 @@ define([
     $,
     _,
     util,
+    vellumUtil,
     TEST_XML_1,
+    DIFF_1_XML,
+    DIFF_2_XML,
+    DIFF_RESULT_HTML,
     GROUP_RENAME_XML,
     INVALID_QUESTIONS_XML,
     INCREMENT_ITEM_XML,
@@ -497,6 +505,13 @@ define([
                 ]);
                 var mug = util.getMug("html-label-other");
                 assert.equal(mug.p.labelItext.get(), "a&b > & < a");
+            });
+        });
+
+        describe("XML diff display", function () {
+            it("should generate HTML disply of XML diff", function () {
+                var diff = vellumUtil.htmlXMLDiff(DIFF_1_XML, DIFF_2_XML);
+                assert.equal(diff.trim(), DIFF_RESULT_HTML.trim());
             });
         });
 
