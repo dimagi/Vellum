@@ -53,6 +53,7 @@
         "dev": "webpack --mode development --config webpack/webpack.dev.js --watch",
         "build": "webpack --mode production --config webpack/webpack.prod.js",
         "testserver": "http-server -p ${VELLUM_PORT:-8088}",
+        "testbuild": "webpack --mode development --config webpack/webpack.dev.js",
         "test:mocha": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/ -t 500000",
         "test:lint": "jshint src && jshint --config tests/.jshintrc tests",
         "test": "npm run test:mocha && npm run test:lint"

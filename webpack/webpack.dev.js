@@ -9,4 +9,12 @@ module.exports = merge(common, {
         path: path.resolve(BASE_PATH, '_build'),
         filename: '[name].js',
     },
+    externals: {
+        // Necessary for tests
+        jquery: 'window.jQuery',
+
+        // Vellum expects bootstrap to be externally provided.
+        // No value needed because Vellum never directly references bootstrap.
+        "bootstrap": "window.nothing",
+    },
 });
