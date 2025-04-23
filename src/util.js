@@ -2,6 +2,7 @@ define([
     'require',
     'json!langCodes',
     'underscore',
+    'diff-match-patch',
     'vellum/markdown',
     'vellum/xml',
     'jquery',
@@ -10,6 +11,7 @@ define([
     require,
     langCodes,
     _,
+    diff_match_patch,
     markdown,
     xml,
     $
@@ -307,6 +309,29 @@ define([
     };
 
     that.parseXML = xml.parseXML;
+
+    that.htmlXMLDiff = function (localForm, serverForm) {
+        function cleanForDiff (value) {
+            // convert leading tabs to spaces
+            value = value.replace(/^\t+/mg, function (match) {
+                return match.replace(/\t/g, "  ");
+            });
+            // add newline at end of file if missing
+            if (!value.match(/\n$/)) {
+                value = value + "\n";
+            }
+            return value;
+        }
+        localForm = cleanForDiff(localForm);
+        serverForm = cleanForDiff(serverForm);
+
+        const dmp = new diff_match_patch(),
+            diff = dmp.diff_main(localForm, serverForm);
+
+        let html = dmp.diff_prettyHtml(diff);
+        html = html.replaceAll("&para;<br>", "<br>");
+        return html;
+    };
 
     that.markdown = markdown;
 
