@@ -3,16 +3,25 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>Vellum Test</title>
-    
+
     <link href="tests/lib/font-awesome.css" type="text/css" rel="stylesheet" />
     <link href="tests/lib/font-commcare.css" type="text/css" rel="stylesheet" />
     <link href="tests/lib/hqstyle-core.css" type="text/css" rel="stylesheet"></link>
     <link href="node_modules/codemirror/lib/codemirror.css" type="text/css" rel="stylesheet" />
-    
+
     <!-- Mocha and test-only dependencies -->
     <link href="node_modules/mocha/mocha.css" type="text/css" rel="stylesheet"></link>
 
+    <!--
+      Provide jquery and bootstrap, which are excluded from bundled files
+      so Vellum can be used as a part of a larger setup that already includes these.
+    -->
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.js"></script>
+
     <script src="tests/typoglycemia.js"></script>
+
+    <!-- Development bundle -->
     <script src="_build/tests.js"></script>
 
     <style>
