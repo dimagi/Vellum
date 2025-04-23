@@ -2,7 +2,7 @@ define([
     'require',
     'json!langCodes',
     'underscore',
-    'jsdiff',
+    'diff-match-patch',
     'vellum/markdown',
     'vellum/xml',
     'jquery',
@@ -11,7 +11,7 @@ define([
     require,
     langCodes,
     _,
-    jsdiff,
+    diff_match_patch,
     markdown,
     xml,
     $
@@ -310,7 +310,7 @@ define([
 
     that.parseXML = xml.parseXML;
 
-    that.xmlDiff = function (localForm, serverForm, opts) {
+    that.htmlXMLDiff = function (localForm, serverForm) {
         function cleanForDiff (value) {
             // convert leading tabs to spaces
             value = value.replace(/^\t+/mg, function (match) {
@@ -322,25 +322,15 @@ define([
             }
             return value;
         }
-        opts = opts || {};
-        if (opts.normalize_xmlns) {
-            var xmlns = $(xml.parseXML(serverForm)).find('data').xmlAttr('xmlns');
-            localForm = localForm.replace(/(data[^>]+xmlns=")(.+?)"/,
-                                    '$1' + xmlns + '"');
-        }
         localForm = cleanForDiff(localForm);
         serverForm = cleanForDiff(serverForm);
-        var patch = jsdiff.createPatch(
-            "",
-            serverForm,
-            localForm,
-            gettext("Server Form"),
-            gettext("Local Form")
-        );
-        patch = patch.replace(/^Index:/,
-            opts.not ? gettext("XML should not be equivalent") : gettext("XML mismatch")
-        );
-        return patch;
+
+        const dmp = new diff_match_patch(),
+            diff = dmp.diff_main(localForm, serverForm);
+
+        let html = dmp.diff_prettyHtml(diff);
+        html = html.replaceAll("&para;<br>", "<br>");
+        return html;
     };
 
     that.markdown = markdown;

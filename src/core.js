@@ -797,13 +797,11 @@ define([
             }
         ], gettext("Cancel"), "fa fa-warning");
 
-        var diff = util.xmlDiff(formText, serverForm || "");
-
         $overwriteForm = $(confirm_overwrite({
             description: gettext("Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
                          "to overwrite their work?"),
-            xmldiff: util.escape(diff),
+            xmldiff: util.htmlXMLDiff(formText, serverForm || ""),
         }));
         $modal.find('.modal-body').html($overwriteForm);
 
