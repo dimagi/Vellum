@@ -17,5 +17,9 @@ module.exports = merge(common, {
 
         // Necessary to allow HQ to override hqAnalytics
         "vellum/hqAnalytics": "require('vellum/hqAnalytics')",
+
+        // Necessary so HQ can use its own bootstrap. No need for a real value
+        // because Vellum never directly references bootstrap.
+        "bootstrap": "window.nothing",
     },
 });
