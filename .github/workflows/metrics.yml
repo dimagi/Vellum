@@ -16,16 +16,19 @@ jobs:
       DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
-        node-version: 14
+        node-version: 20
     - uses: actions/setup-python@v4
       with:
         python-version: |
           3.9
     - name: Install dependencies
       run: |
+        mv package.json package.json.save
         npm install "yarn@^1"
+        rm package-lock.json
+        mv package.json.save package.json
         yarn install
     - name: Install dependency-metrics
       run: pip install dependency-metrics
