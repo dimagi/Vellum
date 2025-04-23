@@ -329,7 +329,10 @@ define([
             diff = dmp.diff_main(localForm, serverForm);
 
         let html = dmp.diff_prettyHtml(diff);
+
+        // Strip paragraph symbols that diff-match-patch appends to each line
         html = html.replaceAll("&para;<br>", "<br>");
+
         return html;
     };
 
