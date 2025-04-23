@@ -797,13 +797,15 @@ define([
             }
         ], gettext("Cancel"), "fa fa-warning");
 
-        var diff = util.xmlDiff(formText, serverForm || "");
+        var diff_match_patch = require('diff-match-patch'),
+            dmp = new diff_match_patch(),
+            diff = dmp.diff_main(formText, serverForm || "");
 
         $overwriteForm = $(confirm_overwrite({
             description: gettext("Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
                          "to overwrite their work?"),
-            xmldiff: util.escape(diff),
+            xmldiff: dmp.diff_prettyHtml(diff),
         }));
         $modal.find('.modal-body').html($overwriteForm);
 
