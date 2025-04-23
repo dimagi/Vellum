@@ -3,6 +3,7 @@ define([
     'chai',
     'equivalent-xml',
     'jsdiff',
+    'diff-match-patch',
     'underscore',
     'jquery',
     'vellum/copy-paste',
@@ -16,6 +17,7 @@ define([
     chai,
     EquivalentXml,
     jsdiff,
+    diff_match_patch,
     _,
     $,
     copypaste,
@@ -109,9 +111,22 @@ define([
      */
     function assertEqual(actual, expected, message) {
         if (actual !== expected) {
+            var dmp = new diff_match_patch();
+            let diffs = dmp.diff_main(actual, expected);
+            var laterDiffs = _.map(diffs, function (d) {
+                let sign = "";
+                if (d[0] < 0) {
+                    sign = "-";
+                } else {
+                    sign = "+";
+                }
+                return sign + d[1];
+            });
+            const text = laterDiffs.join("\n");
+
             var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
             patch = patch.replace(/^Index:/, message || "Not equal:");
-            assert(false, colorDiff(patch));
+            assert(false, colorDiff(patch) + "\n***************************************\n" + colorDiff(text));
         }
     }
 
