@@ -42,7 +42,8 @@ requirejs(['jquery.vellum'], function () {
         paths: {
             'static': testBase + 'tests/static',
             'chai': testBase + 'node_modules/chai/chai',
-            'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml'
+            'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml',
+            'jsdiff': testBase + 'node_modules/jsdiff/diff',
         }
     });
 

@@ -55,7 +55,6 @@ requirejs.config({
 
         'save-button': '../lib/SaveButton',
 
-        'jsdiff': '../node_modules/jsdiff/diff',
         'markdown-it': '../node_modules/markdown-it/dist/markdown-it',
         'caretjs': '../node_modules/Caret.js/dist/jquery.caret',
         'atjs': '../node_modules/at.js/dist/js/jquery.atwho',
