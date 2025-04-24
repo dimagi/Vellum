@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common');
 
@@ -17,5 +18,7 @@ module.exports = merge(common, {
         // Necessary so HQ can use its own bootstrap. No need for a real value
         // because Vellum never directly references bootstrap.
         "bootstrap": "window.nothing",
+
+        "gettext": "window.gettext",
     },
 });
