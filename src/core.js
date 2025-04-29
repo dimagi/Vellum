@@ -347,9 +347,13 @@ define([
                 "Audio",
                 "Video",
                 "Signature",
-                "Document"
             ]
         };
+
+        if (this.opts().features.support_document_upload) {
+            mediaGroup.questions.push("Document");
+        }
+
         if (this.opts().features.case_micro_image) {
             mediaGroup.questions.push("MicroImage");
         }
