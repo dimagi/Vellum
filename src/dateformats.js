@@ -1,8 +1,10 @@
 define([
     'jquery',
+    'underscore',
     'vellum/templates/date_format_menu.html'
 ], function(
     $,
+    _,
     date_format_menu
 ){
     function showMenu(x, y, callback, hideOnLeave) {
