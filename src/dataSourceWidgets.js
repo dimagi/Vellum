@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'vellum/widgets',
-    'tpl!vellum/templates/data_source_editor'
+    'vellum/templates/data_source_editor.html'
 ], function (
     $,
     _,

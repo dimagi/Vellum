@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'tpl!vellum/templates/date_format_menu'
+    'vellum/templates/date_format_menu.html'
 ], function(
     $,
     date_format_menu

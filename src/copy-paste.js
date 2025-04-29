@@ -1,7 +1,7 @@
 define([
     'jquery',
     'underscore',
-    'tpl!vellum/templates/copy_paste_help',
+    'vellum/templates/copy_paste_help.html',
     'vellum/mugs',
     'vellum/tsv',
     'vellum/util',
