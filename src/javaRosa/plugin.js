@@ -22,8 +22,8 @@
 define([
     'underscore',
     'jquery',
-    'tpl!vellum/templates/edit_source',
-    'tpl!vellum/templates/language_selector',
+    'vellum/templates/edit_source.html',
+    'vellum/templates/language_selector.html',
     'vellum/dateformats',
     'vellum/util',
     'vellum/xml',

@@ -6,10 +6,10 @@ define([
     'vellum/util',
     'vellum/atwho',
     'vellum/widgets',
-    'tpl!vellum/templates/widget_update_case',
-    'tpl!vellum/templates/widget_index_case',
-    'tpl!vellum/templates/widget_attachment_case',
-    'tpl!vellum/templates/widget_save_to_case',
+    'vellum/templates/widget_update_case.html',
+    'vellum/templates/widget_index_case.html',
+    'vellum/templates/widget_attachment_case.html',
+    'vellum/templates/widget_save_to_case.html',
     'vellum/core'
 ], function (
     $,

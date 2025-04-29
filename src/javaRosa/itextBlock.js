@@ -2,7 +2,7 @@ define([
     'underscore',
     'jquery',
     'vellum/templates/button_remove.html',
-    'tpl!vellum/templates/control_group',
+    'vellum/templates/control_group.html',
     'vellum/widgets',
     'vellum/util',
     'vellum/javaRosa/itextWidget',
