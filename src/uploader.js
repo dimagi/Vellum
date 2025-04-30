@@ -162,7 +162,7 @@ define([
             $previewContainer.html(getPreviewUI(widget, objectMap, ICONS));
             $controlBlock.append($previewContainer);
 
-            $uploadContainer.html(multimedia_block());
+            $uploadContainer.html(_.template(multimedia_block)());
 
             $uploadContainer.find('.fd-mm-upload-trigger')
                 .append(getUploadButtonUI(widget, objectMap));
@@ -242,7 +242,7 @@ define([
                 url: linkedObject.url
             });
         } else {
-            previewHtml = multimedia_nomedia({
+            previewHtml = _.template(multimedia_nomedia)({
                 iconClass: ICONS[widget.form]
             });
         }
@@ -252,7 +252,7 @@ define([
     var getUploadButtonUI = function (widget, objectMap) {
         var currentPath = widget.getItextValue ? widget.getItextValue() : widget.getValue(),
             $uploadBtn;
-        $uploadBtn = $(multimedia_upload_trigger({
+        $uploadBtn = $(_.template(multimedia_upload_trigger)({
             multimediaExists: currentPath in objectMap,
             uploaderId: SLUG_TO_UPLOADER_SLUG[widget.form],
             mediaType: SLUG_TO_DESCRIPTION[widget.form],
@@ -328,7 +328,7 @@ define([
                                 this.data.uploader.uploadControllers);
         },
         initUploadController: function (options) {
-            var $uploaderModal = $(multimedia_modal({
+            var $uploaderModal = $(_.template(multimedia_modal)({
                 mediaType: options.mediaType,
                 modalId: options.uploaderSlug
             }));

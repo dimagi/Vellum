@@ -156,7 +156,7 @@ define([
 
         return {
             at: atKey,
-            displayTpl: atwhoDisplay,
+            displayTpl: _.template(atwhoDisplay),
             insertTpl: options.insertTpl,
             limit: 10,
             maxLen: 30,

@@ -870,7 +870,7 @@ define([
                     var title_ = title,
                         format = $this.attr("data-date-format");
                     if (isDate || format) {
-                        title_ += date_format_popover({
+                        title_ += _.template(date_format_popover)({
                             guid: dateFormatID,
                             text: util.escape(getHumanReadableDateFormat(format)),
                         });
@@ -899,7 +899,7 @@ define([
                 title: getTitle,
                 html: true,
                 sanitize: false,  // bootstrap, don't remove data-ufid attribute
-                content: easy_reference_popover({
+                content: _.template(easy_reference_popover)({
                     text: description,
                     ufid: labelMug ? labelMug.ufid : "",
                 }),

@@ -63,7 +63,7 @@ define([
 
             widget.refreshControl = function (value) {
                 value = value ? value : widget.getValue();
-                widget.input.html(widget_save_to_case({
+                widget.input.html(_.template(widget_save_to_case)({
                     internal_template: internal_template,
                     props: value
                 }));
@@ -107,7 +107,7 @@ define([
             return widget;
         },
         saveCasePropWidget = function (mug, options) {
-            options.template = widget_update_case;
+            options.template = _.template(widget_update_case);
             var widget = propertyWidget(mug, options);
 
             widget.getValue = function () {
@@ -125,7 +125,7 @@ define([
             return widget;
         },
         indexCaseWidget = function (mug, options) {
-            options.template = widget_index_case;
+            options.template = _.template(widget_index_case);
             var widget = propertyWidget(mug, options);
 
             widget.getValue = function () {
@@ -144,7 +144,7 @@ define([
             return widget;
         },
         attachmentCaseWidget = function (mug, options) {
-            options.template = widget_attach_case;
+            options.template = _.template(widget_attach_case);
             var widget = propertyWidget(mug, options);
 
             widget.getValue = function () {

@@ -24,7 +24,7 @@ module.exports = {
             },
             {
                 test: /\.html$/,
-                loader: path.resolve('src/template-loader.js'),
+                type: 'asset/source',
             },
             {
                 test: /\.tsv$/,
