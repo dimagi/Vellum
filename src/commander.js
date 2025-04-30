@@ -24,7 +24,7 @@ define([
             var vellum = this,
                 cmd = vellum.data.commander;
             cmd.vellum = vellum;
-            cmd.container = $(commanderTemplate());
+            cmd.container = $(_.template(commanderTemplate)());
             cmd.addQuestionButton = vellum.$f.find(".fd-add-question");
             cmd.input = cmd.container.find("input");
             cmd.input.on("keydown", function (e) {

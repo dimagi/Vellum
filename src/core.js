@@ -221,7 +221,7 @@ define([
 
         this.$f.addClass('formdesigner');
         var mainVars = _.extend({format: util.format}, HOTKEY_UNICODE);
-        this.$f.empty().append(main_template(mainVars));
+        this.$f.empty().append(_.template(main_template)(mainVars));
         $(document).on("keydown", function (e) {
             var key = util.getKeyChord(e);
             (fn.hotkeys[key] || _.identity).call(_this, e);
@@ -303,7 +303,7 @@ define([
             groupData.questions = _.map(groupData.questions, getQuestionData);
         });
 
-        $dropdown.find(".fd-add-question").after($(add_question({
+        $dropdown.find(".fd-add-question").after($(_.template(add_question)({
             groups: _.map(_this.getQuestionGroups(), function(groupData) {
                 var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
                 return {
@@ -720,7 +720,7 @@ define([
                 }
             }
         ]);
-        $updateForm = $(edit_source({
+        $updateForm = $(_.template(edit_source)({
             description: gettext("This is the raw XML. You can edit or paste " +
                 "into this box to make changes to your form. Press 'Update " +
                 "Source' to save changes, or 'Close' to cancel.")
@@ -763,7 +763,7 @@ define([
             $exportForm;
 
         $modal = this.generateNewModal(gettext("Export Form Contents"), []);
-        $exportForm = $(edit_source({
+        $exportForm = $(_.template(edit_source)({
             description: gettext("Copy and paste this content into a " +
                 "spreadsheet program like Excel to easily share your " +
                 "form with others.")
@@ -808,7 +808,7 @@ define([
             }
         ], gettext("Cancel"), "fa fa-warning");
 
-        $overwriteForm = $(confirm_overwrite({
+        $overwriteForm = $(_.template(confirm_overwrite)({
             description: gettext("Looks like someone else has edited this form " +
                          "since you loaded the page. Are you sure you want " +
                          "to overwrite their work?"),
@@ -847,7 +847,7 @@ define([
         }
 
         _.each(formProperties, function (prop) {
-            var $propertyInput = $(control_group_stdInput({
+            var $propertyInput = $(_.template(control_group_stdInput)({
                 label: prop.label,
                 type: prop.type || 'text',
             }));
@@ -882,8 +882,8 @@ define([
             tableData = form.findUsages();
 
         $modal.addClass('fd-full-screen-modal');
-        $modalBody.append($(find_usages_search()));
-        $modalBody.append($(find_usages({tableData: tableData})));
+        $modalBody.append($(_.template(find_usages_search)()));
+        $modalBody.append($(_.template(find_usages)({tableData: tableData})));
 
         this._resizeFullScreenModal($modal);
         $modal.modal('show');
@@ -917,7 +917,7 @@ define([
                 });
             }
             $modalBody.find('table').remove();
-            $modalBody.append($(find_usages({tableData: filteredData})));
+            $modalBody.append($(_.template(find_usages)({tableData: filteredData})));
         }, 250));
 
         atwho.autocomplete($('#findUsagesSearch'), _this.getCurrentlySelectedMug(),{
@@ -956,7 +956,7 @@ define([
         // Close any existing modal - multiple modals is a bad state
         _this.closeModal(undefined, true);
 
-        var $modal = $(modal_content({
+        var $modal = $(_.template(modal_content)({
                 title: title,
                 closeButtonTitle: closeButtonTitle,
                 headerIcon: headerIcon,
@@ -971,7 +971,7 @@ define([
                 _this.closeModal();
             };
             $modal.find('.modal-footer').prepend(
-                $(modal_button(button)).click(button.action));
+                $(_.template(modal_button)(button)).click(button.action));
         });
         $modalContainer.html($modal);
         return $modal;
@@ -2039,7 +2039,7 @@ define([
 
             error = errors[errors.length - 1];
             var showMessage = function() {
-                messages_div.html(alert_global({
+                messages_div.html(_.template(alert_global)({
                     messageType: MESSAGE_TYPES[error.level],
                     messages: asArray(error.message)
                 }))
@@ -2080,7 +2080,7 @@ define([
     fn.getSectionDisplay = function (mug, options) {
         var _this = this,
             isCollapsed = _this.sectionIsCollapsed(options),
-            $sec = $(question_fieldset({
+            $sec = $(_.template(question_fieldset)({
                 fieldsetClass: "fd-question-edit-" + options.slug || "anon",
                 fieldsetTitle: options.displayName,
                 fieldsetSlug: options.slug,
@@ -2112,7 +2112,7 @@ define([
         var _this = this,
             form = this.data.core.form,
             mugs = multiselect ? mug : [mug],
-            $baseToolbar = $(question_toolbar({
+            $baseToolbar = $(_.template(question_toolbar)({
                 comment: multiselect ? '' : richText.sanitizeInput(mug.p.comment),
                 isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
                     return _this.isMugRemoveable(mug, mug.hashtagPath);
@@ -2176,7 +2176,7 @@ define([
         };
         var changeable = this.isMugTypeChangeable(mug, mug.hashtagPath);
 
-        var $questionTypeChanger = $(question_type_changer({
+        var $questionTypeChanger = $(_.template(question_type_changer)({
             currentQuestionIcon: mug.getIcon(),
             currentTypeName: mug.options.typeName,
             questions: changeable ? getQuestionList(mug) : []
@@ -2232,7 +2232,7 @@ define([
             displayLanguage = this.data.core.currentItextDisplayLanguage,
             warnings = form.getSerializationWarnings();
         if (warnings.length) {
-            var message = $(form_errors_template({
+            var message = $(_.template(form_errors_template)({
                     errors: warnings,
                     displayLanguage: displayLanguage
                 }));

@@ -115,7 +115,9 @@ define([
                 return;
             }
             $menu.find('.language-selector').remove();
-            $menu.find('.fd-bulk-update-menu').before(language_selector({languages: fullLangs}));
+            $menu.find('.fd-bulk-update-menu').before(_.template(language_selector)({
+                languages: fullLangs
+            }));
             $items = $menu.find(".fd-display-item");
             $items.click(function (e) {
                 $input.val($(this).data("code")).change();
@@ -1040,7 +1042,7 @@ define([
                     }
                 }
             ]);
-            $updateForm = $(edit_source({
+            $updateForm = $(_.template(edit_source)({
                 description: gettext(
                 "Copy these translations into a spreadsheet program " +
                 "like Excel. You can edit them there and then paste them back " +

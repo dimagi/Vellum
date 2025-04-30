@@ -502,7 +502,7 @@ define([
         };
 
         widget.setValue = function (value) {
-            widget.kvInput.html(widget_control_keyvalue({
+            widget.kvInput.html(_.template(widget_control_keyvalue)({
                 pairs: _.clone(value)
             }));
             widget.kvInput.find('input').on('change keyup', function () {
@@ -780,7 +780,7 @@ define([
     };
     
     var getUIElement = function($input, labelText, isDisabled, help) {
-        var $uiElem = $(ui_element({
+        var $uiElem = $(_.template(ui_element)({
             labelText: labelText,
             help: help,
         }));
@@ -803,7 +803,7 @@ define([
         mug.messages.each(path, function (msg) {
             if (seen.hasOwnProperty(msg.message)) { return; }
             seen[msg.message] = true;
-            var html = $(widget_control_message({
+            var html = $(_.template(widget_control_message)({
                     msg: msg,
                     html: /\n/.test(msg.message) ?
                             util.markdown(msg.message) : ""
