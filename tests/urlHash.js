@@ -1,3 +1,4 @@
+/* global require */
 require([
     'chai',
     'jquery',

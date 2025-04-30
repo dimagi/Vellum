@@ -1,17 +1,15 @@
-/* global console, mocha, navigator, URLSearchParams */
+/* global require */
 import mocha from "mocha/mocha";
 mocha.setup({
     ui: 'bdd',
     timeout: '10000',
 });
 
-if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
+if (window.navigator.userAgent.indexOf('HeadlessChrome') < 0) {
     mocha.reporter('html');
 }
 
 (function () { // begin local scope
-
-var urlParams = new URLSearchParams(window.location.search);
 
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
