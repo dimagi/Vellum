@@ -35,7 +35,6 @@ module.exports = {
     "rules": {
         // First option can be off, warn, or error
         "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
-        "camelcase": ["error", {"properties": "never"}],
         "comma-dangle": ["warn", "always-multiline"],
         "curly": ["error"],
         "eqeqeq": ["error"],
