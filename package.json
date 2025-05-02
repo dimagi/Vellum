@@ -16,9 +16,9 @@
     },
     "dependencies": {
         "@bracken/require-less": "0.1.6",
-        "at.js": "1.5.4",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
         "XMLWriter": "dimagi/XMLWriter#master",
+        "at.js": "1.5.4",
         "bootstrap": "3.4.1",
         "codemirror": "5.61.1",
         "fuse.js": "2.7.4",
@@ -41,8 +41,8 @@
         "chai": "4.2.0",
         "csso": ">=1.3.11",
         "equivalent-xml-js": "dimagi/equivalent-xml-js#v0.1.0",
+        "eslint": "8.15.0",
         "http-server": "^14.1.0",
-        "jshint": "^2.13.6",
         "less": "2",
         "minimist": "^1.2.8",
         "mocha": "10.2.0",
@@ -51,9 +51,7 @@
     "main": "src/main.js",
     "scripts": {
         "testserver": "http-server -p ${VELLUM_PORT:-8088}",
-        "test:mocha": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/?useBuilt=true -t 500000",
-        "test:lint": "jshint src && jshint --config tests/.jshintrc tests",
-        "test": "npm run test:mocha && npm run test:lint"
+        "test": "node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/?useBuilt=true -t 500000"
     },
     "resolutions": {
         "ansi-regex": "^4.1.1",
