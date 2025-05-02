@@ -55,5 +55,5 @@ module.exports = {
         "space-infix-ops": ["error"],   // match flake8 E225
         "strict": ["warn", "global"],
     },
-    "ignorePatterns": ["lib/**"],
+    "ignorePatterns": ["lib/**", "_build/**"],
 };
