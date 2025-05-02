@@ -15,7 +15,7 @@ define([
     TEST_XML,
     IMAGE_CAPTURE_XML,
     SELECT1_HELP_XML,
-    SELECT1_HELP_WITH_TYPE_XML
+    SELECT1_HELP_WITH_TYPE_XML,
 ) {
     var call = util.call,
         clickQuestion = util.clickQuestion,
@@ -45,8 +45,8 @@ define([
                     requiredAttr: true,
                 },
                 inputs: {
-                    calculateAttr: 0
-                }
+                    calculateAttr: 0,
+                },
             }, {
                 type: 'Trigger',
                 nodeId: 'question2',
@@ -54,13 +54,13 @@ define([
                     calculateAttr: 0,
                     constraintAttr: 1,
                     requiredAttr: 0,
-                    relevantAttr: 1
-                }
+                    relevantAttr: 1,
+                },
             }, {
                 type: 'Trigger',
                 nodeId: 'question30',
                 attrs: {
-                    appearance: ''
+                    appearance: '',
                 },
             }, {
                 type: 'Select',
@@ -69,32 +69,32 @@ define([
                     calculateAttr: 0,
                     constraintAttr: 1,
                     requiredAttr: 1,
-                    relevantAttr: 1
-                }
+                    relevantAttr: 1,
+                },
             }, {
                 type: 'MSelect',
-                nodeId: 'question6'
+                nodeId: 'question6',
             }, {
                 type: 'Int',
-                nodeId: 'question13'
+                nodeId: 'question13',
             }, {
                 type: 'PhoneNumber',
-                nodeId: 'question14'
+                nodeId: 'question14',
             }, {
                 type: 'Double',
-                nodeId: 'question15'
+                nodeId: 'question15',
             }, {
                 type: 'Long',
-                nodeId: 'question16'
+                nodeId: 'question16',
             }, {
                 type: 'Date',
-                nodeId: 'question17'
+                nodeId: 'question17',
             }, {
                 type: 'Time',
-                nodeId: 'question18'
+                nodeId: 'question18',
             }, {
                 type: 'DateTime',
-                nodeId: 'question19'
+                nodeId: 'question19',
             }, {
                 type: 'DataBindOnly',
                 nodeId: 'question20',
@@ -102,69 +102,69 @@ define([
                     calculateAttr: 1,
                     constraintAttr: 0,
                     requiredAttr: 0,
-                }
+                },
             }, {
                 type: 'DataBindOnly',
                 nodeId: 'question32',
                 attrs: {
-                    calculateAttr: '1 + 2'
+                    calculateAttr: '1 + 2',
                 },
                 inputs: {
                     calculateAttr: 1,
                     constraintAttr: 0,
                     requiredAttr: 0,
-                    relevantAttr: 1
-                }
+                    relevantAttr: 1,
+                },
             }, {
                 clickBeforeAdd: "question19", // insert after question20
                 type: 'Repeat',
-                nodeId: 'question22'
+                nodeId: 'question22',
             }, {
                 type: 'FieldList',
                 path: 'question22/',
-                nodeId: 'question23'
+                nodeId: 'question23',
             }, {
                 type: 'Group',
                 path: 'question22/question23/',
-                nodeId: 'question40'
+                nodeId: 'question40',
             }, {
                 clickBeforeAdd: "question22/question23",
                 type: 'Repeat',
                 path: 'question22/question23/',
-                nodeId: 'question41'
+                nodeId: 'question41',
             },{
                 clickBeforeAdd: "question22/question23",
                 type: 'Image',
                 path: 'question22/question23/',
-                nodeId: 'question24'
+                nodeId: 'question24',
             }, {
                 type: 'Audio',
                 path: 'question22/question23/',
-                nodeId: 'question25'
+                nodeId: 'question25',
             }, {
                 type: 'Video',
                 path: 'question22/question23/',
-                nodeId: 'question26'
+                nodeId: 'question26',
             }, {
                 type: 'Geopoint',
                 path: 'question22/question23/',
-                nodeId: 'question27'
+                nodeId: 'question27',
             }, {
                 type: 'Secret',
                 path: 'question22/question23/',
-                nodeId: 'question28'
+                nodeId: 'question28',
             }, {
                 type: 'Signature',
                 path: 'question22/question23/',
-                nodeId: 'question29'
+                nodeId: 'question29',
             }, {
                 type: 'Document',
                 path: 'question22/question23/',
-                nodeId: 'question33'
+                nodeId: 'question33',
             }, {
                 type: 'AndroidIntent',
                 path: 'question22/question23/',
-                nodeId: 'question7'
+                nodeId: 'question7',
             }, {
                 type: 'MicroImage',
                 path: 'question22/question23/',
@@ -172,15 +172,15 @@ define([
             }, {
                 clickBeforeAdd: "question19", // insert before question22
                 type: 'Group',
-                nodeId: 'question21'
+                nodeId: 'question21',
             }, {
                 type: 'Repeat',
                 path: 'question21/',
                 nodeId: 'question31',
                 attrs: {
-                    repeat_count: 2
-                }
-            }
+                    repeat_count: 2,
+                },
+            },
         ];
 
     describe("Vellum", function () {
@@ -191,11 +191,11 @@ define([
                         form: TEST_XML,
                         onReady: function () {
                             done();
-                        }
+                        },
                     },
                     features: { case_micro_image: true,
-                                use_custom_repeat_button_text: true,
-                     }
+                        use_custom_repeat_button_text: true,
+                    },
                 });
             });
 
@@ -204,7 +204,7 @@ define([
             });
 
 
-            _.each(questionTypes, function(q, index) {
+            _.each(questionTypes, function (q, index) {
                 var nodeId = q.nodeId;
                 describe("with " + q.type + "[" + nodeId + "]", function () {
                     before(function (done) {
@@ -214,12 +214,12 @@ define([
                         done();
                     });
 
-                    it("should be selected when clicked", function() {
+                    it("should be selected when clicked", function () {
                         assert.equal(call("getCurrentlySelectedMug").p.nodeID, nodeId);
                     });
 
                     _.each(q.attrs || {}, function (val, name) {
-                        it("should show 1 input for " + name, function() {
+                        it("should show 1 input for " + name, function () {
                             util.assertInputCount(name, 1, nodeId);
                         });
                     });
@@ -229,7 +229,7 @@ define([
                             assert.equal(num, 1,
                                 "test configuration conflict for " + name);
                         } else {
-                            it("should show " + num + " inputs for " + name, function() {
+                            it("should show " + num + " inputs for " + name, function () {
                                 util.assertInputCount(name, num, nodeId);
                             });
                         }
@@ -365,19 +365,19 @@ define([
                                 .replace('non-itext hint', '')
                                 .replace(/<instance[^>]+?casedb[^>]+?><\/instance>/, '')
                                 .replace(/<setvalue[^>]+?>/, ''),
-                            {normalize_xmlns: true}
+                            {normalize_xmlns: true},
                         );
                         
                         // should have updated question tree
                         clickQuestion("question1");
 
                         done();
-                    }
-                }
+                    },
+                },
             });
         });
 
-        describe("can", function() {
+        describe("can", function () {
             var changes = [
                     /*["Text", "Trigger"],
                     ["Trigger", "Select"],
@@ -397,7 +397,7 @@ define([
                     ["Select", "MSelect"],
                     ["MSelect", "Select"],
                     ["Select + Choices", "MSelect"],
-                    ["MSelect + Choices", "Select"]
+                    ["MSelect + Choices", "Select"],
                 ],
                 no_change = [
                     //["Text", "Group"],
@@ -438,8 +438,8 @@ define([
                     core: {
                         onReady: function () {
                             done();
-                        }
-                    }
+                        },
+                    },
                 });
             });
 
@@ -504,7 +504,7 @@ define([
 
             _.each(remove_appearance, function (change) {
                 var from = change[0];
-                _.each(change[1], function(to) {
+                _.each(change[1], function (to) {
                     it("should remove appearance attribute when changing " + from + " to " + to, function () {
                         var mug = setup(from, to);
                         call("changeMugType", mug, to);
@@ -522,7 +522,7 @@ define([
 
             _.each(change_appearance, function (change) {
                 var from = change[0];
-                _.each(change[1], function(newAppearance, to) {
+                _.each(change[1], function (newAppearance, to) {
                     it("should change appearance attribute when changing " + from + " to " + to, function () {
                         var mug = setup(from, to);
                         call("changeMugType", mug, to);
@@ -577,7 +577,7 @@ define([
             assert.equal(mug.p.requiredAttr, undefined);
         });
 
-        it("should allow user to view longs but not add them", function() {
+        it("should allow user to view longs but not add them", function () {
             util.loadXML("");
 
             // able to programatically add long
@@ -585,7 +585,7 @@ define([
             util.addQuestion("Int", "int");
             util.assertJSTreeState(
                 "long",
-                "int"
+                "int",
             );
 
             // can't change another question to a long
@@ -600,7 +600,7 @@ define([
             assert.equal($dropdown.find("[data-qtype='Long']").length, 0);
         });
 
-        it("prevents changing selects with children to non-selects", function() {
+        it("prevents changing selects with children to non-selects", function () {
             util.loadXML("");
             util.addQuestion("Select", "question1");
             util.addQuestion("Choice", "choice1");
@@ -619,7 +619,7 @@ define([
             assert.ok($(changerSelector + " .change-question:not([data-qtype*='Select'])").length > 0);
         });
 
-        it("adds and removes the add choice action when type changes", function() {
+        it("adds and removes the add choice action when type changes", function () {
             util.loadXML("");
             util.addQuestion("Text", "question1");
             var changerSelector = ".fd-question-changer";
@@ -643,7 +643,7 @@ define([
                 "question1",
                 "  choice1",
                 "  ",
-                "question2"
+                "question2",
             );
 
             choice.form.vellum.ensureCurrentMugIsSaved();  // force choice2 id to generate
@@ -657,7 +657,7 @@ define([
             assert.strictEqual($(".add_choice").length, 0);
         });
 
-        it("gives select questions an add choice action", function() {
+        it("gives select questions an add choice action", function () {
             util.loadXML("");
             var mug = util.addQuestion("Select", "question1");
 
@@ -668,7 +668,7 @@ define([
 
             util.assertJSTreeState(
                 "question1",
-                "  choice1"
+                "  choice1",
             );
         });
 
@@ -677,7 +677,7 @@ define([
             assert.strictEqual($(".add_choice").length, 1);
         });
 
-        it("should show error on delete validation condition but not message", function() {
+        it("should show error on delete validation condition but not message", function () {
             util.loadXML("");
             var text = util.addQuestion("Text", "text");
             text.p.constraintAttr = "a = b";
@@ -691,7 +691,7 @@ define([
             util.addQuestion("FieldList", "fieldlist");
             var repeat = util.addQuestion("Repeat", "repeat");
             assert.notStrictEqual(repeat.spec.repeat_count.validationFunc(repeat), "pass",
-                                  "question should not be valid");
+                "question should not be valid");
         });
 
         it("should require a repeat_count when inside of a group in a question list", function () {
@@ -700,7 +700,7 @@ define([
             util.addQuestion("Group", "group");
             var repeat = util.addQuestion("Repeat", "repeat");
             assert.notStrictEqual(repeat.spec.repeat_count.validationFunc(repeat), "pass",
-                                  "question should not be valid");
+                "question should not be valid");
         });
 
         it("should not require a repeat_count when inside of a group", function () {
@@ -708,18 +708,18 @@ define([
             util.addQuestion("Group", "group");
             var repeat = util.addQuestion("Repeat", "repeat");
             assert.strictEqual(repeat.spec.repeat_count.validationFunc(repeat), "pass",
-                                  "question should be valid");
+                "question should be valid");
         });
     });
 
-    describe("Image Questions", function() {
-        it("should default to small image size", function() {
+    describe("Image Questions", function () {
+        it("should default to small image size", function () {
             util.loadXML("");
             var image = util.addQuestion("Image", 'image');
             assert.strictEqual(image.p.imageSize, 250);
         });
 
-        it("should select original size if there is no option", function() {
+        it("should select original size if there is no option", function () {
             util.loadXML(IMAGE_CAPTURE_XML);
             var image = call("getMugByPath", "/data/image");
             assert.strictEqual(image.p.imageSize, '');

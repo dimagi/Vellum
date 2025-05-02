@@ -3,10 +3,10 @@
  */
 define([
     'jquery',
-    'underscore'
+    'underscore',
 ], function (
     $,
-    _
+    _,
 ) {
     /**
      * Parse XML string and return jQuery-wrapped document object.
@@ -63,7 +63,7 @@ define([
     /**
      * Convert XML string to HTML dom nodes to be manipulated with jQuery
      */
-    function xhtml(xmlString, append=false) {
+    function xhtml(xmlString, append = false) {
         var fixed = fixEmptyTags(xmlString || ""),
             node = document.implementation.createHTMLDocument().createElement('div');
         if (append) {
@@ -105,7 +105,7 @@ define([
             extra = / xmlns="http:\/\/www.w3.org\/1999\/xhtml"/g;
         var output = value[0];
         if (output === undefined) {
-                output = value;
+            output = value;
         }
         var serialized = xml.serializeToString(output);
         if (serialized.startsWith('<output')) {
@@ -144,7 +144,7 @@ define([
             refs = /(?:&lt;(=?\s)|(\s)&gt;|&amp;([^&;\s]+;|.|$))/g;
 
         return xml.replace(refs, function (match, lt, gt, amp) {
-            return lt ? ("<" + lt) : (gt ? (gt + ">") : amp.slice(amp.length-1) === ";" ? match : ("&" + amp));
+            return lt ? ("<" + lt) : (gt ? (gt + ">") : amp.slice(amp.length - 1) === ";" ? match : ("&" + amp));
         });
     }
 

@@ -9,27 +9,27 @@ requirejs.config({
         {
             name: 'less',
             location: '../node_modules/@bracken/require-less',
-            main: 'less.js'
+            main: 'less.js',
         },
         {
             name: 'css',
             location: '../node_modules/require-css',
-            main: 'css.js'
+            main: 'css.js',
         },
         {
             name: 'text',
             location: '../node_modules/requirejs-text',
-            main: 'text.js'
+            main: 'text.js',
         },
         {
             name: 'tpl',
             location: '../node_modules/requirejs-undertemplate',
-            main: 'tpl.js'
+            main: 'tpl.js',
         },
         {
             name: 'json',
             location: '../node_modules/requirejs-plugins/src',
-            main: 'json.js'
+            main: 'json.js',
         },
         {
             name: "codemirror",
@@ -60,73 +60,73 @@ requirejs.config({
         'atjs': '../node_modules/at.js/dist/js/jquery.atwho',
         'ckeditor': '../lib/ckeditor/ckeditor',
         'ckeditor-jquery': '../lib/ckeditor/adapters/jquery',
-        'fusejs': '../node_modules/fuse.js/src/fuse'
+        'fusejs': '../node_modules/fuse.js/src/fuse',
     },
     shim: {
         'CryptoJS': {
-            exports: 'CryptoJS'
+            exports: 'CryptoJS',
         },
         'diff-match-patch': {
-            exports: 'diff_match_patch'
+            exports: 'diff_match_patch',
         },
 
         'jquery.jstree': {
             deps: ['jquery', 'css!../node_modules/jstree/dist/themes/default/style'],
-            exports: '$.fn.jstree'
+            exports: '$.fn.jstree',
         },
         'jstree-actions': {
             deps: ['jquery.jstree'],
         },
         'jquery.bootstrap': {
             deps: ['jquery'],
-            exports: '$.fn.popover'
+            exports: '$.fn.popover',
         },
         'XMLWriter': {
-            exports: 'XMLWriter'
+            exports: 'XMLWriter',
         },
 
         'save-button': {
             deps: ['jquery'],
-            exports: 'SaveButton'
+            exports: 'SaveButton',
         },
 
         'xpath': {
-            exports: 'xpath'
+            exports: 'xpath',
         },
         'jsdiff': {
-            exports: 'JsDiff'
+            exports: 'JsDiff',
         },
         'markdown-it': {
-            exports: 'markdown-it'
+            exports: 'markdown-it',
         },
         'caretjs': {
             deps: ['jquery'],
-            exports: 'caretjs'
+            exports: 'caretjs',
         },
         'atjs': {
             deps: ['jquery', 'caretjs', 'css!../node_modules/at.js/dist/css/jquery.atwho'],
-            exports: 'atjs'
+            exports: 'atjs',
         },
         'ckeditor': {
-            exports: 'CKEDITOR'
+            exports: 'CKEDITOR',
         },
         'ckeditor-jquery': {
             deps: ['jquery', 'ckeditor'],
-            exports: '$.fn.ckeditor'
+            exports: '$.fn.ckeditor',
         },
         'fusejs': {
-            exports: 'fusejs'
-        }
+            exports: 'fusejs',
+        },
     },
     less: {
-        logLevel: 1
-    }
+        logLevel: 1,
+    },
 });
 
 // If jQuery was loaded before RequireJS, use the existing instance.
 // http://www.manuel-strehl.de/dev/load_jquery_before_requirejs.en.html
 if (window.jQuery) {
-    define('jquery', [], function() {
+    define('jquery', [], function () {
         return window.jQuery;
     });
 }

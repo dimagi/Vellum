@@ -5,14 +5,14 @@ define([
     'vellum/tree',
     'vellum/util',
     'vellum/widgets',
-    'vellum/core'
+    'vellum/core',
 ], function (
     $,
     _,
     mugs,
     Tree,
     util,
-    widgets
+    widgets,
 ) {
     var LEDGER_XMLNS = "http://commcarehq.org/ledger/v1",
         LEDGER_INSTANCE_ID = "ledger",
@@ -21,36 +21,36 @@ define([
         transferValues = [
             {
                 attr: "entryId",
-                path: "entry/@id"
+                path: "entry/@id",
             }, {
                 attr: "quantity",
-                path: "entry/@quantity"
+                path: "entry/@quantity",
             }, {
                 attr: "src",
-                path: "@src"
+                path: "@src",
             }, {
                 attr: "dest",
-                path: "@dest"
+                path: "@dest",
             }, {
                 attr: "date",
-                path: "@date"
-            }
+                path: "@date",
+            },
         ],
         bindData = {
             Balance: [
                 {
                     attr: "entryId",
-                    path: "entry/@id"
+                    path: "entry/@id",
                 }, {
                     attr: "quantity",
-                    path: "entry/@quantity"
+                    path: "entry/@quantity",
                 }, {
                     attr: "entityId",
-                    path: "@entity-id"
+                    path: "@entity-id",
                 }, {
                     attr: "date",
-                    path: "@date"
-                }
+                    path: "@date",
+                },
             ],
             Transfer: transferValues,
             Dispense: transferValues,
@@ -80,7 +80,7 @@ define([
                     gettext("The {questionid} is an internal identifier for " +
                             "a question. It does not appear on the phone. It " +
                             "is the name of the question in data exports."),
-                    {questionid: "<strong>" + gettext("Question ID") + "</strong>"}
+                    {questionid: "<strong>" + gettext("Question ID") + "</strong>"},
                 ) + "</p>",
                 link: "https://help.commcarehq.org/display/commcarepublic/Transactions",
             },
@@ -93,11 +93,11 @@ define([
                 text: gettext("Use logic to control when questions are asked and what answers are valid. " +
                     "You can add logic to display a question based on a previous answer, to make " +
                     "the question required or ensure the answer is in a valid range."),
-                link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
+                link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations",
             },
             properties: [
                 'relevantAttr',
-            ]
+            ],
         },
         sectionData = {
             Balance: [
@@ -107,10 +107,10 @@ define([
                         "entityId",
                         "sectionId",
                         "entryId",
-                        "quantity"
+                        "quantity",
                     ],
                 }),
-                logicSection
+                logicSection,
             ],
             Transfer: [basicSection, logicSection],
             Dispense: [basicSection, logicSection],
@@ -137,8 +137,8 @@ define([
                     options: {
                         getExtraDataAttributes: function (mug) {
                             return {id: "", quantity: ""};
-                        }
-                    }
+                        },
+                    },
                 })];
             },
             getBindList: function (mug) {
@@ -204,7 +204,7 @@ define([
                     xpathType: "bool",
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition')
+                    lstring: gettext('Display Condition'),
                 },
             },
         }),
@@ -218,7 +218,7 @@ define([
                     type: mug.p.nodeID,
                     "entity-id": attrs["entity-id"] || "",
                     "section-id": mug.p.sectionId,
-                    date: attrs.date || ""
+                    date: attrs.date || "",
                 };
             },
             icon: 'fcc fcc-fd-hash',
@@ -234,10 +234,10 @@ define([
                 xmlnsAttr: {
                     presence: "optional",
                     serialize: function () {},
-                    deserialize: function () {}
+                    deserialize: function () {},
                 },
                 nodeID: {
-                    serialize: serializeNodeId
+                    serialize: serializeNodeId,
                 },
                 entityId: {
                     lstring: gettext('Case'),
@@ -250,9 +250,9 @@ define([
                     help: gettext('XPath expression for the case ID associated with this balance.'),
                 },
                 requiredAttr: { presence: "notallowed" },
-                constraintAttr: { presence : "notallowed" },
-                calculateAttr: { presence: "notallowed" }
-            }
+                constraintAttr: { presence: "notallowed" },
+                calculateAttr: { presence: "notallowed" },
+            },
         }),
         transferMugValidation = function (mug) {
             var error = {key: "commtrack-transfer-src-dest-error", level: mug.ERROR};
@@ -274,8 +274,8 @@ define([
                     return "";
                 }
                 return gettext("Cannot change $1 to $2")
-                        .replace("$1", mug.__className)
-                        .replace("$2", typeName);
+                    .replace("$1", mug.__className)
+                    .replace("$2", typeName);
             },
             getExtraDataAttributes: function (mug) {
                 var raw = mug.p.rawDataAttributes || {},
@@ -309,12 +309,12 @@ define([
             },
             spec: {
                 nodeID: {
-                    serialize: serializeNodeId
+                    serialize: serializeNodeId,
                 },
                 xmlnsAttr: {
                     presence: "optional",
                     serialize: function () {},
-                    deserialize: function () {}
+                    deserialize: function () {},
                 },
                 src: {
                     lstring: gettext('Source Case'),
@@ -339,9 +339,9 @@ define([
                     validationFunc: transferMugValidation,
                 },
                 requiredAttr: { presence: "notallowed" },
-                constraintAttr: { presence : "notallowed" },
-                calculateAttr: { presence: "notallowed" }
-            }
+                constraintAttr: { presence: "notallowed" },
+                calculateAttr: { presence: "notallowed" },
+            },
         }),
         dispenseMugOptions = util.extend(transferMugOptions, {
             typeName: 'Dispense',
@@ -356,7 +356,7 @@ define([
                     },
                 },
                 dest: { presence: "notallowed" },
-            }
+            },
         }),
         receiveMugOptions = util.extend(transferMugOptions, {
             typeName: 'Receive',
@@ -371,11 +371,11 @@ define([
                         return gettext('Receive must have a Destination Case.');
                     },
                 },
-            }
+            },
         }),
         bindPaths = _.chain(bindData)
             .map(function (items) {
-                return _.map(items, function(attrs) {
+                return _.map(items, function (attrs) {
                     return RegExp.escape(attrs.path);
                 });
             }).flatten().uniq().value(),
@@ -387,7 +387,7 @@ define([
                 "Balance",
                 "Transfer",
                 "Dispense",
-                "Receive"
+                "Receive",
             ]);
         },
         getMugTypes: function () {

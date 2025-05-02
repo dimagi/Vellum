@@ -13,7 +13,7 @@ define([
     'text!vellum/templates/multimedia_existing_text.html',
     'tpl!vellum/templates/multimedia_nomedia',
     'tpl!vellum/templates/multimedia_block',
-    'vellum/core'
+    'vellum/core',
 ], function (
     require,
     module,
@@ -28,39 +28,39 @@ define([
     multimedia_existing_video,
     multimedia_existing_text,
     multimedia_nomedia,
-    multimedia_block
+    multimedia_block,
 ) {
-    "use strict";
+    
 
     var SLUG_TO_DESCRIPTION = {
-        image: gettext('Image'),
-        audio: gettext('Audio'),
-        video: gettext('Video'),
-        'video-inline': gettext('Inline Video'),
-        text: gettext('HTML'),
-    },
-    PREVIEW_TEMPLATES = {
-        image: multimedia_existing_image,
-        audio: multimedia_existing_audio,
-        video: multimedia_existing_video,
-        'video-inline': multimedia_existing_video,
-        text:  multimedia_existing_text,
-    },
-    SLUG_TO_CLASS = {
-        image: 'CommCareImage',
-        audio: 'CommCareAudio',
-        video: 'CommCareVideo',
-        'video-inline': 'CommCareVideo',
-        text:  'CommCareMultimedia',
-    },
-    SLUG_TO_UPLOADER_SLUG = {
-        image: 'fd_hqimage',
-        audio: 'fd_hqaudio',
-        video: 'fd_hqvideo',
-        'video-inline': 'fd_hqInlineVideo',
-        text:  'fd_hqtext',
-    },
-    EXT = /(\.[^\/.]+)?$/;
+            image: gettext('Image'),
+            audio: gettext('Audio'),
+            video: gettext('Video'),
+            'video-inline': gettext('Inline Video'),
+            text: gettext('HTML'),
+        },
+        PREVIEW_TEMPLATES = {
+            image: multimedia_existing_image,
+            audio: multimedia_existing_audio,
+            video: multimedia_existing_video,
+            'video-inline': multimedia_existing_video,
+            text: multimedia_existing_text,
+        },
+        SLUG_TO_CLASS = {
+            image: 'CommCareImage',
+            audio: 'CommCareAudio',
+            video: 'CommCareVideo',
+            'video-inline': 'CommCareVideo',
+            text: 'CommCareMultimedia',
+        },
+        SLUG_TO_UPLOADER_SLUG = {
+            image: 'fd_hqimage',
+            audio: 'fd_hqaudio',
+            video: 'fd_hqvideo',
+            'video-inline': 'fd_hqInlineVideo',
+            text: 'fd_hqtext',
+        },
+        EXT = /(\.[^\/.]+)?$/;
 
     // These functions were extracted out when separating the uploader code from
     // the JavaRosa Itext media widget code.  They could easily be made part of
@@ -93,9 +93,9 @@ define([
             };
             uploadController.uploadParams = {
                 path: ref.path,
-                media_type : SLUG_TO_CLASS[ref.mediaType],
+                media_type: SLUG_TO_CLASS[ref.mediaType],
                 old_ref: (ref.isMediaMatched()) ? ref.linkedObj.m_id : "",
-                replace_attachment: true
+                replace_attachment: true,
             };
         };
 
@@ -239,11 +239,11 @@ define([
         if (currentPath in objectMap) {
             var linkedObject = objectMap[currentPath];
             previewHtml = _.template(PREVIEW_TEMPLATES[widget.form])({
-                url: linkedObject.url
+                url: linkedObject.url,
             });
         } else {
             previewHtml = multimedia_nomedia({
-                iconClass: ICONS[widget.form]
+                iconClass: ICONS[widget.form],
             });
         }
         return previewHtml;
@@ -274,7 +274,7 @@ define([
             audio: false,
             video: false,
             'video-inline': false,
-            text: false
+            text: false,
         },
     }, {
         init: function () {
@@ -314,7 +314,7 @@ define([
                     uploaderSlug: 'fd_hqtext',
                     mediaType: 'text',
                     uploadUrl: uploadUrls.text,
-                })
+                }),
             };
         },
         initMediaUploaderWidget: function (widget) {
@@ -324,13 +324,13 @@ define([
             }
 
             addUploaderToWidget(widget,
-                                this.data.uploader.objectMap,
-                                this.data.uploader.uploadControllers);
+                this.data.uploader.objectMap,
+                this.data.uploader.uploadControllers);
         },
         initUploadController: function (options) {
             var $uploaderModal = $(multimedia_modal({
                 mediaType: options.mediaType,
-                modalId: options.uploaderSlug
+                modalId: options.uploaderSlug,
             }));
             this.$f.find('.fd-multimedia-modal-container').append($uploaderModal);
 

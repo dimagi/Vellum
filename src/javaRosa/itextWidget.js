@@ -8,7 +8,7 @@ define([
     'vellum/richText',
     'vellum/util',
     'vellum/atwho',
-    'vellum/core'
+    'vellum/core',
 ], function (
     _,
     $,
@@ -18,14 +18,14 @@ define([
     widgets,
     richText,
     util,
-    atwho
+    atwho,
 ) {
     var DEFAULT_EXTENSIONS = {
-            image: 'png',
-            audio: 'mp3',
-            video: '3gp',
-            'video-inline': '3gp',
-        };
+        image: 'png',
+        audio: 'mp3',
+        video: '3gp',
+        'video-inline': '3gp',
+    };
 
     var iTextIDWidget = function (mug, options) {
         var widget = widgets.text(mug, options),
@@ -60,7 +60,7 @@ define([
             }
         };
 
-        widget.getValue = function() {
+        widget.getValue = function () {
             currentValue.id = $input.val();
             currentValue.autoId = getAutoMode();
             return currentValue;
@@ -202,7 +202,8 @@ define([
         };
 
         widget.getItextValue = function (lang) {
-            var itextItem = widget.getItextItem(), value;
+            var itextItem = widget.getItextItem(), 
+                value;
             if (!lang) {
                 lang = widget.language;
             }
@@ -228,7 +229,7 @@ define([
                         form: widget.form,
                         prevValue: itextItem.get(widget.form, widget.language),
                         value: value,
-                        itextType: widget.itextType
+                        itextType: widget.itextType,
                     });
                 }
                 itextItem.getForm(widget.form).setValue(widget.language, value);
@@ -328,7 +329,7 @@ define([
                 mug.form.fire({
                     type: 'question-label-text-change',
                     mug: mug,
-                    text: after
+                    text: after,
                 });
             }
         };
@@ -347,7 +348,7 @@ define([
             supportMarkDownTables = options.vellum.opts().features.markdown_tables,
             markdownOff, markdownOn, markdownOutput;
 
-        widget.toggleMarkdown = function() {
+        widget.toggleMarkdown = function () {
             parent.toggleClass("has-markdown");
             widget.mug.form.fire('change');
         };
@@ -358,7 +359,7 @@ define([
             markdownOutput.attr('dir', 'rtl');
         }
 
-        widget.handleChange = function() {
+        widget.handleChange = function () {
             super_handleChange();
             var val = widget.getValue(),
                 item = widget.getItextItem();
@@ -382,7 +383,7 @@ define([
             markdownOutput.html(util.markdown(val));
         };
 
-        widget.getUIElement = function() {
+        widget.getUIElement = function () {
             var elem = super_getUIElement(),
                 val = widget.getValue(),
                 markdownSpacer = $("<div />").addClass("col-sm-3"),
@@ -394,15 +395,15 @@ define([
             markdownContainer.append(markdownOutput);
             markdownRow.append(markdownContainer);
             elem.append(markdownRow);
-            elem.find('.control-label').append(markdown_help({title:options.lstring }));
+            elem.find('.control-label').append(markdown_help({title: options.lstring }));
 
-            markdownOff = elem.find('.turn-markdown-off').click(function() {
+            markdownOff = elem.find('.turn-markdown-off').click(function () {
                 wantsMarkdown = false;
                 widget.getItextItem().hasMarkdown = false;
                 widget.toggleMarkdown();
                 return false;
             });
-            markdownOn = elem.find('.turn-markdown-on').click(function() {
+            markdownOn = elem.find('.turn-markdown-on').click(function () {
                 wantsMarkdown = true;
                 widget.getItextItem().hasMarkdown = true;
                 widget.toggleMarkdown();

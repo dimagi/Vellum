@@ -4,14 +4,14 @@ define([
     'underscore',
     'tests/utils',
     'text!static/profiling/small-form.xml',
-    'text!static/profiling/huge_form.xml'
+    'text!static/profiling/huge_form.xml',
 ], function (
     chai,
     $,
     _,
     util,
     SMALL_FORM_XML,
-    HUGE_FORM_XML
+    HUGE_FORM_XML,
 ) {
     describe("Profiling tests", function () {
         beforeEach(function (done) {
@@ -20,8 +20,8 @@ define([
                 core: {
                     onReady: function () {
                         done();
-                    }
-                }
+                    },
+                },
             });
         });
 
@@ -32,8 +32,8 @@ define([
                         form: SMALL_FORM_XML,
                         onReady: function () {
                             done();
-                        }
-                    }
+                        },
+                    },
                 });
             });
         }
@@ -47,8 +47,8 @@ define([
                     form: HUGE_FORM_XML,
                     onReady: function () {
                         done();
-                    }
-                }
+                    },
+                },
             });
         });
     });

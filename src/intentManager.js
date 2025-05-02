@@ -16,16 +16,16 @@ define([
     'vellum/xml',
     'underscore',
     'jquery',
-    'vellum/core'
+    'vellum/core',
 ], function (
     mugs,
     widgets,
     util,
     xml,
     _,
-    $
+    $,
 ) {
-    "use strict";
+    
     var DEFAULT_XMLNS = "http://opendatakit.org/xforms",
         INTENT_SPECIFIC_SPECS = [
             "androidIntentAppId",
@@ -37,14 +37,14 @@ define([
         ],
         intentTemplates;
 
-    function makeODKXIntentTag (nodeID, appID) {
+    function makeODKXIntentTag(nodeID, appID) {
         return {
             androidIntentAppId: appID || "",
             intentXmlns: DEFAULT_XMLNS,
             androidIntentExtra: {},
             androidIntentResponse: {},
             unknownAttributes: {},
-            nodeID: nodeID
+            nodeID: nodeID,
         };
     }
 
@@ -91,7 +91,7 @@ define([
         return store;
     };
 
-    var writeInnerTagXML = function(xmlWriter, innerTag, store, mug) {
+    var writeInnerTagXML = function (xmlWriter, innerTag, store, mug) {
         if (store) {
             _.each(store, function (ref, key) {
                 if (key) {
@@ -125,7 +125,7 @@ define([
         writeInnerTagXML(xmlWriter, 'extra', properties.androidIntentExtra, mug);
         if (properties.docTemplate) {
             writeInnerTagXML(xmlWriter, 'extra', {
-                'cc:print_template_reference': "'" + properties.docTemplate + "'"
+                'cc:print_template_reference': "'" + properties.docTemplate + "'",
             });
         }
         writeInnerTagXML(xmlWriter, 'response', properties.androidIntentResponse, mug);
@@ -147,12 +147,12 @@ define([
             newTag.androidIntentResponse = parseInnerTags($tag, 'response');
 
             _.chain(tagXML.attributes)
-             .filter(function(attr) {
-                 return !_.contains(['id', 'class', 'xmlns:odk'], attr.nodeName);
-             })
-             .each(function(attr) {
-                 newTag.unknownAttributes[attr.nodeName] = attr.nodeValue;
-             });
+                .filter(function (attr) {
+                    return !_.contains(['id', 'class', 'xmlns:odk'], attr.nodeName);
+                })
+                .each(function (attr) {
+                    newTag.unknownAttributes[attr.nodeName] = attr.nodeValue;
+                });
 
             intentTags[tagId] = newTag;
         });
@@ -160,7 +160,7 @@ define([
         return intentTags;
     }
 
-    function syncMugWithIntent (tags, mug) {
+    function syncMugWithIntent(tags, mug) {
         // called when initializing a new mug or when parsing a form
         if (mug.__className === "AndroidIntent" ||
             mug.__className === "PrintIntent") {
@@ -190,13 +190,13 @@ define([
         }
     }
 
-    function writeIntentXML (unmappedIntentTags, xmlWriter, tree) {
+    function writeIntentXML(unmappedIntentTags, xmlWriter, tree) {
         // make sure any leftover intent tags are still kept
         _.each(unmappedIntentTags, function (tag) {
             writeXML(xmlWriter, tag);
         });
 
-        tree.treeMap(function(node) {
+        tree.treeMap(function (node) {
             var mug = node.getValue();
             if (mug && mug.options.dataType === 'intent') {
                 writeXML(xmlWriter, mug.p, mug);
@@ -237,7 +237,8 @@ define([
                             ["androidIntentResponse", "response"],
                             ["unknownAttributes", "unknownAttributes"],
                         ], function (keys) {
-                            var attr = keys[0], key = keys[1];
+                            var attr = keys[0], 
+                                key = keys[1];
                             if (!_.isEmpty(data.intent[key])) {
                                 mug.p[attr] = data.intent[key];
                             }
@@ -247,12 +248,12 @@ define([
                     }
                 },
                 validationFunc: function (mug) {
-                    function valueNotInIntentTemplates (val) {
+                    function valueNotInIntentTemplates(val) {
                         return _.chain(intentTemplates)
-                                .map(function(template) { return template.value; })
-                                .find(function(appId) { return appId === val; })
-                                .isUndefined()
-                                .value();
+                            .map(function (template) { return template.value; })
+                            .find(function (appId) { return appId === val; })
+                            .isUndefined()
+                            .value();
                     }
                     var opts = mug.form.vellum.opts(),
                         features = opts.features,
@@ -276,14 +277,14 @@ define([
                     }
 
                     // Validate that IDs are unique across app callouts
-                    var intents = _.filter(mug.form.getMugList(), function(m) {
+                    var intents = _.filter(mug.form.getMugList(), function (m) {
                         return m.p.androidIntentAppId;
                     });
                     if (intents.length > 1) {
-                        var idCounts = _.countBy(intents, function(i) {
+                        var idCounts = _.countBy(intents, function (i) {
                             return i.p.nodeID;
                         });
-                        _.each(intents, function(i) {
+                        _.each(intents, function (i) {
                             var changed = false;
                             if (idCounts[i.p.nodeID] > 1) {
                                 changed = i.messages.update("nodeID", {
@@ -324,11 +325,11 @@ define([
                 visibility: 'hidden',
                 presence: 'optional',
                 lstring: gettext("Special Intent XMLNS attribute"),
-            }
+            },
         },
         getAppearanceAttribute: function (mug) {
             return 'intent:' + mug.p.nodeID;
-        }
+        },
     });
 
     var PrintIntent = util.extend(AndroidIntent, {
@@ -345,7 +346,7 @@ define([
                 widget: printTemplateWidget,
             },
             androidIntentAppId: { visibility: 'hidden' },
-        }
+        },
     });
 
     function noIntents(features) {
@@ -367,7 +368,7 @@ define([
     }
 
     $.vellum.plugin("intents", {}, {
-        init: function() {
+        init: function () {
             var opts = this.opts().intents;
             intentTemplates = _.map(opts && opts.templates, function (temp) {
                 return {value: temp.id, text: temp.name, type: temp.mime};
@@ -377,7 +378,7 @@ define([
             this.data.intents.unmappedIntentTags = parseIntentTags(
                 xml.parseXML(xmlString)
                     .find('h\\:head, head')
-                    .children("odkx\\:intent, intent")
+                    .children("odkx\\:intent, intent"),
             );
             this.__callOld();
         },

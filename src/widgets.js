@@ -17,9 +17,9 @@ define([
     atwho,
     util,
     richTextUtils,
-    analytics
+    analytics,
 ) {
-    var base = function(mug, options) {
+    var base = function (mug, options) {
         // set properties shared by all widgets
         var widget = {};
         options.richText = true;
@@ -41,7 +41,7 @@ define([
             }
 
             return mug.form.vellum.isPropertyLocked(mug.hashtagPath,
-                                                    widget.path);
+                widget.path);
         };
 
         widget.getDisplayName = function () {
@@ -65,7 +65,7 @@ define([
             if (this.definition && this.definition.help) {
                 return {
                     text: this.definition.help,
-                    url: this.definition.helpURL
+                    url: this.definition.helpURL,
                 };
             }
             return null;
@@ -102,7 +102,7 @@ define([
 
         widget.getUIElement = function () {
             return getUIElement(widget.getControl(), widget.getDisplayName(),
-                                !!widget.isDisabled(), widget.getHelp());
+                !!widget.isDisabled(), widget.getHelp());
         };
 
         widget.addInstanceRef = function (attrs, property) {
@@ -118,7 +118,7 @@ define([
         return widget;
     };
 
-    var normal = function(mug, options) {
+    var normal = function (mug, options) {
         var path = options.widgetValuePath || options.path,
             inputID = options.id || 'property-' + path,
             disabled = options.disabled || false,
@@ -148,8 +148,8 @@ define([
 
         widget.getMessagesContainer = function () {
             return widget.getControl()
-                    .closest(".widget")
-                    .find(".messages:last");
+                .closest(".widget")
+                .find(".messages:last");
         };
 
         widget.getMessages = function (mug, path) {
@@ -169,7 +169,7 @@ define([
         };
 
         mug.on("messages-changed",
-               function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
+            function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
 
         widget.save = function () {
             widget.saving = true;
@@ -217,7 +217,7 @@ define([
             }
         };
 
-        widget.getValue = function() {
+        widget.getValue = function () {
             var ret = input.val().replace(/&#10;/g, '\n');
 
             if (ret && widget.hasLogicReferences) {
@@ -269,7 +269,7 @@ define([
         return widget;
     };
 
-    var richText = function(mug, options) {
+    var richText = function (mug, options) {
         var widget = normal(mug, options);
 
         widget.input = $("<div />")
@@ -288,7 +288,7 @@ define([
         mug.on('teardown-mug-properties', editor.destroy, null, "teardown-mug-properties");
         editor.on('change', function () { widget.handleChange(); });
 
-        widget.input.on('inserted.atwho', function(atwhoEvent, $li, browserEvent) {
+        widget.input.on('inserted.atwho', function (atwhoEvent, $li, browserEvent) {
             // gets rid of atwho wrapper
             // tod: find out why this is needed and move elsewhere
             $(this).find('.atwho-inserted').children().unwrap();
@@ -304,7 +304,7 @@ define([
         return widget;
     };
 
-    var richInput = function(mug, options) {
+    var richInput = function (mug, options) {
         if (mug.form.richText) {
             options.singleLine = true;
             return richText(mug, options);
@@ -313,7 +313,7 @@ define([
         }
     };
 
-    var richTextarea = function(mug, options) {
+    var richTextarea = function (mug, options) {
         if (mug.form.richText) {
             options.singleLine = false;
             return richText(mug, options);
@@ -350,7 +350,7 @@ define([
             super_updateValue();
         };
 
-        widget._setURLHash = _.debounce(function(mug) {
+        widget._setURLHash = _.debounce(function (mug) {
             mug.form.vellum._setURLHash(mug);
         }, 500);
 
@@ -405,7 +405,7 @@ define([
             input.prop("checked", value);
         };
 
-        widget.getValue = function() {
+        widget.getValue = function () {
             return input.prop("checked");
         };
 
@@ -421,7 +421,7 @@ define([
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
 
-        widget.getValue = function() {
+        widget.getValue = function () {
             return $.trim(super_getValue());
         };
 
@@ -431,7 +431,7 @@ define([
                     control,
                     widget.getDisplayName(),
                     !!widget.isDisabled(),
-                    widget.getHelp()
+                    widget.getHelp(),
                 ),
                 autocompleteChoices;
             control.addClass('jstree-drop');
@@ -503,7 +503,7 @@ define([
 
         widget.setValue = function (value) {
             widget.kvInput.html(widget_control_keyvalue({
-                pairs: _.clone(value)
+                pairs: _.clone(value),
             }));
             widget.kvInput.find('input').on('change keyup', function () {
                 widget.handleChange();
@@ -539,7 +539,7 @@ define([
             return currentValues;
         }
 
-        widget.getValue = function() {
+        widget.getValue = function () {
             return _.omit(getValues(), "");
         };
 
@@ -608,7 +608,7 @@ define([
 
         widget.addOptions = function (options) {
             var _this = this;
-            _.forEach(options, function(option) {
+            _.forEach(options, function (option) {
                 _this.addOption(option.value, option.text);
             });
         };
@@ -618,19 +618,19 @@ define([
         };
 
         widget.getOptions = function () {
-            return _.map(widget.dropdown.find('option'), function(option) {
+            return _.map(widget.dropdown.find('option'), function (option) {
                 return {
                     value: option.value,
-                    text: option.text
+                    text: option.text,
                 };
             });
         };
 
         widget.equivalentOption = function (val) {
-            function parseValue (val) {
+            function parseValue(val) {
                 try {
                     return JSON.parse(val);
-                } catch(err) {
+                } catch (err) {
                     return  val;
                 }
             }
@@ -670,8 +670,8 @@ define([
             });
 
         var control = $('<div class="control-row row">')
-                .append($("<div class='col-sm-4'>").append(widget.dropdown))
-                .append($("<div class='col-sm-8'>").append(widget.text));
+            .append($("<div class='col-sm-4'>").append(widget.dropdown))
+            .append($("<div class='col-sm-8'>").append(widget.text));
 
         widget.setValue = function (value) {
             var val = widget.equivalentOption(value);
@@ -730,11 +730,11 @@ define([
         var widget = normal(mug, options);
         widget.form = "text";
 
-        widget.getValue = function() {
+        widget.getValue = function () {
             return widget.input.val();
         };
 
-        widget.setValue = function(val) {
+        widget.setValue = function (val) {
             return widget.input.val(val);
         };
 
@@ -754,23 +754,23 @@ define([
         return widget;
     };
 
-    var getUIElementWithEditButton = function($uiElem, editFn, isDisabled) {
+    var getUIElementWithEditButton = function ($uiElem, editFn, isDisabled) {
         var input = $uiElem.find('input');
         if (_.isUndefined(isDisabled)) {
             isDisabled = input ? input.prop('disabled') : false;
         }
 
         var button = $('<button />')
-            .addClass("fd-edit-button")
-            .html("<i class='fa fa-edit'></i>")
-            .stopLink()
-            .addClass('btn btn-default btn-block')
-            .attr('type', 'button')
-            .prop('disabled', isDisabled)
-            .click(editFn),
+                .addClass("fd-edit-button")
+                .html("<i class='fa fa-edit'></i>")
+                .stopLink()
+                .addClass('btn btn-default btn-block')
+                .attr('type', 'button')
+                .prop('disabled', isDisabled)
+                .click(editFn),
             buttonContainer = $("<div />")
-            .addClass("col-sm-1")
-            .append(button);
+                .addClass("col-sm-1")
+                .append(button);
 
         $uiElem.css('position', 'relative');
         $uiElem.find('.controls')
@@ -779,7 +779,7 @@ define([
         return $uiElem;
     };
     
-    var getUIElement = function($input, labelText, isDisabled, help) {
+    var getUIElement = function ($input, labelText, isDisabled, help) {
         var $uiElem = $(ui_element({
             labelText: labelText,
             help: help,
@@ -804,10 +804,10 @@ define([
             if (seen.hasOwnProperty(msg.message)) { return; }
             seen[msg.message] = true;
             var html = $(widget_control_message({
-                    msg: msg,
-                    html: /\n/.test(msg.message) ?
-                            util.markdown(msg.message) : ""
-                }));
+                msg: msg,
+                html: /\n/.test(msg.message) ?
+                    util.markdown(msg.message) : "",
+            }));
             html.find("button.close").click(function () {
                 mug.dropMessage(path, msg.key);
                 if (msg.key === "mug-nodeID-changed-warning") {
@@ -857,7 +857,7 @@ define([
             setWidget: setWidget,
             getMessages: getMessages,
             getUIElementWithEditButton: getUIElementWithEditButton,
-            getUIElement: getUIElement
-        }
+            getUIElement: getUIElement,
+        },
     };
 });

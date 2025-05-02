@@ -1,7 +1,7 @@
 define([
-    'underscore'
+    'underscore',
 ], function (
-    _
+    _,
 ) {
     var specialChars = /[\r\n\u2028\u2029"\t]/;
 
@@ -40,7 +40,8 @@ define([
         }
 
         function parseRow() {
-            var cell, qcell, row = [];
+            var cell, qcell, 
+                row = [];
             simpleField.lastIndex = lastIndex;
             do {
                 cell = simpleField.exec(value);
@@ -103,6 +104,6 @@ define([
     return {
         escape: escape,
         makeRowParser: makeRowParser,
-        tabDelimit: tabDelimit
+        tabDelimit: tabDelimit,
     };
 });

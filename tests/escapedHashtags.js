@@ -9,14 +9,14 @@ define([
     chai,
     escapedHashtags,
     util,
-    INVALID_XPATH_XML
+    INVALID_XPATH_XML,
 ) {
     var assert = chai.assert;
 
     describe("The escaped hashtag parser", function () {
         function transformToProperty(input) {
             var ret = input.split('/');
-            return ret[ret.length-1];
+            return ret[ret.length - 1];
         }
 
         var hashtagMap = {
@@ -29,7 +29,7 @@ define([
                 hashtagNamespaces: {form: true, "case": true},
             };
 
-        describe("#transform()", function() {
+        describe("#transform()", function () {
             var testCases = [
                 ["`#case/type/prop`", "#case/type/prop", "prop"],
                 ["`#case/type/prop`- 1", "#case/type/prop - 1", "prop - 1"],
@@ -54,17 +54,17 @@ define([
                     outputNoTransform = testCase[1],
                     outputToProp = testCase[2];
 
-                it("default transform should parse " + input + " into " + outputNoTransform, function() {
+                it("default transform should parse " + input + " into " + outputNoTransform, function () {
                     assert.strictEqual(escapedHashtags.transform(input), outputNoTransform);
                 });
 
-                it("custom transform should parse " + input + " into " + outputToProp, function() {
+                it("custom transform should parse " + input + " into " + outputToProp, function () {
                     assert.strictEqual(escapedHashtags.transform(input, transformToProperty), outputToProp);
                 });
             });
         });
 
-        describe("#makeHashtagTransform() with #delimit()", function() {
+        describe("#makeHashtagTransform() with #delimit()", function () {
             // Note: this combination is not currently used in production, but
             // it's a good test for makeHashtagTransform
             var testCases = [
@@ -80,22 +80,22 @@ define([
                 transform = escapedHashtags.makeHashtagTransform(hashtagInfo),
                 delimit = escapedHashtags.delimit;
 
-            testCases.forEach(function(testCase) {
-                it("should parse " + testCase[0] + " into " + testCase[1], function() {
+            testCases.forEach(function (testCase) {
+                it("should parse " + testCase[0] + " into " + testCase[1], function () {
                     assert.strictEqual(transform(testCase[0], delimit), testCase[1]);
                 });
             });
         });
     });
 
-    describe("The form's escaped hashtag parser with rich_text disabled", function() {
+    describe("The form's escaped hashtag parser with rich_text disabled", function () {
         before(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
                 core: {
                     onReady: function () {
                         done();
-                    }
+                    },
                 },
                 features: {rich_text: false},
             });
@@ -117,7 +117,7 @@ define([
                 core: {
                     onReady: function () {
                         done();
-                    }
+                    },
                 },
             });
         });
@@ -131,7 +131,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 INVALID_XPATH_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
     });

@@ -2,11 +2,11 @@
 
 define([
     'jquery',
-    'underscore'
+    'underscore',
 ], function (
     $,
     _,
-    undefined
+    undefined,
 ) {
     // The order of plugins in this list is important: it controls the order in
     // which plugin methods are called. Core is at the center, each plugin is a
@@ -14,16 +14,16 @@ define([
     // list that defines the method and continues toward the core (assuming each
     // plugin method calls `this.__callOld()`)
     var corePlugins = [
-            'core',
-            'intents',
-            'javaRosa',
-            'lock',
-            'ignore',
-            'uploader',
-            'windowManager',
-            'copyPaste',
-            'commander',
-        ];
+        'core',
+        'intents',
+        'javaRosa',
+        'lock',
+        'ignore',
+        'uploader',
+        'windowManager',
+        'copyPaste',
+        'commander',
+    ];
 
     function bindPluginMethod(pluginName, fn, fnName) {
         // this is not how jstree does it, and a bit hacky, but it makes
@@ -107,7 +107,7 @@ define([
                 _.union(corePlugins, options.plugins || []),
                 function (name) {
                     return !_.isUndefined($.vellum._plugins[name]);
-                }
+                },
             );
             options = $.extend(true, {}, $.vellum.defaults, options);
 
@@ -157,7 +157,7 @@ define([
             $.vellum.defaults[pluginName] = defaults;
             $.vellum._plugins[pluginName] = fns;
             return $;
-        }
+        },
     };
 
     return;

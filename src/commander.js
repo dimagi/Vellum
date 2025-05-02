@@ -14,7 +14,7 @@ define([
     analytics,
     atwho,
     util,
-    commanderTemplate
+    commanderTemplate,
 ) {
     var fn = {},
         handlers = {};
@@ -75,9 +75,9 @@ define([
         atwho.autocomplete(
             cmd.input,
             {form: cmd.vellum.data.core.form, on: _.identity},  // fake mug
-            {useHashtags: true, tabSelectsMatch: true}          // options
+            {useHashtags: true, tabSelectsMatch: true},          // options
         );
-        cmd.vellum.data.core.form.on("change-display-language", function() {
+        cmd.vellum.data.core.form.on("change-display-language", function () {
             // NOTE this is tightly coupled with atwho.autocomplete(...), which
             // calls $input.atwho('destroy') on change-display-language
             cmd.input.atwho(cmd.atwhoConfig);
@@ -226,7 +226,8 @@ define([
          * @returns the result of the command, `undefined` on failure.
          */
         function dispatch(command) {
-            var obj = tokenize(command), args;
+            var obj = tokenize(command), 
+                args;
             if (!obj) {
                 return;
             }
@@ -286,7 +287,7 @@ define([
                         } catch (err) {
                             //window.console.log(err.message);
                         }
-                    }
+                    },
                 },
                 //{
                 //    // delete question
@@ -316,7 +317,7 @@ define([
                             vellum.focusFirstInput();
                             return mug;
                         }
-                    }
+                    },
                 },
             ];
 
@@ -376,7 +377,7 @@ define([
                 callbacks: {
                     matcher: function (flag, subtext) { return subtext; },
                     filter: filter,
-                    sorter: function(query, items) { return items; },
+                    sorter: function (query, items) { return items; },
                 },
             },
         };

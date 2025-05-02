@@ -5,12 +5,12 @@ define([
 ], function (
     chai,
     util,
-    $
+    $,
 ) {
     var assert = chai.assert;
 
     describe("The undo manager", function () {
-        before(function(done) {
+        before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: { onReady: function () { done(); } },
@@ -18,7 +18,7 @@ define([
             });
         });
 
-        beforeEach(function() {
+        beforeEach(function () {
             util.loadXML("");
         });
 
@@ -205,7 +205,7 @@ define([
             assert.strictEqual($('.fd-undo-delete').length, 0);
         });
 
-        it("should undelete a multiple choice question when selected with others", function() {
+        it("should undelete a multiple choice question when selected with others", function () {
             util.addQuestion('Text', 'text');
             util.addQuestion('Select', 'select');
             util.addQuestion("Choice", "choice1");
@@ -225,7 +225,7 @@ define([
         });
 
         it("should adjust the tree's height to accommodate the undo alert message", function () {
-            var getHeight = function() { return $(".fd-tree .fd-scrollable").outerHeight(); };
+            var getHeight = function () { return $(".fd-tree .fd-scrollable").outerHeight(); };
             util.addQuestion('Text', 'text');
             util.addQuestion('Select', 'select');
             util.clickQuestion('text');

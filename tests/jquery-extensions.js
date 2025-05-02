@@ -11,7 +11,7 @@ define([
     _,
     util,
     ext,
-    REQUIRED_XML
+    REQUIRED_XML,
 ) {
     var assert = chai.assert,
         xml;

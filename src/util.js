@@ -6,7 +6,7 @@ define([
     'vellum/markdown',
     'vellum/xml',
     'jquery',
-    'vellum/jquery-extensions'
+    'vellum/jquery-extensions',
 ], function (
     require,
     langCodes,
@@ -14,9 +14,9 @@ define([
     diff_match_patch,
     markdown,
     xml,
-    $
+    $,
 ) {
-    RegExp.escape = function(s) {
+    RegExp.escape = function (s) {
         return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
 
@@ -150,7 +150,7 @@ define([
             var handler = {
                 method: method,
                 parameters: parameters,
-                context: context
+                context: context,
             };
             if (registry.hasOwnProperty(type)) {
                 registry[type].push(handler);
@@ -205,31 +205,32 @@ define([
         return $("<div>").text(string).html();
     };
 
-    that.get_guid = function() {
+    that.get_guid = function () {
         // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-        var S4 = function() {
-            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        var S4 = function () {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
         };
-        return (S4()+S4()+S4()+S4()+S4()+S4()+S4()+S4());
+        return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
     };
 
     that.generate_xmlns_uuid = function () {
         var CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        var uuid = [], r, i;
+        var uuid = [], 
+            r, i;
 
-		// rfc4122 requires these characters
-		uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-		uuid[14] = '4';
+        // rfc4122 requires these characters
+        uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+        uuid[14] = '4';
 
-		// Fill in random data.  At i==19 set the high bits of clock sequence as
-		// per rfc4122, sec. 4.1.5
-		for (i = 0; i < 36; i++) {
-			if (!uuid[i]) {
-				r = Math.floor((Math.random()*16));
-				uuid[i] = CHARS[(i === 19) ? (r & 0x3) | 0x8 : r & 0xf];
-			}
-		}
-		return uuid.toString().replace(/,/g,'');
+        // Fill in random data.  At i==19 set the high bits of clock sequence as
+        // per rfc4122, sec. 4.1.5
+        for (i = 0; i < 36; i++) {
+            if (!uuid[i]) {
+                r = Math.floor((Math.random() * 16));
+                uuid[i] = CHARS[(i === 19) ? (r & 0x3) | 0x8 : r & 0xf];
+            }
+        }
+        return uuid.toString().replace(/,/g,'');
     };
 
     that.isValidElementName = function (name) {
@@ -242,10 +243,10 @@ define([
      * Converts true to 'true()' and false to 'false()'. Returns null for all else.
      * @param req
      */
-    that.createXPathBoolFromJS = function(req) {
-        if(req === true || req === 'true') {
+    that.createXPathBoolFromJS = function (req) {
+        if (req === true || req === 'true') {
             return 'true()';
-        }else if (req === false || req === 'false') {
+        } else if (req === false || req === 'false') {
             return 'false()';
         } else {
             return null;
@@ -268,9 +269,9 @@ define([
     that.getCaretPosition = function (ctrl) {
         var pos = 0;
         if (ctrl.createTextRange) {
-            ctrl.focus ();
-            var sel = document.selection.createRange ();
-            sel.moveStart ('character', -ctrl.value.length);
+            ctrl.focus();
+            var sel = document.selection.createRange();
+            sel.moveStart('character', -ctrl.value.length);
             pos = sel.text.length;
         } else if (typeof ctrl.selectionStart !== 'undefined') {
             pos = ctrl.selectionStart;
@@ -278,7 +279,7 @@ define([
         return pos;
     };
 
-    that.setCaretPosition = function (ctrl, start, end){
+    that.setCaretPosition = function (ctrl, start, end) {
         if (end === null || end === undefined) {
             end = start;
         }
@@ -308,7 +309,7 @@ define([
     that.parseXML = xml.parseXML;
 
     that.htmlXMLDiff = function (localForm, serverForm) {
-        function cleanForDiff (value) {
+        function cleanForDiff(value) {
             // convert leading tabs to spaces
             value = value.replace(/^\t+/mg, function (match) {
                 return match.replace(/\t/g, "  ");
@@ -442,17 +443,17 @@ define([
                 url: form.submissionUrl,
                 type: 'GET',
                 dataType: 'json',
-                success: function(data) {
-                    if(data.form_has_submissions) {
+                success: function (data) {
+                    if (data.form_has_submissions) {
                         form.warnWhenChanged = true;
                         form.walkMugs(function (mug) {
                             mug.validate();
                         });
                     }
                 },
-                complete: function() {
+                complete: function () {
                     form.isCurrentlyCheckingForSubmissions = false;
-                }
+                },
             });
         }
     }, 10000);

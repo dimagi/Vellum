@@ -6,7 +6,7 @@ define([
     'vellum/parser',
     'vellum/tree',
     'vellum/util',
-    'vellum/core'
+    'vellum/core',
 ], function (
     $,
     _,
@@ -14,7 +14,7 @@ define([
     mugs,
     parser,
     Tree,
-    util
+    util,
 ) {
     var oldRepeat = mugs.baseMugTypes.normal.Repeat,
         // the order of the items in this list is important:
@@ -24,23 +24,23 @@ define([
                 key: "ids",
                 event: "xforms-ready",
                 path: "",
-                query: "join(' ', {})"
+                query: "join(' ', {})",
             }, {
                 key: "count",
                 event: "xforms-ready",
                 path: "",
-                query: "count-selected({}/@ids)"
+                query: "count-selected({}/@ids)",
             }, {
                 key: "index",
                 event: "jr-insert",
                 path: "/item",
-                query: "int({}/@current_index)"
+                query: "int({}/@current_index)",
             }, {
                 key: "id",
                 event: "jr-insert",
                 path: "/item",
-                query: "selected-at({}/@ids, ../@index)"
-            }
+                query: "selected-at({}/@ids, ../@index)",
+            },
         ],
         joinIdsRegexp = /^ *join\(['"] ['"], *(.*)\) *$/i,
         modelRepeatMugOptions = {
@@ -68,8 +68,8 @@ define([
                     options: {
                         getExtraDataAttributes: function (mug) {
                             return {id: "", index: "", "jr:template": ""};
-                        }
-                    }
+                        },
+                    },
                 })];
             },
             controlChildFilter: function (children, mug) {
@@ -93,7 +93,7 @@ define([
                     ids: "",
                     count: "",
                     current_index: "",
-                    "vellum:role": "Repeat"
+                    "vellum:role": "Repeat",
                 };
             },
             getBindList: function (mug) {
@@ -102,7 +102,7 @@ define([
                 if (mug.p.dataSource.idsQuery) {
                     binds.splice(0, 0, {
                         nodeset: path.replace(/\/item$/, "/@current_index"),
-                        calculate: "count(" + path + ")"
+                        calculate: "count(" + path + ")",
                     });
                 }
                 return binds;
@@ -126,12 +126,12 @@ define([
                             return deserialize(copy, key, mug, context);
                         }
                         return deserialize(data, key, mug, context);
-                    }
+                    },
                 },
                 repeat_count: _.extend({}, oldRepeat.spec.repeat_count, {
                     visibility: function (mug) {
                         return !mug.p.dataSource.idsQuery;
-                    }
+                    },
                 }),
                 dataSource: {
                     lstring: gettext('Data Source'),
@@ -164,8 +164,8 @@ define([
                             fakeMug = {form: mug.form, p: src};
                         src.idsQuery = mugs.deserializeXPath(value, "idsQuery", fakeMug, context);
                         return src;
-                    }
-                }
+                    },
+                },
             },
             ignoreReferenceWarning: function (mug) {
                 return isModelRepeat(mug);
@@ -183,7 +183,7 @@ define([
                     var isNested = mug.parentMug && mug.parentMug.isInRepeat(),
                         setvalues = mug.p.setvalues;
                     _.each(setvalueData, function (data) {
-                        var event = isNested ? "jr-insert": data.event,
+                        var event = isNested ? "jr-insert" : data.event,
                             value = setvalues[data.key];
                         if (!value) {
                             value = {};
@@ -196,7 +196,7 @@ define([
                         ret.push({
                             event: event,
                             ref: value.ref,
-                            value: value.value
+                            value: value.value,
                         });
                     });
                 }
@@ -292,7 +292,7 @@ define([
             });
             if (mug.p.dataSource.idsQuery) {
                 mug.p.dataSource.instance = mug.form.parseInstance(
-                        mug.p.dataSource.idsQuery, mug, "dataSource");
+                    mug.p.dataSource.idsQuery, mug, "dataSource");
             } else {
                 // keep paths consistent for malformed model repeat with
                 // missing IDs query. this XPath returns the empty set
@@ -311,7 +311,7 @@ define([
                     updateDataSource(mug, event.val, event.previous);
                 }
             });
-        }
+        },
     });
 
     function isModelRepeat(mug) {
@@ -320,7 +320,7 @@ define([
 
     function idsQueryDataSourceWidget(mug, options) {
         var widget = datasourceWidgets.advancedDataSourceWidget(
-                                    mug, options, gettext("Model Iteration ID Query")),
+                mug, options, gettext("Model Iteration ID Query")),
             super_getValue = widget.getValue,
             super_setValue = widget.setValue;
 
@@ -333,7 +333,7 @@ define([
             var val = super_getValue();
             return {
                 instance: ($.trim(val.src) ? {id: val.id, src: val.src} : null),
-                idsQuery: val.query
+                idsQuery: val.query,
             };
         };
 
@@ -342,7 +342,7 @@ define([
             super_setValue({
                 id: (val.instance ? val.instance.id : ""),
                 src: (val.instance ? val.instance.src : ""),
-                query: val.idsQuery || ""
+                query: val.idsQuery || "",
             });
         };
 
@@ -352,11 +352,11 @@ define([
     function updateDataSource(mug, value, previous) {
         if (previous && previous.instance && previous.instance.src) {
             mug.form.dropInstanceReference(
-                        previous.instance.src, mug, "dataSource.instance");
+                previous.instance.src, mug, "dataSource.instance");
         }
         if (value && value.instance && value.instance.src) {
             var instanceId = mug.form.addInstanceIfNotExists(
-                                    value.instance, mug, "dataSource.instance");
+                value.instance, mug, "dataSource.instance");
             if (instanceId !== value.instance.id) {
                 // is it too magical to replace the instance id in the query?
                 // there might be edge cases where a user is entering a

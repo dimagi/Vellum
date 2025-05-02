@@ -7,7 +7,7 @@ define([
     chai,
     util,
     $,
-    TEST_XML
+    TEST_XML,
 ) {
     // NOTE: timer mocking here doesn't actually work, it only handles timeouts,
     // doesn't actually implement sleep-like functionality.
@@ -26,12 +26,12 @@ define([
             core: {
                 onReady: function () {
                     call('loadXFormOrError', TEST_XML, done);
-                }
-            }
+                },
+            },
         });
     }
 
-    describe("The Lock plugin", function() {
+    describe("The Lock plugin", function () {
         before(beforeFn);
 
         function locked(mugPath, property) {

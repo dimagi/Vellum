@@ -10,7 +10,7 @@ define([
     'tpl!vellum/templates/widget_index_case',
     'tpl!vellum/templates/widget_attachment_case',
     'tpl!vellum/templates/widget_save_to_case',
-    'vellum/core'
+    'vellum/core',
 ], function (
     $,
     _,
@@ -22,8 +22,8 @@ define([
     widget_update_case,
     widget_index_case,
     widget_attach_case,
-    widget_save_to_case
-){
+    widget_save_to_case,
+) {
     function createsCase(mug) {
         return mug ? mug.p.useCreate : false;
     }
@@ -65,7 +65,7 @@ define([
                 value = value ? value : widget.getValue();
                 widget.input.html(widget_save_to_case({
                     internal_template: internal_template,
-                    props: value
+                    props: value,
                 }));
                 widget.input.find('input').on('change keyup', function () {
                     widget.handleChange();
@@ -73,7 +73,7 @@ define([
                 widget.input.find('.fd-add-property').click(widget.addProperty);
                 widget.input.find('.fd-remove-property').click(widget.removeProperty);
                 widget.input.find('input').addClass('jstree-drop');
-                widget.input.find('input').each(function() {
+                widget.input.find('input').each(function () {
                     atwho.autocomplete($(this), mug);
                 });
             };
@@ -92,14 +92,14 @@ define([
                 widget.save();
             };
 
-            widget.removeProperty = function(e) {
+            widget.removeProperty = function (e) {
                 $(this).parent().parent().parent().remove();
                 widget.refreshControl();
                 widget.save();
                 e.preventDefault();
             };
 
-            widget.addProperty = function(e) {
+            widget.addProperty = function (e) {
                 widget.refreshControl();
                 e.preventDefault();
             };
@@ -211,7 +211,7 @@ define([
                     lstring: gettext("Create Case"),
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.checkbox
+                    widget: widgets.checkbox,
                 },
                 createProperty: {
                     lstring: gettext("Properties To Create"),
@@ -226,14 +226,14 @@ define([
                                 legal = _.union(required, optional),
                                 illegalProps = _.difference(props, legal),
                                 requiredProps = _.intersection(props, required),
-                                invalidProps = _.filter(props, function(p) {
+                                invalidProps = _.filter(props, function (p) {
                                     return !VALID_PROP_REGEX.test(p);
                                 });
 
                             if (requiredProps.length !== required.length) {
                                 return util.format(
                                     gettext("You must include {columns} columns to create a case"),
-                                    {columns: required.join(", ")}
+                                    {columns: required.join(", ")},
                                 );
                             } else if (illegalProps.length > 0) {
                                 return gettext("You can only use the following properties:") +
@@ -241,19 +241,19 @@ define([
                             } else if (invalidProps.length > 0) {
                                 return util.format(
                                     gettext("{props} are invalid properties"),
-                                    {props: invalidProps.join(", ")}
+                                    {props: invalidProps.join(", ")},
                                 );
                             }
 
                         }
                         return 'pass';
-                    }
+                    },
                 },
                 useClose: {
                     lstring: gettext("Close Case"),
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.checkbox
+                    widget: widgets.checkbox,
                 },
                 closeCondition: {
                     lstring: gettext("Close Condition"),
@@ -267,7 +267,7 @@ define([
                     lstring: gettext("Update Case"),
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.checkbox
+                    widget: widgets.checkbox,
                 },
                 updateProperty: {
                     lstring: gettext("Properties To Update"),
@@ -277,25 +277,25 @@ define([
                     validationFunc: function (mug) {
                         if (mug.p.useUpdate) {
                             var props = _.without(_.keys(mug.p.updateProperty), ""),
-                                invalidProps = _.filter(props, function(p) {
+                                invalidProps = _.filter(props, function (p) {
                                     return !VALID_PROP_REGEX.test(p);
                                 });
 
                             if (invalidProps.length > 0) {
                                 return util.format(
                                     gettext("{props} are invalid properties"),
-                                    {props: invalidProps.join(", ")}
+                                    {props: invalidProps.join(", ")},
                                 );
                             }
                         }
                         return 'pass';
-                    }
+                    },
                 },
                 useIndex: {
                     lstring: gettext("Use Index"),
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.checkbox
+                    widget: widgets.checkbox,
                 },
                 indexProperty: {
                     lstring: gettext("Index Properties"),
@@ -305,7 +305,7 @@ define([
                     validationFunc: function (mug) {
                         if (mug.p.useIndex) {
                             var props = _.without(_.keys(mug.p.indexProperty), ""),
-                                invalidProps = _.filter(props, function(p) {
+                                invalidProps = _.filter(props, function (p) {
                                     return !VALID_PROP_REGEX.test(p);
                                 }),
                                 relationships = _.without(_.map(mug.p.indexProperty, function (v, k) {
@@ -318,20 +318,20 @@ define([
                             if (invalidProps.length > 0) {
                                 return util.format(
                                     gettext("{props} are invalid properties"),
-                                    {props: invalidProps.join(", ")}
+                                    {props: invalidProps.join(", ")},
                                 );
                             } else if (invalidRelationships.length > 0) {
                                 return gettext("Relationship must be child or extension");
                             }
                         }
                         return 'pass';
-                    }
+                    },
                 },
                 useAttachment: {
                     lstring: gettext("Use Attachments"),
                     visibility: 'visible',
                     presence: 'optional',
-                    widget: widgets.checkbox
+                    widget: widgets.checkbox,
                 },
                 attachmentProperty: {
                     lstring: gettext("Attachment Properties"),
@@ -344,14 +344,14 @@ define([
                         }
 
                         var props = _.without(_.keys(mug.p.attachmentProperty), ""),
-                            invalidProps = _.filter(props, function(p) {
+                            invalidProps = _.filter(props, function (p) {
                                 return !VALID_PROP_REGEX.test(p);
                             }),
-                            invalidFroms = _.filter(props, function(p) {
+                            invalidFroms = _.filter(props, function (p) {
                                 return !_.contains(['local', 'remote', 'inline'],
-                                                   mug.p.attachmentProperty[p].from);
+                                    mug.p.attachmentProperty[p].from);
                             }),
-                            invalidInlines = _.filter(props, function(p) {
+                            invalidInlines = _.filter(props, function (p) {
                                 var prop = mug.p.attachmentProperty[p],
                                     from = prop.from,
                                     name = prop.name;
@@ -361,7 +361,7 @@ define([
                         if (invalidProps.length > 0) {
                             return util.format(
                                 gettext("{props} are invalid properties"),
-                                {props: invalidProps.join(", ")}
+                                {props: invalidProps.join(", ")},
                             );
                         }
 
@@ -376,8 +376,8 @@ define([
                         }
 
                         return "pass";
-                    }
-                }
+                    },
+                },
             },
             getExtraDataAttributes: function (mug) {
                 return {
@@ -391,19 +391,19 @@ define([
                     var node = new Tree.Node(children, {
                         getNodeID: function () { return name; },
                         p: {
-                            rawDataAttributes: null
+                            rawDataAttributes: null,
                         },
                         options: { 
                             getExtraDataAttributes: function (mug) {
                                 return dataAttributes;
-                            }
-                        }
+                            },
+                        },
                     });
                     return node;
                 }
 
                 function makeColumns(properties, dataKeys) {
-                    return _.chain(properties).map(function(v, k) {
+                    return _.chain(properties).map(function (v, k) {
                         if (k) {
                             return simpleNode(k, [], _.pick(v, dataKeys));
                         }
@@ -425,14 +425,14 @@ define([
 
                 if (indexesCase(mug)) {
                     actions.push(simpleNode('index', 
-                                            makeColumns(mug.p.indexProperty, 
-                                                        ['case_type', 'relationship'])));
+                        makeColumns(mug.p.indexProperty, 
+                            ['case_type', 'relationship'])));
                 }
 
                 if (attachmentCase(mug)) {
                     actions.push(simpleNode('attachment', 
-                                            makeColumns(mug.p.attachmentProperty, 
-                                                        ['from', 'name'])));
+                        makeColumns(mug.p.attachmentProperty, 
+                            ['from', 'name'])));
                 }
 
                 return [new Tree.Node(actions, {
@@ -446,18 +446,18 @@ define([
                                 date_modified: '',
                                 user_id: '',
                             };
-                        }
-                    }
+                        },
+                    },
                 })];
             },
             getBindList: function (mug) {
                 var ret = [];
                 function generateBinds(action, properties) {
-                    return _.chain(properties).omit("").map(function(v, k) {
+                    return _.chain(properties).omit("").map(function (v, k) {
                         return {
                             nodeset: mug.absolutePath + "/case/" + action + "/" + k,
                             calculate: v.calculate,
-                            relevant: v.relevant
+                            relevant: v.relevant,
                         };
                     }).value();
                 }
@@ -466,7 +466,7 @@ define([
                     if (mug.isInRepeat()) {
                         ret = ret.concat({
                             nodeset: mug.absolutePath + "/case/@case_id",
-                            calculate: mug.p.case_id
+                            calculate: mug.p.case_id,
                         });
                     }
                     ret = ret.concat(generateBinds('create', mug.p.createProperty));
@@ -477,7 +477,7 @@ define([
                 if (closesCase(mug)) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/close",
-                        relevant: mug.p.closeCondition
+                        relevant: mug.p.closeCondition,
                     });
                 }
                 if (indexesCase(mug)) {
@@ -486,13 +486,13 @@ define([
                 if (attachmentCase(mug)) {
                     ret = ret.concat(
                         _.chain(mug.p.attachmentProperty)
-                         .omit("")
-                         .map(function(v, k) {
-                             return {
-                                 nodeset: mug.absolutePath + "/case/attachment/" + k + "/@src",
-                                 calculate: v.calculate
-                             };
-                         }).value()
+                            .omit("")
+                            .map(function (v, k) {
+                                return {
+                                    nodeset: mug.absolutePath + "/case/attachment/" + k + "/@src",
+                                    calculate: v.calculate,
+                                };
+                            }).value(),
                     );
                 }
 
@@ -500,17 +500,17 @@ define([
                     ret.push({
                         nodeset: mug.absolutePath + "/case/@date_modified",
                         calculate: mug.p.date_modified,
-                        type: "xsd:dateTime"
+                        type: "xsd:dateTime",
                     });
                     ret.push({
                         nodeset: mug.absolutePath + "/case/@user_id",
-                        calculate: mug.p.user_id
+                        calculate: mug.p.user_id,
                     });
 
                     if (!createsCase(mug)) {
                         ret.push({
                             nodeset: mug.absolutePath + "/case/@case_id",
-                            calculate: mug.p.case_id
+                            calculate: mug.p.case_id,
                         });
                     }
                 }
@@ -539,11 +539,11 @@ define([
                 if (index && index.length !== 0) {
                     mug.p.useIndex = true;
                     mug.p.indexProperty = {};
-                    _.each(index.children(), function(child) {
+                    _.each(index.children(), function (child) {
                         var prop = $(child);
                         mug.p.indexProperty[prop.prop('tagName')] = {
                             case_type: prop.xmlAttr('case_type'),
-                            relationship: prop.xmlAttr('relationship')
+                            relationship: prop.xmlAttr('relationship'),
                         };
                     });
                 }
@@ -552,17 +552,17 @@ define([
                     if (!mug.p.attachmentProperty) {
                         mug.p.attachmentProperty = {};
                     }
-                    _.each(attach.children(), function(child) {
+                    _.each(attach.children(), function (child) {
                         var prop = $(child);
                         mug.p.attachmentProperty[prop.prop('tagName')] = {
                             from: prop.xmlAttr('from'),
-                            name: prop.xmlAttr('name')
+                            name: prop.xmlAttr('name'),
                         };
                     });
                 }
                 return $([]);
             },
-            getSetValues: function(mug) {
+            getSetValues: function (mug) {
                 if (createsCase(mug) && !mug.isInRepeat()) {
                     return [{
                         event: 'xforms-ready',
@@ -575,7 +575,7 @@ define([
             getCaseSaveData: function (mug) {
                 var propertyNames = _.union(
                     _.keys(mug.p.createProperty || {}),
-                    _.keys(mug.p.updateProperty || {})
+                    _.keys(mug.p.updateProperty || {}),
                 );
                 return {
                     case_type: mug.p.case_type || '',
@@ -653,7 +653,7 @@ define([
                         return !attachmentCase(mug);
                     },
                 },
-            ]
+            ],
         };
 
     $.vellum.plugin("saveToCase", {}, {
@@ -672,7 +672,7 @@ define([
                 });
             if (value) {
                 mug.p.case_id = value.value;
-                mug.form.dropSetValues(function(inner) {
+                mug.form.dropSetValues(function (inner) {
                     return value === inner;
                 });
             }
@@ -729,19 +729,19 @@ define([
                             var attr = {
                                 close: {
                                     mugProp: 'closeCondition',
-                                    elAttr: 'relevant'
+                                    elAttr: 'relevant',
                                 },
                                 '@date_modified': {
                                     mugProp: 'date_modified',
-                                    elAttr: 'calculate'
+                                    elAttr: 'calculate',
                                 },
                                 '@user_id': {
                                     mugProp: 'user_id',
-                                    elAttr: 'calculate'
+                                    elAttr: 'calculate',
                                 },
                                 '@case_id': {
                                     mugProp: 'case_id',
-                                    elAttr: 'calculate'
+                                    elAttr: 'calculate',
                                 },
                             }[matchRet[3]];
 
@@ -751,7 +751,7 @@ define([
                         form.parseWarnings.push(util.format(
                             gettext("An error occurred when parsing bind " + 
                                     "node [{path}]. Please fix this."),
-                            {path: path}
+                            {path: path},
                         ));
                         return;
                     }
@@ -774,6 +774,6 @@ define([
                 }
             }
             this.__callOld();
-        }
+        },
     });
 });

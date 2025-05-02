@@ -17,7 +17,7 @@ define([
     REPEAT_NO_ADD_REMOVE_FALSE_XML,
     REPEAT_WITH_COUNT_XML,
     REPEAT_WITH_COUNT_NO_ADD_REMOVE_FALSE_XML,
-    REPEAT_WITH_COUNT_AS_QUESTION_XML
+    REPEAT_WITH_COUNT_AS_QUESTION_XML,
 ) {
     var assert = chai.assert;
 
@@ -27,7 +27,7 @@ define([
                 core: {
                     onReady: function () {
                         done();
-                    }
+                    },
                 },
             });
         });
@@ -37,7 +37,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITHOUT_COUNT_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
@@ -47,7 +47,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITHOUT_COUNT_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
@@ -56,7 +56,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITHOUT_COUNT_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
@@ -65,7 +65,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITH_COUNT_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
@@ -74,7 +74,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITH_COUNT_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
@@ -87,7 +87,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 REPEAT_WITH_COUNT_AS_QUESTION_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
@@ -98,7 +98,7 @@ define([
             util.assertXmlEqual(
                 util.call("createXML"),
                 INGORE_RICHTEXT_AND_MARKDWON,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 

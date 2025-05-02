@@ -10,7 +10,7 @@ define([
     'text!static/copy-paste/two-questions.xml',
     'text!static/form/manual-instance-reference.xml',
     'vellum/copy-paste',
-    'vellum/tsv'
+    'vellum/tsv',
 ], function (
     chai,
     $,
@@ -23,7 +23,7 @@ define([
     TWO_QUESTIONS_XML,
     MANUAL_INSTANCE_REFERENCE_XML,
     mod,
-    tsv
+    tsv,
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -34,7 +34,7 @@ define([
             rows = tsv.tabDelimit([HEADER].concat(rows));
         }
         util.assertEqual(serial + "\n", rows + "\n",
-                         message || "cut or copy mismatch");
+            message || "cut or copy mismatch");
     }
 
     function paste(rows, errors, print) {
@@ -56,10 +56,10 @@ define([
                 core: {
                     onReady: function () {
                         assert(this.isPluginEnabled("copyPaste"),
-                               "copyPaste plugin should be enabled");
+                            "copyPaste plugin should be enabled");
                         done();
-                    }
-                }
+                    },
+                },
             });
         });
 
@@ -258,7 +258,7 @@ define([
                         "hint label",
                     ],
                 ]),
-            }
+            },
         ], function (item) {
             it("should copy " + item.message, function () {
                 util.loadXML(item.xml);
@@ -368,7 +368,7 @@ define([
             var mug = util.getMug("other");
             mug.p.nodeID = "text";
             assert(mug.messages.get("nodeID", "mug-conflictedNodeId-warning"),
-                   "expected confict warning");
+                "expected confict warning");
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "conflictedNodeId"],
@@ -685,13 +685,13 @@ define([
             paste([
                 ["id", "type", "labelItext:en-default", "itemsetData"],
                 ["/select", "SelectDynamic", "select",
-                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+                    '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
             ]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "itemsetData"],
                 ["/select", "SelectDynamic", "select", "select",
-                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+                    '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
             ]);
         });
 
@@ -700,7 +700,7 @@ define([
             paste([
                 ["id", "type", "labelItext:en-default", "itemsetData"],
                 ["/select", "SelectDynamic", "select",
-                 '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+                    '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
             ]);
             util.clickQuestion("select/itemset");
             eq(mod.cut(), "");
@@ -711,7 +711,7 @@ define([
             var data = [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "instances", "itemsetData"],
                 ["/select", "SelectDynamic", "select", "select", '{"foo":{"src":"jr://foo"}}',
-                 '[{"instance":{"id":"foo","src":"jr://foo"},' +
+                    '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
             util.loadXML("");
@@ -724,9 +724,9 @@ define([
             var data = [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "filter", "instances", "itemsetData"],
                 ["/select", "SelectDynamic", "select", "select",
-                 '["type = instance(\'fum\')/fum/@type"]',
-                 '{"foo":{"src":"jr://foo"},"fum":{"src":"jr://fum"}}',
-                 '[{"instance":{"id":"foo","src":"jr://foo"},' +
+                    '["type = instance(\'fum\')/fum/@type"]',
+                    '{"foo":{"src":"jr://foo"},"fum":{"src":"jr://fum"}}',
+                    '[{"instance":{"id":"foo","src":"jr://foo"},' +
                    '"nodeset":"instance(\'foo\')/foo/items","labelRef":"@name","valueRef":"@id"}]'],
             ];
             util.loadXML("");
@@ -744,7 +744,7 @@ define([
             ]);
             assert(util.isTreeNodeValid("two"), util.getMessages("two"));
             assert(!util.isTreeNodeValid("double_trouble"),
-                   "double_trouble should not be valid");
+                "double_trouble should not be valid");
         });
 
         it("should show warning on paste missing multimedia", function () {
@@ -755,7 +755,7 @@ define([
             ]);
             var mug = util.getMug("text");
             assert(mug.messages.get("labelItext", "missing-multimedia-warning"),
-                   "text should have missing-multimedia-warning");
+                "text should have missing-multimedia-warning");
         });
 
         it("should copy questions in tree order", function () {
@@ -774,7 +774,7 @@ define([
                 "text3",
                 "group/text2",
                 "group/text1",
-                "text1"
+                "text1",
             );
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default"],
@@ -802,7 +802,7 @@ define([
                 "question2",
                 "question3",
                 "question4",
-                "question5"
+                "question5",
             );
             mod.paste(mod.copy());
             util.selectAll();
@@ -883,9 +883,9 @@ define([
                     "unknownAttributes"],
                 ["/app", "AndroidIntent", "app", "app",
                     "commcare.org/xforms", "app-id",
-                    JSON.stringify({key1:"val1", key2:"val2"}),
+                    JSON.stringify({key1: "val1", key2: "val2"}),
                     JSON.stringify({key3: "val3"}),
-                    JSON.stringify({type: "robin"})]
+                    JSON.stringify({type: "robin"})],
             ]);
             util.selectAll();
             eq(mod.copy(), [
@@ -896,9 +896,9 @@ define([
                     "intentXmlns", "unknownAttributes"],
                 ["/app", "AndroidIntent", "app", "app",
                     "app-id",
-                    JSON.stringify({key1:"val1", key2:"val2"}),
+                    JSON.stringify({key1: "val1", key2: "val2"}),
                     JSON.stringify({key3: "val3"}),
-                    "commcare.org/xforms", JSON.stringify({type: "robin"})]
+                    "commcare.org/xforms", JSON.stringify({type: "robin"})],
             ]);
         });
 
@@ -909,10 +909,10 @@ define([
                 ["/app", "AndroidIntent", "app", "app", JSON.stringify({
                     path: "app-id",
                     xmlns: "commcare.org/xforms",
-                    extra: {key1:"val1", key2:"val2"},
+                    extra: {key1: "val1", key2: "val2"},
                     response: {key3: "val3"},
-                    unknownAttributes: {type: "robin"}
-                })]
+                    unknownAttributes: {type: "robin"},
+                })],
             ]);
             util.selectAll();
             eq(mod.copy(), [
@@ -923,9 +923,9 @@ define([
                     "intentXmlns", "unknownAttributes"],
                 ["/app", "AndroidIntent", "app", "app",
                     "app-id",
-                    JSON.stringify({key1:"val1", key2:"val2"}),
+                    JSON.stringify({key1: "val1", key2: "val2"}),
                     JSON.stringify({key3: "val3"}),
-                    "commcare.org/xforms", JSON.stringify({type: "robin"})]
+                    "commcare.org/xforms", JSON.stringify({type: "robin"})],
             ]);
         });
 
@@ -977,7 +977,7 @@ define([
             assert.equal(input.val(), "other");
         });
 
-        it("should paste markdown correctly", function() {
+        it("should paste markdown correctly", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "labelItext:en-default", "labelItext:hasMarkdown"],
@@ -990,7 +990,7 @@ define([
             assert(!util.markdownVisible());
         });
 
-        it("should paste invalid xpaths correctly", function(done) {
+        it("should paste invalid xpaths correctly", function (done) {
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr"],
@@ -1020,7 +1020,7 @@ define([
             });
         });
 
-        it("should paste valid xpaths correctly", function(done) {
+        it("should paste valid xpaths correctly", function (done) {
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr"],
@@ -1037,7 +1037,7 @@ define([
                 assert.strictEqual(widget.getValue(), '#form/invalid');
                 assert.strictEqual(
                     $('[name=property-calculateAttr]').find('span .label').data('value'),
-                    '#form/invalid'
+                    '#form/invalid',
                 );
                 util.selectAll();
                 eq(mod.copy(), [
@@ -1049,7 +1049,7 @@ define([
             });
         });
 
-        it("should not add calculate condition to text node on paste", function() {
+        it("should not add calculate condition to text node on paste", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr"],
@@ -1061,7 +1061,7 @@ define([
             assert(!mug.isVisible("calculateAttr"), "calculateAttr should not be visible");
         });
 
-        it("should maintain reference to pasted question", function() {
+        it("should maintain reference to pasted question", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr"],
@@ -1089,7 +1089,7 @@ define([
             ]);
         });
 
-        it("should maintain reference to question pasted in group", function() {
+        it("should maintain reference to question pasted in group", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "calculateAttr"],
@@ -1115,35 +1115,35 @@ define([
             ]);
         });
 
-        it("should maintain reference to question referenced by itemset", function() {
+        it("should maintain reference to question referenced by itemset", function () {
             util.loadXML("");
             paste([
                 ["id", "type", "labelItext:en-default", "itemsetData"],
                 ["/items", "DataBindOnly", "null", "null"],
                 ["/select", "SelectDynamic", "select",
-                 '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
+                    '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
                 ["/sub", "Group", "null", "null"],
             ]);
             paste([
                 ["id", "type", "labelItext:en-default", "itemsetData"],
                 ["/items", "DataBindOnly", "null", "null"],
                 ["/select", "SelectDynamic", "select",
-                 '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
+                    '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
             ]);
             util.selectAll();
             eq(mod.copy(), [
                 ["id", "type", "labelItext:en-default", "labelItext:hin-default", "itemsetData"],
                 ["/items", "DataBindOnly", "null", "null", "null"],
                 ["/select", "SelectDynamic", "select", "select",
-                 '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
+                    '[{"instance":null,"nodeset":"#form/items","labelRef":"@name","valueRef":"@id"}]'],
                 ["/sub", "Group", "null", "null", "null"],
                 ["/sub/items", "DataBindOnly", "null", "null", "null"],
                 ["/sub/select", "SelectDynamic", "select", "select",
-                 '[{"instance":null,"nodeset":"#form/sub/items","labelRef":"@name","valueRef":"@id"}]'],
+                    '[{"instance":null,"nodeset":"#form/sub/items","labelRef":"@name","valueRef":"@id"}]'],
             ]);
         });
 
-        it("should maintain reference to question referenced by model iteration", function() {
+        it("should maintain reference to question referenced by model iteration", function () {
             util.loadXML("");
             paste([
                 ['id', 'type', 'labelItext:en-default', 'labelItext:hin-default', 'dataSource'],
@@ -1167,7 +1167,7 @@ define([
             ]);
         });
 
-        it("should maintain reference in output value", function() {
+        it("should maintain reference in output value", function () {
             util.loadXML("");
             paste([
                 ['id', 'type', 'labelItext:en-default', 'appearance'],
@@ -1191,17 +1191,17 @@ define([
             ]);
         });
 
-        describe("with instances without src", function() {
+        describe("with instances without src", function () {
             before(function (done) {
                 util.init({
                     javaRosa: { langs: ['en'] },
                     core: {
                         onReady: function () {
                             assert(this.isPluginEnabled("copyPaste"),
-                                   "copyPaste plugin should be enabled");
+                                "copyPaste plugin should be enabled");
                             done();
-                        }
-                    }
+                        },
+                    },
                 });
             });
 
@@ -1214,13 +1214,13 @@ define([
                 ['/result', 'Trigger', '<output value="#form/output" />', 'minimal', 'null', 'null'],
             ];
 
-            it("should properly paste", function() {
+            it("should properly paste", function () {
                 util.loadXML("");
                 paste(data);
                 util.assertXmlEqual(call("createXML"), MANUAL_INSTANCE_REFERENCE_XML, {normalize_xmlns: true});
             });
 
-            it("should properly copy", function() {
+            it("should properly copy", function () {
                 util.loadXML(MANUAL_INSTANCE_REFERENCE_XML);
                 util.selectAll();
                 eq(mod.copy(), data);
@@ -1232,15 +1232,15 @@ define([
                 util.init({
                     javaRosa: { langs: ['en', 'hin'] },
                     uploader: { objectMap: {
-                        "jr://file/commcare/audio/data/question1.mp3": true
+                        "jr://file/commcare/audio/data/question1.mp3": true,
                     }},
                     core: {
                         onReady: function () {
                             assert(this.isPluginEnabled("copyPaste"),
-                                   "copyPaste plugin should be enabled");
+                                "copyPaste plugin should be enabled");
                             done();
-                        }
-                    }
+                        },
+                    },
                 });
             });
 

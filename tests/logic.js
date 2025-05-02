@@ -17,7 +17,7 @@ define([
     xpath,
     TEST_XML_1,
     MOTHER_REF_XML,
-    HASHTAG_FILTER
+    HASHTAG_FILTER,
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -59,7 +59,7 @@ define([
             var repeat = util.addQuestion("Repeat", "product");
             repeat.p.dataSource = {
                 instance: {id: "products", src: "jr://fixture/commtrack:products"},
-                idsQuery: "instance('products')/products/product/@id"
+                idsQuery: "instance('products')/products/product/@id",
             };
             call("createXML");
             assert(util.isTreeNodeValid(repeat), "repeat should be valid");
@@ -95,7 +95,7 @@ define([
                     "repeat_count",
                     "filter",
                     "defaultValue",
-                    "requiredCondition"
+                    "requiredCondition",
                 ],
                 canSelfRef = ["constraintAttr"],
                 noSelfProps = _.difference(properties, canSelfRef),
@@ -123,11 +123,11 @@ define([
                     if (bad) {
                         assert(!util.isTreeNodeValid(mug), "mug should not be valid");
                         assert(mug.messages.get(attr).length,
-                               attr + " should have messages");
+                            attr + " should have messages");
                     } else {
                         assert(util.isTreeNodeValid(mug), "mug should be valid");
                         assert(mug.messages.get(attr).length === 0,
-                               attr + " should not have messages");
+                            attr + " should not have messages");
                     }
                 } finally {
                     mug.p[attr] = "";
@@ -145,20 +145,20 @@ define([
                 });
             });
 
-            _.each(noSelfProps, function(attr) {
+            _.each(noSelfProps, function (attr) {
                 it("self referencing path in " + attr, function () {
                     testReference(attr, '.', true);
                 });
             });
 
-            _.each(canSelfRef, function(attr) {
+            _.each(canSelfRef, function (attr) {
                 it("self referencing path in " + attr, function () {
                     testReference(attr, '.', false);
                 });
             });
         });
 
-        describe("should not add validation error for", function() {
+        describe("should not add validation error for", function () {
             var allowedReferences = [
                 "meta/deviceID",
                 "meta/instanceID",
@@ -169,7 +169,7 @@ define([
                 "meta/location",
             ];
 
-            _.each(allowedReferences, function(ref) {
+            _.each(allowedReferences, function (ref) {
                 it(ref, function () {
                     util.loadXML("");
                     var mug = util.addQuestion("Text", "text");
@@ -184,7 +184,7 @@ define([
                 util.init({core: {onReady: function () { done(); }}});
             });
 
-            it("should be the correct format", function() {
+            it("should be the correct format", function () {
                 var form = util.loadXML(MOTHER_REF_XML),
                     manager = form._logicManager;
                 assert.deepEqual(manager.caseReferences(),
@@ -215,7 +215,7 @@ define([
                     ["/select/choice", "Choice", '<output value="#case/dob" />'],
                 ]);
                 assert.deepEqual(manager.caseReferences(),
-                                 {load: {"/data/select": ["#case/dob"]}, save: {}});
+                    {load: {"/data/select": ["#case/dob"]}, save: {}});
             });
 
             it("should send all properties referenced by a question", function () {
@@ -228,11 +228,11 @@ define([
                     ["/select/other", "Choice", '<output value="#user/role" />'],
                 ]);
                 assert.deepEqual(manager.caseReferences(),
-                                 {load: {"/data/select": [
-                                    "#case/name",
-                                    "#case/dob",
-                                    "#user/role",
-                                 ]}, save: {}});
+                    {load: {"/data/select": [
+                        "#case/name",
+                        "#case/dob",
+                        "#user/role",
+                    ]}, save: {}});
             });
         });
 
@@ -243,7 +243,7 @@ define([
                         "#form/question2": "Display Condition",
                         "#form/question3": "Display Condition",
                     },
-                    "#form/question2": {"#form/question3": "Display Condition"}
+                    "#form/question2": {"#form/question3": "Display Condition"},
                 };
             before(function (done) {
                 form = util.loadXML(TEST_XML_1);
@@ -258,10 +258,10 @@ define([
                 var q1 = "#form/question1",
                     q2 = "#form/question2";
                 assert.deepEqual(form.findUsages(q1),
-                    {"#form/question1": expectedUsages[q1]}
+                    {"#form/question1": expectedUsages[q1]},
                 );
                 assert.deepEqual(form.findUsages(q2),
-                    {"#form/question2": expectedUsages[q2]}
+                    {"#form/question2": expectedUsages[q2]},
                 );
             });
 
@@ -303,7 +303,7 @@ define([
         });
     });
 
-    describe("Logic expression", function() {
+    describe("Logic expression", function () {
         var expressions = [
             [
                 "instance('casedb')/cases/case/property",
@@ -327,7 +327,7 @@ define([
                     "@case_id",
                     "instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent",
                     "instance('commcaresession')/session/data/case_id",
-                    "/data/other_caseid"
+                    "/data/other_caseid",
                 ],
                 ["instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd", "/data/other_caseid"],
             ],
@@ -348,78 +348,78 @@ define([
             ],
         ];
 
-        _.each(expressions, function(expr) {
+        _.each(expressions, function (expr) {
             var logicExpr = new logic.LogicExpression(expr[0], xpath.createParser(xpath.makeXPathModels()));
 
-            it("should return all paths: " + expr[0], function() {
+            it("should return all paths: " + expr[0], function () {
                 var paths = _.map(logicExpr.getPaths(), getPath);
                 assert.deepEqual(_.difference(paths, expr[1]), []);
                 assert.deepEqual(_.difference(expr[1], paths), []);
             });
 
-            it("should return top level paths: " + expr[0], function() {
+            it("should return top level paths: " + expr[0], function () {
                 var paths = _.map(logicExpr.getTopLevelPaths(), getPath);
                 assert.deepEqual(_.difference(paths, expr[2]), []);
                 assert.deepEqual(_.difference(expr[2], paths), []);
             });
         });
 
-        describe("hashtags", function() {
+        describe("hashtags", function () {
             function getHashtags(expr) {
                 return expr.toHashtag();
             }
 
             var hashtags = [
-                {
-                    path: "#form/text1 = #form/text2",
-                    hashtags: ["#form/text1", "#form/text2"],
-                    xpath: "/data/text1 = /data/text2",
+                    {
+                        path: "#form/text1 = #form/text2",
+                        hashtags: ["#form/text1", "#form/text2"],
+                        xpath: "/data/text1 = /data/text2",
+                    },
+                    {
+                        path: "/data/not/in/form[#form/text1] = #form/text2",
+                        hashtags: ["#form/text1", "#form/text2"],
+                        xpath: "/data/not/in/form[/data/text1] = /data/text2",
+                    },
+                    {
+                        path: "/data/not/in/form[#form/text1 = /data/also/not/in/form[#form/text2]] = #form/text2",
+                        hashtags: ["#form/text1", "#form/text2"],
+                        xpath: "/data/not/in/form[/data/text1 = /data/also/not/in/form[/data/text2]] = /data/text2",
+                    },
+                ],
+                incorrectHashtags = [
+                    {
+                        path: "#wtf/mate",
+                        hashtags: [],
+                    },
+                    {
+                        path: "#wtf/mate[filter=filter]",
+                        hashtags: [],
+                    },
+                ],
+                hashtagMap = {
+                    "#form/text1": "/data/text1",
+                    "#form/text2": "/data/text2",
                 },
-                {
-                    path: "/data/not/in/form[#form/text1] = #form/text2",
-                    hashtags: ["#form/text1", "#form/text2"],
-                    xpath: "/data/not/in/form[/data/text1] = /data/text2",
+                hashtagInfo = {
+                    hashtagMap: hashtagMap,
+                    invertedHashtagMap: _.invert(hashtagMap),
+                    hashtagNamespaces: {form: true},
                 },
-                {
-                    path: "/data/not/in/form[#form/text1 = /data/also/not/in/form[#form/text2]] = #form/text2",
-                    hashtags: ["#form/text1", "#form/text2"],
-                    xpath: "/data/not/in/form[/data/text1 = /data/also/not/in/form[/data/text2]] = /data/text2",
-                },
-            ],
-            incorrectHashtags = [
-                {
-                    path: "#wtf/mate",
-                    hashtags: [],
-                },
-                {
-                    path: "#wtf/mate[filter=filter]",
-                    hashtags: [],
-                },
-            ],
-            hashtagMap = {
-                "#form/text1": "/data/text1",
-                "#form/text2": "/data/text2",
-            },
-            hashtagInfo = {
-                hashtagMap: hashtagMap,
-                invertedHashtagMap: _.invert(hashtagMap),
-                hashtagNamespaces: {form: true},
-            },
-            xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
+                xpathParser = xpath.createParser(xpath.makeXPathModels(hashtagInfo));
 
             function compareHashtags(expr, expected) {
                 var tags = _.map(expr.getHashtags(), getHashtags);
                 assert.includeMembers(tags, expected.hashtags);
             }
 
-            _.each(hashtags, function(hashtag) {
+            _.each(hashtags, function (hashtag) {
                 var logicExpr = new logic.LogicExpression(hashtag.path, xpathParser);
 
-                it("should return all hashtags: " + hashtag.path, function() {
+                it("should return all hashtags: " + hashtag.path, function () {
                     compareHashtags(logicExpr, hashtag);
                 });
 
-                it("should translate " + hashtag.path + " to " + hashtag.xpath, function() {
+                it("should translate " + hashtag.path + " to " + hashtag.xpath, function () {
                     assert.strictEqual(logicExpr.parsed.toXPath(), hashtag.xpath);
                 });
             });
@@ -427,11 +427,11 @@ define([
             _.each(incorrectHashtags, function (hashtag) {
                 var logicExpr = new logic.LogicExpression(hashtag.path, xpathParser);
 
-                it("should return all hashtags: " + hashtag.path, function() {
+                it("should return all hashtags: " + hashtag.path, function () {
                     compareHashtags(logicExpr, hashtag);
                 });
 
-                it("should not be able to translate " + hashtag.path, function() {
+                it("should not be able to translate " + hashtag.path, function () {
                     // filtered hashtags will add an error and not parse
                     if (!logicExpr.error) {
                         assert.throws(logicExpr.parsed.toXPath, /translate the hashtag/);

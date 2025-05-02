@@ -15,12 +15,12 @@ define([
     commcareConnect,
     LEARN_MODULE_XML,
     ASSESSMENT_XML,
-    DELIVER_XML
+    DELIVER_XML,
 ) {
     var assert = chai.assert,
         call = util.call;
 
-    describe("The CommCareConnect", function() {
+    describe("The CommCareConnect", function () {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -29,7 +29,7 @@ define([
         });
 
         describe("learn module", function () {
-             it("should load and save", function () {
+            it("should load and save", function () {
                 util.loadXML(LEARN_MODULE_XML);
                 var module = util.getMug("module_1");
                 assert.equal(module.__className, "ConnectLearnModule");

@@ -50,7 +50,7 @@ define(["underscore"], function (_) {
                 key: "@case_type",
                 structure: {
                     address: {},
-                }
+                },
             }, {
                 id: "parent",
                 name: "parent (mother)",
@@ -64,8 +64,8 @@ define(["underscore"], function (_) {
                         subset: "grandparent",
                         subset_key: "@case_type",
                         key: "@case_id",
-                    }
-                }
+                    },
+                },
             }, {
                 id: "commcare-user",
                 name: "user",
@@ -73,7 +73,7 @@ define(["underscore"], function (_) {
                 structure: {
                     role: {},
                     username: {},
-                }
+                },
             }, {
                 id: "case",
                 name: "case (child)",
@@ -111,9 +111,9 @@ define(["underscore"], function (_) {
                         subset: "parent",
                         subset_key: "@case_type",
                         key: "@case_id",
-                    }
+                    },
                 },
-            }]
+            }],
         }, {
             id: "some-fixture",
             uri: "jr://fixture/item-list:some-fixture",
@@ -122,16 +122,16 @@ define(["underscore"], function (_) {
             structure: {
                 "inner-attribute": {
                     structure: {
-                        "extra-inner-attribute": {}
-                    }
+                        "extra-inner-attribute": {},
+                    },
                 },
                 "@id": {
-                    no_option: true
+                    no_option: true,
                 },
                 name: {
-                    no_option: true
-                }
-            }
+                    no_option: true,
+                },
+            },
         }, {
             id: "some-other-fixture",
             uri: "jr://fixture/item-list:some-other-fixture",
@@ -139,15 +139,15 @@ define(["underscore"], function (_) {
             name: 'some-other-fixture-name',
             structure: {
                 "other-inner-attribute": {
-                    no_option: true
+                    no_option: true,
                 },
                 "@id-other": {
-                    no_option: true
+                    no_option: true,
                 },
                 "name-other": {
-                    no_option: true
-                }
-            }
+                    no_option: true,
+                },
+            },
         },
     ];
 
@@ -176,7 +176,7 @@ define(["underscore"], function (_) {
         },
         javaRosa: {
             langs: ['en', 'hin'],
-            displayLanguage: 'en'
+            displayLanguage: 'en',
         },
         intents: {
             templates: [
@@ -217,15 +217,15 @@ define(["underscore"], function (_) {
                 return _.filter(sources, function (source) {
                     return !source.uri || /^jr:\/\/fixture\//.test(source.uri);
                 });
-            }
+            },
         },
         uploader: {
             uploadUrls: {
                 image: 'foo',
                 audio: 'foo',
-                video: 'foo'
+                video: 'foo',
             },
-            objectMap: {}
+            objectMap: {},
         },
         plugins: [
             'databrowser',
@@ -251,7 +251,7 @@ define(["underscore"], function (_) {
             'markdown_in_groups': true,
             'allow_data_reference_in_setvalue': true,
             'allow_bulk_form_actions': true,
-        }
+        },
     };
 
     return {

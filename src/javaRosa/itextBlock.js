@@ -6,7 +6,7 @@ define([
     'vellum/widgets',
     'vellum/util',
     'vellum/javaRosa/itextWidget',
-    'vellum/core'
+    'vellum/core',
 ], function (
     _,
     $,
@@ -14,10 +14,10 @@ define([
     control_group,
     widgets,
     util,
-    itextWidget
+    itextWidget,
 ) {
     var RESERVED_ITEXT_CONTENT_TYPES = _.union(
-            util.SUPPORTED_MEDIA_TYPES, ['default', 'short', 'long']
+            util.SUPPORTED_MEDIA_TYPES, ['default', 'short', 'long'],
         ),
         NO_MARKDOWN_MUGS = ['Choice', 'Group', 'FieldList', 'Repeat'];
 
@@ -46,8 +46,8 @@ define([
 
         var $messages = $("<div />").addClass("controls").addClass("messages"),
             $blockUI = $("<div />")
-            .addClass('itext-block-container')
-            .addClass("itext-block-" + block.itextType);
+                .addClass('itext-block-container')
+                .addClass("itext-block-" + block.itextType);
 
         block.getFormGroupClass = function (form) {
             return 'itext-block-' + block.itextType + '-group-' + form;
@@ -71,24 +71,24 @@ define([
         };
 
         mug.on("messages-changed",
-               function () { block.refreshMessages(); }, null, "teardown-mug-properties");
+            function () { block.refreshMessages(); }, null, "teardown-mug-properties");
 
         block.getUIElement = function () {
             _.each(block.getForms(), function (form) {
                 var $formGroup = block.getFormGroupContainer(form);
                 var langs_to_show = block.languages;
-                if(options.vellum.data.javaRosa.showOnlyCurrentLang) {
+                if (options.vellum.data.javaRosa.showOnlyCurrentLang) {
                     // show default and/or current display language and
                     // ensure they are in app languages
                     langs_to_show = _.intersection(
                         [options.vellum.data.javaRosa.Itext.defaultLanguage,
-                         options.vellum.data.core.currentItextDisplayLanguage],
-                        block.languages
+                            options.vellum.data.core.currentItextDisplayLanguage],
+                        block.languages,
                     );
                 }
-                _.each(langs_to_show, function(lang){
+                _.each(langs_to_show, function (lang) {
                     var itextWidget = block.itextWidget(block.mug, lang, form,
-                                                        _.extend(options, {parent: $blockUI}));
+                        _.extend(options, {parent: $blockUI}));
                     itextWidget.init();
                     itextWidget.on("change", function () {
                         block.fire("change");
@@ -187,13 +187,13 @@ define([
                         title: gettext("Add"),
                         cssClasses: newItextBtnClass + " disabled ",
                         attributes: {
-                            disabled: "disabled"
-                        }
-                    }
+                            disabled: "disabled",
+                        },
+                    },
                 ]);
 
                 $newItemForm = $(control_group({
-                    label: gettext("Content Type")
+                    label: gettext("Content Type"),
                 }));
 
                 $newItemInput = $("<input />").attr("type", "text").addClass("form-control");
@@ -202,8 +202,7 @@ define([
                         $addButton = mug.form.vellum.$f.find('.' + newItextBtnClass);
                     if (!currentValue || 
                         RESERVED_ITEXT_CONTENT_TYPES.indexOf(currentValue) !== -1 || 
-                        block.activeForms.indexOf(currentValue) !== -1) 
-                    {
+                        block.activeForms.indexOf(currentValue) !== -1) {
                         $addButton
                             .addClass('disabled')
                             .removeClass('btn-primary')
@@ -313,7 +312,7 @@ define([
         var block = itextConfigurableBlock(mug, options),
             pathPrefix = options.pathPrefix;
 
-        if(!_.isString(options.pathPrefix)) {
+        if (!_.isString(options.pathPrefix)) {
             pathPrefix = '/' + options.itextType;
         }
 

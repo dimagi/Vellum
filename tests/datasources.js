@@ -17,7 +17,7 @@ define([
     itemset,
     CASE_PROPERTY_XML,
     NULL_HASHTAGS_XML,
-    UNKNOWN_CASE_PROPERTY_XML
+    UNKNOWN_CASE_PROPERTY_XML,
 ) {
     var assert = chai.assert,
         clickQuestion = util.clickQuestion,
@@ -33,14 +33,14 @@ define([
                         "extra-inner-attribute": {
                             structure: {
                                 "@id": {},
-                                name: {}
-                            }
-                        }
-                    }
+                                name: {},
+                            },
+                        },
+                    },
                 },
                 "@id": {},
-                name: {}
-            }
+                name: {},
+            },
         }, {
             id: "commcaresession",
             uri: "jr://instance/session",
@@ -89,7 +89,7 @@ define([
                 structure: {
                     dob: {},
                     parent: {},
-                    realName: {name: "anAlias"}
+                    realName: {name: "anAlias"},
                 },
                 related: {
                     parent: {
@@ -97,7 +97,7 @@ define([
                         subset: "parent",
                         subset_key: "@case_type",
                         key: "@case_id",
-                    }
+                    },
                 },
             }, {
                 id: "parent",
@@ -113,22 +113,22 @@ define([
                         subset_key: "@case_type",
                         key: "@case_id",
                     },
-                }
+                },
             }, {
                 id: "grandparent",
                 name: "household",
                 key: "@case_type",
                 structure: {
                     address: {},
-                }
+                },
             }, {
                 id: "commcare-user",
                 name: "user",
                 key: "@case_type",
                 structure: {
                     role: {},
-                }
-            }]
+                },
+            }],
         }];
 
     describe("The data sources loader", function () {
@@ -148,7 +148,7 @@ define([
             });
         });
 
-        it("displays nested structures", function() {
+        it("displays nested structures", function () {
             util.loadXML("");
             util.addQuestion("SelectDynamic", "select1");
             clickQuestion('select1/itemset');
@@ -175,7 +175,7 @@ define([
                 nodes = transform(vellum.datasources.getDataNodes());
             });
 
-            it("should merge structures when merge flag is set", function() {
+            it("should merge structures when merge flag is set", function () {
                 assert.deepEqual(_.keys(nodes), ["child", "user"]);
                 assert.equal(nodes.child.xpath,
                     "instance('commcaresession')/session/data/case_id");
@@ -183,39 +183,39 @@ define([
                     "instance('commcaresession')/session/context/userid");
             });
 
-            it("should use reference.hashtag", function() {
+            it("should use reference.hashtag", function () {
                 assert.equal(nodes.user.nodes.role.hashtag, "#user/role");
             });
 
-            it("should construct #case hashtag with reference.subset", function() {
+            it("should construct #case hashtag with reference.subset", function () {
                 assert.equal(nodes.child.nodes.dob.hashtag, "#case/dob");
             });
 
-            it("should use aliases for hashtags", function() {
+            it("should use aliases for hashtags", function () {
                 assert.equal(nodes.child.nodes.anAlias.hashtag, "#case/anAlias");
             });
 
-            it("should reference an aliased property by its original id in its xpath", function() {
+            it("should reference an aliased property by its original id in its xpath", function () {
                 assert.match(nodes.child.nodes.anAlias.xpath, /\/realName$/);
             });
 
-            it("should construct #case/parent hashtag with related subset", function() {
+            it("should construct #case/parent hashtag with related subset", function () {
                 assert.equal(nodes.child.nodes.mother.nodes.edd.hashtag, "#case/parent/edd");
             });
 
-            it("should construct #case/grandparent hashtag with related subset", function() {
+            it("should construct #case/grandparent hashtag with related subset", function () {
                 var house = nodes.child.nodes.mother.nodes.household.nodes;
                 assert.equal(house.address.hashtag, "#case/grandparent/address");
             });
 
-            it("should use index path for related parent node", function() {
+            it("should use index path for related parent node", function () {
                 assert.strictEqual(nodes.child.nodes.mother.hashtag, null);
                 assert.equal(nodes.child.nodes.mother.xpath,
                     "instance('casedb')/cases/case[@case_id = " +
                     "instance('commcaresession')/session/data/case_id]/index/parent");
             });
 
-            it("should support property with same name as related index", function() {
+            it("should support property with same name as related index", function () {
                 assert.equal(nodes.child.nodes.parent.hashtag, "#case/parent");
                 assert.equal(nodes.child.nodes.parent.xpath,
                     "instance('casedb')/cases/case[@case_id = " +
@@ -223,14 +223,14 @@ define([
             });
         });
 
-        describe("", function() {
-            before(function(done) {
+        describe("", function () {
+            before(function (done) {
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (callback) { callback([]); },
-                        onReady: function () { done(); }
+                        onReady: function () { done(); },
                     },
                     features: {rich_text: false},
                 });
@@ -243,7 +243,7 @@ define([
             });
         });
 
-        describe("async options loader", function() {
+        describe("async options loader", function () {
             var vellum, callback;
             before(function (done) {
                 util.init({
@@ -264,7 +264,7 @@ define([
                 callback = null;
             });
 
-            it("should indicate loading status for empty itemset", function() {
+            it("should indicate loading status for empty itemset", function () {
                 util.loadXML("");
                 util.addQuestion("SelectDynamic", "select");
                 clickQuestion('select/itemset');
@@ -273,7 +273,7 @@ define([
                 assert.equal(options.length, 1, $("<div />").append(options).html());
             });
 
-            it("should replace loading indicator with async loaded options", function() {
+            it("should replace loading indicator with async loaded options", function () {
                 util.loadXML("");
                 util.addQuestion("SelectDynamic", "select");
                 clickQuestion('select/itemset');
@@ -283,12 +283,12 @@ define([
                 assert.equal(options.length, 1, $("<div />").append(options).html());
             });
 
-            it("should show custom option when loading itemset with value", function() {
+            it("should show custom option when loading itemset with value", function () {
                 util.loadXML("");
                 util.paste([
                     ["id", "type", "itemsetData"],
                     ["select", "SelectDynamic",
-                     '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
+                        '[{"instance":null,"nodeset":"/items","labelRef":"@name","valueRef":"@id"}]'],
                 ]);
                 clickQuestion('select/itemset');
                 var options = $('[name=property-itemsetData] option'),
@@ -299,7 +299,7 @@ define([
                 assert.equal(options.length, 2, $("<div />").append(options).html());
             });
 
-            it("should select first option when empty and finished loading", function() {
+            it("should select first option when empty and finished loading", function () {
                 util.loadXML("");
                 util.addQuestion("SelectDynamic", "select");
                 callback([{
@@ -327,12 +327,12 @@ define([
                 assert.equal($('[name=property-labelRef]').val(), 'name');
             });
 
-            it("should select correct option when not empty and finished loading", function() {
+            it("should select correct option when not empty and finished loading", function () {
                 util.loadXML("");
                 util.paste([
                     ["id", "type", "itemsetData"],
                     ["select", "SelectDynamic",
-                     '[{"instance":{"id":"bar",' +
+                        '[{"instance":{"id":"bar",' +
                      '"src":"jr://fixture/foo","query":"instance(\'bar\')/root/inner"},' +
                      '"nodeset":"instance(\'bar\')/root/inner","labelRef":"name","valueRef":"@id"}]'],
                 ]);
@@ -370,7 +370,7 @@ define([
             });
         });
 
-        describe("when still loading", function() {
+        describe("when still loading", function () {
             var vellum, callback;
             before(function (done) {
                 util.init({

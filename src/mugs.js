@@ -44,7 +44,7 @@ define([
     Tree,
     widgets,
     logic,
-    util
+    util,
 ) {
     function Mug(options, form, baseSpec, attrs) {
         var properties = null;
@@ -177,7 +177,7 @@ define([
             return this.messages.update(attr, {
                 key: "mug-" + attr + "-error",
                 level: this.ERROR,
-                message: util.format(message || "", {question: label})
+                message: util.format(message || "", {question: label}),
             });
         },
         // message levels
@@ -254,7 +254,7 @@ define([
          */
         getErrors: function () {
             var errors = [];
-            this.messages.each(function(msg) {
+            this.messages.each(function (msg) {
                 if (msg.level !== "info") {
                     errors.push(msg.message);
                 }
@@ -402,7 +402,7 @@ define([
             }
             lang = lang || defaultLang;
 
-            if(!lang) {
+            if (!lang) {
                 return gettext('No Translation Data');
             }
 
@@ -433,7 +433,7 @@ define([
                     }
                 } else if (value && !(_.isEmpty(value) &&
                                       (_.isObject(value) || _.isArray(value))
-                          )) {
+                )) {
                     data[key] = value;
                 }
             });
@@ -463,7 +463,7 @@ define([
         teardownProperties: function () {
             this.fire({type: "teardown-mug-properties", mug: this});
         },
-        isInRepeat: function() {
+        isInRepeat: function () {
             if (this.__className === "Repeat") { // HACK hard-coded class name
                 return true;
             }
@@ -483,13 +483,13 @@ define([
     Object.defineProperty(Mug.prototype, "absolutePath", {
         get: function () {
             return this.form.getAbsolutePath(this);
-        }
+        },
     });
 
     Object.defineProperty(Mug.prototype, "absolutePathNoRoot", {
         get: function () {
             return this.form.getAbsolutePath(this, true);
-        }
+        },
     });
 
     Object.defineProperty(Mug.prototype, "hashtagPath", {
@@ -499,7 +499,7 @@ define([
                 return '#form' + this.absolutePathNoRoot;
             }
             return this.absolutePath;
-        }
+        },
     });
 
     Object.defineProperty(Mug.prototype, "parentMug", {
@@ -510,13 +510,13 @@ define([
             } else {
                 return null;
             }
-        }
+        },
     });
 
     Object.defineProperty(Mug.prototype, "previousSibling", {
         get: function () {
             return this.form.tree.getPreviousSibling(this);
-        }
+        },
     });
 
     function copyAndProcessSpec(baseSpec, mugSpec, mugOptions) {
@@ -661,12 +661,12 @@ define([
         /**
          * Check if this messages object is empty
          */
-        isEmpty: function() {
+        isEmpty: function () {
             return _.isEmpty(this.messages);
         },
     };
 
-    function MugProperties (options) {
+    function MugProperties(options) {
         this.__data = {};
         this.__spec = options.spec;
         this.__mug = options.mug;
@@ -687,7 +687,7 @@ define([
                 // page), we get an error.  This is an easy and harmless
                 // alternative, but properties should never need to be redefined
                 // otherwise.
-                configurable: true
+                configurable: true,
             });
         });
     };
@@ -722,8 +722,7 @@ define([
                 // DataBindOnly (which all mugs are before the control block has
                 // been parsed).
                 (mug.getPresence(attr) === 'notallowed' &&
-                 mug.__className !== 'DataBindOnly'))
-            {
+                 mug.__className !== 'DataBindOnly')) {
                 return;
             }
 
@@ -742,7 +741,7 @@ define([
             _(attrs).each(function (val, attr) {
                 _this[attr] = val;
             });
-        }
+        },
     };
 
     /**
@@ -751,7 +750,7 @@ define([
     function serializeXPath(value, key, mug, data) {
         if (value && /\binstance\(/.test(value)) {
             data.instances = _.extend(data.instances || {},
-                                      mug.form.parseInstanceRefs(value));
+                mug.form.parseInstanceRefs(value));
         }
         try {
             if (value) {
@@ -825,7 +824,7 @@ define([
                         },
                         changedQuestionIDWarning = {
                             key: "mug-nodeID-changed-warning",
-                            level: mug.INFO
+                            level: mug.INFO,
                         },
                         return_value = "pass";
 
@@ -834,7 +833,7 @@ define([
                             gettext("The ID '{nodeID}' may cause problems " +
                             "with form parsing. It is recommended to pick " +
                             "a different Question ID."),
-                            {nodeID: mug.p.nodeID}
+                            {nodeID: mug.p.nodeID},
                         );
                     }
                     mug.addMessage("nodeID", nameWarning);
@@ -844,7 +843,7 @@ define([
                             "{nodeID} is not a valid Question ID. " +
                             "It must start with a letter and contain only " +
                             "letters, numbers, and '-' or '_' characters."),
-                            {nodeID: mug.p.nodeID});
+                        {nodeID: mug.p.nodeID});
                     } else if (mug.p.nodeID.toLowerCase() === "meta") {
                         return_value = gettext("'meta' is not a valid Question ID.");
                     } else if (mug.form.warnWhenChanged && mug.showChangedMsg &&
@@ -886,7 +885,7 @@ define([
                             resolveConflictedNodeId(mug);
                         }
                     });
-                }
+                },
             },
             conflictedNodeId: {
                 visibility: 'hidden',
@@ -905,12 +904,12 @@ define([
                         key: "mug-conflictedNodeId-warning",
                         level: mug.WARNING,
                         message: message,
-                        fixSerializationWarning: resolveConflictedNodeId
+                        fixSerializationWarning: resolveConflictedNodeId,
                     });
                 },
                 deserialize: function () {
                     // deserialization is done by nodeID
-                }
+                },
             },
             dataValue: {
                 visibility: 'visible_if_present',
@@ -920,7 +919,7 @@ define([
             xmlnsAttr: {
                 visibility: 'visible',
                 presence: 'notallowed',
-                lstring: gettext("Special Hidden Value XMLNS attribute")
+                lstring: gettext("Special Hidden Value XMLNS attribute"),
             },
             rawDataAttributes: {
                 presence: 'optional',
@@ -935,7 +934,7 @@ define([
                 xpathType: "bool",
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                lstring: gettext('Display Condition')
+                lstring: gettext('Display Condition'),
             },
             calculateAttr: {
                 // only show calculate condition for non-data nodes if it already
@@ -948,7 +947,7 @@ define([
                 xpathType: "generic",
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                lstring: gettext('Calculate Condition')
+                lstring: gettext('Calculate Condition'),
             },
             constraintAttr: {
                 visibility: 'visible',
@@ -961,29 +960,29 @@ define([
                 mayReferenceSelf: true,
                 serialize: serializeXPath,
                 deserialize: deserializeXPath,
-                lstring: gettext('Validation Condition')
+                lstring: gettext('Validation Condition'),
             },
             // non-itext constraint message
             constraintMsgAttr: {
                 visibility: 'visible',
                 presence: 'optional',
-                validationFunc : function (mug) {
+                validationFunc: function (mug) {
                     if (mug.p.constraintMsgAttr && !mug.p.constraintAttr) {
                         return gettext('You cannot have a Validation Error Message with no Validation Condition!');
                     } else {
                         return 'pass';
                     }
                 },
-                lstring: gettext('Validation Error Message')
+                lstring: gettext('Validation Error Message'),
             },
             requiredAttr: {
                 visibility: 'visible',
                 presence: 'optional',
                 lstring: gettext("Required"),
                 widget: widgets.checkbox,
-                validationFunc: function(mug) {
+                validationFunc: function (mug) {
                     return baseSpecs.databind.requiredCondition.validationFunc(mug);
-                }
+                },
             },
             requiredCondition: {
                 visibility: 'requiredAttr',
@@ -1002,7 +1001,7 @@ define([
                             mug.addMessage(attr, {
                                 key: warningKey,
                                 level: mug.WARNING,
-                                message: message
+                                message: message,
                             });
                         });
                     } else {
@@ -1011,16 +1010,16 @@ define([
                         });
                     }
                     return 'pass';
-                }
+                },
             },
             nodeset: {
                 visibility: 'hidden',
-                presence: 'optional' //if not present one will be generated... hopefully.
+                presence: 'optional', //if not present one will be generated... hopefully.
             },
             // could use a key-value widget for this in the future
             rawBindAttributes: {
                 presence: 'optional',
-                lstring: gettext('Extra Bind Attributes')
+                lstring: gettext('Extra Bind Attributes'),
             },
             defaultValue: {
                 visibility: 'visible',
@@ -1034,7 +1033,7 @@ define([
                     var form = mug.form;
                     if (!form.vellum.opts().features.allow_data_reference_in_setvalue) {
                         var paths = mug.form.getHashtagsInXPath(mug.p.defaultValue);
-                        paths =  _.filter(paths, function(path) { return path.namespace === 'form'; });
+                        paths =  _.filter(paths, function (path) { return path.namespace === 'form'; });
                         if (paths.length) {
                             return gettext(
                                 "You are referencing a node in this form. " +
@@ -1042,13 +1041,13 @@ define([
                         }
                     }
                     return 'pass';
-                }
+                },
             },
             comment: {
                 lstring: gettext('Comment'),
                 visibility: 'visible',
                 widget: widgets.multilineText,
-            }
+            },
         },
 
         control: {
@@ -1056,7 +1055,7 @@ define([
                 deleteOnCopy: true,
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: gettext('Appearance Attribute')
+                lstring: gettext('Appearance Attribute'),
             },
             label: {
                 visibility: 'visible',
@@ -1067,12 +1066,12 @@ define([
                         return gettext('Default Display Text is required');
                     }
                     return 'pass';
-                }
+                },
             },
             hintLabel: {
                 visibility: 'visible',
                 presence: 'optional',
-                lstring: gettext("Hint Display Text")
+                lstring: gettext("Hint Display Text"),
             },
             rawControlAttributes: {
                 presence: 'optional',
@@ -1080,7 +1079,7 @@ define([
             },
             rawControlXML: {
                 presence: 'optional',
-                lstring: gettext('Raw XML')
+                lstring: gettext('Raw XML'),
             },
             dataParent: {
                 lstring: gettext('Data Parent'),
@@ -1092,7 +1091,7 @@ define([
                     mug.form._updateMugPath(mug, oldPath);
                 },
                 widget: widgets.droppableText,
-                validationFunc: function(mug) {
+                validationFunc: function (mug) {
                     function limitingParent(mug) {
                         if (!mug) {
                             return null;
@@ -1114,7 +1113,7 @@ define([
                         } else if (parent === mug || !parent.options.possibleDataParent) {
                             return util.format(
                                 gettext("{path} is not a valid data parent"),
-                                {path: parent.hashtagPath}
+                                {path: parent.hashtagPath},
                             );
                         } else if (limitingParent(mug) !== limitingParent(parent)) {
                             return gettext("Data parent of question in repeat " +
@@ -1123,9 +1122,9 @@ define([
                     }
 
                     return "pass";
-                }
+                },
             },
-        }
+        },
     };
 
     // question-type specific properties, gets reset when you change the
@@ -1276,7 +1275,7 @@ define([
                 ret = [{
                     value: mug.p.defaultValue,
                     event: mug.isInRepeat() ? 'jr-insert' : 'xforms-ready',
-                    ref: mug.hashtagPath
+                    ref: mug.hashtagPath,
                 }];
             }
 
@@ -1328,7 +1327,7 @@ define([
          * - serialize: A function to serialize the attribute e.g. `mug.serializeXPath`
          * - deserialize: A function to deserialize the attribute e.g. `mug.deserializeXPath`
          */
-        spec: {}
+        spec: {},
     };
 
     var DataBindOnly = util.extend(defaultOptions, {
@@ -1339,9 +1338,9 @@ define([
         spec: {
             xmlnsAttr: { presence: "optional" },
             requiredAttr: { presence: "notallowed" },
-            constraintAttr: { presence : "notallowed" },
-            calculateAttr: { visibility: "visible" }
-        }
+            constraintAttr: { presence: "notallowed" },
+            calculateAttr: { visibility: "visible" },
+        },
     });
 
     var ReadOnly = util.extend(defaultOptions, {
@@ -1352,9 +1351,9 @@ define([
         spec: {
             readOnlyControl: {
                 visibility: "visible",
-                widget: widgets.readOnlyControl
-            }
-        }
+                widget: widgets.readOnlyControl,
+            },
+        },
     });
 
     var Text = util.extend(defaultOptions, {
@@ -1362,7 +1361,7 @@ define([
         dataType: "xsd:string",
         icon: "fcc fcc-fd-text",
         init: function (mug, form) {
-        }
+        },
     });
 
     var PhoneNumber = util.extend(Text, {
@@ -1384,7 +1383,7 @@ define([
         icon: 'fa fa-key',
         canOutputValue: false,
         init: function (mug, form) {
-        }
+        },
     });
 
     var Int = util.extend(defaultOptions, {
@@ -1392,7 +1391,7 @@ define([
         dataType: 'xsd:int',
         icon: 'fcc fcc-fd-numeric',
         init: function (mug, form) {
-        }
+        },
     });
 
     var Audio = util.extend(defaultOptions, {
@@ -1416,7 +1415,7 @@ define([
                 lstring: gettext("Image Size"),
                 visibility: 'visible',
                 widget: widgets.dropdown,
-                enabled: function(mug) {
+                enabled: function (mug) {
                     return mug.options.resize_enabled;
                 },
                 defaultOptions: [
@@ -1429,7 +1428,7 @@ define([
                     "Use this option to send smaller images in areas of poor " +
                     "connectivity.<ul><li>Small - 0.1 megapixels</li><li>" +
                     "Medium - 0.2 megapixels</li><li>Large - 0.5 megapixels</li></ul>"),
-            }
+            },
         },
         writeCustomXML: function (xmlWriter, mug) {
             Audio.writeCustomXML(xmlWriter, mug);
@@ -1442,7 +1441,7 @@ define([
             if (mug.p.imageSize !== "") {
                 mug.p.imageSize = mug.p.imageSize || 250;
             }
-        }
+        },
     });
 
     var MicroImage = util.extend(Audio, {
@@ -1454,7 +1453,7 @@ define([
         init: function (mug, form) {
             Audio.init(mug, form);
             mug.p.appearance = "micro-image";
-        }
+        },
     });
 
     var Video = util.extend(Audio, {
@@ -1469,7 +1468,7 @@ define([
         spec: {
             imageSize: {
                 visibility: 'hidden',
-            }
+            },
         },
         init: function (mug, form) {
             Image.init(mug, form);
@@ -1491,7 +1490,7 @@ define([
         dataType: 'geopoint',
         icon: 'fa-solid fa-location-dot',
         init: function (mug, form) {
-        }
+        },
     });
 
     var Barcode = util.extend(defaultOptions, {
@@ -1499,7 +1498,7 @@ define([
         dataType: 'barcode',
         icon: 'fa fa-barcode',
         init: function (mug, form) {
-        }
+        },
     });
 
     var Date = util.extend(defaultOptions, {
@@ -1507,7 +1506,7 @@ define([
         dataType: 'xsd:date',
         icon: 'fa-solid fa-calendar-days',
         init: function (mug, form) {
-        }
+        },
     });
 
     var DateTime = util.extend(defaultOptions, {
@@ -1515,7 +1514,7 @@ define([
         dataType: 'xsd:dateTime',
         icon: 'fcc fcc-fd-datetime',
         init: function (mug, form) {
-        }
+        },
     });
 
     var Time = util.extend(defaultOptions, {
@@ -1523,7 +1522,7 @@ define([
         dataType: 'xsd:time',
         icon: 'fa-regular fa-clock',
         init: function (mug, form) {
-        }
+        },
     });
 
     // Deprecated. Users may not add new longs to forms,
@@ -1533,7 +1532,7 @@ define([
         dataType: 'xsd:long',
         icon: 'fcc fcc-fd-long',
         init: function (mug, form) {
-        }
+        },
     });
 
     var Double = util.extend(Int, {
@@ -1541,7 +1540,7 @@ define([
         dataType: 'xsd:double',
         icon: 'fcc fcc-fd-decimal',
         init: function (mug, form) {
-        }
+        },
     });
 
     var Choice = util.extend(defaultOptions, {
@@ -1585,7 +1584,7 @@ define([
                     }
                     if (mug.parentMug) {
                         var siblings = mug.form.getChildren(mug.parentMug),
-                            dup = _.any(siblings, function(ele) {
+                            dup = _.any(siblings, function (ele) {
                                 return ele !== mug && ele.p.nodeID === mug.p.nodeID;
                             });
                         if (dup) {
@@ -1600,7 +1599,7 @@ define([
                 },
                 deserialize: function (data) {
                     return data.id && data.id.slice(data.id.lastIndexOf("/") + 1);
-                }
+                },
             },
             labelItext: { presence: 'required' },
             conflictedNodeId: { presence: 'notallowed' },
@@ -1608,7 +1607,7 @@ define([
             hintItext: { presence: 'notallowed' },
             helpItext: { presence: 'notallowed' },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
-        }
+        },
     });
 
     var Trigger = util.extend(defaultOptions, {
@@ -1630,7 +1629,7 @@ define([
                     return mug.p.appearance !== "minimal";
                 },
             },
-        }
+        },
     });
 
     var BaseSelect = util.extend(defaultOptions, {
@@ -1650,7 +1649,7 @@ define([
         spec: {
             appearance: {
                 deleteOnCopy: false,
-            }
+            },
         },
         dataType: "",
     });
@@ -1659,14 +1658,14 @@ define([
         typeName: gettext('Checkbox'),
         tagName: 'select',
         icon: 'fcc fcc-fd-multi-select',
-        defaultOperator: "selected"
+        defaultOperator: "selected",
     });
 
     var Select = util.extend(BaseSelect, {
         typeName: gettext('Multiple Choice'),
         tagName: 'select1',
         icon: 'fcc fcc-fd-single-select',
-        defaultOperator: null
+        defaultOperator: null,
     });
 
     var Group = util.extend(defaultOptions, {
@@ -1693,7 +1692,7 @@ define([
             dataValue: { presence: "notallowed" },
             requiredAttr: { presence: "notallowed" },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
-        }
+        },
     });
 
     // This is just a group, but appearance = 'field-list' displays it as a list
@@ -1752,7 +1751,7 @@ define([
                         }
                         util.writeHashtags(xmlWriter, 'nodeset', hashtag, mug);
                     },
-                }
+                },
             })];
         },
         writeControlRefAttr: null,
@@ -1788,8 +1787,8 @@ define([
             rawRepeatAttributes: {
                 presence: 'optional',
                 lstring: gettext("Extra Repeat Attributes"),
-            }
-        }
+            },
+        },
     });
 
     function MugTypesManager(baseSpec, mugTypes, opts) {
@@ -1814,15 +1813,15 @@ define([
 
         var allTypeNames = _.keys(this.allTypes),
             innerChildTypeNames = _.without.apply(_,
-                  [allTypeNames].concat(_.keys(this.auxiliaryTypes)));
+                [allTypeNames].concat(_.keys(this.auxiliaryTypes)));
 
         if (!group_in_field_list) {
             this.normalTypes.FieldList.validChildTypes = _.without.apply(_,
                 [innerChildTypeNames].concat(_.without(_.map(this.allTypes,
                     function (type, name) {
                         return type.isNestableGroup ? name : null;
-                    }
-                ), null))
+                    },
+                ), null)),
             );
         }
 
@@ -1872,7 +1871,7 @@ define([
                 _.each(children, function (childMug) {
                     form.fire({
                         type: 'parent-question-type-change',
-                        childMug: childMug
+                        childMug: childMug,
                     });
                 });
             }
@@ -1881,10 +1880,10 @@ define([
             form.fire({
                 type: 'question-type-change',
                 qType: typeName,
-                mug: mug
+                mug: mug,
             });
             form.fireChange(mug);
-        }
+        },
     };
 
     return {
@@ -1915,11 +1914,11 @@ define([
                 "Text": Text,
                 "Time": Time,
                 "Trigger": Trigger,
-                "Video": Video
+                "Video": Video,
             },
             auxiliary: {
-                "Choice": Choice
-            }
+                "Choice": Choice,
+            },
         },
         MugTypesManager: MugTypesManager,
         MugMessages: MugMessages,

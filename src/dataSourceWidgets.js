@@ -2,12 +2,12 @@ define([
     'jquery',
     'underscore',
     'vellum/widgets',
-    'tpl!vellum/templates/data_source_editor'
+    'tpl!vellum/templates/data_source_editor',
 ], function (
     $,
     _,
     widgets,
-    edit_source
+    edit_source,
 ) {
     /**
      * Load data source editor
@@ -41,7 +41,7 @@ define([
             return {
                 id: $instanceId.val(),
                 src: $instanceSrc.val(),
-                query: $query.val()
+                query: $query.val(),
             };
         }
 
@@ -88,24 +88,24 @@ define([
         widget.options.richText = false;
         widget.getUIElement = function () {
             var query = getUIElementWithEditButton(
-                    getUIElement(widget.input, labelText),
-                    function () {
-                        mug.form.vellum.displaySecondaryEditor({
-                            source: local_getValue(),
-                            headerText: labelText,
-                            loadEditor: loadDataSourceEditor,
-                            onLoad: function ($ui) {
-                                widgets.util.setWidget($ui, widget);
-                            },
-                            done: function (source) {
-                                if (!_.isUndefined(source)) {
-                                    local_setValue(source);
-                                    widget.handleChange();
-                                }
+                getUIElement(widget.input, labelText),
+                function () {
+                    mug.form.vellum.displaySecondaryEditor({
+                        source: local_getValue(),
+                        headerText: labelText,
+                        loadEditor: loadDataSourceEditor,
+                        onLoad: function ($ui) {
+                            widgets.util.setWidget($ui, widget);
+                        },
+                        done: function (source) {
+                            if (!_.isUndefined(source)) {
+                                local_setValue(source);
+                                widget.handleChange();
                             }
-                        });
-                    }
-                );
+                        },
+                    });
+                },
+            );
             return $("<div></div>").append(query);
         };
 
@@ -196,24 +196,24 @@ define([
         if (options.hasAdvancedEditor) {
             widget.getUIElement = function () {
                 var query = widgets.util.getUIElementWithEditButton(
-                        widgets.util.getUIElement(widget.input, labelText),
-                        function () {
-                            mug.form.vellum.displaySecondaryEditor({
-                                source: getSource(mug),
-                                headerText: labelText,
-                                loadEditor: loadDataSourceEditor,
-                                onLoad: function ($ui) {
-                                    widgets.util.setWidget($ui, widget);
-                                },
-                                done: function (source) {
-                                    if (!_.isUndefined(source)) {
-                                        setSource(source, mug);
-                                        widget.handleChange();
-                                    }
+                    widgets.util.getUIElement(widget.input, labelText),
+                    function () {
+                        mug.form.vellum.displaySecondaryEditor({
+                            source: getSource(mug),
+                            headerText: labelText,
+                            loadEditor: loadDataSourceEditor,
+                            onLoad: function ($ui) {
+                                widgets.util.setWidget($ui, widget);
+                            },
+                            done: function (source) {
+                                if (!_.isUndefined(source)) {
+                                    setSource(source, mug);
+                                    widget.handleChange();
                                 }
-                            });
-                        }
-                    );
+                            },
+                        });
+                    },
+                );
                 query.find(".fd-edit-button").text("...");
                 return $("<div></div>").append(query);
             };
@@ -227,7 +227,7 @@ define([
 
     function getPossibleFixtures(data) {
         function generateFixtureDefinitions(structure, baseFixture) {
-            return _.map(structure, function(value, key) {
+            return _.map(structure, function (value, key) {
                 var ret = [],
                     newBaseFixture = {
                         id: baseFixture.id,
@@ -243,12 +243,12 @@ define([
             });
         }
 
-        return _.flatten(_.map(data, function(fixture) {
+        return _.flatten(_.map(data, function (fixture) {
             var baseFixture = {
                 id: fixture.id,
                 src: fixture.uri,
                 query: "instance('" + fixture.id + "')" + fixture.path,
-                name: fixture.name || fixture.id
+                name: fixture.name || fixture.id,
             };
 
             return [baseFixture].concat(generateFixtureDefinitions(fixture.structure, baseFixture));
@@ -256,18 +256,18 @@ define([
     }
 
     function generateFixtureOptions(fixtures) {
-        return _.map(fixtures, function(fixture) {
+        return _.map(fixtures, function (fixture) {
             return {
                 value: JSON.stringify(_.omit(fixture, 'name')),
-                text: fixture.name
+                text: fixture.name,
             };
         });
     }
 
     function generateFixtureColumns(fixture) {
         function generateColumns(structure) {
-            return _.map(structure, function(value, key) {
-                return [key].concat(_.map(generateColumns(value.structure), function(value) {
+            return _.map(structure, function (value, key) {
+                return [key].concat(_.map(generateColumns(value.structure), function (value) {
                     return key + '/' + value;
                 }));
             });

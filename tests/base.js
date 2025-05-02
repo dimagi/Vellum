@@ -2,12 +2,12 @@ define([
     'chai',
     'jquery',
     'underscore',
-    'tests/utils'
+    'tests/utils',
 ], function (
     chai,
     $,
     _,
-    util
+    util,
 ) {
     var assert = chai.assert;
 
@@ -19,8 +19,8 @@ define([
                     assert(!this.isPluginEnabled("plugin-will-not-be-found"),
                         "loaded unknown plugin");
                     done();
-                }
-            }});
+                },
+                }});
         });
     });
 });

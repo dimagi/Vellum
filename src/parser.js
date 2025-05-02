@@ -9,21 +9,21 @@ define([
     util,
     xml,
     $,
-    _
+    _,
 ) {
     var DEFAULT_FORM_ID = 'data';
 
-    function init (instance) {
+    function init(instance) {
         var data = instance.data.core;
         data.controlNodeAdaptorMap = buildControlNodeAdaptorMap();
         instance.updateControlNodeAdaptorMap(data.controlNodeAdaptorMap);
     }
 
-    function getAttributes (element) {
+    function getAttributes(element) {
         var attributes = _.chain($(element)[0].attributes)
-                .map(function (value) {
-                    return [value.nodeName, value.nodeValue];
-                }) .object().value();
+            .map(function (value) {
+                return [value.nodeName, value.nodeValue];
+            }).object().value();
 
         return attributes;
     }
@@ -50,7 +50,7 @@ define([
             data = $(instances[0]).children(),
             setValues = head.find('> model > setvalue');
 
-        if(xml.find('parsererror').length > 0) {
+        if (xml.find('parsererror').length > 0) {
             throw gettext('PARSE ERROR!:') + xml.find('parsererror').find('div').html();
         }
 
@@ -70,7 +70,7 @@ define([
         form.instanceMetadata = instances.map(function (instance) {
             return InstanceMetadata(
                 getAttributes(instance),
-                $(instance).children()
+                $(instance).children(),
             );
         });
         form.updateKnownInstances();
@@ -80,12 +80,12 @@ define([
             initHashtags(
                 form,
                 head.children('vellum\\:hashtags, hashtags'),
-                head.children('vellum\\:hashtagTransforms, hashtagTransforms')
+                head.children('vellum\\:hashtagTransforms, hashtagTransforms'),
             );
         }
 
         // TODO! adapt
-        if(data.length === 0) {
+        if (data.length === 0) {
             form.parseErrors.push(
                 gettext('No Data block was found in the form. Please check that your form is valid!'));
         }
@@ -104,7 +104,7 @@ define([
             for (i = 0; i < form.parseErrors.length; i++) {
                 form.updateError({
                     level: "error",
-                    message: form.parseErrors[i]
+                    message: form.parseErrors[i],
                 });
             }
         }
@@ -113,7 +113,7 @@ define([
             for (i = 0; i < form.parseWarnings.length; i++) {
                 form.updateError({
                     level: "parse-warning",
-                    message: form.parseWarnings[i]
+                    message: form.parseWarnings[i],
                 });
             }
         }
@@ -157,7 +157,7 @@ define([
     }
 
     // DATA PARSING FUNCTIONS
-    function parseDataTree (form, dataEl, titleText) {
+    function parseDataTree(form, dataEl, titleText) {
         var root = $(dataEl),
             tree = form.tree,
             recFunc;
@@ -277,7 +277,8 @@ define([
     function parseControlElement(form, $cEl, parentMug) {
         var tagName = $cEl[0].nodeName.toLowerCase(),
             appearance = $cEl.popAttr('appearance'),
-            adapt, mug = null;
+            adapt, 
+            mug = null;
 
         var getAdaptor = form.vellum.getControlNodeAdaptorFactory(tagName);
         if (getAdaptor) {
@@ -409,7 +410,7 @@ define([
                 'time': makeMugAdaptor('Time'),
                 'geopoint': makeMugAdaptor('Geopoint'),
                 'barcode': makeMugAdaptor('Barcode'),
-                'intent': makeMugAdaptor('AndroidIntent')
+                'intent': makeMugAdaptor('AndroidIntent'),
             },
             // pre-make adaptors for these because they are used frequently
             adaptSelect = makeMugAdaptor('Select'),
@@ -432,7 +433,7 @@ define([
                     // WARNING produces different XML than consumed (input -> trigger)
                     return triggerAdaptor(appearance);
                 }
-                return function(mug, form) {
+                return function (mug, form) {
                     var dataType = mug && mug.p.rawBindAttributes && mug.p.rawBindAttributes.type;
                     if (dataType) {
                         dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
@@ -485,7 +486,7 @@ define([
             },
             upload: function ($cEl, appearance, form, parentMug) {
                 var mediaType = $cEl.popAttr('mediatype');
-                if(!mediaType) {
+                if (!mediaType) {
                     // Why throw?! This will kill form parsing.
                     // TODO create a parser warning instead?
                     throw 'Unable to parse binary question type. ' +
@@ -512,11 +513,11 @@ define([
                           getPathFromControlElement($cEl, form, parentMug);
                 }
                 return makeMugAdaptor(type);
-            }
+            },
         };
     }
 
-    function parseBoolAttributeValue (attrString, undefined) {
+    function parseBoolAttributeValue(attrString, undefined) {
         if (!attrString) {
             return undefined;
         }
@@ -537,13 +538,13 @@ define([
      * @return - a string of the ref/nodeset value
      */
     function getPathFromControlElement(el, form, parentMug, noPop) {
-        if(!el){
+        if (!el) {
             return null;
         }
         var path = parseVellumAttrs(form, el, 'ref', noPop),
             rootNodeName = form.tree.getRootNode().getID(),
             nodeId, pathToTry;
-        if(!path){
+        if (!path) {
             path = parseVellumAttrs(form, el, 'nodeset', noPop);
         }
         if (!path) {
@@ -575,7 +576,8 @@ define([
 
     function parseControlTree(form, controlsTree) {
         function controlGenerator(controlNodes, parentMug) {
-            var i = 0, count = controlNodes.length;
+            var i = 0, 
+                count = controlNodes.length;
             return function () {
                 if (i >= count) {
                     return null;
@@ -590,7 +592,8 @@ define([
             };
         }
         function makeGenerator(items) {
-            var i = 0, count = items.length;
+            var i = 0, 
+                count = items.length;
             return function () {
                 return i < count ? items[i++] : null;
             };
@@ -638,7 +641,7 @@ define([
      * @param rootNodeName - the name of the model root (used to create the absolute path)
      * @return absolute nodeset path.
      */
-    function processPath (path, rootNodeName, form) {
+    function processPath(path, rootNodeName, form) {
         var newPath, parsed;
         try {
             parsed = form.xpath.parse(path);
@@ -658,7 +661,7 @@ define([
         return newPath;
     }
 
-    function parseBindList (form, bindList) {
+    function parseBindList(form, bindList) {
         var rootNodeName = form.tree.getRootNode().getID();
 
         bindList.each(function () {
@@ -670,14 +673,14 @@ define([
         });
     }
 
-    function parseBindElement (form, el, path) {
+    function parseBindElement(form, el, path) {
         var mug = form.getMugByPath(path);
 
-        if(!mug){
+        if (!mug) {
             form.parseWarnings.push(util.format(
                 gettext("Bind Node [{path}] found but has no associated " +
                         "Data node. This bind node will be discarded!"),
-                {path: path}
+                {path: path},
             ));
             return;
         }
@@ -697,7 +700,7 @@ define([
         var raw = attrs.rawBindAttributes = getAttributes(el);
 
         // normalize type ('int' and 'integer' are both valid).
-        if(raw.type && raw.type.toLowerCase() === 'xsd:integer') {
+        if (raw.type && raw.type.toLowerCase() === 'xsd:integer') {
             raw.type = 'xsd:int';
         }
 
@@ -744,6 +747,6 @@ define([
         getAttributes: getAttributes,
         getPathFromControlElement: getPathFromControlElement,
         makeControlOnlyMugAdaptor: makeControlOnlyMugAdaptor,
-        makeMugAdaptor: makeMugAdaptor
+        makeMugAdaptor: makeMugAdaptor,
     };
 });

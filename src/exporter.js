@@ -1,9 +1,9 @@
 define([
     'vellum/tsv',
-    'vellum/richText'
+    'vellum/richText',
 ], function (
     tsv,
-    richText
+    richText,
 ) {
     // todo: abstract out IText stuff into part of the plugin interface
     var generateExportTSV = function (form) {
@@ -19,7 +19,7 @@ define([
 
         var columnOrder = [
             "Question",
-            "Type"
+            "Type",
         ];
 
         for (var type in itextColumns) {
@@ -117,6 +117,6 @@ define([
     };
 
     return {
-        generateExportTSV: generateExportTSV
+        generateExportTSV: generateExportTSV,
     };
 });

@@ -11,7 +11,7 @@ define([
     chai,
     $,
     _,
-    TEST1_XML
+    TEST1_XML,
 ) {
     var assert = chai.assert,
         dataSources = [
@@ -45,7 +45,7 @@ define([
                     structure: {
                         dob: {},
                     },
-                }]
+                }],
             },
         ];
 
@@ -56,7 +56,7 @@ define([
     }
 
     function getDisplayedAtwhoViews() {
-        return $('.atwho-view').filter(function() {
+        return $('.atwho-view').filter(function () {
             return $(this).css('display') === 'block';
         });
     }
@@ -65,9 +65,9 @@ define([
         assert.strictEqual(getDisplayedAtwhoViews().find('li').length, num);
     }
 
-    describe("atwho", function() {
-        describe("without rich text", function() {
-            before(function(done) {
+    describe("atwho", function () {
+        describe("without rich text", function () {
+            before(function (done) {
                 util.init({
                     javaRosa: {langs: ['en']},
                     core: { form: TEST1_XML, onReady: function () { done(); } },
@@ -93,42 +93,42 @@ define([
                 assert(!getDisplayedAtwhoViews().length);
             }
 
-            it("should truncate the display label", function() {
+            it("should truncate the display label", function () {
                 var mug = getFuseData('one');
                 assert.strictEqual(mug.displayLabel, "One");
                 mug = getFuseData('long');
                 assert.strictEqual(mug.displayLabel, "This is going to be a rea&hellip;");
             });
 
-            it("should not show mugs without absolutePath", function() {
-                displayAtwho(function(mug) {
+            it("should not show mugs without absolutePath", function () {
+                displayAtwho(function (mug) {
                     assert(!getDisplayedAtwhoViews().find('li:contains("choice1")').length);
                 });
             });
 
             // only valid for small sets of questions
             it("should have each mug", function () {
-                displayAtwho(function(mug) {
+                displayAtwho(function (mug) {
                     assertNumAtwhoChoices(3);
                 });
             });
 
-            it("should destroy the atwho container on mug removal", function() {
-                displayAtwho(function(mug) {
+            it("should destroy the atwho container on mug removal", function () {
+                displayAtwho(function (mug) {
                     mug.fire('teardown-mug-properties');
                     assert(!getDisplayedAtwhoViews().length);
                 });
             });
 
             it("should not show itself in the results", function () {
-                displayAtwho(function(mug) {
+                displayAtwho(function (mug) {
                     assertNumAtwhoChoices(3);
                 });
             });
 
-            it("should show questions with /data/", function() {
-                displayAtwho(function(mug) {
-                    _.map(getDisplayedAtwhoViews().find('li'), function(li) {
+            it("should show questions with /data/", function () {
+                displayAtwho(function (mug) {
+                    _.map(getDisplayedAtwhoViews().find('li'), function (li) {
                         var text = $.trim($(li).text());
                         assert(text.startsWith('/data/'));
                     });
@@ -136,7 +136,7 @@ define([
             });
         });
 
-        describe("with rich text", function() {
+        describe("with rich text", function () {
             // TODO: shouldn't rely on global widget
             var widget;
 
@@ -146,7 +146,7 @@ define([
                     core: {
                         form: "",
                         dataSourcesEndpoint: function (callback) { callback(dataSources); },
-                        onReady: function() {
+                        onReady: function () {
                             util.addQuestion("Text", 'dash-dash');
                             util.addQuestion("Text", 'text');
                             util.addQuestion("Text", 'text2');
@@ -154,7 +154,7 @@ define([
                             // TODO: shouldn't rely on defaultValue
                             widget = util.getWidget('property-defaultValue');
                             widget.input.promise.then(function () { done(); });
-                        }
+                        },
                     },
                     plugins: ['atwho','modeliteration', 'databrowser'],
                 });
@@ -177,10 +177,10 @@ define([
                 assert(!getDisplayedAtwhoViews().length);
             }
 
-            it("should show questions with #form", function() {
-                displayAtwho('#form', function(mug) {
+            it("should show questions with #form", function () {
+                displayAtwho('#form', function (mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
-                        tags = _.map(atwhoEntries, function(li) {
+                        tags = _.map(atwhoEntries, function (li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
                         });
                     assert.deepEqual(tags, [
@@ -192,29 +192,29 @@ define([
             });
 
             it("should show questions after a dash", function () {
-                displayAtwho('#dash-dash', function(mug) {
+                displayAtwho('#dash-dash', function (mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
-                        tags = _.map(atwhoEntries, function(li) {
+                        tags = _.map(atwhoEntries, function (li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
                         });
                     assert.deepEqual(tags, ["#form/dash-dash"]);
                 });
             });
 
-            it("should show case properties with #case", function() {
-                displayAtwho('#case', function(mug) {
+            it("should show case properties with #case", function () {
+                displayAtwho('#case', function (mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
-                        tags = _.map(atwhoEntries, function(li) {
+                        tags = _.map(atwhoEntries, function (li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
                         });
                     assert.deepEqual(tags, ["#case/child/dob"]);
                 });
             });
 
-            it("should show case properties and form questions with #", function() {
-                displayAtwho('#', function(mug) {
+            it("should show case properties and form questions with #", function () {
+                displayAtwho('#', function (mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
-                        tags = _.map(atwhoEntries, function(li) {
+                        tags = _.map(atwhoEntries, function (li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
                         });
                     assert.deepEqual(tags, [

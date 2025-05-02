@@ -22,12 +22,12 @@ define([
     'jquery',
     'vellum/xml',
     'vellum/parser',
-    'vellum/core'
+    'vellum/core',
 ], function (
     _,
     $,
     xml,
-    parser
+    parser,
 ) {
     var xmls = new XMLSerializer(),
         parseXML = xml.parseXML,
@@ -66,12 +66,12 @@ define([
             });
             ignores = ignores.not(function (i, el) {
                 var isDataOrControl = _.any($(el).parents(), function (parent) {
-                        return instance.is(parent) || body.is(parent) ||
+                    return instance.is(parent) || body.is(parent) ||
                             _.any(ignores, function (ignored) {
                                 // exclude nested nodes ... O(n^2)
                                 return $(ignored).is(parent);
                             });
-                    });
+                });
                 if (!isDataOrControl && el.nodeName === "bind") {
                     return $(el).parent().is(model);
                 }
@@ -167,8 +167,7 @@ define([
                     mug = findParent(path, form);
                 }
                 if ((mug && mug.__className === "Ignored") ||
-                    el.xmlAttr("vellum:ignore") === "retain")
-                {
+                    el.xmlAttr("vellum:ignore") === "retain") {
                     var basePath, relativeTo;
                     if (mug && mug.__className === "Ignored") {
                         basePath = mug.absolutePath;
@@ -188,9 +187,9 @@ define([
                     }
                     mug.p.binds.push({
                         path: path.startsWith(basePath) ?
-                                    path.slice(basePath.length) : path,
+                            path.slice(basePath.length) : path,
                         relativeTo: path.startsWith(basePath) ? relativeTo : null,
-                        attrs: parser.getAttributes(el)
+                        attrs: parser.getAttributes(el),
                     });
                     return;
                 }
@@ -205,8 +204,7 @@ define([
                     mug = findParent(path, form);
                 }
                 if ((mug && mug.__className === "Ignored") ||
-                    el.xmlAttr("vellum:ignore") === "retain")
-                {
+                    el.xmlAttr("vellum:ignore") === "retain") {
                     var basePath, relativeTo;
                     if (mug && mug.__className === "Ignored") {
                         basePath = mug.absolutePath;
@@ -227,7 +225,7 @@ define([
                     mug.p.setValues.push({
                         ref: el.xmlAttr('ref'),
                         event: el.xmlAttr('event'),
-                        value: el.xmlAttr('value')
+                        value: el.xmlAttr('value'),
                     });
                     return;
                 }
@@ -250,7 +248,7 @@ define([
                     }
                     adapt.skipPopulate = true;
                     var path = parser.getPathFromControlElement(
-                                        $cEl, form, parentMug, true),
+                            $cEl, form, parentMug, true),
                         mug = form.getMugByPath(path);
                     if ($cEl.xmlAttr("vellum:ignore") === "retain") {
                         adapt.ignoreDataNode = mug && mug.__className !== "Ignored";
@@ -279,8 +277,8 @@ define([
                         title: gettext("Advanced"),
                         text: gettext("This question represents advanced content " +
                           "that is not supported by the form builder. Please " +
-                          "only change it if you have a specific need!")
-                    }
+                          "only change it if you have a specific need!"),
+                    },
                 }];
             }
             return this.__callOld();
@@ -310,70 +308,70 @@ define([
                     });
                 });
             }
-        }
+        },
     });
 
     var IgnoredQuestion = {
-            typeName: gettext("Ignored XML"),
-            icon: 'fa fa-question-circle',
-            isTypeChangeable: false,
-            isRemoveable: false,
-            isCopyable: false,
-            ignoreHashtags: true,
-            isHashtaggable: false,
-            init: function (mug) {
-                mug.p.binds = [];
-                mug.p.setValues = [];
-            },
-            parseDataNode: function (mug, node) {
-                return $([]);
-            },
-            getTagName: function (mug, nodeID) {
-                return mug.p.rawDataAttributes ? nodeID : null;
-            },
-            writeDataNodeXML: function (writer, mug) {
-                if (mug.p.dataNodeXML) {
-                    writer.writeXML(mug.p.dataNodeXML);
-                }
-            },
-            getBindList: function (mug) {
-                return _.map(mug.p.binds, function (bind) {
-                    var attrs = _.clone(bind.attrs),
-                        basePath = "";
-                    if (bind.relativeTo === MUG) {
-                        basePath = mug.absolutePath;
-                    } else if (bind.relativeTo === PARENT) {
-                        var parent = mug.parentMug;
-                        basePath = parent ? parent.absolutePath :
-                                            mug.form.getBasePath(true);
-                    }
-                    attrs.nodeset = basePath + bind.path;
-                    return attrs;
-                });
-            },
-            getSetValues: function(mug) {
-                return mug.p.setValues;
-            },
-            writesOnlyCustomXML: true,
-            writeCustomXML: function (writer, mug) {
-                if (mug.p.controlNode) {
-                    writer.writeXML(mug.p.controlNode);
-                }
-            },
-            spec: {
-                label: { presence: 'notallowed' },
-                labelItext: { presence: 'notallowed' },
-                labelItextID: { presence: 'notallowed' },
-                hintLabel: { presence: 'notallowed' },
-                hintItext: { presence: 'notallowed' },
-                hintItextID: { presence: 'notallowed' },
-                helpItext: { presence: 'notallowed' },
-                helpItextID: { presence: 'notallowed' },
-                mediaItext: { presence: 'notallowed' },
-                otherItext: { presence: 'notallowed' },
-                appearance: { presence: 'notallowed' },
+        typeName: gettext("Ignored XML"),
+        icon: 'fa fa-question-circle',
+        isTypeChangeable: false,
+        isRemoveable: false,
+        isCopyable: false,
+        ignoreHashtags: true,
+        isHashtaggable: false,
+        init: function (mug) {
+            mug.p.binds = [];
+            mug.p.setValues = [];
+        },
+        parseDataNode: function (mug, node) {
+            return $([]);
+        },
+        getTagName: function (mug, nodeID) {
+            return mug.p.rawDataAttributes ? nodeID : null;
+        },
+        writeDataNodeXML: function (writer, mug) {
+            if (mug.p.dataNodeXML) {
+                writer.writeXML(mug.p.dataNodeXML);
             }
-        };
+        },
+        getBindList: function (mug) {
+            return _.map(mug.p.binds, function (bind) {
+                var attrs = _.clone(bind.attrs),
+                    basePath = "";
+                if (bind.relativeTo === MUG) {
+                    basePath = mug.absolutePath;
+                } else if (bind.relativeTo === PARENT) {
+                    var parent = mug.parentMug;
+                    basePath = parent ? parent.absolutePath :
+                        mug.form.getBasePath(true);
+                }
+                attrs.nodeset = basePath + bind.path;
+                return attrs;
+            });
+        },
+        getSetValues: function (mug) {
+            return mug.p.setValues;
+        },
+        writesOnlyCustomXML: true,
+        writeCustomXML: function (writer, mug) {
+            if (mug.p.controlNode) {
+                writer.writeXML(mug.p.controlNode);
+            }
+        },
+        spec: {
+            label: { presence: 'notallowed' },
+            labelItext: { presence: 'notallowed' },
+            labelItextID: { presence: 'notallowed' },
+            hintLabel: { presence: 'notallowed' },
+            hintItext: { presence: 'notallowed' },
+            hintItextID: { presence: 'notallowed' },
+            helpItext: { presence: 'notallowed' },
+            helpItextID: { presence: 'notallowed' },
+            mediaItext: { presence: 'notallowed' },
+            otherItext: { presence: 'notallowed' },
+            appearance: { presence: 'notallowed' },
+        },
+    };
 
     function findParent(path, form) {
         var parent = null,
@@ -407,7 +405,7 @@ define([
         }
         // remove xmlns attributes from the root node
         return string.slice(0, i)
-                     .replace(/ xmlns(:.*?)?="(.*?)"/g, "") + string.slice(i);
+            .replace(/ xmlns(:.*?)?="(.*?)"/g, "") + string.slice(i);
     }
 
     function getPathAndPosition(node) {
@@ -428,13 +426,13 @@ define([
             // XMLSerializer adds xmlns to fragments, which we don't want.  This
             // should only remove the xmlns from the root node, so if inner elements
             // have an XMLNS, it will be preserved.
-                .replace(/xmlns="(.*?)"/, "");
+            .replace(/xmlns="(.*?)"/, "");
 
         return {
             prev: prev,
             next: next,
             path: path.join(" > "),
-            nodeXML: "\n" + nodeXML
+            nodeXML: "\n" + nodeXML,
         };
     }
 

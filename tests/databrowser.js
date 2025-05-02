@@ -31,7 +31,7 @@ define([
     IGNORE_RICH_TEXT,
     PRELOADED_HASHTAGS_XML,
     UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML,
-    CASE_PROPERTY_XML
+    CASE_PROPERTY_XML,
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -66,14 +66,14 @@ define([
                 key: "@case_type",
                 structure: {
                     edd: {},
-                }
+                },
             }, {
                 id: "case",
                 name: "child",
                 key: "@case_type",
                 structure: {
                     dob: {},
-                    invalid: {}
+                    invalid: {},
                 },
                 related: {
                     parent: {
@@ -109,12 +109,12 @@ define([
                             databrowser.initDataBrowser(this);
                             dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
                             done();
-                        }
-                    }
+                        },
+                    },
                 });
             });
 
-            it("should add ref on drag/drop", function(done) {
+            it("should add ref on drag/drop", function (done) {
                 util.loadXML("");
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     calc = $("[name=property-calculateAttr]"),
@@ -123,12 +123,12 @@ define([
                     editor = calc.ckeditor().editor,
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () { 
-                    editor.on('change', function() {
+                    editor.on('change', function () {
                         assert.equal(mug.p.calculateAttr, dobProp);
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_XML,
-                                            {normalize_xmlns: true});
+                            {normalize_xmlns: true});
                         done();
                     });
                     assert.equal(getInstanceId(mug.form, sessionUri), null);
@@ -138,7 +138,7 @@ define([
                 });
             });
 
-            it("should add parent ref on drag/drop", function(done) {
+            it("should add parent ref on drag/drop", function (done) {
                 util.loadXML("");
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     calc = $("[name=property-calculateAttr]"),
@@ -147,12 +147,12 @@ define([
                     editor = calc.ckeditor().editor,
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () { 
-                    editor.on('change', function() {
+                    editor.on('change', function () {
                         assert.equal(mug.p.calculateAttr, "#case/parent/edd");
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), MOTHER_REF_XML,
-                                            {normalize_xmlns: true});
+                            {normalize_xmlns: true});
                         done();
                     });
                     assert.equal(getInstanceId(mug.form, sessionUri), null);
@@ -162,32 +162,32 @@ define([
                 });
             });
 
-            it("should hashtagify refs when written", function() {
+            it("should hashtagify refs when written", function () {
                 util.loadXML(CHILD_REF_NO_HASHTAG_XML);
                 util.assertXmlEqual(call("createXML"), CHILD_REF_XML);
             });
 
-            it("is not overwritten by the forms preloaded tags", function() {
+            it("is not overwritten by the forms preloaded tags", function () {
                 util.loadXML(PRELOADED_HASHTAGS_XML);
                 var form = call('getData').core.form;
                 assert(form.isValidHashtag(dobProp));
                 assert.notStrictEqual(form.hashtagMap[dobProp], null);
             });
 
-            it("should write externally referenced hashtags to form", function() {
+            it("should write externally referenced hashtags to form", function () {
                 util.loadXML(PRELOADED_HASHTAGS_XML);
                 util.assertXmlEqual(call("createXML"), PRELOADED_HASHTAGS_XML, {normalize_xmlns: true});
             });
 
-            it("should not write unknown referenced hashtags to form", function() {
+            it("should not write unknown referenced hashtags to form", function () {
                 util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
                 var xml = $(call("createXML")),
                     hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
                     test = JSON.parse($.trim(hashtags.text()));
-                assert.deepEqual(test, {"#case/dob":null});
+                assert.deepEqual(test, {"#case/dob": null});
             });
 
-            it("should add the casedb instance when referencing a case in a label", function(done) {
+            it("should add the casedb instance when referencing a case in a label", function (done) {
                 util.loadXML("");
                 var mug = util.addQuestion("Text", "mug"),
                     label = $("[name=itext-en-label]"),
@@ -196,12 +196,12 @@ define([
                     editor = label.ckeditor().editor,
                     widget = util.getWidget('itext-en-label');
                 widget.input.promise.then(function () { 
-                    editor.on('change', _.debounce(function() {
+                    editor.on('change', _.debounce(function () {
                         assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" /> ');
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_XML,
-                                            {normalize_xmlns: true});
+                            {normalize_xmlns: true});
                         done();
                     }, 20));
                     assert.equal(getInstanceId(mug.form, sessionUri), null);
@@ -233,12 +233,12 @@ define([
                                 databrowser.initDataBrowser(this);
                                 dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
                                 done();
-                            }
-                        }
+                            },
+                        },
                     });
                 });
 
-                it("should add the casedb instance when referencing a case in a label of non default language", function(done) {
+                it("should add the casedb instance when referencing a case in a label of non default language", function (done) {
                     util.loadXML("");
                     var mug = util.addQuestion("Text", "mug");
                     // util.addQuestion sets nodeId and labelItext in a way that doesn't affect UI
@@ -249,13 +249,13 @@ define([
                         editor = label.ckeditor().editor,
                         widget = util.getWidget('itext-hin-label');
                     widget.input.promise.then(function () { 
-                        editor.on('change', _.debounce(function() {
+                        editor.on('change', _.debounce(function () {
                             assert.equal(mug.p.labelItext.get(), '');
                             assert.equal(mug.p.labelItext.get(null, 'hin'), '<output value="#case/dob" /> ');
                             assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                             assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                             util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
-                                                {normalize_xmlns: true});
+                                {normalize_xmlns: true});
                             done();
                         }, 20));
                         assert.equal(getInstanceId(mug.form, sessionUri), null);
@@ -277,13 +277,13 @@ define([
                                 databrowser.initDataBrowser(this);
                                 dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
                                 done();
-                            }
+                            },
                         },
                         features: { rich_text: false },
                     });
                 });
 
-                it("should add ref on drag/drop", function() {
+                it("should add ref on drag/drop", function () {
                     util.loadXML("");
                     var mug = util.addQuestion("DataBindOnly", "mug"),
                         calc = $("[name=property-calculateAttr]"),
@@ -295,12 +295,12 @@ define([
                     assert.equal(calc.length, 1);
                     util.findNode(dataTree, "dob").data.handleDrop(calc);
                     assert.equal(mug.p.calculateAttr,
-                                 "instance('casedb')/cases/case[" + where + "]/dob");
+                        "instance('casedb')/cases/case[" + where + "]/dob");
                     assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                     assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                 });
 
-                it("should add parent ref on drag/drop", function() {
+                it("should add parent ref on drag/drop", function () {
                     util.loadXML("");
                     var mug = util.addQuestion("DataBindOnly", "mug"),
                         calc = $("[name=property-calculateAttr]"),
@@ -318,7 +318,7 @@ define([
                 });
             });
 
-            it("shouldn't show invalid properties", function() {
+            it("shouldn't show invalid properties", function () {
                 assert.isNull(util.findNode(dataTree, "invalid"), "invalid shouldn't be in case tree");
             });
 
@@ -326,7 +326,8 @@ define([
         });
 
         describe("when loaded after the form", function () {
-            var vellum, widget, blue, event = {};
+            var vellum, widget, blue, 
+                event = {};
             vellumUtil.eventuality(event);
             function loadDataTree(done) {
                 databrowser.initDataBrowser(vellum);
@@ -338,7 +339,7 @@ define([
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (callback) {
-                            event.on("loadCaseData", function() {
+                            event.on("loadCaseData", function () {
                                 callback(CASE_DATA);
                             });
                         },
@@ -351,12 +352,12 @@ define([
                             blue = util.addQuestion("DataBindOnly", "blue");
                             widget = util.getWidget('property-calculateAttr');
                             widget.input.promise.then(done);
-                        }
-                    }
+                        },
+                    },
                 });
             });
 
-            it("should error for unknown properties", function(done) {
+            it("should error for unknown properties", function (done) {
                 widget.setValue(dobProp);
                 widget.handleChange();
                 assert(!util.isTreeNodeValid(blue), "expected validation error");
@@ -364,7 +365,7 @@ define([
                     // TODO soften this message when data sources are not yet loaded
                     'calculateAttr:\n  - Unknown question: #case/dob');
                 event.fire("loadCaseData");
-                loadDataTree(function() {
+                loadDataTree(function () {
                     assert(util.isTreeNodeValid(blue), blue.getErrors().join("\n"));
                     done();
                 });
@@ -372,7 +373,8 @@ define([
         });
 
         describe("when loaded after the form with loaded xml", function () {
-            var vellum, widget, event = {};
+            var vellum, widget, 
+                event = {};
             vellumUtil.eventuality(event);
             function loadDataTree(done) {
                 databrowser.initDataBrowser(vellum);
@@ -384,7 +386,7 @@ define([
                     javaRosa: {langs: ['en']},
                     core: {
                         dataSourcesEndpoint: function (callback) {
-                            event.on("loadCaseData", function() {
+                            event.on("loadCaseData", function () {
                                 callback(CASE_DATA);
                             });
                         },
@@ -393,12 +395,12 @@ define([
                             vellum = this;
                             widget = util.getWidget('property-calculateAttr');
                             widget.input.promise.then(done);
-                        }
-                    }
+                        },
+                    },
                 });
             });
 
-            it("should not error for known properties", function() {
+            it("should not error for known properties", function () {
                 assert.strictEqual(widget.getValue(), dobProp);
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
                 event.fire("loadCaseData");
@@ -406,7 +408,7 @@ define([
                 assert.lengthOf(widget.getControl().find('.label-datanode-unknown'), 0);
             });
 
-            it("overwrites the forms preloaded tags", function() {
+            it("overwrites the forms preloaded tags", function () {
                 var form = call('getData').core.form,
                     path = "instance('casedb')/cases/case[@case_id = " +
                            "instance('commcaresession')/session/data/case_id]/dob";
@@ -418,13 +420,13 @@ define([
                 assert.equal(form.hashtagMap[dobProp], path);
             });
 
-            it("should not write unknown referenced hashtags to form", function() {
+            it("should not write unknown referenced hashtags to form", function () {
                 util.loadXML(UNKNOWN_PROPERTY_PRELOADED_HASHTAGS_XML);
                 event.fire("loadCaseData");
                 var xml = $(call("createXML")),
                     hashtags = xml.find('h\\:head, head').children('vellum\\:hashtags, hashtags'),
                     test = JSON.parse($.trim(hashtags.text()));
-                assert.deepEqual(test, {"#case/dob":null});
+                assert.deepEqual(test, {"#case/dob": null});
             });
 
             it("the parser and form should point to same hashtag dictionary", function (done) {
@@ -433,7 +435,7 @@ define([
                     origFormDict = form.hashtagMap,
                     parser = form.xpath;
                 event.fire('loadCaseData');
-                loadDataTree(function() {
+                loadDataTree(function () {
                     var newForm = call('getData').core.form,
                         newFormDict = newForm.hashtagMap,
                         newParser = newForm.xpath;
@@ -471,12 +473,12 @@ define([
                             databrowser.initDataBrowser(this);
                             dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
                             done();
-                        }
-                    }
+                        },
+                    },
                 });
             });
 
-            it("should add ref on drag/drop", function() {
+            it("should add ref on drag/drop", function () {
                 util.loadXML("");
                 var mug = util.addQuestion("Text", "mug"),
                     text = $("[name=itext-en-label]"),
@@ -487,7 +489,7 @@ define([
                 assert.equal(text.length, 1);
                 util.findNode(dataTree, "dob").data.handleDrop(text);
                 assert.equal(mug.p.labelItext.get(),
-                             "<output value=\"instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob\" />");
+                    "<output value=\"instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/dob\" />");
                 assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                 assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
             });
@@ -495,67 +497,67 @@ define([
 
         describe("with user properties", function () {
             var CASE_AND_USER_DATA = [{
-                    id: "commcaresession",
-                    uri: "jr://instance/session",
-                    path: "/session",
-                    name: 'Session',
+                id: "commcaresession",
+                uri: "jr://instance/session",
+                path: "/session",
+                name: 'Session',
+                structure: {
+                    data: {
+                        merge: true,
+                        structure: {
+                            case_id: {
+                                reference: {
+                                    hashtag: "#case",
+                                    source: "casedb",
+                                    subset: "case",
+                                    subset_key: "@case_type",
+                                    key: "@case_id",
+                                },
+                            },
+                        },
+                    },
+                    context: {
+                        merge: true,
+                        structure: {
+                            userid: {
+                                reference: {
+                                    hashtag: "#user",
+                                    source: "casedb",
+                                    subset: "commcare-user",
+                                    subset_key: "@case_type",
+                                    subset_filter: true,
+                                    key: "hq_user_id",
+                                },
+                            },
+                        },
+                    },
+                },
+            }, {
+                id: "casedb",
+                uri: "jr://instance/casedb",
+                path: "/casedb/case",
+                name: 'Cases',
+                structure: {
+                    name: {},
+                },
+                subsets: [{
+                    id: "case",
+                    name: "child",
+                    key: "@case_type",
                     structure: {
-                        data: {
-                            merge: true,
-                            structure: {
-                                case_id: {
-                                    reference: {
-                                        hashtag: "#case",
-                                        source: "casedb",
-                                        subset: "case",
-                                        subset_key: "@case_type",
-                                        key: "@case_id",
-                                    },
-                                },
-                            },
-                        },
-                        context: {
-                            merge: true,
-                            structure: {
-                                userid: {
-                                    reference: {
-                                        hashtag: "#user",
-                                        source: "casedb",
-                                        subset: "commcare-user",
-                                        subset_key: "@case_type",
-                                        subset_filter: true,
-                                        key: "hq_user_id",
-                                    },
-                                },
-                            },
-                        },
+                        dob: {},
+                        invalid: {},
                     },
                 }, {
-                    id: "casedb",
-                    uri: "jr://instance/casedb",
-                    path: "/casedb/case",
-                    name: 'Cases',
+                    id: "commcare-user",
+                    name: "user",
+                    key: "@case_type",
                     structure: {
-                        name: {},
+                        code_name: {},
+                        user_role: {},
                     },
-                    subsets: [{
-                        id: "case",
-                        name: "child",
-                        key: "@case_type",
-                        structure: {
-                            dob: {},
-                            invalid: {}
-                        },
-                    }, {
-                        id: "commcare-user",
-                        name: "user",
-                        key: "@case_type",
-                        structure: {
-                            code_name: {},
-                            user_role: {},
-                        }
-                    }],
-                }];
+                }],
+            }];
 
             before(function (done) {
                 util.init({
@@ -568,8 +570,8 @@ define([
                             databrowser.initDataBrowser(this);
                             dataTree = this.$f.find(".fd-external-sources-tree").jstree(true);
                             done();
-                        }
-                    }
+                        },
+                    },
                 });
             });
 
@@ -580,7 +582,7 @@ define([
                     editor = input.ckeditor().editor,
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () {
-                    editor.on('change', function() {
+                    editor.on('change', function () {
                         assert.equal(mug.p.calculateAttr, "#case/dob");
                         done();
                     });
@@ -596,7 +598,7 @@ define([
                     editor = input.ckeditor().editor,
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () {
-                    editor.on('change', function() {
+                    editor.on('change', function () {
                         assert.equal(mug.p.calculateAttr,
                             "instance('commcaresession')/session/data/case_id");
                         done();
@@ -613,7 +615,7 @@ define([
                     editor = input.ckeditor().editor,
                     widget = util.getWidget('property-calculateAttr');
                 widget.input.promise.then(function () {
-                    editor.on('change', function() {
+                    editor.on('change', function () {
                         assert.equal(mug.p.calculateAttr, "#user/code_name");
                         assert.equal(form.normalizeXPath("#user/code_name"),
                             "instance('casedb')/casedb/case[@case_type = 'commcare-user']" +

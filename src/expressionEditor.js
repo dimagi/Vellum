@@ -8,7 +8,7 @@ define([
     'tpl!vellum/templates/xpath_validation_errors',
     'tpl!vellum/templates/xpath_expression',
     'tpl!vellum/templates/xpath',
-    'less!vellum/less-style/xpath-editor'
+    'less!vellum/less-style/xpath-editor',
 ], function (
     $,
     _,
@@ -18,7 +18,7 @@ define([
     analytics,
     xpath_validation_errors,
     xpath_expression,
-    xpath_tpl
+    xpath_tpl,
 ) {
     function validateXPath(form, expr) {
         if (expr) {
@@ -56,29 +56,29 @@ define([
         var operationOpts = [];
         var expTypes = form.xpath.models.XPathExpressionTypeEnum;
         var BinOpHandler = {
-            toString: function(op, left, right) {
+            toString: function (op, left, right) {
                 // make sure we wrap the vals in parens in case they were necessary
                 // todo, construct manually, and validate individual parts.
                 return "(" + left + ") " + 
                     form.xpath.models.expressionTypeEnumToXPathLiteral(op) + 
                     " (" + right + ")";
             },
-            typeLeftRight: function(expOp) {
+            typeLeftRight: function (expOp) {
                 return expOp;
-            }
+            },
         };
         var FunctionHandler = {
-            toString: function(op, left, right) {
+            toString: function (op, left, right) {
                 return op + "(" + left + ", " + right + ")";
             },
-            typeLeftRight: function(expOp) {
-                if (expOp.args.length !== 2) return false;
+            typeLeftRight: function (expOp) {
+                if (expOp.args.length !== 2) {return false;}
                 return {
                     type: expOp.id,
                     left: expOp.args[0],
-                    right: expOp.args[1]
+                    right: expOp.args[1],
                 };
-            }
+            },
         };
         function addOp(expr, value, label) {
             value = form.xpath.models.expressionTypeEnumToXPathLiteral(value);
@@ -98,7 +98,7 @@ define([
             return $div.find(".fd-xpath-editor-text");
         };
 
-        var setExpression = function(input, val) {
+        var setExpression = function (input, val) {
             if (options.mug.form.richText) {
                 richText.editor(input, form, richTextOptions).setValue(val);
             } else {
@@ -106,7 +106,7 @@ define([
             }
         };
 
-        var getExpression = function(input) {
+        var getExpression = function (input) {
             if (options.mug.form.richText) {
                 return richText.editor(input, form, richTextOptions).getValue();
             } else {
@@ -142,7 +142,7 @@ define([
             var pane = getExpressionPane();
             var expressionParts = [];
             var joinType = getTopLevelJoinSelect().val();
-            pane.children().each(function() {
+            pane.children().each(function () {
                 var left = getExpression($(this).find(".left-question")),
                     right = getExpression($(this).find(".right-question"));
 
@@ -172,7 +172,7 @@ define([
             }
         };
 
-        var tryAddExpression = function(parsedExpression, joiningOp) {
+        var tryAddExpression = function (parsedExpression, joiningOp) {
             // trys to add an expression to the UI.
             // if the expression is empty just appends a new div for the expression.
             // if the expression exists, it will try to parse it into sub
@@ -195,7 +195,8 @@ define([
             };
 
             var newExpressionUIElement = function (expOp) {
-                var tag = 'input', tagArgs = '';
+                var tag = 'input', 
+                    tagArgs = '';
                 if (options.mug.form.richText) {
                     tag = 'div';
                     tagArgs = 'contenteditable="true"';
@@ -223,7 +224,7 @@ define([
                     return $($expUI.find(".right-question")[0]);
                 };
 
-                var validateExpression = function(item) {
+                var validateExpression = function (item) {
                     handleChange();
                     var le = getExpression(getLeftQuestionInput()),
                         re = getExpression(getRightQuestionInput());
@@ -252,7 +253,7 @@ define([
                 }
                 $expUI.find('.op-select').on('change', validateExpression);
 
-                $expUI.find('.xpath-delete-expression').click(function() {
+                $expUI.find('.xpath-delete-expression').click(function () {
                     $expUI.remove();
                     handleChange();
                 });
@@ -268,7 +269,7 @@ define([
                         // matter though since already fulfill the necessary
                         // "type/left/right" interface.
                         expOp = simpleExpressions[expOp.id].typeLeftRight(expOp);
-                        if (!expOp) return false;
+                        if (!expOp) {return false;}
                     }
                     populateQuestionInputBox(getLeftQuestionInput(), expOp.left);
                     $expUI.find('.op-select').val(form.xpath.models.expressionTypeEnumToXPathLiteral(expOp.type));
@@ -355,7 +356,7 @@ define([
             }
         };
 
-        var updateXPathEditor = function(options) {
+        var updateXPathEditor = function (options) {
             // clear validation text
             getValidationSummary()
                 .text("")
@@ -410,8 +411,9 @@ define([
             }
         };
 
-        var initXPathEditor = function() {
-            var tag = 'textarea', tagArgs = 'rows="5"';
+        var initXPathEditor = function () {
+            var tag = 'textarea', 
+                tagArgs = 'rows="5"';
             if (options.mug.form.richText) {
                 tag = 'div';
                 tagArgs = 'contenteditable="true"';
@@ -420,7 +422,7 @@ define([
             var $xpathUI = $(xpath_tpl({
                 topLevelJoinOpts: [
                     [gettext("True when ALL of the expressions are true."), expTypes.AND],
-                    [gettext("True when ANY of the expressions are true."), expTypes.OR]
+                    [gettext("True when ANY of the expressions are true."), expTypes.OR],
                 ],
                 tag: tag,
                 tagArgs: tagArgs,
@@ -445,7 +447,7 @@ define([
             var advancedInput = $xpathUI.find('.fd-xpath-editor-text');
             if (options.mug.form.richText) {
                 richText.editor(advancedInput, form, richTextOptions)
-                        .on('change', handleChange);
+                    .on('change', handleChange);
             } else {
                 advancedInput.on('change keyup', handleChange);
             }
@@ -457,7 +459,7 @@ define([
                 editorContent.empty();
             };
 
-            saveButton.addClass("disabled").click(function() {
+            saveButton.addClass("disabled").click(function () {
                 var uiExpression  = getExpressionFromUI();
                 setExpression(getExpressionInput(), uiExpression);
                 var results = validate(uiExpression);
@@ -466,7 +468,7 @@ define([
                 } else {
                     getValidationSummary()
                         .html($(xpath_validation_errors({
-                            errors: results[1].message
+                            errors: results[1].message,
                         })))
                         .removeClass("hide");
                 }

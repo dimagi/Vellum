@@ -29,7 +29,7 @@ define([
     'text!static/javaRosa/test-xml-3.xml',
     'text!static/javaRosa/test-xml-4.xml',
     'text!static/javaRosa/non-default-lang-first.xml',
-    'text!static/javaRosa/invalid-output-ref.xml'
+    'text!static/javaRosa/invalid-output-ref.xml',
 ], function (
     chai,
     $,
@@ -61,7 +61,7 @@ define([
     TEST_XML_3,
     TEST_XML_4,
     NON_DEFAULT_LANG_FIRST_XML,
-    INVALID_OUTPUT_REF_XML
+    INVALID_OUTPUT_REF_XML,
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -114,11 +114,11 @@ define([
                 util.init({
                     features: {rich_text: false},
                     javaRosa: {langs: ['hin', 'en']},
-                    core: {onReady: function () { done(); }}
+                    core: {onReady: function () { done(); }},
                 });
             });
 
-            it("should change default to first language on save", function() {
+            it("should change default to first language on save", function () {
                 util.loadXML(NON_DEFAULT_LANG_FIRST_XML);
                 var xml = util.parseXML(call('createXML'));
                 assert(xml.find("translation[lang=en]").attr("default") === undefined,
@@ -157,7 +157,7 @@ define([
                         util.assertXmlEqual(
                             call('createXML'),
                             TEST_XML_4,
-                            {normalize_xmlns: true}
+                            {normalize_xmlns: true},
                         );
                         done();
                     });
@@ -179,14 +179,14 @@ define([
             describe("should preserve output tags when setting Itext value", function () {
                 var items = [
                     ['<output />', '<output value="#form/question1" />',
-                    '<output value="#form/question1" />'],
+                        '<output value="#form/question1" />'],
                     ['<output></output>', '<output value="#form/question1" ></output>',
-                    '<output value="#form/question1" />'],
+                        '<output value="#form/question1" />'],
                     ['<output /><img /><output></output>',
-                    '<output value="#form/question1" /><img src="x" onerror="alert(\'XSSinbrokenimg\')"/>' +
+                        '<output value="#form/question1" /><img src="x" onerror="alert(\'XSSinbrokenimg\')"/>' +
                     '<output value="#form/question1" ></output>',
-                    '<output value="#form/question1" />&lt;img src="x" onerror="alert(\'XSSinbrokenimg\')"&gt;' +
-                    '<output value="#form/question1" />']
+                        '<output value="#form/question1" />&lt;img src="x" onerror="alert(\'XSSinbrokenimg\')"&gt;' +
+                    '<output value="#form/question1" />'],
                 ];
 
                 _.each(items, function (item) {
@@ -223,7 +223,7 @@ define([
                         util.assertXmlEqual(
                             call('createXML'),
                             OUTPUT_REFS_XML,
-                            {normalize_xmlns: true}
+                            {normalize_xmlns: true},
                         );
                         done();
                     });
@@ -244,7 +244,7 @@ define([
                 south.p.nodeID = "south";
                 north.form.moveMug(south, "after", north);
                 util.assertXmlEqual(util.call("createXML"), ITEXT_ITEM_RENAME_XML,
-                                    {normalize_xmlns: true});
+                    {normalize_xmlns: true});
             });
 
             it("should rename group's child itext item IDs after move group", function () {
@@ -254,8 +254,8 @@ define([
                 util.addQuestion("Text", "text");
                 blue.form.moveMug(blue, "before", green);
                 util.assertXmlEqual(util.call("createXML"),
-                                    ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
-                                    {normalize_xmlns: true});
+                    ITEXT_ITEM_RENAME_GROUP_MOVE_XML,
+                    {normalize_xmlns: true});
             });
 
             it("should not erase invalid outputs", function (done) {
@@ -271,8 +271,8 @@ define([
                     widget.input.promise.then(function () {
                         assert.strictEqual(widget.getValue(), itext);
                         util.assertXmlEqual(call('createXML'),
-                                            INVALID_OUTPUT_REF_XML,
-                                            {normalize_xmlns: true});
+                            INVALID_OUTPUT_REF_XML,
+                            {normalize_xmlns: true});
                         done();
                     });
                 });
@@ -368,29 +368,29 @@ define([
             util.assertXmlEqual(
                 call('createXML'),
                 TEST_XML_2,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
-        it("should prefer alert over constraintMsg", function() {
+        it("should prefer alert over constraintMsg", function () {
             util.loadXML(TEST_XML_2_WITH_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
                 TEST_XML_2,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
-        it("should convert constraintMsg to alert", function() {
+        it("should convert constraintMsg to alert", function () {
             util.loadXML(TEST_XML_2_WITH_ONLY_BIND_CONSTRAINT);
             util.assertXmlEqual(
                 call('createXML'),
                 TEST_XML_2,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
-        it("should correctly set alert's auto id", function() {
+        it("should correctly set alert's auto id", function () {
             util.loadXML(TEST_XML_2_WITH_BIND_CONSTRAINT);
             var mug = util.getMug('question1');
             assert(mug.p.constraintMsgItext.autoId);
@@ -477,7 +477,7 @@ define([
             assert.equal(hinLabel.val(), "English");
         });
 
-        it("tree should note when default language is being displayed instead of selected language", function() {
+        it("tree should note when default language is being displayed instead of selected language", function () {
             util.loadXML("");
             util.addQuestion("Text", "question1");
             util.clickQuestion("question1");
@@ -540,7 +540,7 @@ define([
             util.assertXmlEqual(
                 call('createXML'),
                 OUTPUTREF_WITH_INEQUALITY_XML,
-                {normalize_xmlns: true}
+                {normalize_xmlns: true},
             );
         });
 
@@ -612,7 +612,7 @@ define([
             target.trigger({
                 type: "keydown",
                 which: 8,
-                ctrlKey: false
+                ctrlKey: false,
             });
             target.change();
             var val = mug.p.labelItext.get('default', 'en');
@@ -630,7 +630,7 @@ define([
             target.trigger({
                 type: "keydown",
                 which: 46,
-                ctrlKey: false
+                ctrlKey: false,
             });
             target.change();
             var val = mug.p.labelItext.get('default', 'en');
@@ -671,7 +671,7 @@ define([
             jr.parseXLSItext(form, trans, Itext);
             var q1 = util.getMug("question1");
             assert.equal(q1.p.labelItext.get("default", "en"),
-                         'First "line\nSecond" line\nThird line');
+                'First "line\nSecond" line\nThird line');
             assert.equal(q1.p.labelItext.get("default", "hin"), 'Hindu trans');
         });
 
@@ -688,7 +688,7 @@ define([
             var form = util.loadXML(MULTI_LINE_TRANS_XML),
                 Itext = util.call("getData").javaRosa.Itext;
             assert.equal(jr.generateItextXLS(form, Itext),
-                         'label\tdefault_en\tdefault_hin\t' +
+                'label\tdefault_en\tdefault_hin\t' +
                          'audio_en\taudio_hin\timage_en\timage_hin\t' +
                          'video_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\n' +
                          'question1-label\t"First ""line\nSecond"" line\nThird line"\t' +
@@ -699,7 +699,7 @@ define([
             var form = util.loadXML(MULTI_LANG_TRANS_XML),
                 Itext = util.call("getData").javaRosa.Itext;
             assert.equal(jr.generateItextXLS(form, Itext),
-                         'label\tdefault_en\tdefault_hin\taudio_en\taudio_hin\t' +
+                'label\tdefault_en\tdefault_hin\taudio_en\taudio_hin\t' +
                          'image_en\timage_hin\tvideo_en\tvideo_hin\tvideo-inline_en\tvideo-inline_hin\n' +
                          'text-label\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t');
         });
@@ -713,7 +713,7 @@ define([
             jr.parseXLSItext(form, trans, Itext);
             var q1 = util.getMug("question1");
             assert.equal(q1.p.labelItext.get("default", "en"),
-                         'First "line\nSecond" line\nThird line');
+                'First "line\nSecond" line\nThird line');
             // existing translation should be cleared
             assert.equal(q1.p.labelItext.get("default", "hin"), '');
             // non-existent form should not be added
@@ -776,13 +776,13 @@ define([
             var xml = call("createXML"),
                 $xml = util.parseXML(xml);
             assert.strictEqual($xml.find("text#north-label").length, 2,
-                               "wrong <text> node count\n" + xml);
+                "wrong <text> node count\n" + xml);
         });
 
         it("should unlink auto itext id from other questions with shared itext", function () {
             util.loadXML(ITEXT_ITEM_NON_AUTO_ID_XML);
             assert.equal($(ITEXT_ITEM_NON_AUTO_ID_XML).find("text#south-label").length, 0,
-                         "wrong <text#south> node count\n" + ITEXT_ITEM_NON_AUTO_ID_XML);
+                "wrong <text#south> node count\n" + ITEXT_ITEM_NON_AUTO_ID_XML);
             util.clickQuestion("south");
             var controls = $("[name='property-labelItext']").closest(".form-group"),
                 autobox = controls.find("input[type=checkbox]");
@@ -793,13 +793,13 @@ define([
             var xml = call("createXML"),
                 $xml = util.parseXML(xml);
             assert.equal($xml.find("text#north-label").length, 2,
-                         "wrong <text#north> node count\n" + xml);
+                "wrong <text#north> node count\n" + xml);
             assert.equal($xml.find("text#south-label").length, 2,
-                         "wrong <text#south> node count\n" + xml);
+                "wrong <text#south> node count\n" + xml);
         });
 
         _.each(["hint", "help", "constraintMsg"], function (tag) {
-            it("should not serialize empty " + tag + " itext item with non-empty id and autoId = true", function() {
+            it("should not serialize empty " + tag + " itext item with non-empty id and autoId = true", function () {
                 util.loadXML("");
                 var mug = util.addQuestion("Text"),
                     itext = mug.p[tag + "Itext"];
@@ -809,15 +809,15 @@ define([
                     $xml = util.parseXML(xml);
                 if (tag === "constraintMsg") {
                     assert.strictEqual($xml.find("[jr\\:" + tag + "]").length, 0,
-                                       "wrong " + tag + " count\n" + xml);
+                        "wrong " + tag + " count\n" + xml);
                 } else {
                     assert.strictEqual($xml.find(tag).length, 0,
-                                       "wrong <" + tag + "> node count\n" + xml);
+                        "wrong <" + tag + "> node count\n" + xml);
                 }
             });
         });
 
-        it("should not allow apostrophes in item labels", function() {
+        it("should not allow apostrophes in item labels", function () {
             util.loadXML("");
             util.addQuestion("Select", "select");
             util.addQuestion("Choice", "choice1");
@@ -826,7 +826,7 @@ define([
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-label');
         });
 
-        it("should not allow > in item labels", function() {
+        it("should not allow > in item labels", function () {
             util.loadXML("");
             util.addQuestion("Select", "select");
             util.addQuestion("Choice", "choice1");
@@ -835,7 +835,7 @@ define([
             assert.strictEqual($("[name='property-labelItext']").val(), 'select-blah___blah-label');
         });
 
-        it("should not change with node id when blank", function() {
+        it("should not change with node id when blank", function () {
             util.loadXML("");
             util.addQuestion("Text", "text");
             util.clickQuestion("text");
@@ -847,19 +847,19 @@ define([
         });
     });
 
-    describe("The javaRosaplugin with one language", function() {
-        before(function(done) {
+    describe("The javaRosaplugin with one language", function () {
+        before(function (done) {
             util.init({
                 javaRosa: { langs: ['en'] },
                 core: {
                     onReady: function () {
                         done();
-                    }
-                }
+                    },
+                },
             });
         });
 
-        it("should allow a value to be blank", function(){
+        it("should allow a value to be blank", function () {
             util.loadXML("");
             util.addQuestion('Trigger', 'label');
             util.clickQuestion('label');
@@ -867,11 +867,11 @@ define([
             $('.itext-block-label-add-form-image').click();
             $('[name=itext-en-label]').val('').change();
             util.assertXmlEqual(call("createXML"), 
-                                NO_LABEL_TEXT_ONE_LANG_XML,
-                                {normalize_xmlns: true});
+                NO_LABEL_TEXT_ONE_LANG_XML,
+                {normalize_xmlns: true});
         });
 
-        it ("should not error on form with output without value", function() {
+        it("should not error on form with output without value", function () {
             util.loadXML(BARE_OUTPUT);
             var mug = util.getMug("output");
             assert.equal(mug.p.labelItext.get(), "x <output /> x");
@@ -879,8 +879,8 @@ define([
         });
     });
 
-    describe("The javaRosa plugin itext widgets", function() {
-        before(function(done) {
+    describe("The javaRosa plugin itext widgets", function () {
+        before(function (done) {
             util.init({
                 features: {rich_text: false, use_custom_repeat_button_text: true},
                 javaRosa: { langs: ['en'] },
@@ -893,13 +893,13 @@ define([
                         // trigger itext id population
                         jr.parseXLSItext(form, "", Itext);
                         done();
-                    }
-                }
+                    },
+                },
             });
         });
         var mug, repeatMug, itext, spec;
 
-        it ("should detect whether or not readable itext labels are present", function() {
+        it("should detect whether or not readable itext labels are present", function () {
             var model = new jrItext.model(),
                 item = new jrItext.item({
                     itextModel: model,
@@ -1014,7 +1014,7 @@ define([
         testItextIdValidation("addEmptyCaptionItext");
         testItextIdValidation("addCaptionItext");
 
-        it("should display constraintMsgItext validation error for non-autoId itext without validation condition", function() {
+        it("should display constraintMsgItext validation error for non-autoId itext without validation condition", function () {
             var itext = mug.p.constraintMsgItext,
                 spec = mug.spec.constraintMsgItext,
                 before = mug.p.constraintAttr;
@@ -1029,7 +1029,7 @@ define([
             }
         });
 
-        it("should not display constraintMsgItext validation error for autoId itext with validation condition", function() {
+        it("should not display constraintMsgItext validation error for autoId itext with validation condition", function () {
             var itext = mug.p.constraintMsgItext,
                 spec = mug.spec.constraintMsgItext,
                 before = mug.p.constraintAttr;
@@ -1042,7 +1042,7 @@ define([
             }
         });
 
-        it("should not display constraintMsgItext validation error after removing validation message and condition", function() {
+        it("should not display constraintMsgItext validation error after removing validation message and condition", function () {
             util.loadXML("");
             util.paste([
                 ["id", "type", "constraintMsgItext:en-default", "constraintAttr", "constraintMsgAttr"],
@@ -1054,7 +1054,7 @@ define([
             assert(!message, "unexpected message: " + message);
         });
 
-        it("should show and hide the validation message as appropriate", function() {
+        it("should show and hide the validation message as appropriate", function () {
             util.loadXML(GROUP_WITH_CONSTRAINT_XML);
             $("[name='property-constraintAttr']").val('true()').change();
             $("[name='itext-en-constraintMsg']").val('This is not possible').change();
@@ -1064,22 +1064,22 @@ define([
             assert(!$("[name='itext-en-constraintMsg']").is(":visible"));
         });
 
-        it("should show a validation error when dropping a self reference", function() {
+        it("should show a validation error when dropping a self reference", function () {
             util.loadXML("");
             var mug = util.addQuestion("Text", "question1"),
                 property = 'itext-en-label';
             util.clickQuestion("question1");
 
             assert.deepEqual(mug.messages.get(property), []);
-            mug.form.vellum.handleDropFinish($('[name='+property+']'), '.', mug);
+            mug.form.vellum.handleDropFinish($('[name=' + property + ']'), '.', mug);
             assert.equal(mug.messages.get(property).length, 1,
-                         util.getMessages(mug));
+                util.getMessages(mug));
 
-                mug.dropMessage(property, "core-circular-reference-warning");
-                assert.deepEqual(mug.messages.get(property), []);
+            mug.dropMessage(property, "core-circular-reference-warning");
+            assert.deepEqual(mug.messages.get(property), []);
         });
 
-        it("should show a validation error for choices without labels", function() {
+        it("should show a validation error for choices without labels", function () {
             util.loadXML("");
             util.addQuestion("Select", "question1");
             var item = util.addQuestion("Choice", "choice1");
@@ -1095,7 +1095,7 @@ define([
             assert(messages[0].match(/required/i));
         });
 
-        it("should not show a validation error for manually added choices", function() {
+        it("should not show a validation error for manually added choices", function () {
             util.loadXML("");
             util.addQuestion("Select", "question1");
             var item = util.addQuestion("Choice", "choice1");
@@ -1124,41 +1124,41 @@ define([
         });
     });
 
-    describe("The javaRosa markdown detector", function() {
+    describe("The javaRosa markdown detector", function () {
         _.each([
             "**Word!**",
             "**a bold phrase**",
         ], function (text) {
-            it("should recognize " + JSON.stringify(text), function() {
+            it("should recognize " + JSON.stringify(text), function () {
                 assert(jr.looksLikeMarkdown(text, false), "fail");
             });
         });
         var markdownTable = "| col1    | col2    | col3 |\n|:----:|:----:|:----:|\n| r1c1 | r1c2 | r1c3 |";
-        it("should detect a markdown table" + JSON.stringify(markdownTable), function(){
+        it("should detect a markdown table" + JSON.stringify(markdownTable), function () {
             assert(jr.looksLikeMarkdown(markdownTable, true), "fail");
         });
-        it("should not detect a markdown table since supportMarkdown is false" + JSON.stringify(markdownTable), function(){
+        it("should not detect a markdown table since supportMarkdown is false" + JSON.stringify(markdownTable), function () {
             assert(!jr.looksLikeMarkdown(markdownTable, false), "fail");
         });
         _.each([
             "**not\nbold**",
         ], function (text) {
-            it("should NOT recognize " + JSON.stringify(text), function() {
+            it("should NOT recognize " + JSON.stringify(text), function () {
                 assert(!jr.looksLikeMarkdown(text, false), "fail");
             });
         });
     });
 
-    describe("The javaRosa plugin language selector", function() {
-        before(function(done) {
+    describe("The javaRosa plugin language selector", function () {
+        before(function (done) {
             util.init({
                 features: {rich_text: false},
                 javaRosa: { langs: ['en'] },
-                core: {onReady: function () { done (); }},
+                core: {onReady: function () { done(); }},
             });
         });
 
-        it("should have option to display IDs", function() {
+        it("should have option to display IDs", function () {
             util.loadXML("");
             util.addQuestion("Text", "question1");
             util.clickQuestion("question1");
@@ -1177,7 +1177,7 @@ define([
             assert.equal($(treeSelector).text(), "question1");
         });
 
-        it("should only display once after multiple load xml", function() {
+        it("should only display once after multiple load xml", function () {
             assert.strictEqual($('.fd-questions-menu li:contains("Display")').length, 1);
             util.loadXML("");
             assert.strictEqual($('.fd-questions-menu li:contains("Display")').length, 1);
@@ -1191,19 +1191,19 @@ define([
             util.init({
                 features: {rich_text: false},
                 javaRosa: {langs: ['en', 'hin', 'tel'],
-                           showOnlyCurrentLang: true,
-                           displayLanguage: 'en'
-                           },
-                core: {onReady: function () { done(); }}
+                    showOnlyCurrentLang: true,
+                    displayLanguage: 'en',
+                },
+                core: {onReady: function () { done(); }},
             });
         });
 
-        it("should change the property on javaRosa", function() {
+        it("should change the property on javaRosa", function () {
             assert.equal(util.call("getData").javaRosa.showOnlyCurrentLang, true);
         });
 
-        describe("when current language same as default language", function() {
-            it("should just show translation for the current display language", function() {
+        describe("when current language same as default language", function () {
+            it("should just show translation for the current display language", function () {
                 assert.equal(util.call("getData").core.currentItextDisplayLanguage, "en");
                 assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
                 util.loadXML(TEST_XML_1);
@@ -1213,17 +1213,17 @@ define([
             });
         });
 
-        describe("when current display language not same as default language", function() {
-            describe("when current display language is one of the app langs", function() {
+        describe("when current display language not same as default language", function () {
+            describe("when current display language is one of the app langs", function () {
                 before(function (done) {
                     util.init({
                         features: {rich_text: false},
                         javaRosa: {langs: ['en', 'hin', 'tel'], showOnlyCurrentLang: true, displayLanguage: 'tel'},
-                        core: {onReady: function () { done(); }}
+                        core: {onReady: function () { done(); }},
                     });
                 });
 
-                it("should show translation for both current and default language", function() {
+                it("should show translation for both current and default language", function () {
                     assert.equal(util.call("getData").core.currentItextDisplayLanguage, "tel");
                     assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
                     util.loadXML(TEST_XML_1);
@@ -1234,16 +1234,16 @@ define([
                 });
             });
 
-            describe("when current display language is not one of the app langs", function() {
+            describe("when current display language is not one of the app langs", function () {
                 before(function (done) {
                     util.init({
                         features: {rich_text: false},
                         javaRosa: {langs: ['en', 'hin', 'tel'], showOnlyCurrentLang: true, displayLanguage: '_ids'},
-                        core: {onReady: function () { done(); }}
+                        core: {onReady: function () { done(); }},
                     });
                 });
 
-                it("should just show translation for the default language", function() {
+                it("should just show translation for the default language", function () {
                     assert.equal(util.call("getData").core.currentItextDisplayLanguage, "_ids");
                     assert.equal(util.call("getData").javaRosa.Itext.defaultLanguage, "en");
                     util.loadXML(TEST_XML_1);

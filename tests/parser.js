@@ -37,7 +37,7 @@ define([
     FIRST_TIME_HASHTAG_XML,
     REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML,
     REPEAT_WITH_COUNT_AS_QUESTION_XML,
-    REQUIRED_XML
+    REQUIRED_XML,
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -52,9 +52,9 @@ define([
                 core: {
                     onReady: function () {
                         assert(this.isPluginEnabled("itemset"),
-                               "itemset plugin should be enabled");
+                            "itemset plugin should be enabled");
                         done();
-                    }
+                    },
                 },
             });
         });
@@ -65,9 +65,9 @@ define([
                 core: {
                     onReady: function () {
                         assert(!this.isPluginEnabled("itemset"),
-                               "itemset plugin should be disabled");
+                            "itemset plugin should be disabled");
                         done();
-                    }
+                    },
                 },
             });
         });
@@ -84,9 +84,9 @@ define([
                             doc = util.parseXML(xml);
                         assert.equal(doc.find("instance[id=states]").length, 1, xml);
                         assert.equal(doc.find('itemset').attr('nodeset'),
-                                     "instance('states')/state_list/state");
+                            "instance('states')/state_list/state");
                         done();
-                    }
+                    },
                 },
             });
         });
@@ -149,7 +149,7 @@ define([
             assert(!$('[name=property-dataValue]').length);
         });
 
-        it("should set required correctly", function() {
+        it("should set required correctly", function () {
             util.loadXML(REQUIRED_XML);
             var q1 = util.getMug("question1");
             assert(q1.p.requiredAttr, "required is false");
@@ -174,18 +174,18 @@ define([
             util.loadXML(BODY_GROUP);
             util.assertJSTreeState(
                 "body",
-                "  text"
+                "  text",
             );
         });
 
-        describe("override", function() {
-            before(function(done) {
+        describe("override", function () {
+            before(function (done) {
                 util.init({
                     plugins: plugins,
                     javaRosa: {langs: ['en']},
                     core: {
-                        onReady: function () { done(); }
-                    }
+                        onReady: function () { done(); },
+                    },
                 });
             });
 
@@ -195,35 +195,35 @@ define([
                 'calculateAttr': 'question3',
             };
 
-            _.each(properties, function(question, prop) {
-                it("should override " + prop + " in question " + question, function() {
+            _.each(properties, function (question, prop) {
+                it("should override " + prop + " in question " + question, function () {
                     util.loadXML(OVERRIDE_XML);
                     var mug = util.getMug(question);
                     assert.strictEqual(mug.p[prop], "#form/question1");
                 });
             });
 
-            it("should override correctly", function() {
+            it("should override correctly", function () {
                 util.loadXML(OVERRIDE_XML);
                 util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
             });
 
-            it("should generate hashtags correctly on first load", function() {
+            it("should generate hashtags correctly on first load", function () {
                 util.loadXML(FIRST_TIME_HASHTAG_XML);
                 util.assertXmlEqual(util.call('createXML'), OVERRIDDEN_XML);
             });
 
             describe("with two languages", function () {
-                before(function(done) {
+                before(function (done) {
                     util.init({
                         plugins: plugins,
                         javaRosa: {langs: ['en', 'hin']},
                         core: {
-                            onReady: function () { done(); }
-                        }
+                            onReady: function () { done(); },
+                        },
                     });
                 });
-                it("should load jr__count as jr:count", function() {
+                it("should load jr__count as jr:count", function () {
                     util.loadXML(REPEAT_WITH_COUNT_AS_QUESTION_ONLY_FORM_XML);
                     util.assertXmlEqual(util.call('createXML'), REPEAT_WITH_COUNT_AS_QUESTION_XML);
                 });

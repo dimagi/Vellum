@@ -20,7 +20,7 @@ define([
     'text!static/ignoreButRetain/referenced-unrenamed.xml',
     'text!static/ignoreButRetain/renamed.xml',
     'text!static/ignoreButRetain/unknown-element.xml',
-    'text!static/ignoreButRetain/unrenamed.xml'
+    'text!static/ignoreButRetain/unrenamed.xml',
 ], function (
     util,
     chai,
@@ -43,12 +43,12 @@ define([
     REFERENCED_UNRENAMED,
     RENAMED,
     UNKNOWN_ELEMENT,
-    UNRENAMED
+    UNRENAMED,
 ) {
     var assertXmlEqual = util.assertXmlEqual,
         call = util.call;
 
-    describe("The Ignore-But-Retain plugin", function() {
+    describe("The Ignore-But-Retain plugin", function () {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -131,7 +131,7 @@ define([
             util.loadXML(IGNORED_BINDS_WITH_EXTRA_PATH);
             util.assertJSTreeState(
                 "question",
-                "question2"
+                "question2",
             );
             assertXmlEqual(call('createXML'), IGNORED_BINDS_WITH_EXTRA_PATH);
         });
@@ -140,7 +140,7 @@ define([
             util.loadXML(IGNORED_CONTROL_NODE);
             util.assertJSTreeState(
                 "question",
-                "ignored--1"
+                "ignored--1",
             );
             assertXmlEqual(call('createXML'), IGNORED_CONTROL_NODE);
         });

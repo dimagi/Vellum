@@ -17,7 +17,7 @@ define([
     'text!static/exporter/item-id.tsv',
     'text!static/javaRosa/multi-lang-trans.xml',
     'text!static/exporter/vid-ref.xml',
-    'text!static/exporter/vid-ref.tsv'
+    'text!static/exporter/vid-ref.tsv',
 ], function (
     chai,
     $,
@@ -29,7 +29,7 @@ define([
     ITEM_ID_TSV,
     MULTI_LANG_TRANS_XML,
     VID_REF_XML,
-    VID_REF_TSV
+    VID_REF_TSV,
 ) {
     var assert = chai.assert,
         call = util.call;
@@ -40,7 +40,7 @@ define([
                 core: {
                     onReady: function () {
                         done();
-                    }
+                    },
                 },
                 features: {
                     rich_text: false,
@@ -73,7 +73,7 @@ define([
                 'Video (hin)\tVideo Inline (en)\tVideo Inline (hin)\t' +
                 'Display Condition\tValidation Condition\tValidation Message\t' + 
                 'Calculate Condition\tRequired\tHint Text\tHelp Text\tComment\n' +
-                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t\t\t\tno\t\t\t'
+                '/text\tText\t"""Text"\t"""Text"\t\t\t\t\t\t\t\t\t\t\t\t\tno\t\t\t',
             );
         });
     });

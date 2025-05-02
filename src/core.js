@@ -37,7 +37,7 @@ define([
     'jstree-actions',
     'jquery.bootstrap',
     'caretjs',
-    'atjs'
+    'atjs',
 ], function (
     require,
     SaveButton,
@@ -67,7 +67,7 @@ define([
     jrUtil,
     analytics,
     atwho,
-    debug
+    debug,
 ) {
     // Load these modules in the background after all runtime dependencies have
     // been resolved, since they're not needed initially.
@@ -138,7 +138,7 @@ define([
         var _this = this,
             bindBeforeUnload = this.opts().core.bindBeforeUnload;
         this.data.core.saveButton = SaveButton.init({
-            save: function(event) {
+            save: function (event) {
                 var forceFullSave = event && event.altKey;
                 if (forceFullSave &&
                     !window.confirm(gettext("Holding the ALT key while clicking save " +
@@ -156,7 +156,7 @@ define([
                 });
             },
             unsavedMessage: gettext('Are you sure you want to exit? All unsaved changes will be lost!'),
-            csrftoken: _this.opts().csrftoken
+            csrftoken: _this.opts().csrftoken,
         });
 
         var validateForSave = _.debounce(function () {
@@ -193,7 +193,7 @@ define([
             title: function () {
                 return validateForSave().title;
             },
-            content: function() {
+            content: function () {
                 return validateForSave().content;
             },
             html: true,
@@ -204,7 +204,7 @@ define([
         });
         // Saving, and the associated modal, can interfere with the popover,
         // so make absolutely sure that the popover is removed on save.
-        _this.data.core.saveButton.ui.on('click', function() {
+        _this.data.core.saveButton.ui.on('click', function () {
             $(this).popover('hide');
         });
 
@@ -220,7 +220,7 @@ define([
             (fn.hotkeys[key] || _.identity).call(_this, e);
         });
 
-        $(document).on('click', '.jstree-hover', function(e) {
+        $(document).on('click', '.jstree-hover', function (e) {
             e.preventDefault();
             var ufid = $(this).data("ufid");
             _this.scrollTreeTo(ufid);
@@ -237,13 +237,13 @@ define([
         this._createJSTree();
         this.datasources = datasources.init(
             this.opts().core.dataSourcesEndpoint,
-            this.opts().core.invalidCaseProperties
+            this.opts().core.invalidCaseProperties,
         );
     };
 
     fn.postInit = function () {
         var _this = this;
-        function onReady () {
+        function onReady() {
             // Allow onReady to access vellum instance (mostly for tests)
             _this.opts().core.onReady.apply(_this);
         }
@@ -286,7 +286,7 @@ define([
                     questionData = [
                         questionType,
                         mugType.typeName,
-                        mugType.icon
+                        mugType.icon,
                     ];
 
                 _this.data.core.QUESTIONS_IN_TOOLBAR.push(questionType);
@@ -297,7 +297,7 @@ define([
         });
 
         $dropdown.find(".fd-add-question").after($(add_question({
-            groups: _.map(_this.getQuestionGroups(), function(groupData) {
+            groups: _.map(_this.getQuestionGroups(), function (groupData) {
                 var defaultMug = _this.data.core.mugTypes[groupData.group[0]];
                 return {
                     name: groupData.group[1] || defaultMug.typeName,
@@ -306,7 +306,7 @@ define([
                         name: groupData.group[1] || defaultMug.typeName,
                         icon: groupData.group[2] || defaultMug.icon,
                     },
-                    questions: _.map(groupData.questions, function(questionType) {
+                    questions: _.map(groupData.questions, function (questionType) {
                         var mugType = _this.data.core.mugTypes[questionType];
                         return {
                             slug: questionType,
@@ -347,7 +347,7 @@ define([
                 "Audio",
                 "Video",
                 "Signature",
-            ]
+            ],
         };
 
         if (this.opts().features.support_document_upload) {
@@ -373,23 +373,23 @@ define([
                     "Int",
                     "PhoneNumber",
                     "Double",
-                ]
+                ],
             },
             {
                 group: ["Date", gettext('Date')],
                 questions: [
                     "Date",
                     "Time",
-                    "DateTime"
-                ]
+                    "DateTime",
+                ],
             },
             {
                 group: ["Group", gettext('Groups')],
                 questions: [
                     "Group",
                     "Repeat",
-                    "FieldList"
-                ]
+                    "FieldList",
+                ],
             },
             mediaGroup,
             {
@@ -399,14 +399,14 @@ define([
             {
                 group: ["DataBindOnly", gettext('Hidden Value')],
                 questions: [
-                    "DataBindOnly"
-                ]
+                    "DataBindOnly",
+                ],
             },
             {
                 group: ["Geopoint", gettext('Advanced'), ''],
                 textOnly: true,
-                questions: this.getAdvancedQuestions()
-            }
+                questions: this.getAdvancedQuestions(),
+            },
         ];
     };
 
@@ -427,7 +427,7 @@ define([
         _(menuItems).each(function (menuItem) {
             var $menuLink = $(util.format(
                     "<a tabindex='-1' href='#'>{name}</a>",
-                    _.extend(menuItem)
+                    _.extend(menuItem),
                 )).click(function (e) {
                     e.preventDefault();
                     _this.showConfirmBulkActionModal(menuItem.confirmMessage, menuItem.confirmAction);
@@ -507,8 +507,8 @@ define([
                 action: function () {
                     _this.closeModal();
                     confirmActionFn();
-                }
-            }
+                },
+            },
         ], gettext("Cancel"));
         $modal.find('.modal-body').html($('<p></p>').text(confirmMessage));
         $modal.modal('show');
@@ -534,7 +534,7 @@ define([
             }
             var $a = $(util.format(
                     "<a tabindex='-1' href='#'><i class='{icon}'></i> {name}{key}</a>",
-                    _.extend({key: key}, menuItem)
+                    _.extend({key: key}, menuItem),
                 )).click(function (e) {
                     e.preventDefault();
                     _this.ensureCurrentMugIsSaved(function () {
@@ -549,11 +549,11 @@ define([
             $lastItem = $newItem;
         });
 
-        this.$f.find('.fd-expand-all').click(function() {
+        this.$f.find('.fd-expand-all').click(function () {
             _this.data.core.$tree.jstree("open_all");
         });
 
-        this.$f.find('.fd-collapse-all').click(function() {
+        this.$f.find('.fd-collapse-all').click(function () {
             _this.data.core.$tree.jstree("close_all");
         });
 
@@ -570,7 +570,7 @@ define([
         });
 
         // Section toggling menu
-        this.$f.find(".fd-content-right").on('click', '.fd-section-changer .dropdown-menu a', function(e) {
+        this.$f.find(".fd-content-right").on('click', '.fd-section-changer .dropdown-menu a', function (e) {
             var $link = $(e.target);
             _this.collapseSection($link.data("slug"), $link.hasClass("selected"));
         });
@@ -581,7 +581,7 @@ define([
             expand = gettext("Expand Editor"),
             shrink = gettext("Shrink Editor"),
             expandOrShrink = new RegExp(RegExp.escape(expand) + "|" + RegExp.escape(shrink)),
-            $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function(li) {
+            $fullScreenMenuItem = $(_.find(_this.$f.find('.fd-tools-menu').nextAll(), function (li) {
                 return $(li).find("a").text().match(expandOrShrink);
             })).find("a"),
             html = $fullScreenMenuItem.html();
@@ -609,35 +609,35 @@ define([
                 hotkey: "Ctrl+Alt+F",
                 action: function (done) {
                     _this.toggleFullScreen();
-                }
+                },
             },
             {
                 name: gettext("Export Form Contents"),
                 icon: "fa-regular fa-file-excel",
                 action: function (done) {
                     _this.showExportModal(done);
-                }
+                },
             },
             {
                 name: gettext("Edit Source XML"),
                 icon: "fa fa-edit",
                 action: function (done) {
                     _this.showSourceXMLModal(done);
-                }
+                },
             },
             {
                 name: gettext("Form Properties"),
                 icon: "fa-regular fa-rectangle-list",
                 action: function (done) {
                     _this.showFormPropertiesModal(done);
-                }
+                },
             },
             {
                 name: gettext("Find Usages"),
                 icon: "fa fa-search",
                 action: function (done) {
                     _this.findUsages(done);
-                }
+                },
             },
         ];
     };
@@ -679,7 +679,7 @@ define([
         return val;
     };
 
-    fn._resizeFullScreenModal = function($modal) {
+    fn._resizeFullScreenModal = function ($modal) {
         var modalHeaderHeight, modalFooterHeight, modalHeight, modalBodyHeight;
         modalHeaderHeight = $modal.find('.modal-header').outerHeight(false);
         modalFooterHeight = $modal.find('.modal-footer').outerHeight(false);
@@ -710,13 +710,13 @@ define([
                         $modal.modal('hide');
                         done();
                     }, true);
-                }
-            }
+                },
+            },
         ]);
         $updateForm = $(edit_source({
             description: gettext("This is the raw XML. You can edit or paste " +
                 "into this box to make changes to your form. Press 'Update " +
-                "Source' to save changes, or 'Close' to cancel.")
+                "Source' to save changes, or 'Close' to cancel."),
         }));
 
         $modal.addClass('fd-full-screen-modal')
@@ -728,7 +728,7 @@ define([
         $textarea = $updateForm.find('textarea');
 
         // populate text
-        if(!this.data.core.formLoadingFailed){
+        if (!this.data.core.formLoadingFailed) {
             $textarea.val(this.createXML());
         } else {
             $textarea.val(this.data.core.failedLoadXML);
@@ -751,7 +751,7 @@ define([
         });
     };
 
-    fn.showExportModal = function(done) {
+    fn.showExportModal = function (done) {
         var $modal,
             $exportForm;
 
@@ -759,7 +759,7 @@ define([
         $exportForm = $(edit_source({
             description: gettext("Copy and paste this content into a " +
                 "spreadsheet program like Excel to easily share your " +
-                "form with others.")
+                "form with others."),
         }));
         $modal.find('.modal-body').html($exportForm);
 
@@ -770,8 +770,9 @@ define([
         $modal.one('shown.bs.modal', function () { $text.focus(); });
     };
 
-    fn.showOverwriteWarning = function(send, formText, serverForm) {
-        var $modal, $overwriteForm, _this = this;
+    fn.showOverwriteWarning = function (send, formText, serverForm) {
+        var $modal, $overwriteForm, 
+            _this = this;
 
         $modal = _this.generateNewModal(gettext("Lost Work Warning"), [
             {
@@ -782,7 +783,7 @@ define([
                     $('#form-differences').hide();
                     send(formText, 'full');
                     _this.closeModal();
-                }
+                },
             },
             {
                 title: gettext("Show XML Differences"),
@@ -797,8 +798,8 @@ define([
                     _this._resizeFullScreenModal($modal);
 
                     $modal.find('.btn-info').prop('disabled', true);
-                }
-            }
+                },
+            },
         ], gettext("Cancel"), "fa fa-warning");
 
         $overwriteForm = $(confirm_overwrite({
@@ -822,10 +823,10 @@ define([
                     label: gettext("Disable Text Formatting"),
                     slug: "noMarkdown",
                     type: "checkbox",
-                    value: function(jq, val) {
+                    value: function (jq, val) {
                         return val ? jq.prop('checked', val) : jq.prop('checked');
-                    }
-                }
+                    },
+                },
             ];
 
         if (this.opts().features.rich_text) {
@@ -833,9 +834,9 @@ define([
                 label: gettext("Use Easy References"),
                 slug: "richText",
                 type: "checkbox",
-                value: function(jq, val) {
+                value: function (jq, val) {
                     return val ? jq.prop('checked', val) : jq.prop('checked');
-                }
+                },
             });
         }
 
@@ -881,7 +882,7 @@ define([
         this._resizeFullScreenModal($modal);
         $modal.modal('show');
 
-        $modalBody.find('.link-to-question').click(function() {
+        $modalBody.find('.link-to-question').click(function () {
             var goToMug = $(this).text();
             $modal.modal('hide');
             _this.setCurrentMug(form.getMugByPath(goToMug));
@@ -922,7 +923,7 @@ define([
         var _this = this,
             $modal = _this.$f.find('.fd-modal-generic-container .modal');
         if (done) {
-            $modal.one('hidden.bs.modal', function() {
+            $modal.one('hidden.bs.modal', function () {
                 done.apply(_this);
             });
         }
@@ -950,10 +951,10 @@ define([
         _this.closeModal(undefined, true);
 
         var $modal = $(modal_content({
-                title: title,
-                closeButtonTitle: closeButtonTitle,
-                headerIcon: headerIcon,
-            }));
+            title: title,
+            closeButtonTitle: closeButtonTitle,
+            headerIcon: headerIcon,
+        }));
         $modal.one("shown.bs.modal", function () {
             $modal.find(".btn-default:last").focus();
         });
@@ -970,17 +971,17 @@ define([
         return $modal;
     };
 
-    var showPageSpinner = function() {
+    var showPageSpinner = function () {
         var spinner = $("<div><div><div></div></div></div>");
         spinner.addClass("fd-form-saving");
         $('body').append(spinner);
     };
 
-    var hidePageSpinner = function() {
+    var hidePageSpinner = function () {
         $(".fd-form-saving").remove();
     };
 
-    fn.handleDropFinish = function(target, path, mug, event) {
+    fn.handleDropFinish = function (target, path, mug, event) {
         var _this = this,
             ops = target.closest(".xpath-expression-row").find(".op-select");
 
@@ -1022,23 +1023,24 @@ define([
     fn._createJSTree = function () {
         typeData = {
             "#": {
-                valid_children: this.data.core.mugTypes.Group.validChildTypes
+                valid_children: this.data.core.mugTypes.Group.validChildTypes,
             },
             "default": {
                 icon: 'fa fa-question-circle',
                 max_children: 0,
-                valid_children: []
-            }
+                valid_children: [],
+            },
         };
         _(this.data.core.mugTypes.allTypes).each(function (type, typeName) {
             typeData[typeName] = {
                 icon: type.icon,
                 max_children: type.maxChildren,
-                valid_children: type.validChildTypes
+                valid_children: type.validChildTypes,
             };
         });
 
-        var $tree, _this = this;
+        var $tree, 
+            _this = this;
         this.data.core.$tree = $tree = this.$f.find('.fd-question-tree');
         $tree.jstree({
             "core": {
@@ -1046,22 +1048,22 @@ define([
                 worker: false,
                 multiple: true,
                 strings: {
-                    'New node': this.opts().core.noTextString
+                    'New node': this.opts().core.noTextString,
                 },
-                check_callback: function(operation, node, parent, position, more) {
+                check_callback: function (operation, node, parent, position, more) {
                     // operation can be 'create_node', 'rename_node', 'delete_node',
                     // 'move_node' or 'copy_node'. In case of 'rename_node'
                     // position is filled with the new node name
                     if (operation === "move_node") {
                         return _this.checkMove(node.id, node.type,
-                                               parent.id, parent.type, position);
+                            parent.id, parent.type, position);
                     }
                     return true;  //allow all other operations
-                }
+                },
             },
-            "dnd" : {
+            "dnd": {
                 copy: false,
-                inside_pos: "last"
+                inside_pos: "last",
             },
             "types": typeData,
             conditionalevents: {
@@ -1077,9 +1079,9 @@ define([
                         $(node).find('a > i').first().after(obj.data.errors);
                     }
                     return node;
-                }
+                },
             },
-            "plugins" : [ "themes", "types", "dnd", "conditionalevents", "actions" ]
+            "plugins": [ "themes", "types", "dnd", "conditionalevents", "actions" ],
             // We enable the "themes" plugin, but bundle the default theme CSS
             // (with base64-embedded images) in our CSS build.  The themes
             // plugin needs to stay enabled because it adds CSS selectors to
@@ -1101,7 +1103,7 @@ define([
                 _this.jstree("open_all", data.node);
             }
             var mug = _this.data.core.form.getMugByUFID(data.node.id);
-            _this.data.core.form.getDescendants(mug).map(function(descendant) {
+            _this.data.core.form.getDescendants(mug).map(function (descendant) {
                 _this.refreshMugName(descendant);
             });
         }).on("close_node.jstree", function (e, data) {
@@ -1238,7 +1240,7 @@ define([
         this.notifyUserActivity();
     };
 
-    fn.notifyUserActivity = function() {
+    fn.notifyUserActivity = function () {
         var now = Date.now(),
             // default timeout: 5 minutes in ms
             activityTimeout = this.opts().core.activityTimeout || 5 * 60 * 1000,
@@ -1324,7 +1326,7 @@ define([
     };
 
     // Suggest a node ID, based on the mug's label
-    fn.nodeIDFromLabel = function(mug) {
+    fn.nodeIDFromLabel = function (mug) {
         var suggestedID = this.getMugDisplayName(mug) || "";
         suggestedID = $("<div/>").html(suggestedID).text();     // strip any HTML (i.e., bubbles)
         suggestedID = suggestedID.toLowerCase();
@@ -1414,7 +1416,7 @@ define([
                 _this.hideQuestionProperties();
 
                 var $modal = _this.generateNewModal(
-                        gettext("Error"), [], gettext("OK"), "fa fa-warning");
+                    gettext("Error"), [], gettext("OK"), "fa fa-warning");
                 $modal.find(".modal-body").text(msg);
                 $modal.modal('show');
 
@@ -1433,14 +1435,16 @@ define([
     };
 
     fn.loadXML = function (formXML, options) {
-        var form, _this = this, selectedHashtag = window.location.hash;
+        var form, 
+            _this = this, 
+            selectedHashtag = window.location.hash;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
         });
         options = _.extend({
             mugTypes: this.data.core.mugTypes,
             allowedDataNodeReferences: this.opts().core.allowedDataNodeReferences,
-            enableInstanceRefCounting: true
+            enableInstanceRefCounting: true,
         }, options);
         if (this.data.core.form) {
             this.data.core.form.disconnectDataSources();
@@ -1491,7 +1495,7 @@ define([
                 _this.ensureCurrentMugIsSaved(form.undo.bind(form));
                 return false;
             });
-            $('.fd-undo-container').on('click', '.close', function() {
+            $('.fd-undo-container').on('click', '.close', function () {
                 form.undomanager.resetUndo();
             });
         }).on('question-create', function (e) {
@@ -1671,7 +1675,7 @@ define([
         }
     };
 
-    fn.adjustToWindow = function() {
+    fn.adjustToWindow = function () {
         this.data.windowManager.adjustToWindow();
     };
 
@@ -1690,7 +1694,8 @@ define([
      *      In practice position will be one of `"last"` or `"after"`.
      */
     fn.getInsertTargetAndPosition = function (refMug, qType, after) {
-        var parent, childTypes, position = after ? 'after' : 'last';
+        var parent, childTypes, 
+            position = after ? 'after' : 'last';
         while (refMug) {
             if (position === 'after') {
                 parent = refMug.parentMug;
@@ -1762,7 +1767,8 @@ define([
      * @returns The tree node that was created or `false` if it was not created.
      */
     fn.createQuestion = function (mug, refMug, position) {
-        var node, _this = this;
+        var node, 
+            _this = this;
         mug.on("messages-changed", function (event) {
             _this.setTreeValidationIcon(event.mug);
         }, null, null, this.data.core);
@@ -1776,16 +1782,16 @@ define([
                     handleDrop: function (target, event) {
                         var path = _this.mugToXPathReference(mug);
                         _this.handleDropFinish(target, path, mug, event);
-                    }
+                    },
                 },
                 li_attr: {
                     id: mug.ufid,
-                    rel: mug.__className
+                    rel: mug.__className,
                 },
-                state: { opened: true }
+                state: { opened: true },
             },
             // NOTE 'into' is not a supported position in JSTree
-            (position === 'into' ? 'last' : position)
+            (position === 'into' ? 'last' : position),
         );
 
         return node;
@@ -1820,7 +1826,7 @@ define([
 
             section.mug = mug;
             section.properties = _(section.properties)
-                .map(function(property) {
+                .map(function (property) {
                     return getWidgetClassAndOptions(property, mug);
                 })
                 .filter(_.identity);
@@ -1855,8 +1861,7 @@ define([
         if (mug && mug.getNodeID() !== undefined &&
             mug.hashtagPath && mug.hashtagPath.startsWith("#") && !mug.hashtagPath.endsWith('/')) {
             window.history.replaceState(null, null, mug.hashtagPath);
-        }
-        else {
+        } else {
             // If the mug doesn't have a question id yet, remove the hash from the url
             window.history.replaceState(null, null, ' ');
         }
@@ -1912,7 +1917,7 @@ define([
      *      done: function(value)                   // editor done callback
      *  }
      */
-    fn.displaySecondaryEditor = function(options) {
+    fn.displaySecondaryEditor = function (options) {
         // All mention of "xpath" in this function is from when this function
         // displayed the xpath editor. It has been adapted to show any editor.
         var _this = this,
@@ -1946,9 +1951,9 @@ define([
         options.loadEditor(_this.$f.find('.fd-xpath-editor-content'), options);
     };
 
-    fn.displayXPathEditor = function(options) {
+    fn.displayXPathEditor = function (options) {
         options.headerText = gettext("Expression Editor");
-        options.loadEditor = function($div, options) {
+        options.loadEditor = function ($div, options) {
             require(['vellum/expressionEditor'], function (expressionEditor) {
                 expressionEditor.showXPathEditor($div, options);
             });
@@ -1989,7 +1994,7 @@ define([
             });
     };
 
-    fn.alertUser = function(message) {
+    fn.alertUser = function (message) {
         this._resetMessages([{
             level: 'info',
             message: message,
@@ -2012,7 +2017,8 @@ define([
     };
 
     fn._resetMessages = function (errors) {
-        var error, messages_div = this.$f.find('.fd-messages');
+        var error, 
+            messages_div = this.$f.find('.fd-messages');
 
         function asArray(value) {
             // TODO: I don't like this array business, should be refactored away
@@ -2031,12 +2037,12 @@ define([
             // default with a clickable indicator to show them?
 
             error = errors[errors.length - 1];
-            var showMessage = function() {
+            var showMessage = function () {
                 messages_div.html(alert_global({
                     messageType: MESSAGE_TYPES[error.level],
-                    messages: asArray(error.message)
+                    messages: asArray(error.message),
                 }))
-                .fadeIn(500);
+                    .fadeIn(500);
             };
             if (messages_div.is(":visible")) {
                 messages_div.fadeOut(500, showMessage);
@@ -2046,7 +2052,7 @@ define([
         }
     };
 
-    fn.sectionIsCollapsed = function(section) {
+    fn.sectionIsCollapsed = function (section) {
         var collapseKey = "collapse-" + section.slug;
         if (section.slug === "main") {
             // Always show basic section
@@ -2057,7 +2063,7 @@ define([
             section.isCollapsed;
     };
 
-    fn.collapseSection = function(slug, shouldCollapse) {
+    fn.collapseSection = function (slug, shouldCollapse) {
         var $fieldset = $(".fd-question-fieldset[data-slug='" + slug + "']"),
             $command = $(".fd-section-changer [data-slug='" + slug + "']");
         if (shouldCollapse) {
@@ -2078,7 +2084,7 @@ define([
                 fieldsetTitle: options.displayName,
                 fieldsetSlug: options.slug,
                 isCollapsed: !!isCollapsed,
-                help: options.help
+                help: options.help,
             })),
             $fieldsetContent = $sec.find('.fd-fieldset-content');
         options.properties.map(function (prop) {
@@ -2087,7 +2093,7 @@ define([
                 displayXPathEditor: function (options) {
                     _this.data.core.currentlyEditedProperty = prop.options.path;
                     _this.displayXPathEditor(options);
-                }
+                },
             }));
             elemWidget.setValue(elemWidget.currentValue);
             elemWidget.on("change", function () {
@@ -2113,13 +2119,13 @@ define([
                 isCopyable: !multiselect && mug.options.isCopyable,
                 sections: multiselect ? [] : _.chain(_this.getSections(mug))
                     .rest()
-                    .filter(function(s) {
+                    .filter(function (s) {
                         // Limit to sections relevant to this mug
-                        return _.some(_.map(s.properties, function(property) {
+                        return _.some(_.map(s.properties, function (property) {
                             return getWidgetClassAndOptions(property, mug);
                         }));
                     })
-                    .map(function(s) {
+                    .map(function (s) {
                         // Just pass the template a show/hide flag
                         return _.extend({
                             show: !_this.sectionIsCollapsed(s),
@@ -2161,7 +2167,7 @@ define([
                     ret.push({
                         slug: questions[i],
                         name: q.typeName,
-                        icon: q.icon
+                        icon: q.icon,
                     });
                 }
             }
@@ -2172,7 +2178,7 @@ define([
         var $questionTypeChanger = $(question_type_changer({
             currentQuestionIcon: mug.getIcon(),
             currentTypeName: mug.options.typeName,
-            questions: changeable ? getQuestionList(mug) : []
+            questions: changeable ? getQuestionList(mug) : [],
         }));
         $questionTypeChanger.find('.change-question').click(function (e) {
             try {
@@ -2191,7 +2197,7 @@ define([
         this.setTreeActions(mug);
     };
 
-    fn.setTreeActions = function(mug) {
+    fn.setTreeActions = function (mug) {
         var _this = this,
             tree = _this.data.core.$tree,
             action_id = "add_choice";
@@ -2208,7 +2214,7 @@ define([
                         _this.setCurrentMug(mug);
                         _this.addQuestion("Choice");
                     });
-                }
+                },
             });
         } else {
             tree.jstree(true).remove_action(mug.ufid, action_id);
@@ -2226,16 +2232,16 @@ define([
             warnings = form.getSerializationWarnings();
         if (warnings.length) {
             var message = $(form_errors_template({
-                    errors: warnings,
-                    displayLanguage: displayLanguage
-                }));
+                errors: warnings,
+                displayLanguage: displayLanguage,
+            }));
             forAction = forAction ? " " + gettext("and") + " " + forAction : "";
             this.alert(gettext("There are errors in the form"), message, [
                 {
                     title: gettext("Fix Manually"),
                     action: function () {
                         _this.data.core.$modal.modal('hide');
-                    }
+                    },
                 }, {
                     title: gettext("Fix Automatically") + forAction,
                     cssClasses: 'btn-primary',
@@ -2245,8 +2251,8 @@ define([
                         _this.data.core.$modal.modal('hide');
                         retry();
                         _this.refreshVisibleData();
-                    }
-                }
+                    },
+                },
             ]);
             return false;
         }
@@ -2278,14 +2284,14 @@ define([
                 {
                     title: gettext('Fix the problem (recommended)'),
                     cssClasses: "btn-primary",
-                    action: function() {
+                    action: function () {
                         _this.closeModal();
                     },
                 },
                 {
                     title: gettext('Save anyway'),
                     cssClasses: "btn-default",
-                    action: function() {
+                    action: function () {
                         _this.closeModal();
                         _this.send(formText, forceFullSave ? 'full' : null);
                     },
@@ -2316,7 +2322,7 @@ define([
             var diff_match_patch = require('diff-match-patch'),
                 dmp = new diff_match_patch();
             patch = dmp.patch_toText(
-                dmp.patch_make(this.data.core.lastSavedXForm, formText)
+                dmp.patch_make(this.data.core.lastSavedXForm, formText),
             );
             // abort if diff too long and send full instead
             if (patch.length > formText.length && opts.saveUrl) {
@@ -2336,7 +2342,7 @@ define([
             url: url,
             data: data,
             dataType: 'json',
-            error: function() {
+            error: function () {
                 hidePageSpinner();
             },
             success: function (data) {
@@ -2353,7 +2359,7 @@ define([
                         } else {
                             hidePageSpinner();
                             _this.showOverwriteWarning(_this.send.bind(_this),
-                                                       formText, data.xform);
+                                formText, data.xform);
                         }
                         return;
                     } else if (CryptoJS.SHA1(formText).toString() !== data.sha1) {
@@ -2365,7 +2371,7 @@ define([
                 _this.opts().core.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
                 _this._setURLHash(_this._propertiesMug);
-            }
+            },
         });
     };
 
@@ -2393,10 +2399,10 @@ define([
                         gettext("The {displaytext} " +
                             "appears in the application. This text will not " +
                             "appear in data exports."),
-                        {displaytext: "<strong>" + gettext("Display Text") + "</strong>"}
+                        {displaytext: "<strong>" + gettext("Display Text") + "</strong>"},
                     ) + "</p> ",
-                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder"
-                }
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Form+Builder",
+                },
             },
             {
                 slug: "data_source",
@@ -2407,8 +2413,8 @@ define([
                     title: gettext("Data Source"),
                     text: gettext("You can configure an external data source like a " +
                         "case list or lookup table to use as the choices for " +
-                        "a multiple choice question.")
-                }
+                        "a multiple choice question."),
+                },
             },
             {
                 slug: "logic",
@@ -2420,8 +2426,8 @@ define([
                     text: gettext("Use logic to control when questions are asked and what answers are valid. " +
                         "You can add logic to display a question based on a previous answer, to make " +
                         "the question required or ensure the answer is in a valid range."),
-                    link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
-                }
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations",
+                },
             },
             {
                 displayName: gettext("Media"),
@@ -2431,8 +2437,8 @@ define([
                 help: {
                     title: gettext("Media"),
                     text: gettext("This will allow you to add images, audio or video media to a question, or other custom content."),
-                    link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare"
-                }
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Multimedia+in+CommCare",
+                },
             },
             {
                 slug: "advanced",
@@ -2444,9 +2450,9 @@ define([
                     title: gettext("Advanced"),
                     text: gettext("These are advanced settings and are not needed for most applications.  " +
                         "Please only change these if you have a specific need!"),
-                    link: "https://confluence.dimagi.com/display/commcarepublic/Application+Building"
-                }
-            }
+                    link: "https://confluence.dimagi.com/display/commcarepublic/Application+Building",
+                },
+            },
         ];
     };
 
@@ -2468,7 +2474,7 @@ define([
 
     fn.getMediaProperties = function () {
         return [
-            "mediaItext"
+            "mediaItext",
         ];
     };
 
@@ -2503,7 +2509,7 @@ define([
         }
         return {
             widget: propDef.widget || widgets.text,
-            options: $.extend(true, {path: propPath}, propDef)
+            options: $.extend(true, {path: propPath}, propDef),
         };
     }
 
@@ -2531,7 +2537,7 @@ define([
         form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
     };
 
-    fn.duplicateMugProperties = function(mug) {};
+    fn.duplicateMugProperties = function (mug) {};
 
     fn.beforeSerialize = function () {};
     fn.afterSerialize = function () {};
@@ -2629,6 +2635,6 @@ define([
         onFormSave: function (data) {},
         bindBeforeUnload: function (handler) {
             $(window).on('beforeunload', handler);
-        }
+        },
     }, fn);
 });

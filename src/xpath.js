@@ -3,7 +3,7 @@ define([
     'xpath',
 ], function (
     _,
-    xpath
+    xpath,
 ) {
     return {
         // hashtagInfo properties:
@@ -43,7 +43,7 @@ define([
                         return hashtagInfo.invertedHashtagMap[expr];
                     }
                     return null;
-                }
+                },
             }));
         },
         createParser: function (xpathmodels) {

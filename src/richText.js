@@ -46,8 +46,8 @@ define([
     'vellum/xml',
     'vellum/hqAnalytics',
     'ckeditor',
-    'ckeditor-jquery'
-], function(
+    'ckeditor-jquery',
+], function (
     require,
     _,
     $,
@@ -59,59 +59,59 @@ define([
     util,
     xml,
     analytics,
-    CKEDITOR
-){
+    CKEDITOR,
+) {
     var FORM_REF_REGEX = /^#form\//,
         INVALID_PREFIX = "#invalid/xpath ",
         // http://stackoverflow.com/a/16459606/10840
         bubbleWidgetDefinition = {
-        template:
+            template:
             '<span class="label label-datanode label-datanode-internal">' +
               '<i class="fa fa-question-circle">&nbsp;</i>' +
               'example widget, not used' +
             '</span>',
-        upcast: function ( element ) {
-            return element.name === 'span' && element.hasClass('label-datanode');
-        },
-        init: function() {
+            upcast: function (element) {
+                return element.name === 'span' && element.hasClass('label-datanode');
+            },
+            init: function () {
             // TODO: PR to ckeditor to make changing drag ui supported
-            var $this = $(this.element.$),
-                width = $this.innerWidth(),
-                height = $this.outerHeight(),
-                dragContainer = this.dragHandlerContainer,
-                editor = this.editor;
-            dragContainer.setStyles({
-                width: width + 'px',
-                height: height + 'px',
-                left: '0px'
-            });
-
-            if (editor.commands.createPopover) {
-                var _this = this;
-
-                // Look for deleted bubbles
-                editor.on('change', function(e) {
-                    editor.widgets.checkWidgets({ initOnlyNew: 1 });
+                var $this = $(this.element.$),
+                    width = $this.innerWidth(),
+                    height = $this.outerHeight(),
+                    dragContainer = this.dragHandlerContainer,
+                    editor = this.editor;
+                dragContainer.setStyles({
+                    width: width + 'px',
+                    height: height + 'px',
+                    left: '0px',
                 });
 
-                // if the editor is still being initialized then this command
-                // won't be enabled until it is ready
-                if (editor.status === "ready") {
-                    editor.execCommand('createPopover', _this);
-                } else {
-                    editor.on('instanceReady', function () {
-                        editor.execCommand('createPopover', _this);
+                if (editor.commands.createPopover) {
+                    var _this = this;
+
+                    // Look for deleted bubbles
+                    editor.on('change', function (e) {
+                        editor.widgets.checkWidgets({ initOnlyNew: 1 });
                     });
+
+                    // if the editor is still being initialized then this command
+                    // won't be enabled until it is ready
+                    if (editor.status === "ready") {
+                        editor.execCommand('createPopover', _this);
+                    } else {
+                        editor.on('instanceReady', function () {
+                            editor.execCommand('createPopover', _this);
+                        });
+                    }
                 }
-            }
-        }
-    };
+            },
+        };
 
     CKEDITOR.plugins.add('bubbles', {
         requires: 'widget',
         init: function (editor) {
             editor.widgets.add('bubbles', bubbleWidgetDefinition);
-        }
+        },
     });
 
     CKEDITOR.config.allowedContent = true;
@@ -145,7 +145,7 @@ define([
      *    createPopover - function to create a popover on the bubble.
      *        arguments are editor, ckwidget
      */
-    var editor = function(input, form, options) {
+    var editor = function (input, form, options) {
         // HACK use 1/4 em space to fix cursor movement/hiding near bubble
         var TRAILING_SPACE = "\u2005";
         function insertHtmlWithSpace(content) {
@@ -177,7 +177,7 @@ define([
         wrapper = {
             getValue: function (callback) {
                 if (callback) {
-                    input.promise.then(function() {
+                    input.promise.then(function () {
                         callback(fromRichText(editor.getData()));
                     });
                 } else if (newval !== NOTSET) {
@@ -230,7 +230,7 @@ define([
                 editor.fire("saveSnapshot");
                 return wrapper;
             },
-            focus: function() {
+            focus: function () {
                 if (editor.status === "ready") {
                     editor.focus();
                 } else {
@@ -272,7 +272,7 @@ define([
             var selection = editor.getSelection();
             var range = selection.getRanges()[0];
             if (range) {
-                var pCon = range.startContainer.getAscendant({p:2},true);
+                var pCon = range.startContainer.getAscendant({p: 2},true);
                 if (pCon) {
                     var newRange = new CKEDITOR.dom.range(range.document);
                     newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
@@ -285,7 +285,7 @@ define([
             return fromRichText(html, form, options.isExpression);
         };
 
-        editor.on('paste', function(event) {
+        editor.on('paste', function (event) {
             var data = event.data;
             if (data.dataTransfer && data.dataTransfer.getData("Text")) {
                 // Get plain text instead of HTML because HTML encoded
@@ -307,7 +307,7 @@ define([
                 data.type = 'html';
                 data.dataValue = $('<div />').text(text).html()
                     .replace(/\n/g, "<br />")
-                    .replace(/  /g, " &nbsp;");
+                    .replace(/ {2}/g, " &nbsp;");
             } else {
                 // fall back to HTML
                 // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
@@ -340,7 +340,7 @@ define([
                 if (isInvalid(text)) {
                     text = escapedHashtags.transform(
                         text.slice(INVALID_PREFIX.length),
-                        function (v) { return v; }
+                        function (v) { return v; },
                     );
                 }
                 // always copy plain text, not HTML
@@ -450,20 +450,20 @@ define([
      */
     var formats = {
             'dateFormat': {
-                serialize: function(currentValue, dataAttrs) {
+                serialize: function (currentValue, dataAttrs) {
                     return _.template("format-date(date(<%=xpath%>), '<%=dateFormat%>')")({
                         xpath: currentValue,
-                        dateFormat: dataAttrs.dateFormat
+                        dateFormat: dataAttrs.dateFormat,
                     });
                 },
             },
             'value': {
-                serialize: function(currentValue) {
+                serialize: function (currentValue) {
                     return _.template('&lt;output value="<%=xpath%>" /&gt;')({
-                        xpath: currentValue
+                        xpath: currentValue,
                     });
                 },
-            }
+            },
         },
         formatOrdering = ['dateFormat', 'value'];
 
@@ -480,7 +480,7 @@ define([
      */
     function applyFormats(dataAttrs) {
         var currentValue = dataAttrs.value;
-        _.each(formatOrdering, function(format) {
+        _.each(formatOrdering, function (format) {
             if (dataAttrs[format]) {
                 currentValue = formats[format].serialize(currentValue, dataAttrs);
             }
@@ -501,10 +501,10 @@ define([
 
         if (topLevelPaths.length) {
             steps = topLevelPaths[0].steps;
-            dispValue = steps[steps.length-1].name;
+            dispValue = steps[steps.length - 1].name;
         } else {
             steps = hashtags[0].toHashtag().split('/');
-            dispValue = steps[steps.length-1];
+            dispValue = steps[steps.length - 1];
         }
         return dispValue;
     }
@@ -520,11 +520,11 @@ define([
             if (!FORM_REF_REGEX.test(xpath)) {
                 if (form.isValidHashtag(xpath)) {
                     return {
-                        classes: ['label-datanode-external', 'fcc fcc-fd-case-property']
+                        classes: ['label-datanode-external', 'fcc fcc-fd-case-property'],
                     };
                 } else if (form.hasValidHashtagPrefix(form.normalizeHashtag(xpath))) {
                     return {
-                        classes: ['label-datanode-external-unknown', 'fa-solid fa-triangle-exclamation']
+                        classes: ['label-datanode-external-unknown', 'fa-solid fa-triangle-exclamation'],
                     };
                 }
             }
@@ -603,7 +603,7 @@ define([
      * or if the '<' character is followed by a space (to avoid matching with
      * '<' or '>' characters used as attributes)
      */
-    function sanitizeInput (text) {
+    function sanitizeInput(text) {
         var regex = /<(?!output| )/g;
         if (!regex.test(text)) {
             return text;
@@ -625,7 +625,7 @@ define([
         text = $('<div />').text(xml.humanize(text)).html();
         text = text.replace(/{(.+?)}/g, function (match, id) {
             return places.hasOwnProperty(id) ?
-                    $("<div>").append(places[id]).html() : match;
+                $("<div>").append(places[id]).html() : match;
         });
         return text;
     }
@@ -707,7 +707,7 @@ define([
         if (isInvalid(value)) {
             value = escapedHashtags.transform(
                 value.slice(INVALID_PREFIX.length),
-                form.normalizeXPath.bind(form)
+                form.normalizeXPath.bind(form),
             );
         }
         return value;
@@ -724,7 +724,7 @@ define([
         if (isInvalid(value)) {
             value = escapedHashtags.transform(
                 value.slice(INVALID_PREFIX.length),
-                form.normalizeHashtag.bind(form)
+                form.normalizeHashtag.bind(form),
             );
         }
         return value;
@@ -737,7 +737,7 @@ define([
      */
     function toHtml(text) {
         text = text.replace(/\n/g, "</p><p>")
-                   .replace(/  /g, " &nbsp;");
+            .replace(/ {2}/g, " &nbsp;");
         return "<p>" + text + "</p>";
     }
 
@@ -748,18 +748,18 @@ define([
      */
     function fromHtml(html) {
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
-                   .replace(/<p>/ig,"")
-                   .replace(/<\/p>/ig, "\n")
-                   .replace(/<br \/>/ig, "\n")
-                   .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
-                   // While copying widgets with text, CKEditor adds these html elements
-                   .replace(/<span\b[^>]*?id="?cke_bm_\d+\w"?\b[^>]*?>.*?<\/span>/ig, "")
-                   .replace(/<span\b[^>]*?data-cke-copybin-(start|end)[^<]*?<\/span>/ig, "")
-                   // CKEditor uses zero-width spaces as markers
-                   // and sometimes they leak out (on copy/paste?)
-                   .replace(/\u200b+/ig, " ")
-                   // fixup final </p>, which is is not a newline
-                   .replace(/\n$/, "");
+            .replace(/<p>/ig,"")
+            .replace(/<\/p>/ig, "\n")
+            .replace(/<br \/>/ig, "\n")
+            .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
+        // While copying widgets with text, CKEditor adds these html elements
+            .replace(/<span\b[^>]*?id="?cke_bm_\d+\w"?\b[^>]*?>.*?<\/span>/ig, "")
+            .replace(/<span\b[^>]*?data-cke-copybin-(start|end)[^<]*?<\/span>/ig, "")
+        // CKEditor uses zero-width spaces as markers
+        // and sometimes they leak out (on copy/paste?)
+            .replace(/\u200b+/ig, " ")
+        // fixup final </p>, which is is not a newline
+            .replace(/\n$/, "");
     }
 
     /**
@@ -859,7 +859,7 @@ define([
                 title = util.escape(hashtag),
                 labelMug = widget.mug.form.getMugByPath(xpath),
                 description = labelMug && labelMug.p.labelItext ?
-                            labelMug.p.labelItext.get() : "",
+                    labelMug.p.labelItext.get() : "",
                 isDate = labelMug && labelMug.__className.indexOf("Date") === 0,
                 $dragContainer = $(dragContainer.$),
                 $imgs = $dragContainer.children("img"),
@@ -911,7 +911,7 @@ define([
                     show: 350,  // be less annoying
                     hide: 200,  // allow time for user to move cursor into popover
                 },
-            }).on('shown.bs.popover', function() {
+            }).on('shown.bs.popover', function () {
                 var type = isFormRef ? 'form' : 'case';
                 analytics.fbUsage("Hovered over easy " + type + " reference");
                 analytics.workflow("Hovered over easy reference");
@@ -933,7 +933,7 @@ define([
             ckwidget.on('destroy', function (e)  {
                 try {
                     $imgs.popover('destroy');
-                } catch(err) {
+                } catch (err) {
                     // sometimes these are already destroyed
                 }
             });

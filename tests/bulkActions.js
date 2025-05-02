@@ -5,11 +5,11 @@ define([
     'tests/utils',
     'vellum/richText',
     'vellum/javaRosa/util',
-], function(
+], function (
     chai,
     $,
     _,
-    util
+    util,
 ) {
     var assert = chai.assert,
         CASE_DATA = [{
@@ -82,7 +82,7 @@ define([
         }];
 
 
-    describe("Bulk form actions", function() {
+    describe("Bulk form actions", function () {
 
         describe("should make all applicable questions required", function () {
             function test(qType, isRequired) {
@@ -96,7 +96,8 @@ define([
                     }
                 });
             }
-            var form, map = {};
+            var form, 
+                map = {};
             before(function () {
                 form = util.loadXML("");
                 map.Text = util.addQuestion("Text");
@@ -123,7 +124,8 @@ define([
         });
 
         describe("should set matching case properties as default values on applicable question types", function () {
-            var form, map = {};
+            var form, 
+                map = {};
 
             function test(qType, isMatching, existingDefault) {
                 var defaultStatus = existingDefault ? " matched the existing default value" : " was not applicable",

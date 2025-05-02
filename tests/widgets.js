@@ -6,7 +6,7 @@ define([
     'vellum/expressionEditor',
     'vellum/mugs',
     'vellum/richText',
-    'vellum/util'
+    'vellum/util',
 ], function (
     chai,
     $,
@@ -15,7 +15,7 @@ define([
     expressionEditor,
     mugs,
     richText,
-    vellumUtil
+    vellumUtil,
 ) {
     var assert = chai.assert,
         real_showXPathEditor = expressionEditor.showXPathEditor,
@@ -36,9 +36,9 @@ define([
                 core: {
                     onReady: function () {
                         assert(this.isPluginEnabled("modeliteration"),
-                               "modeliteration plugin should be enabled");
+                            "modeliteration plugin should be enabled");
                         done();
-                    }
+                    },
                 },
                 features: {rich_text: false},
             });
@@ -63,7 +63,7 @@ define([
             var value = '"line 1 \n line 2"',
                 escaped = '"line 1 &#10; line 2"';
             util.addQuestion("DataBindOnly", "hidden", {
-                calculateAttr: value
+                calculateAttr: value,
             });
             util.clickQuestion("/data/hidden");
             var input = $("[name=property-calculateAttr]");
@@ -86,7 +86,7 @@ define([
             var value = '"line 1 \n line 2"',
                 escaped = '"line 1 &#10; line 2"',
                 hidden = util.addQuestion("DataBindOnly", "hidden", {
-                    calculateAttr: ""
+                    calculateAttr: "",
                 });
             util.clickQuestion("/data/hidden");
 
@@ -112,7 +112,7 @@ define([
             var value = '/data/text',
                 escaped = '#form/text',
                 hidden = util.addQuestion("DataBindOnly", "hidden", {
-                    calculateAttr: escaped
+                    calculateAttr: escaped,
                 });
             assert.equal(hidden.p.calculateAttr, escaped);
             util.clickQuestion("/data/hidden");
@@ -177,12 +177,12 @@ define([
             });
         });
 
-        describe("should preserve", function() {
+        describe("should preserve", function () {
             var data = [
-                    ["id", "type", "labelItext:en-default"],
-                    ["/newlines", "Text", "list\n\n* item\n* item\n"],
-                    ["/spaces", "Text", "a  b   c    d"],
-                ];
+                ["id", "type", "labelItext:en-default"],
+                ["/newlines", "Text", "list\n\n* item\n* item\n"],
+                ["/spaces", "Text", "a  b   c    d"],
+            ];
             before(function () {
                 util.loadXML("");
                 util.paste(data);

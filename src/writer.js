@@ -7,7 +7,7 @@ define([
     $,
     _,
     XMLWriter,
-    util
+    util,
 ) {
     var createXForm = function (form) {
         var xmlWriter = new XMLWriter('UTF-8', '1.0');
@@ -76,12 +76,12 @@ define([
         //e.g. <model><instance><data> <--- we're at <data> now.
 
         jrm = form.formJRM;
-        if(!jrm) {
+        if (!jrm) {
             jrm = "http://dev.commcarehq.org/jr/xforms";
         }
 
         uuid = form.formUuid;
-        if(!uuid) {
+        if (!uuid) {
             uuid = "http://openrosa.org/formdesigner/" + util.generate_xmlns_uuid();
         }
 
@@ -92,13 +92,13 @@ define([
         xmlWriter.writeAttributeString("name", form.formName || gettext("New Form"));
     };
 
-    function write_html_tag_boilerplate (xmlWriter, form) {
-        xmlWriter.writeAttributeString( "xmlns:h", "http://www.w3.org/1999/xhtml" );
-        xmlWriter.writeAttributeString( "xmlns:orx", "http://openrosa.org/jr/xforms" );
-        xmlWriter.writeAttributeString( "xmlns", "http://www.w3.org/2002/xforms" );
-        xmlWriter.writeAttributeString( "xmlns:xsd", "http://www.w3.org/2001/XMLSchema" );
-        xmlWriter.writeAttributeString( "xmlns:jr", "http://openrosa.org/javarosa" );
-        xmlWriter.writeAttributeString( "xmlns:vellum", "http://commcarehq.org/xforms/vellum" );
+    function write_html_tag_boilerplate(xmlWriter, form) {
+        xmlWriter.writeAttributeString("xmlns:h", "http://www.w3.org/1999/xhtml");
+        xmlWriter.writeAttributeString("xmlns:orx", "http://openrosa.org/jr/xforms");
+        xmlWriter.writeAttributeString("xmlns", "http://www.w3.org/2002/xforms");
+        xmlWriter.writeAttributeString("xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+        xmlWriter.writeAttributeString("xmlns:jr", "http://openrosa.org/javarosa");
+        xmlWriter.writeAttributeString("xmlns:vellum", "http://commcarehq.org/xforms/vellum");
         var ignore = [];
         if (form.mayDisableRichText && !form.richText) {
             ignore.push('richText');
@@ -162,7 +162,7 @@ define([
                 var dataValue = mug.p.dataValue,
                     xmlnsAttr = mug.p.xmlnsAttr;
                 
-                if (dataValue){
+                if (dataValue) {
                     xmlWriter.writeString(dataValue);
                 }
                 if (mug.options.writeDataNodeXML) {
@@ -171,7 +171,7 @@ define([
                 if (mug.p.comment) {
                     xmlWriter.writeAttributeString('vellum:comment', mug.p.comment);
                 }
-                if (xmlnsAttr){
+                if (xmlnsAttr) {
                     xmlWriter.writeAttributeString("xmlns", xmlnsAttr);
                 }
                 if (extra) {
@@ -189,7 +189,7 @@ define([
 
     var createBindList = function (dataTree, xmlWriter) {
         dataTree.walk(function (mug, nodeID, processChildren) {
-            if(mug && mug.options.getBindList) {
+            if (mug && mug.options.getBindList) {
                 _.each(mug.options.getBindList(mug), function (attrs) {
                     xmlWriter.writeStartElement('bind');
                     _.each(attrs, function (value, key) {
@@ -216,7 +216,7 @@ define([
         _.each(form.getSetValues(), function (sv) { writeSetValue(sv, {form: form}); });
 
         dataTree.walk(function (mug, nodeID, processChildren) {
-            if(mug && mug.options.getSetValues) {
+            if (mug && mug.options.getSetValues) {
                 _.each(mug.options.getSetValues(mug), function (setValue) {
                     writeSetValue(setValue, mug);
                 });
@@ -227,7 +227,7 @@ define([
 
     var createControlBlock = function (form, xmlWriter) {
         form.tree.walk(function (mug, nodeID, processChildren) {
-            if(!mug) {
+            if (!mug) {
                 // root node
                 processChildren();
                 return;
@@ -364,6 +364,6 @@ define([
 
 
     return {
-        createXForm: createXForm
+        createXForm: createXForm,
     };
 });

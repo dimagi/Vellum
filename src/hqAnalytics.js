@@ -1,6 +1,6 @@
-define([], function() {
+define([], function () {
 
-    var noop = function() {};
+    var noop = function () {};
 
     return {
         fbUsage: noop,

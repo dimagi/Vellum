@@ -1,9 +1,9 @@
 define([
     'vellum/util',
-    'underscore'
+    'underscore',
 ], function (
     util,
-    _
+    _,
 ) {
     /**
      * Children is a list of objects.
@@ -87,7 +87,8 @@ define([
          * Return a list of Mug objects, or empty list for no children.
          */
         getChildrenMugs: function () {
-            var i, retList = [];
+            var i, 
+                retList = [];
             for (i in this.children) {
                 if (this.children.hasOwnProperty(i)) {
                     retList.push(this.children[i].getValue());
@@ -114,16 +115,16 @@ define([
             var result = nodeFunc(this), // call on self
                 children = this.getChildren(),
                 child;
-            if(result) {
+            if (result) {
                 store.push(result);
             }
-            for(child in children) {
-                if(children.hasOwnProperty(child)){
+            for (child in children) {
+                if (children.hasOwnProperty(child)) {
                     // have each children also perform the func
                     children[child].treeMap(nodeFunc, store, afterChildFunc);
                 }
             }
-            if(afterChildFunc) {
+            if (afterChildFunc) {
                 afterChildFunc(this, result);
             }
             return store;
@@ -176,7 +177,7 @@ define([
         },
         validateTree: function (validateValue) {
             var i, childResult;
-            if(!this.getValue()){
+            if (!this.getValue()) {
                 throw 'Tree contains node with no values!';
             }
             if (!validateValue(this.getValue())) {
@@ -186,7 +187,7 @@ define([
             for (i in this.getChildren()) {
                 if (this.getChildren().hasOwnProperty(i)) {
                     childResult = this.getChildren()[i].validateTree(validateValue);
-                    if(!childResult){
+                    if (!childResult) {
                         return false;
                     }
                 }
@@ -200,7 +201,7 @@ define([
                 return this;
             }
             return this.parent.getRootNode();
-        }
+        },
     };
 
     /**
@@ -244,7 +245,7 @@ define([
             if (parent) {
                 parent.removeChild(node);
                 this.fire({
-                    type: 'change'
+                    type: 'change',
                 });
             }
         },
@@ -285,23 +286,23 @@ define([
                     refNodeParent = this.getParentNode(refNode);
                     refNodeIndex = refNodeParent.children.indexOf(refNode);
                     refNodeParent.insertChild(node, refNodeIndex);
-                break;
+                    break;
                 case null:
                 case 'after':
                     refNodeParent = this.getParentNode(refNode);
                     refNodeIndex = refNodeParent.children.indexOf(refNode);
                     refNodeParent.insertChild(node, refNodeIndex + 1);
-                break;
+                    break;
                 case 'into': // not officially supported by, but happens to work in JSTree
                 case 'last':
                     refNode.addChild(node);
-                break;
+                    break;
                 case 'first':
                     refNode.insertChild(node, 0);
-                break;
+                    break;
                 case 'index':
                     refNode.insertChild(node, index);
-                break;
+                    break;
                 default:
                     throw "in insertMug() position argument MUST be null, " +
                           "'before', 'after', 'into', 'first' or 'last'. " +
@@ -309,7 +310,7 @@ define([
             }
             this.fire({
                 type: 'change',
-                mug: mug
+                mug: mug,
             });
             return node;
         },
@@ -416,13 +417,13 @@ define([
         walk: function (callback) {
             this.rootNode.walk(callback);
         },
-        isTreeValid: function(validateValue) {
+        isTreeValid: function (validateValue) {
             var rChildren = this.rootNode.getChildren(),
-            i, retVal;
-            for (i in rChildren){
-                if(rChildren.hasOwnProperty(i)){
+                i, retVal;
+            for (i in rChildren) {
+                if (rChildren.hasOwnProperty(i)) {
                     retVal = rChildren[i].validateTree(validateValue);
-                    if(!retVal){
+                    if (!retVal) {
                         return false;
                     }
                 }
@@ -431,7 +432,7 @@ define([
         },
         getRootNode: function () {
             return this.rootNode;
-        }
+        },
     };
 
     Tree.Node = Node; // exposed for walk filters
