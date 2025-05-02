@@ -20,10 +20,14 @@ module.exports = {
         "requirejs": false,
         "gettext": false,
         "ngettext": false,
+        // For tests
         "assert": false,
         "it": false,
         "describe": false,
+        "before": false,
         "beforeEach": false,
+        "after": false,
+        "afterEach": false,
     },
 
     // http://eslint.org/docs/rules/
