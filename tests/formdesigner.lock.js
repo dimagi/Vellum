@@ -1,4 +1,3 @@
-/*jshint multistr: true */
 define([
     'chai',
     'tests/utils',

@@ -1,4 +1,3 @@
-/*jshint multistr: true */
 define([
     'tests/options',
     'tests/utils',

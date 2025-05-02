@@ -1,4 +1,3 @@
-/*jshint multistr: true */
 /*
  Updating these tests can be hard due to whitespace differences.
  The following approach is recommended:
