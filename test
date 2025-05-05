@@ -1,10 +1,10 @@
 #! /bin/bash
-# run vellum tests and jshint the source
+# run vellum tests and lint the source
 
 export PATH=`npm bin`:$PATH
 
 if [[ "$1" == "--help" ]]; then
-    echo "USAGE: $0 [TEST_GREP] [--no-jshint]"
+    echo "USAGE: $0 [TEST_GREP] [--no-lint]"
     exit
 fi
 
@@ -14,9 +14,9 @@ if [[ "$1" != "" && "$1" != -* ]]; then
     shift
 fi
 
-run_jshint="true"
-if [[ "$1" == "--no-jshint" ]]; then
-    run_jshint="false"
+run_lint="true"
+if [[ "$1" == "--no-lint" ]]; then
+    run_lint="false"
     shift
 fi
 
@@ -39,8 +39,7 @@ else
     fi
 fi
 
-if [[ "$run_jshint" == "true" ]]; then
-    jshint src \
-        && jshint --config tests/.jshintrc tests \
-        && echo "jshint passed"
+if [[ "$run_lint" == "true" ]]; then
+    npx eslint .
+        && echo "linting passed"
 fi
