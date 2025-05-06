@@ -312,7 +312,7 @@ define([
             if (window.getSelection) {
                 const sel = window.getSelection();
                 if (sel.getRangeAt && sel.rangeCount) {
-                    const range = sel.getRangeAt(0);
+                    let range = sel.getRangeAt(0);
                     range.deleteContents();
 
                     const el = document.createElement("div");
@@ -754,7 +754,7 @@ define([
             var dateFormatID = util.get_guid();
             var getTitle = function () {
                 var title_ = title,
-                    format = $widget.attr("data-date-format");
+                    format = $element.attr("data-date-format");
                 if (isDate || format) {
                     title_ += date_format_popover({
                         guid: dateFormatID,
