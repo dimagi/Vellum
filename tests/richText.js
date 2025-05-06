@@ -1,3 +1,5 @@
+const { template } = require("underscore");
+
 /*
  * expected structure of a richText widget:
  *
@@ -111,9 +113,12 @@ define([
     function externalIcon () { return icon('fcc-fd-case-property'); }
     function externalUnknownIcon () { return icon('fa-solid fa-triangle-exclamation'); }
 
-    function makeBubble(xpath, dispValue, icon, internal) {
+    function makeBubble(xpath, dispValue, icon, internal, id) {
         var span = $('<span>').addClass('label label-datanode').attr({
             'data-value': xpath,
+            'contenteditable': false,
+            'data-toggle': 'popover',
+            'id': id,
         });
         if (internal && !_.isString(internal)) {
             span.addClass('label-datanode-internal');
@@ -151,6 +156,17 @@ define([
         });
     }
 
+    function getSpanId(htmlString) {
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = htmlString;
+        const spanElement = tempElement.querySelector('span[id]');
+        return spanElement ? spanElement.id : null;
+    }
+
+    function removeSpanId(htmlString) {
+        return htmlString.replace(/<span([^>]*)\s+id="[^"]*"([^>]*)>/g, '<span$1$2>');
+    }
+
     describe("Rich text utilities", function() {
         before(setupGlobalForm);
 
@@ -166,16 +182,18 @@ define([
 
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
+                    const richTextText = richText.toRichText(val[0], form, opts)
                     assert.strictEqual(
-                        richText.toRichText(val[0], form, opts),
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
+                        richTextText,
+                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html()
                     );
                 });
 
                 it("from text to html with output value: " + val[0], function() {
+                    const richTextText = richText.toRichText(outputValueTemplateFn(val[0]), form);
                     assert.strictEqual(
-                        richText.toRichText(outputValueTemplateFn(val[0]), form),
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
+                        richTextText,
+                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html()
                     );
                 });
             });
@@ -197,13 +215,15 @@ define([
 
             _.each(dates, function(val) {
                 it("from text to html with output value: " + val.xmlValue, function() {
+                    const richTextText = richText.toRichText(outputValueTemplateFn(val.xmlValue), form)
                     assert.equal(
-                        richText.toRichText(outputValueTemplateFn(val.xmlValue), form),
+                        richTextText,
                         wrapWithDivP(makeBubble(
                             val.valueInBubble,
                             val.bubbleDispValue,
                             val.icon,
-                            val.internalRef
+                            val.internalRef,
+                            getSpanId(richTextText)
                         ).attr(val.extraAttrs)).html()
                     );
                 });
@@ -242,7 +262,7 @@ define([
             _.each(equations, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(val[0], form, opts),
+                        removeSpanId(richText.toRichText(val[0], form, opts)),
                         "<p>" + val[1] + "</p>"
                     );
                 });
@@ -299,14 +319,14 @@ define([
 
             _.each(text, function(val){
                 it("from html to text: " + JSON.stringify(val[1]), function() {
-                    assert.strictEqual(richText.fromRichText(val[1]), val[0]);
+                    assert.strictEqual(removeSpanId(richText.fromRichText(val[1])), val[0]);
                 });
             });
 
             _.each(text, function(val){
                 it("(text -> html -> text): " + JSON.stringify(val[0]), function() {
                     assert.strictEqual(
-                        richText.fromRichText(richText.toRichText(val[0], form)),
+                        removeSpanId(richText.fromRichText(richText.toRichText(val[0], form))),
                         val[0]
                     );
                 });
@@ -352,7 +372,7 @@ define([
 
             _.each(items, function (item) {
                 it("to text: " + item[0], function () {
-                    var result = richText.bubbleOutputs(item[0], form, true),
+                    var result = removeSpanId(richText.bubbleOutputs(item[0], form, true)),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
                             if (form.getIconByPath("#form/" + name)) {
                                 var output = makeBubble("#form/" + name, name, ico, true);
