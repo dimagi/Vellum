@@ -97,7 +97,7 @@ define([
             value = inner ? $(value) : xhtml(value, true);
         }
         var xml = new XMLSerializer(),
-            xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ \/>])/g,
+            xmlns = / xmlns:vellum="http:\/\/commcarehq.org\/xforms\/vellum"([ />])/g,
             wrapper = /^<([\w:.-]+)(?:\s+[\w:.-]+=(["'])[^]*?\2)*\s*(?:\/>|>([^]*)<\/\1>)$/g,
             // emptytag does not match <tag attr="a > b"></tag>
             emptytag = /(<([\w:.-]+)(?:\s[^>]*|))><\/\2>/g,

@@ -60,7 +60,7 @@ define([
             'video-inline': 'fd_hqInlineVideo',
             text: 'fd_hqtext',
         },
-        EXT = /(\.[^\/.]+)?$/;
+        EXT = /(\.[^/.]+)?$/;
 
     // These functions were extracted out when separating the uploader code from
     // the JavaRosa Itext media widget code.  They could easily be made part of
