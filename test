@@ -40,6 +40,5 @@ else
 fi
 
 if [[ "$run_lint" == "true" ]]; then
-    npx eslint .
-        && echo "linting passed"
+    npx eslint . && echo "linting passed"
 fi
