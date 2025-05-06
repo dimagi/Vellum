@@ -340,6 +340,87 @@ define([
         return wrapper;
     };
 
+    function ckSelect(editor, index, length) {
+        function iterNodes(parent) {
+            var i = 0,
+                children = parent.getChildren(),
+                count = children.count(),
+                inner = null;
+            function next() {
+                var child;
+                if (inner) {
+                    child = inner();
+                    if (child !== null) {
+                        return child;
+                    }
+                    inner = null;
+                }
+                if (i >= count) {
+                    return null;
+                }
+                child = children.getItem(i);
+                i++;
+                if (child.type === CKEDITOR.NODE_ELEMENT) {
+                    var name = child.getName().toLowerCase();
+                    if (name === "p") {
+                        inner = iterNodes(child);
+                        return next();
+                    }
+                    if (name === "span" || name === "br") {
+                        return {node: child, length: 1, isText: false};
+                    }
+                    throw new Error("not implemented: " + name);
+                } else if (child.type === CKEDITOR.NODE_TEXT) {
+                    return {
+                        node: child,
+                        length: child.getText().length,
+                        isText: true,
+                    };
+                }
+                throw new Error("unhandled element type: " + child.type);
+            }
+            return next;
+        }
+        function getNodeOffset(index, nextNode) {
+            var offset = index,
+                node = nextNode();
+            while (node) {
+                if (node.length >= offset) {
+                    return {
+                        node: node.node,
+                        offset: offset,
+                        isText: node.isText,
+                    };
+                }
+                offset -= node.length;
+                node = nextNode();
+            }
+            throw new Error("index is larger than content: " + index);
+        }
+        editor.focus();
+        var sel = editor.getSelection(),
+            nextNode = iterNodes(sel.root),
+            node = getNodeOffset(index, nextNode),
+            range = sel.getRanges()[0];
+        if (node.isText) {
+            range.setStart(node.node, node.offset);
+        } else {
+            range.setStartAfter(node.node);
+        }
+        if (length) {
+            nextNode = iterNodes(sel.root);
+            node = getNodeOffset(index + length, nextNode);
+            if (node.isText) {
+                range.setEnd(node.node, node.offset);
+            } else {
+                range.setEndAfter(node.node);
+            }
+        } else {
+            range.collapse(true);
+        }
+        sel.selectRanges([range]);
+    }
+
     /*
      * formats specifies the serialization for different formats that can be
      * applied to bubbles.
