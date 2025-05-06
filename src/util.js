@@ -41,9 +41,9 @@ define([
             metaKey = (isMac && e.ctrlKey) || (!isMac && e.metaKey),
             key = String(e.key),
             code = e.which;
-        if (KEY_CODES.hasOwnProperty(code)) {
+        if (Object.prototype.hasOwnProperty.call(KEY_CODES, code)) {
             key = KEY_CODES[code];
-        } else if (KEY_CODES.hasOwnProperty(key)) {
+        } else if (Object.prototype.hasOwnProperty.call(KEY_CODES, key)) {
             key = KEY_CODES[key];
         } else if (key.length === 1 || key === "Unidentified") {
             // Work around Alt+<key> on Mac produces strange e.key values.
@@ -113,7 +113,7 @@ define([
                 handler,
                 i,
                 type = typeof event === 'string' ? event : event.type;
-            if (registry.hasOwnProperty(type)) {
+            if (Object.prototype.hasOwnProperty.call(registry, type)) {
                 array = registry[type];
                 for (i = 0; i < array.length; i += 1) {
                     handler = array[i];
@@ -152,7 +152,7 @@ define([
                 parameters: parameters,
                 context: context,
             };
-            if (registry.hasOwnProperty(type)) {
+            if (Object.prototype.hasOwnProperty.call(registry, type)) {
                 registry[type].push(handler);
             } else {
                 registry[type] = [handler];
@@ -188,7 +188,7 @@ define([
                     });
                     return [type, handlers];
                 }));
-            } else if (registry.hasOwnProperty(type)) {
+            } else if (Object.prototype.hasOwnProperty.call(registry, type)) {
                 registry[type] = _.filter(registry[type], function (handler) {
                     return handler.context !== context;
                 });
@@ -429,7 +429,7 @@ define([
      */
     that.format = function (string, map) {
         return string.replace(/\{([a-z][\w_]*)\}/ig, function (match, key) {
-            if (map.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(map, key)) {
                 return map[key];
             }
             return match;
