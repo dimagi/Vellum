@@ -40,7 +40,7 @@ requirejs.config({
     paths: {
         'vellum': '.',
 
-        'CryptoJS': '../lib/sha1',
+        'CryptoJS': '../node_modules/crypto-js/crypto-js',
         'diff-match-patch': '../lib/diff_match_patch',
         'jquery': '../node_modules/jquery/dist/jquery',
         'jquery.jstree': '../node_modules/jstree/dist/jstree',

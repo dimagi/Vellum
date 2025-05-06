@@ -21,6 +21,7 @@
         "at.js": "1.5.4",
         "bootstrap": "3.4.1",
         "codemirror": "5.61.1",
+        "crypto-js": "4.2.0",
         "fuse.js": "2.7.4",
         "jquery": "3.6.0",
         "jsdiff": "components/jsdiff#master",
