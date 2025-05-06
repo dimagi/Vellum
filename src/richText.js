@@ -259,41 +259,81 @@ define([
             },
         };
 
+        inputElement.addEventListener('copy', function(e) {
+            e.preventDefault();
+            const selection = window.getSelection();
+            let selectedText = '';
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const container = document.createElement('div');
+                container.appendChild(range.cloneContents());
+                selectedText = fromRichText(container.innerHTML);
+            }
+            if (e.clipboardData) {
+                e.clipboardData.setData('text/plain', selectedText);
+            }
+        });
 
         inputElement.addEventListener('paste', function(event) {
-            const text = event.clipboardData.getData('text/plain');
-            console.log("plaintext: " + text);
-            const pastedHTML = (event.clipboardData || window.clipboardData).getData('text/html');
-            console.log("pastedHTML: " + pastedHTML);
-            // var data = event.data;
-            // if (data.dataTransfer && data.dataTransfer.getData("Text")) {
-            //     // Get plain text instead of HTML because HTML encoded
-            //     // content from applications like Word or your text
-            //     // editor often contains unwanted styling information.
-            //     //
-            //     // Insert HTML-ified plain text rather than HTML with
-            //     // bubbles because we cannot reliably find hashtags in
-            //     // text fragments that are not valid XPath expressions.
-            //     // We need to know where the text is being pasted (is it
-            //     // inside a string?), and finally put the cursor at the
-            //     // end of the pasted content. It's hard, but maybe
-            //     // possible? For now this tries to follow the law of
-            //     // least surprise by inserting plain text. Unfortunately
-            //     // a surprising thing happens later: hashtags are
-            //     // automatically converted to bubbles the next time the
-            //     // expression is loaded in a rich text editor.
-            //     var text = data.dataTransfer.getData("Text");
-            //     data.type = 'html';
-            //     data.dataValue = $('<div />').text(text).html()
-            //         .replace(/\n/g, "<br />")
-            //         .replace(/  /g, " &nbsp;");
-            // } else {
-            //     // fall back to HTML
-            //     // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
-            //     var style = /<style type="text\/css">.*?<\/style>/g;
-            //     data.dataValue = data.dataValue.replace(style, "");
-            // }
+            event.preventDefault();
+            if (event.clipboardData && event.clipboardData.getData("text/plain")) {
+                // Get plain text instead of HTML because HTML encoded
+                // content from applications like Word or your text
+                // editor often contains unwanted styling information.
+                //
+                // Insert HTML-ified plain text rather than HTML with
+                // bubbles because we cannot reliably find hashtags in
+                // text fragments that are not valid XPath expressions.
+                // We need to know where the text is being pasted (is it
+                // inside a string?), and finally put the cursor at the
+                // end of the pasted content. It's hard, but maybe
+                // possible? For now this tries to follow the law of
+                // least surprise by inserting plain text. Unfortunately
+                // a surprising thing happens later: hashtags are
+                // automatically converted to bubbles the next time the
+                // expression is loaded in a rich text editor.
+                // var text = data.dataTransfer.getData("Text");
+                const text = event.clipboardData.getData("text/plain");
+                const htmlText = document.createElement('div');
+                htmlText.textContent = text; // This escapes the text
+                const htmlContent = htmlText.innerHTML
+                    .replace(/\n/g, "<br />")
+                    .replace(/  /g, " &nbsp;");
+                insertHTML(htmlContent);
+            } else if (event.clipboardData.getData("text/html")){
+                let htmlData = event.clipboardData.getData("text/html");
+                const style = /<style[^>]*>.*?<\/style>/g;
+                htmlData = htmlData.replace(style, "");
+                insertHTML(htmlData);
+            }
         });
+
+        function insertHTML(html) {
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                if (sel.getRangeAt && sel.rangeCount) {
+                    const range = sel.getRangeAt(0);
+                    range.deleteContents();
+
+                    const el = document.createElement("div");
+                    el.innerHTML = html;
+                    const frag = document.createDocumentFragment();
+                    let node, lastNode;
+
+                    while ((node = el.firstChild)) {
+                        lastNode = frag.appendChild(node);
+                    }
+                    range.insertNode(frag);
+                    if (lastNode) {
+                        range = range.cloneRange();
+                        range.setStartAfter(lastNode);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
+            }
+        }
 
         input.data("ckwrapper", wrapper);
         resolveEditorPromise()// probably can just set it to a resolved promise to beging with or remove the code that waits for it.
