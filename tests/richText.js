@@ -101,7 +101,7 @@ define([
             }],
         }];
 
-    function icon(iconClass) { 
+    function icon(iconClass) {
         if (iconClass.startsWith("fa-")) {
             return $('<i>').addClass(iconClass).html('&nbsp;');
         }
@@ -820,6 +820,8 @@ define([
                     });
                 });
 
+                const editorUpDelay = 500;
+
                 it("should not change saved state", function (done) {
                     util.loadXML(BURPEE_XML);
                     assert(!util.saveButtonEnabled(), "Save button should not be enabled");
@@ -836,7 +838,7 @@ define([
                     util.clickQuestion("total_num_burpees");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -852,7 +854,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -868,7 +872,7 @@ define([
                     util.clickQuestion("text");
                     var widget = util.getWidget('property-relevantAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -883,7 +887,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -894,7 +900,7 @@ define([
                     util.clickQuestion("text");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -905,7 +911,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -917,7 +925,7 @@ define([
                     util.clickQuestion("text");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -928,7 +936,118 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
+
+                it("should destroy popover when moving mouse away", function (done) {
+                    util.loadXML(BURPEE_XML);
+                    util.clickQuestion("total_num_burpees");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last p:first');
+                                assert.strictEqual($popover.text(),
+                                    "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+
+                                bubble.mouseleave();
+                                // popover destroy just fades the popover
+                                assert.strictEqual($('.popover:not(.fade)').length, 0);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
+
+                // it("should expand tree on click show in question list", function (done) {
+                //     util.paste([
+                //         ["id", "type", "relevantAttr"],
+                //         ["/group", "Group", "null"],
+                //         ["/group/text", "Text", "null"],
+                //         ["/text", "Text", '#form/group/text'],
+                //     ]);
+                //     var group = util.getMug("group");
+                //     util.collapseGroup(group);
+                //     util.clickQuestion("text");
+                //     var widget = util.getWidget('property-relevantAttr');
+                //     widget.input.promise.then(function () {
+                //         var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                //         assert(bubble.length, "No bubbles detected");
+                //         $(document).one('shown.bs.popover', function() {
+                //             try {
+                //                 var $popover = $('.popover-content:last');
+                //                 var $link = $popover.find("a");
+                //                 assert.strictEqual($(".jstree-hovered").length, 0);
+                //                 assert($link.length);
+                //                 $link.click();
+                //                 assert.strictEqual($(".jstree-hovered").length, 1);
+                //                 done();
+                //             } finally {
+                //                 $(".popover").remove();
+                //             }
+                //         });
+                //         setTimeout(function() {
+                //             bubble.mouseenter();
+                //         }, editorUpDelay);
+                //     });
+                // });
+
+                it("should show case property description on popover", function (done) {
+                    util.loadXML();
+                    var mug = util.addQuestion("Text", "text");
+                    mug.p.calculateAttr = "#case/dob";
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.equal($popover.find('p:first').text(), "Date of Birth");
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
+
+                it("should split long text in case property descriptions", function (done) {
+                    util.loadXML();
+                    var mug = util.addQuestion("Text", "text");
+                    mug.p.calculateAttr = "#case/long";
+                    let expected = "Property with a_very_long_word_in_the_description_that_ex\n\nceeds_43_chars";
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.equal($popover.find('p:first').text(), expected);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -937,7 +1056,7 @@ define([
                     util.clickQuestion("total_num_burpees");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -945,7 +1064,7 @@ define([
                                 assert.strictEqual($popover.text(),
                                     "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
 
-                                widget.input.ckeditor().editor.widgets.destroyAll();
+                                widget.input.data("ckwrapper").destroy();
                                 // popover destroy just fades the popover
                                 assert.strictEqual($('.popover:not(.fade)').length, 0);
                                 done();
@@ -953,7 +1072,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -962,10 +1083,10 @@ define([
                     util.addQuestion("Text", "text");
                     var widget = util.getWidget('property-relevantAttr'),
                         editor = richText.editor(widget.input);
-                    editor.on("instanceReady", function () {
+                    setTimeout(function() {
                         editor.setValue("#form/unknown");
                         done();
-                    });
+                    }, editorUpDelay);
                 });
 
                 describe("for date references", function () {
@@ -997,8 +1118,7 @@ define([
                                 output = '<output value="' + xpath + '" />';
                             editor.setValue(output, function () {
                                 var bubble = widget.input
-                                        .find('.cke_widget_drag_handler_container')
-                                        .children('img').first(),
+                                        .find('[data-toggle="popover"]').first(),
                                     $desc;
                                 assert(bubble.length, "No bubbles detected");
 
