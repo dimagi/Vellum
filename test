@@ -23,8 +23,7 @@ fi
 temp="/tmp/test-$$.tmp"
 
 # run the tests
-node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/?grep="$qs" -t 500000 | tee
-$temp
+node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/?grep="$qs" -t 500000 | tee $temp
 
 RESULT="${PIPESTATUS[0]}"
 if grep -q "Parse error" $temp; then
