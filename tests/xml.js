@@ -13,7 +13,7 @@ define([
     xml,
     REGEXP_CRASHING_DEBUG_ITEXT,
     REGEXP_CRASHING_DEBUG_ITEXT_PARSED,
-    SLOW_REGEXP_ITEXT
+    SLOW_REGEXP_ITEXT,
 ) {
     var assert = chai.assert;
 
@@ -80,43 +80,43 @@ define([
 
         it("should escape attribute value with > and trailing text (v1)", function () {
             eq('<output value="2 > 3" /> text',
-               '<output value="2 &gt; 3" /> text');
+                '<output value="2 &gt; 3" /> text');
         });
 
         it("should escape attribute value with > and trailing text (v2)", function () {
             eq("<output value='2 > 3' /> text",
-               '<output value="2 &gt; 3" /> text', false);
+                '<output value="2 &gt; 3" /> text', false);
         });
 
         it("should escape attribute value with > and trailing text (v3)", function () {
             eq('<output value="2 > 3"/>text',
-               '<output value="2 &gt; 3" />text', false);
+                '<output value="2 &gt; 3" />text', false);
         });
 
         it("should escape attribute value with > and trailing text (v4)", function () {
             eq('<output value="2 > 3"></output> text',
-               '<output value="2 &gt; 3" /> text', false);
+                '<output value="2 &gt; 3" /> text', false);
         });
 
         it("should escape attribute value with > and trailing text (v5)", function () {
             eq('<out:p_3-6. h:v-1._="2 > 3" />text',
-               '<out:p_3-6. h:v-1._="2 &gt; 3" />text');
+                '<out:p_3-6. h:v-1._="2 &gt; 3" />text');
         });
 
         it("should escape attribute value with < and trailing text", function () {
             eq('<output value="2 < 3" /> text',
-               '<output value="2 &lt; 3" /> text');
+                '<output value="2 &lt; 3" /> text');
         });
 
         it("should escape < character before tag", function () {
             // immortalizing https://github.com/dimagi/Vellum/pull/212
             eq('your visit count must be < <output value="/path" />',
-               'your visit count must be &lt; <output value="/path" />');
+                'your visit count must be &lt; <output value="/path" />');
         });
 
         it("should escape > character before tag", function () {
             eq('your visit count must be > <output value="/path" />',
-               'your visit count must be &gt; <output value="/path" />');
+                'your visit count must be &gt; <output value="/path" />');
         });
 
         it("should preserve attribute value with path", function () {
@@ -236,7 +236,7 @@ define([
 
         it("should convert output tag", function () {
             eq('<output value="1 &amp; 2 &lt; 3" />',
-               '<output value="1 & 2 < 3" />', true);
+                '<output value="1 & 2 < 3" />', true);
         });
 
         it("should not unescape '&amp;' when part of a double escaped character", function () {
@@ -322,11 +322,11 @@ define([
             eq(xml.query(
                 "& <output value=\"/data/question1\" " +
                 "vellum:value=\"#form/question1\"> " +
-                "text-after *should* remain. ~& not #disrupt the\nflow</output>"
+                "text-after *should* remain. ~& not #disrupt the\nflow</output>",
             ).toString(),
-                "&amp; <output value=\"/data/question1\" " +
+            "&amp; <output value=\"/data/question1\" " +
                 "vellum:value=\"#form/question1\" /> " +
-                "text-after *should* remain. ~&amp; not #disrupt the\nflow"
+                "text-after *should* remain. ~&amp; not #disrupt the\nflow",
             );
         });
     });

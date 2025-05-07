@@ -23,7 +23,7 @@ define([
     Fuse,
     undomanager,
     util,
-    analytics
+    analytics,
 ) {
     // Load these dependencies in the background after all other run-time
     // dependencies have been resolved, since they shouldn't be necessary
@@ -115,15 +115,15 @@ define([
     var INSTANCE_REGEXP = /(^)instance\((['"])([^'"]+)\2\)/i,
         HASHTAG_NAMESPACE = /^#([^\/]+)/;
 
-    function Form (opts, vellum, mugTypes) {
+    function Form(opts, vellum, mugTypes) {
         var _this = this;
 
         this.setValues = [];
         this._setValueId = 1;
 
         this._logicManager = new logic.LogicManager(this, {
-                allowedDataNodeReferences: opts.allowedDataNodeReferences
-            });
+            allowedDataNodeReferences: opts.allowedDataNodeReferences,
+        });
 
         // Some things in the form and mug methods depend on the UI.  These
         // should eventually be factored out.
@@ -161,13 +161,13 @@ define([
         this.xpath = xpath.parser(this);
         this.undomanager = new undomanager();
 
-        this.undomanager.on('reset', function(e) {
+        this.undomanager.on('reset', function (e) {
             _this.vellum.adjustToWindow();
         });
 
         //make the object event aware
         util.eventuality(this);
-        this.on('form-load-finished', function() {
+        this.on('form-load-finished', function () {
             _this.fuse = new Fuse(_this);
         }).on('question-create', function () {
             _this.undomanager.resetUndo();
@@ -200,9 +200,9 @@ define([
             }
             form.updateKnownInstances(
                 _.chain(vellum.datasources.getDataSources([]))
-                 .map(function (source) { return [source.id, source.uri]; })
-                 .object()
-                 .value()
+                    .map(function (source) { return [source.id, source.uri]; })
+                    .object()
+                    .value(),
             );
             if (oldHashtags) {
                 _.each(oldHashtags, function (xpath, tag) {
@@ -216,12 +216,12 @@ define([
             form.fixBrokenReferences();
             this._logicManager.validateExternalReferences();
         },
-        inferHashtagMeanings: function(hashtag, xpath_) {
+        inferHashtagMeanings: function (hashtag, xpath_) {
             if (hashtag && xpath && this.shouldInferHashtags) {
                 this._inferHashtags(hashtag, xpath_);
             }
         },
-        isValidHashtag: function(tag) {
+        isValidHashtag: function (tag) {
             tag = this.normalizeHashtag(tag);
             return this.hashtagMap.hasOwnProperty(tag);
         },
@@ -232,23 +232,23 @@ define([
          * contain at least one character after the slash. This does a raw
          * string analysis, it does not convert xpath expressions to hashtags.
          */
-        hasValidHashtagPrefix: function(tag) {
+        hasValidHashtagPrefix: function (tag) {
             var lastSlashIndex = tag.lastIndexOf("/");
             return lastSlashIndex !== -1 &&
                 tag.length > lastSlashIndex + 1 &&
                 this.hashtagTransformations.hasOwnProperty(tag.substring(0, lastSlashIndex + 1));
         },
-        addHashtag: function(hashtag, xpath) {
+        addHashtag: function (hashtag, xpath) {
             this.hashtagMap[hashtag] = xpath;
             this.invertedHashtagMap[xpath] = hashtag;
         },
-        initHashtag: function(hashtag, xpath) {
+        initHashtag: function (hashtag, xpath) {
             if (!this.hashtagMap[hashtag]) {
                 this.addHashtag(hashtag, xpath);
                 this.hashtagNamespaces[HASHTAG_NAMESPACE.exec(hashtag)[1]] = true;
             }
         },
-        removeHashtag: function(hashtag) {
+        removeHashtag: function (hashtag) {
             if (this.hashtagMap.hasOwnProperty(hashtag)) {
                 delete this.invertedHashtagMap[this.hashtagMap[hashtag]];
                 delete this.hashtagMap[hashtag];
@@ -283,7 +283,7 @@ define([
             // Work around js-xpath limitation that fails to parse hashtag
             // nodes with filters by converting hashtags to xpath.
             function hasHashtagFilter(expr) {
-                if (!richText.isInvalid(expr)) return false;
+                if (!richText.isInvalid(expr)) {return false;}
                 var unescaped = richText.unescapeHashtags(expr, form);
                 if (unescaped) {
                     try {
@@ -324,18 +324,18 @@ define([
             }
             return data;
         },
-        referenceHashtag: function(hashtag, mug, property) {
+        referenceHashtag: function (hashtag, mug, property) {
             if (this.hasValidHashtagPrefix(hashtag)) {
                 this.referenceInstance('casedb', mug, property);
                 this.referenceInstance('commcaresession', mug, property);
             }
         },
-        dataTree: function() {
+        dataTree: function () {
             var rootId = this.getBasePath().slice(1,-1),
                 dataTree = new Tree(rootId, 'data'),
                 diffDataParents = {},
                 _this = this;
-            this.tree.walk(function(mug, nodeID, processChildren) {
+            this.tree.walk(function (mug, nodeID, processChildren) {
                 if (mug) {
                     if (mug.options.isControlOnly) {
                         return;
@@ -366,7 +366,7 @@ define([
         fireChange: function (mug) {
             this.fire({
                 type: 'change',
-                mug: mug
+                mug: mug,
             });
         },
         /**
@@ -402,8 +402,8 @@ define([
                 if (!meta) {
                     // attrs.src not found, try to find by id
                     var ids = _.indexBy(this.instanceMetadata, function (m) {
-                            return m.attributes.id;
-                        });
+                        return m.attributes.id;
+                    });
                     meta = attrs.id && ids.hasOwnProperty(attrs.id) ? ids[attrs.id] : null;
                     if (meta && meta.internal) {
                         // assign new src to internal instance
@@ -436,7 +436,7 @@ define([
             if (!meta) {
                 meta = InstanceMetadata({
                     src: attrs.src,
-                    id: attrs.id
+                    id: attrs.id,
                 }, attrs.children, mug || null, property);
                 if (!attrs.src && !attrs.children) {
                     meta.internal = true;
@@ -538,13 +538,13 @@ define([
             var instances = this.knownInstances;
             if (map) {
                 var metas = _.indexBy(this.instanceMetadata, function (m) {
-                        return m.attributes.id;
-                    });
+                    return m.attributes.id;
+                });
                 _.each(map, function (instance, id) {
                     if (instance && !instances.hasOwnProperty(id)) {
                         if (instance.children) {
                             instances[id] = { children: $(instance.children)};
-                        } else if (_.isString(instance)){
+                        } else if (_.isString(instance)) {
                             // assume a string is the src
                             instances[id] = { src: instance };
                         } else {
@@ -584,8 +584,8 @@ define([
                 return false;
             }
             var meta = _.find(this.instanceMetadata, function (m) {
-                    return m.attributes.src === src;
-                });
+                return m.attributes.src === src;
+            });
             if (meta) {
                 if (meta.dropReference(mug, property)) {
                     this.instanceMetadata = _.without(this.instanceMetadata, meta);
@@ -614,7 +614,7 @@ define([
                     _id: this._setValueId++,
                     event: event,
                     ref: ref,
-                    value: value
+                    value: value,
                 };
                 this.setValues.push(setValue);
             }
@@ -638,7 +638,7 @@ define([
                 this._updateHashtags();
             }
             this.fire({
-                type: 'change'
+                type: 'change',
             });
         },
         createXML: function () {
@@ -651,8 +651,8 @@ define([
          * autocomplete skip logic wizard.
          */
         getMugList: function () {
-            return this.tree.treeMap( function (node) {
-                if(node.isRootNode) {
+            return this.tree.treeMap(function (node) {
+                if (node.isRootNode) {
                     return;
                 }
 
@@ -668,8 +668,7 @@ define([
             errObj = FormError(errObj);
             if (!errObj.key) {
                 this.errors.push(errObj);
-            }
-            else {
+            } else {
                 var removed = null;
                 for (var i = 0; i < this.errors.length; i++) {
                     if (errObj.isMatch(this.errors[i])) {
@@ -719,7 +718,7 @@ define([
         },
         findFirstMatchingChild: function (parentMug, match) {
             var parent = (parentMug ? this.tree.getNodeFromMug(parentMug)
-                                    : this.tree.rootNode);
+                : this.tree.rootNode);
             return _.find(parent.getChildrenMugs(), match);
         },
         insertMug: function (refMug, newMug, position) {
@@ -806,7 +805,8 @@ define([
             this.tree.walk(callback);
         },
         getDescendants: function (mug) {
-            var desc = this.getChildren(mug), i;
+            var desc = this.getChildren(mug), 
+                i;
             for (i = desc.length - 1; i >= 0; i--) {
                 desc = desc.concat(this.getDescendants(desc[i]));
             }
@@ -829,7 +829,7 @@ define([
                 return;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
-                postMovePaths = _(mugs).map(function(mug) { return mug.hashtagPath; }),
+                postMovePaths = _(mugs).map(function (mug) { return mug.hashtagPath; }),
                 postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
                 updates = {},
                 preMovePath;
@@ -846,8 +846,8 @@ define([
             if (oldId && mug.__className !== "Choice") {
                 // update first child of old parent with matching conflicted nodeID
                 var conflict = this.findFirstMatchingChild(oldParent, function (mug) {
-                        return mug.p.conflictedNodeId === oldId;
-                    });
+                    return mug.p.conflictedNodeId === oldId;
+                });
                 if (conflict) {
                     this.moveMug(conflict, "rename", oldId);
                 }
@@ -945,7 +945,7 @@ define([
                     type: 'property-changed',
                     property: property,
                     val: value,
-                    previous: previous
+                    previous: previous,
                 });
 
                 var event = {
@@ -953,7 +953,7 @@ define([
                     mug: mug,
                     property: property,
                     val: value,
-                    previous: previous
+                    previous: previous,
                 };
                 mug.validate(property);
                 this.fire(event);
@@ -995,14 +995,15 @@ define([
                 mug: mug,
                 refMug: refMug,
                 position: position,
-                isInternal: isInternal
+                isInternal: isInternal,
             });
             if (!isInternal) {
                 mug.options.afterInsert(this, mug);
             }
         },
         _updateMugPath: function (mug, oldHashtag, newHashtag) {
-            var map = this.mugMap, newPath;
+            var map = this.mugMap, 
+                newPath;
             delete map[this.normalizeHashtag(oldHashtag)];
             if (oldHashtag) {
                 this.removeHashtag(oldHashtag);
@@ -1042,8 +1043,8 @@ define([
         },
         isReferencedByOtherMugs: function (mug, except) {
             var exclude = _.object(_.map(except, function (mug) {
-                    return [mug.ufid, null];
-                }));
+                return [mug.ufid, null];
+            }));
             exclude[mug.ufid] = null;
             return this._logicManager.hasReferencingMug(mug, function (mug) {
                 return !exclude.hasOwnProperty(mug.ufid);
@@ -1070,7 +1071,7 @@ define([
             return this.mugMap[ufid];
         },
         getMugByPath: function (path) {
-            if(!path) { //no path specified
+            if (!path) { //no path specified
                 return null;
             }
             return this.mugMap[this.normalizeHashtag(path)];
@@ -1096,7 +1097,7 @@ define([
             });
             this._logicManager.forEachReferencingProperty(ufids, breakReferences);
         },
-        _addToUndoManager: function(mugs) {
+        _addToUndoManager: function (mugs) {
             function pushUndoItem(mug) {
                 if (ufids.hasOwnProperty(mug.ufid)) {
                     return; // already removed
@@ -1122,7 +1123,7 @@ define([
             _.each(mugs, pushUndoItem);
             this.undomanager.setUndo(stack);
         },
-        _removeMugFromForm: function(mug, ufids, isInternal) {
+        _removeMugFromForm: function (mug, ufids, isInternal) {
             if (ufids.hasOwnProperty(mug.ufid)) {
                 return; // already removed
             }
@@ -1185,7 +1186,7 @@ define([
         },
         generate_item_label: function (parentMug, name, i) {
             var node = (parentMug ? this.tree.getNodeFromMug(parentMug)
-                                  : this.tree.rootNode),
+                    : this.tree.rootNode),
                 items = node.getChildrenMugs(),
                 ret;
             if (!name) { name = "choice"; }
@@ -1216,7 +1217,7 @@ define([
             this.vellum.afterSerialize();
             return value;
         },
-        undo: function() {
+        undo: function () {
             this.undomanager.undo();
             this.fixBrokenReferences();
             this.vellum.selectSomethingOrHideProperties();
@@ -1302,6 +1303,6 @@ define([
 
     return {
         Form: Form,
-        InstanceMetadata: InstanceMetadata
+        InstanceMetadata: InstanceMetadata,
     };
 });

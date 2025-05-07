@@ -14,7 +14,7 @@ define([
     util,
     widgets,
     window_,
-    external_sources_tree
+    external_sources_tree,
 ) {
     var fn = {},
         DATABROWSER_HEIGHT = 0.33;
@@ -43,14 +43,14 @@ define([
                     }
                 });
             paneRatio = pane.height() / $('.fd-content-left').height();
-            $(window).scroll(function() {
+            $(window).scroll(function () {
                 if (pane.height() > headHeight) {
                     pane.height($('.fd-content-left').height() * paneRatio);
                     vellum.data.core.databrowser.panelHeight = pane.height();
                 }
             });
             searchBar = pane.find('#fdExternalSearch');
-            searchBar.on('keyup keypress', function(e) {
+            searchBar.on('keyup keypress', function (e) {
                 var code = e.keyCode || e.which;
                 if (code === 13) {
                     //disable submitting on enter
@@ -60,7 +60,7 @@ define([
             });
             fn.initDataBrowser(vellum);
             window_.preventDoubleScrolling(pane.find(".fd-scrollable"));
-            vellum.datasources.on("error", function(event) {
+            vellum.datasources.on("error", function (event) {
                 var container = vellum.data.core.databrowser.errorContainer;
                 if (container) {
                     // HQ will send a 400 (bad request) if it captures an error like an app build problem.
@@ -120,17 +120,17 @@ define([
                 },
                 worker: false,
                 multiple: false,
-                check_callback: function(operation, node, parent, position, more) {
+                check_callback: function (operation, node, parent, position, more) {
                     return false;
-                }
+                },
             },
             search: {
-                show_only_matches: true
+                show_only_matches: true,
             },
             conditionalevents: {
-                should_activate: function () { return false; }
+                should_activate: function () { return false; },
             },
-            "plugins" : [ "themes", "conditionalevents", "dnd", "search" ]
+            "plugins": [ "themes", "conditionalevents", "dnd", "search" ],
         });
         $search.keyup(_.debounce(function () {
             $tree.jstree(true).search($search.val());
@@ -144,8 +144,8 @@ define([
             return {
                 text: node.name,
                 icon: node.recursive || children.length ?
-                        "fcc fcc-fd-external-case" :
-                        "fcc fcc-fd-case-property",
+                    "fcc fcc-fd-external-case" :
+                    "fcc fcc-fd-case-property",
                 state: {opened: !node.recursive && children.length <= MAX_OPEN_NODE},
                 children: children,
                 data: {
@@ -156,7 +156,7 @@ define([
                     'data-content': node.description,
                     'data-container': 'body',
                     'data-trigger': 'hover',
-                }
+                },
             };
         }
         function handleDrop(node, info, target, event) {
@@ -176,10 +176,10 @@ define([
         }
         function flattenNode(node) {
             // data sources should be in a flat list instead of hierarchy
-            var subCases = _.filter(node.children, function(child) {
+            var subCases = _.filter(node.children, function (child) {
                 return child.children.length;
             });
-            node.children = _.filter(node.children, function(child) {
+            node.children = _.filter(node.children, function (child) {
                 return child.children.length === 0;
             });
             subCases = _.flatten(_.map(subCases, flattenNode));

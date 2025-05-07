@@ -127,7 +127,7 @@ define([
 ], function (
     $,
     _,
-    util
+    util,
 ) {
     var builders = {};
 
@@ -210,7 +210,7 @@ define([
                 uri: "",
                 path: "",
                 name: gettext("Not Found"),
-                structure: {}
+                structure: {},
             }]};
             that.loading = false;
             that.fire("change");
@@ -242,7 +242,7 @@ define([
                     dataType: 'json',
                     success: finish,
                     error: onError,
-                    data: {}
+                    data: {},
                 });
             } else {
                 that.endpoint(finish);
@@ -343,8 +343,8 @@ define([
             var tree = {
                     name: item.name || id,
                     description: item.description || '',
-                    recursive: false
-            },
+                    recursive: false,
+                },
                 source = item,
                 children = null;
             if (!item.structure && item.reference) {

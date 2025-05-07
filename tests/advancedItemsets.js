@@ -7,7 +7,7 @@ define([
     'vellum/itemset',
     'vellum/form',
     'text!static/itemset/test1.xml',
-    'text!static/itemset/inner-filters.xml'
+    'text!static/itemset/inner-filters.xml',
 ], function (
     options,
     util,
@@ -17,7 +17,7 @@ define([
     itemset,
     form,
     TEST_XML_1,
-    INNER_FILTERS_XML
+    INNER_FILTERS_XML,
 ) {
 
     var assert = chai.assert,
@@ -33,7 +33,7 @@ define([
                 core: {onReady: function () { done(); }},
                 features: {
                     advanced_itemsets: true,
-                }
+                },
             });
         }
         before(beforeFn);
@@ -51,7 +51,7 @@ define([
             var xml = call('createXML'),
                 $xml = util.parseXML(xml);
             assert($xml.find("instance[id=somefixture]").length,
-                   "somefixture instance not found:\n" + xml);
+                "somefixture instance not found:\n" + xml);
         });
 
         it("renames instance on add itemset with matching instance", function () {
@@ -72,9 +72,9 @@ define([
             var xml = call('createXML'),
                 $xml = util.parseXML(xml);
             assert($xml.find("instance[id=casedb]").length,
-                   "casedb instance not found:\n" + xml);
+                "casedb instance not found:\n" + xml);
             assert($xml.find("instance[id=cases]").length === 0,
-                   "cases instance should have been renamed/merged:\n" + xml);
+                "cases instance should have been renamed/merged:\n" + xml);
         });
 
         describe("parsing and serializing", function () {
@@ -101,11 +101,11 @@ define([
 
                 util.assertXmlEqual(
                     INNER_FILTERS_XML.replace('case_name', 'dummy'),
-                    call('createXML')
+                    call('createXML'),
                 );
             });
 
-            it("includes filter when in advanced mode", function() {
+            it("includes filter when in advanced mode", function () {
                 util.loadXML(TEST_XML_1);
                 clickQuestion("question1/itemset");
                 var mug = util.getMug("question1/itemset");
@@ -114,7 +114,7 @@ define([
                 assert($('[name=query]').val().indexOf(mug.p.filter) > 1);
             });
 
-            it("changes filter when in advanced mode", function() {
+            it("changes filter when in advanced mode", function () {
                 util.loadXML(TEST_XML_1);
                 clickQuestion("question1/itemset");
 
@@ -127,7 +127,7 @@ define([
                 $('.fd-data-source-save-button').click();
 
                 assert.strictEqual(mug.p.filter,
-                                   "'blah' = /data/no_question");
+                    "'blah' = /data/no_question");
             });
         });
     });

@@ -8,7 +8,7 @@ define([
     'text!static/intentManager/intent-with-unknown-attrs.xml',
     'text!static/intentManager/intent-with-no-mug.xml',
     'text!static/intentManager/printing-intent.xml',
-    'text!static/intentManager/custom-intent.xml'
+    'text!static/intentManager/custom-intent.xml',
 ], function (
     util,
     chai,
@@ -19,7 +19,7 @@ define([
     INTENT_WITH_UNKNOWN_ATTRS_XML,
     INTENT_WITH_NO_MUG_XML,
     PRINTING_INTENT_XML,
-    CUSTOM_INTENT_XML
+    CUSTOM_INTENT_XML,
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -56,7 +56,7 @@ define([
             },
         ];
 
-    describe("The intent manager plugin", function() {
+    describe("The intent manager plugin", function () {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -121,7 +121,7 @@ define([
                     $(".fd-kv-key[value=name]").map(function (i, el) {
                         return $(el).parent().parent().find(".fd-kv-val").val();
                     }).toArray(),
-                    ["/data/node1", "/data/node2"]
+                    ["/data/node1", "/data/node2"],
                 );
             });
 
@@ -132,7 +132,7 @@ define([
                     responses.map(function (i, node) {
                         return $(node).attr("ref");
                     }).toArray(),
-                    ["/data/node1", "/data/node2"], xml
+                    ["/data/node1", "/data/node2"], xml,
                 );
             });
 
@@ -140,33 +140,33 @@ define([
                 util.loadXML(xml);
                 assert.deepEqual(
                     util.getMug("intent").p.androidIntentResponse,
-                    {name: ["/data/node1", "/data/node2"]}
+                    {name: ["/data/node1", "/data/node2"]},
                 );
             });
         });
 
-        describe("printing mug", function() {
-            before(function() {
+        describe("printing mug", function () {
+            before(function () {
                 util.loadXML(PRINTING_INTENT_XML);
             });
 
-            it("should parse as a printing question", function() {
+            it("should parse as a printing question", function () {
                 assert.strictEqual(util.getMug('/data/print_data').__className, 'PrintIntent');
             });
 
-            it("should write the same as parse", function() {
+            it("should write the same as parse", function () {
                 util.assertXmlEqual(call('createXML'), PRINTING_INTENT_XML);
             });
 
-            it("should correctly parse filename", function() {
+            it("should correctly parse filename", function () {
                 assert.strictEqual(util.getMug('/data/print_data').p.docTemplate,
-                                   'jr://file/commcare/doc/data/print_data.doc');
+                    'jr://file/commcare/doc/data/print_data.doc');
             });
         });
 
-        describe("template selector", function() {
+        describe("template selector", function () {
             var vellum, mug;
-            before(function(done) {
+            before(function (done) {
                 util.init({
                     intents: {templates: templates},
                     features: {
@@ -177,7 +177,7 @@ define([
                         mug = util.addQuestion("AndroidIntent", "intent");
                         util.clickQuestion("intent");
                         done();
-                    }}
+                    }},
                 });
             });
 
@@ -185,11 +185,11 @@ define([
                 assert.equal($("[name=property-androidIntentAppId]").val(), "com.richard.lu.areamapper");
             });
 
-            it("should not show validation error on question add", function() {
+            it("should not show validation error on question add", function () {
                 assert.strictEqual(mug.spec.androidIntentAppId.validationFunc(mug), 'pass');
             });
 
-            it("should write the mime/type if supplied", function() {
+            it("should write the mime/type if supplied", function () {
                 $("[name=property-androidIntentAppId]").val("com.simprints.id.REGISTER").change();
                 var xml = util.call("createXML"),
                     $xml = util.parseXML(xml),
@@ -205,9 +205,9 @@ define([
             });
         });
 
-        describe("custom intents", function() {
+        describe("custom intents", function () {
             var vellum, mug, customIndex;
-            before(function(done) {
+            before(function (done) {
                 util.init({
                     intents: {templates: templates},
                     features: {
@@ -216,35 +216,35 @@ define([
                     },
                     core: {
                         onReady: function () {
-                        vellum = this;
-                        mug = util.addQuestion("AndroidIntent", "intent");
-                        util.clickQuestion("intent");
-                        customIndex = templates.length;
-                        done();
-                    }}
+                            vellum = this;
+                            mug = util.addQuestion("AndroidIntent", "intent");
+                            util.clickQuestion("intent");
+                            customIndex = templates.length;
+                            done();
+                        }},
                 });
             });
 
-            it("should always have one custom option", function() {
+            it("should always have one custom option", function () {
                 var customOption = $('[name=property-androidIntentAppId] option:contains("Custom")');
                 assert.lengthOf(customOption, 1, "incorrect number of custom options");
             });
 
-            it("should change text to not readonly when custom is selected", function() {
+            it("should change text to not readonly when custom is selected", function () {
                 $('[name=property-androidIntentAppId]').prop('selectedIndex', 0).change();
                 assert($("[name=property-androidIntentAppId-text]").attr('readonly'));
                 $('[name=property-androidIntentAppId]').prop('selectedIndex', customIndex).change();
                 assert(!$("[name=property-androidIntentAppId-text]").attr('readonly'));
             });
 
-            it("should change text to readonly when custom is not selected", function() {
+            it("should change text to readonly when custom is not selected", function () {
                 $('[name=property-androidIntentAppId]').prop('selectedIndex', customIndex).change();
                 assert(!$("[name=property-androidIntentAppId-text]").attr('readonly'));
                 $('[name=property-androidIntentAppId]').prop('selectedIndex', 0).change();
                 assert($("[name=property-androidIntentAppId-text]").attr('readonly'));
             });
 
-            it("should update the custom option when text is changed", function() {
+            it("should update the custom option when text is changed", function () {
                 $('[name=property-androidIntentAppId]').prop('selectedIndex', customIndex).change();
                 $('[name=property-androidIntentAppId-text]').val("fake.intent").change();
                 var customOption = $('[name=property-androidIntentAppId]')
@@ -258,37 +258,37 @@ define([
                     $("[name=property-androidIntentAppId]").val(temp.id).change();
                     assert.strictEqual(mug.p.androidIntentAppId, temp.id);
                     assert.strictEqual($("[name=property-androidIntentAppId-text]").val(),
-                                       temp.id);
+                        temp.id);
                     assert($("[name=property-androidIntentAppId-text]").attr('readonly'));
                 });
             });
 
-            describe("on load", function() {
-                before(function() {
+            describe("on load", function () {
+                before(function () {
                     util.loadXML(CUSTOM_INTENT_XML);
                 });
 
-                it("should display the correct intent", function() {
+                it("should display the correct intent", function () {
                     util.clickQuestion("not_breath_count");
                     assert.strictEqual($('[name=property-androidIntentAppId-text]').val(),
-                                       "android.intent.action.VIEW");
+                        "android.intent.action.VIEW");
                 });
             });
         });
 
-        describe("no intents", function() {
-            before(function(done) {
+        describe("no intents", function () {
+            before(function (done) {
                 util.init({
                     intents: {templates: templates},
                     features: {
                         custom_intents: false,
                         templated_intents: false,
                     },
-                    core: { onReady: function () { done(); } }
+                    core: { onReady: function () { done(); } },
                 });
             });
 
-            it("shows error on form load", function() {
+            it("shows error on form load", function () {
                 util.loadXML(CUSTOM_INTENT_XML);
                 var mug = util.getMug('not_breath_count');
                 assert.notStrictEqual(mug.spec.androidIntentAppId.validationFunc(mug), 'pass');

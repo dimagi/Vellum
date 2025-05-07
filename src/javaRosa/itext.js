@@ -4,16 +4,16 @@ define([
     'vellum/javaRosa/util',
     'vellum/util',
     'vellum/xml',
-    'vellum/core'
+    'vellum/core',
 ], function (
     _,
     $,
     jrUtil,
     util,
-    xml
+    xml,
 ) {
     var _nextItextItemKey = 1;
-    var ItextItem = function(options) {
+    var ItextItem = function (options) {
         this.forms = options.forms || [];
         this.id = options.id || "";
         this.autoId = _.isUndefined(options.autoId) ? true : options.autoId;
@@ -29,7 +29,7 @@ define([
                 id: this.id,
                 autoId: this.autoId,
                 itextModel: this.itextModel,
-                hasMarkdown: this.hasMarkdown
+                hasMarkdown: this.hasMarkdown,
             });
             return item;
         },
@@ -60,7 +60,7 @@ define([
             if (!this.hasForm(name)) {
                 var newForm = new ItextForm({
                     name: name,
-                    itextModel: this.itextModel
+                    itextModel: this.itextModel,
                 });
                 this.forms.push(newForm);
                 return newForm;
@@ -78,7 +78,7 @@ define([
             newForm.name = cloneTo;
             this.forms.push(newForm);
         },
-        get: function(form, language) {
+        get: function (form, language) {
             if (_.isUndefined(form) || form === null) {
                 form = "default";
             }
@@ -101,7 +101,7 @@ define([
          *        value is empty or matches the previous value of the
          *        default language will be set to the new value.
          */
-        set: function(value, form, language) {
+        set: function (value, form, language) {
             if (_.isUndefined(form) || form === null) {
                 form = "default";
             }
@@ -122,7 +122,7 @@ define([
                 itextForm.setValue(language, value);
             }
         },
-        defaultValue: function() {
+        defaultValue: function () {
             return this.get();
         },
         isEmpty: function () {
@@ -133,17 +133,17 @@ define([
             }
             return true;
         },
-        hasHumanReadableItext: function() {
+        hasHumanReadableItext: function () {
             var self = this;
-            return _.some(['default', 'long', 'short'].concat(jrUtil.SUPPORTED_MEDIA_TYPES), function(form) {
-                return self.hasForm(form) && _.every(self.itextModel.languages, function(lang) {
+            return _.some(['default', 'long', 'short'].concat(jrUtil.SUPPORTED_MEDIA_TYPES), function (form) {
+                return self.hasForm(form) && _.every(self.itextModel.languages, function (lang) {
                     return self.get(form, lang);
                 });
             });
         },
         mapLogicExpressions: function (fn) {
             var forms = this.getForms(),
-                ret = _.map(forms, function(form) {
+                ret = _.map(forms, function (form) {
                     return _.map(form.getOutputRefExpressions(), fn);
                 });
             return _.flatten(ret);
@@ -176,7 +176,7 @@ define([
             return new ItextForm({
                 itextModel: this.itextModel,
                 data: _.clone(this.data),
-                name: this.name
+                name: this.name,
             });
         },
         getValue: function (lang) {
@@ -319,7 +319,7 @@ define([
             } 
         },
         removeLanguage: function (lang) {
-            if(this.hasLanguage(lang)) {
+            if (this.hasLanguage(lang)) {
                 this.languages.splice(this.languages.indexOf(lang), 1);
             }
             // if we removed the default, reset it
@@ -347,9 +347,9 @@ define([
                 itextModel: this,
                 forms: [new ItextForm({
                     name: "default",
-                    itextModel: this
+                    itextModel: this,
                 })],
-                hasMarkdown: hasMarkdown
+                hasMarkdown: hasMarkdown,
             });
         },
         updateForMug: function (mug) {
@@ -382,7 +382,7 @@ define([
                     mug.p.constraintMsgItext = this.createItem();
                 }
             }
-        }
+        },
     };
 
     return {

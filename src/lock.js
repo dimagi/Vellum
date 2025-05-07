@@ -16,9 +16,9 @@
  */
 define([
     'jquery',
-    'vellum/core'
+    'vellum/core',
 ], function (
-    $
+    $,
 ) {
     $.vellum.plugin("lock", {}, {
         loadXML: function (xml) {
@@ -42,8 +42,7 @@ define([
             }
 
             if ((lock === 'node' || lock === 'value') && 
-                propertyPath === 'nodeID') 
-            {
+                propertyPath === 'nodeID') {
                 return true;
             } else if (lock === 'value' && propertyPath.indexOf('Itext') === -1) {
                 return true;
@@ -59,6 +58,6 @@ define([
         },
         isMugTypeChangeable: function (mug, mugPath) {
             return this.__callOld() && this.data.lock.locks[mugPath] !== 'value';
-        }
+        },
     });
 });

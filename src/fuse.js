@@ -5,7 +5,7 @@ define([
 ], function (
     _,
     fusejs,
-    util
+    util,
 ) {
     var FUSE_CONFIG = {
         keys: ['displayPath'],
@@ -18,12 +18,12 @@ define([
         var _this = this;
         this.form = form;
 
-        form.vellum.datasources.on("change", function() {
+        form.vellum.datasources.on("change", function () {
             _this.dataset = generateNewFuseData(form);
             _this.fusejs.set(_this.dataset);
         }, null, null, form);  // context=form for form.disconnectDataSources()
 
-        form.on("change", function(event) {
+        form.on("change", function (event) {
             if (event.mug === undefined) {
                 _this.dataset = generateNewFuseData(form);
                 _this.fusejs.set(_this.dataset);
@@ -55,8 +55,8 @@ define([
                 addToDataset(e);
             }
         }).on('question-label-text-change', addToDataset)
-        .on('question-create', addToDataset)
-        .on('question-remove', removeFromDataset);
+            .on('question-create', addToDataset)
+            .on('question-remove', removeFromDataset);
     }
 
     Fuse.prototype = {
@@ -65,7 +65,7 @@ define([
         },
         search: function (query) {
             return this.fusejs.search(query);
-        }
+        },
     };
 
     function mugToData(mug) {
@@ -92,24 +92,24 @@ define([
         var caseData = [];
         if (form.richText) {
             caseData = _.chain(form.vellum.datasources.getHashtagMap({}))
-             .map(function(absolutePath, hashtag) {
-                 return {
-                     name: hashtag,
-                     hashtagPath: hashtag,
-                     absolutePath: absolutePath,
-                     icon: 'fcc fcc-fd-case-property',
-                     displayLabel: null,
-                     displayPath: hashtag,
-                 };
-             })
-             .value();
+                .map(function (absolutePath, hashtag) {
+                    return {
+                        name: hashtag,
+                        hashtagPath: hashtag,
+                        absolutePath: absolutePath,
+                        icon: 'fcc fcc-fd-case-property',
+                        displayLabel: null,
+                        displayPath: hashtag,
+                    };
+                })
+                .value();
         }
         return _.chain(form.getMugList())
-                .map(mugToData)
-                .filter(function(choice) {
-                    return choice.name && !_.isUndefined(choice.displayLabel);
-                })
-                .value().concat(caseData);
+            .map(mugToData)
+            .filter(function (choice) {
+                return choice.name && !_.isUndefined(choice.displayLabel);
+            })
+            .value().concat(caseData);
     }
 
     return Fuse;

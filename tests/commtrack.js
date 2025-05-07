@@ -19,12 +19,12 @@ define([
     BALANCE_BLOCK_SETVALUES_XML,
     INVALID_TRANSFER_XML,
     TRANSFER_BLOCK_XML,
-    TRANSFER_BLOCK_SETVALUES_XML
+    TRANSFER_BLOCK_SETVALUES_XML,
 ) {
     var assert = chai.assert,
         call = util.call;
 
-    describe("The CommTrack module", function() {
+    describe("The CommTrack module", function () {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -56,14 +56,14 @@ define([
             trans.p.relevantAttr = "true()";
             trans.form.addInstanceIfNotExists({
                 id: "products",
-                src: "jr://fixture/commtrack:products"
+                src: "jr://fixture/commtrack:products",
             });
             trans.form.addInstanceIfNotExists({
                 id: "ledger",
-                src: "jr://instance/ledgerdb"
+                src: "jr://instance/ledgerdb",
             });
             util.assertXmlEqual(call("createXML"), TRANSFER_BLOCK_XML,
-                                {normalize_xmlns: true});
+                {normalize_xmlns: true});
         });
 
         it("should load a balance block", function () {
@@ -87,14 +87,14 @@ define([
             bal.p.relevantAttr = "/data/stock_amount != 0";
             bal.form.addInstanceIfNotExists({
                 id: "products",
-                src: "jr://fixture/commtrack:products"
+                src: "jr://fixture/commtrack:products",
             });
             bal.form.addInstanceIfNotExists({
                 id: "ledger",
-                src: "jr://instance/ledgerdb"
+                src: "jr://instance/ledgerdb",
             });
             util.assertXmlEqual(call("createXML"), BALANCE_BLOCK_XML,
-                                {normalize_xmlns: true});
+                {normalize_xmlns: true});
         });
 
         it("transfer question should not be valid when src and dest are both empty", function () {
@@ -213,16 +213,16 @@ define([
 
         it("transfer block with dest only should load as Receive question", function () {
             util.loadXML(TRANSFER_BLOCK_XML
-                            .replace(' src=""', '')
-                            .replace(/<bind [^>]*@src[^>]*\/>/, ''));
+                .replace(' src=""', '')
+                .replace(/<bind [^>]*@src[^>]*\/>/, ''));
             var mug = util.getMug("transfer[@type='trans-1']");
             assert.equal(mug.__className, "Receive");
         });
 
         it("transfer block with src only should load as Dispense question", function () {
             util.loadXML(TRANSFER_BLOCK_XML
-                            .replace(' dest=""', '')
-                            .replace(/<bind [^>]*@dest[^>]*\/>/, ''));
+                .replace(' dest=""', '')
+                .replace(/<bind [^>]*@dest[^>]*\/>/, ''));
             var mug = util.getMug("transfer[@type='trans-1']");
             assert.equal(mug.__className, "Dispense");
         });
@@ -234,7 +234,7 @@ define([
             var editor = $('[name=property-dest]').ckeditor().editor,
                 widget = util.getWidget('property-dest');
             widget.input.promise.then(function () {
-                editor.on('change', function() {
+                editor.on('change', function () {
                     assert(util.saveButtonEnabled(), "save button is disabled");
                     done();
                 });
@@ -267,7 +267,7 @@ define([
                 var xml = util.call("createXML"),
                     $xml = util.parseXML(xml);
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
-                             "wrong ledger instance count\n" + xml);
+                    "wrong ledger instance count\n" + xml);
             });
 
             it("should remove ledger instance on delete " + type + " question", function () {
@@ -277,7 +277,7 @@ define([
                 var xml = util.call("createXML"),
                     $xml = util.parseXML(xml);
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
-                             "ledger instance should be removed\n" + xml);
+                    "ledger instance should be removed\n" + xml);
             });
         });
 
@@ -294,21 +294,21 @@ define([
                 var trans = type === "Transfer";
                 util.loadXML(trans ? TRANSFER_BLOCK_XML : BALANCE_BLOCK_XML);
                 var question = util.getMug(trans ?
-                                            "transfer[@type='trans-1']" :
-                                            "balance[@type='bal-0']");
+                    "transfer[@type='trans-1']" :
+                    "balance[@type='bal-0']");
                 util.deleteQuestion(question.absolutePath);
                 var xml = util.call("createXML"),
                     $xml = util.parseXML(xml);
                 assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 0,
-                             "ledger instance should be removed\n" + xml);
+                    "ledger instance should be removed\n" + xml);
             });
 
             it("should drop bind and setvalue nodes on delete " + type + " question", function () {
                 var trans = type === "Transfer";
                 util.loadXML(trans ? TRANSFER_BLOCK_SETVALUES_XML : BALANCE_BLOCK_SETVALUES_XML);
                 var question = util.getMug(trans ?
-                                            "transfer[@type='trans-1']" :
-                                            "balance[@type='bal-0']");
+                    "transfer[@type='trans-1']" :
+                    "balance[@type='bal-0']");
                 util.deleteQuestion(question.absolutePath);
                 var xml = util.call("createXML"),
                     $xml = util.parseXML(xml);
@@ -316,7 +316,7 @@ define([
                     return /^\/data\/(balance|transfer)\[/.test($(this).attr("nodeset"));
                 }).length, 0, "bind nodes should be removed\n" + xml);
                 assert.equal($xml.find("setvalue").length, 0,
-                             "setvalue nodes should be removed\n" + xml);
+                    "setvalue nodes should be removed\n" + xml);
             });
         });
 
@@ -328,7 +328,7 @@ define([
             var xml = util.call("createXML"),
                 $xml = util.parseXML(xml);
             assert.equal($xml.find("instance[src='jr://instance/ledgerdb']").length, 1,
-                         "ledger instance should be removed\n" + xml);
+                "ledger instance should be removed\n" + xml);
         });
 
         it("should show 'Case' property for Balance", function () {
@@ -339,14 +339,14 @@ define([
 
         describe("should properly encode", function () {
             var map = {
-                    Transfer: TRANSFER_BLOCK_XML,
-                    Dispense: TRANSFER_BLOCK_XML
-                                .replace(' dest=""', '')
-                                .replace(/<bind [^>]*@dest[^>]*\/>/, ''),
-                    Receive: TRANSFER_BLOCK_XML
-                                .replace(' src=""', '')
-                                .replace(/<bind [^>]*@src[^>]*\/>/, ''),
-                };
+                Transfer: TRANSFER_BLOCK_XML,
+                Dispense: TRANSFER_BLOCK_XML
+                    .replace(' dest=""', '')
+                    .replace(/<bind [^>]*@dest[^>]*\/>/, ''),
+                Receive: TRANSFER_BLOCK_XML
+                    .replace(' src=""', '')
+                    .replace(/<bind [^>]*@src[^>]*\/>/, ''),
+            };
             _.each([
                 {from: "Transfer", to: "Dispense"},
                 {from: "Transfer", to: "Receive"},

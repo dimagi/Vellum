@@ -21,7 +21,7 @@ define([
     'vellum/parser',
     'vellum/util',
     'vellum/atwho',
-    'vellum/debugutil'
+    'vellum/debugutil',
 ], function (
     _,
     $,
@@ -31,7 +31,7 @@ define([
     parser,
     util,
     atwho,
-    debug
+    debug,
 ) {
     var mugTypes = mugs.baseMugTypes.normal,
         Itemset, isAdvancedItemsetEnabled, opts,
@@ -130,12 +130,12 @@ define([
                             "You no longer have access to Lookup Tables in your application. " +
                             "Lookup Tables are available on the Standard plan and higher.\n" +
                             "Before you can make a new version of your application, " +
-                            "you must {link} or delete this question"
+                            "you must {link} or delete this question",
                         ), {
                             link: changeSubscriptionLink ?
                                 "[" + gettext("change your subscription") +
                                 "](" + changeSubscriptionLink + ")" :
-                                gettext("change your subscription")
+                                gettext("change your subscription"),
                         });
                     }
                     var itemsetData = mug.p.itemsetData;
@@ -147,7 +147,7 @@ define([
                     }
 
                     return 'pass';
-                }
+                },
             },
             valueRef: {
                 lstring: 'Value Field',
@@ -196,15 +196,15 @@ define([
                 deserialize: mugs.deserializeXPath,
                 visibility: 'visible',
                 leftPlaceholder: '',
-                autocompleteChoices: function(mug) {
+                autocompleteChoices: function (mug) {
                     var sources = getDataSources(mug),
                         src = mug.p.itemsetData.instance.src;
                     return datasourceWidgets.autocompleteChoices(sources, src);
                 },
                 help: gettext("This is an XPath expression that will filter the set " +
                       "of choices from the lookup table"),
-            }
-        }
+            },
+        },
     });
 
     function afterDynamicSelectInsert(form, mug) {
@@ -230,27 +230,27 @@ define([
     }
 
     var itemsetDataSpec = {
-            presence: 'optional',
-            visibility: 'hidden',
-            serialize: function (value, key, mug, data) {
-                value = _.chain(mug.form.getChildren(mug))
-                    .map(function (child) {
-                        return child.spec[key].serialize(child.p[key], key, child, data);
-                    })
-                    .filter(_.identity)
-                    .value();
-                return !_.isEmpty(value) ? value : undefined;
-            },
-            deserialize: function (data, key, mug, context) {
-                _.each(data[key], function (value, i) {
-                    var children = mug.form.getChildren(mug),
-                        itemset = children[i] || afterDynamicSelectInsert(mug.form, mug),
-                        dat = _.clone(data);
-                    dat[key] = value;
-                    itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset, context);
-                });
-            }
-        };
+        presence: 'optional',
+        visibility: 'hidden',
+        serialize: function (value, key, mug, data) {
+            value = _.chain(mug.form.getChildren(mug))
+                .map(function (child) {
+                    return child.spec[key].serialize(child.p[key], key, child, data);
+                })
+                .filter(_.identity)
+                .value();
+            return !_.isEmpty(value) ? value : undefined;
+        },
+        deserialize: function (data, key, mug, context) {
+            _.each(data[key], function (value, i) {
+                var children = mug.form.getChildren(mug),
+                    itemset = children[i] || afterDynamicSelectInsert(mug.form, mug),
+                    dat = _.clone(data);
+                dat[key] = value;
+                itemset.p[key] = itemset.spec[key].deserialize(dat, key, itemset, context);
+            });
+        },
+    };
 
     $.vellum.plugin("itemset", {}, {
         init: function () {
@@ -262,7 +262,7 @@ define([
         getQuestionGroups: function () {
             var groups = this.__callOld();
             if (this.opts().features.lookup_tables) {
-               groups.splice(groups.length - 1, 0, {
+                groups.splice(groups.length - 1, 0, {
                     group: ["SelectDynamic", gettext('Lookup Tables')],
                     questions: ["SelectDynamic", "MSelectDynamic"],
                 });
@@ -297,7 +297,7 @@ define([
                         labelRef: itemsetDataSpec,
                         sortRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
-                    }
+                    },
                 }),
                 "SelectDynamic": util.extend(mugTypes.Select, {
                     typeName: gettext('Multiple Choice Lookup Table'),
@@ -323,8 +323,8 @@ define([
                         labelRef: itemsetDataSpec,
                         sortRef: itemsetDataSpec,
                         filter: itemsetDataSpec,
-                    }
-                })
+                    },
+                }),
             });
             return types;
         },
@@ -342,12 +342,12 @@ define([
                     }
                     mug = adaptItemset(mug, form);
                     var nodeset = parseNodeset(
-                            $element.popAttr('vellum:nodeset') ||
+                        $element.popAttr('vellum:nodeset') ||
                             $element.popAttr('nodeset'));
                     mug.p.filter = nodeset.filter;
                     mug.p.itemsetData = {
                         instance: form.parseInstance(
-                                    nodeset.value, mug, "itemsetData"),
+                            nodeset.value, mug, "itemsetData"),
                         nodeset: nodeset.value,
                     };
                     mug.p.labelRef = $element.children('label').xmlAttr('ref');
@@ -371,7 +371,7 @@ define([
                 }
             });
         },
-        getMainProperties: function() {
+        getMainProperties: function () {
             return this.__callOld().concat([
                 'valueRef',
                 'labelRef',
@@ -395,11 +395,11 @@ define([
     function updateDataSource(mug, value, previous) {
         if (previous && previous.instance && previous.instance.src) {
             mug.form.dropInstanceReference(
-                        previous.instance.src, mug, "itemsetData.instance");
+                previous.instance.src, mug, "itemsetData.instance");
         }
         if (value && value.instance && value.instance.src) {
             var instanceId = mug.form.addInstanceIfNotExists(
-                    value.instance, mug, "itemsetData.instance");
+                value.instance, mug, "itemsetData.instance");
             if (instanceId !== value.instance.id) {
                 value.instance.id = instanceId;
                 value.nodeset = mug.form.updateInstanceQuery(value.nodeset, instanceId);
@@ -412,7 +412,7 @@ define([
         if (i !== -1) {
             return {
                 value: nodeset.slice(0, i),
-                filter: nodeset.slice(i + 1, -1)
+                filter: nodeset.slice(i + 1, -1),
             };
         }
         return {value: nodeset, filter: ''};
@@ -514,7 +514,7 @@ define([
             super_setValue = widget.setValue,
             super_handleChange = widget.handleChange;
 
-        widget.handleChange = function() {
+        widget.handleChange = function () {
             updateAutocomplete(dataSources);
             super_handleChange();
         };
@@ -540,7 +540,7 @@ define([
             super_setValue({
                 id: (val.instance ? val.instance.id : ""),
                 src: (val.instance ? val.instance.src : ""),
-                query: val.nodeset || ""
+                query: val.nodeset || "",
             });
         };
 
@@ -567,7 +567,7 @@ define([
     }
 
     function validateRefWidget(attr) {
-        return function(mug) {
+        return function (mug) {
             var itemsetData = mug.p.itemsetData,
                 mugAttr = mug.p[attr],
                 instance = itemsetData.instance,
@@ -584,7 +584,7 @@ define([
             if (notCustom && !_.contains(choices, strippedMugAttr)) {
                 return util.format(
                     gettext("{attr} was not found in the lookup table"),
-                    {attr: mugAttr}
+                    {attr: mugAttr},
                 );
             }
 

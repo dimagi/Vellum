@@ -27,12 +27,12 @@ define([
     CASE_TYPE_PROPERTY_XML,
     CREATE_2_PROPERTY_XML,
     LOGIC_TEST_XML,
-    TWO_SAME_NAME_XML
+    TWO_SAME_NAME_XML,
 ) {
     var assert = chai.assert,
         call = util.call;
 
-    describe("The SaveToCase module", function() {
+    describe("The SaveToCase module", function () {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -71,7 +71,7 @@ define([
             assert(_.isEqual(update.p.updateProperty, {
                 name: {
                     relevant: "/data/name != ''",
-                    calculate: "/data/name"
+                    calculate: "/data/name",
                 },
                 "dash-dash": {
                     calculate: "'-'",
@@ -92,7 +92,7 @@ define([
                     calculate: "/data/meta/caseID",
                     case_type: "extension_case",
                     relationship: "extension",
-                }
+                },
             }));
             util.clickQuestion('save_to_case');
             assert.strictEqual(index.spec.indexProperty.validationFunc(index), "pass");
@@ -111,7 +111,7 @@ define([
                     calculate: "/data/question1",
                     from: "local",
                     name: "name",
-                }
+                },
             }));
             assert.equal(attach.p.date_modified, '/data/meta/timeEnd');
             assert.equal(attach.p.user_id, "/data/meta/userID");
@@ -140,11 +140,11 @@ define([
                 util.init({
                     javaRosa: {langs: ['en']},
                     core: {
-                        onReady: function() {
+                        onReady: function () {
                             mug = util.addQuestion("SaveToCase", "mug");
                             spec = mug.spec.attachmentProperty;
                             done();
-                        }
+                        },
                     },
                 });
             });
@@ -154,16 +154,16 @@ define([
                     inline_prop: {
                         calculate: "/data/question1",
                         from: "inline",
-                    }
+                    },
                 },
                 "invalid from strings": {
                     from_strings: {
                         calculate: "/data/question1",
-                        from: "blah"
-                    }
+                        from: "blah",
+                    },
                 },
-            }, function(v, k) {
-                it("should validate " + k, function() {
+            }, function (v, k) {
+                it("should validate " + k, function () {
                     mug.p.useAttachment = true;
                     mug.p.attachmentProperty = v;
                     assert.notEqual(spec.validationFunc(mug), "pass");
@@ -171,17 +171,17 @@ define([
             });
         });
 
-        describe("should allow", function() {
+        describe("should allow", function () {
             var mug, spec;
             before(function (done) {
                 util.init({
                     javaRosa: {langs: ['en']},
                     core: {
-                        onReady: function() {
+                        onReady: function () {
                             mug = util.addQuestion("SaveToCase", "mug");
                             spec = mug.spec.attachmentProperty;
                             done();
-                        }
+                        },
                     },
                 });
             });
@@ -192,22 +192,22 @@ define([
                         calculate: "/data/question1",
                         from: "inline",
                         name: "test",
-                    }
+                    },
                 },
                 "from strings": {
                     from_strings: {
                         calculate: "/data/question1",
-                        from: "local"
-                    }
+                        from: "local",
+                    },
                 },
                 "hyphenated properties": {
                     "hyphen-props": {
                         calculate: "/data/question1",
-                        from: "local"
-                    }
-                }
-            }, function(v, k) {
-                it("should validate " + k, function() {
+                        from: "local",
+                    },
+                },
+            }, function (v, k) {
+                it("should validate " + k, function () {
                     mug.p.useAttachment = true;
                     mug.p.attachmentProperty = v;
                     assert.equal(spec.validationFunc(mug), "pass");
@@ -231,7 +231,7 @@ define([
             util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
         });
 
-        it("should have @case_id in bind for create when in repeat", function() {
+        it("should have @case_id in bind for create when in repeat", function () {
             util.loadXML("");
             util.addQuestion("Repeat", 'repeat');
             var mug = util.addQuestion("SaveToCase", 'case', {
@@ -240,12 +240,12 @@ define([
                 useCreate: true,
                 createProperty: {
                     'case_type': 'type',
-                    'case_name': 'name'
-                }
+                    'case_name': 'name',
+                },
             });
             assert.deepInclude(mug.options.getBindList(mug), {
                 nodeset: mug.absolutePath + "/case/@case_id",
-                calculate: 'uuid()'
+                calculate: 'uuid()',
             });
         });
 
@@ -266,7 +266,7 @@ define([
             });
             mug.p.createProperty = {
                 'case_type': {
-                    'calculate': 'type'
+                    'calculate': 'type',
                 },
                 'case_name': {
                     'calculate': 'name',
@@ -286,7 +286,7 @@ define([
                     calculate: "/data/question1",
                     case_type: "type",
                     relationship: "notchildorextension",
-                }
+                },
             };
             assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "Relationship must be child or extension");
         });
@@ -323,8 +323,8 @@ define([
                         "create": false,
                         "properties": [
                             "p1",
-                            "p3"
-                        ]
+                            "p3",
+                        ],
                     },
                     "/data/save_to_case_create": {
                         "case_type": "mother",
@@ -334,16 +334,16 @@ define([
                             "case_name",
                             "case_type",
                             "p1",
-                            "p2"
-                        ]
+                            "p2",
+                        ],
                     },
                     "/data/save_to_case_close": {
                         "case_type": "close_case",
                         "close": true,
                         "create": false,
-                        "properties": []
-                    }
-                }
+                        "properties": [],
+                    },
+                },
             });
         });
     });

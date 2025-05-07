@@ -33,7 +33,7 @@ define([
     'vellum/javaRosa/itextWidget',
     'vellum/richText',
     'vellum/javaRosa/util',
-    'vellum/core'
+    'vellum/core',
 ], function (
     _,
     $,
@@ -47,7 +47,7 @@ define([
     itextBlock,
     itextWidget,
     richText,
-    jrUtil
+    jrUtil,
 ) {
     var ICONS = {
         image: 'fa-regular fa-image',
@@ -58,7 +58,7 @@ define([
 
     $.vellum.plugin("javaRosa", {
         langs: ['en'],
-        displayLanguage: 'en'
+        displayLanguage: 'en',
     }, {
         init: function () {
             this.data.javaRosa.ItextItem = itext.item;
@@ -103,12 +103,12 @@ define([
             fullLangs = _.map(langs, function (lang) {
                 return {
                     code: lang,
-                    name: util.langCodeToName[lang] || lang
+                    name: util.langCodeToName[lang] || lang,
                 };
             });
             fullLangs[fullLangs.length] = {
                 code: '_ids',
-                name: gettext('Question ID')
+                name: gettext('Question ID'),
             };
 
             if (fullLangs.length < 2) {
@@ -127,7 +127,7 @@ define([
                 var code = $input.val();
                 _this._changeTreeDisplayLanguage(code);
                 $items.removeClass("selected")
-                      .filter("[data-code=" + code + "]").addClass("selected");
+                    .filter("[data-code=" + code + "]").addClass("selected");
             });
             $input.val(this.data.core.currentItextDisplayLanguage).change();
         },
@@ -147,8 +147,7 @@ define([
 
                 if (_this.data.core.currentItextDisplayLanguage === "_ids") {
                     _this.jstree('rename_node', $el, mug.getNodeID());
-                }
-                else {
+                } else {
                     if (mug.p.labelItext) {
                         var text = _this.getMugDisplayName(mug);
                         _this.jstree('rename_node', $el, text ||
@@ -189,7 +188,7 @@ define([
                     function eachValue() {
                         var valEl = $(this);
                         var curForm = valEl.xmlAttr('form');
-                        if(!curForm) {
+                        if (!curForm) {
                             curForm = "default";
                             if (item.hasMarkdown) {
                                 return; // value already set below
@@ -267,7 +266,7 @@ define([
                         if (!text) { return; }
                         text = richText.sanitizeInput(text);
                         var xquery = xml.query(text);
-                        xquery.find('output').replaceWith(function() {
+                        xquery.find('output').replaceWith(function () {
                             var output = $(this),
                                 key = output.is("[value]") ||
                                     !output.is("[ref]") ? "value" : "ref",
@@ -297,7 +296,7 @@ define([
 
             this.__callOld();
         },
-        populateControlMug: function(mug, controlElement) {
+        populateControlMug: function (mug, controlElement) {
             this.__callOld();
 
             var Itext = this.data.javaRosa.Itext,
@@ -307,8 +306,7 @@ define([
                 try {
                     var parsed = mug.form.xpath.parse(value);
                     if (parsed instanceof mug.form.xpath.models.XPathFuncExpr &&
-                        parsed.id === "jr:itext")
-                    {
+                        parsed.id === "jr:itext") {
                         return parsed.args[0].value;
                     }
                 } catch (err) {
@@ -432,7 +430,7 @@ define([
 
             function writeValue(xmlWriter, val) {
                 val = xml.query(val);
-                val.find('output').each(function() { hashtags(this); });
+                val.find('output').each(function () { hashtags(this); });
                 xmlWriter.writeXML(val.toString());
             }
 
@@ -459,7 +457,7 @@ define([
                             form = forms[k];
                             val = form.getValueOrDefault(lang);
                             xmlWriter.writeStartElement("value");
-                            if(form.name !== "default") {
+                            if (form.name !== "default") {
                                 xmlWriter.writeAttributeString('form', form.name);
                             }
                             writeValue(xmlWriter, val);
@@ -503,8 +501,8 @@ define([
 
             normal.Group.spec = util.extend(normal.Group.spec, {
                 constraintMsgItext: {
-                    presence: 'notallowed'
-                }
+                    presence: 'notallowed',
+                },
             });
 
             return types;
@@ -523,12 +521,12 @@ define([
                         if (itext.itextModel.languages.length === 1) {
                             return util.format(
                                 gettext("{name} (or multimedia) is required."),
-                                {name: name}
+                                {name: name},
                             );
                         } else {
                             return util.format(
                                 gettext("{name} (or multimedia) is required for all languages."),
-                                {name: name}
+                                {name: name},
                             );
                         }
                     }
@@ -537,12 +535,12 @@ define([
                         if (!itext.id) {
                             return util.format(
                                 gettext("{name} Itext ID is required."),
-                                {name: name}
+                                {name: name},
                             );
                         } else if (!util.isValidAttributeValue(itext.id)) {
                             return util.format(
                                 gettext("{name} is not a valid ID."),
-                                {name: itext.id}
+                                {name: itext.id},
                             );
                         }
                     }
@@ -623,7 +621,7 @@ define([
                                     // set default value(s) for this form
                                     var dkey = name + ":" + dlang + "-" + form,
                                         dval = data.hasOwnProperty(dkey) ?
-                                             str(data[dkey]) : str(value);
+                                            str(data[dkey]) : str(value);
                                     item.set(dval, form);
                                     if (!isMM && dval) {
                                         context.later(function () {
@@ -675,7 +673,7 @@ define([
                                 level: mug.WARNING,
                                 langs: discardedLangs,
                                 message: gettext("Discarded languages:") +
-                                    " " + discardedLangs.join(", ")
+                                    " " + discardedLangs.join(", "),
                             });
                         }
                     }
@@ -684,7 +682,7 @@ define([
 
                 function hashtrans(val, context) {
                     var qry = xml.query(val);
-                    qry.find('output').each(function() {
+                    qry.find('output').each(function () {
                         transformOutputRef(this, context);
                     });
                     return qry.toString();
@@ -730,7 +728,7 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.constraintMsgItext;
                         },
-                        displayName: gettext("Validation Message")
+                        displayName: gettext("Validation Message"),
                     }));
                 }),
                 validationFunc: function (mug) {
@@ -743,7 +741,7 @@ define([
                         result = validateConstraintMsgAttr(mug);
                     }
                     return result;
-                }
+                },
             });
             databind.constraintAttr.validationFunc = validateConstraintMsgAttr;
             // virtual property used to define a widget
@@ -752,11 +750,11 @@ define([
                 presence: 'optional',
                 lstring: gettext("Validation Message Itext ID"),
                 widget: itextWidget.id,
-                widgetValuePath: "constraintMsgItext"
+                widgetValuePath: "constraintMsgItext",
             };
             databind.constraintMediaIText = function (mugOptions) {
                 return mugOptions.isSpecialGroup ? undefined : {
-                    visibility: function(mug) {
+                    visibility: function (mug) {
                         return mug.isVisible("constraintAttr");
                     },
                     presence: 'optional',
@@ -769,9 +767,9 @@ define([
                                 return mug.p.constraintMsgItext;
                             },
                             forms: jrUtil.SUPPORTED_MEDIA_TYPES,
-                            formToIcon: ICONS
+                            formToIcon: ICONS,
                         }));
-                    }
+                    },
                 };
             };
 
@@ -792,10 +790,10 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.labelItext;
                         },
-                        displayName: gettext("Display Text")
+                        displayName: gettext("Display Text"),
                     }));
                 }),
-                validationFunc: itextValidator("labelItext", gettext("Display Text"))
+                validationFunc: itextValidator("labelItext", gettext("Display Text")),
             });
             // virtual property used to define a widget
             control.labelItextID = {
@@ -803,7 +801,7 @@ define([
                 presence: 'optional',
                 lstring: gettext("Display Text Itext ID"),
                 widget: itextWidget.id,
-                widgetValuePath: "labelItext"
+                widgetValuePath: "labelItext",
             };
 
             control.hintItext = addSerializer({
@@ -819,17 +817,17 @@ define([
                         getItextByMug: function (mug) {
                             return mug.p.hintItext;
                         },
-                        displayName: gettext("Hint Message")
+                        displayName: gettext("Hint Message"),
                     }));
                 }),
-                validationFunc: itextValidator("hintItext", gettext("Hint Message"))
+                validationFunc: itextValidator("hintItext", gettext("Hint Message")),
             });
             // virtual property used to get a widget
             control.hintItextID = {
                 visibility: 'hintItext',
                 lstring: gettext("Hint Itext ID"),
                 widget: itextWidget.id,
-                widgetValuePath: "hintItext"
+                widgetValuePath: "hintItext",
             };
 
             control.helpItext = addSerializer({
@@ -850,14 +848,14 @@ define([
 
                     return block;
                 }),
-                validationFunc: itextValidator("helpItext", gettext("Help Message"))
+                validationFunc: itextValidator("helpItext", gettext("Help Message")),
             });
             // virtual property used to get a widget
             control.helpItextID = {
                 visibility: 'helpItext',
                 lstring: gettext("Help Itext ID"),
                 widget: itextWidget.id,
-                widgetValuePath: "helpItext"
+                widgetValuePath: "helpItext",
             };
 
             control.addEmptyCaptionItext = addSerializer({
@@ -928,9 +926,9 @@ define([
                                 return mug.p.labelItext;
                             },
                             forms: ['long', 'short'],
-                            isCustomAllowed: true
+                            isCustomAllowed: true,
                         }));
-                    }
+                    },
                 };
             };
             // virtual property used to get a widget
@@ -948,9 +946,9 @@ define([
                                 return mug.p.labelItext;
                             },
                             forms: jrUtil.SUPPORTED_MEDIA_TYPES,
-                            formToIcon: ICONS
+                            formToIcon: ICONS,
                         }));
-                    }
+                    },
                 };
             };
             // virtual property used to get a widget
@@ -967,9 +965,9 @@ define([
                                 return mug.p.helpItext;
                             },
                             forms: jrUtil.SUPPORTED_MEDIA_TYPES,
-                            formToIcon: ICONS
+                            formToIcon: ICONS,
                         }));
-                    }
+                    },
                 };
             };
             return spec;
@@ -985,7 +983,7 @@ define([
                 1 + ret.indexOf('constraintAttr'), 0, 'constraintMsgItext');
             return ret;
         },
-        getMediaProperties: function() {
+        getMediaProperties: function () {
             var ret = this.__callOld();
             ret.push('constraintMediaIText');
             return ret;
@@ -1019,8 +1017,8 @@ define([
                     icon: "fa fa-language",
                     action: function (done) {
                         _this.showItextModal(done);
-                    }
-                }
+                    },
+                },
             ]);
         },
         showItextModal: function (done) {
@@ -1037,16 +1035,16 @@ define([
                         jrUtil.parseXLSItext(form, $textarea.val(), Itext);
                         $modal.modal('hide');
                         done();
-                    }
-                }
+                    },
+                },
             ]);
             $updateForm = $(edit_source({
                 description: gettext(
-                "Copy these translations into a spreadsheet program " +
+                    "Copy these translations into a spreadsheet program " +
                 "like Excel. You can edit them there and then paste them back " +
                 "here when you're done. These will update the translations used in " +
                 "your form. Press 'Update Translations' to save changes, or 'Close' " +
-                "to cancel.")
+                "to cancel."),
             }));
             $modal.find('.modal-body').html($updateForm);
 
@@ -1056,6 +1054,6 @@ define([
 
             $modal.modal('show');
             $modal.one('shown.bs.modal', function () { $textarea.focus(); });
-        }
+        },
     });
 });

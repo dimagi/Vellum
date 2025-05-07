@@ -7,9 +7,9 @@
 define([
     'underscore',
     'vellum/xpath',
-], function(
+], function (
     _,
-    xpath
+    xpath,
 ) {
     var OUTSIDE_HASHTAG = 0,
         INSIDE_HASHTAG = 1,
@@ -72,7 +72,7 @@ define([
 
         for (var i = 0; i < strLen; i++) {
             var current = symbols[i],
-                next = symbols[i+1];
+                next = symbols[i + 1];
 
             if (state === OUTSIDE_HASHTAG) {
                 if (current === DELIMITER && next === DELIMITER) {

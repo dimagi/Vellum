@@ -4,14 +4,14 @@ define([
     'vellum/tsv',
     'vellum/richText',
     'vellum/xml',
-    'vellum/util'
+    'vellum/util',
 ], function (
     _,
     $,
     tsv,
     richText,
     xml,
-    util
+    util,
 ) {
     var SUPPORTED_MEDIA_TYPES = ['image', 'audio', 'video', 'video-inline'],
         ITEXT_TYPES = ['default', 'audio', 'image', 'video', 'video-inline'],
@@ -24,7 +24,7 @@ define([
             'addCaptionItext',
         ];
 
-    var getDefaultItextRoot = function(mug) {
+    var getDefaultItextRoot = function (mug) {
         if (mug.__className === "Choice") {
             var regex = new RegExp(util.invalidAttributeRegex.source, 'g');
             return getDefaultItextRoot(mug.parentMug) + "-" +
@@ -45,11 +45,11 @@ define([
         }
     };
 
-    var getDefaultItextId = function(mug, property) {
+    var getDefaultItextId = function (mug, property) {
         return getDefaultItextRoot(mug) + "-" + property;
     };
 
-    var looksLikeMarkdown = function(val, supportTables) {
+    var looksLikeMarkdown = function (val, supportTables) {
         /* Regex checks (in order):
          * ordered lists
          * unordered lists
@@ -70,11 +70,11 @@ define([
     /**
      * Call visitor function for each Itext item in the form
      */
-    var forEachItextItem = function(form, visit) {
+    var forEachItextItem = function (form, visit) {
         var seen = {};
 
         form.tree.walk(function (mug, nodeID, processChildren) {
-            if(mug) { // skip root node
+            if (mug) { // skip root node
                 _.each(ITEXT_PROPERTIES, function (property) {
                     var item = mug.p[property];
                     if (item && !item.key) {
@@ -107,7 +107,7 @@ define([
      *                   otherwise return a list of non-empty Itext items.
      * @returns - a list or object containing Itext items (see `asObject`).
      */
-    var getItextItemsFromMugs = function(form, asObject) {
+    var getItextItemsFromMugs = function (form, asObject) {
         var empty = asObject,
             items = [],
             byId = {},
@@ -119,7 +119,7 @@ define([
             var itemIsEmpty = item.isEmpty();
             if (!itemIsEmpty || empty) {
                 var id = item.autoId || !item.id ?
-                         getDefaultItextId(mug, props[property]) : item.id,
+                        getDefaultItextId(mug, props[property]) : item.id,
                     origId = id,
                     count = 2;
                 if (byId.hasOwnProperty(id) && (itemIsEmpty || item === byId[id])) {
@@ -217,7 +217,7 @@ define([
         return tsv.tabDelimit(rows);
     };
 
-    var warnOnNonOutputableValue = function(form, mug, path) {
+    var warnOnNonOutputableValue = function (form, mug, path) {
         if (!mug.options.canOutputValue) {
             // TODO display message near where it was dropped
             // HACK should be in the itext widget, which has the mug and path
@@ -230,14 +230,14 @@ define([
                     message: util.format(gettext(
                         "{type} nodes cannot be used in an output value. " +
                         "Please remove the output value for '{path}' or " +
-                        "your form will have errors."
+                        "your form will have errors.",
                     ), {type: typeName, path: path}),
                 });
             }
         }
     };
 
-    var getOutputRef = function(path, dateFormat) {
+    var getOutputRef = function (path, dateFormat) {
         if (dateFormat) {
             return '<output value="format-date(date(' + path + '), \'' + dateFormat + '\')"/>';
         } else {
@@ -245,7 +245,7 @@ define([
         }
     };
 
-    var warnOnCircularReference = function(property, mug, path, refName, propName) {
+    var warnOnCircularReference = function (property, mug, path, refName, propName) {
         // TODO track output refs in logic manager
         if (path === "." && property === 'label') {
             var fieldName = mug.p.getDefinition(property).lstring;
@@ -255,13 +255,13 @@ define([
                 message: util.format(gettext(
                     "The {field} for a question is not allowed to reference " +
                     "the question itself. Please remove the {ref} from the " +
-                    "{field} or your form will have errors."
+                    "{field} or your form will have errors.",
                 ), {field: fieldName, ref: refName}),
             });
         }
     };
 
-    var insertOutputRef = function(vellum, target, path, mug, dateFormat) {
+    var insertOutputRef = function (vellum, target, path, mug, dateFormat) {
         var output = getOutputRef(path, dateFormat),
             form = vellum.data.core.form;
         if (form.richText) {
@@ -276,11 +276,11 @@ define([
         }
     };
 
-    function _outputToXPathOrHashtag (functionName) {
+    function _outputToXPathOrHashtag(functionName) {
         return function (text, xpathParser, escape) {
             if (text) {
                 var xquery = xml.query(text);
-                xquery.find('output').each(function() {
+                xquery.find('output').each(function () {
                     var $this = $(this),
                         value = $this.xmlAttr('value') || $this.xmlAttr('ref');
                     try {

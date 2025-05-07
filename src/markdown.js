@@ -1,13 +1,13 @@
 define([
     'markdown-it',
-    'underscore'
-], function(
+    'underscore',
+], function (
     markdownIt,
-    _
+    _,
 ) {
     var md = markdownIt('zero')
-             .enable(['link', 'emphasis', 'strikethrough', 'heading', 'list', 'table']),
-        defaultRender = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
+            .enable(['link', 'emphasis', 'strikethrough', 'heading', 'list', 'table']),
+        defaultRender = md.renderer.rules.link_open || function (tokens, idx, options, env, self) {
             return self.renderToken(tokens, idx, options);
         };
 

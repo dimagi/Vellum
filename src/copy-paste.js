@@ -6,7 +6,7 @@ define([
     'vellum/tsv',
     'vellum/util',
     'vellum/hqAnalytics',
-    'vellum/core'
+    'vellum/core',
 ], function (
     $,
     _,
@@ -14,7 +14,7 @@ define([
     mugsModule,
     tsv,
     util,
-    analytics
+    analytics,
 ) {
     var PREAMBLE = ["Form Builder clip", "version 1"],
         vellum,
@@ -22,7 +22,7 @@ define([
         hiddenTextarea = $('<textarea></textarea>').css({
             position: 'absolute',
             width: 0,
-            height: 0
+            height: 0,
         }).css(offScreen).appendTo('body'),
         isChrome = /Chrome/.test(navigator.userAgent),
         isSafari = /Safari/.test(navigator.userAgent) && !isChrome;
@@ -168,12 +168,12 @@ define([
             if (!node.mug) {
                 pos.error = util.format(
                     gettext("Cannot insert {type} into tree root"),
-                    {type: nameOf(values.type)}
+                    {type: nameOf(values.type)},
                 );
             } else {
                 pos.error = gettext("Cannot insert $1 into or after $2")
-                        .replace("$1", nameOf(values.type))
-                        .replace("$2", nameOf(node.mug.__className));
+                    .replace("$1", nameOf(values.type))
+                    .replace("$2", nameOf(node.mug.__className));
             }
         } else {
             // verify that item will be inserted inside the paste root
@@ -320,7 +320,7 @@ define([
             errors.update(null, {
                 key: message,
                 level: mugsModule.ERROR,
-                message: message
+                message: message,
             });
         }
 
@@ -369,7 +369,7 @@ define([
     $.vellum.plugin('copyPaste', {
         cut: cut,
         copy: copy,
-        paste: paste
+        paste: paste,
     }, {
         init: function () {
             var opts = this.opts().copyPaste;
@@ -418,13 +418,13 @@ define([
                 });
             }
             copyPasteArea.focus(function () {
-                copyPasteArea.select().mouseup(function() {
+                copyPasteArea.select().mouseup(function () {
                     copyPasteArea.off('mouseup');
                     return false;
                 });
             }).keyup(function (e) {
                 // workaround for webkit: http://stackoverflow.com/a/12114908
-                if(e.which === 9) { // tab
+                if (e.which === 9) { // tab
                     copyPasteArea.select();
                 }
             });
@@ -432,7 +432,7 @@ define([
                 paste(copyPasteArea.val());
             });
             this.$f.find(".fd-props-content").html(html);
-        }
+        },
     });
 
     return {
@@ -440,6 +440,6 @@ define([
         copy: copy,
         paste: paste,
         stringify: stringify,
-        valuify: valuify
+        valuify: valuify,
     };
 });

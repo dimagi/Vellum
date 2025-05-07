@@ -3,11 +3,11 @@ define([
     'underscore',
     'vellum/util',
     'tpl!vellum/templates/undo_alert',
-], function(
+], function (
     $,
     _,
     util,
-    undo_alert
+    undo_alert,
 ) {
     function alertShown() {
         var alert = $('.fd-undo-delete');
@@ -22,8 +22,8 @@ define([
 
     function createAlert(mugs) {
         var refs = _.filter(_.map(mugs, function (mug) {
-                return mug.isReferencedByOtherMugs(mugs) ? mug.p.nodeID : "";
-            }), _.identity);
+            return mug.isReferencedByOtherMugs(mugs) ? mug.p.nodeID : "";
+        }), _.identity);
         $('.fd-undo-container').append(undo_alert({
             errors: refs,
             format: util.format,
@@ -62,7 +62,7 @@ define([
             toggleAlert(this.undoStack);
         },
         undo: function () {
-            _.each(this.undoStack, function(undo) {
+            _.each(this.undoStack, function (undo) {
                 var mug = undo[0],
                     sibling = undo[1],
                     position = undo[2];

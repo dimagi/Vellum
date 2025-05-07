@@ -1,13 +1,13 @@
 define([
     'jquery',
     'vellum/core',
-    'vellum/jquery-extensions'
+    'vellum/jquery-extensions',
 ], function (
-    $
+    $,
 ) {
     $.vellum.plugin('windowManager', {
         minHeight: 200,
-        bottomOffset: 0
+        bottomOffset: 0,
     }, {
         init: function () {
             var _this = this,
@@ -18,18 +18,18 @@ define([
             setupDraggableDivider(
                 this.$f.find('.fd-content-divider'),
                 this.$f.find('.fd-content-left'),
-                adjustToWindow
+                adjustToWindow,
             );
             setupDraggableDivider(
                 this.$f.find('.fd-content-left-divider'),
                 this.$f.find('.fd-accessory-pane'),
-                adjustToWindow
+                adjustToWindow,
             );
 
             this.data.windowManager.offset = {
-                top: opts.topOffset || this.$f.offset().top-1,
+                top: opts.topOffset || this.$f.offset().top - 1,
                 bottom: opts.bottomOffset || 0,
-                left: opts.leftOffset || this.$f.offset().left
+                left: opts.leftOffset || this.$f.offset().left,
             };
             this.data.windowManager.fullscreen = opts.fullscreen;
             this.data.windowManager.adjustToWindow = adjustToWindow;
@@ -40,7 +40,7 @@ define([
             $(adjustToWindow);
             _this.adjustToWindow();
         },
-        adjustToWindow: function() {
+        adjustToWindow: function () {
             if (!this.$f.is(':visible')) {
                 return;
             }
@@ -60,7 +60,7 @@ define([
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    backgroundColor: 'white'
+                    backgroundColor: 'white',
                 });
                 $fdc.css('width', $(window).width());
             } else {
@@ -71,7 +71,7 @@ define([
                     bottom: '',
                     left: '',
                     right: '',
-                    backgroundColor: 'white'
+                    backgroundColor: 'white',
                 });
                 $fdc.css('width', $fdc.parent().width());
             }
@@ -87,7 +87,7 @@ define([
             availableHorizSpace = $fdc.width();
 
             var panelHeight = Math.max(availableVertSpace,
-                                       this.opts().windowManager.minHeight),
+                    this.opts().windowManager.minHeight),
                 treeHeight = panelHeight,
                 columnHeight = panelHeight - this.$f.find('.fd-head').outerHeight(false),
                 accessoryPane = this.$f.find(".fd-accessory-pane");
@@ -96,7 +96,7 @@ define([
 
             // Decrement tree height by height of any siblings
             var $tree = $fdc.find('.fd-content-left .fd-tree');
-            $tree.children(":not(.fd-scrollable)").each(function(i, child) {
+            $tree.children(":not(.fd-scrollable)").each(function (i, child) {
                 treeHeight -= $(child).outerHeight(false);
             });
 
@@ -108,7 +108,7 @@ define([
                 treeHeight -= 2 + accessoryHeight +
                     this.$f.find('.fd-content-left-divider').outerHeight(true);
                 accessoryPane.find(".fd-scrollable")
-                             .css('height', accessoryScrollableHeight + 'px');
+                    .css('height', accessoryScrollableHeight + 'px');
                 accessoryPane.show();
                 this.$f.find(".fd-content-left-divider").show();
             } else {
@@ -155,7 +155,7 @@ define([
                 offset = this.data.windowManager.offset,
                 offsetLeft = (typeof offset.left === 'function') ? offset.left() : offset.left;
             return Math.min(offsetLeft - scrollLeft, offsetLeft);
-        }
+        },
     });
 
     function preventDoubleScrolling($scrollable) {
@@ -177,7 +177,7 @@ define([
                 height = $this.height(),
                 delta = ev.originalEvent.wheelDelta,
                 up = delta > 0,
-                prevent = function() {
+                prevent = function () {
                     ev.stopPropagation();
                     ev.preventDefault();
                     ev.returnValue = false;
@@ -231,6 +231,6 @@ define([
     }
 
     return {
-        preventDoubleScrolling: preventDoubleScrolling
+        preventDoubleScrolling: preventDoubleScrolling,
     };
 });

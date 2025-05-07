@@ -12,7 +12,7 @@ define([
     richText,
     analytics,
     util,
-    atwhoDisplay
+    atwhoDisplay,
 ) {
     var that = {};
 
@@ -33,7 +33,7 @@ define([
             return;
         }
         if (options && options.choices) {
-           that._dropdownAutocomplete($input, options.choices);
+            that._dropdownAutocomplete($input, options.choices);
         } else {
             that._questionAutocomplete($input, mug, options);
         }
@@ -60,22 +60,22 @@ define([
             suffix: "",
             tabSelectsMatch: false,
             callbacks: {
-                filter: function(query, data, searchKey) {
-                    return _.filter(data, function(item) {
+                filter: function (query, data, searchKey) {
+                    return _.filter(data, function (item) {
                         return item.name.indexOf(query) !== -1;
                     });
                 },
-                matcher: function(flag, subtext, should_startWithSpace) {
+                matcher: function (flag, subtext, should_startWithSpace) {
                     return $input.val();
                 },
-                beforeInsert: function(value, $li) {
+                beforeInsert: function (value, $li) {
                     $input.data("selected-value", value);
                 },
-            }
+            },
         };
 
         $input.one('focus', function () {
-            $input.atwho(options).on("inserted.atwho", function(event, $li, otherEvent) {
+            $input.atwho(options).on("inserted.atwho", function (event, $li, otherEvent) {
                 $(this).find('.atwho-inserted').children().unwrap();
                 if ($input.attr("contenteditable")) {
                     richText.editor($input)
@@ -114,7 +114,7 @@ define([
 
         if (options.useRichText) {
             options.useHashtags = true;
-            options.functionOverrides.insert = function(content, $li) {
+            options.functionOverrides.insert = function (content, $li) {
                 // this references internal At.js object
                 this.query.el.remove();
 
@@ -139,11 +139,11 @@ define([
 
         addAtWhoToInput();
 
-        $input.on("inserted.atwho", function(event, $li, otherEvent) {
+        $input.on("inserted.atwho", function (event, $li, otherEvent) {
             $(this).find('.atwho-inserted').children().unwrap();
         });
 
-        mug.form.on("change-display-language", function() {
+        mug.form.on("change-display-language", function () {
             if ($input.data('atwho')) {
                 $input.atwho('destroy');
                 addAtWhoToInput();
@@ -163,7 +163,7 @@ define([
             startWithSpace: false,
             tabSelectsMatch: options.tabSelectsMatch,
             callbacks: {
-                matcher: function(flag, subtext) {
+                matcher: function (flag, subtext) {
                     var match, regexp;
                     // Match text that starts with the flag and then looks like a path.
                     // CKEditor reserves the right to insert arbitrary zero-width spaces, so watch for those.
@@ -175,8 +175,8 @@ define([
                     // filters the mug that is currently selected
                     // and choice mugs/other mugs taht don't have
                     // absolute paths
-                    function filterDropdown (list) {
-                        return _.filter(list, function(mug_) {
+                    function filterDropdown(list) {
+                        return _.filter(list, function (mug_) {
                             return (mug.ufid !== mug_.id) &&
                                 (mug_.name && !_.isUndefined(mug_.displayLabel));
                         });
@@ -186,17 +186,17 @@ define([
                     return filterDropdown(form.fuse.search(query));
                 },
                 sorter: function (query, items, searchKey) {
-                    return _.map(items, function(item, idx) {
+                    return _.map(items, function (item, idx) {
                         item.atwho_order = idx;
                         return item;
                     });
                 },
-                beforeInsert: function(value, $li) {
+                beforeInsert: function (value, $li) {
                     var category = util.getReferenceName(value);
                     analytics.usage(category, "Autocomplete", options.property);
                     return value;
                 },
-                afterMatchFailed: function(at, $el) {
+                afterMatchFailed: function (at, $el) {
                     if (options.useRichText && $el.html()) {
                         // If user typed out a full legitimate hashtag, or something that isn't
                         // legit but looks like a valid hashtag reference, turn it into a bubble.

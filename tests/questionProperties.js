@@ -4,33 +4,33 @@ define([
     'jquery',
     'underscore',
     'vellum/form',
-    'text!static/questionProperties/comment-test.xml'
+    'text!static/questionProperties/comment-test.xml',
 ], function (
     util,
     chai,
     $,
     _,
     form,
-    COMMENT_TEST_XML
+    COMMENT_TEST_XML,
 ) {
     var assert = chai.assert,
         call = util.call;
 
-    describe("Question Comments", function() {
-        before(function(done) {
+    describe("Question Comments", function () {
+        before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: function () { done(); }},
             });
         });
 
-        it("should parse the comment", function() {
+        it("should parse the comment", function () {
             util.loadXML(COMMENT_TEST_XML);
             var mug = util.getMug("/data/mug");
             assert.strictEqual(mug.p.comment, "This is a comment");
         });
 
-        it("should display the comment", function() {
+        it("should display the comment", function () {
             util.loadXML(COMMENT_TEST_XML);
             assert($('.fd-props-toolbar > .alert-info'));
         });
@@ -42,20 +42,20 @@ define([
             assert.strictEqual($('.fd-question-comment').text(), 'still a comment');
         });
 
-        it("should write the comment", function() {
+        it("should write the comment", function () {
             util.loadXML("");
             var mug = util.addQuestion("Text", "mug");
             mug.p.comment = "This is a comment";
             util.assertXmlEqual(COMMENT_TEST_XML, call("createXML"), {normalize_xmlns: true});
         });
 
-        it("should not show comment the comment if there isn't one", function() {
+        it("should not show comment the comment if there isn't one", function () {
             util.loadXML("");
             util.addQuestion("Text", "mug");
             assert(!$('.fd-props-toolbar > .alert-info').is(':visible'));
         });
 
-        it("should display a comment once it is specified", function() {
+        it("should display a comment once it is specified", function () {
             util.loadXML("");
             var mug = util.addQuestion("Text", "mug");
             mug.p.comment = 'this is a comment';
@@ -63,15 +63,15 @@ define([
         });
     });
 
-    describe("Section Toggler", function() {
-        before(function(done) {
+    describe("Section Toggler", function () {
+        before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: function () { done(); }},
             });
         });
 
-        it("should show and hide sections", function() {
+        it("should show and hide sections", function () {
             util.loadXML("");
             util.addQuestion("Text");
 
@@ -92,8 +92,8 @@ define([
         });
     });
 
-    describe("Required Condition", function() {
-        before(function(done) {
+    describe("Required Condition", function () {
+        before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 core: {onReady: function () { done(); }},
@@ -105,7 +105,7 @@ define([
             var mug = util.addQuestion("Text");
 
             assert(util.isTreeNodeValid(mug),
-                    "precondition failed:\n" + util.getMessages(mug));
+                "precondition failed:\n" + util.getMessages(mug));
             try {
                 mug.p.requiredCondition = "True()";
                 assert(mug.messages.get("requiredCondition").length === 1, "requiredCondition doesn't have error");
