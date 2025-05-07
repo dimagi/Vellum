@@ -233,6 +233,7 @@ define([
             },
             select: function (index, length) {
                 console.log(`select ${inputElement.getAttribute('name')}`);
+                divSelect.call(null, inputElement, index, length);
                 // used in test???
                 return wrapper;
             },
@@ -340,12 +341,13 @@ define([
         return wrapper;
     };
 
-    function ckSelect(editor, index, length) {
+    function divSelect(div, index, length) {
         function iterNodes(parent) {
             var i = 0,
-                children = parent.getChildren(),
-                count = children.count(),
+                children = Array.from(parent.childNodes),
+                count = children.length,
                 inner = null;
+
             function next() {
                 var child;
                 if (inner) {
@@ -358,10 +360,11 @@ define([
                 if (i >= count) {
                     return null;
                 }
-                child = children.getItem(i);
+                child = children[i];
                 i++;
-                if (child.type === CKEDITOR.NODE_ELEMENT) {
-                    var name = child.getName().toLowerCase();
+
+                if (child.nodeType === Node.ELEMENT_NODE) {
+                    var name = child.nodeName.toLowerCase();
                     if (name === "p") {
                         inner = iterNodes(child);
                         return next();
@@ -370,17 +373,18 @@ define([
                         return {node: child, length: 1, isText: false};
                     }
                     throw new Error("not implemented: " + name);
-                } else if (child.type === CKEDITOR.NODE_TEXT) {
+                } else if (child.nodeType === Node.TEXT_NODE) {
                     return {
                         node: child,
-                        length: child.getText().length,
+                        length: child.textContent.length,
                         isText: true,
                     };
                 }
-                throw new Error("unhandled element type: " + child.type);
+                throw new Error("unhandled element type: " + child.nodeType);
             }
             return next;
         }
+
         function getNodeOffset(index, nextNode) {
             var offset = index,
                 node = nextNode();
@@ -397,18 +401,21 @@ define([
             }
             throw new Error("index is larger than content: " + index);
         }
-        editor.focus();
-        var sel = editor.getSelection(),
-            nextNode = iterNodes(sel.root),
+
+        div.focus();
+        var sel = window.getSelection(),
+            nextNode = iterNodes(div),
             node = getNodeOffset(index, nextNode),
-            range = sel.getRanges()[0];
+            range = document.createRange();
+
         if (node.isText) {
             range.setStart(node.node, node.offset);
         } else {
             range.setStartAfter(node.node);
         }
+
         if (length) {
-            nextNode = iterNodes(sel.root);
+            nextNode = iterNodes(div);
             node = getNodeOffset(index + length, nextNode);
             if (node.isText) {
                 range.setEnd(node.node, node.offset);
@@ -418,7 +425,9 @@ define([
         } else {
             range.collapse(true);
         }
-        sel.selectRanges([range]);
+
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 
     /*
