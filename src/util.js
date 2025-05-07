@@ -17,7 +17,7 @@ define([
     $,
 ) {
     RegExp.escape = function (s) {
-        return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
     };
 
     var that = {isMac: /Mac/.test(navigator.platform)},
@@ -182,7 +182,7 @@ define([
          */
         that.unbind = function (context, type) {
             if (_.isUndefined(type)) {
-                registry = _.object(_.map(registry, function (handlers, type, reg) {
+                registry = _.object(_.map(registry, function (handlers, type) {
                     handlers = _.filter(handlers, function (handler) {
                         return handler.context !== context;
                     });
@@ -410,7 +410,7 @@ define([
     };
 
     that.getReferenceName = function (value) {
-        var ref = /^#([^\/]+)\//.exec(value);
+        var ref = /^#([^/]+)\//.exec(value);
         if (!ref) {
             return "Form Reference";
         }

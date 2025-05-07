@@ -17,7 +17,7 @@ define([
             configDecorator = configDecorator || function (v) { return v; };
             return xpath.makeXPathModels(configDecorator({
                 isValidNamespace: function (namespace) {
-                    return hashtagInfo.hashtagNamespaces.hasOwnProperty(namespace);
+                    return Object.prototype.hasOwnProperty.call(hashtagInfo.hashtagNamespaces, namespace);
                 },
                 hashtagToXPath: function (hashtagExpr) {
                     var xpath_ = hashtagInfo.hashtagMap[hashtagExpr];
@@ -31,7 +31,7 @@ define([
                     if (lastSlashIndex !== -1) {
                         var prefix = hashtagExpr.substring(0, lastSlashIndex + 1),
                             property = hashtagExpr.substring(lastSlashIndex + 1);
-                        if (hashtagInfo.hashtagTransformations.hasOwnProperty(prefix)) {
+                        if (Object.prototype.hasOwnProperty.call(hashtagInfo.hashtagTransformations, prefix)) {
                             return hashtagInfo.hashtagTransformations[prefix](property);
                         }
                     }
@@ -39,7 +39,7 @@ define([
                 },
                 toHashtag: function (xpath_) {
                     var expr = xpath_.toXPath();
-                    if (hashtagInfo.invertedHashtagMap.hasOwnProperty(expr)) {
+                    if (Object.prototype.hasOwnProperty.call(hashtagInfo.invertedHashtagMap, expr)) {
                         return hashtagInfo.invertedHashtagMap[expr];
                     }
                     return null;

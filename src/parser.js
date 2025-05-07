@@ -126,7 +126,7 @@ define([
         function transformHashtag(hashtag, xpath) {
             if (!xpath) {
                 var match = /(#.+\/)([^\/]+)/.exec(hashtag);
-                if (match && transforms.hasOwnProperty(match[1])) {
+                if (match && Object.prototype.hasOwnProperty.call(transforms, match[1])) {
                     return transforms[match[1]] + match[2];
                 }
             }
@@ -218,7 +218,7 @@ define([
             comment = $el.popAttr('vellum:comment') || null;
         role = role || $el.xmlAttr('vellum:role');
 
-        if (role && form.mugTypes.allTypes.hasOwnProperty(role) &&
+        if (role && Object.prototype.hasOwnProperty.call(form.mugTypes.allTypes, role) &&
             form.mugTypes.allTypes[role].supportsDataNodeRole) {
             $el.popAttr('vellum:role');
         } else {
@@ -438,7 +438,7 @@ define([
                     if (dataType) {
                         dataType = dataType.replace('xsd:',''); //strip out extraneous namespace
                         dataType = dataType.toLowerCase();
-                        if (inputAdaptors.hasOwnProperty(dataType)) {
+                        if (Object.prototype.hasOwnProperty.call(inputAdaptors, dataType)) {
                             delete mug.p.rawBindAttributes.type;
                             if (dataType === 'string' && appearance === 'numeric') {
                                 return makeMugAdaptor('PhoneNumber')(mug, form);
@@ -621,7 +621,7 @@ define([
                     seen[getID(child0)] = null;
                     child0 = nextChild0();
                 } else {
-                    fixOrder = fixOrder || seen.hasOwnProperty(getID(child1));
+                    fixOrder = fixOrder || Object.prototype.hasOwnProperty.call(seen, getID(child1));
                     controls.push(child1);
                     child1 = nextChild1();
                 }

@@ -114,7 +114,7 @@ define([
     var _writeInstanceAttributes = function (writer, instanceMetadata) {
         var attrs = instanceMetadata.attributes;
         for (var attrId in attrs) {
-            if (attrs.hasOwnProperty(attrId) && attrs[attrId]) {
+            if (Object.prototype.hasOwnProperty.call(attrs, attrId) && attrs[attrId]) {
                 writer.writeAttributeString(attrId, attrs[attrId]);
             }
         }
@@ -154,7 +154,7 @@ define([
                 }
                 // Write any custom attributes first
                 for (var k in rawDataAttributes) {
-                    if (rawDataAttributes.hasOwnProperty(k)) {
+                    if (Object.prototype.hasOwnProperty.call(rawDataAttributes, k)) {
                         xmlWriter.writeAttributeString(k, rawDataAttributes[k]);
                     }
                 }
@@ -176,7 +176,7 @@ define([
                 }
                 if (extra) {
                     for (k in extra) {
-                        if (extra.hasOwnProperty(k)) {
+                        if (Object.prototype.hasOwnProperty.call(extra, k)) {
                             xmlWriter.writeAttributeString(k, extra[k]);
                         }
                     }
@@ -261,7 +261,7 @@ define([
             // Write custom attributes first
             var attributes = mug.p.rawControlAttributes;
             for (var k in attributes) {
-                if (attributes.hasOwnProperty(k)) {
+                if (Object.prototype.hasOwnProperty.call(attributes, k)) {
                     xmlWriter.writeAttributeString(k, attributes[k]);
                 }
             }

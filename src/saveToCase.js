@@ -171,7 +171,7 @@ define([
             isDataOnly: true,
             supportsDataNodeRole: true,
             icon: 'fa fa-save',
-            init: function (mug, form) {
+            init: function (mug) {
                 mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
                 mug.p.user_id = mug.p.user_id || "instance('commcaresession')/session/context/userid";
             },
@@ -308,7 +308,7 @@ define([
                                 invalidProps = _.filter(props, function (p) {
                                     return !VALID_PROP_REGEX.test(p);
                                 }),
-                                relationships = _.without(_.map(mug.p.indexProperty, function (v, k) {
+                                relationships = _.without(_.map(mug.p.indexProperty, function (v) {
                                     return v.relationship;
                                 }), ""),
                                 invalidRelationships = _.filter(relationships, function (r) {
@@ -394,7 +394,7 @@ define([
                             rawDataAttributes: null,
                         },
                         options: { 
-                            getExtraDataAttributes: function (mug) {
+                            getExtraDataAttributes: function () {
                                 return dataAttributes;
                             },
                         },
@@ -439,7 +439,7 @@ define([
                     getNodeID: function () { return "case"; },
                     p: {rawDataAttributes: null},
                     options: { 
-                        getExtraDataAttributes: function (mug) {
+                        getExtraDataAttributes: function () {
                             return {
                                 "xmlns": CASE_XMLNS,
                                 case_id: '',
@@ -684,7 +684,7 @@ define([
             return types;
         },
         getSections: function (mug) {
-            if (sectionData.hasOwnProperty(mug.__className)) {
+            if (Object.prototype.hasOwnProperty.call(sectionData, mug.__className)) {
                 return _.map(sectionData[mug.__className], function (section) {
                     var tmpSection = _.clone(section);
                     if (_.isFunction(tmpSection.isCollapsed)) {
@@ -748,12 +748,6 @@ define([
                             mug.p[attr.mugProp] = el.xmlAttr(attr.elAttr);
                             return;
                         }
-                        form.parseWarnings.push(util.format(
-                            gettext("An error occurred when parsing bind " + 
-                                    "node [{path}]. Please fix this."),
-                            {path: path},
-                        ));
-                        return;
                     }
                 }
                 

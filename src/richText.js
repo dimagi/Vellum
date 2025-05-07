@@ -90,7 +90,7 @@ define([
                     var _this = this;
 
                     // Look for deleted bubbles
-                    editor.on('change', function (e) {
+                    editor.on('change', function () {
                         editor.widgets.checkWidgets({ initOnlyNew: 1 });
                     });
 
@@ -624,7 +624,7 @@ define([
     function escapeReplace(text, places) {
         text = $('<div />').text(xml.humanize(text)).html();
         text = text.replace(/{(.+?)}/g, function (match, id) {
-            return places.hasOwnProperty(id) ?
+            return Object.prototype.hasOwnProperty.call(places, id) ?
                 $("<div>").append(places[id]).html() : match;
         });
         return text;
@@ -669,10 +669,10 @@ define([
         bubbles.replaceWith(replacer);
         result = el.text();
         if (isExpression) {
-            expr = result.replace(/{(.+?)}([\w.\-]?)/g, function (match, id, after) {
+            expr = result.replace(/{(.+?)}([\w.-]?)/g, function (match, id, after) {
                 // `after` is a character following {id} that would fuse with
                 // the bubble expression if we did not put a space between them
-                return places.hasOwnProperty(id) ?
+                return Object.prototype.hasOwnProperty.call(places, id) ?
                     places[id] + (after ? " " + after : "") : match;
             });
             try {
@@ -680,7 +680,7 @@ define([
             } catch (e) {
                 expr = INVALID_PREFIX + escapedHashtags.escapeDelimiters(result)
                     .replace(/{(.+?)}/g, function (match, id) {
-                        return places.hasOwnProperty(id) ?
+                        return Object.prototype.hasOwnProperty.call(places, id) ?
                             escapedHashtags.delimit(places[id]) : match;
                     });
             }
@@ -839,7 +839,7 @@ define([
             return gettext("no formatting");
         }
         return format.replace(/(%[YymnbdeHhMS3a])/g, function (match, fmt) {
-            return DATE_FORMATS.hasOwnProperty(fmt[1]) ? DATE_FORMATS[fmt[1]] : fmt;
+            return Object.prototype.hasOwnProperty.call(DATE_FORMATS, fmt[1]) ? DATE_FORMATS[fmt[1]] : fmt;
         });
     }
 
@@ -930,7 +930,7 @@ define([
                 }
             });
 
-            ckwidget.on('destroy', function (e)  {
+            ckwidget.on('destroy', function ()  {
                 try {
                     $imgs.popover('destroy');
                 } catch (err) {
