@@ -16,6 +16,7 @@ deps:
 _webpack:
 	rm -rf _build
 	yarn build
+	cp -r lib/ _build/lib
 	echo "$(VERSION)" > _build/version.txt
 	(yarn list || yarn list --offline) | grep -Ev "^(Vellum|yarn) " > _build/manifest.txt
 
