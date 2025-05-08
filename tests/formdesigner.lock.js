@@ -3,7 +3,7 @@ define([
     'chai',
     'tests/utils',
     'jquery',
-    'text!tests/static/lock/test.xml',
+    'tests/static/lock/test.xml',
 ], function (
     chai,
     util,

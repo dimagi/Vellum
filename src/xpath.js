@@ -1,6 +1,6 @@
 define([
     'underscore',
-    'xpath',
+    'xpath/dist/js-xpath',
 ], function (
     _,
     xpath

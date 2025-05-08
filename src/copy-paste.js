@@ -1,7 +1,7 @@
 define([
     'jquery',
     'underscore',
-    'tpl!vellum/templates/copy_paste_help',
+    'vellum/templates/copy_paste_help.html',
     'vellum/mugs',
     'vellum/tsv',
     'vellum/util',
@@ -396,7 +396,7 @@ define([
                 copyPasteBox.removeClass("hide");
                 copyPasteArea.val(copy(true));
             }
-            var html = $(copy_paste_help({
+            var html = $(_.template(copy_paste_help)({
                     "metachar": (util.isMac ? "\u2318" : "Ctrl+"),
                     "format": util.format,
                 })),

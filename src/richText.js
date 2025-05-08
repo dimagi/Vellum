@@ -29,16 +29,18 @@
 
 (function () {
     // set CKEditor base path before loading ckeditor
-    var path = window.requirejs.toUrl("vellum/../lib/ckeditor/").replace(/\?.*/, "");
-    window.CKEDITOR_BASEPATH = path;
+    var path = 'src/../lib/ckeditor/';
+    if (!window.CKEDITOR_BASEPATH) {
+        window.CKEDITOR_BASEPATH = path;
+    }
 })();
 
 define([
     'require',
     'underscore',
     'jquery',
-    'tpl!vellum/templates/date_format_popover',
-    'tpl!vellum/templates/easy_reference_popover',
+    'vellum/templates/date_format_popover.html',
+    'vellum/templates/easy_reference_popover.html',
     'vellum/dateformats',
     'vellum/escapedHashtags',
     'vellum/logic',
@@ -868,7 +870,7 @@ define([
                     var title_ = title,
                         format = $this.attr("data-date-format");
                     if (isDate || format) {
-                        title_ += date_format_popover({
+                        title_ += _.template(date_format_popover)({
                             guid: dateFormatID,
                             text: util.escape(getHumanReadableDateFormat(format)),
                         });
@@ -897,7 +899,7 @@ define([
                 title: getTitle,
                 html: true,
                 sanitize: false,  // bootstrap, don't remove data-ufid attribute
-                content: easy_reference_popover({
+                content: _.template(easy_reference_popover)({
                     text: description,
                     ufid: labelMug ? labelMug.ufid : "",
                 }),

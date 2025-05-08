@@ -4,7 +4,7 @@ define([
     'jquery',
     'underscore',
     'vellum/form',
-    'text!static/questionProperties/comment-test.xml'
+    'static/questionProperties/comment-test.xml'
 ], function (
     util,
     chai,

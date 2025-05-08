@@ -3,9 +3,9 @@ define([
     'underscore',
     'chai',
     'vellum/xml',
-    'text!static/xml/regexp-crashing-debug-itext.xml',
-    'text!static/xml/regexp-crashing-debug-itext-parsed.xml',
-    'text!static/xml/slow-regexp-itext.xml',
+    'static/xml/regexp-crashing-debug-itext.xml',
+    'static/xml/regexp-crashing-debug-itext-parsed.xml',
+    'static/xml/slow-regexp-itext.xml',
 ], function (
     $,
     _,

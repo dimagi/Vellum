@@ -6,8 +6,8 @@ define([
     'underscore',
     'vellum/itemset',
     'vellum/form',
-    'text!static/itemset/test1.xml',
-    'text!static/itemset/inner-filters.xml'
+    'static/itemset/test1.xml',
+    'static/itemset/inner-filters.xml'
 ], function (
     options,
     util,

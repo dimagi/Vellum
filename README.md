@@ -40,47 +40,13 @@ Usage
 
 Checkout the source from [GitHub](https://github.com/dimagi/Vellum)
 
-Optionally, build an optimized version
+Run `yarn dev` to watch and continuously bundle files during development.
 
-```sh
-$ make # artifacts will be in _build dir and also vellum.tar.gz
-```
+To bundle for production, run `yarn build`.
 
-Then load it on a page using [RequireJS](http://requirejs.org), optionally with
-an existing jQuery instance:
+Running `make` will run `yarn build` and all TAR up artifacts in `vellum.tar.gz`.
 
-```html
-<link rel="stylesheet" href="path/to/bootstrap.css"></link>
-<link rel="stylesheet" href="path/to/vellum/style.css"></link>
-<!-- optional, if using bundled jquery et al -->
-<link rel="stylesheet" href="path/to/vellum/global-deps.css"></link>
-
-<!-- 
-Optionally reuse existing jQuery instance with Bootstrap.  
-If not present, bundled versions will be loaded.  -->
-<script src="jquery.js"></script>
-<script src="bootstrap.js"></script>
-
-<script src="require.js"></script>
-<script>
-    require.config({
-        packages: [
-            {
-                name: 'jquery.vellum',
-                location: "/path/to/vellum/src"
-            }
-        ]
-    });
-
-    require(["jquery.vellum"], function () {
-        require(["jquery"], function ($) {
-            $(function () {
-                $('#some_div').vellum(VELLUM_OPTIONS);
-            });
-        });
-    });
-</script>
-```
+Load `index.html` to run in a browser.
 
 See
 [here](https://github.com/dimagi/commcare-hq/blob/master/corehq/apps/app_manager/static/app_manager/js/forms/form_designer.js)
@@ -96,6 +62,8 @@ Testing and Running Locally
 Make sure you have Node.js 14.x installed and are using `node 14.x` in your working directory (tip: manage multiple versions of node.js with nvm)
 
 Make sure you have `npm 7.x` installed (`npm install npm@7`)
+
+Run `yarn dev` to generate bundles based on the dev webpack configuration.
 
 ### Setup
 
@@ -113,8 +81,6 @@ Click the link in the output to open in your browser, or run
 $ chromium-browser http://localhost:${VELLUM_PORT:-8088}
 ```
 
-Note: By default, the test page will load the non-built version unless a `built`
-parameter is present in the query string.
 
 ### Running tests
 
@@ -159,7 +125,7 @@ $ npm install --no-package-lock yarn  # if yarn is not installed globally
 $ `npm bin`/yarn install
 ```
 
-Build optimized version (test locally by changing `useBuilt` in `tests/main.js`):
+Build optimized version:
 ```
 $ make
 ```

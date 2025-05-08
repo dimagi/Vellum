@@ -19,7 +19,11 @@ jobs:
         rm package-lock.json
         mv package.json.save package.json
         yarn install
+    - name: Build webpack
+      run: |
+        rm -rf _build
+        yarn testbuild
     - name: Run tests
       run: |
         npm run testserver &
-        make test
+        npm test

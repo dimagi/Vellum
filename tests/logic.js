@@ -6,9 +6,9 @@ define([
     'tests/utils',
     'vellum/logic',
     'vellum/xpath',
-    'text!tests/static/logic/test-xml-1.xml',
-    'text!tests/static/databrowser/mother-ref.xml',
-    'text!tests/static/logic/hashtag-filter.xml',
+    'tests/static/logic/test-xml-1.xml',
+    'tests/static/databrowser/mother-ref.xml',
+    'tests/static/logic/hashtag-filter.xml',
 ], function (
     chai,
     $,

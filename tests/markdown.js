@@ -6,13 +6,13 @@ define([
     'jquery',
     'underscore',
     'vellum/form',
-    'text!static/markdown/markdown-test.xml',
-    'text!static/markdown/simple-markdown.xml',
-    'text!static/markdown/simple-markdown-no-chars.xml',
-    'text!static/markdown/no-markdown.xml',
-    'text!static/markdown/no-markdown-stars.xml',
-    'text!static/markdown/explicit-no-markdown.xml',
-    'text!static/markdown/markdown-output-value.xml'
+    'static/markdown/markdown-test.xml',
+    'static/markdown/simple-markdown.xml',
+    'static/markdown/simple-markdown-no-chars.xml',
+    'static/markdown/no-markdown.xml',
+    'static/markdown/no-markdown-stars.xml',
+    'static/markdown/explicit-no-markdown.xml',
+    'static/markdown/markdown-output-value.xml'
 ], function (
     options,
     util,

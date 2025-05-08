@@ -5,7 +5,7 @@ define([
     'underscore',
     'tests/utils',
     'vellum/jquery-extensions',
-    'text!static/parser/required.xml',
+    'static/parser/required.xml',
 ], function (
     chai,
     $,

@@ -7,7 +7,7 @@ define([
     'vellum/hqAnalytics',
     'vellum/atwho',
     'vellum/util',
-    'tpl!vellum/templates/commander',
+    'vellum/templates/commander.html',
 ], function (
     $,
     _,
@@ -24,7 +24,7 @@ define([
             var vellum = this,
                 cmd = vellum.data.commander;
             cmd.vellum = vellum;
-            cmd.container = $(commanderTemplate());
+            cmd.container = $(_.template(commanderTemplate)());
             cmd.addQuestionButton = vellum.$f.find(".fd-add-question");
             cmd.input = cmd.container.find("input");
             cmd.input.on("keydown", function (e) {

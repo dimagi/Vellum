@@ -3,11 +3,11 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/modeliteration/case-list-iteration.xml',
-    'text!static/modeliteration/case-list-iteration-with-questions.xml',
-    'text!static/modeliteration/case-list-iteration-with-questions-and-hidden-value.xml',
-    'text!static/modeliteration/fixture-iteration.xml',
-    'text!static/modeliteration/regular-repeat.xml',
+    'static/modeliteration/case-list-iteration.xml',
+    'static/modeliteration/case-list-iteration-with-questions.xml',
+    'static/modeliteration/case-list-iteration-with-questions-and-hidden-value.xml',
+    'static/modeliteration/fixture-iteration.xml',
+    'static/modeliteration/regular-repeat.xml',
     'tests/modeliteration'
 ], function (
     chai,

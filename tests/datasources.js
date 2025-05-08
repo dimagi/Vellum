@@ -6,9 +6,9 @@ define([
     'jquery',
     'underscore',
     'vellum/itemset',
-    'text!static/datasources/case-property.xml',
-    'text!static/datasources/null-hashtags.xml',
-    'text!static/datasources/unknown-case-property.xml',
+    'static/datasources/case-property.xml',
+    'static/datasources/null-hashtags.xml',
+    'static/datasources/unknown-case-property.xml',
 ], function (
     options,
     util,

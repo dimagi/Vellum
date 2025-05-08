@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'vellum/util',
-    'tpl!vellum/templates/undo_alert',
+    'vellum/templates/undo_alert.html',
 ], function(
     $,
     _,
@@ -24,7 +24,7 @@ define([
         var refs = _.filter(_.map(mugs, function (mug) {
                 return mug.isReferencedByOtherMugs(mugs) ? mug.p.nodeID : "";
             }), _.identity);
-        $('.fd-undo-container').append(undo_alert({
+        $('.fd-undo-container').append(_.template(undo_alert)({
             errors: refs,
             format: util.format,
         }));

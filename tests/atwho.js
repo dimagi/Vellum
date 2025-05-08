@@ -4,7 +4,7 @@ define([
     'chai',
     'jquery',
     'underscore',
-    'text!static/atwho/test1.xml',
+    'static/atwho/test1.xml',
 ], function (
     util,
     vellumUtil,
