@@ -59,7 +59,7 @@ define([
          * links
          * tables (hasTable regex) 
          */
-        var hasMarkdown = /^\d+[\.\)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val),
+        var hasMarkdown = /^\d+[.)] |^\* |~~.+~~|# |\*{1,3}\S.*\*{1,3}|\[.+\]\(\S+\)/m.test(val),
             hasTable = false;
         if (supportTables) {
             hasTable = /^(\|[^\n]+\|\r?\n)((?:\|\s*:?[-]+:?\s*)+\|)(\n(?:\|[^\n]+\|\r?\n?)*)?$/m.test(val);
@@ -82,7 +82,7 @@ define([
                         window.console.log(
                             "ignoring ItextItem without a key: " + item.id);
                         return;
-                    } else if (item && !seen.hasOwnProperty(item.key)) {
+                    } else if (item && !Object.prototype.hasOwnProperty.call(seen, item.key)) {
                         seen[item.key] = true;
                         visit(item, mug, property);
                     }
@@ -122,11 +122,11 @@ define([
                         getDefaultItextId(mug, props[property]) : item.id,
                     origId = id,
                     count = 2;
-                if (byId.hasOwnProperty(id) && (itemIsEmpty || item === byId[id])) {
+                if (Object.prototype.hasOwnProperty.call(byId, id) && (itemIsEmpty || item === byId[id])) {
                     // ignore same or empty item with duplicate ID
                     return;
                 }
-                while (byId.hasOwnProperty(id)) {
+                while (Object.prototype.hasOwnProperty.call(byId, id)) {
                     id = origId + count;
                     count++;
                 }

@@ -175,7 +175,7 @@ define([
 
         that.getNode = function (hashtag, defaultValue) {
             var nodeMap = getValue(that, "nodeMap", {});
-            return nodeMap.hasOwnProperty(hashtag) ? nodeMap[hashtag] : defaultValue;
+            return Object.prototype.hasOwnProperty.call(nodeMap, hashtag) ? nodeMap[hashtag] : defaultValue;
         };
 
         /**
@@ -267,7 +267,7 @@ define([
      */
     function getValue(that, name, defaultValue) {
         var cache = that.cache;
-        if (cache.hasOwnProperty(name)) {
+        if (Object.prototype.hasOwnProperty.call(cache, name)) {
             return cache[name];
         }
         var value = builders[name](that);
@@ -372,7 +372,7 @@ define([
                     if (name) {
                         tree.name = name;
                     }
-                    if (seen.hasOwnProperty(source.id)) {
+                    if (Object.prototype.hasOwnProperty.call(seen, source.id)) {
                         // defer to prevent infinite loop
                         tree.recursive = true;
                     } else {

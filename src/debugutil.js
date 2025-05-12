@@ -1,4 +1,3 @@
-/* global console */
 define(["underscore"], function (_) {
     if (_.isUndefined(console)) {
         return {

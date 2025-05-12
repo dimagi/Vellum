@@ -198,7 +198,7 @@ define([
             }
             // check arbitrarily for something
             for (var i in this.data) {
-                if (this.data.hasOwnProperty(i) && this.data[i]) {
+                if (Object.prototype.hasOwnProperty.call(this.data, i) && this.data[i]) {
                     return this.data[i];
                 }
             }
@@ -207,7 +207,7 @@ define([
         },
         isEmpty: function () {
             for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                if (Object.prototype.hasOwnProperty.call(this.data, lang) && this.data[lang]) {
                     return false;
                 }
             }
@@ -227,7 +227,7 @@ define([
                 data = this.data;
             defaultValue = this.getValueOrDefault(defLang) || defaultValue || "";
             _.each(this.itextModel.languages, function (lang) {
-                if (!data.hasOwnProperty(lang)) {
+                if (!Object.prototype.hasOwnProperty.call(data, lang)) {
                     data[lang] = defaultValue;
                 }
             });
@@ -265,7 +265,7 @@ define([
             var change = false,
                 shouldReset, xquery;
             for (var lang in this.data) {
-                if (this.data.hasOwnProperty(lang) && this.data[lang]) {
+                if (Object.prototype.hasOwnProperty.call(this.data, lang) && this.data[lang]) {
                     shouldReset = false;
                     xquery = xml.query(this.data[lang]);
                     _.each(xquery.find('output'), function (output) {

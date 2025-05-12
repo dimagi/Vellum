@@ -78,7 +78,7 @@ define([
                 key = $innerTag.xmlAttr('key'),
                 value;
             value = $innerTag.xmlAttr('ref');
-            if (store.hasOwnProperty(key)) {
+            if (Object.prototype.hasOwnProperty.call(store, key)) {
                 if (_.isArray(store[key])) {
                     store[key].push(value);
                 } else {
@@ -165,7 +165,7 @@ define([
         if (mug.__className === "AndroidIntent" ||
             mug.__className === "PrintIntent") {
             var nodeID = mug.p.nodeID,
-                tag = tags.hasOwnProperty(nodeID) ? tags[nodeID] : makeODKXIntentTag(nodeID);
+                tag = Object.prototype.hasOwnProperty.call(tags, nodeID) ? tags[nodeID] : makeODKXIntentTag(nodeID);
 
             _.each(INTENT_SPECIFIC_SPECS, function (key) {
                 if (!mug.p[key]) {
@@ -217,7 +217,7 @@ define([
         tagName: 'input',
         icon: 'fcc fcc-fd-android-intent',
         isTypeChangeable: false,
-        init: function (mug, form) {
+        init: function (mug) {
             mug.p.intentXmlns = mug.p.intentXmlns || DEFAULT_XMLNS;
         },
         spec: {

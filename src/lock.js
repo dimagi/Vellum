@@ -21,7 +21,7 @@ define([
     $,
 ) {
     $.vellum.plugin("lock", {}, {
-        loadXML: function (xml) {
+        loadXML: function () {
             this.data.lock.locks = {};
             this.__callOld();
         },

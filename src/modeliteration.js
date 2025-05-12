@@ -66,7 +66,7 @@ define([
                     getNodeID: function () { return "item"; },
                     p: {rawDataAttributes: null},
                     options: {
-                        getExtraDataAttributes: function (mug) {
+                        getExtraDataAttributes: function () {
                             return {id: "", index: "", "jr:template": ""};
                         },
                     },
@@ -222,7 +222,7 @@ define([
                     if (/\/item$/.test(path)) {
                         mug = form.getMugByPath(path.substring(0, path.length - 5));
                         if (mug && mug.__className === "Repeat") {
-                            adapt = function (ignore, form) {
+                            adapt = function () {
                                 mug.p.nodeset = path;
                                 mug.p.repeat_count = repeat.popAttr('jr:count') || null;
                                 mug.p.rawRepeatAttributes = parser.getAttributes(repeat);
@@ -389,7 +389,7 @@ define([
         if (mug.p.setvalues) {
             var setvaluesToRemove = _.groupBy(mug.p.setvalues, "_id");
             mug.form.dropSetValues(function (value) {
-                return setvaluesToRemove.hasOwnProperty(value._id);
+                return Object.prototype.hasOwnProperty.call(setvaluesToRemove, value._id);
             });
         }
     }

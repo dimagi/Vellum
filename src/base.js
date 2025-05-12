@@ -6,7 +6,6 @@ define([
 ], function (
     $,
     _,
-    undefined,
 ) {
     // The order of plugins in this list is important: it controls the order in
     // which plugin methods are called. Core is at the center, each plugin is a
@@ -35,7 +34,7 @@ define([
         // call private methods normally
         if (fnName.indexOf('_') === 0) {
             if (this[fnName] !== undefined) {
-                throw ("private plugin method " + pluginName + "." + fnName +
+                throw new Error("private plugin method " + pluginName + "." + fnName +
                        " would overwrite existing: " + this[fnName]);
             }
             // this could be a problem if two plugins have a private

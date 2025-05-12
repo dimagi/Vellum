@@ -104,7 +104,7 @@ define([
 
             // make sure there aren't any null values
             for (var prop in row) {
-                if (row.hasOwnProperty(prop)) {
+                if (Object.prototype.hasOwnProperty.call(row, prop)) {
                     row[prop] = row[prop] || "";
                 }
             }
