@@ -34,7 +34,7 @@ define([
     'text!static/richText/burpee.xml',
     'text!static/richText/output-ref.xml',
     'text!static/richText/output-value.xml',
-], function(
+], function (
     chai,
     $,
     _,
@@ -45,7 +45,7 @@ define([
     CKEDITOR,
     BURPEE_XML,
     OUTPUT_REF_XML,
-    OUTPUT_VALUE_XML
+    OUTPUT_VALUE_XML,
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -108,8 +108,8 @@ define([
         return $('<i>').addClass('fcc ' + iconClass).html('&nbsp;');
     }
 
-    function externalIcon () { return icon('fcc-fd-case-property'); }
-    function externalUnknownIcon () { return icon('fa-solid fa-triangle-exclamation'); }
+    function externalIcon() { return icon('fcc-fd-case-property'); }
+    function externalUnknownIcon() { return icon('fa-solid fa-triangle-exclamation'); }
 
     function makeBubble(xpath, dispValue, icon, internal) {
         var span = $('<span>').addClass('label label-datanode').attr({
@@ -151,10 +151,10 @@ define([
         });
     }
 
-    describe("Rich text utilities", function() {
+    describe("Rich text utilities", function () {
         before(setupGlobalForm);
 
-        describe("simple conversions", function() {
+        describe("simple conversions", function () {
             // path, display value, icon
             var simpleConversions = [
                     ['#form/text', 'text', icon('fcc-fd-text'), true],
@@ -164,52 +164,52 @@ define([
                 ],
                 opts = {isExpression: true};
 
-            _.each(simpleConversions, function(val) {
-                it("from text to html: " + val[0], function() {
+            _.each(simpleConversions, function (val) {
+                it("from text to html: " + val[0], function () {
                     assert.strictEqual(
                         richText.toRichText(val[0], form, opts),
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
+                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html(),
                     );
                 });
 
-                it("from text to html with output value: " + val[0], function() {
+                it("from text to html with output value: " + val[0], function () {
                     assert.strictEqual(
                         richText.toRichText(outputValueTemplateFn(val[0]), form),
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
+                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html(),
                     );
                 });
             });
         });
 
-        describe("date conversions", function() {
+        describe("date conversions", function () {
             var dates = [
-                    {
-                        xmlValue: "format-date(date(#form/date), '%d/%n/%y')",
-                        valueInBubble: '#form/date',
-                        bubbleDispValue: 'date',
-                        icon: icon('fa-solid fa-calendar-days'),
-                        internalRef: true,
-                        extraAttrs: {
-                            'data-date-format': '%d/%n/%y',
-                        }
+                {
+                    xmlValue: "format-date(date(#form/date), '%d/%n/%y')",
+                    valueInBubble: '#form/date',
+                    bubbleDispValue: 'date',
+                    icon: icon('fa-solid fa-calendar-days'),
+                    internalRef: true,
+                    extraAttrs: {
+                        'data-date-format': '%d/%n/%y',
                     },
-                ];
+                },
+            ];
 
-            _.each(dates, function(val) {
-                it("from text to html with output value: " + val.xmlValue, function() {
+            _.each(dates, function (val) {
+                it("from text to html with output value: " + val.xmlValue, function () {
                     assert.equal(
                         richText.toRichText(outputValueTemplateFn(val.xmlValue), form),
                         wrapWithDivP(makeBubble(
                             val.valueInBubble,
                             val.bubbleDispValue,
                             val.icon,
-                            val.internalRef
-                        ).attr(val.extraAttrs)).html()
+                            val.internalRef,
+                        ).attr(val.extraAttrs)).html(),
                     );
                 });
             });
 
-            it("bubble a drag+drop reference", function() {
+            it("bubble a drag+drop reference", function () {
                 var fmt = "%d/%n/%y",
                     tag = javaRosa.getOutputRef("#form/text", fmt),
                     bubble = richText.toRichText(tag, form);
@@ -217,7 +217,7 @@ define([
             });
         });
 
-        describe("equation conversions", function() {
+        describe("equation conversions", function () {
             var f_1065 = "#case/f_1065",
                 ico = icon('fcc-fd-text'),
                 opts = {isExpression: true},
@@ -225,31 +225,31 @@ define([
                     [
                         "#form/text = #form/othertext",
                         html(makeBubble('#form/text', 'text', ico, true)) + " = " +
-                        html(makeBubble('#form/othertext', 'othertext', ico, true))
+                        html(makeBubble('#form/othertext', 'othertext', ico, true)),
                     ],
                     [
                         "#form/text <= #form/othertext",
                         html(makeBubble('#form/text', 'text', ico, true)) + " <= " +
-                        html(makeBubble('#form/othertext', 'othertext', ico, true))
+                        html(makeBubble('#form/othertext', 'othertext', ico, true)),
                     ],
                     [
                         f_1065 + " = " + f_1065,
                         html(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")) + " = " +
-                        html(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case"))
+                        html(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")),
                     ],
                 ];
 
-            _.each(equations, function(val) {
-                it("from text to html: " + val[0], function() {
+            _.each(equations, function (val) {
+                it("from text to html: " + val[0], function () {
                     assert.strictEqual(
                         richText.toRichText(val[0], form, opts),
-                        "<p>" + val[1] + "</p>"
+                        "<p>" + val[1] + "</p>",
                     );
                 });
             });
         });
 
-        describe("text conversions", function() {
+        describe("text conversions", function () {
             var prefix_html_1 = '<span data-cke-copybin-start="1">​</span><p>',
                 prefix_html_2 = '<span id="cke_bm_909S" style="display: none;">&nbsp;</span>',
                 prefix_html = prefix_html_1 + prefix_html_2,
@@ -272,19 +272,19 @@ define([
                 ["blah\nblah\n", "<p>blah</p><p>blah</p><p>&nbsp;</p>"],
                 [
                     "blah\n\nblah\n\n",
-                    "<p>blah</p><p>&nbsp;</p><p>blah</p><p>&nbsp;</p><p>&nbsp;</p>"
+                    "<p>blah</p><p>&nbsp;</p><p>blah</p><p>&nbsp;</p><p>&nbsp;</p>",
                 ],
                 [
                     "list\n* item\n* item",
-                    "<p>list</p><p>* item</p><p>* item</p>"
+                    "<p>list</p><p>* item</p><p>* item</p>",
                 ],
                 [
                     "list\n\n* item\n* item",
-                    "<p>list</p><p></p><p>* item</p><p>* item</p>"
+                    "<p>list</p><p></p><p>* item</p><p>* item</p>",
                 ],
                 [
                     "list\n\n\n* item\n* item",
-                    "<p>list</p><p></p><p></p><p>* item</p><p>* item</p>"
+                    "<p>list</p><p></p><p></p><p>* item</p><p>* item</p>",
                 ],
                 [" ", " "],
                 ["   ", " \xa0 "],
@@ -297,23 +297,23 @@ define([
                 ['This dob: <output value="#case/dob" /> is of child', 'This dob: &lt;output value="#case/dob" /&gt; is of child'],
             ];
 
-            _.each(text, function(val){
-                it("from html to text: " + JSON.stringify(val[1]), function() {
+            _.each(text, function (val) {
+                it("from html to text: " + JSON.stringify(val[1]), function () {
                     assert.strictEqual(richText.fromRichText(val[1]), val[0]);
                 });
             });
 
-            _.each(text, function(val){
-                it("(text -> html -> text): " + JSON.stringify(val[0]), function() {
+            _.each(text, function (val) {
+                it("(text -> html -> text): " + JSON.stringify(val[0]), function () {
                     assert.strictEqual(
                         richText.fromRichText(richText.toRichText(val[0], form)),
-                        val[0]
+                        val[0],
                     );
                 });
             });
         });
 
-        describe("doesn't convert", function() {
+        describe("doesn't convert", function () {
             var nonConversions = [
                     "instance('casedb')/cases/case[" +
                         "@case_id = instance('casedb')/cases/case[" +
@@ -324,11 +324,11 @@ define([
                 ],
                 opts = {isExpression: true};
 
-            _.each(nonConversions, function(val) {
-                it("from text to html: " + val, function() {
+            _.each(nonConversions, function (val) {
+                it("from text to html: " + val, function () {
                     assert.strictEqual(
                         richText.toRichText(val, form, opts),
-                        "<p>" + val + "</p>"
+                        "<p>" + val + "</p>",
                     );
                 });
             });
@@ -337,15 +337,15 @@ define([
         describe("convert value with output and escaped HTML", function () {
             var items = [
                     ['<h1><output value="#form/text" /></h1>',
-                     '&lt;h1&gt;{text}&lt;/h1&gt;'],
+                        '&lt;h1&gt;{text}&lt;/h1&gt;'],
                     ['<output value="#form/text" /> <tag /> <output value="#form/othertext" />',
-                     '{text} &lt;tag /&gt; {othertext}'],
+                        '{text} &lt;tag /&gt; {othertext}'],
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                     ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
                     ['<output value="concat(1, 2" />', '&lt;output value="concat(1, 2" /&gt;'],
                     ['<output value="#form/question,\'-label\')" />',
-                     '&lt;output value="#form/question,\'-label\')" /&gt;'],
+                        '&lt;output value="#form/question,\'-label\')" /&gt;'],
                     ['<output />', '&lt;output /&gt;'],
                 ],
                 ico = icon('fcc-fd-text');
@@ -366,13 +366,13 @@ define([
         });
 
         describe("serialize formats correctly", function () {
-            it("should handle output refs", function() {
+            it("should handle output refs", function () {
                 assert.equal(richText.applyFormats({
                     value: "#case/f_2685",
                 }), '&lt;output value="#case/f_2685" /&gt;');
             });
 
-            it("should handle dates", function() {
+            it("should handle dates", function () {
                 assert.equal(richText.applyFormats({
                     dateFormat: "%d/%n/%y",
                     value: "#form/question1",
@@ -381,7 +381,7 @@ define([
         });
 
         describe("invalid xpath unescaper", function () {
-            it("should pass through xpath not marked as invalid", function() {
+            it("should pass through xpath not marked as invalid", function () {
                 assert.equal(richText.unescapeXPath("/data/valid", form), "/data/valid");
             });
 
@@ -389,7 +389,7 @@ define([
                 "#invalid/xpath `#form/text` xpath": "/data/text xpath",
                 "#invalid/xpath `#form/text`xpath": "/data/text xpath",
             }, function (expect, expr) {
-                it("should unescape invalid xpath: " + expr + " -> " + expect, function() {
+                it("should unescape invalid xpath: " + expr + " -> " + expect, function () {
                     assert.equal(richText.unescapeXPath(expr, form), expect);
                 });
             });
@@ -399,7 +399,7 @@ define([
     describe("The rich text editor", function () {
         before(setupGlobalForm);
 
-        describe("", function() {
+        describe("", function () {
             var el = $(
                     "<div id='cktestparent'>" +
                         "<div contenteditable></div>" +
@@ -534,31 +534,27 @@ define([
                         files: CKEDITOR.env.ie && CKEDITOR.env.version < 10 ? undefined : [],
                         _data: {},
                         // Emulate browsers native behavior for getDeta/setData.
-                        setData: function( type, data ) {
-                            if ( CKEDITOR.env.ie && type !== 'Text' && type !== 'URL' )
-                                throw 'Unexpected call to method or property access.';
+                        setData: function (type, data) {
+                            if (CKEDITOR.env.ie && type !== 'Text' && type !== 'URL') {throw 'Unexpected call to method or property access.';}
 
-                            if ( CKEDITOR.env.ie && CKEDITOR.env.version > 9 && type === 'URL' )
-                                return;
+                            if (CKEDITOR.env.ie && CKEDITOR.env.version > 9 && type === 'URL') {return;}
 
-                            if ( type === 'text/plain' || type === 'Text' ) {
+                            if (type === 'text/plain' || type === 'Text') {
                                 this._data[ 'text/plain' ] = data;
                                 this._data.Text = data;
                             } else {
                                 this._data[ type ] = data;
                             }
 
-                            this.types.push( type );
+                            this.types.push(type);
                         },
-                        getData: function( type ) {
-                            if ( CKEDITOR.env.ie && type !== 'Text' && type !== 'URL' )
-                                throw 'Invalid argument.';
+                        getData: function (type) {
+                            if (CKEDITOR.env.ie && type !== 'Text' && type !== 'URL') {throw 'Invalid argument.';}
 
-                            if ( typeof this._data[ type ] === 'undefined' || this._data[ type ] === null )
-                                return '';
+                            if (typeof this._data[ type ] === 'undefined' || this._data[ type ] === null) {return '';}
 
                             return this._data[ type ];
-                        }
+                        },
                     };
                 }
                 function mockPasteEvent(_target, dataTransfer) {
@@ -567,17 +563,17 @@ define([
                     return {
                         $: {
                             ctrlKey: true,
-                            clipboardData: CKEDITOR.env.ie ? undefined : dataTransfer
+                            clipboardData: CKEDITOR.env.ie ? undefined : dataTransfer,
                         },
-                        preventDefault: function() {
+                        preventDefault: function () {
                             // noop
                         },
-                        getTarget: function() {
+                        getTarget: function () {
                             return target;
                         },
-                        setTarget: function( t ) {
+                        setTarget: function (t) {
                             target = t;
-                        }
+                        },
                     };
                 }
                 var editor = $editor.ckeditor().editor,
@@ -713,15 +709,15 @@ define([
                     var text = richText.toRichText(result, form, {isExpression: true}),
                         bubble = makeBubble('#form/text', 'text', icon('fcc-fd-text'), true),
                         expected = (expr.slice(0, i) + html(bubble) + " " + expr.slice(i))
-                            .replace(/  $/, "")  // HACK for "one =  "
-                            .replace(/  /g, " &nbsp;")
+                            .replace(/ {2}$/, "")  // HACK for "one =  "
+                            .replace(/ {2}/g, " &nbsp;")
                             .replace(/\n/g, "</p><p>");
                     assert.equal(text, "<p>" + expected + "</p>");
                 });
             }));
         });
 
-        describe("in vellum", function() {
+        describe("in vellum", function () {
             var widget;
 
             describe("", function () {
@@ -730,17 +726,17 @@ define([
                         javaRosa: {langs: ['en']},
                         form: "",
                         core: {
-                            onReady: function() {
+                            onReady: function () {
                                 util.addQuestion("Text", 'text');
                                 widget = util.getWidget('itext-en-label');
                                 widget.input.promise.then(function () { done(); });
-                            }
+                            },
                         },
                         features: {rich_text: true},
                     });
                 });
 
-                it("should show the markdown preview", function(done) {
+                it("should show the markdown preview", function (done) {
                     var super_handleChange = widget.handleChange;
                     function handleChange() {
                         super_handleChange();
@@ -770,7 +766,7 @@ define([
                         value = 'testing cursor';
                     widget.setValue(value);
                     // Make sure focus is elsewhere, then focus on the rich text input
-                    editor.on('instanceReady', function() {
+                    editor.on('instanceReady', function () {
                         $('[name=property-nodeID]').focus();
                         editor.focus();
                         var selection = editor.getSelection(true);
@@ -790,7 +786,7 @@ define([
                     widget.input.promise.then(function () {
                         widget.setValue('<output value="#case/not_a_child" />' +
                             '<output value="#case/not_a_thing" />' +
-                            '<output value="#case/dob" />'
+                            '<output value="#case/dob" />',
                         );
                         assert.strictEqual($widget.find(".label-datanode-external-unknown").length, 1);
                         assert.strictEqual($widget.find(".label-datanode-external").length, 1);
@@ -838,11 +834,11 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        $(document).one('shown.bs.popover', function() {
+                        $(document).one('shown.bs.popover', function () {
                             try {
                                 var $popover = $('.popover-content').last();
                                 assert.strictEqual($popover.find('p').first().text(),
-                                                   "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+                                    "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
                                 var $link = $popover.find("a");
                                 assert($link.length);
                                 $link.click();
@@ -870,7 +866,7 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        $(document).one('shown.bs.popover', function() {
+                        $(document).one('shown.bs.popover', function () {
                             try {
                                 var $popover = $('.popover-content:last');
                                 var $link = $popover.find("a");
@@ -896,7 +892,7 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        $(document).one('shown.bs.popover', function() {
+                        $(document).one('shown.bs.popover', function () {
                             try {
                                 var $popover = $('.popover-content:last');
                                 assert.equal($popover.find('p:first').text(), "Date of Birth");
@@ -919,7 +915,7 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        $(document).one('shown.bs.popover', function() {
+                        $(document).one('shown.bs.popover', function () {
                             try {
                                 var $popover = $('.popover-content:last');
                                 assert.equal($popover.find('p:first').text(), expected);
@@ -939,7 +935,7 @@ define([
                     widget.input.promise.then(function () {
                         var bubble = $('.cke_widget_drag_handler_container').children('img').first();
                         assert(bubble.length, "No bubbles detected");
-                        $(document).one('shown.bs.popover', function() {
+                        $(document).one('shown.bs.popover', function () {
                             try {
                                 var $popover = $('.popover-content:last p:first');
                                 assert.strictEqual($popover.text(),
@@ -1002,7 +998,7 @@ define([
                                     $desc;
                                 assert(bubble.length, "No bubbles detected");
 
-                                $(document).one('shown.bs.popover', function() {
+                                $(document).one('shown.bs.popover', function () {
                                     $desc = $('.popover-title .text-muted');
                                     try {
                                         assert.equal($desc.text(), desc);

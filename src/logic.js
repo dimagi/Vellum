@@ -5,12 +5,12 @@ define([
 ], function (
     $,
     _,
-    util
+    util,
 ) {
     var EXTERNAL_REF = "#",
         INVALID_XPATH = "#invalid/xpath ";
 
-    function LogicExpression (exprText, xpathParser) {
+    function LogicExpression(exprText, xpathParser) {
         this._text = exprText || "";
         this._xpathParser = xpathParser;
         if (typeof this._text === "string" && this._text.startsWith(INVALID_XPATH)) {
@@ -68,14 +68,14 @@ define([
                             if (!this._addInstanceRef(node.filter.expr)) {
                                 queue.push({
                                     xpath: node.filter.expr,
-                                    insideFilter: insideFilter
+                                    insideFilter: insideFilter,
                                 });
                             }
                             predicates = node.filter.predicates;
                             for (i = 0; i < predicates.length; i++) {
                                 queue.push({
                                     xpath: predicates[i],
-                                    insideFilter: insideFilter
+                                    insideFilter: insideFilter,
                                 });
                             }
                         }
@@ -88,14 +88,14 @@ define([
                     for (i = 0; i < children.length; i++) {
                         queue.push({
                             xpath: children[i],
-                            insideFilter: insideFilter
+                            insideFilter: insideFilter,
                         });
                         if (children[i].predicates && children[i].predicates.length) {
                             predicates = children[i].predicates;
                             for (j = 0; j < predicates.length; j++) {
                                 queue.push({
                                     xpath: predicates[j],
-                                    insideFilter: insideFilter
+                                    insideFilter: insideFilter,
                                 });
                             }
                         }
@@ -157,10 +157,10 @@ define([
             } else {
                 return this._text;
             }
-        }
+        },
     };
 
-    function LogicManager (form, opts) {
+    function LogicManager(form, opts) {
         opts.allowedDataNodeReferences = opts.allowedDataNodeReferences || {};
 
         this.opts = opts;
@@ -182,7 +182,7 @@ define([
                     }
                     reverse[ref.ref][ref.mug] = _.filter(
                         reverse[ref.ref][ref.mug],
-                        function (r) { return r.property !== property; }
+                        function (r) { return r.property !== property; },
                     );
                 }
             }
@@ -200,7 +200,7 @@ define([
                     }
                     forward[mug.ufid][property] = [];
                 } else {
-                    _.each(forward[mug.ufid], function(refs, property) {
+                    _.each(forward[mug.ufid], function (refs, property) {
                         removeMugFromReverse = _.partial(_removeMugFromReverse, property);
                         _.each(refs, removeMugFromReverse);
                     });
@@ -242,12 +242,12 @@ define([
                     "is not allowed to reference the question itself. " +
                     "Please remove the . from the {property} " +
                     "or your form will have errors."),
-                    {property: propertyName});
+                {property: propertyName});
             }
             messages.push({
                 key: "core-circular-reference-warning",
                 level: mug.WARNING,
-                message: warning
+                message: warning,
             });
 
             // append item for each mug referenced (by absolute path) in mug's
@@ -265,8 +265,7 @@ define([
                 if ((!refMug && !knownHashtag) &&
                     (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&
                     _this.opts.allowedDataNodeReferences.indexOf(pathWithoutRoot) === -1 &&
-                    !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1)))
-                {
+                    !(property === "dataParent" && pathString === form.getBasePath().slice(0,-1))) {
                     unknowns.push(xpath);
                 } else if (!refMug && isHashRef && !knownHashtag) {
                     unknowns.push(xpath);
@@ -277,7 +276,7 @@ define([
                         ref: refid, // referenced Mug or EXTERNAL_REF or ""
                         property: property,
                         path: xpath, // path to refMug
-                        sourcePath: mug.hashtagPath
+                        sourcePath: mug.hashtagPath,
                     };
                 if (refid) {
                     if (!reverse.hasOwnProperty(refid)) {
@@ -315,7 +314,7 @@ define([
                         return gettext("Unknown question:") + " " + unknowns[0];
                     }
                     return gettext("Unknown questions:") + "\n- " + unknowns.join("\n- ");
-                })()
+                })(),
             });
             return messages;
         },
@@ -422,7 +421,7 @@ define([
          * The function is called with one argument or two arguments:
          * the mug with broken references and property if known.
          */
-        forEachBrokenReference: function(func) {
+        forEachBrokenReference: function (func) {
             _.each(this.errors, function (props, ufid) {
                 var mug = this.form.getMugByUFID(ufid);
                 if (mug) {
@@ -449,11 +448,11 @@ define([
                 invalid = _.chain(this.reverse[EXTERNAL_REF] || {})
                     .values()
                     .flatten(true)
-                    .filter(function(ref) {
+                    .filter(function (ref) {
                         return !_this.form.isValidHashtag(ref.path);
                     })
                     .value();
-            _.each(invalid, function(ref) {
+            _.each(invalid, function (ref) {
                 var mug = _this.form.getMugByUFID(ref.mug);
                 _this.updateReferences(mug, ref.property);
             });
@@ -474,7 +473,7 @@ define([
          * @param subtree - (optional) only visit references from nodes
          *        beginning with this path (no trailing /)
          */
-        forEachReferencingProperty: function(ufids, func, subtree) {
+        forEachReferencingProperty: function (ufids, func, subtree) {
             var form = this.form,
                 reverse = this.reverse;
             _.each(ufids, function (mapValue, ufid) {
@@ -484,8 +483,7 @@ define([
                         _.each(refs, function (ref) {
                             if (!subtree ||
                                 ref.sourcePath === subtree ||
-                                ref.sourcePath.indexOf(subtree + '/') === 0)
-                            {
+                                ref.sourcePath.indexOf(subtree + '/') === 0) {
                                 func(mug, ref.property, mapValue);
                             }
                         });
@@ -518,7 +516,7 @@ define([
             var _this = this,
                 load = {},
                 save = {};
-            _.each(_.flatten(_.values(this.reverse[EXTERNAL_REF] || {})), function(ref) {
+            _.each(_.flatten(_.values(this.reverse[EXTERNAL_REF] || {})), function (ref) {
                 var path = _this.form.normalizeXPath(ref.sourcePath);
                 if (path === null) {
                     // Choices have null path, use parent path.
@@ -539,7 +537,7 @@ define([
                     load[path] = [ref.path];
                 }
             });
-            var saveToCaseQuestions = _.filter(this.form.getMugList(), function(mug) {
+            var saveToCaseQuestions = _.filter(this.form.getMugList(), function (mug) {
                 return mug.options.getCaseSaveData !== undefined;
             });
             _.each(saveToCaseQuestions, function (mug) {
@@ -554,10 +552,10 @@ define([
             return _.chain(this.reverse[EXTERNAL_REF] || {})
                 .values()
                 .flatten(true)
-                .filter(function(ref) {
+                .filter(function (ref) {
                     return _this.form.isValidHashtag(ref.path);
                 })
-                .map(function(ref) {
+                .map(function (ref) {
                     return [ref.path, null];
                 }).object().value();
         },

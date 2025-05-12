@@ -127,7 +127,7 @@ define([
 ], function (
     $,
     _,
-    util
+    util,
 ) {
     var builders = {};
 
@@ -175,7 +175,7 @@ define([
 
         that.getNode = function (hashtag, defaultValue) {
             var nodeMap = getValue(that, "nodeMap", {});
-            return nodeMap.hasOwnProperty(hashtag) ? nodeMap[hashtag] : defaultValue;
+            return Object.prototype.hasOwnProperty.call(nodeMap, hashtag) ? nodeMap[hashtag] : defaultValue;
         };
 
         /**
@@ -210,7 +210,7 @@ define([
                 uri: "",
                 path: "",
                 name: gettext("Not Found"),
-                structure: {}
+                structure: {},
             }]};
             that.loading = false;
             that.fire("change");
@@ -242,7 +242,7 @@ define([
                     dataType: 'json',
                     success: finish,
                     error: onError,
-                    data: {}
+                    data: {},
                 });
             } else {
                 that.endpoint(finish);
@@ -267,7 +267,7 @@ define([
      */
     function getValue(that, name, defaultValue) {
         var cache = that.cache;
-        if (cache.hasOwnProperty(name)) {
+        if (Object.prototype.hasOwnProperty.call(cache, name)) {
             return cache[name];
         }
         var value = builders[name](that);
@@ -343,8 +343,8 @@ define([
             var tree = {
                     name: item.name || id,
                     description: item.description || '',
-                    recursive: false
-            },
+                    recursive: false,
+                },
                 source = item,
                 children = null;
             if (!item.structure && item.reference) {
@@ -372,7 +372,7 @@ define([
                     if (name) {
                         tree.name = name;
                     }
-                    if (seen.hasOwnProperty(source.id)) {
+                    if (Object.prototype.hasOwnProperty.call(seen, source.id)) {
                         // defer to prevent infinite loop
                         tree.recursive = true;
                     } else {

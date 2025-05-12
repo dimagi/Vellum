@@ -14,7 +14,7 @@ define([
     analytics,
     atwho,
     util,
-    commanderTemplate
+    commanderTemplate,
 ) {
     var fn = {},
         handlers = {};
@@ -29,14 +29,14 @@ define([
             cmd.input = cmd.container.find("input");
             cmd.input.on("keydown", function (e) {
                 var chord = util.getKeyChord(e);
-                if (handlers.hasOwnProperty(chord)) {
+                if (Object.prototype.hasOwnProperty.call(handlers, chord)) {
                     handlers[chord](cmd);
                     e.preventDefault();
                 } else {
                     cmd.input.removeClass("alert-danger");
                 }
             });
-            cmd.container.find(".fd-commander-close").click(function (e) {
+            cmd.container.find(".fd-commander-close").click(function () {
                 hideCommander(cmd);
             });
             $(".fd-add-question-dropdown").append(cmd.container.hide());
@@ -75,9 +75,9 @@ define([
         atwho.autocomplete(
             cmd.input,
             {form: cmd.vellum.data.core.form, on: _.identity},  // fake mug
-            {useHashtags: true, tabSelectsMatch: true}          // options
+            {useHashtags: true, tabSelectsMatch: true},          // options
         );
-        cmd.vellum.data.core.form.on("change-display-language", function() {
+        cmd.vellum.data.core.form.on("change-display-language", function () {
             // NOTE this is tightly coupled with atwho.autocomplete(...), which
             // calls $input.atwho('destroy') on change-display-language
             cmd.input.atwho(cmd.atwhoConfig);
@@ -96,7 +96,7 @@ define([
     function configure(vellum) {
         function getMugClassName(typeName) {
             typeName = typeName.toLowerCase();
-            if (mugTypes.hasOwnProperty(typeName)) {
+            if (Object.prototype.hasOwnProperty.call(mugTypes, typeName)) {
                 return mugTypes[typeName].__className;
             }
         }
@@ -104,7 +104,7 @@ define([
         function getPosition(position) {
             if (position) {
                 position = position.toLowerCase();
-                if (positionMap.hasOwnProperty(position)) {
+                if (Object.prototype.hasOwnProperty.call(positionMap, position)) {
                     position = positionMap[position];
                 }
             }
@@ -226,7 +226,8 @@ define([
          * @returns the result of the command, `undefined` on failure.
          */
         function dispatch(command) {
-            var obj = tokenize(command), args;
+            var obj = tokenize(command), 
+                args;
             if (!obj) {
                 return;
             }
@@ -250,7 +251,7 @@ define([
                 return {name: name};
             }),
             positionMap = {"in": "into", "first in": "first"},
-            questionRef = {regexp: /[#\/][^\s]+/.source, getArg: getMug},
+            questionRef = {regexp: /[#/][^\s]+/.source, getArg: getMug},
             tokenizers = [],
             forms = [],
             commandConfigs = [
@@ -286,7 +287,7 @@ define([
                         } catch (err) {
                             //window.console.log(err.message);
                         }
-                    }
+                    },
                 },
                 //{
                 //    // delete question
@@ -316,7 +317,7 @@ define([
                             vellum.focusFirstInput();
                             return mug;
                         }
-                    }
+                    },
                 },
             ];
 
@@ -376,7 +377,7 @@ define([
                 callbacks: {
                     matcher: function (flag, subtext) { return subtext; },
                     filter: filter,
-                    sorter: function(query, items) { return items; },
+                    sorter: function (query, items) { return items; },
                 },
             },
         };
@@ -431,7 +432,7 @@ define([
     fn.getQuestionMap = function (vellum) {
         var cmd = vellum.data.commander,
             types = vellum.data.core.mugTypes;
-        if (!cmd.hasOwnProperty("questions")) {
+        if (!Object.prototype.hasOwnProperty.call(cmd, "questions")) {
             cmd.questions = _.chain(vellum.data.core.QUESTIONS_IN_TOOLBAR)
                 .map(function (name) {
                     var type = types[name];

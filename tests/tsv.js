@@ -1,10 +1,9 @@
-/*jshint multistr: true */
 define([
     'chai',
-    'vellum/tsv'
+    'vellum/tsv',
 ], function (
     chai,
-    tsv
+    tsv,
 ) {
     var assert = chai.assert;
 
@@ -22,11 +21,11 @@ define([
 
     function eq(value, parsed, roundTrip) {
         var repr = value
-                    .replace(/\r/g, "\\r")
-                    .replace(/\n/g, "\\n")
-                    .replace(/\t/g, "\\t");
+            .replace(/\r/g, "\\r")
+            .replace(/\n/g, "\\n")
+            .replace(/\t/g, "\\t");
         assert.deepEqual(parseRows(value, parsed.length + 5), parsed,
-                         "parsed '" + repr + "'");
+            "parsed '" + repr + "'");
         if (roundTrip) {
             assert.strictEqual(tsv.tabDelimit(parsed), value);
         }
@@ -120,7 +119,7 @@ define([
         it("should escape special characters", function () {
             var rows = [
                     ['""', '\t\t\t', '\n\n\n', '\r\r\r', ''],
-                    ['  '] // space is not a special character
+                    ['  '], // space is not a special character
                 ],
                 encoded = '""""""\t"\t\t\t"\t"\n\n\n"\t"\r\r\r"\t\n  ';
             assert.strictEqual(tsv.tabDelimit(rows), encoded);

@@ -9,11 +9,11 @@ define([
     chai,
     $,
     _,
-    BLANK_CHOICE_XML
+    BLANK_CHOICE_XML,
 ) {
     var assert = chai.assert;
 
-    describe("Mugs", function() {
+    describe("Mugs", function () {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -22,7 +22,7 @@ define([
             });
         });
 
-        it("should coalesce change events inside _withMessages", function() {
+        it("should coalesce change events inside _withMessages", function () {
             util.loadXML("");
             var mug = util.addQuestion("Text"),
                 id = 1,
@@ -53,14 +53,14 @@ define([
             assert.equal(changes, 3);
         });
 
-        it("at the top level should not be named meta", function() {
+        it("at the top level should not be named meta", function () {
             var data = [
-                    ["id", "type"],
-                    ["meta", "Group"],
-                    ["meta/meta", "Text"],
-                    ["group", "Group"],
-                    ["group/meta", "Group"],
-                ];
+                ["id", "type"],
+                ["meta", "Group"],
+                ["meta/meta", "Text"],
+                ["group", "Group"],
+                ["group/meta", "Group"],
+            ];
             util.loadXML("");
             util.paste(data);
             _.each(data.slice(1), function (row) {
@@ -76,10 +76,10 @@ define([
 
         it("should have a function to tell if referenced by other mugs", function () {
             var data = [
-                    ["id", "type", "relevantAttr"],
-                    ["red", "Text", ""],
-                    ["blue", "Text", "#form/red = '1'"],
-                ];
+                ["id", "type", "relevantAttr"],
+                ["red", "Text", ""],
+                ["blue", "Text", "#form/red = '1'"],
+            ];
             util.loadXML("");
             util.paste(data);
             var red = util.getMug("red"),

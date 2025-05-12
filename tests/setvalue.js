@@ -4,19 +4,19 @@ define([
     'jquery',
     'vellum/xml',
     'text!static/setvalue/set-value.xml',
-    'text!static/setvalue/set-value-special.xml'
+    'text!static/setvalue/set-value-special.xml',
 ], function (
     util,
     chai,
     $,
     xml,
     SET_VALUE_XML,
-    SET_VALUE_SPECIAL_XML
+    SET_VALUE_SPECIAL_XML,
 ) {
     var assert = chai.assert,
         call = util.call;
 
-    describe("setvalues", function() {
+    describe("setvalues", function () {
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
@@ -25,13 +25,13 @@ define([
             });
         });
 
-        it("should be associated with the correct mug on form load", function() {
+        it("should be associated with the correct mug on form load", function () {
             util.loadXML(SET_VALUE_XML);
             var text = util.getMug('text');
             assert.strictEqual(text.p.defaultValue, 'blah');
         });
 
-        it("should have event jr-insert when added into repeat", function() {
+        it("should have event jr-insert when added into repeat", function () {
             util.loadXML("");
             util.addQuestion("Repeat", 'repeat');
             var text = util.addQuestion("Text", 'text'),
@@ -47,7 +47,7 @@ define([
             assert.strictEqual(setvalue.attr('value'), 'blah');
         });
 
-        it("should have event xforms-ready when added outside of repeat", function() {
+        it("should have event xforms-ready when added outside of repeat", function () {
             util.loadXML("");
             var text = util.addQuestion("Text", 'text'),
                 form, setvalue;
@@ -62,7 +62,7 @@ define([
             assert.strictEqual(setvalue.attr('value'), 'blah');
         });
 
-        it("should not be associated with a question if event is not xforms-ready or jr-insert", function() {
+        it("should not be associated with a question if event is not xforms-ready or jr-insert", function () {
             util.loadXML(SET_VALUE_SPECIAL_XML);
             var form = call("createXML"),
                 setvalue = xml.parseXML(form).find('setvalue');
@@ -82,7 +82,7 @@ define([
                     },
                 });
             });
-            it("should not warn when referencing another node", function() {
+            it("should not warn when referencing another node", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
@@ -90,7 +90,7 @@ define([
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 
-            it("should not warn when referencing a case", function() {
+            it("should not warn when referencing a case", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
@@ -98,7 +98,7 @@ define([
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 
-            it("should not warn when referencing a case with filter", function() {
+            it("should not warn when referencing a case with filter", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
@@ -118,7 +118,7 @@ define([
                     },
                 });
             });
-            it("should warn when referencing another node", function() {
+            it("should warn when referencing another node", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
@@ -126,7 +126,7 @@ define([
                 assert.notStrictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 
-            it("should not warn when referencing a case", function() {
+            it("should not warn when referencing a case", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');
@@ -134,7 +134,7 @@ define([
                 assert.strictEqual(text2.spec.defaultValue.validationFunc(text2), 'pass');
             });
 
-            it("should not warn when referencing a case with filter", function() {
+            it("should not warn when referencing a case with filter", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'text1');
                 var text2 = util.addQuestion("Text", 'text2');

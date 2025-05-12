@@ -12,7 +12,7 @@ define([
     'text!static/markdown/no-markdown.xml',
     'text!static/markdown/no-markdown-stars.xml',
     'text!static/markdown/explicit-no-markdown.xml',
-    'text!static/markdown/markdown-output-value.xml'
+    'text!static/markdown/markdown-output-value.xml',
 ], function (
     options,
     util,
@@ -27,7 +27,7 @@ define([
     NO_MARKDOWN_XML,
     NO_MARKDOWN_STARS_XML,
     EXPLICIT_NO_MARKDOWN_XML,
-    MARKDOWN_OUTPUT_VALUE_XML
+    MARKDOWN_OUTPUT_VALUE_XML,
 ) {
     var assert = chai.assert,
         call = util.call,
@@ -47,26 +47,26 @@ define([
         }
         before(beforeFn);
 
-        it("should parse form that has markdown", function() {
+        it("should parse form that has markdown", function () {
             util.loadXML(MARKDOWN_TEST_XML);
             var mug = util.getMug('/data/markdown_question');
             assert(mug.p.labelItext.hasMarkdown);
         });
 
-        it("should use the markdown form when there are conflicting strings", function() {
+        it("should use the markdown form when there are conflicting strings", function () {
             util.loadXML(MARKDOWN_TEST_XML);
             var mug = util.getMug('/data/markdown_question');
             assert.strictEqual(mug.p.labelItext.get(), "**some markdown**");
         });
 
-        describe("when a user has not defined markdown usage", function() {
-            it("should not show markdown with nothing in the text", function() {
+        describe("when a user has not defined markdown usage", function () {
+            it("should not show markdown with nothing in the text", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 assert(!markdownVisible());
             });
 
-            it("should allow turning off markdown if markdown characters are input", function() {
+            it("should allow turning off markdown if markdown characters are input", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("**markdown**").change();
@@ -75,7 +75,7 @@ define([
                 assert(!markdownVisible());
             });
 
-            it("should not show markdown if non markdown characters are not input", function() {
+            it("should not show markdown if non markdown characters are not input", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 assert(!markdownVisible());
@@ -83,28 +83,28 @@ define([
                 assert(!markdownVisible());
             });
 
-            it("should write any markdown if markdown characters are input", function() {
+            it("should write any markdown if markdown characters are input", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("**some markdown**").change();
                 util.assertXmlEqual(call('createXML'), SIMPLE_MARKDOWN_XML, {normalize_xmlns: true});
             });
 
-            it("should not write any markdown if markdown characters are not input", function() {
+            it("should not write any markdown if markdown characters are not input", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("no markdown").change();
                 util.assertXmlEqual(call('createXML'), NO_MARKDOWN_XML, {normalize_xmlns: true});
             });
 
-            it("should support ordered list with parens", function() {
+            it("should support ordered list with parens", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("1) first\n 2) second").change();
                 assert(markdownVisible());
             });
 
-            it("should write /data/ to output value", function() {
+            it("should write /data/ to output value", function () {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
                 $('[name=itext-en-label]').val("**some markdown**").change();
@@ -118,7 +118,7 @@ define([
             });
         });
 
-        describe("when a user explicitly wants no markdown", function() {
+        describe("when a user explicitly wants no markdown", function () {
             beforeEach(function (done) {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
@@ -127,27 +127,27 @@ define([
                 done();
             });
 
-            it("should not show markdown when there are markdown characters", function() {
+            it("should not show markdown when there are markdown characters", function () {
                 assert(!markdownVisible());
                 $('[name=itext-en-label]').val("~~more markdown~~").change();
                 assert(!markdownVisible());
             });
 
-            it("should allow re-enabling markdown", function() {
+            it("should allow re-enabling markdown", function () {
                 toggleMarkdown();
                 assert(markdownVisible());
             });
 
-            it("should not write any markdown", function() {
+            it("should not write any markdown", function () {
                 util.assertXmlEqual(call('createXML'), NO_MARKDOWN_STARS_XML, {normalize_xmlns: true});
             });
 
-            it("should activate the save button", function() {
+            it("should activate the save button", function () {
                 assert(util.saveButtonEnabled(), "save button is disabled");
             });
         });
 
-        describe("when a user explicitly wants markdown", function() {
+        describe("when a user explicitly wants markdown", function () {
             function beforeFn(done) {
                 util.loadXML("");
                 util.addQuestion("Text", 'markdown_question');
@@ -163,28 +163,28 @@ define([
                 assert(markdownVisible());
             });
 
-            it("should allow turning off markdown", function() {
+            it("should allow turning off markdown", function () {
                 assert(markdownVisible());
                 toggleMarkdown();
                 assert(!markdownVisible());
             });
 
-            it("should write markdown even if there are no markdown characters", function() {
+            it("should write markdown even if there are no markdown characters", function () {
                 $('[name=itext-en-label]').val("some markdown").change();
                 util.assertXmlEqual(call('createXML'), SIMPLE_MARKDOWN_NO_CHARS_XML, {normalize_xmlns: true});
             });
 
-            it("should activate the save button", function() {
+            it("should activate the save button", function () {
                 assert(util.saveButtonEnabled(), "save button is disabled");
             });
         });
 
-        it("should not include markdown with vellum:ignore='markdown'", function() {
+        it("should not include markdown with vellum:ignore='markdown'", function () {
             util.loadXML(EXPLICIT_NO_MARKDOWN_XML);
             util.assertXmlEqual(call('createXML'), EXPLICIT_NO_MARKDOWN_XML);
         });
 
-        it("should remove markdown when no markdown is specified", function() {
+        it("should remove markdown when no markdown is specified", function () {
             var form = util.loadXML(SIMPLE_MARKDOWN_XML);
             form.noMarkdown = true;
             util.assertXmlEqual(call('createXML'), EXPLICIT_NO_MARKDOWN_XML);

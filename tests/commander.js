@@ -9,17 +9,17 @@ define([
     chai,
     $,
     _,
-    commander
+    commander,
 ) {
     var assert = chai.assert;
 
-    describe("The commander plugin", function() {
+    describe("The commander plugin", function () {
         var vellum, mugTypes;
         before(function (done) {
             util.init({
                 javaRosa: {langs: ['en']},
                 features: {rich_text: false},
-                core: {onReady: function() {
+                core: {onReady: function () {
                     vellum = this;
                     mugTypes = commander.getQuestionMap(vellum);
                     done();

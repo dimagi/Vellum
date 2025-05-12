@@ -1,16 +1,16 @@
 define([
     'jquery',
-    'tpl!vellum/templates/date_format_menu'
-], function(
+    'tpl!vellum/templates/date_format_menu',
+], function (
     $,
-    date_format_menu
-){
+    date_format_menu,
+) {
     function showMenu(x, y, callback, hideOnLeave) {
         var formats = {
-                "": gettext("No Formatting"),
-                "%e/%n/%y": "d/m/yy e.g. 30/1/14",
-                "%a, %b %e, %Y": "ddd, mmm d, yyyy e.g. Thu, Jan 30, 2014"
-            };
+            "": gettext("No Formatting"),
+            "%e/%n/%y": "d/m/yy e.g. 30/1/14",
+            "%a, %b %e, %Y": "ddd, mmm d, yyyy e.g. Thu, Jan 30, 2014",
+        };
         var menu = $(date_format_menu({formats: formats}));
         $('body').append(menu);
         menu.find('li a').click(function () {

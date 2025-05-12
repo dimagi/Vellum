@@ -9,7 +9,7 @@ define([
     $,
     _,
     util,
-    expressionEditor
+    expressionEditor,
 ) {
     var assert = chai.assert;
 
@@ -53,7 +53,7 @@ define([
             xpathType: "bool",
             value: value,
             changed: false,
-            change: function () { opts.changed = true; }
+            change: function () { opts.changed = true; },
         };
         return opts;
     }

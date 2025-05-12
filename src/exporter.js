@@ -1,9 +1,9 @@
 define([
     'vellum/tsv',
-    'vellum/richText'
+    'vellum/richText',
 ], function (
     tsv,
-    richText
+    richText,
 ) {
     // todo: abstract out IText stuff into part of the plugin interface
     var generateExportTSV = function (form) {
@@ -19,7 +19,7 @@ define([
 
         var columnOrder = [
             "Question",
-            "Type"
+            "Type",
         ];
 
         for (var type in itextColumns) {
@@ -104,7 +104,7 @@ define([
 
             // make sure there aren't any null values
             for (var prop in row) {
-                if (row.hasOwnProperty(prop)) {
+                if (Object.prototype.hasOwnProperty.call(row, prop)) {
                     row[prop] = row[prop] || "";
                 }
             }
@@ -117,6 +117,6 @@ define([
     };
 
     return {
-        generateExportTSV: generateExportTSV
+        generateExportTSV: generateExportTSV,
     };
 });

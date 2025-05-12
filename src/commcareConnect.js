@@ -13,14 +13,14 @@ define([
     'vellum/tree',
     'vellum/util',
     'vellum/widgets',
-    'vellum/core'
+    'vellum/core',
 ], function (
     $,
     _,
     mugs,
     Tree,
     util,
-    widgets
+    widgets,
 ) {
     let CCC_XMLNS = 'http://commcareconnect.com/data/v1/learn',
         baseSection = {
@@ -38,21 +38,21 @@ define([
                 text: gettext("Use logic to control when questions are asked and what answers are valid. " +
                     "You can add logic to display a question based on a previous answer, to make " +
                     "the question required or ensure the answer is in a valid range."),
-                link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations"
+                link: "https://confluence.dimagi.com/display/commcarepublic/Common+Logic+and+Calculations",
             },
             properties: [
                 'relevantAttr',
-            ]
+            ],
         },
         baseSpec = {
             xmlnsAttr: {
                 presence: "optional",
                 serialize: () => {},
-                deserialize: () => {}
+                deserialize: () => {},
             },
             requiredAttr: {presence: "notallowed"},
             constraintAttr: {presence: "notallowed"},
-            calculateAttr: {presence: "notallowed"}
+            calculateAttr: {presence: "notallowed"},
         },
         baseMugOptions = {
             isTypeChangeable: false,
@@ -104,8 +104,8 @@ define([
                         getNodeID: () => child.id,
                         p: p,
                         options: {
-                            getExtraDataAttributes: () => {}
-                        }
+                            getExtraDataAttributes: () => {},
+                        },
                     });
                 });
                 return [new Tree.Node(children, {
@@ -115,8 +115,8 @@ define([
                         getExtraDataAttributes: () => ({
                             "xmlns": CCC_XMLNS,
                             "id": mug.p.nodeID,
-                        })
-                    }
+                        }),
+                    },
                 })];
             },
         },
@@ -171,8 +171,8 @@ define([
                             serialize: mugs.serializeXPath,
                             deserialize: mugs.deserializeXPath,
                             lstring: gettext('Display Condition'),
-                        }
-                    })
+                        },
+                    }),
                 }),
                 sections: [
                     _.extend({}, baseSection, {
@@ -217,9 +217,9 @@ define([
                             xpathType: "bool",
                             serialize: mugs.serializeXPath,
                             deserialize: mugs.deserializeXPath,
-                            lstring: gettext('Display Condition')
-                        }
-                    })
+                            lstring: gettext('Display Condition'),
+                        },
+                    }),
                 }),
                 sections: [
                     _.extend({}, baseSection, {
@@ -281,9 +281,9 @@ define([
                             xpathType: "bool",
                             serialize: mugs.serializeXPath,
                             deserialize: mugs.deserializeXPath,
-                            lstring: gettext('Display Condition')
-                        }
-                    })
+                            lstring: gettext('Display Condition'),
+                        },
+                    }),
                 }),
                 sections: [
                     _.extend({}, baseSection, {
@@ -296,7 +296,7 @@ define([
                     }),
                     _.clone(logicSection),
                 ],
-            }
+            },
         };
 
 

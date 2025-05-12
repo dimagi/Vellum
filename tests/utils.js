@@ -10,7 +10,7 @@ define([
     'vellum/widgets',
     'vellum/xml',
     'jquery.jstree',
-    'jquery.vellum'
+    'jquery.vellum',
 ], function (
     options,
     chai,
@@ -21,7 +21,7 @@ define([
     copypaste,
     tsv,
     widgets,
-    xml
+    xml,
 ) {
     var assert = chai.assert,
         savedForm = null,
@@ -46,7 +46,7 @@ define([
         if (opts.normalize_xmlns) {
             var xmlns = xml.parseXML(expected).find('data').attr('xmlns');
             actual = actual.replace(/(data[^>]+xmlns=")(.+?)"/,
-                                    '$1' + xmlns + '"');
+                '$1' + xmlns + '"');
         }
         var result = xmlEqual(actual, expected);
         if (opts.not) {
@@ -68,7 +68,8 @@ define([
 
     function assertJSTreeState() {
         function repr(node, level) {
-            var i, len, child, items = [];
+            var i, len, child, 
+                items = [];
             if (node.id === "#") {
                 level = -1;
             } else {
@@ -87,7 +88,8 @@ define([
 
     function assertTreeState(tree) {
         function repr(node, level) {
-            var i, len, child, items = [];
+            var i, len, child, 
+                items = [];
             if (node.isRootNode) {
                 level = -1;
             } else {
@@ -129,9 +131,9 @@ define([
 
     function colorDiff(patch) {
         var colors = {
-                "-": 31, // red
-                "+": 32  // green
-            };
+            "-": 31, // red
+            "+": 32,  // green
+        };
         function color(str) {
             var code = colors[str[0]] || 0;
             return '\u001b[' + code + 'm' + str + '\u001b[0m';
@@ -212,7 +214,7 @@ define([
 
         // Turn off animations for testing
         var oldAnimate = $.fn.animate;
-        $.fn.animate = function(prop, speed, easing, callback) {
+        $.fn.animate = function (prop, speed, easing, callback) {
             oldAnimate.apply(this, [prop, 0, easing, callback]);
         };
 
@@ -247,7 +249,7 @@ define([
     }
         
     // call a method on the active instance
-    function call () {
+    function call() {
         var args = Array.prototype.slice.call(arguments),
             $vellum = $("#vellum");
         return $vellum.vellum.apply($vellum, args);
@@ -255,8 +257,9 @@ define([
 
     // load XML syncronously
     function loadXML(value, options, ignoreParseWarnings, maintainUrlHash) {
-        var warnings = [], data = call("getData");
-        if (!maintainUrlHash){
+        var warnings = [], 
+            data = call("getData");
+        if (!maintainUrlHash) {
             window.history.replaceState(null, null, " ");
         }
         data.core.parseWarnings = [];
@@ -339,12 +342,12 @@ define([
         return mug;
     }
 
-    function deleteQuestion () {
+    function deleteQuestion() {
         var mugs = _.map(arguments, function (path) {
-                var mug = getMug(path);
-                assert(mug, "mug not found: " + path);
-                return mug;
-            });
+            var mug = getMug(path);
+            assert(mug, "mug not found: " + path);
+            return mug;
+        });
         call("getData").core.form.removeMugsFromForm(mugs);
         _.each(arguments, function (path) {
             assert(!getMug(path), "mug not removed: " + path);
@@ -463,7 +466,7 @@ define([
         init: init,
         call: call,
         loadXML: loadXML,
-        saveAndReload: function(callback) {
+        saveAndReload: function (callback) {
             call("loadXFormOrError", call("createXML"), callback);
         },
         getMug: getMug,
@@ -487,7 +490,7 @@ define([
             }
             if (nodeId) {
                 assert(_.isUndefined(attrs.nodeID),
-                       "unexpected attribute for " + qType + "[" + nodeId + "]");
+                    "unexpected attribute for " + qType + "[" + nodeId + "]");
                 if (mug.p.labelItext) {
                     mug.p.labelItext.set(mug.getLabelValue());
                 }
@@ -509,7 +512,7 @@ define([
             });
 
             // Open all sections
-            _.each(call('getSections', mug), function(section) {
+            _.each(call('getSections', mug), function (section) {
                 call('collapseSection', section.slug, false);
             });
 

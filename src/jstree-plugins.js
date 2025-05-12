@@ -1,8 +1,8 @@
 define([
     'jquery',
-    'jquery.jstree'
+    'jquery.jstree',
 ], function (
-    $
+    $,
 ) {
     /**
      * Conditional events plugin
@@ -18,19 +18,19 @@ define([
      * Based on https://github.com/vakata/jstree/blob/master/src/misc.js
      * See also http://stackoverflow.com/a/24499593/10840
      */
-    "use strict";
+    
     $.jstree.defaults.conditionalevents = {
         should_activate: function () { return true; },
         //should_move: function () { return true; },
         redraw_node: function () {
             var args = Array.prototype.slice.call(arguments);
             return this.parent.redraw_node.apply(this.inst, args);
-        }
+        },
     };
     $.jstree.plugins.conditionalevents = function (options, parent) {
         this.activate_node = function () {
             var args = Array.prototype.slice.call(arguments);
-            if(this.settings.conditionalevents.should_activate.apply(this, args)) {
+            if (this.settings.conditionalevents.should_activate.apply(this, args)) {
                 parent.activate_node.apply(this, args);
             }
         };
