@@ -984,7 +984,7 @@ define([
     };
 
     var hidePageSpinner = function() {
-        $(".fd-form-saving").remove();
+        //$(".fd-form-saving").remove();
     };
 
     fn.handleDropFinish = function(target, path, mug, event) {
