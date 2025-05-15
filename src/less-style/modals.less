@@ -17,9 +17,7 @@
     z-index: @zindexBlockInteraction;
 
     > div {
-        @imageSize: 32px;
-        @padding: 8px;
-        @size: @imageSize + @padding * 2;
+        @size: 32px;
 
         opacity: 1;
         position: fixed;
@@ -30,13 +28,8 @@
         height: @size;
         .border-radius(4px);
         background-color: @white;
-        padding: @padding;
-
-        > div {
-            width: @imageSize;
-            height: @imageSize;
-            background-image: url('../images/ajax-loader.gif');
-        }
+        font-size: 22px;
+        text-align: center;
     }
 }
 
