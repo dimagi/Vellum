@@ -23,8 +23,12 @@ module.exports = {
                 type: 'asset/source',
             },
             {
-                test: /\.html$/,
+                test: /templates\/.*\.html$/,
                 loader: path.resolve('src/template-loader.js'),
+            },
+            {
+                test: /static\/.*\.html$/,
+                type: 'asset/source',
             },
             {
                 test: /\.tsv$/,

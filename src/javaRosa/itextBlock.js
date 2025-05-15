@@ -246,7 +246,7 @@ define([
         };
 
         block.getDeleteFormButton = function (form) {
-            var $deleteButton = $(button_remove);
+            var $deleteButton = $(button_remove());
             $deleteButton.addClass('pull-right')
                 .addClass("delete-" + block.getFormGroupClass(form))
                 .click(function () {
