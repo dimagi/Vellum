@@ -95,51 +95,75 @@ define([
             y = e.clientY;
         });
 
+        function htmlToElement(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            doc.body.firstChild.contentEditable = false;
+            return doc.body.firstChild;
+        }
+
         function insertHtmlWithSpace(content) {
-            const elementAtDrop = document.elementFromPoint(x, y);
-            const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
-
+            const hasFocus = document.activeElement === inputElement;
+            console.log(`has focus ${hasFocus}`);
             let range;
-            if (existingBubble) {
-                // If dropping on an existing bubble, position after it
-                range = document.createRange();
-                range.setStartAfter(existingBubble);
-                range.setEndAfter(existingBubble);
-            } else {
-                const position = document.caretPositionFromPoint(x, y);
-                if (position) {
-                    range = document.createRange();
-                    range.setStart(position.offsetNode, position.offset);
-                    range.collapse(true);
+            if (!hasFocus && x && y) {
+                const elementAtDrop = document.elementFromPoint(x, y);
+                const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
 
-                    // Remove the paragraph so the inserted text does not create a new one.
-                    const parentNode = position.offsetNode.parentNode;
-                    if (parentNode && parentNode.tagName === 'P' &&
-                        position.offsetNode.nodeType === Node.TEXT_NODE &&
-                        position.offset === position.offsetNode.nodeValue.length) {
-                        content = content.replace(/^<p>/i, '').replace(/<\/p>$/i, '');
+                if (existingBubble) {
+                    // If dropping on an existing bubble, position after it
+                    range = document.createRange();
+                    range.setStartAfter(existingBubble);
+                    range.setEndAfter(existingBubble);
+                } else {
+                    const position = document.caretPositionFromPoint(x, y);
+                    if (position) {
+                        range = document.createRange();
+                        range.setStart(position.offsetNode, position.offset);
+                        range.collapse(true);
+
+                        // Remove the paragraph so the inserted text does not create a new one.
+                        const parentNode = position.offsetNode.parentNode;
+                        if (parentNode && parentNode.tagName === 'P' &&
+                            position.offsetNode.nodeType === Node.TEXT_NODE &&
+                            position.offset === position.offsetNode.nodeValue.length) {
+                            content = content.replace(/^<p>/i, '').replace(/<\/p>$/i, '');
+                        }
                     }
                 }
+            } else if (!hasFocus) {
+                range = document.createRange();
+                range.selectNodeContents(inputElement);
+                range.collapse();
+            } else {
+                range = window.getSelection().getRangeAt(0);
             }
+
             if (range) {
+
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(range);
-
-                inputElement.focus();
-                document.execCommand('insertHTML', false, content);
-
-                const insertedElement = inputElement.querySelector('[data-toggle]:not(.popover-initialized)');
-                if (insertedElement && insertedElement.getAttribute('data-toggle')) {
-                    createPopover(insertedElement);
+                const element = htmlToElement(content);
+                range.deleteContents();
+                range.insertNode(element);
+                if (element.getAttribute('data-toggle')) {
+                    createPopover(element);
                 }
+                inputElement.focus();
 
                 const inputEvent = new Event('input', {
-                  bubbles: true,
-                  cancelable: true
+                    bubbles: true,
+                    cancelable: true
                 });
                 inputElement.dispatchEvent(inputEvent);
+            } else {
+                console.log("no range")
             }
+
+
+
+
         }
 
         var getWidget = require('vellum/widgets').util.getWidget;
@@ -243,7 +267,7 @@ define([
                 var args = Array.prototype.slice.call(arguments);
                 if (args.length === 2 && args[0] === 'change' && typeof args[1] === 'function') {
                     const handleContentChange = function(e) {
-                        console.log(`editor change event`);
+                        // console.log(`editor change event`);
                         args[1].apply(); // callee in widgets.js does not take any arguments
                     };
 
