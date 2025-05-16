@@ -518,7 +518,7 @@ define([
             it("should not paste style content into editor", function () {
                 var html = '<style type="text/css"><!--td--></style><span>A</span>';
                 input[0].focus();
-                document.execCommand('paste', html);
+                document.execCommand('insertHTML', false, html);
                 assert.equal(editor.getValue(), 'A');
             });
 
