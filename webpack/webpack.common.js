@@ -103,7 +103,6 @@ module.exports = {
         alias: {
             'ckeditor': path.resolve(BASE_PATH, 'lib/ckeditor/ckeditor.js'),
             'ckeditor-jquery': path.resolve(BASE_PATH, 'lib/ckeditor/adapters/jquery.js'),
-            'CryptoJS': path.resolve(BASE_PATH, 'lib/sha1'),
             'diff-match-patch': path.resolve(BASE_PATH, 'lib/diff_match_patch'),
             'save-button': path.resolve(BASE_PATH, 'lib', 'SaveButton.js'),
             'jquery.vellum': path.resolve(BASE_PATH, 'src', 'main'),
