@@ -971,7 +971,7 @@ define([
     };
 
     var showPageSpinner = function() {
-        var spinner = $("<div><div><div></div></div></div>");
+        var spinner = $("<div><div><i class='fa fa-spin fa-spinner'></i></div></div>");
         spinner.addClass("fd-form-saving");
         $('body').append(spinner);
     };

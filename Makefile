@@ -28,7 +28,6 @@ _rjs:
 # combine CSS files (and adjust location for relative image paths)
 	cat _build/src/local-deps.css _build/src/main-components.css > _build/style.css
 	rm _build/src/local-deps.css _build/src/main-components.css
-	mv _build/src/images _build/
 	echo "$(VERSION)" > _build/version.txt
 	(yarn list || yarn list --offline) | grep -Ev "^(Vellum|yarn) " > _build/manifest.txt
 	python buildmain.py > _build/src/main.js
