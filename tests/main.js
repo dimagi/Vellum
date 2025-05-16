@@ -1,65 +1,25 @@
-/* global console, mocha, navigator, URLSearchParams */
-if (navigator.userAgent.indexOf('HeadlessChrome') < 0) {
+/* global require */
+import mocha from "mocha/mocha";
+mocha.setup({
+    ui: 'bdd',
+    timeout: '10000',
+});
+
+if (window.navigator.userAgent.indexOf('HeadlessChrome') < 0) {
     mocha.reporter('html');
 }
 
 (function () { // begin local scope
 
-var urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('useBuilt')) {
-    window.useBuilt = true;
-}
-
-var useBuilt = window.useBuilt, baseUrl, testBase;
-
-if (useBuilt) {
-    baseUrl = '_build/src';
-    testBase = "../../";
-} else {
-    baseUrl = 'src';
-    testBase = "../";
-}
-console.log("loading Vellum from " + baseUrl);
-
-requirejs.config({
-    baseUrl: baseUrl,
-    paths: {
-        "jquery.vellum": "main",
-        "tests": testBase + "tests"
-    }
-});
-
 // load jquery.vellum before loading tests because some tests depend on
 // jquery.vellum components and would try to load them at the wrong path
 // (this is only important when using the built version)
-requirejs(['jquery.vellum'], function () {
+require(['jquery.vellum'], function () {
     // define our own paths for test dependencies that are also dependencies of
     // vellum that get excluded from the built version of vellum, to ensure that
     // the built version is tested correctly
-    requirejs.config({
-        // handle potential slow free heroku dynos
-        waitSeconds: 60,
-        paths: {
-            'static': testBase + 'tests/static',
-            'chai': testBase + 'node_modules/chai/chai',
-            'equivalent-xml': testBase + 'node_modules/equivalent-xml-js/src/equivalent-xml',
-            'jsdiff': testBase + 'node_modules/jsdiff/diff',
-        }
-    });
 
-    if (useBuilt) {
-        requirejs.config({
-            paths: {
-                'text': '../node_modules/requirejs-text',
-                // https://github.com/guybedford/require-css/issues/133 
-                //'css': 'error',
-                'less': 'error',
-                'json': 'error'
-            }
-        });
-    }
-
-    requirejs([
+    require([
         'jquery',
         'tests/options',
 
@@ -108,10 +68,6 @@ requirejs(['jquery.vellum'], function () {
         'tests/commcareConnect',
     ], function ($, options) {
         var session = window.sessionStorage;
-
-        if (useBuilt) {
-            $('head').append('<link rel="stylesheet" type="text/css" href="_build/style.css">');
-        }
 
         function runTests() {
             function showTestResults() {

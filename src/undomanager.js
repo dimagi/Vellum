@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'vellum/util',
-    'tpl!vellum/templates/undo_alert',
+    'vellum/templates/undo_alert.html',
 ], function(
     $,
     _,

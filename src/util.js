@@ -1,6 +1,6 @@
 define([
     'require',
-    'json!langCodes',
+    'langcodes/langs.json',
     'underscore',
     'diff-match-patch',
     'vellum/markdown',

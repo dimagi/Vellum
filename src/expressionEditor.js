@@ -5,10 +5,10 @@ define([
     'vellum/atwho',
     'vellum/richText',
     'vellum/hqAnalytics',
-    'tpl!vellum/templates/xpath_validation_errors',
-    'tpl!vellum/templates/xpath_expression',
-    'tpl!vellum/templates/xpath',
-    'less!vellum/less-style/xpath-editor'
+    'vellum/templates/xpath_validation_errors.html',
+    'vellum/templates/xpath_expression.html',
+    'vellum/templates/xpath.html',
+    'vellum/less-style/xpath-editor.less'
 ], function (
     $,
     _,

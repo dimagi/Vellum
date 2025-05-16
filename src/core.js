@@ -5,20 +5,21 @@ define([
     'save-button',
     'underscore',
     'jquery',
-    'tpl!vellum/templates/main',
-    'tpl!vellum/templates/add_question',
-    'tpl!vellum/templates/edit_source',
-    'tpl!vellum/templates/confirm_overwrite',
-    'tpl!vellum/templates/control_group_stdInput',
-    'tpl!vellum/templates/form_errors_template',
-    'tpl!vellum/templates/question_fieldset',
-    'tpl!vellum/templates/question_type_changer',
-    'tpl!vellum/templates/question_toolbar',
-    'tpl!vellum/templates/alert_global',
-    'tpl!vellum/templates/modal_content',
-    'tpl!vellum/templates/modal_button',
-    'tpl!vellum/templates/find_usages',
-    'tpl!vellum/templates/find_usages_search',
+    'vellum/templates/main.html',
+    'vellum/templates/add_question.html',
+    'vellum/templates/edit_source.html',
+    'vellum/templates/confirm_overwrite.html',
+    'vellum/templates/control_group_stdInput.html',
+    'vellum/templates/form_errors_template.html',
+    'vellum/templates/question_fieldset.html',
+    'vellum/templates/question_type_changer.html',
+    'vellum/templates/question_toolbar.html',
+    'vellum/templates/alert_global.html',
+    'vellum/templates/modal_content.html',
+    'vellum/templates/modal_button.html',
+    'vellum/templates/find_usages.html',
+    'vellum/templates/find_usages_search.html',
+    'vellum/base',  // This sets up $.vellum, so it much be included before modules that add plugins, notably atwho and modules that depend on it, which include mugs.js
     'vellum/mugs',
     'vellum/widgets',
     'vellum/richText',
@@ -30,14 +31,19 @@ define([
     'vellum/hqAnalytics',
     'vellum/atwho',
     'vellum/debugutil',
-    'vellum/base',
+    'diff-match-patch',
+    'crypto-js',
     'vellum/jstree-plugins',
-    'less!vellum/less-style/main',
-    'jquery.jstree',
+    'vellum/less-style/main.less',
+    'jstree',
     'jstree-actions',
-    'jquery.bootstrap',
-    'caretjs',
-    'atjs'
+    'jstree-styles',
+    'bootstrap',
+    'Caret.js',
+    'at.js',
+    'at.js/dist/css/jquery.atwho.min.css',
+    'codemirror/lib/codemirror.css',
+    'jstree/dist/themes/default/style.min.css',
 ], function (
     require,
     SaveButton,
@@ -57,6 +63,7 @@ define([
     modal_button,
     find_usages,
     find_usages_search,
+    base,
     mugs,
     widgets,
     richText,
@@ -67,7 +74,9 @@ define([
     jrUtil,
     analytics,
     atwho,
-    debug
+    debug,
+    diff_match_patch,
+    CryptoJS
 ) {
     // Load these modules in the background after all runtime dependencies have
     // been resolved, since they're not needed initially.
@@ -75,8 +84,6 @@ define([
         require([
             'codemirror',
             'codemirror/mode/xml/xml',
-            'diff-match-patch',
-            'CryptoJS',
             'vellum/expressionEditor',
         ], function () {});
     }, 0);
@@ -2300,8 +2307,7 @@ define([
     };
 
     fn.send = function (formText, saveType) {
-        var CryptoJS = require('CryptoJS'),
-            _this = this,
+        var _this = this,
             opts = this.opts().core,
             checkForConflict = false,
             patch, data;
@@ -2313,8 +2319,7 @@ define([
 
         if (saveType === 'patch') {
             checkForConflict = true;
-            var diff_match_patch = require('diff-match-patch'),
-                dmp = new diff_match_patch();
+            var dmp = new diff_match_patch();
             patch = dmp.patch_toText(
                 dmp.patch_make(this.data.core.lastSavedXForm, formText)
             );

@@ -31,9 +31,9 @@ define([
     'vellum/javaRosa/util',
     'vellum/escapedHashtags',
     'ckeditor',
-    'text!static/richText/burpee.xml',
-    'text!static/richText/output-ref.xml',
-    'text!static/richText/output-value.xml',
+    'static/richText/burpee.xml',
+    'static/richText/output-ref.xml',
+    'static/richText/output-value.xml',
 ], function(
     chai,
     $,

@@ -4,8 +4,8 @@ define([
     'jquery',
     'underscore',
     'tests/utils',
-    'text!static/profiling/small-form.xml',
-    'text!static/profiling/huge_form.xml'
+    'static/profiling/small-form.xml',
+    'static/profiling/huge_form.xml'
 ], function (
     chai,
     $,

@@ -3,16 +3,16 @@ define([
     'module',
     'underscore',
     'jquery',
-    'tpl!vellum/templates/multimedia_modal',
-    'tpl!vellum/templates/multimedia_upload_trigger',
-    'text!vellum/templates/multimedia_upload_status.html',
-    'text!vellum/templates/multimedia_errors.html',
-    'text!vellum/templates/multimedia_existing_image.html',
-    'text!vellum/templates/multimedia_existing_audio.html',
-    'text!vellum/templates/multimedia_existing_video.html',
-    'text!vellum/templates/multimedia_existing_text.html',
-    'tpl!vellum/templates/multimedia_nomedia',
-    'tpl!vellum/templates/multimedia_block',
+    'vellum/templates/multimedia_modal.html',
+    'vellum/templates/multimedia_upload_trigger.html',
+    'vellum/templates/multimedia_upload_status.html',
+    'vellum/templates/multimedia_errors.html',
+    'vellum/templates/multimedia_existing_image.html',
+    'vellum/templates/multimedia_existing_audio.html',
+    'vellum/templates/multimedia_existing_video.html',
+    'vellum/templates/multimedia_existing_text.html',
+    'vellum/templates/multimedia_nomedia.html',
+    'vellum/templates/multimedia_block.html',
     'vellum/core'
 ], function (
     require,
@@ -238,7 +238,7 @@ define([
         }
         if (currentPath in objectMap) {
             var linkedObject = objectMap[currentPath];
-            previewHtml = _.template(PREVIEW_TEMPLATES[widget.form])({
+            previewHtml = PREVIEW_TEMPLATES[widget.form]({
                 url: linkedObject.url
             });
         } else {
@@ -370,7 +370,7 @@ define([
 
                 if ($fileInput.get(0).files.length) {
                     var file = $fileInput.get(0).files[0];
-                    $uploadStatusContainer.html(_.template(multimedia_upload_status)({
+                    $uploadStatusContainer.html(multimedia_upload_status({
                         file_size: (file.size / MEGABYTE).toFixed(3),
                         file_name: file.name,
                     }));
@@ -416,7 +416,7 @@ define([
                     error: function (response) {
                         response = JSON.parse(response.responseText);
                         $uploadStatusContainer.find(".hqm-error").show();
-                        $uploadStatusContainer.find(".hqm-errors").html(_.template(multimedia_errors)({
+                        $uploadStatusContainer.find(".hqm-errors").html(multimedia_errors({
                             errors: response.errors,
                         }));
                         $uploadStatusContainer.find(".hqm-begin").hide();

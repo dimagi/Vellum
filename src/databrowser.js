@@ -7,7 +7,7 @@ define([
     'vellum/util',
     'vellum/widgets',
     'vellum/window',
-    'tpl!vellum/templates/external_sources_tree',
+    'vellum/templates/external_sources_tree.html',
 ], function (
     $,
     _,

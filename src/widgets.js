@@ -1,7 +1,7 @@
 define([
-    'tpl!vellum/templates/ui_element',
-    'tpl!vellum/templates/widget_control_keyvalue',
-    'tpl!vellum/templates/widget_control_message',
+    'vellum/templates/ui_element.html',
+    'vellum/templates/widget_control_keyvalue.html',
+    'vellum/templates/widget_control_message.html',
     'underscore',
     'jquery',
     'vellum/atwho',

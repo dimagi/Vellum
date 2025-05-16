@@ -7,7 +7,7 @@ define([
     'vellum/hqAnalytics',
     'vellum/atwho',
     'vellum/util',
-    'tpl!vellum/templates/commander',
+    'vellum/templates/commander.html',
 ], function (
     $,
     _,

@@ -5,10 +5,10 @@ define([
     'jquery',
     'vellum/intentManager',
     'vellum/widgets',
-    'text!static/intentManager/intent-with-unknown-attrs.xml',
-    'text!static/intentManager/intent-with-no-mug.xml',
-    'text!static/intentManager/printing-intent.xml',
-    'text!static/intentManager/custom-intent.xml'
+    'static/intentManager/intent-with-unknown-attrs.xml',
+    'static/intentManager/intent-with-no-mug.xml',
+    'static/intentManager/printing-intent.xml',
+    'static/intentManager/custom-intent.xml'
 ], function (
     util,
     chai,

@@ -1,8 +1,8 @@
 define([
     'underscore',
     'jquery',
-    'text!vellum/templates/button_remove.html',
-    'tpl!vellum/templates/control_group',
+    'vellum/templates/button_remove.html',
+    'vellum/templates/control_group.html',
     'vellum/widgets',
     'vellum/util',
     'vellum/javaRosa/itextWidget',
@@ -246,7 +246,7 @@ define([
         };
 
         block.getDeleteFormButton = function (form) {
-            var $deleteButton = $(button_remove);
+            var $deleteButton = $(button_remove());
             $deleteButton.addClass('pull-right')
                 .addClass("delete-" + block.getFormGroupClass(form))
                 .click(function () {

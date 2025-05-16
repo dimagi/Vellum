@@ -4,7 +4,7 @@ define([
     'vellum/richText',
     'vellum/hqAnalytics',
     'vellum/util',
-    'tpl!vellum/templates/atwho_display',
+    'vellum/templates/atwho_display.html',
     'vellum/core',
 ], function (
     _,

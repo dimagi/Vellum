@@ -1,8 +1,8 @@
 define([
     'underscore',
     'jquery',
-    'tpl!vellum/templates/auto_box',
-    'tpl!vellum/templates/markdown_help',
+    'vellum/templates/auto_box.html',
+    'vellum/templates/markdown_help.html',
     'vellum/javaRosa/util',
     'vellum/widgets',
     'vellum/richText',
