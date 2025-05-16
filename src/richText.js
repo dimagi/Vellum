@@ -86,6 +86,12 @@ define([
      */
     var editor = function(input, form, options) {
         var inputElement = input[0];
+        if (options && options['disableNativeSpellChecker']) {
+            inputElement.setAttribute('spellcheck', false);
+        } else {
+            inputElement.setAttribute('spellcheck', true)
+        }
+        
         // HACK use 1/4 em space to fix cursor movement/hiding near bubble
         var TRAILING_SPACE = "\u2005";
 
@@ -160,10 +166,6 @@ define([
             } else {
                 console.log("no range")
             }
-
-
-
-
         }
 
         var getWidget = require('vellum/widgets').util.getWidget;
