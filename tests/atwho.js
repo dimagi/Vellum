@@ -161,11 +161,19 @@ define([
             });
 
             function displayAtwho(query, callback) {
-                var mug = util.getMug('text3');
-                widget.setValue(query);
-                var editor = widget.input.editor;
-                editor.focus();
-                $('[name=property-defaultValue]').keyup();
+                const mug = util.getMug('text3');
+                const $element = $('[name=property-defaultValue]')
+                $element.text(query);
+                const range = document.createRange();
+                const textNode = $element[0].childNodes[0];
+                range.setStart(textNode, textNode.length);
+                range.setEnd(textNode, textNode.length);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                widget.input.focus();
+                $element.trigger('keyup')
+
                 assert.strictEqual(getDisplayedAtwhoViews().length, 1);
                 try {
                     callback(mug);
