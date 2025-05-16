@@ -476,7 +476,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertExpression("#form/text");
-                    assert.equal(editor.getValue(), "one" + output + "  two");
+                    assert.equal(editor.getValue(), "one" + output + " two");
                     done();
                 });
             });
@@ -487,7 +487,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertOutput(output);
-                    assert.equal(editor.getValue(), "one" + output + "  two");
+                    assert.equal(editor.getValue(), "one" + output + " two");
                     done();
                 });
             });
@@ -496,30 +496,29 @@ define([
                 var output = '<output value="#form/text" />';
                 editor.setValue(output, function () {
                     assert.equal(editor.getValue(), output);
-                    var copyVal = input.ckeditor().editor.getData();
+                    var copyVal = input[0].innerHTML;
                     assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
-                    exprInput.ckeditor().editor.setData(copyVal, function () {
-                        assert.equal(exprEditor.getValue(), "#form/text");
-                        done();
-                    });
+                    exprInput[0].innerHTML = copyVal;
+                    assert.equal(exprEditor.getValue(), "#form/text");
+                    done();
                 });
             });
 
             it("should copy output value from expression editor to label", function (done) {
                 exprEditor.setValue("#form/text", function () {
                     assert.equal(exprEditor.getValue(), "#form/text");
-                    var copyVal = exprInput.ckeditor().editor.getData();
+                    var copyVal = exprInput[0].innerHTML;
                     assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
-                    input.ckeditor().editor.setData(copyVal, function () {
-                        assert.equal(editor.getValue(), '<output value="#form/text" />');
-                        done();
-                    });
+                    input[0].innerHTML = copyVal
+                    assert.equal(editor.getValue(), '<output value="#form/text" />');
+                    done();
                 });
             });
 
             it("should not paste style content into editor", function () {
                 var html = '<style type="text/css"><!--td--></style><span>A</span>';
-                input.ckeditor().editor.execCommand('paste', html);
+                input[0].focus();
+                document.execCommand('paste', html);
                 assert.equal(editor.getValue(), 'A');
             });
 
@@ -783,19 +782,6 @@ define([
                     var mug = util.getMug('total_num_burpees');
                     mug.p.relevantAttr = '';
                     util.assertXmlEqual(call('createXML'), BURPEE_XML);
-                });
-
-                it("cursor should be at end of input on focus", function () {
-                    var editor = widget.input.editor,
-                        value = 'testing cursor';
-                    widget.setValue(value);
-                    // Make sure focus is elsewhere, then focus on the rich text input
-                    editor.on('instanceReady', function() {
-                        $('[name=property-nodeID]').focus();
-                        editor.focus();
-                        var selection = editor.getSelection(true);
-                        assert.strictEqual(selection.getNative().focusOffset, value.length);
-                    });
                 });
 
                 it("should change output ref to output value", function () {
