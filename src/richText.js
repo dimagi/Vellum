@@ -91,7 +91,7 @@ define([
         } else {
             inputElement.setAttribute('spellcheck', true)
         }
-        
+
         // HACK use 1/4 em space to fix cursor movement/hiding near bubble
         var TRAILING_SPACE = "\u2005";
 
@@ -153,6 +153,9 @@ define([
                 const element = htmlToElement(content);
                 range.deleteContents();
                 range.insertNode(element);
+                range.collapse();
+                const spaceNode = document.createTextNode(TRAILING_SPACE);
+                range.insertNode(spaceNode);
                 if (element.getAttribute('data-toggle')) {
                     createPopover(element);
                 }
