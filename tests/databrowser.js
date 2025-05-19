@@ -121,9 +121,9 @@ define([
                     calc = $("[name=property-calculateAttr]"),
                     sessionUri = CASE_DATA[0].uri,
                     casedbUri = CASE_DATA[1].uri,
-                    editor = calc.ckeditor().editor,
-                    widget = util.getWidget('property-calculateAttr');
-                widget.input.promise.then(function () { 
+                    widget = util.getWidget('property-calculateAttr'),
+                    editor = widget.input.data("ckwrapper");
+                widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, dobProp);
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
@@ -145,9 +145,9 @@ define([
                     calc = $("[name=property-calculateAttr]"),
                     sessionUri = CASE_DATA[0].uri,
                     casedbUri = CASE_DATA[1].uri,
-                    editor = calc.ckeditor().editor,
-                    widget = util.getWidget('property-calculateAttr');
-                widget.input.promise.then(function () { 
+                    widget = util.getWidget('property-calculateAttr'),
+                    editor = widget.input.data("ckwrapper");
+                widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, "#case/parent/edd");
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
@@ -194,9 +194,9 @@ define([
                     label = $("[name=itext-en-label]"),
                     sessionUri = CASE_DATA[0].uri,
                     casedbUri = CASE_DATA[1].uri,
-                    editor = label.ckeditor().editor,
-                    widget = util.getWidget('itext-en-label');
-                widget.input.promise.then(function () { 
+                    widget = util.getWidget('itext-en-label'),
+                    editor = widget.input.data("ckwrapper");
+                widget.input.promise.then(function () {
                     editor.on('change', _.debounce(function() {
                         assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" /> ');
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
@@ -247,9 +247,9 @@ define([
                     var label = $("[name=itext-hin-label]"),
                         sessionUri = CASE_DATA[0].uri,
                         casedbUri = CASE_DATA[1].uri,
-                        editor = label.ckeditor().editor,
-                        widget = util.getWidget('itext-hin-label');
-                    widget.input.promise.then(function () { 
+                        widget = util.getWidget('itext-hin-label'),
+                        editor = widget.input.data("ckwrapper");
+                    widget.input.promise.then(function () {
                         editor.on('change', _.debounce(function() {
                             assert.equal(mug.p.labelItext.get(), '');
                             assert.equal(mug.p.labelItext.get(null, 'hin'), '<output value="#case/dob" /> ');
@@ -578,8 +578,8 @@ define([
                 util.loadXML("");
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     input = $("[name=property-calculateAttr]"),
-                    editor = input.ckeditor().editor,
-                    widget = util.getWidget('property-calculateAttr');
+                    widget = util.getWidget('property-calculateAttr'),
+                    editor = widget.input.data("ckwrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, "#case/dob");
@@ -594,8 +594,8 @@ define([
                 util.loadXML("");
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     input = $("[name=property-calculateAttr]"),
-                    editor = input.ckeditor().editor,
-                    widget = util.getWidget('property-calculateAttr');
+                    widget = util.getWidget('property-calculateAttr'),
+                    editor = widget.input.data("ckwrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr,
@@ -611,8 +611,8 @@ define([
                 var form = util.loadXML(""),
                     mug = util.addQuestion("DataBindOnly", "mug"),
                     input = $("[name=property-calculateAttr]"),
-                    editor = input.ckeditor().editor,
-                    widget = util.getWidget('property-calculateAttr');
+                    widget = util.getWidget('property-calculateAttr'),
+                    editor = widget.input.data("ckwrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, "#user/code_name");
