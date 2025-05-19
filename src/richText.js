@@ -156,7 +156,7 @@ define([
                 range.collapse();
                 const spaceNode = document.createTextNode(TRAILING_SPACE);
                 range.insertNode(spaceNode);
-                if (element.getAttribute('data-toggle')) {
+                if (element.getAttribute && element.getAttribute('data-toggle')) {
                     createPopover(element);
                 }
                 inputElement.focus();
