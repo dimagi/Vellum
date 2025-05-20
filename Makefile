@@ -25,4 +25,5 @@ _tar:
 	tar -czf vellum.tar.gz -C _build .
 
 _test:
+	yarn testbuild
 	npm test
