@@ -330,7 +330,11 @@ define([
             } else if (event.clipboardData.getData("text/html")){
                 let htmlData = event.clipboardData.getData("text/html");
                 const style = /<style[^>]*>.*?<\/style>/g;
-                htmlData = htmlData.replace(style, "");
+                let previousHtmlData;
+                do {
+                    previousHtmlData = htmlData;
+                    htmlData = htmlData.replace(style, "");
+                } while (htmlData !== previousHtmlData);
                 insertHTML(htmlData);
             }
         });
