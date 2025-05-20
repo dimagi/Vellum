@@ -86,10 +86,10 @@ define([
      */
     var editor = function(input, form, options) {
         var inputElement = input[0];
-        if (options && options['disableNativeSpellChecker']) {
+        if (options && options.disableNativeSpellChecker) {
             inputElement.setAttribute('spellcheck', false);
         } else {
-            inputElement.setAttribute('spellcheck', true)
+            inputElement.setAttribute('spellcheck', true);
         }
 
         // HACK use 1/4 em space to fix cursor movement/hiding near bubble
@@ -110,7 +110,6 @@ define([
 
         function insertHtmlWithSpace(content) {
             const hasFocus = document.activeElement === inputElement;
-            console.log(`has focus ${hasFocus}`);
             let range;
             if (!hasFocus && x && y) {
                 const elementAtDrop = document.elementFromPoint(x, y);
@@ -166,8 +165,6 @@ define([
                     cancelable: true
                 });
                 inputElement.dispatchEvent(inputEvent);
-            } else {
-                console.log("no range")
             }
         }
 
@@ -187,9 +184,9 @@ define([
             }
         }
 
-        var wrapper = input.data("ckwrapper");
-        if (wrapper) {
-            return wrapper;
+        const existingWrapper = input.data("ckwrapper");
+        if (existingWrapper) {
+            return existingWrapper;
         }
         if (arguments.length === 1) {
             throw new Error("editor not initialized: " +
@@ -208,8 +205,8 @@ define([
           resolveEditorPromise = resolve;
         });
         var NOTSET = {};
-        var newval = NOTSET,  // HACK work around async get/set
-        wrapper = {
+        var newval = NOTSET;  // HACK work around async get/set
+        const wrapper = {
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
@@ -263,9 +260,7 @@ define([
                 inputElement.focus();
             },
             select: function (index, length) {
-                console.log(`select ${inputElement.getAttribute('name')}`);
                 divSelect.call(null, inputElement, index, length);
-                // used in test???
                 return wrapper;
             },
             on: function () {
@@ -368,7 +363,7 @@ define([
         }
 
         input.data("ckwrapper", wrapper);
-        resolveEditorPromise()// probably can just set it to a resolved promise to beging with or remove the code that waits for it.
+        resolveEditorPromise(); // probably can just set it to a resolved promise to beging with or remove the code that waits for it.
         return wrapper;
     };
 
@@ -874,14 +869,13 @@ define([
 
     function createPopover(element) {
         var $element = $(element);
-        var $widget = $element .closest('.form-control')
+        var $widget = $element.closest('.form-control');
         var xpath = element.getAttribute('data-value');
         var getWidget = require('vellum/widgets').util.getWidget;
         // TODO find out why widget is sometimes null (tests only?)
         var widget = getWidget($widget);
         if (widget) {
             var isFormRef = FORM_REF_REGEX.test(xpath);
-            var isText = function () { return this.nodeType === 3; };
             var displayId = element.textContent.trim();
             var hashtag = widget.mug.form.normalizeHashtag(xpath);
             var title = util.escape(hashtag);

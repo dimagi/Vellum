@@ -1,5 +1,3 @@
-const { template } = require("underscore");
-
 /*
  * expected structure of a richText widget:
  *
@@ -182,7 +180,7 @@ define([
 
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
-                    const richTextText = richText.toRichText(val[0], form, opts)
+                    const richTextText = richText.toRichText(val[0], form, opts);
                     assert.strictEqual(
                         richTextText,
                         wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html()
@@ -215,7 +213,7 @@ define([
 
             _.each(dates, function(val) {
                 it("from text to html with output value: " + val.xmlValue, function() {
-                    const richTextText = richText.toRichText(outputValueTemplateFn(val.xmlValue), form)
+                    const richTextText = richText.toRichText(outputValueTemplateFn(val.xmlValue), form);
                     assert.equal(
                         richTextText,
                         wrapWithDivP(makeBubble(
@@ -509,7 +507,7 @@ define([
                     assert.equal(exprEditor.getValue(), "#form/text");
                     var copyVal = exprInput[0].innerHTML;
                     assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
-                    input[0].innerHTML = copyVal
+                    input[0].innerHTML = copyVal;
                     assert.equal(editor.getValue(), '<output value="#form/text" />');
                     done();
                 });

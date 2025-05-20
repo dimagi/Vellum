@@ -162,7 +162,7 @@ define([
 
             function displayAtwho(query, callback) {
                 const mug = util.getMug('text3');
-                const $element = $('[name=property-defaultValue]')
+                const $element = $('[name=property-defaultValue]');
                 $element.text(query);
                 const range = document.createRange();
                 const textNode = $element[0].childNodes[0];
@@ -172,7 +172,7 @@ define([
                 selection.removeAllRanges();
                 selection.addRange(range);
                 widget.input.focus();
-                $element.trigger('keyup')
+                $element.trigger('keyup');
 
                 assert.strictEqual(getDisplayedAtwhoViews().length, 1);
                 try {

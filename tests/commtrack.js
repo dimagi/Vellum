@@ -238,7 +238,7 @@ define([
                     assert(util.saveButtonEnabled(), "save button is disabled");
                     done();
                 });
-                widget.input[0].dispatchEvent(new InputEvent('input', {
+                widget.input[0].dispatchEvent(new Event('input', {
                     bubbles: true,
                     cancelable: false
                 }));
