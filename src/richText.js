@@ -204,16 +204,12 @@ define([
         input.promise = new Promise((resolve) => {
           resolveEditorPromise = resolve;
         });
-        var NOTSET = {};
-        var newval = NOTSET;  // HACK work around async get/set
         const wrapper = {
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
                         callback(fromRichText(inputElement.innerHTML));// ??? why not data, form here?
                     });
-                } else if (newval !== NOTSET) {
-                    return newval;
                 } else {
                     var data = inputElement.innerHTML;
                     var value = fromRichText(data, form, options.isExpression);
@@ -221,9 +217,7 @@ define([
                 }
             },
             setValue: function (value, callback) {
-                newval = value;
                 var richTextValue = toRichText(value, form, options);
-                // console.log(`setValue: ${richTextValue}`);
                 inputElement.innerHTML = richTextValue;
                 onVellumWidgetSet(inputElement, () => {
                     inputElement
@@ -231,7 +225,6 @@ define([
                         .forEach(element => createPopover(element));
                 });
 
-                newval = NOTSET;
                 if (callback) {
                     setTimeout(callback, 0);
                 }

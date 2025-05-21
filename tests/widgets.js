@@ -202,16 +202,15 @@ define([
             });
         });
 
-        // Fails due to race condition
-        // it("should return just-set value on get value", function () {
-        //     util.loadXML("");
-        //     util.addQuestion("Text", "text");
-        //     util.clickQuestion('text');
-        //     var widget = util.getWidget('itext-en-label'),
-        //         text = '<output value="/data/text" />';
-        //     widget.setValue(text);
-        //     assert.equal(widget.getValue(), text);
-        // });
+        it("should return just-set value on get value", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            util.clickQuestion('text');
+            var widget = util.getWidget('itext-en-label'),
+                text = '<output value="#form/text" />';
+            widget.setValue(text);
+            assert.equal(widget.getValue(), text);
+        });
 
         it("should create reference to hidden value in display condition", function (done) {
             util.loadXML("");
