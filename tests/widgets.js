@@ -207,7 +207,7 @@ define([
             util.addQuestion("Text", "text");
             util.clickQuestion('text');
             var widget = util.getWidget('itext-en-label'),
-                text = '<output value="/data/text" />';
+                text = '<output value="#form/text" />';
             widget.setValue(text);
             assert.equal(widget.getValue(), text);
         });
@@ -250,14 +250,12 @@ define([
                     editor = richText.editor(input),
                     tree = $(".fd-question-tree").jstree(true),
                     saveButton = $('.fd-xpath-save-button');
-                editor.on("instanceReady", function () {
-                    assert(!saveButton.hasClass('btn-success'), "save button should not be green");
-                    editor.on("change", function () {
-                        assert(saveButton.hasClass('btn-success'), "save button not green");
-                        done();
-                    });
-                    util.findNode(tree, "hidden").data.handleDrop(input);
+                assert(!saveButton.hasClass('btn-success'), "save button should not be green");
+                editor.on("change", function () {
+                    assert(saveButton.hasClass('btn-success'), "save button not green");
+                    done();
                 });
+                    util.findNode(tree, "hidden").data.handleDrop(input);
             }, null, "showXPathEditor");
         });
 

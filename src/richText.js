@@ -46,9 +46,7 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
-    'vellum/hqAnalytics',
-    'ckeditor',
-    'ckeditor-jquery'
+    'vellum/hqAnalytics'
 ], function(
     require,
     _,
@@ -60,71 +58,10 @@ define([
     logic,
     util,
     xml,
-    analytics,
-    CKEDITOR
+    analytics
 ){
-    var FORM_REF_REGEX = /^#form\//,
-        INVALID_PREFIX = "#invalid/xpath ",
-        // http://stackoverflow.com/a/16459606/10840
-        bubbleWidgetDefinition = {
-        template:
-            '<span class="label label-datanode label-datanode-internal">' +
-              '<i class="fa fa-question-circle">&nbsp;</i>' +
-              'example widget, not used' +
-            '</span>',
-        upcast: function ( element ) {
-            return element.name === 'span' && element.hasClass('label-datanode');
-        },
-        init: function() {
-            // TODO: PR to ckeditor to make changing drag ui supported
-            var $this = $(this.element.$),
-                width = $this.innerWidth(),
-                height = $this.outerHeight(),
-                dragContainer = this.dragHandlerContainer,
-                editor = this.editor;
-            dragContainer.setStyles({
-                width: width + 'px',
-                height: height + 'px',
-                left: '0px'
-            });
-
-            if (editor.commands.createPopover) {
-                var _this = this;
-
-                // Look for deleted bubbles
-                editor.on('change', function(e) {
-                    editor.widgets.checkWidgets({ initOnlyNew: 1 });
-                });
-
-                // if the editor is still being initialized then this command
-                // won't be enabled until it is ready
-                if (editor.status === "ready") {
-                    editor.execCommand('createPopover', _this);
-                } else {
-                    editor.on('instanceReady', function () {
-                        editor.execCommand('createPopover', _this);
-                    });
-                }
-            }
-        }
-    };
-
-    CKEDITOR.plugins.add('bubbles', {
-        requires: 'widget',
-        init: function (editor) {
-            editor.widgets.add('bubbles', bubbleWidgetDefinition);
-        }
-    });
-
-    CKEDITOR.config.allowedContent = true;
-    CKEDITOR.config.customConfig = '';
-    CKEDITOR.config.title = false;
-    CKEDITOR.config.extraPlugins = 'bubbles';
-    CKEDITOR.config.disableNativeSpellChecker = false;
-    // We don't use Toolbar, however it is required by clipboard.
-    // Once https://github.com/ckeditor/ckeditor4/issues/654 is resolved,
-    // toolbar can be removed from the source(build).
-    CKEDITOR.config.toolbar = [];
+    var FORM_REF_REGEX = /^#form\//;
+    var INVALID_PREFIX = "#invalid/xpath ";
 
     /**
      * Get or create a rich text editor for the given element
@@ -148,14 +85,108 @@ define([
      *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
+        var inputElement = input[0];
+        if (options && options.disableNativeSpellChecker) {
+            inputElement.setAttribute('spellcheck', false);
+        } else {
+            inputElement.setAttribute('spellcheck', true);
+        }
+
         // HACK use 1/4 em space to fix cursor movement/hiding near bubble
         var TRAILING_SPACE = "\u2005";
-        function insertHtmlWithSpace(content) {
-            editor.insertHtml(content + TRAILING_SPACE);
+
+        let x, y;
+        inputElement.addEventListener('mousemove', e => {
+            x = e.clientX;
+            y = e.clientY;
+        });
+
+        function htmlToElement(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            doc.body.firstChild.contentEditable = false;
+            return doc.body.firstChild;
         }
-        var wrapper = input.data("ckwrapper");
-        if (wrapper) {
-            return wrapper;
+
+        function insertHtmlWithSpace(content) {
+            const hasFocus = document.activeElement === inputElement;
+            let range;
+            if (!hasFocus && x && y) {
+                const elementAtDrop = document.elementFromPoint(x, y);
+                const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
+
+                if (existingBubble) {
+                    // If dropping on an existing bubble, position after it
+                    range = document.createRange();
+                    range.setStartAfter(existingBubble);
+                    range.setEndAfter(existingBubble);
+                } else {
+                    const position = document.caretPositionFromPoint(x, y);
+                    if (position) {
+                        range = document.createRange();
+                        range.setStart(position.offsetNode, position.offset);
+                        range.collapse(true);
+
+                        // Remove the paragraph so the inserted text does not create a new one.
+                        const parentNode = position.offsetNode.parentNode;
+                        if (parentNode && parentNode.tagName === 'P' &&
+                            position.offsetNode.nodeType === Node.TEXT_NODE &&
+                            position.offset === position.offsetNode.nodeValue.length) {
+                            content = content.replace(/^<p>/i, '').replace(/<\/p>$/i, '');
+                        }
+                    }
+                }
+            } else if (!hasFocus) {
+                range = document.createRange();
+                range.selectNodeContents(inputElement);
+                range.collapse();
+            } else {
+                range = window.getSelection().getRangeAt(0);
+            }
+
+            if (range) {
+
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                const element = htmlToElement(content);
+                range.deleteContents();
+                range.insertNode(element);
+                range.collapse();
+                const spaceNode = document.createTextNode(TRAILING_SPACE);
+                range.insertNode(spaceNode);
+                if (element.getAttribute && element.getAttribute('data-toggle')) {
+                    createPopover(element);
+                }
+                inputElement.focus();
+
+                const inputEvent = new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                inputElement.dispatchEvent(inputEvent);
+            }
+        }
+
+        var getWidget = require('vellum/widgets').util.getWidget;
+
+        function onVellumWidgetSet(element, callback, attempts = 0) {
+            const maxAttempts = 5;
+            const intervalTime = 500;
+
+            if (attempts < maxAttempts) {
+                var widget = getWidget($(element));
+                if (widget !== null && widget !== undefined) {
+                    callback();
+                } else {
+                    setTimeout(() => onVellumWidgetSet(element, callback, attempts + 1), intervalTime);
+                }
+            }
+        }
+
+        const existingWrapper = input.data("ckwrapper");
+        if (existingWrapper) {
+            return existingWrapper;
         }
         if (arguments.length === 1) {
             throw new Error("editor not initialized: " +
@@ -169,47 +200,34 @@ define([
         if (!options.createPopover && !form.vellum.opts().features.disable_popovers) {
             options.createPopover = createPopover;
         }
-        var NOTSET = {},
-            newval = NOTSET,  // HACK work around async get/set
-            editor = input.ckeditor({
-                contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
-                disableNativeSpellChecker: options.disableNativeSpellChecker,
-                placeholder: ' ',
-            }).editor;
-        wrapper = {
+        let resolveEditorPromise;
+        input.promise = new Promise((resolve) => {
+          resolveEditorPromise = resolve;
+        });
+        const wrapper = {
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
-                        callback(fromRichText(editor.getData()));
+                        callback(fromRichText(inputElement.innerHTML));// ??? why not data, form here?
                     });
-                } else if (newval !== NOTSET) {
-                    return newval;
                 } else {
-                    var data;
-                    try {
-                        data = editor.getData();
-                    } catch (err) {
-                        if (err.name !== "IndexSizeError") {
-                            throw err;
-                        }
-                        // HACK work around Chrome/CKEditor bug
-                        // https://dev.ckeditor.com/ticket/13903
-                        wrapper.select(0);
-                        data = editor.getData();
-                    }
-                    return fromRichText(data, form, options.isExpression);
+                    var data = inputElement.innerHTML;
+                    var value = fromRichText(data, form, options.isExpression);
+                    return value;
                 }
             },
             setValue: function (value, callback) {
-                newval = value;
-                value = toRichText(value, form, options);
-                editor.setData(value, {
-                    callback: function () {
-                        newval = NOTSET;
-                        if (callback) { callback(); }
-                    },
-                    noSnapshot: true,
+                var richTextValue = toRichText(value, form, options);
+                inputElement.innerHTML = richTextValue;
+                onVellumWidgetSet(inputElement, () => {
+                    inputElement
+                        .querySelectorAll('[data-toggle="popover"]')
+                        .forEach(element => createPopover(element));
                 });
+
+                if (callback) {
+                    setTimeout(callback, 0);
+                }
                 return wrapper;
             },
             insertExpression: function (xpath) {
@@ -229,67 +247,56 @@ define([
                 return wrapper;
             },
             change: function () {
-                editor.fire("saveSnapshot");
                 return wrapper;
             },
             focus: function() {
-                if (editor.status === "ready") {
-                    editor.focus();
-                } else {
-                    editor.removeListener('instanceReady', editor.focus);
-                    editor.on('instanceReady', editor.focus);
-                }
+                inputElement.focus();
             },
             select: function (index, length) {
-                ckSelect.call(null, editor, index, length);
+                divSelect.call(null, inputElement, index, length);
                 return wrapper;
             },
             on: function () {
                 var args = Array.prototype.slice.call(arguments);
-                editor.on.apply(editor, args);
+                if (args.length === 2 && args[0] === 'change' && typeof args[1] === 'function') {
+                    const handleContentChange = function(e) {
+                        // console.log(`editor change event`);
+                        args[1].apply(); // callee in widgets.js does not take any arguments
+                    };
+
+                    inputElement.addEventListener('input', handleContentChange);
+                    inputElement.addEventListener('paste', handleContentChange);
+                    inputElement.addEventListener('cut', handleContentChange);
+
+                }
                 return wrapper;
             },
             destroy: function () {
                 if (input !== null) {
                     input.removeData("ckwrapper");
-                    input.promise.then(function () {
-                        editor.destroy();
-                        editor = null;
-                    });
                     input = null;
                 }
             },
         };
 
-        editor.on('focus', function (e) {
-            // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
-            editor.setReadOnly(false);
-            // remove any placeholder text that may be in the text area
-            var editable = e.editor.editable();
-            if (editable.hasClass('placeholder')) {
-                editable.removeClass('placeholder');
-                editable.setHtml('');
+        inputElement.addEventListener('copy', function(e) {
+            e.preventDefault();
+            const selection = window.getSelection();
+            let selectedText = '';
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const container = document.createElement('div');
+                container.appendChild(range.cloneContents());
+                selectedText = fromRichText(container.innerHTML);
             }
-            // set the cursor to the end of text
-            var selection = editor.getSelection();
-            var range = selection.getRanges()[0];
-            if (range) {
-                var pCon = range.startContainer.getAscendant({p:2},true);
-                if (pCon) {
-                    var newRange = new CKEDITOR.dom.range(range.document);
-                    newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-                    newRange.select();
-                }
+            if (e.clipboardData) {
+                e.clipboardData.setData('text/plain', selectedText);
             }
         });
 
-        editor._vellum_fromRichText = function (html) {
-            return fromRichText(html, form, options.isExpression);
-        };
-
-        editor.on('paste', function(event) {
-            var data = event.data;
-            if (data.dataTransfer && data.dataTransfer.getData("Text")) {
+        inputElement.addEventListener('paste', function(event) {
+            event.preventDefault();
+            if (event.clipboardData && event.clipboardData.getData("text/plain")) {
                 // Get plain text instead of HTML because HTML encoded
                 // content from applications like Word or your text
                 // editor often contains unwanted styling information.
@@ -305,66 +312,65 @@ define([
                 // a surprising thing happens later: hashtags are
                 // automatically converted to bubbles the next time the
                 // expression is loaded in a rich text editor.
-                var text = data.dataTransfer.getData("Text");
-                data.type = 'html';
-                data.dataValue = $('<div />').text(text).html()
+                // var text = data.dataTransfer.getData("Text");
+                const text = event.clipboardData.getData("text/plain");
+                const htmlText = document.createElement('div');
+                htmlText.textContent = text; // This escapes the text
+                const htmlContent = htmlText.innerHTML
                     .replace(/\n/g, "<br />")
                     .replace(/  /g, " &nbsp;");
-            } else {
-                // fall back to HTML
-                // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
-                var style = /<style type="text\/css">.*?<\/style>/g;
-                data.dataValue = data.dataValue.replace(style, "");
+                insertHTML(htmlContent);
+            } else if (event.clipboardData.getData("text/html")){
+                let htmlData = event.clipboardData.getData("text/html");
+                const style = /<style[^>]*>.*?<\/style>/g;
+                let previousHtmlData;
+                do {
+                    previousHtmlData = htmlData;
+                    htmlData = htmlData.replace(style, "");
+                } while (htmlData !== previousHtmlData);
+                insertHTML(htmlData);
             }
-        }, null, null, 2);
+        });
 
-        if (_.isFunction(options.createPopover)) {
-            editor.addCommand('createPopover', {
-                exec: options.createPopover,
-                editorFocus: false,
-                canUndo: false,
-            });
+        function insertHTML(html) {
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                if (sel.getRangeAt && sel.rangeCount) {
+                    let range = sel.getRangeAt(0);
+                    range.deleteContents();
+
+                    const el = document.createElement("div");
+                    el.innerHTML = html;
+                    const frag = document.createDocumentFragment();
+                    let node, lastNode;
+
+                    while ((node = el.firstChild)) {
+                        lastNode = frag.appendChild(node);
+                    }
+                    range.insertNode(frag);
+                    if (lastNode) {
+                        range = range.cloneRange();
+                        range.setStartAfter(lastNode);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
+            }
         }
 
         input.data("ckwrapper", wrapper);
+        resolveEditorPromise(); // probably can just set it to a resolved promise to beging with or remove the code that waits for it.
         return wrapper;
     };
 
-    function richTextDataTransfer(nativeDataTransfer, editor) {
-        realDataTransfer.call(this, nativeDataTransfer);
-
-        if (editor) {
-            this.sourceEditor = editor;
-
-            var html = editor.getSelectedHtml(1);
-            if (html) {
-                var text = editor._vellum_fromRichText(html);
-                if (isInvalid(text)) {
-                    text = escapedHashtags.transform(
-                        text.slice(INVALID_PREFIX.length),
-                        function (v) { return v; }
-                    );
-                }
-                // always copy plain text, not HTML
-                this.setData('text/plain', text);
-            }
-        }
-    }
-    // monkeypatch clipboard plugin to transform easy reference
-    // bubbles to hashtags on copy/cut.
-    var realDataTransfer = CKEDITOR.plugins.clipboard.dataTransfer;
-    richTextDataTransfer.prototype = realDataTransfer.prototype;
-    CKEDITOR.plugins.clipboard.dataTransfer = richTextDataTransfer;
-
-    /**
-     * Set selection in CKEditor
-     */
-    function ckSelect(editor, index, length) {
+    function divSelect(div, index, length) {
         function iterNodes(parent) {
             var i = 0,
-                children = parent.getChildren(),
-                count = children.count(),
+                children = Array.from(parent.childNodes),
+                count = children.length,
                 inner = null;
+
             function next() {
                 var child;
                 if (inner) {
@@ -377,10 +383,11 @@ define([
                 if (i >= count) {
                     return null;
                 }
-                child = children.getItem(i);
+                child = children[i];
                 i++;
-                if (child.type === CKEDITOR.NODE_ELEMENT) {
-                    var name = child.getName().toLowerCase();
+
+                if (child.nodeType === Node.ELEMENT_NODE) {
+                    var name = child.nodeName.toLowerCase();
                     if (name === "p") {
                         inner = iterNodes(child);
                         return next();
@@ -389,17 +396,18 @@ define([
                         return {node: child, length: 1, isText: false};
                     }
                     throw new Error("not implemented: " + name);
-                } else if (child.type === CKEDITOR.NODE_TEXT) {
+                } else if (child.nodeType === Node.TEXT_NODE) {
                     return {
                         node: child,
-                        length: child.getText().length,
+                        length: child.textContent.length,
                         isText: true,
                     };
                 }
-                throw new Error("unhandled element type: " + child.type);
+                throw new Error("unhandled element type: " + child.nodeType);
             }
             return next;
         }
+
         function getNodeOffset(index, nextNode) {
             var offset = index,
                 node = nextNode();
@@ -416,18 +424,21 @@ define([
             }
             throw new Error("index is larger than content: " + index);
         }
-        editor.focus();
-        var sel = editor.getSelection(),
-            nextNode = iterNodes(sel.root),
+
+        div.focus();
+        var sel = window.getSelection(),
+            nextNode = iterNodes(div),
             node = getNodeOffset(index, nextNode),
-            range = sel.getRanges()[0];
+            range = document.createRange();
+
         if (node.isText) {
             range.setStart(node.node, node.offset);
         } else {
             range.setStartAfter(node.node);
         }
+
         if (length) {
-            nextNode = iterNodes(sel.root);
+            nextNode = iterNodes(div);
             node = getNodeOffset(index + length, nextNode);
             if (node.isText) {
                 range.setEnd(node.node, node.offset);
@@ -437,7 +448,9 @@ define([
         } else {
             range.collapse(true);
         }
-        sel.selectRanges([range]);
+
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 
     /*
@@ -538,16 +551,22 @@ define([
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
 
-        var xpathInfo = _parseXPath(xpath, form),
-            bubbleClasses = xpathInfo.classes[0],
-            iconClasses = xpathInfo.classes[1],
-            dispValue = getBubbleDisplayValue(xpath, form.xpath),
-            icon = $('<i>').addClass(iconClasses).html('&nbsp;');
-        return $('<span>')
+        var xpathInfo = _parseXPath(xpath, form);
+        var bubbleClasses = xpathInfo.classes[0];
+        var iconClasses = xpathInfo.classes[1];
+        var dispValue = getBubbleDisplayValue(xpath, form.xpath);
+        var icon = $('<i>').addClass(iconClasses).html('&nbsp;');
+        var uniqueId = 'bubble-' + Math.random().toString(36).substr(2, 9);
+        var $bubble = $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
             .attr('data-value', xpath)
+            .attr('contenteditable', 'false')
+            .attr('data-toggle', 'popover')
+            .attr('id', uniqueId)
             .append(icon)
             .append(dispValue);
+
+        return $bubble;
     }
 
     /**
@@ -733,7 +752,7 @@ define([
     }
 
     /**
-     * Convert plain text to HTML to be edited in CKEditor
+     * Convert plain text to HTML
      *
      * Replace line breaks with <p> tags and preserve contiguous spaces.
      */
@@ -744,7 +763,7 @@ define([
     }
 
     /**
-     * Convert CKEditor HTML to plain text
+     * Convert HTML to plain text
      *
      * Replace <p> tags with newlines.
      */
@@ -845,39 +864,35 @@ define([
         });
     }
 
-    function createPopover(editor, ckwidget) {
-        var $this = $(ckwidget.element.$),
-            dragContainer = ckwidget.dragHandlerContainer;
-        // Setup popover
-        var xpath = $this.data('value'),
-            getWidget = require('vellum/widgets').util.getWidget,
-            // TODO find out why widget is sometimes null (tests only?)
-            widget = getWidget($this);
+    function createPopover(element) {
+        var $element = $(element);
+        var $widget = $element.closest('.form-control');
+        var xpath = element.getAttribute('data-value');
+        var getWidget = require('vellum/widgets').util.getWidget;
+        // TODO find out why widget is sometimes null (tests only?)
+        var widget = getWidget($widget);
         if (widget) {
-            var isFormRef = FORM_REF_REGEX.test(xpath),
-                isText = function () { return this.nodeType === 3; },
-                displayId = $this.contents().filter(isText)[0].nodeValue,
-                hashtag = widget.mug.form.normalizeHashtag(xpath),
-                title = util.escape(hashtag),
-                labelMug = widget.mug.form.getMugByPath(xpath),
-                description = labelMug && labelMug.p.labelItext ?
-                            labelMug.p.labelItext.get() : "",
-                isDate = labelMug && labelMug.__className.indexOf("Date") === 0,
-                $dragContainer = $(dragContainer.$),
-                $imgs = $dragContainer.children("img"),
-                dateFormatID = util.get_guid(),
-                getTitle = function () {
-                    var title_ = title,
-                        format = $this.attr("data-date-format");
-                    if (isDate || format) {
-                        title_ += date_format_popover({
-                            guid: dateFormatID,
-                            text: util.escape(getHumanReadableDateFormat(format)),
-                        });
-                    }
-                    return '<h3>' + util.escape(displayId) + '</h3>' +
-                        '<div class="text-muted">' + title_ + '</div>';
-                };
+            var isFormRef = FORM_REF_REGEX.test(xpath);
+            var displayId = element.textContent.trim();
+            var hashtag = widget.mug.form.normalizeHashtag(xpath);
+            var title = util.escape(hashtag);
+            var labelMug = widget.mug.form.getMugByPath(xpath);
+            var description = labelMug && labelMug.p.labelItext ?
+                labelMug.p.labelItext.get() : "";
+            var isDate = labelMug && labelMug.__className.indexOf("Date") === 0;
+            var dateFormatID = util.get_guid();
+            var getTitle = function () {
+                var title_ = title,
+                    format = $element.attr("data-date-format");
+                if (isDate || format) {
+                    title_ += date_format_popover({
+                        guid: dateFormatID,
+                        text: util.escape(getHumanReadableDateFormat(format)),
+                    });
+                }
+                return '<h3>' + util.escape(displayId) + '</h3>' +
+                    '<div class="text-muted">' + title_ + '</div>';
+            };
             if (!labelMug) {
                 var datasources = widget.mug.form.vellum.datasources;
                 description = datasources.getNode(hashtag, {}).description || "";
@@ -889,16 +904,13 @@ define([
             });
             description = xml.normalize(description);
 
-            // Remove ckeditor-supplied title attributes, which will otherwise override popover title
-            $imgs.removeAttr("title");
-
-            $imgs.popover({
+            $element.popover({
                 trigger: 'hover',
                 container: 'body',
                 placement: 'bottom',
-                title: getTitle,
+                title: getTitle(), // only needs to be called once
                 html: true,
-                sanitize: false,  // bootstrap, don't remove data-ufid attribute
+                sanitize: false, // bootstrap, don't remove data-ufid attribute
                 content: easy_reference_popover({
                     text: description,
                     ufid: labelMug ? labelMug.ufid : "",
@@ -917,24 +929,27 @@ define([
                 var type = isFormRef ? 'form' : 'case';
                 analytics.fbUsage("Hovered over easy " + type + " reference");
                 analytics.workflow("Hovered over easy reference");
-                if (isDate || $this.attr("data-date-format")) {
+                if (isDate || $widget.attr("data-date-format")) {
                     var pos = $(this).offset(),
                         x = pos.left,
                         y = pos.top + $(this).height();
                     $("#" + dateFormatID).click(function () {
-                        $imgs.popover('hide');
+                        $element.popover('hide');
                         dateformats.showMenu(x, y, function (format) {
-                            $this.attr("data-date-format", format);
-                            editor.fire("saveSnapshot");
+                            $widget.attr("data-date-format", format);
+                            // editor.fire("saveSnapshot");
+                            // todo: save snapshot
                         }, true);
                         return false;
                     });
                 }
             });
 
-            ckwidget.on('destroy', function (e)  {
+            element.classList.add('popover-initialized');
+
+            $element.on('destroy', function (e)  {
                 try {
-                    $imgs.popover('destroy');
+                    $element.popover('destroy');
                 } catch(err) {
                     // sometimes these are already destroyed
                 }
