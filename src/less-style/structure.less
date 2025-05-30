@@ -30,11 +30,15 @@ body.vellum-full-screen {
                 }
 
                 .fd-add-question {
-                    width: 100%;
-                    border-radius: 0;
+                    max-width: 130px;
+                    width: 90%;
+                    border-radius: 8px;
                     text-align: left;
                     border: 0;
-
+                    margin: 10px;
+                    white-space: nowrap; // to prevent the text from wrapping
+                    overflow: hidden; // to hide any content that exceeds the button's width
+                    text-overflow: ellipsis; // to show an ellipsis (...) when the text is too long
                 }
 
                 // Bottom half of left column: data tree
