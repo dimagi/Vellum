@@ -1148,6 +1148,7 @@ define([
      */
     $(document).one("dnd_move.vakata.jstree", function (e, data) {
         $(document).on("dnd_move.vakata.jstree", function (e, data) {
+            $('.jstree-drop').addClass('jstree-drop-active');
             var source = $(data.data.obj),
                 target = $(data.event.target),
                 inst = $.jstree.reference(target);
@@ -1160,6 +1161,7 @@ define([
                 }
             }
         }).on("dnd_stop.vakata.jstree", function (e, data) {
+            $('.jstree-drop').removeClass('jstree-drop-active');
             var vellum = $(data.data.obj).vellum("get"),
                 target = $(data.event.target),
                 inst = $.jstree.reference(target);
