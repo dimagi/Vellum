@@ -374,7 +374,7 @@ define([
                 data: [],
                 limit: 50,
                 maxLen: Infinity,
-                displayTpl: '<li><i class="${icon}" /> ${name}</li>',
+                displayTpl: '<li><i class="${icon}"></i> ${name}</li>',
                 insertTpl: "${full}",
                 suffix: " ",
                 searchKey: $.fn.atwho["default"].searchKey,
