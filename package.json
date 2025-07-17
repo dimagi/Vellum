@@ -39,7 +39,7 @@
         "exports-loader": "5.0.0",
         "http-server": "^14.1.0",
         "jshint": "^2.13.6",
-        "less": "3.10.3",
+        "less": "4.4.0",
         "less-loader": "12.2.0",
         "minimist": "^1.2.8",
         "mocha": "10.2.0",
