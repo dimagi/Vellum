@@ -3099,9 +3099,9 @@ ws@8.5.0, ws@^5.2.3:
   dependencies:
     async-limiter "~1.0.0"
 
-xpath@dimagi/js-xpath#v0.0.9:
-  version "0.0.9"
-  resolved "https://codeload.github.com/dimagi/js-xpath/tar.gz/7a9b92e18a3574015eaac70de63ffbc09234b405"
+xpath@dimagi/js-xpath#v0.0.10:
+  version "0.0.10"
+  resolved "https://codeload.github.com/dimagi/js-xpath/tar.gz/c8c303af838998a0d6ce3dc6bcf6f7dd2261f0e6"
   dependencies:
     biginteger "^1.0.3"
 

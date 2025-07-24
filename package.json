@@ -29,7 +29,7 @@
         "langcodes": "dimagi/langcodes#master",
         "markdown-it": "12.3.2",
         "underscore": "1.13.1",
-        "xpath": "dimagi/js-xpath#v0.0.9"
+        "xpath": "dimagi/js-xpath#v0.0.10"
     },
     "devDependencies": {
         "chai": "4.2.0",
