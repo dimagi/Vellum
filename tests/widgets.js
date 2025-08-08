@@ -194,7 +194,6 @@ define([
                     util.clickQuestion(name);
                     var widget = util.getWidget('itext-en-label');
                     widget.getValue(function (val) {
-                        // async assert because ckEditor setData is async
                         util.assertEqual(val, row[2]);
                         done();
                     });

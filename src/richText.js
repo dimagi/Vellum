@@ -1,7 +1,7 @@
 /*
  * expected structure of a richText widget:
  *
- * <div contenteditable="true" ... ckeditor stuff...>
+ * <div contenteditable="true">
  *   <p>
  *      User input text
  *   </p>
@@ -26,14 +26,6 @@
  *
  *   #invalid/xpath (`#form/text`
  */
-
-(function () {
-    // set CKEditor base path before loading ckeditor
-    var path = 'src/../lib/ckeditor/';
-    if (!window.CKEDITOR_BASEPATH) {
-        window.CKEDITOR_BASEPATH = path;
-    }
-})();
 
 define([
     'require',
@@ -800,12 +792,7 @@ define([
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
                    .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
-                   // While copying widgets with text, CKEditor adds these html elements
-                   .replace(/<span\b[^>]*?id="?cke_bm_\d+\w"?\b[^>]*?>.*?<\/span>/ig, "")
-                   .replace(/<span\b[^>]*?data-cke-copybin-(start|end)[^<]*?<\/span>/ig, "")
-                   // CKEditor uses zero-width spaces as markers
-                   // and sometimes they leak out (on copy/paste?)
-                   .replace(/\u200b+/ig, " ")
+
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }
@@ -830,7 +817,7 @@ define([
      * Deconstructs html strings that have bubbles in them
      * This should preserve whitespace as it appears in the editor
      *
-     * Dependent on CKEditor, which uses p and &nbsp; to format content
+     * Dependent on the editor to use p and &nbsp; to format content
      *
      * Expects the html to only be at most two levels deep (considering a
      * bubble span as one level):

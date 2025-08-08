@@ -1,7 +1,7 @@
 /*
  * expected structure of a richText widget:
  *
- * <div contenteditable="true" ... ckeditor stuff...>
+ * <div contenteditable="true">
  *   <p>
  *      User input text
  *   </p>
@@ -30,7 +30,6 @@ define([
     'vellum/richText',
     'vellum/javaRosa/util',
     'vellum/escapedHashtags',
-    'ckeditor',
     'static/richText/burpee.xml',
     'static/richText/output-ref.xml',
     'static/richText/output-value.xml',
@@ -42,7 +41,6 @@ define([
     richText,
     javaRosa,
     escapedHashtags,
-    CKEDITOR,
     BURPEE_XML,
     OUTPUT_REF_XML,
     OUTPUT_VALUE_XML
