@@ -22,6 +22,9 @@ fi
 
 temp="/tmp/test-$$.tmp"
 
+# Make sure the right build files have been generated
+yarn testbuild
+
 # run the tests
 node_modules/mocha-headless-chrome/bin/start -f http://localhost:${VELLUM_PORT:-8088}/?grep="$qs" -t 500000 | tee $temp
 

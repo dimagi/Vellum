@@ -56,6 +56,12 @@ define([
     function showCommander(cmd) {
         setupAutocomplete(cmd);
         cmd.addQuestionButton.hide();
+        const height = cmd.addQuestionButton.outerHeight(true);
+
+        // Set the container's minimum height to match the button's height.
+        // This ensures that replacing the button with the container
+        // won't cause elements below to shift up.
+        cmd.container.css('min-height', height + 'px');
         cmd.container.show();
         cmd.input.focus().select();
     }
@@ -368,7 +374,7 @@ define([
                 data: [],
                 limit: 50,
                 maxLen: Infinity,
-                displayTpl: '<li><i class="${icon}" /> ${name}</li>',
+                displayTpl: '<li><i class="${icon}"></i> ${name}</li>',
                 insertTpl: "${full}",
                 suffix: " ",
                 searchKey: $.fn.atwho["default"].searchKey,

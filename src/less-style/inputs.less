@@ -80,6 +80,8 @@
 .fd-commander {
     background-color: @cc-bg;
     padding: 5px;
+    display: flex;
+    align-items: center;
 
     input {
         border: 1px solid @cc-neutral-hi;
@@ -92,8 +94,14 @@
         border: none;
         color: @cc-neutral-low;
         position: absolute;
-        top: 8px;
         right: 8px;
         cursor: pointer;
     }
+}
+
+.jstree-drop-active {
+    border: 2px solid @cc-brand-mid !important;
+    background: fade(@cc-brand-hi, 30%);
+    box-shadow: 0 0 8px 2px fade(@cc-brand-mid, 40%);
+    transition: box-shadow 0.2s, border 0.2s, background 0.2s;
 }
