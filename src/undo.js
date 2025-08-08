@@ -1,8 +1,4 @@
-define([
-    'underscore'
-], function (
-    _
-) {
+define([], function () {
     const PUSH_INTERVAL = 500;
 
     function UndoStack() {
@@ -140,7 +136,7 @@ define([
             selection.removeAllRanges();
             selection.addRange(range);
         } catch (e) {
-            console.error("Failed to restore cursor position:", e);
+            // console.error("Failed to restore cursor position:", e);
         }
     }
 
@@ -157,7 +153,7 @@ define([
             const item = {
                 value: this.element.innerHTML,
                 cursor: getCursorPosition(this.element)
-            }
+            };
             this.undoStack.push(item, accumulateUntilPause);
         },
         undo: function () {
@@ -178,8 +174,7 @@ define([
                 }
             });
         },
-
-    }
+    };
 
     return {
         UndoStack,

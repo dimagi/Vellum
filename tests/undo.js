@@ -19,7 +19,7 @@ define([
 
         it("undo should return null if only one item is on the undo stack", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test', accumulateUntilPause=false);
+            undoStack.push('test', false);
             undoStack.undo(value => {
                 assert.isNull(value);
             });
@@ -27,11 +27,11 @@ define([
 
         it("Trying to undo the first item should not take it off the stack", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test', accumulateUntilPause=false);
+            undoStack.push('test', false);
             undoStack.undo(value => {
                 assert.isNull(value);
             });
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test2', false);
             undoStack.undo(value => {
                 assert.equal(value, 'test');
             });
@@ -39,8 +39,8 @@ define([
 
         it("undo should return the previous item if at least two items are on the undo stack", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1', accumulateUntilPause=false);
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test1', false);
+            undoStack.push('test2', false);
             undoStack.undo(value => {
                 assert.equal(value, 'test1');
             });
@@ -55,8 +55,8 @@ define([
 
         it("redo should return null if nothing has been undone", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1', accumulateUntilPause=false);
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test1', false);
+            undoStack.push('test2', false);
             undoStack.redo(value => {
                 assert.isNull(value);
             });
@@ -64,8 +64,8 @@ define([
 
         it("redo after undo should return the last pushed item", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1', accumulateUntilPause=false);
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test1', false);
+            undoStack.push('test2', false);
             undoStack.undo(value => {
                 assert.equal(value, 'test1');
             });
@@ -76,8 +76,8 @@ define([
 
         it("undo after redo should return same item as first undo", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1', accumulateUntilPause=false);
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test1', false);
+            undoStack.push('test2', false);
             undoStack.undo(value => {
                 assert.equal(value, 'test1');
             });
@@ -92,12 +92,12 @@ define([
 
         it("push after undo empties redo stack", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1', accumulateUntilPause=false);
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test1', false);
+            undoStack.push('test2', false);
             undoStack.undo(value => {
                 assert.equal(value, 'test1');
             });
-            undoStack.push('test1', accumulateUntilPause=false);
+            undoStack.push('test1', false);
             undoStack.redo(value => {
                 assert.isNull(value);
             });
@@ -105,8 +105,8 @@ define([
 
         it("cannot push during undo", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1', accumulateUntilPause=false);
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test1', false);
+            undoStack.push('test2', false);
             undoStack.undo(value => {
                 assert.equal(value, 'test1');
                 assert.isFalse(undoStack.push('test3'));
@@ -118,9 +118,9 @@ define([
 
         it("pushing twice in fast succession only keeps the last one", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1a', accumulateUntilPause=true);
-            undoStack.push('test1b', accumulateUntilPause=true);
-            undoStack.push('test2', accumulateUntilPause=false);
+            undoStack.push('test1a', true);
+            undoStack.push('test1b', true);
+            undoStack.push('test2', false);
             undoStack.undo(value => {
                 assert.equal(value, 'test1b');
             });
@@ -131,10 +131,10 @@ define([
 
         it("pushing twice with pause keeps both items", function () {
             const undoStack = new undo.UndoStack();
-            undoStack.push('test1a', accumulateUntilPause=true);
+            undoStack.push('test1a', true);
             setTimeout(() => {
-                undoStack.push('test1b', accumulateUntilPause=true);
-                undoStack.push('test2', accumulateUntilPause=false);
+                undoStack.push('test1b', true);
+                undoStack.push('test2', false);
                 undoStack.undo(value => {
                     assert.equal(value, 'test1b');
                 });
