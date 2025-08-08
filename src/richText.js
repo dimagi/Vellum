@@ -46,7 +46,8 @@ define([
     'vellum/logic',
     'vellum/util',
     'vellum/xml',
-    'vellum/hqAnalytics'
+    'vellum/hqAnalytics',
+    'vellum/undo'
 ], function(
     require,
     _,
@@ -58,7 +59,8 @@ define([
     logic,
     util,
     xml,
-    analytics
+    analytics,
+    undo
 ){
     var FORM_REF_REGEX = /^#form\//;
     var INVALID_PREFIX = "#invalid/xpath ";
@@ -94,12 +96,6 @@ define([
 
         // HACK use 1/4 em space to fix cursor movement/hiding near bubble
         var TRAILING_SPACE = "\u2005";
-
-        let x, y;
-        inputElement.addEventListener('mousemove', e => {
-            x = e.clientX;
-            y = e.clientY;
-        });
 
         function htmlToElement(html) {
             const parser = new DOMParser();
@@ -145,7 +141,6 @@ define([
             }
 
             if (range) {
-
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(range);
@@ -165,6 +160,7 @@ define([
                     cancelable: true
                 });
                 inputElement.dispatchEvent(inputEvent);
+                undoStack.push();
             }
         }
 
@@ -188,6 +184,36 @@ define([
         if (existingWrapper) {
             return existingWrapper;
         }
+
+        const undoStack = new undo.ElementUndoStack(inputElement);
+        inputElement.addEventListener('keydown', function(e) {
+            const key = e.key;
+            const ctrlKey = e.ctrlKey;
+            const metaKey = e.metaKey;
+            if ((key === 'z' || key === 'Z') &&
+                    (ctrlKey || metaKey)) {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    undoStack.redo();
+                } else {
+                    undoStack.undo();
+                }
+                inputElement
+                    .querySelectorAll('[data-toggle="popover"]')
+                    .forEach(element => createPopover(element));
+            }
+        });
+
+        inputElement.addEventListener('input', function(e) {
+            undoStack.push();
+        });
+
+        let x, y;
+        inputElement.addEventListener('mousemove', e => {
+            x = e.clientX;
+            y = e.clientY;
+        });
+
         if (arguments.length === 1) {
             throw new Error("editor not initialized: " +
                             $("<div>").append(input).html());
@@ -219,6 +245,7 @@ define([
             setValue: function (value, callback) {
                 var richTextValue = toRichText(value, form, options);
                 inputElement.innerHTML = richTextValue;
+                undoStack.push();
                 onVellumWidgetSet(inputElement, () => {
                     inputElement
                         .querySelectorAll('[data-toggle="popover"]')
