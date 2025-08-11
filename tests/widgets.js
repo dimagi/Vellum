@@ -190,13 +190,11 @@ define([
 
             _.each(data.slice(1), function (row) {
                 var name = row[0].slice(1);
-                it(name, function (done) {
+                it(name, function () {
                     util.clickQuestion(name);
                     var widget = util.getWidget('itext-en-label');
-                    widget.getValue(function (val) {
-                        util.assertEqual(val, row[2]);
-                        done();
-                    });
+                    var val = widget.getValue();
+                    util.assertEqual(val, row[2]);
                 });
             });
         });
