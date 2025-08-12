@@ -420,21 +420,21 @@ define([
                     "</div>"),
                 options = {isExpression: false},
                 input, editor, exprInput, exprEditor;
-            before(function (done) {
+            before(function () {
                 $("body").append(el);
                 input = el.children().first();
                 editor = richText.editor(input, form, options);
                 exprInput = $(el.children()[1]);
                 exprEditor = richText.editor(exprInput, form, {isExpression: true});
                 // wait for editor to be ready; necessary to change selection
-                input.promise.then(function () {
-                    exprInput.promise.then(function () { done(); });
-                });
+                // input.promise.then(function () {
+                //     exprInput.promise.then(function () { done(); });
+                // });
             });
-            beforeEach(function (done) {
-                editor.setValue("", function () {
-                    exprEditor.setValue("", function () { done(); });
-                });
+            beforeEach(function () {
+                editor.setValue("");
+                exprEditor.setValue("");
+
             });
             after(function () {
                 editor.destroy();
@@ -444,16 +444,14 @@ define([
                 assert.equal($("#cktestparent").length, 0);
             });
 
-            it("should be accessible via various jquery paths", function (done) {
+            it("should be accessible via various jquery paths", function () {
                 var v0 = editor,
                     v1 = richText.editor(input);
                 assert.equal(v0, v1);
-                v0.setValue("test", function () {
-                    assert.equal(v1.getValue(), "test");
-                    var div = $("#cktestparent").children().first();
-                    assert.equal(richText.editor(div), v0);
-                    done();
-                });
+                v0.setValue("test");
+                assert.equal(v1.getValue(), "test");
+                var div = $("#cktestparent").children().first();
+                assert.equal(richText.editor(div), v0);
             });
 
             it("should return just-set value on get value", function () {
@@ -463,49 +461,41 @@ define([
                 assert.equal(editor.getValue(), text);
             });
 
-            it("should create output on insert expression into label editor", function (done) {
+            it("should create output on insert expression into label editor", function () {
                 var output = '<output value="#form/text" />';
-                editor.setValue('one two', function () {
-                    assert.equal(editor.getValue(), 'one two');
-                    editor.select(3);
-                    editor.insertExpression("#form/text");
-                    assert.equal(editor.getValue(), "one" + output + "  two");
-                    done();
-                });
+                editor.setValue('one two');
+                assert.equal(editor.getValue(), 'one two');
+                editor.select(3);
+                editor.insertExpression("#form/text");
+                assert.equal(editor.getValue(), "one" + output + "  two");
             });
 
-            it("should insert output into label editor", function (done) {
+            it("should insert output into label editor", function () {
                 var output = '<output value="#form/text" />';
-                editor.setValue('one two', function () {
-                    assert.equal(editor.getValue(), 'one two');
-                    editor.select(3);
-                    editor.insertOutput(output);
-                    assert.equal(editor.getValue(), "one" + output + "  two");
-                    done();
-                });
+                editor.setValue('one two');
+                assert.equal(editor.getValue(), 'one two');
+                editor.select(3);
+                editor.insertOutput(output);
+                assert.equal(editor.getValue(), "one" + output + "  two");
             });
 
-            it("should not copy output value from label to expression editor", function (done) {
+            it("should not copy output value from label to expression editor", function () {
                 var output = '<output value="#form/text" />';
-                editor.setValue(output, function () {
-                    assert.equal(editor.getValue(), output);
-                    var copyVal = input[0].innerHTML;
-                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
-                    exprInput[0].innerHTML = copyVal;
-                    assert.equal(exprEditor.getValue(), "#form/text");
-                    done();
-                });
+                editor.setValue(output);
+                assert.equal(editor.getValue(), output);
+                var copyVal = input[0].innerHTML;
+                assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
+                exprInput[0].innerHTML = copyVal;
+                assert.equal(exprEditor.getValue(), "#form/text");
             });
 
-            it("should copy output value from expression editor to label", function (done) {
-                exprEditor.setValue("#form/text", function () {
-                    assert.equal(exprEditor.getValue(), "#form/text");
-                    var copyVal = exprInput[0].innerHTML;
-                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
-                    input[0].innerHTML = copyVal;
-                    assert.equal(editor.getValue(), '<output value="#form/text" />');
-                    done();
-                });
+            it("should copy output value from expression editor to label", function () {
+                exprEditor.setValue("#form/text");
+                assert.equal(exprEditor.getValue(), "#form/text");
+                var copyVal = exprInput[0].innerHTML;
+                assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
+                input[0].innerHTML = copyVal;
+                assert.equal(editor.getValue(), '<output value="#form/text" />');
             });
 
             it("should not paste style content into editor", function () {
@@ -537,14 +527,12 @@ define([
 
             _.each(argsets, applyArgs(function (expr, i, result) {
                 var repr = JSON.stringify(result);
-                it("should insert expression into expression at " + i + ": " + repr, function (done) {
-                    exprEditor.setValue(expr, function () {
-                        assert.equal(exprEditor.getValue(), expr);
-                        exprEditor.select(i);
-                        exprEditor.insertExpression('#form/text');
-                        assert.equal(exprEditor.getValue(), result);
-                        done();
-                    });
+                it("should insert expression into expression at " + i + ": " + repr, function () {
+                    exprEditor.setValue(expr);
+                    assert.equal(exprEditor.getValue(), expr);
+                    exprEditor.select(i);
+                    exprEditor.insertExpression('#form/text');
+                    assert.equal(exprEditor.getValue(), result);
                 });
             }));
 
@@ -566,7 +554,7 @@ define([
             var widget;
 
             describe("", function () {
-                beforeEach(function (done) {
+                beforeEach(function () {
                     util.init({
                         javaRosa: {langs: ['en']},
                         form: "",
@@ -574,21 +562,17 @@ define([
                             onReady: function() {
                                 util.addQuestion("Text", 'text');
                                 widget = util.getWidget('itext-en-label');
-                                widget.input.promise.then(function () { done(); });
+                                // widget.input.promise.then(function () { done(); });
                             }
                         },
                         features: {rich_text: true},
                     });
                 });
 
-                it("should show the markdown preview", function(done) {
-                    var super_handleChange = widget.handleChange;
-                    function handleChange() {
-                        super_handleChange();
-                        assert($('.has-markdown').length);
-                        done();
-                    }
-                    widget.setValue('# blah', handleChange);
+                it("should show the markdown preview", function() {
+                    widget.setValue('# blah');
+                    widget.handleChange();
+                    assert($('.has-markdown').length);
                 });
 
                 it("should allow editing of validation message", function () {
@@ -640,7 +624,7 @@ define([
                     util.init({
                         javaRosa: {langs: ['en']},
                         form: "",
-                        core: { onReady: function () { done(); } },
+                        // core: { onReady: function () { done(); } },
                         features: {
                             rich_text: true,
                             disable_popovers: false,
@@ -919,7 +903,7 @@ define([
 
                 describe("for date references", function () {
                     var widget;
-                    before(function (done) {
+                    before(function () {
                         util.loadXML("");
                         util.paste([
                             ["id", "type", "labelItext:en-default"],
@@ -928,7 +912,7 @@ define([
                         ]);
                         util.clickQuestion("text");
                         widget = util.getWidget('itext-en-label');
-                        widget.input.promise.then(done);
+                        // widget.input.promise.then(done);
                     });
 
                     _.each({

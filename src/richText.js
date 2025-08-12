@@ -223,18 +223,12 @@ define([
           resolveEditorPromise = resolve;
         });
         const wrapper = {
-            getValue: function (callback) {
-                if (callback) {
-                    input.promise.then(function() {
-                        callback(fromRichText(inputElement.innerHTML));// ??? why not data, form here?
-                    });
-                } else {
-                    var data = inputElement.innerHTML;
-                    var value = fromRichText(data, form, options.isExpression);
-                    return value;
-                }
+            getValue: function () {
+                var data = inputElement.innerHTML;
+                var value = fromRichText(data, form, options.isExpression);
+                return value;
             },
-            setValue: function (value, callback) {
+            setValue: function (value) {
                 var richTextValue = toRichText(value, form, options);
                 inputElement.innerHTML = richTextValue;
                 undoStack.push();
@@ -243,10 +237,6 @@ define([
                         .querySelectorAll('[data-toggle="popover"]')
                         .forEach(element => createPopover(element));
                 });
-
-                if (callback) {
-                    setTimeout(callback, 0);
-                }
                 return wrapper;
             },
             insertExpression: function (xpath) {
