@@ -383,9 +383,11 @@ define([
     };
 
     var droppableText = function (mug, options) {
-        var widget = richInput(mug, options);
+        const placeholder = options.placeholder ? options.placeholder : gettext('Drag question here');
+
+        const widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
-            .attr('placeholder', 'Drag question here')
+            .attr('placeholder', placeholder)
             .change(function () {
                 widget.handleChange();
             });
