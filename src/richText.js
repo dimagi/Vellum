@@ -226,7 +226,7 @@ define([
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
-                        callback(fromRichText(inputElement.innerHTML));// ??? why not data, form here?
+                        callback(fromRichText(inputElement.innerHTML));
                     });
                 } else {
                     var data = inputElement.innerHTML;
@@ -279,7 +279,6 @@ define([
                 var args = Array.prototype.slice.call(arguments);
                 if (args.length === 2 && args[0] === 'change' && typeof args[1] === 'function') {
                     const handleContentChange = function(e) {
-                        // console.log(`editor change event`);
                         args[1].apply(); // callee in widgets.js does not take any arguments
                     };
 
@@ -331,7 +330,6 @@ define([
                 // a surprising thing happens later: hashtags are
                 // automatically converted to bubbles the next time the
                 // expression is loaded in a rich text editor.
-                // var text = data.dataTransfer.getData("Text");
                 const text = event.clipboardData.getData("text/plain");
                 const htmlText = document.createElement('div');
                 htmlText.textContent = text; // This escapes the text
@@ -379,7 +377,7 @@ define([
         }
 
         input.data("ckwrapper", wrapper);
-        resolveEditorPromise(); // probably can just set it to a resolved promise to beging with or remove the code that waits for it.
+        resolveEditorPromise();
         return wrapper;
     };
 
@@ -575,7 +573,7 @@ define([
         var iconClasses = xpathInfo.classes[1];
         var dispValue = getBubbleDisplayValue(xpath, form.xpath);
         var icon = $('<i>').addClass(iconClasses).html('&nbsp;');
-        var uniqueId = 'bubble-' + Math.random().toString(36).substr(2, 9);
+        var uniqueId = 'bubble-' + Math.random().toString(36).slice(2, 10);
         var $bubble = $('<span>')
             .addClass('label label-datanode ' + bubbleClasses)
             .attr('data-value', xpath)
@@ -951,7 +949,6 @@ define([
                         $element.popover('hide');
                         dateformats.showMenu(x, y, function (format) {
                             $widget.attr("data-date-format", format);
-                            // editor.fire("saveSnapshot");
                             // todo: save snapshot
                         }, true);
                         return false;
