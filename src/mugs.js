@@ -78,7 +78,8 @@ define([
         // set or change question type
         setOptionsAndProperties: function (options, properties) {
             var _this = this,
-                currentAttrs = properties || (this.p && this.p.getAttrs()) || {};
+                currentAttrs = properties || (this.p && this.p.getAttrs()) || {},
+                oldMugType = this.__className;
 
             // These could both be calculated once for each type instead of
             // each instance.
@@ -91,7 +92,10 @@ define([
             // Reset any properties that are part of the question type
             // definition.
             _.each(this.spec, function (spec, name) {
-                if (spec.deleteOnCopy) {
+                if (spec.deleteOnCopy && (
+                    spec.deleteOnCopy === true ||
+                    spec.deleteOnCopy(currentAttrs, oldMugType)
+                )) {
                     delete currentAttrs[name];
                 }
                 var allowed = _this.getPresence(name) !== 'notallowed';
@@ -1624,10 +1628,22 @@ define([
         spec: {
             dataValue: { presence: 'optional' },
             defaultValue: { presence: 'optional', visibility: 'hidden' },
+            // Delete _required_ properties if changing from non-Trigger
+            // to Trigger except for DataBindOnly, which is the initial
+            // question type used when loading a form before control
+            // nodes are parsed. Required properties are not allowed on
+            // DataBindOnly (except during initial form loading).
             requiredAttr: {
-                deleteOnCopy: true,
+                deleteOnCopy: function (attrs, oldMugType) {
+                    return attrs.appearance === "minimal" || oldMugType !== "DataBindOnly";
+                },
                 visibility: function (mug) {
                     return mug.p.appearance !== "minimal";
+                },
+            },
+            requiredCondition: {
+                deleteOnCopy: function (attrs, oldMugType) {
+                    return attrs.appearance === "minimal" || oldMugType !== "DataBindOnly";
                 },
             },
         }
