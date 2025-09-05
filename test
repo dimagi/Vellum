@@ -42,7 +42,7 @@ else
 fi
 
 if [[ "$run_jshint" == "true" ]]; then
-    jshint src \
-        && jshint --config tests/.jshintrc tests \
+    npm exec -- jshint src \
+        && npm exec -- jshint --config tests/.jshintrc tests \
         && echo "jshint passed"
 fi
