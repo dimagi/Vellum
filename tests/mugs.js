@@ -101,10 +101,10 @@ define([
         it("should load required attribute on label with non-minimal appearance", function () {
             util.loadXML(REQUIRED_LABEL_XML);
             var label = util.getMug("label");
-            assert.isOk(label.p.requiredAttr);
+            assert.isTrue(label.p.requiredAttr);
             assert.equal(label.p.requiredCondition, "test()");
-            assert.isOk(label.isVisible("requiredAttr"), "required checkbox should be visible");
-            assert.isOk(label.isVisible("requiredCondition"), "required condition should be visible");
+            assert.isTrue(label.isVisible("requiredAttr"), "required checkbox should be visible");
+            assert.isTrue(label.isVisible("requiredCondition"), "required condition should be visible");
         });
 
         it("should remove required attribute when changing Text to Label", function () {
@@ -115,8 +115,8 @@ define([
             form.changeMugType(mug, "Trigger");
             assert.isUndefined(mug.p.requiredAttr);
             assert.isUndefined(mug.p.requiredCondition);
-            assert.isNotOk(mug.isVisible("requiredAttr"), "required checkbox should not be visible");
-            assert.isNotOk(mug.isVisible("requiredCondition"), "required condition should not be visible");
+            assert.isFalse(mug.isVisible("requiredAttr"), "required checkbox should not be visible");
+            assert.isFalse(mug.isVisible("requiredCondition"), "required condition should not be visible");
         });
     });
 });
