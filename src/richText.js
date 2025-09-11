@@ -56,6 +56,22 @@ define([
 ){
     var FORM_REF_REGEX = /^#form\//;
     var INVALID_PREFIX = "#invalid/xpath ";
+    var ZERO_WIDTH_SPACE = "\u200B";
+
+    function htmlToFrament(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const fragment = document.createDocumentFragment();
+
+        Array.from(doc.body.childNodes).forEach(child => {
+            if (child.tagName === 'SPAN') {
+                child.contentEditable = false;
+            }
+            fragment.appendChild(child);
+        });
+
+        return fragment;
+    }
 
     /**
      * Get or create a rich text editor for the given element
@@ -86,17 +102,7 @@ define([
             inputElement.setAttribute('spellcheck', true);
         }
 
-        // HACK use 1/4 em space to fix cursor movement/hiding near bubble
-        var TRAILING_SPACE = "\u2005";
-
-        function htmlToElement(html) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            doc.body.firstChild.contentEditable = false;
-            return doc.body.firstChild;
-        }
-
-        function insertHtmlWithSpace(content) {
+        function insertHtmlWithSpace(content, insertSpaces = false) {
             const hasFocus = document.activeElement === inputElement;
             let range;
             if (!hasFocus && x && y) {
@@ -136,15 +142,26 @@ define([
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(range);
-                const element = htmlToElement(content);
                 range.deleteContents();
-                range.insertNode(element);
-                range.collapse();
-                const spaceNode = document.createTextNode(TRAILING_SPACE);
-                range.insertNode(spaceNode);
-                if (element.getAttribute && element.getAttribute('data-toggle')) {
-                    createPopover(element);
+                if (insertSpaces) {
+                    const leadingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE);
+                    range.insertNode(leadingSpaceNode);
+                    range.setStartAfter(leadingSpaceNode);
                 }
+
+                const fragment = htmlToFrament(content);
+                range.insertNode(fragment);
+                range.collapse(false);
+
+                if (insertSpaces) {
+                    const trailingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE);
+                    range.insertNode(trailingSpaceNode);
+                }
+                fragment.childNodes.forEach(child => {
+                    if (child.getAttribute && child.getAttribute('data-toggle')) {
+                        createPopover(child);
+                    }
+                });
                 inputElement.focus();
 
                 const inputEvent = new Event('input', {
@@ -196,7 +213,90 @@ define([
             }
         });
 
+        inputElement.addEventListener('mouseup', checkCursorPosition);
+        inputElement.addEventListener('keyup', checkCursorPosition);
+
+        function checkCursorPosition(event) {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+            if (!range.collapsed) return; // Only check when cursor is a point, not a selection
+
+            const node = range.startContainer;
+            const offset = range.startOffset;
+
+            if (node.nodeType === Node.TEXT_NODE) {
+                // Check if cursor is at the end of a text node that ends with ZWSP
+                if (offset === node.length && node.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
+                    const nextNode = node.nextSibling;
+                    if (nextNode && nextNode.nodeName.toLowerCase() === 'span' &&
+                        nextNode.contentEditable === 'false') {
+                        if (event.keyCode === 39) {
+                           const nodeAfterSpan = nextNode.nextSibling;
+                           if (nodeAfterSpan && nodeAfterSpan.nodeType === Node.TEXT_NODE) {
+                               range.setStart(nodeAfterSpan, 1);
+                               range.collapse(true);
+                           }
+                        } else {
+                            range.setStart(node, offset - 1);
+                            range.collapse(true);
+                        }
+                    }
+                }
+
+                if (offset === 0 && node.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
+                    const prevNode = node.previousSibling;
+                    if (prevNode && prevNode.nodeName.toLowerCase() === 'span' &&
+                        prevNode.contentEditable === 'false') {
+                        if (event.keyCode === 37) {
+                            const nodeLeftOfSpan = prevNode.previousSibling;
+                            range.setStart(nodeLeftOfSpan, nodeLeftOfSpan.nodeValue.length - 1); // jumping over span and ZWSP
+                            range.collapse(true);
+                        } else {
+                            range.setStart(node, 1);
+                            range.collapse(true);
+                        }
+                    }
+                }
+            }
+        }
+
         inputElement.addEventListener('input', function(e) {
+            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
+            const spansToRemove = [];
+
+            nonEditableSpans.forEach(span => {
+                const prevNode = span.previousSibling;
+                const nextNode = span.nextSibling;
+
+                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== 3 || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE);
+                const zwspAfterMissing = !nextNode || nextNode.nodeType !== 3 || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
+                if (zwspBeforeMissing || zwspAfterMissing) {
+                    spansToRemove.push(span);
+                }
+            });
+
+            spansToRemove.forEach(span => {
+                const prevNode = span.previousSibling;
+                const nextNode = span.nextSibling;
+
+                if (prevNode && prevNode.nodeType === 3 && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
+                    prevNode.nodeValue = prevNode.nodeValue.slice(0, -1);
+                    if (prevNode.length === 0) {
+                        prevNode.remove();
+                    }
+                }
+                if (nextNode && nextNode.nodeType === 3 && nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
+                    nextNode.nodeValue = nextNode.nodeValue.slice(1);
+                    if (nextNode.length === 0) {
+                        nextNode.remove();
+                    }
+                }
+
+                console.log('span removed');
+                span.remove();
+            });
             undoStack.push();
         });
 
@@ -237,6 +337,20 @@ define([
             setValue: function (value, callback) {
                 var richTextValue = toRichText(value, form, options);
                 inputElement.innerHTML = richTextValue;
+
+                // Add ZWSP around non-contenteditable spans
+                const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
+                nonEditableSpans.forEach(span => {
+                    const prevNode = span.previousSibling;
+                    const nextNode = span.nextSibling;
+                    if (!prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
+                        span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span);
+                    }
+                    if (!nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
+                        span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span.nextSibling);
+                    }
+                });
+
                 undoStack.push();
                 onVellumWidgetSet(inputElement, () => {
                     inputElement
@@ -251,10 +365,12 @@ define([
             },
             insertExpression: function (xpath) {
                 if (options.isExpression) {
-                    insertHtmlWithSpace(bubbleExpression(xpath, form));
+                    insertHtmlWithSpace(bubbleExpression(xpath, form), true);
                 } else {
                     var output = makeBubble(form, xpath);
-                    insertHtmlWithSpace($('<p>').append(output).html());
+                    insertHtmlWithSpace($('<p>')
+                        .append(output)
+                        .html(), true);
                 }
                 return wrapper;
             },
@@ -297,7 +413,7 @@ define([
             },
         };
 
-        inputElement.addEventListener('copy', function(e) {
+        function handleCopyOrCut(e) {
             e.preventDefault();
             const selection = window.getSelection();
             let selectedText = '';
@@ -306,11 +422,18 @@ define([
                 const container = document.createElement('div');
                 container.appendChild(range.cloneContents());
                 selectedText = fromRichText(container.innerHTML);
+
+                if (e.type === 'cut') {
+                    range.deleteContents();
+                }
             }
             if (e.clipboardData) {
                 e.clipboardData.setData('text/plain', selectedText);
             }
-        });
+        }
+
+        inputElement.addEventListener('copy', handleCopyOrCut);
+        inputElement.addEventListener('cut', handleCopyOrCut);
 
         inputElement.addEventListener('paste', function(event) {
             event.preventDefault();
@@ -583,6 +706,7 @@ define([
             .append(icon)
             .append(dispValue);
 
+        console.log("created bubble");
         return $bubble;
     }
 
@@ -601,7 +725,13 @@ define([
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
             return $('<span>').text(xml.normalize(output)).html();
         }
-        return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
+        // return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
+        const m = $('<div>')
+            .append(document.createTextNode(ZERO_WIDTH_SPACE))
+            .append(makeBubble(form, xpath).attr(attrs))
+            .append(document.createTextNode(ZERO_WIDTH_SPACE))
+            .html();
+        return m;
     }
 
     /**
@@ -682,7 +812,8 @@ define([
         function bubble(hashtag) {
             return makeBubble(form, hashtag).prop('outerHTML');
         }
-        return transform(text, bubble, true);
+        const transformed = transform(text, bubble, true);
+        return transformed;
     }
 
     function unwrapBubbles(text, form, isExpression) {
@@ -790,6 +921,7 @@ define([
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
                    .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
+                   .replace(/(\u200B)/ig, "")
 
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
@@ -973,6 +1105,7 @@ define([
         bubbleOutputs: bubbleOutputs,
         sanitizeInput: sanitizeInput,
         editor: editor,
+        htmlToFrament: htmlToFrament,
         fromRichText: fromRichText,
         toRichText: toRichText,
         isInvalid: isInvalid,

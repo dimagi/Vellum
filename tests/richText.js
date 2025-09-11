@@ -133,6 +133,7 @@ define([
 
     function wrapWithDiv(el) { return $('<div>').append(el); }
     function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
+    function wrapWithDivPZwsp(el) { return wrapWithDiv($('<p>').text('\u200b').append(el).append('\u200b')); }
     function html(value) { return wrapWithDiv(value).html(); }
 
     function setupGlobalForm(done) {
@@ -179,18 +180,17 @@ define([
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
                     const richTextText = richText.toRichText(val[0], form, opts);
-                    assert.strictEqual(
-                        richTextText,
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html()
-                    );
+                    const expectedHtml = wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                    console.log(`actual: ${richTextText}, expected: ${expectedHtml}`);
+                    assert.strictEqual(richTextText, expectedHtml);
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     const richTextText = richText.toRichText(outputValueTemplateFn(val[0]), form);
-                    assert.strictEqual(
-                        richTextText,
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html()
-                    );
+
+                    const expectedHtml = wrapWithDivPZwsp(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                    console.log(`actual: ${richTextText}, expected: ${expectedHtml}`);
+                    assert.strictEqual(richTextText, expectedHtml);
                 });
             });
         });
@@ -214,7 +214,7 @@ define([
                     const richTextText = richText.toRichText(outputValueTemplateFn(val.xmlValue), form);
                     assert.equal(
                         richTextText,
-                        wrapWithDivP(makeBubble(
+                        wrapWithDivPZwsp(makeBubble(
                             val.valueInBubble,
                             val.bubbleDispValue,
                             val.icon,
@@ -350,9 +350,9 @@ define([
         describe("convert value with output and escaped HTML", function () {
             var items = [
                     ['<h1><output value="#form/text" /></h1>',
-                     '&lt;h1&gt;{text}&lt;/h1&gt;'],
+                     '&lt;h1&gt;​{text}​&lt;/h1&gt;'],
                     ['<output value="#form/text" /> <tag /> <output value="#form/othertext" />',
-                     '{text} &lt;tag /&gt; {othertext}'],
+                     '​{text}​ &lt;tag /&gt; ​{othertext}​'],
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                     ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
@@ -469,7 +469,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertExpression("#form/text");
-                    assert.equal(editor.getValue(), "one" + output + "  two");
+                    assert.equal(editor.getValue(), "one" + output + " two");
                     done();
                 });
             });
@@ -480,7 +480,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertOutput(output);
-                    assert.equal(editor.getValue(), "one" + output + "  two");
+                    assert.equal(editor.getValue(), "one" + output + " two");
                     done();
                 });
             });
@@ -490,7 +490,7 @@ define([
                 editor.setValue(output, function () {
                     assert.equal(editor.getValue(), output);
                     var copyVal = input[0].innerHTML;
-                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
+                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal);
                     exprInput[0].innerHTML = copyVal;
                     assert.equal(exprEditor.getValue(), "#form/text");
                     done();
@@ -501,7 +501,7 @@ define([
                 exprEditor.setValue("#form/text", function () {
                     assert.equal(exprEditor.getValue(), "#form/text");
                     var copyVal = exprInput[0].innerHTML;
-                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
+                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal);
                     input[0].innerHTML = copyVal;
                     assert.equal(editor.getValue(), '<output value="#form/text" />');
                     done();
@@ -521,16 +521,16 @@ define([
                 };
             }
             var argsets = [
-                ["= two", 0, "#form/text = two"],
-                ["one two", 3, "#invalid/xpath one`#form/text`  two"],
-                ["one two", 4, "#invalid/xpath one `#form/text` two"],
-                ["one\n\ntwo", 3, "#invalid/xpath one`#form/text` \n\ntwo"],
+                [" = two", 0, "#form/text = two"],
+                ["one two", 3, "#invalid/xpath one`#form/text` two"],
+                ["one two", 4, "#invalid/xpath one `#form/text`two"],
+                ["one\n\ntwo", 3, "#invalid/xpath one`#form/text`\n\ntwo"],
                 // TODO updated select does not count additional p tags right
                 // ["one\n\ntwo", 4, "#invalid/xpath one\n`#form/text` \ntwo"],
-                ["one``two", 4, "#invalid/xpath one```#form/text` ``two"],
-                ["`one  two", 5, "#invalid/xpath ``one `#form/text`  two"],
+                ["one``two", 4, "#invalid/xpath one```#form/text```two"],
+                ["`one  two", 5, "#invalid/xpath ``one `#form/text` two"],
                 // end padding added to work around bug in exprEditor.select(i)
-                ["one =  ", 6, "one = #form/text  "],
+                ["one =  ", 6, "one = #form/text "],
                 // TODO I think exprEditor.select(i) is breaking this one
                 //["one\n\ntwo", 5, "#invalid/xpath one\n\n`#form/text` two"],
             ];
@@ -553,11 +553,12 @@ define([
                 it("should make bubbles on converting to rich text: " + repr, function () {
                     var text = richText.toRichText(result, form, {isExpression: true}),
                         bubble = makeBubble('#form/text', 'text', icon('fcc-fd-text'), true),
-                        expected = (expr.slice(0, i) + html(bubble) + " " + expr.slice(i))
-                            .replace(/  $/, "")  // HACK for "one =  "
+                        expected = (expr.slice(0, i) + html(bubble) + expr.slice(i)),
+                        expected2 = expected
+                            .replace(/ $/, "")  // HACK for "one =  "
                             .replace(/  /g, " &nbsp;")
                             .replace(/\n/g, "</p><p>");
-                    assert.equal(removeSpanId(text), "<p>" + expected + "</p>");
+                    assert.equal(removeSpanId(text), "<p>" + expected2 + "</p>");
                 });
             }));
         });
@@ -970,5 +971,43 @@ define([
                 });
             });
         });
+    });
+
+    describe("htmlToFrament", function() {
+        it("should convert a single tag", function() {
+            var html = '<p>one</p>';
+            var fragment = richText.htmlToFrament(html);
+            const div = document.createElement('div');
+            div.appendChild(fragment);
+            assert.equal(div.innerHTML, html);
+        });
+
+        it("should mark spans as contenteditable=false", function() {
+            var html = '<span contenteditable="false">one</span>';
+            var fragment = richText.htmlToFrament('<span>one</span>');
+            const div = document.createElement('div');
+            div.appendChild(fragment);
+            assert.equal(div.innerHTML, html);
+        });
+
+        it("should convert mulitple tags", function() {
+            var html = '<p>one</p><span contenteditable="false">one</span>';
+            var fragment = richText.htmlToFrament('<p>one</p><span>one</span>');
+            const div = document.createElement('div');
+            div.appendChild(fragment);
+            assert.equal(div.innerHTML, html);
+        });
+
+        it("should work with zwsp", function() {
+            var htmlInput = '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​';
+            var fragment = richText.htmlToFrament(htmlInput);
+            const div = document.createElement('div');
+            div.append(fragment);
+
+            assert.equal(div.childNodes.length, 3);
+            assert.equal(div.innerHTML, '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​');
+        });
+
+
     });
 });

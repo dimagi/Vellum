@@ -38,6 +38,26 @@ define([], function () {
             return true;
         },
         /**
+         * Peeks at the last action without removing it from the undo stack.
+         *
+         * @returns {Object} The last action item.
+         */
+        peek: function (callback) {
+            let result = null;
+            if (this.undoItems.length > 0) {
+                result = this.undoItems[this.undoItems.length - 1];
+            }
+            if (callback && typeof callback === 'function') {
+                this.isUpdating = true;
+                try {
+                    callback(result);
+                } finally {
+                    this.lastPushTime = null;
+                    this.isUpdating = false;
+                }
+            }
+        },
+        /**
          * Undoes the last action by popping the most recent item from the undo stack and
          * pushes it to the redo stack.
          *
@@ -155,6 +175,22 @@ define([], function () {
                 cursor: getCursorPosition(this.element)
             };
             this.undoStack.push(item, accumulateUntilPause);
+        },
+        peek: function () {
+            let value = null;
+            this.undoStack.peek((v) => {
+                value = v;
+            });
+            return value;
+        },
+        reset: function () {
+            this.undoStack.peek((item) => {
+                if (item !== null) {
+                    this.element.innerHTML = item.value;
+                    setCursorPosition(this.element, item.cursor);
+                    // sendInputEvent(this.element);
+                }
+            });
         },
         undo: function () {
             this.undoStack.undo(item => {

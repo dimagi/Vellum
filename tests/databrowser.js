@@ -198,7 +198,7 @@ define([
                     editor = widget.input.data("ckwrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', _.debounce(function() {
-                        assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" /> ');
+                        assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" />');
                         assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                         assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                         util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_XML,
@@ -252,7 +252,7 @@ define([
                     widget.input.promise.then(function () {
                         editor.on('change', _.debounce(function() {
                             assert.equal(mug.p.labelItext.get(), '');
-                            assert.equal(mug.p.labelItext.get(null, 'hin'), '<output value="#case/dob" /> ');
+                            assert.equal(mug.p.labelItext.get(null, 'hin'), '<output value="#case/dob" />');
                             assert.equal(getInstanceId(mug.form, sessionUri), "commcaresession");
                             assert.equal(getInstanceId(mug.form, casedbUri), "casedb");
                             util.assertXmlEqual(call("createXML"), CHILD_REF_OUTPUT_VALUE_OTHER_LANG_XML,
