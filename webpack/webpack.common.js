@@ -47,17 +47,6 @@ module.exports = {
                 use: ["style-loader", "css-loader", "less-loader"],
             },
             {
-                test: /lib\/ckeditor\/ckeditor/,
-                loader: "exports-loader",
-                options: {
-                    type: "commonjs",
-                    exports: {
-                        syntax: "single",
-                        name: "CKEDITOR",
-                    },
-                },
-            },
-            {
                 test: /lib\/sha1/,
                 loader: "exports-loader",
                 options: {
@@ -101,8 +90,6 @@ module.exports = {
     ],
     resolve: {
         alias: {
-            'ckeditor': path.resolve(BASE_PATH, 'lib/ckeditor/ckeditor.js'),
-            'ckeditor-jquery': path.resolve(BASE_PATH, 'lib/ckeditor/adapters/jquery.js'),
             'diff-match-patch': path.resolve(BASE_PATH, 'lib/diff_match_patch'),
             'save-button': path.resolve(BASE_PATH, 'lib', 'SaveButton.js'),
             'jquery.vellum': path.resolve(BASE_PATH, 'src', 'main'),
