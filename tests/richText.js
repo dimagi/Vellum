@@ -795,38 +795,38 @@ define([
                     });
                 });
 
-                // it("should expand tree on click show in question list", function (done) {
-                //     util.paste([
-                //         ["id", "type", "relevantAttr"],
-                //         ["/group", "Group", "null"],
-                //         ["/group/text", "Text", "null"],
-                //         ["/text", "Text", '#form/group/text'],
-                //     ]);
-                //     var group = util.getMug("group");
-                //     util.collapseGroup(group);
-                //     util.clickQuestion("text");
-                //     var widget = util.getWidget('property-relevantAttr');
-                //     widget.input.promise.then(function () {
-                //         var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
-                //         assert(bubble.length, "No bubbles detected");
-                //         $(document).one('shown.bs.popover', function() {
-                //             try {
-                //                 var $popover = $('.popover-content:last');
-                //                 var $link = $popover.find("a");
-                //                 assert.strictEqual($(".jstree-hovered").length, 0);
-                //                 assert($link.length);
-                //                 $link.click();
-                //                 assert.strictEqual($(".jstree-hovered").length, 1);
-                //                 done();
-                //             } finally {
-                //                 $(".popover").remove();
-                //             }
-                //         });
-                //         setTimeout(function() {
-                //             bubble.mouseenter();
-                //         }, editorUpDelay);
-                //     });
-                // });
+                it("should expand tree on click show in question list", function (done) {
+                    util.paste([
+                        ["id", "type", "relevantAttr"],
+                        ["/group", "Group", "null"],
+                        ["/group/text", "Text", "null"],
+                        ["/text", "Text", '#form/group/text'],
+                    ]);
+                    var group = util.getMug("group");
+                    util.collapseGroup(group);
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-relevantAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                var $link = $popover.find("a");
+                                assert.strictEqual($(".jstree-hovered").length, 0);
+                                assert($link.length);
+                                $link.click();
+                                assert.strictEqual($(".jstree-hovered").length, 1);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
 
                 it("should show case property description on popover", function (done) {
                     util.loadXML();
@@ -970,7 +970,7 @@ define([
         });
     });
 
-    describe("htmlToFrament", function() {
+    describe("htmlToFragment", function() {
         it("should convert a single tag", function() {
             var html = '<p>one</p>';
             var fragment = richText.htmlToFragment(html);

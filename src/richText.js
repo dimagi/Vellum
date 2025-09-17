@@ -1101,7 +1101,7 @@ define([
         bubbleOutputs: bubbleOutputs,
         sanitizeInput: sanitizeInput,
         editor: editor,
-        htmlToFrament: htmlToFragment,
+        htmlToFragment: htmlToFragment,
         fromRichText: fromRichText,
         toRichText: toRichText,
         isInvalid: isInvalid,
