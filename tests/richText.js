@@ -181,15 +181,12 @@ define([
                 it("from text to html: " + val[0], function() {
                     const richTextText = richText.toRichText(val[0], form, opts);
                     const expectedHtml = wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
-                    console.log(`actual: ${richTextText}, expected: ${expectedHtml}`);
                     assert.strictEqual(richTextText, expectedHtml);
                 });
 
                 it("from text to html with output value: " + val[0], function() {
                     const richTextText = richText.toRichText(outputValueTemplateFn(val[0]), form);
-
                     const expectedHtml = wrapWithDivPZwsp(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
-                    console.log(`actual: ${richTextText}, expected: ${expectedHtml}`);
                     assert.strictEqual(richTextText, expectedHtml);
                 });
             });
@@ -976,7 +973,7 @@ define([
     describe("htmlToFrament", function() {
         it("should convert a single tag", function() {
             var html = '<p>one</p>';
-            var fragment = richText.htmlToFrament(html);
+            var fragment = richText.htmlToFragment(html);
             const div = document.createElement('div');
             div.appendChild(fragment);
             assert.equal(div.innerHTML, html);
@@ -984,7 +981,7 @@ define([
 
         it("should mark spans as contenteditable=false", function() {
             var html = '<span contenteditable="false">one</span>';
-            var fragment = richText.htmlToFrament('<span>one</span>');
+            var fragment = richText.htmlToFragment('<span>one</span>');
             const div = document.createElement('div');
             div.appendChild(fragment);
             assert.equal(div.innerHTML, html);
@@ -992,7 +989,7 @@ define([
 
         it("should convert mulitple tags", function() {
             var html = '<p>one</p><span contenteditable="false">one</span>';
-            var fragment = richText.htmlToFrament('<p>one</p><span>one</span>');
+            var fragment = richText.htmlToFragment('<p>one</p><span>one</span>');
             const div = document.createElement('div');
             div.appendChild(fragment);
             assert.equal(div.innerHTML, html);
@@ -1000,7 +997,7 @@ define([
 
         it("should work with zwsp", function() {
             var htmlInput = '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​';
-            var fragment = richText.htmlToFrament(htmlInput);
+            var fragment = richText.htmlToFragment(htmlInput);
             const div = document.createElement('div');
             div.append(fragment);
 

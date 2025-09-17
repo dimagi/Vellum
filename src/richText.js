@@ -58,7 +58,7 @@ define([
     var INVALID_PREFIX = "#invalid/xpath ";
     var ZERO_WIDTH_SPACE = "\u200B";
 
-    function htmlToFrament(html) {
+    function htmlToFragment(html) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const fragment = document.createDocumentFragment();
@@ -149,7 +149,7 @@ define([
                     range.setStartAfter(leadingSpaceNode);
                 }
 
-                const fragment = htmlToFrament(content);
+                const fragment = htmlToFragment(content);
                 range.insertNode(fragment);
                 range.collapse(false);
 
@@ -293,8 +293,6 @@ define([
                         nextNode.remove();
                     }
                 }
-
-                console.log('span removed');
                 span.remove();
             });
             undoStack.push();
@@ -706,7 +704,6 @@ define([
             .append(icon)
             .append(dispValue);
 
-        console.log("created bubble");
         return $bubble;
     }
 
@@ -1105,7 +1102,7 @@ define([
         bubbleOutputs: bubbleOutputs,
         sanitizeInput: sanitizeInput,
         editor: editor,
-        htmlToFrament: htmlToFrament,
+        htmlToFrament: htmlToFragment,
         fromRichText: fromRichText,
         toRichText: toRichText,
         isInvalid: isInvalid,
