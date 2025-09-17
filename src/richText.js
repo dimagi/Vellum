@@ -1018,9 +1018,9 @@ define([
                 title = util.escape(hashtag),
                 labelMug = widget.mug.form.getMugByPath(xpath),
                 description = labelMug && labelMug.p.labelItext ?
-                    labelMug.p.labelItext.get() : "";
-                isDate = labelMug && labelMug.__className.indexOf("Date") === 0;
-                dateFormatID = util.get_guid();
+                    labelMug.p.labelItext.get() : "",
+                isDate = labelMug && labelMug.__className.indexOf("Date") === 0,
+                dateFormatID = util.get_guid(),
                 getTitle = function () {
                     var title_ = title,
                         format = $element.attr("data-date-format");
