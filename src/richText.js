@@ -54,14 +54,14 @@ define([
     analytics,
     undo
 ){
-    var FORM_REF_REGEX = /^#form\//;
-    var INVALID_PREFIX = "#invalid/xpath ";
-    var ZERO_WIDTH_SPACE = "\u200B";
+    var FORM_REF_REGEX = /^#form\//,
+        INVALID_PREFIX = "#invalid/xpath ",
+        ZERO_WIDTH_SPACE = "\u200B";
 
     function htmlToFragment(html) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const fragment = document.createDocumentFragment();
+        const parser = new DOMParser(),
+              doc = parser.parseFromString(html, 'text/html'),
+              fragment = document.createDocumentFragment();
 
         Array.from(doc.body.childNodes).forEach(child => {
             if (child.tagName === 'SPAN') {
@@ -176,8 +176,8 @@ define([
         var getWidget = require('vellum/widgets').util.getWidget;
 
         function onVellumWidgetSet(element, callback, attempts = 0) {
-            const maxAttempts = 5;
-            const intervalTime = 500;
+            const maxAttempts = 5,
+                  intervalTime = 500;
 
             if (attempts < maxAttempts) {
                 var widget = getWidget($(element));
@@ -196,9 +196,9 @@ define([
 
         const undoStack = new undo.ElementUndoStack(inputElement);
         inputElement.addEventListener('keydown', function(e) {
-            const key = e.key;
-            const ctrlKey = e.ctrlKey;
-            const metaKey = e.metaKey;
+            const key = e.key,
+                  ctrlKey = e.ctrlKey,
+                  metaKey = e.metaKey;
             if ((key === 'z' || key === 'Z') &&
                     (ctrlKey || metaKey)) {
                 e.preventDefault();
@@ -223,8 +223,8 @@ define([
             const range = selection.getRangeAt(0);
             if (!range.collapsed) return; // Only check when cursor is a point, not a selection
 
-            const node = range.startContainer;
-            const offset = range.startOffset;
+            const node = range.startContainer,
+                  offset = range.startOffset;
 
             if (node.nodeType === Node.TEXT_NODE) {
                 // Check if cursor is at the end of a text node that ends with ZWSP
@@ -263,23 +263,23 @@ define([
         }
 
         inputElement.addEventListener('input', function(e) {
-            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
-            const spansToRemove = [];
+            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]'),
+                  spansToRemove = [];
 
             nonEditableSpans.forEach(span => {
-                const prevNode = span.previousSibling;
-                const nextNode = span.nextSibling;
+                const prevNode = span.previousSibling,
+                      nextNode = span.nextSibling;
 
-                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== 3 || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE);
-                const zwspAfterMissing = !nextNode || nextNode.nodeType !== 3 || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
+                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== 3 || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE),
+                      zwspAfterMissing = !nextNode || nextNode.nodeType !== 3 || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
                 if (zwspBeforeMissing || zwspAfterMissing) {
                     spansToRemove.push(span);
                 }
             });
 
             spansToRemove.forEach(span => {
-                const prevNode = span.previousSibling;
-                const nextNode = span.nextSibling;
+                const prevNode = span.previousSibling,
+                      nextNode = span.nextSibling;
 
                 if (prevNode && prevNode.nodeType === 3 && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
                     prevNode.nodeValue = prevNode.nodeValue.slice(0, -1);
@@ -327,8 +327,8 @@ define([
                         callback(fromRichText(inputElement.innerHTML));
                     });
                 } else {
-                    var data = inputElement.innerHTML;
-                    var value = fromRichText(data, form, options.isExpression);
+                    var data = inputElement.innerHTML,
+                        value = fromRichText(data, form, options.isExpression);
                     return value;
                 }
             },
@@ -336,11 +336,10 @@ define([
                 var richTextValue = toRichText(value, form, options);
                 inputElement.innerHTML = richTextValue;
 
-                // Add ZWSP around non-contenteditable spans
                 const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
                 nonEditableSpans.forEach(span => {
-                    const prevNode = span.previousSibling;
-                    const nextNode = span.nextSibling;
+                    const prevNode = span.previousSibling,
+                          nextNode = span.nextSibling;
                     if (!prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
                         span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span);
                     }
@@ -416,8 +415,8 @@ define([
             const selection = window.getSelection();
             let selectedText = '';
             if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const container = document.createElement('div');
+                const range = selection.getRangeAt(0),
+                      container = document.createElement('div');
                 container.appendChild(range.cloneContents());
                 selectedText = fromRichText(container.innerHTML);
 
@@ -689,20 +688,20 @@ define([
             return {classes: ['label-datanode-unknown', 'fcc fcc-help']};
         }
 
-        var xpathInfo = _parseXPath(xpath, form);
-        var bubbleClasses = xpathInfo.classes[0];
-        var iconClasses = xpathInfo.classes[1];
-        var dispValue = getBubbleDisplayValue(xpath, form.xpath);
-        var icon = $('<i>').addClass(iconClasses).html('&nbsp;');
-        var uniqueId = 'bubble-' + Math.random().toString(36).slice(2, 10);
-        var $bubble = $('<span>')
-            .addClass('label label-datanode ' + bubbleClasses)
-            .attr('data-value', xpath)
-            .attr('contenteditable', 'false')
-            .attr('data-toggle', 'popover')
-            .attr('id', uniqueId)
-            .append(icon)
-            .append(dispValue);
+        var xpathInfo = _parseXPath(xpath, form),
+            bubbleClasses = xpathInfo.classes[0],
+            iconClasses = xpathInfo.classes[1],
+            dispValue = getBubbleDisplayValue(xpath, form.xpath),
+            icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
+            uniqueId = 'bubble-' + Math.random().toString(36).slice(2, 10),
+            $bubble = $('<span>')
+                .addClass('label label-datanode ' + bubbleClasses)
+                .attr('data-value', xpath)
+                .attr('contenteditable', 'false')
+                .attr('data-toggle', 'popover')
+                .attr('id', uniqueId)
+                .append(icon)
+                .append(dispValue);
 
         return $bubble;
     }
@@ -1006,34 +1005,34 @@ define([
     }
 
     function createPopover(element) {
-        var $element = $(element);
-        var $widget = $element.closest('.form-control');
-        var xpath = element.getAttribute('data-value');
-        var getWidget = require('vellum/widgets').util.getWidget;
-        // TODO find out why widget is sometimes null (tests only?)
-        var widget = getWidget($widget);
+        var $element = $(element),
+            $widget = $element.closest('.form-control'),
+            xpath = element.getAttribute('data-value'),
+            getWidget = require('vellum/widgets').util.getWidget,
+            // TODO find out why widget is sometimes null (tests only?)
+            widget = getWidget($widget);
         if (widget) {
-            var isFormRef = FORM_REF_REGEX.test(xpath);
-            var displayId = element.textContent.trim();
-            var hashtag = widget.mug.form.normalizeHashtag(xpath);
-            var title = util.escape(hashtag);
-            var labelMug = widget.mug.form.getMugByPath(xpath);
-            var description = labelMug && labelMug.p.labelItext ?
-                labelMug.p.labelItext.get() : "";
-            var isDate = labelMug && labelMug.__className.indexOf("Date") === 0;
-            var dateFormatID = util.get_guid();
-            var getTitle = function () {
-                var title_ = title,
-                    format = $element.attr("data-date-format");
-                if (isDate || format) {
-                    title_ += date_format_popover({
-                        guid: dateFormatID,
-                        text: util.escape(getHumanReadableDateFormat(format)),
-                    });
-                }
-                return '<h3>' + util.escape(displayId) + '</h3>' +
-                    '<div class="text-muted">' + title_ + '</div>';
-            };
+            var isFormRef = FORM_REF_REGEX.test(xpath),
+                displayId = element.textContent.trim(),
+                hashtag = widget.mug.form.normalizeHashtag(xpath),
+                title = util.escape(hashtag),
+                labelMug = widget.mug.form.getMugByPath(xpath),
+                description = labelMug && labelMug.p.labelItext ?
+                    labelMug.p.labelItext.get() : "";
+                isDate = labelMug && labelMug.__className.indexOf("Date") === 0;
+                dateFormatID = util.get_guid();
+                getTitle = function () {
+                    var title_ = title,
+                        format = $element.attr("data-date-format");
+                    if (isDate || format) {
+                        title_ += date_format_popover({
+                            guid: dateFormatID,
+                            text: util.escape(getHumanReadableDateFormat(format)),
+                        });
+                    }
+                    return '<h3>' + util.escape(displayId) + '</h3>' +
+                        '<div class="text-muted">' + title_ + '</div>';
+                };
             if (!labelMug) {
                 var datasources = widget.mug.form.vellum.datasources;
                 description = datasources.getNode(hashtag, {}).description || "";
