@@ -516,6 +516,10 @@ define([
                         return child;
                     }
                     inner = null;
+                    // After exhausting children of a <p> tag, return a special node for the line break
+                    if (children[i - 1] && children[i - 1].nodeName.toLowerCase() === "p") {
+                        return {node: children[i - 1], length: 1, isText: false};
+                    }
                 }
                 if (i >= count) {
                     return null;

@@ -522,8 +522,7 @@ define([
                 ["one two", 3, "#invalid/xpath one`#form/text` two"],
                 ["one two", 4, "#invalid/xpath one `#form/text`two"],
                 ["one\n\ntwo", 3, "#invalid/xpath one`#form/text`\n\ntwo"],
-                // TODO updated select does not count additional p tags right
-                // ["one\n\ntwo", 4, "#invalid/xpath one\n`#form/text` \ntwo"],
+                ["one\n\ntwo", 4, "#invalid/xpath one\n`#form/text`\ntwo"],
                 ["one``two", 4, "#invalid/xpath one```#form/text```two"],
                 ["`one  two", 5, "#invalid/xpath ``one `#form/text` two"],
                 // end padding added to work around bug in exprEditor.select(i)
