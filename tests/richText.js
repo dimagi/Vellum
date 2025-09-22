@@ -1,3 +1,5 @@
+const { data } = require("jquery");
+
 /*
  * expected structure of a richText widget:
  *
@@ -512,6 +514,41 @@ define([
                 assert.equal(editor.getValue(), 'A');
             });
 
+            function assertCopy($editor, value, callback) {
+                const dataTransfer = new DataTransfer();
+                const clipboardEvent = new ClipboardEvent('copy', {
+                    clipboardData: dataTransfer,
+                    bubbles: true,
+                    cancelable: true
+                });
+                $editor[0].dispatchEvent(clipboardEvent);
+
+                assert.equal(dataTransfer.getData('text/plain'), value);
+                assert.strictEqual(dataTransfer.getData("text/html"), '');
+                callback();
+            }
+
+            var TEST_LABEL = 'Weight: <output value="#form/text" /> grams',
+                TEST_XPATH = "if(today() + (#case/dob - 3), #form/text, 0)";
+
+            it("should copy output tag from rich text editor", function (done) {
+                editor.setValue(TEST_LABEL, function () {
+                    editor.select(6, 4);
+                    assertCopy(input, ': <output value="#form/text" />', function () {
+                        done();
+                    });
+                });
+            });
+
+            it("should copy expression with hashtags from expression editor", function (done) {
+                exprEditor.setValue(TEST_XPATH, function () {
+                    exprEditor.select(11, 5);
+                    assertCopy(exprInput, "+ (#case/dob", function () {
+                        done();
+                    });
+                });
+            });
+
             function applyArgs(func) {
                 return function (args) {
                     return func.apply(this, args);
@@ -602,6 +639,20 @@ define([
                     mug.p.relevantAttr = '';
                     util.assertXmlEqual(call('createXML'), BURPEE_XML);
                 });
+
+                // it("cursor should be at end of input on focus", function () {
+                //     var editor = richText.editor(widget.input),
+                //         value = 'testing cursor';
+                //     widget.setValue(value);
+                //     // Make sure focus is elsewhere, then focus on the rich text input
+                //     // editor.on('instanceReady', function() {
+                //     $('[name=property-nodeID]').focus();
+                //     editor.focus();
+                //     var selection = editor.getSelection(true);
+                //     assert.strictEqual(selection.getNative().focusOffset, value.length);
+                //     // });
+                // });
+
 
                 it("should change output ref to output value", function () {
                     util.loadXML(OUTPUT_REF_XML);

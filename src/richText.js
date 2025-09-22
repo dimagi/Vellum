@@ -418,10 +418,16 @@ define([
                 const range = selection.getRangeAt(0),
                       container = document.createElement('div');
                 container.appendChild(range.cloneContents());
-                selectedText = fromRichText(container.innerHTML);
+                selectedText = fromRichText(container.innerHTML, form, options.isExpression);
 
                 if (e.type === 'cut') {
                     range.deleteContents();
+                }
+                if (isInvalid(selectedText)) {
+                    selectedText = escapedHashtags.transform(
+                        selectedText.slice(INVALID_PREFIX.length),
+                        function (v) { return v; }
+                    );
                 }
             }
             if (e.clipboardData) {
