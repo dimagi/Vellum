@@ -1,5 +1,3 @@
-const { data } = require("jquery");
-
 /*
  * expected structure of a richText widget:
  *
@@ -31,7 +29,7 @@ define([
     'tests/utils',
     'vellum/richText',
     'vellum/javaRosa/util',
-    'vellum/escapedHashtags',
+
     'static/richText/burpee.xml',
     'static/richText/output-ref.xml',
     'static/richText/output-value.xml',
@@ -42,7 +40,7 @@ define([
     util,
     richText,
     javaRosa,
-    escapedHashtags,
+
     BURPEE_XML,
     OUTPUT_REF_XML,
     OUTPUT_VALUE_XML
