@@ -270,8 +270,8 @@ define([
                 const prevNode = span.previousSibling,
                       nextNode = span.nextSibling;
 
-                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== 3 || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE),
-                      zwspAfterMissing = !nextNode || nextNode.nodeType !== 3 || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
+                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE),
+                      zwspAfterMissing = !nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
                 if (zwspBeforeMissing || zwspAfterMissing) {
                     spansToRemove.push(span);
                 }
@@ -281,13 +281,13 @@ define([
                 const prevNode = span.previousSibling,
                       nextNode = span.nextSibling;
 
-                if (prevNode && prevNode.nodeType === 3 && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
+                if (prevNode && prevNode.nodeType === Node.TEXT_NODE && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
                     prevNode.nodeValue = prevNode.nodeValue.slice(0, -1);
                     if (prevNode.length === 0) {
                         prevNode.remove();
                     }
                 }
-                if (nextNode && nextNode.nodeType === 3 && nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
+                if (nextNode && nextNode.nodeType === Node.TEXT_NODE && nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
                     nextNode.nodeValue = nextNode.nodeValue.slice(1);
                     if (nextNode.length === 0) {
                         nextNode.remove();
