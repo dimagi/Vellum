@@ -188,7 +188,6 @@ define([], function () {
                 if (item !== null) {
                     this.element.innerHTML = item.value;
                     setCursorPosition(this.element, item.cursor);
-                    // sendInputEvent(this.element);
                 }
             });
         },

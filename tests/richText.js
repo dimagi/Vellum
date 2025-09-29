@@ -347,9 +347,9 @@ define([
         describe("convert value with output and escaped HTML", function () {
             var items = [
                     ['<h1><output value="#form/text" /></h1>',
-                     '&lt;h1&gt;​{text}​&lt;/h1&gt;'],
+                     '&lt;h1&gt;​{text}​&lt;/h1&gt;'], // string contains zero width spaces
                     ['<output value="#form/text" /> <tag /> <output value="#form/othertext" />',
-                     '​{text}​ &lt;tag /&gt; ​{othertext}​'],
+                     '​{text}​ &lt;tag /&gt; ​{othertext}​'], // string contains zero width spaces
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                     ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
@@ -487,7 +487,7 @@ define([
                 editor.setValue(output, function () {
                     assert.equal(editor.getValue(), output);
                     var copyVal = input[0].innerHTML;
-                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal);
+                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal); // string contains zero width space
                     exprInput[0].innerHTML = copyVal;
                     assert.equal(exprEditor.getValue(), "#form/text");
                     done();
@@ -498,7 +498,7 @@ define([
                 exprEditor.setValue("#form/text", function () {
                     assert.equal(exprEditor.getValue(), "#form/text");
                     var copyVal = exprInput[0].innerHTML;
-                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal);
+                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal); // string contains zero width space
                     input[0].innerHTML = copyVal;
                     assert.equal(editor.getValue(), '<output value="#form/text" />');
                     done();
@@ -1044,13 +1044,13 @@ define([
         });
 
         it("should work with zwsp", function() {
-            var htmlInput = '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​';
+            var htmlInput = '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​'; // string contains zero width space
             var fragment = richText.htmlToFragment(htmlInput);
             const div = document.createElement('div');
             div.append(fragment);
 
             assert.equal(div.childNodes.length, 3);
-            assert.equal(div.innerHTML, '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​');
+            assert.equal(div.innerHTML, '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​'); // string contains zero width space
         });
 
 
