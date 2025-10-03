@@ -592,7 +592,9 @@ define([
             for (var i = messages.length - 1; i >= 0; i--) {
                 var obj = messages[i];
                 if (obj.key === msg.key) {
-                    if (obj.level === msg.level && obj.message === msg.message) {
+                    const objMessage = this.getMessageText(obj.message)
+                    const msgMessage = this.getMessageText(msg.message);
+                    if (obj.level === msg.level && objMessage === msgMessage) {
                         // message already exists (no change)
                         return false;
                     }
@@ -668,6 +670,9 @@ define([
         isEmpty: function() {
             return _.isEmpty(this.messages);
         },
+        getMessageText: function(message) {
+            return message.hasOwnProperty("html") ? message.html : message;
+        }
     };
 
     function MugProperties (options) {

@@ -801,13 +801,20 @@ define([
         var $messages = $(),
             seen = {};
         mug.messages.each(path, function (msg) {
-            if (seen.hasOwnProperty(msg.message)) { return; }
-            seen[msg.message] = true;
-            var html = $(widget_control_message({
-                    msg: msg,
-                    html: /\n/.test(msg.message) ?
-                            util.markdown(msg.message) : ""
-                }));
+            const messageKey = mug.messages.getMessageText(msg.message);
+            if (seen.hasOwnProperty(messageKey)) { return; }
+            seen[messageKey] = true;
+            let htmlMessage = "";
+            if (msg.message.hasOwnProperty("html")) {
+                htmlMessage = msg.message.html;
+            } else if (/n/.test(msg.message)) {
+                // html swallows newlines by default, so treat these messages as HTML to embed newline objects
+                htmlMessage = util.markdown(msg.message);
+            }
+
+            context = {msg: msg, html: htmlMessage};
+            const html = $(widget_control_message(context));
+
             html.find("button.close").click(function () {
                 mug.dropMessage(path, msg.key);
                 if (msg.key === "mug-nodeID-changed-warning") {
