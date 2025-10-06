@@ -97,6 +97,8 @@ we recommend [Option 3](https://chromium.googlesource.com/chromium/src/+/main/do
 export CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox
 ```
 
+The testserver will run all tests by default. If you wish to run a subset of tests (or debug one specific test), append a `?grep=<pattern>` to the URL, such as <http://localhost:${VELLUM_PORT:-8088}/?grep=Vellum%20core>, which will test against all of the "Vellum core" tests. The same techniques described below for running specific tests can be used here.
+
 
 Commands to run tests headlessly (make sure `npm run testserver` is called in the background):
 ```
