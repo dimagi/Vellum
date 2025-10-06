@@ -671,7 +671,7 @@ define([
             return _.isEmpty(this.messages);
         },
         getMessageText: function(message) {
-            return (message && message.hasOwnProperty("html")) ? message.html : message;
+            return (message && message.hasOwnProperty("markdown")) ? message.markdown: message;
         }
     };
 

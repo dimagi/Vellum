@@ -71,17 +71,17 @@ define([
             chai.expect(messageDiv.html()).to.include("This is &lt;b&gt;bold&lt;/b&gt;");
         });
 
-        it("should preserve explicit HTML elements within a message", function () {
+        it("should respect markdown content", function () {
             util.loadXML("");
             const text = util.addQuestion("Text", "text"),
-                msg = {html: "This is <b>bold</b>"};
+                msg = {markdown: "Click [here](testurl)"};
             text.addMessage(null, {
                 key: "testing-1-2-3",
                 level: "error",
                 message: msg
             });
             const messageDiv = $("fieldset[data-slug='main'] + .messages");
-            chai.expect(messageDiv.html()).to.include(msg.html);
+            chai.expect(messageDiv.html()).to.include('Click <a href="testurl" target="_blank">here</a>');
         });
 
         it("should load form with save button in 'saved' state", function (done) {

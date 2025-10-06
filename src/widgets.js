@@ -805,8 +805,8 @@ define([
             if (seen.hasOwnProperty(messageKey)) { return; }
             seen[messageKey] = true;
             let htmlMessage = "";
-            if (msg.message.hasOwnProperty("html")) {
-                htmlMessage = msg.message.html;
+            if (msg.message.hasOwnProperty("markdown")) {
+                htmlMessage = util.markdown(msg.message.markdown);
             } else if (/n/.test(msg.message)) {
                 // html swallows newlines by default, so treat these messages as HTML to embed newline objects
                 htmlMessage = util.markdown(msg.message);
