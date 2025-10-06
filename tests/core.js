@@ -60,8 +60,8 @@ define([
 
         it("should escape generic messages", function () {
             util.loadXML("");
-            const text = util.addQuestion("Text", "text");
-            const msg = "This is <b>bold</b>";
+            const text = util.addQuestion("Text", "text"),
+                msg = "This is <b>bold</b>";
             text.addMessage(null, {
                 key: "testing-1-2-3",
                 level: "error",
@@ -73,14 +73,14 @@ define([
 
         it("should preserve explicit HTML elements within a message", function () {
             util.loadXML("");
-            const text = util.addQuestion("Text", "text");
-            const msg = {html: "This is <b>bold</b>"};
+            const text = util.addQuestion("Text", "text"),
+                msg = {html: "This is <b>bold</b>"};
             text.addMessage(null, {
                 key: "testing-1-2-3",
                 level: "error",
                 message: msg
             });
-            const messageDiv = $("fieldset[data-slug='main'] + .messages")
+            const messageDiv = $("fieldset[data-slug='main'] + .messages");
             chai.expect(messageDiv.html()).to.include(msg.html);
         });
 
