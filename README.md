@@ -85,6 +85,20 @@ $ chromium-browser http://localhost:${VELLUM_PORT:-8088}
 ### Running tests
 
 You can run tests in the browser using the testserver described above.
+For best results, we recommend using a Chromium browser.
+Firefox currently has issues when running all tests.
+
+Additionally, if you are running Ubuntu 23.10+, you may run into issues running tests headlessly.
+See [the Chromium Docs](https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md) for background. While any of the approaches outlined there will work,
+we recommend [Option 3](https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md#option-3_the-safest-way):
+- Download and install Chrome from [the official Chrome website](https://www.google.com/chrome/dr/download/)
+- add the following to your `.bashrc`:
+```
+export CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox
+```
+
+The testserver will run all tests by default. If you wish to run a subset of tests (or debug one specific test), append a `?grep=<pattern>` to the URL, such as <http://localhost:${VELLUM_PORT:-8088}/?grep=Vellum%20core>, which will test against all of the "Vellum core" tests. The same techniques described below for running specific tests can be used here.
+
 
 Commands to run tests headlessly (make sure `npm run testserver` is called in the background):
 ```
