@@ -58,6 +58,32 @@ define([
             chai.expect(div.text()).to.include(msg);
         });
 
+        it("should escape generic messages", function () {
+            util.loadXML("");
+            const text = util.addQuestion("Text", "text"),
+                msg = "This is <b>bold</b>";
+            text.addMessage(null, {
+                key: "testing-1-2-3",
+                level: "error",
+                message: msg
+            });
+            const messageDiv = $("fieldset[data-slug='main'] + .messages");
+            chai.expect(messageDiv.html()).to.include("This is &lt;b&gt;bold&lt;/b&gt;");
+        });
+
+        it("should respect markdown content", function () {
+            util.loadXML("");
+            const text = util.addQuestion("Text", "text"),
+                msg = {markdown: "Click [here](testurl)"};
+            text.addMessage(null, {
+                key: "testing-1-2-3",
+                level: "error",
+                message: msg
+            });
+            const messageDiv = $("fieldset[data-slug='main'] + .messages");
+            chai.expect(messageDiv.html()).to.include('Click <a href="testurl" target="_blank">here</a>');
+        });
+
         it("should load form with save button in 'saved' state", function (done) {
             util.init({
                 core: {
