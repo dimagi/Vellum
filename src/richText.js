@@ -29,7 +29,7 @@
 
 (function () {
     // set CKEditor base path before loading ckeditor
-    var path = 'src/../lib/ckeditor/';
+    var path = '/src/../lib/ckeditor/';
     if (!window.CKEDITOR_BASEPATH) {
         window.CKEDITOR_BASEPATH = path;
     }
