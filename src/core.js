@@ -2577,6 +2577,14 @@ define([
         parser.parseSetValue(form, el, path);
     };
 
+    /**
+     * Extension point for plugins to add arbitrary data from the parsed xml into the form
+     *
+     * @param {Form} form - The form instance being loaded.
+     * @param xml - The parsed XML object
+     */
+    fn.performAdditionalParsing = function (form, xml) {};
+
     fn.getControlNodeAdaptorFactory = function (tagName) {
         return this.data.core.controlNodeAdaptorMap[tagName];
     };
