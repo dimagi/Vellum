@@ -1,7 +1,9 @@
 define([
     'jquery',
+    'vellum/mugs',
 ], function (
-    $
+    $,
+    mugs
 ) {
     'use strict';
 
@@ -119,6 +121,57 @@ define([
 
             const writer = new XMLCaseMappingWriter(xmlWriter);
             writer.writeCaseMappingsElement(form);
+        },
+
+        getMugTypes: function () {
+            const types = this.__callOld();
+            // never show the case management property for labels
+            types.normal.Trigger.spec.case_property = { presence: 'notallowed' };
+            return types;
+        },
+
+        getSections: function (mug) {
+            const sections = this.__callOld(mug);
+
+            if (!this.data.caseManagement.isActive) {
+                return sections;
+            }
+
+            sections.splice(1, 0, {
+                slug: 'caseManagement',
+                displayName: gettext('Case Management'),
+                properties: ['case_property'],
+                help: {
+                    title: gettext('Case Management'),
+                    text: gettext(
+                        'Saving a question as a case property makes it accessible and reuseable ' +
+                        'across your application. Case properties can be tracked and updated ' +
+                        'over time.'
+                    ),
+                    link: 'https://dimagi.atlassian.net/wiki/spaces/commcarepublic' +
+                        '/pages/2143955170/Case+Management+Overview',
+                }
+            });
+
+            return sections;
+        },
+
+        getMugSpec: function () {
+            const specs = this.__callOld();
+
+            const databindSpecs = Object.assign(specs.databind, {
+                'case_property': {
+                    visibility: 'visible',
+                    presence: 'optional',
+                    lstring: gettext('Case Property'),
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                },
+            });
+
+            specs.databind = databindSpecs;
+
+            return specs;
         },
 
     });

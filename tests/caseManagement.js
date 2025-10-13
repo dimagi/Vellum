@@ -51,6 +51,24 @@ define([
             assert.equal(mappings.children().length, 0);
         });
 
+        it("should display the case management section for generic fields", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "text");
+            const propertiesPane = document.querySelector(".fd-content-right");
+            const caseManagementElement = propertiesPane.querySelector('fieldset[data-slug="caseManagement"]');
+
+            assert.exists(caseManagementElement);
+        });
+
+        it("should hide the case management section for labels", function () {
+            util.loadXML("");
+            util.addQuestion("Trigger", "label");
+            const propertiesPane = document.querySelector(".fd-content-right");
+            const caseManagementElement = propertiesPane.querySelector('fieldset[data-slug="caseManagement"]');
+
+            assert.notExists(caseManagementElement);
+        });
+
         describe("with no case management data", function () {
             beforeEach(function () {
                 const vellum = $("#vellum").vellum("get");
@@ -76,6 +94,16 @@ define([
 
                 // ensure no mappings are created in XML
                 assert.equal(mappings.length, 0);
+            });
+
+            it ("should hide the case management section", function () {
+                util.loadXML("");
+                util.addQuestion("Text", "text");
+
+                const propertiesPane = document.querySelector('.fd-content-right');
+                const caseManagementElement = propertiesPane.querySelector('fieldset[data-slug="caseManagement"]');
+
+                assert.notExists(caseManagementElement);
             });
         });
     });
