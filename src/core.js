@@ -2628,6 +2628,14 @@ define([
 
     fn.contributeToHeadXML = function (xmlWriter, form) {};
 
+    /**
+     * Extension point for plugins to add arbitrary XML beneath the body element
+     * 
+     * @param {XMLWriter} xmlWriter - The writer, having already written the head and body elements
+     * @param {Form} form  - The form instance
+     */
+    fn.contributeToAdditionalXML = function (xmlWriter, form) {};
+
     fn.initMediaUploaderWidget = function (widget) {};
 
     fn.destroy = function () {};
