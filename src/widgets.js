@@ -75,6 +75,12 @@ define([
             // placeholder to be overridden by widgets that inherit from base
         };
 
+        widget.postRender = function () {
+            // placeholder to be overriden by widgets that inherit from base
+            // intended to allow post render configuration, such as
+            // enabling select2 functionality
+        };
+
         widget.handleChange = function () {
             widget.updateValue();
             mug.showChangedMsg = true;

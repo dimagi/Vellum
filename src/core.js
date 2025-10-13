@@ -2105,6 +2105,9 @@ define([
             var $ui = elemWidget.getUIElement();
             widgets.util.setWidget($ui, elemWidget);
             $fieldsetContent.append($ui);
+            if (elemWidget.postRender) {
+                elemWidget.postRender();
+            }
             elemWidget.refreshMessages();
         });
         return $sec;
