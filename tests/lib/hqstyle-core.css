@@ -12957,3 +12957,13 @@ nav.appmanager-content #langs select {
         opacity: 1.0
     }
 }
+
+
+/*
+Custom added without a minify script. Probably one of several
+styles needed for select2 widgets to display like HQ.
+TODO: Create a script to generate this whole file
+*/
+.select2-container {
+    width: 100% !important;
+}
