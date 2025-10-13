@@ -212,6 +212,9 @@ define(["underscore"], function (_) {
                 },
             ],
         },
+        caseManagement: {
+            properties: ['one', 'two', 'three'],
+        },
         itemset: {
             dataSourcesFilter: function (sources) {
                 return _.filter(sources, function (source) {

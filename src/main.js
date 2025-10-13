@@ -22,6 +22,7 @@ define([
     'vellum/copy-paste',
     'vellum/commander',
     'vellum/commcareConnect',
+    'vellum/caseManagement',
     'vellum/jqueryCleanup',
 ], function () {
     // adds $.vellum as a side-effect

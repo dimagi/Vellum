@@ -66,6 +66,7 @@ require(['jquery.vellum'], function () {
         'tests/bulkActions',
         'tests/undomanager',
         'tests/commcareConnect',
+        'tests/caseManagement',
     ], function ($, options) {
         var session = window.sessionStorage;
 
