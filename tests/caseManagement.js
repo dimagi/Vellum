@@ -36,6 +36,8 @@ define([
         return propertiesPane.find('fieldset[data-slug="caseManagement"]');
     }
 
+    const CASE_PROPERTY_WIDGET_TYPE = "select";
+
     describe("The Case Management plugin", function () {
         before(function (done) {
             util.init({
@@ -92,7 +94,7 @@ define([
             util.clickQuestion(question1);
 
             const caseManagementSection = getCaseManagementSection();
-            const caseProperty = caseManagementSection.find("input");
+            const caseProperty = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
 
             assert.equal(caseProperty.val(), 'one');
         });
@@ -104,7 +106,7 @@ define([
             util.clickQuestion(question1);
 
             const caseManagementSection = getCaseManagementSection();
-            const caseProperty = caseManagementSection.find("input");
+            const caseProperty = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
 
             // this question should be mapped to both 'one' and 'two', but since 'one' is first, that is expected
             assert.equal(caseProperty.val(), 'one');
@@ -116,7 +118,7 @@ define([
             
             // set the value
             const caseManagementSection = getCaseManagementSection();
-            const casePropertySelect = caseManagementSection.find("input");
+            const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("one").trigger("change");
 
             const xml = call("createXML");
@@ -136,7 +138,7 @@ define([
 
             // set the value
             const caseManagementSection = getCaseManagementSection();
-            const casePropertySelect = caseManagementSection.find("input");
+            const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("two").trigger("change");
 
             const xml = call("createXML");
@@ -156,7 +158,7 @@ define([
 
             // set the value
             const caseManagementSection = getCaseManagementSection();
-            const casePropertySelect = caseManagementSection.find("input");
+            const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("two").trigger("change");
 
             const xml = call("createXML");
@@ -167,6 +169,22 @@ define([
             chai.expect(mappedQuestions.length).to.equal(1);
             chai.expect(mappedQuestions.attr("question_path")).to.equal("/data/question1");
             chai.expect(mappedQuestions.attr("update_mode")).to.equal("edit");
+        });
+
+        it("should display a dropdown of potential case management properties", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question1");
+
+            const caseManagementSection = getCaseManagementSection();
+            const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+
+            const optionValues = {};
+            $.each(casePropertySelect.prop("options"), function(i) {
+                const $opt = $(this);
+                optionValues[$opt.prop("value")] = $opt.text();
+            });
+
+            chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", ""]);
         });
 
         describe("with no case management data", function () {

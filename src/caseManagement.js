@@ -1,11 +1,35 @@
 define([
     'jquery',
     'vellum/mugs',
+    'vellum/widgets',
 ], function (
     $,
-    mugs
+    mugs,
+    widgets
 ) {
     'use strict';
+
+    function casePropertyDropdownWidget (mug, opts) {
+        const defaultOptions = 
+            opts.vellum.data.caseManagement.properties.map(prop => ({ text: prop, value: prop }));
+        opts.defaultOptions = defaultOptions;
+        opts.useValueAsCustomName = true;
+        var widget = widgets.dropdown(mug, opts);
+        widget.postRender = function () {
+            widget.input.select2({
+                tags: true,
+                allowClear: true,
+                placeholder: '',
+            });
+            widget.input.on('remove', function () {
+                if ($(this).data('select2')) {
+                    $(this).select2('destroy');
+                }
+            });
+        };
+
+        return widget;
+    }
 
     class CaseMappingsBuilder {
         addMappingsToForm (form, xml) {
@@ -219,6 +243,7 @@ define([
             const databindSpecs = Object.assign(specs.databind, {
                 'case_property': {
                     visibility: 'visible',
+                    widget: casePropertyDropdownWidget,
                     presence: 'optional',
                     lstring: gettext('Case Property'),
                     serialize: mugs.serializeXPath,
