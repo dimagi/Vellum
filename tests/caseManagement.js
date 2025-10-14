@@ -282,6 +282,18 @@ define([
             assert.isTrue(util.isTreeNodeValid(question2));
         });
 
+        it("should preserve mappings when a question is renamed", function () {
+            util.loadXML(PROPERTY_CONFLICT_XML);
+            const question1 = call("getMugByPath", "/data/question1");
+
+            question1.p.nodeID = "question3";
+
+            const question_paths = question1.form.mappings.one.map(questionObj => questionObj.question_path);
+            assert.sameOrderedMembers(question_paths, ['/data/question3', '/data/question2']);
+            assert.sameOrderedMembers(question1.form.mappingsByQuestion['/data/question3'], ['one']);
+            assert.notExists(question1.form.mappingsByQuestion['/data/question1']);
+        });
+
         describe("with no case management data", function () {
             beforeEach(function () {
                 const vellum = $("#vellum").vellum("get");

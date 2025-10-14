@@ -226,6 +226,34 @@ define([
                 }
             }
         }
+
+        moveMappings (prevPath, newPath) {
+            if (!this.form.hasOwnProperty('mappingsByQuestion')) {
+                return;
+            }
+
+            // determine what case properties were affected by this question
+            const prevMappings = this.form.mappingsByQuestion[prevPath] || [];
+            if (prevMappings.length === 0) {
+                // this question wasn't using case management, so there is nothing to update
+                return;
+            }
+
+            // otherwise, record the affected case properties
+            const case_properties = prevMappings.slice();
+            // move those case properties from prevPath to newPath
+            delete this.form.mappingsByQuestion[prevPath];
+            this.form.mappingsByQuestion[newPath] = case_properties;
+
+            // rebuild mappings by case
+            case_properties.forEach(case_property => {
+                const questions = this.form.mappings[case_property];
+                const index = questions.findIndex((question) => question.question_path === prevPath);
+                if (index !== -1) {
+                    questions[index].question_path = newPath;
+                }
+            });
+        }
     }
 
     $.vellum.plugin('caseManagement', {}, {
@@ -320,6 +348,15 @@ define([
                     },
                 },
             });
+
+            const oldNodeIDSetter = databindSpecs.nodeID.setter;
+            databindSpecs.nodeID.setter = function (mug, attr, value) {
+                const prevPath = mug.absolutePath;
+                oldNodeIDSetter(mug, attr, value);
+                const currentPath = mug.absolutePath;
+                const maintainer = new CaseMapMaintainer(mug.form);
+                maintainer.moveMappings(prevPath, currentPath);
+            };
 
             specs.databind = databindSpecs;
 
