@@ -93,6 +93,63 @@ define([
         }
     }
 
+    class CaseMapMaintainer {
+        constructor (form) {
+            this.form = form;
+        }
+
+        updateFormMappings (questionPath, prev, current) {
+            this.replaceFormQuestionMappings(questionPath, prev, current);
+            this.replaceFormPropertyMappings(questionPath, prev, current);
+        }
+
+        replaceFormQuestionMappings (questionPath, prev, current) {
+            this.form.mappingsByQuestion[questionPath] = this.form.mappingsByQuestion[questionPath] || [];
+            const mappings = this.form.mappingsByQuestion[questionPath];
+            let prevIndex = 0;
+
+            if (prev) {
+                // remove the previous element
+                prevIndex = mappings.findIndex((ele) => ele === prev);
+                mappings.splice(prevIndex, 1);
+            }
+
+            if (current) {
+                mappings.splice(prevIndex, 0, current);
+            } else {
+                // no current, check if we should remove the mappings
+                if (mappings.length === 0) {
+                    delete this.form.mappingsByQuestion[questionPath];
+                }
+            }
+        }
+
+        replaceFormPropertyMappings (questionPath, prev, current) {
+            let questions = prev ? this.form.mappings[prev] : [];
+            let question = null;
+
+            let prevIndex = questions.findIndex((question) => question.question_path === questionPath);
+            if (prevIndex !== -1) {
+                // grab the previous question to preserve any additional properties it had
+                question = questions[prevIndex];
+                // remove the old question
+                questions.splice(prevIndex, 1);
+                if (questions.length === 0) {
+                    // delete the old case property questions
+                    delete this.form.mappings[prev];
+                }
+            }
+
+            if (current) {
+                this.form.mappings[current] = this.form.mappings[current] || [];
+                if (!question) {
+                    question = {'question_path': questionPath};
+                }
+                this.form.mappings[current].push(question);
+            }
+        }
+    }
+
     $.vellum.plugin('caseManagement', {}, {
         init: function () {
             const data = this.data.caseManagement;
@@ -166,6 +223,11 @@ define([
                     lstring: gettext('Case Property'),
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
+                    setter: function (mug, attr, value) {
+                        const maintainer = new CaseMapMaintainer(mug.form);
+                        maintainer.updateFormMappings(mug.absolutePath, mug.p[attr], value);
+                        mug.p.set(attr, value);
+                    },
                 },
             });
 

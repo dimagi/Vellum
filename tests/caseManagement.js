@@ -7,7 +7,8 @@ define([
     'tests/utils',
     'static/caseManagement/baseline.xml',
     'static/caseManagement/baseline_no_mapping_block.xml',
-    'static/caseManagement/multipleProperties.xml'
+    'static/caseManagement/multipleProperties.xml',
+    'static/caseManagement/extra_question_attrs.xml'
 ], function (
     chai,
     $,
@@ -15,10 +16,20 @@ define([
     util,
     BASELINE_XML,
     BASELINE_NO_MAPPING_XML,
-    MULTIPLE_PROPERTIES_XML
+    MULTIPLE_PROPERTIES_XML,
+    EXTRA_QUESTION_ATTRS_XML
 ) {
     const assert = chai.assert;
     const call = util.call;
+
+    function getMappingAndQuestionElementsFromXML(xml) {
+        const xmlDoc = $.parseXML(xml);
+        const $xml = $(xmlDoc);
+        const mappings = $xml.find("case_mappings > mapping");
+        const mappedQuestions = mappings.find("question");
+
+        return [mappings, mappedQuestions];
+    }
 
     describe("The Case Management plugin", function () {
         before(function (done) {
@@ -96,6 +107,68 @@ define([
 
             // this question should be mapped to both 'one' and 'two', but since 'one' is first, that is expected
             assert.equal(caseProperty.val(), 'one');
+        });
+
+        it("should save the case property to the XML", function () {
+            util.loadXML("");
+            util.addQuestion("Text", "question");
+            
+            // set the value
+            const propertiesPane = $(".fd-content-right");
+            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const casePropertySelect = caseManagementSection.find("input");
+            casePropertySelect.val("one").trigger("change");
+
+            const xml = call("createXML");
+            const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
+
+            chai.expect(mappings.length).to.equal(1);
+            chai.expect(mappings.attr("property")).to.equal("one");
+            chai.expect(mappedQuestions.length).to.equal(1);
+            chai.expect(mappedQuestions.attr("question_path")).to.equal("/data/question");
+        });
+
+        it("should modify the existing mapping", function () {
+            util.loadXML(BASELINE_XML);
+
+            const question1 = call("getMugByPath", "/data/question1");
+            util.clickQuestion(question1);
+
+            // set the value
+            const propertiesPane = $(".fd-content-right");
+            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const casePropertySelect = caseManagementSection.find("input");
+            casePropertySelect.val("two").trigger("change");
+
+            const xml = call("createXML");
+            const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
+
+            chai.expect(mappings.length).to.equal(1);
+            chai.expect(mappings.attr("property")).to.equal("two");
+            chai.expect(mappedQuestions.length).to.equal(1);
+            chai.expect(mappedQuestions.attr("question_path")).to.equal("/data/question1");
+        });
+
+        it("should preserve additional question attributes", function () {
+            util.loadXML(EXTRA_QUESTION_ATTRS_XML);
+
+            const question1 = call("getMugByPath", "/data/question1");
+            util.clickQuestion(question1);
+
+            // set the value
+            const propertiesPane = $(".fd-content-right");
+            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const casePropertySelect = caseManagementSection.find("input");
+            casePropertySelect.val("two").trigger("change");
+
+            const xml = call("createXML");
+            const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
+
+            chai.expect(mappings.length).to.equal(1);
+            chai.expect(mappings.attr("property")).to.equal("two");
+            chai.expect(mappedQuestions.length).to.equal(1);
+            chai.expect(mappedQuestions.attr("question_path")).to.equal("/data/question1");
+            chai.expect(mappedQuestions.attr("update_mode")).to.equal("edit");
         });
 
         describe("with no case management data", function () {
