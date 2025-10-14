@@ -7,7 +7,7 @@ define([
     'tests/utils',
     'static/caseManagement/baseline.xml',
     'static/caseManagement/baseline_no_mapping_block.xml',
-    'static/caseManagement/multipleProperties.xml',
+    'static/caseManagement/multiple_properties.xml',
     'static/caseManagement/extra_question_attrs.xml',
     'static/caseManagement/property_conflict.xml'
 ], function (
