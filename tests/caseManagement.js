@@ -6,14 +6,16 @@ define([
     'underscore',
     'tests/utils',
     'static/caseManagement/baseline.xml',
-    'static/caseManagement/baseline_no_mapping_block.xml'
+    'static/caseManagement/baseline_no_mapping_block.xml',
+    'static/caseManagement/multipleProperties.xml'
 ], function (
     chai,
     $,
     _,
     util,
     BASELINE_XML,
-    BASELINE_NO_MAPPING_XML
+    BASELINE_NO_MAPPING_XML,
+    MULTIPLE_PROPERTIES_XML
 ) {
     const assert = chai.assert;
     const call = util.call;
@@ -67,6 +69,33 @@ define([
             const caseManagementElement = propertiesPane.querySelector('fieldset[data-slug="caseManagement"]');
 
             assert.notExists(caseManagementElement);
+        });
+
+        it("should show the saved case property data", function () {
+            util.loadXML(BASELINE_XML);
+
+            const question1 = call("getMugByPath", "/data/question1");
+            util.clickQuestion(question1);
+
+            const propertiesPane = $(".fd-content-right");
+            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const caseProperty = caseManagementSection.find("input");
+
+            assert.equal(caseProperty.val(), 'one');
+        });
+
+        it("should show the first property when multiple exist", function () {
+            util.loadXML(MULTIPLE_PROPERTIES_XML);
+
+            const question1 = call("getMugByPath", "/data/question1");
+            util.clickQuestion(question1);
+
+            const propertiesPane = $(".fd-content-right");
+            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const caseProperty = caseManagementSection.find("input");
+
+            // this question should be mapped to both 'one' and 'two', but since 'one' is first, that is expected
+            assert.equal(caseProperty.val(), 'one');
         });
 
         describe("with no case management data", function () {

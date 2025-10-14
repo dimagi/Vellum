@@ -174,5 +174,24 @@ define([
             return specs;
         },
 
+        handleMugParseFinish: function (mug) {
+            this.__callOld();
+
+            if (!this.data.caseManagement.isActive) {
+                return;
+            }
+
+            if (!mug.absolutePath) {
+                // no use trying to find a mapping for a question that doesn't have a path
+                return;
+            }
+
+            const questionMappings = mug.form.mappingsByQuestion[mug.absolutePath];
+
+            if (questionMappings && questionMappings.length > 0) {
+                mug.p.set('case_property', questionMappings[0]);
+            }
+        }
+
     });
 });
