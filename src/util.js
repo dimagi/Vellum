@@ -325,8 +325,8 @@ define([
         localForm = cleanForDiff(localForm);
         serverForm = cleanForDiff(serverForm);
 
-        const dmp = new diff_match_patch(),
-            diff = dmp.diff_main(localForm, serverForm);
+        const dmp = new diff_match_patch();
+        const diff = dmp.diff_main(localForm, serverForm);
 
         let html = dmp.diff_prettyHtml(diff);
 
