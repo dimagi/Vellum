@@ -214,6 +214,7 @@ define(["underscore"], function (_) {
         },
         caseManagement: {
             properties: ['one', 'two', 'three'],
+            view_form_url: 'http://view_form',
         },
         itemset: {
             dataSourcesFilter: function (sources) {

@@ -1,10 +1,12 @@
 define([
     'jquery',
     'vellum/mugs',
+    'vellum/util',
     'vellum/widgets',
 ], function (
     $,
     mugs,
+    util,
     widgets
 ) {
     'use strict';
@@ -180,6 +182,7 @@ define([
 
             data.properties = this.opts().caseManagement.properties;
             data.isActive = !!data.properties;
+            data.view_form_url = this.opts().caseManagement.view_form_url;
         },
 
         performAdditionalParsing: function (form, xml) {
@@ -287,6 +290,27 @@ define([
 
             if (questionMappings && questionMappings.length > 0) {
                 mug.p.set('case_property', questionMappings[0]);
+
+                if (questionMappings.length > 1) {
+                    // if a question is attempting to update multiple cases,
+                    // it will be disabled. Leave an informational message
+                    // to explain that this needs to be edited with the case management page
+                    const message = {
+                        key: 'mug-caseProperty-multipleAssignments',
+                        message: {
+                            markdown: util.format(
+                                gettext(
+                                    'This question is used to update multiple case properties. ' +
+                                    'If you wish to update these case properties, ' +
+                                    'please visit the [Manage Case Page]({url})'
+                                ),
+                                {url: this.data.caseManagement.view_form_url}
+                            )
+                        },
+                        level: mug.INFO,
+                    };
+                    mug.addMessage('case_property', message);
+                }
             }
         }
 

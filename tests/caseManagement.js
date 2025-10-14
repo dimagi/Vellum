@@ -100,7 +100,7 @@ define([
         });
 
         it("should show the first property when multiple exist", function () {
-            // and disable the select
+            // and disable the select, display warning
 
             util.loadXML(MULTIPLE_PROPERTIES_XML);
 
@@ -111,10 +111,17 @@ define([
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             // fetching by selected option, because jquery does not return disabled select values
             const selectedOption = casePropertySelect.find("option:checked");
+            const messages = casePropertySelect.find("~ .messages");
 
             assert.isTrue(casePropertySelect.prop("disabled"));
             // this question should be mapped to both 'one' and 'two', but since 'one' is first, that is expected
             assert.equal(selectedOption.val(), "one");
+
+            chai.expect(messages.text()).to.include(
+                "This question is used to update multiple case properties"
+            );
+            // but this is not an error state, so ensure that the mug is still valid
+            assert.isTrue(util.isTreeNodeValid(question1));
         });
 
         it("should save the case property to the XML", function () {
