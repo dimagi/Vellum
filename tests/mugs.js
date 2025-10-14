@@ -4,12 +4,14 @@ define([
     'jquery',
     'underscore',
     'static/mugs/blank-choice.xml',
+    'static/mugs/required-label.xml',
 ], function (
     util,
     chai,
     $,
     _,
-    BLANK_CHOICE_XML
+    BLANK_CHOICE_XML,
+    REQUIRED_LABEL_XML
 ) {
     var assert = chai.assert;
 
@@ -94,6 +96,27 @@ define([
             util.loadXML(BLANK_CHOICE_XML);
             var blank = util.getMug("select/blank");
             assert.equal(blank.p.labelItext.get(), "", "blank label itext");
+        });
+
+        it("should load required attribute on label with non-minimal appearance", function () {
+            util.loadXML(REQUIRED_LABEL_XML);
+            var label = util.getMug("label");
+            assert.isTrue(label.p.requiredAttr);
+            assert.equal(label.p.requiredCondition, "test()");
+            assert.isTrue(label.isVisible("requiredAttr"), "required checkbox should be visible");
+            assert.isTrue(label.isVisible("requiredCondition"), "required condition should be visible");
+        });
+
+        it("should remove required attribute when changing Text to Label", function () {
+            var form = util.loadXML(""),
+                mug = util.addQuestion("Text", "text");
+            mug.p.requiredAttr = true;
+            mug.p.requiredCondition = "something()";
+            form.changeMugType(mug, "Trigger");
+            assert.isUndefined(mug.p.requiredAttr);
+            assert.isUndefined(mug.p.requiredCondition);
+            assert.isFalse(mug.isVisible("requiredAttr"), "required checkbox should not be visible");
+            assert.isFalse(mug.isVisible("requiredCondition"), "required condition should not be visible");
         });
     });
 });
