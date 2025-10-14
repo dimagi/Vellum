@@ -8,7 +8,8 @@ define([
     'static/caseManagement/baseline.xml',
     'static/caseManagement/baseline_no_mapping_block.xml',
     'static/caseManagement/multipleProperties.xml',
-    'static/caseManagement/extra_question_attrs.xml'
+    'static/caseManagement/extra_question_attrs.xml',
+    'static/caseManagement/property_conflict.xml'
 ], function (
     chai,
     $,
@@ -17,7 +18,8 @@ define([
     BASELINE_XML,
     BASELINE_NO_MAPPING_XML,
     MULTIPLE_PROPERTIES_XML,
-    EXTRA_QUESTION_ATTRS_XML
+    EXTRA_QUESTION_ATTRS_XML,
+    PROPERTY_CONFLICT_XML
 ) {
     const assert = chai.assert;
     const call = util.call;
@@ -197,6 +199,87 @@ define([
             });
 
             chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", ""]);
+        });
+
+        it("should display a warning when multiple questions are saving to the same case property", function () {
+            util.loadXML("");
+            const question1 = util.addQuestion("Text", "question1");
+            const question2 = util.addQuestion("Text", "question2");
+
+            // set the case property on value 1, verify no warning
+            util.clickQuestion(question1);
+            let caseManagementSection = getCaseManagementSection();
+            let casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            casePropertySelect.val("one").trigger("change");
+            // verify no warning
+            assert.isTrue(util.isTreeNodeValid(question1));
+
+            // set the case property on value 2, now verify that this question displays a warning
+            // and that the warning icon is next to both icons in the tree
+            util.clickQuestion(question2);
+            caseManagementSection = getCaseManagementSection();
+            casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            casePropertySelect.val("one").trigger("change");
+            let messages = casePropertySelect.find("~ .messages");
+            assert.isFalse(util.isTreeNodeValid(question1));
+            assert.isFalse(util.isTreeNodeValid(question2));
+            const expectedMessage = (
+                "\"one\" is assigned by another question. You can still save the form, " +
+                "but will need to have only one question for any case property in order to " +
+                "build the application"
+            );
+            chai.expect(messages.text()).to.include(expectedMessage);
+
+            // click back to the first question, verify that the warning is visible
+            util.clickQuestion(question1);
+            messages = casePropertySelect.find("~ .messages");
+            chai.expect(messages.text()).to.include(expectedMessage);
+            assert.isFalse(util.isTreeNodeValid(question1));
+        });
+        
+        it("should display a warning when loading xml with a property conflict", function () {
+            util.loadXML(PROPERTY_CONFLICT_XML);
+            const question1 = call("getMugByPath", "/data/question1");
+            const question2 = call("getMugByPath", "/data/question2");
+            assert.isFalse(util.isTreeNodeValid(question1));
+            assert.isFalse(util.isTreeNodeValid(question2));
+
+            util.clickQuestion(question1);
+            const caseManagementSection = getCaseManagementSection();
+            const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            const messages = casePropertySelect.find("~ .messages");
+
+            assert.equal(messages.children().length, 1);
+        });
+
+        it("should clear the conflict warning when one of the affected questions changes its property",
+            function () {
+            util.loadXML("");
+            const question1 = util.addQuestion("Text", "question1");
+            const question2 = util.addQuestion("Text", "question2");
+
+            // set the case property on value 1
+            util.clickQuestion(question1);
+            let caseManagementSection = getCaseManagementSection();
+            let casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            casePropertySelect.val("one").trigger("change");
+
+            // set the case property on value 2
+            util.clickQuestion(question2);
+            caseManagementSection = getCaseManagementSection();
+            casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            casePropertySelect.val("one").trigger("change");
+
+            // click back to the first question, verify that the warning is visible
+            util.clickQuestion(question1);
+            caseManagementSection = getCaseManagementSection();
+            casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            casePropertySelect.val("two").trigger("change");
+
+            const messages = casePropertySelect.find("~ .messages");
+            assert.equal(messages.children().length, 0); // no messages
+            assert.isTrue(util.isTreeNodeValid(question1));
+            assert.isTrue(util.isTreeNodeValid(question2));
         });
 
         describe("with no case management data", function () {

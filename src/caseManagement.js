@@ -33,6 +33,39 @@ define([
         return widget;
     }
 
+    const CONFLICT_MSG_KEY = 'mug-caseProperty-conflict';
+    const MULTI_ASSIGNMENT_MSG_KEY = 'mug-caseProperty-multipleAssignments';
+
+    function addConflictMessageToMug(mug, caseProperty) {
+        const message = {
+            key: CONFLICT_MSG_KEY,
+            message: util.format(gettext(
+                '"{caseProperty}" is assigned by another question. You can still save the form, ' +
+                'but will need to have only one question for any case property in order to ' +
+                'build the application'), {caseProperty}),
+            level: mug.WARNING,
+        };
+        mug.addMessage('case_property', message);
+    }
+
+    function addMultipleAssignmentsMessageToMug(mug, url) {
+        const message = {
+            key: MULTI_ASSIGNMENT_MSG_KEY,
+            message: {
+                markdown: util.format(
+                    gettext(
+                        'This question is used to update multiple case properties. ' +
+                        'If you wish to update these case properties, ' +
+                        'please visit the [Manage Case Page]({url})'
+                    ),
+                    {url}
+                )
+            },
+            level: mug.INFO,
+        };
+        mug.addMessage('case_property', message);
+    }
+
     class CaseMappingsBuilder {
         addMappingsToForm (form, xml) {
             let mappingElements = [];
@@ -163,7 +196,16 @@ define([
                 if (questions.length === 0) {
                     // delete the old case property questions
                     delete this.form.mappings[prev];
+                } else if (questions.length === 1) {
+                    // this case property is now unique, so we can remove conflict warnings from the remaining mug
+                    const remainingMug = this.form.getMugByPath(questions[0].question_path);
+                    remainingMug.dropMessage('case_property', CONFLICT_MSG_KEY);
                 }
+
+                const mug = this.form.getMugByPath(question.question_path);
+                // always drop the conflict message. Moving may create a conflict, but it will be
+                // generated again later
+                mug.dropMessage('case_property', CONFLICT_MSG_KEY);
             }
 
             if (current) {
@@ -172,6 +214,16 @@ define([
                     question = {'question_path': questionPath};
                 }
                 this.form.mappings[current].push(question);
+
+                if (this.form.mappings[current].length >= 2) {
+                    // this new mapping creates a conflict, so add a warning to each assigned question
+                    // these warnings will cause the save button to mention validation errors,
+                    // but they do not prevent saving the form
+                    this.form.mappings[current].forEach(question => {
+                        const mugWithConflict = this.form.getMugByPath(question.question_path);
+                        addConflictMessageToMug(mugWithConflict, current);
+                    });
+                }
             }
         }
     }
@@ -295,22 +347,14 @@ define([
                     // if a question is attempting to update multiple cases,
                     // it will be disabled. Leave an informational message
                     // to explain that this needs to be edited with the case management page
-                    const message = {
-                        key: 'mug-caseProperty-multipleAssignments',
-                        message: {
-                            markdown: util.format(
-                                gettext(
-                                    'This question is used to update multiple case properties. ' +
-                                    'If you wish to update these case properties, ' +
-                                    'please visit the [Manage Case Page]({url})'
-                                ),
-                                {url: this.data.caseManagement.view_form_url}
-                            )
-                        },
-                        level: mug.INFO,
-                    };
-                    mug.addMessage('case_property', message);
+                    addMultipleAssignmentsMessageToMug(mug, this.data.caseManagement.view_form_url);
                 }
+
+                questionMappings.forEach(caseProperty => {
+                    if (mug.form.mappings[caseProperty].length >= 2) {
+                        addConflictMessageToMug(mug, caseProperty);
+                    }
+                });
             }
         }
 
