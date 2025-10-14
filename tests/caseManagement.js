@@ -31,6 +31,11 @@ define([
         return [mappings, mappedQuestions];
     }
 
+    function getCaseManagementSection() {
+        const propertiesPane = $(".fd-content-right");
+        return propertiesPane.find('fieldset[data-slug="caseManagement"]');
+    }
+
     describe("The Case Management plugin", function () {
         before(function (done) {
             util.init({
@@ -67,19 +72,17 @@ define([
         it("should display the case management section for generic fields", function () {
             util.loadXML("");
             util.addQuestion("Text", "text");
-            const propertiesPane = document.querySelector(".fd-content-right");
-            const caseManagementElement = propertiesPane.querySelector('fieldset[data-slug="caseManagement"]');
+            const caseManagementSection = getCaseManagementSection();
 
-            assert.exists(caseManagementElement);
+            assert.exists(caseManagementSection[0]);
         });
 
         it("should hide the case management section for labels", function () {
             util.loadXML("");
             util.addQuestion("Trigger", "label");
-            const propertiesPane = document.querySelector(".fd-content-right");
-            const caseManagementElement = propertiesPane.querySelector('fieldset[data-slug="caseManagement"]');
+            const caseManagementSection = getCaseManagementSection();
 
-            assert.notExists(caseManagementElement);
+            assert.notExists(caseManagementSection[0]);
         });
 
         it("should show the saved case property data", function () {
@@ -88,8 +91,7 @@ define([
             const question1 = call("getMugByPath", "/data/question1");
             util.clickQuestion(question1);
 
-            const propertiesPane = $(".fd-content-right");
-            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const caseManagementSection = getCaseManagementSection();
             const caseProperty = caseManagementSection.find("input");
 
             assert.equal(caseProperty.val(), 'one');
@@ -101,8 +103,7 @@ define([
             const question1 = call("getMugByPath", "/data/question1");
             util.clickQuestion(question1);
 
-            const propertiesPane = $(".fd-content-right");
-            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const caseManagementSection = getCaseManagementSection();
             const caseProperty = caseManagementSection.find("input");
 
             // this question should be mapped to both 'one' and 'two', but since 'one' is first, that is expected
@@ -114,8 +115,7 @@ define([
             util.addQuestion("Text", "question");
             
             // set the value
-            const propertiesPane = $(".fd-content-right");
-            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const caseManagementSection = getCaseManagementSection();
             const casePropertySelect = caseManagementSection.find("input");
             casePropertySelect.val("one").trigger("change");
 
@@ -135,8 +135,7 @@ define([
             util.clickQuestion(question1);
 
             // set the value
-            const propertiesPane = $(".fd-content-right");
-            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const caseManagementSection = getCaseManagementSection();
             const casePropertySelect = caseManagementSection.find("input");
             casePropertySelect.val("two").trigger("change");
 
@@ -156,8 +155,7 @@ define([
             util.clickQuestion(question1);
 
             // set the value
-            const propertiesPane = $(".fd-content-right");
-            const caseManagementSection = propertiesPane.find('fieldset[data-slug="caseManagement"]');
+            const caseManagementSection = getCaseManagementSection();
             const casePropertySelect = caseManagementSection.find("input");
             casePropertySelect.val("two").trigger("change");
 
@@ -202,10 +200,9 @@ define([
                 util.loadXML("");
                 util.addQuestion("Text", "text");
 
-                const propertiesPane = document.querySelector('.fd-content-right');
-                const caseManagementElement = propertiesPane.querySelector('fieldset[data-slug="caseManagement"]');
+                const caseManagementSection = getCaseManagementSection();
 
-                assert.notExists(caseManagementElement);
+                assert.notExists(caseManagementSection[0]);
             });
         });
     });
