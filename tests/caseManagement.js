@@ -96,20 +96,25 @@ define([
             const caseManagementSection = getCaseManagementSection();
             const caseProperty = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
 
-            assert.equal(caseProperty.val(), 'one');
+            assert.equal(caseProperty.val(), "one");
         });
 
         it("should show the first property when multiple exist", function () {
+            // and disable the select
+
             util.loadXML(MULTIPLE_PROPERTIES_XML);
 
             const question1 = call("getMugByPath", "/data/question1");
             util.clickQuestion(question1);
 
             const caseManagementSection = getCaseManagementSection();
-            const caseProperty = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            // fetching by selected option, because jquery does not return disabled select values
+            const selectedOption = casePropertySelect.find("option:checked");
 
+            assert.isTrue(casePropertySelect.prop("disabled"));
             // this question should be mapped to both 'one' and 'two', but since 'one' is first, that is expected
-            assert.equal(caseProperty.val(), 'one');
+            assert.equal(selectedOption.val(), "one");
         });
 
         it("should save the case property to the XML", function () {

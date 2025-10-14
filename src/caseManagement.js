@@ -245,6 +245,16 @@ define([
                     visibility: 'visible',
                     widget: casePropertyDropdownWidget,
                     presence: 'optional',
+                    enabled: function (mug) {
+                        if (!mug.absolutePath || !mug.form.mappingsByQuestion) {
+                            return true;
+                        }
+                        const questionMappings = mug.form.mappingsByQuestion[mug.absolutePath];
+                        if (!questionMappings) {
+                            return true;
+                        }
+                        return questionMappings.length <= 1;
+                    },
                     lstring: gettext('Case Property'),
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
