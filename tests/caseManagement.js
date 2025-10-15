@@ -294,6 +294,50 @@ define([
             assert.notExists(question1.form.mappingsByQuestion['/data/question1']);
         });
 
+        it("should add custom options to future dropdowns", function () {
+            util.loadXML();
+
+            // Verify that custom options will be included for other questions
+            const question1 = util.addQuestion("Text", "question1");
+
+            let caseManagementSection = getCaseManagementSection();
+            let casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            const newOption = new Option("newCaseProperty", "newCaseProperty", true, true);
+            casePropertySelect.append(newOption).trigger("change");
+
+            const question2 = util.addQuestion("Text", "question2");
+
+            caseManagementSection = getCaseManagementSection();
+            casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+
+            let optionValues = {};
+            $.each(casePropertySelect.prop("options"), function(i) {
+                const $opt = $(this);
+                optionValues[$opt.prop("value")] = $opt.text();
+            });
+
+            chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", "newCaseProperty", ""]);
+
+            // Verify that custom options will be removed when no longer in use
+            util.clickQuestion(question1);
+            caseManagementSection = getCaseManagementSection();
+            casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            casePropertySelect.val(null).trigger("change");
+
+            util.clickQuestion(question2);
+
+            caseManagementSection = getCaseManagementSection();
+            casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+
+            optionValues = {};
+            $.each(casePropertySelect.prop("options"), function(i) {
+                const $opt = $(this);
+                optionValues[$opt.prop("value")] = $opt.text();
+            });
+
+            chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", ""]);
+        });
+
         describe("with no case management data", function () {
             beforeEach(function () {
                 const vellum = $("#vellum").vellum("get");

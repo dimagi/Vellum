@@ -12,8 +12,8 @@ define([
     'use strict';
 
     function casePropertyDropdownWidget (mug, opts) {
-        const defaultOptions = 
-            opts.vellum.data.caseManagement.properties.map(prop => ({ text: prop, value: prop }));
+        const rawOptions = opts.vellum.caseManager.getProperties();
+        const defaultOptions = rawOptions.map(prop => ({ text: prop, value: prop }));
         opts.defaultOptions = defaultOptions;
         opts.useValueAsCustomName = true;
         var widget = widgets.dropdown(mug, opts);
@@ -256,6 +256,41 @@ define([
         }
     }
 
+    class CaseManager {
+        constructor (baseProperties, viewFormUrl) {
+            this.baseProperties = new Set(baseProperties);
+            this.customProperties = {};
+            this.viewFormUrl = viewFormUrl;
+        }
+
+        addProperty (property) {
+            if (this.baseProperties.has(property)) {
+                // no need to modify the base properties
+                return;
+            }
+
+            this.customProperties[property] = this.customProperties[property] || 0;
+            this.customProperties[property]++;
+        }
+
+        removeProperty (property) {
+            if (!this.customProperties.hasOwnProperty(property)) {
+                return;
+            }
+
+            this.customProperties[property]--;
+            if (this.customProperties[property] <= 0){
+                delete this.customProperties[property];
+            }
+        }
+
+        getProperties () {
+            return Array.from(this.baseProperties.values()).concat(
+                Object.keys(this.customProperties)
+            );
+        }
+    }
+
     $.vellum.plugin('caseManagement', {}, {
         init: function () {
             const data = this.data.caseManagement;
@@ -263,6 +298,11 @@ define([
             data.properties = this.opts().caseManagement.properties;
             data.isActive = !!data.properties;
             data.view_form_url = this.opts().caseManagement.view_form_url;
+
+            this.caseManager = new CaseManager(
+                this.opts().caseManagement.properties,
+                this.opts().caseManagement.view_form_url
+            );
         },
 
         performAdditionalParsing: function (form, xml) {
@@ -322,6 +362,7 @@ define([
 
         getMugSpec: function () {
             const specs = this.__callOld();
+            const that = this;
 
             const databindSpecs = Object.assign(specs.databind, {
                 'case_property': {
@@ -344,6 +385,13 @@ define([
                     setter: function (mug, attr, value) {
                         const maintainer = new CaseMapMaintainer(mug.form);
                         maintainer.updateFormMappings(mug.absolutePath, mug.p[attr], value);
+                        const prevValue = mug.p[attr];
+                        if (prevValue) {
+                            that.caseManager.removeProperty(prevValue);
+                        }
+                        if (value) {
+                            that.caseManager.addProperty(value);
+                        }
                         mug.p.set(attr, value);
                     },
                 },
