@@ -84,9 +84,29 @@ define([
         it("should hide the case management section for labels", function () {
             util.loadXML("");
             util.addQuestion("Trigger", "label");
-            const caseManagementSection = getCaseManagementSection();
 
-            assert.notExists(caseManagementSection[0]);
+            assert.notExists(getCaseManagementSection()[0]);
+        });
+
+        it("should hide the case management section for normal groups" , function () {
+            util.loadXML("");
+            util.addQuestion("Group", "normal_group");
+
+            assert.notExists(getCaseManagementSection()[0]);
+        });
+
+        it("should hide the case management section for repeat groups", function () {
+            util.loadXML("");
+            util.addQuestion("Repeat", "repeat_group");
+
+            assert.notExists(getCaseManagementSection()[0]);
+        });
+
+        it("should hide the case management section for question lists", function () {
+            util.loadXML("");
+            util.addQuestion("FieldList", "question_list");
+
+            assert.notExists(getCaseManagementSection()[0]);
         });
 
         it("should show the saved case property data", function () {

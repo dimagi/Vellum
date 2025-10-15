@@ -331,6 +331,14 @@ define([
             const types = this.__callOld();
             // never show the case management property for labels
             types.normal.Trigger.spec.case_property = { presence: 'notallowed' };
+
+            const groupTypes = [
+                types.normal.Group,
+                types.normal.Repeat,
+                types.normal.FieldList
+            ];
+            groupTypes.forEach(groupType => groupType.spec.case_property = { presence: 'notallowed' });
+
             return types;
         },
 
