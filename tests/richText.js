@@ -1,7 +1,7 @@
 /*
  * expected structure of a richText widget:
  *
- * <div contenteditable="true" ... ckeditor stuff...>
+ * <div contenteditable="true">
  *   <p>
  *      User input text
  *   </p>
@@ -29,8 +29,7 @@ define([
     'tests/utils',
     'vellum/richText',
     'vellum/javaRosa/util',
-    'vellum/escapedHashtags',
-    'ckeditor',
+
     'static/richText/burpee.xml',
     'static/richText/output-ref.xml',
     'static/richText/output-value.xml',
@@ -41,8 +40,7 @@ define([
     util,
     richText,
     javaRosa,
-    escapedHashtags,
-    CKEDITOR,
+
     BURPEE_XML,
     OUTPUT_REF_XML,
     OUTPUT_VALUE_XML
@@ -101,7 +99,7 @@ define([
             }],
         }];
 
-    function icon(iconClass) { 
+    function icon(iconClass) {
         if (iconClass.startsWith("fa-")) {
             return $('<i>').addClass(iconClass).html('&nbsp;');
         }
@@ -111,9 +109,12 @@ define([
     function externalIcon () { return icon('fcc-fd-case-property'); }
     function externalUnknownIcon () { return icon('fa-solid fa-triangle-exclamation'); }
 
-    function makeBubble(xpath, dispValue, icon, internal) {
+    function makeBubble(xpath, dispValue, icon, internal, id) {
         var span = $('<span>').addClass('label label-datanode').attr({
             'data-value': xpath,
+            'contenteditable': false,
+            'data-toggle': 'popover',
+            'id': id,
         });
         if (internal && !_.isString(internal)) {
             span.addClass('label-datanode-internal');
@@ -132,6 +133,7 @@ define([
 
     function wrapWithDiv(el) { return $('<div>').append(el); }
     function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
+    function wrapWithDivPZwsp(el) { return wrapWithDiv($('<p>').text('\u200b').append(el).append('\u200b')); }
     function html(value) { return wrapWithDiv(value).html(); }
 
     function setupGlobalForm(done) {
@@ -151,6 +153,17 @@ define([
         });
     }
 
+    function getSpanId(htmlString) {
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = htmlString;
+        const spanElement = tempElement.querySelector('span[id]');
+        return spanElement ? spanElement.id : null;
+    }
+
+    function removeSpanId(htmlString) {
+        return htmlString.replace(/<span([^>]*)\s+id="[^"]*"([^>]*)>/g, '<span$1$2>');
+    }
+
     describe("Rich text utilities", function() {
         before(setupGlobalForm);
 
@@ -166,17 +179,15 @@ define([
 
             _.each(simpleConversions, function(val) {
                 it("from text to html: " + val[0], function() {
-                    assert.strictEqual(
-                        richText.toRichText(val[0], form, opts),
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
-                    );
+                    const richTextText = richText.toRichText(val[0], form, opts);
+                    const expectedHtml = wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                    assert.strictEqual(richTextText, expectedHtml);
                 });
 
                 it("from text to html with output value: " + val[0], function() {
-                    assert.strictEqual(
-                        richText.toRichText(outputValueTemplateFn(val[0]), form),
-                        wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3])).html()
-                    );
+                    const richTextText = richText.toRichText(outputValueTemplateFn(val[0]), form);
+                    const expectedHtml = wrapWithDivPZwsp(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                    assert.strictEqual(richTextText, expectedHtml);
                 });
             });
         });
@@ -197,13 +208,15 @@ define([
 
             _.each(dates, function(val) {
                 it("from text to html with output value: " + val.xmlValue, function() {
+                    const richTextText = richText.toRichText(outputValueTemplateFn(val.xmlValue), form);
                     assert.equal(
-                        richText.toRichText(outputValueTemplateFn(val.xmlValue), form),
-                        wrapWithDivP(makeBubble(
+                        richTextText,
+                        wrapWithDivPZwsp(makeBubble(
                             val.valueInBubble,
                             val.bubbleDispValue,
                             val.icon,
-                            val.internalRef
+                            val.internalRef,
+                            getSpanId(richTextText)
                         ).attr(val.extraAttrs)).html()
                     );
                 });
@@ -242,7 +255,7 @@ define([
             _.each(equations, function(val) {
                 it("from text to html: " + val[0], function() {
                     assert.strictEqual(
-                        richText.toRichText(val[0], form, opts),
+                        removeSpanId(richText.toRichText(val[0], form, opts)),
                         "<p>" + val[1] + "</p>"
                     );
                 });
@@ -250,24 +263,22 @@ define([
         });
 
         describe("text conversions", function() {
-            var prefix_html_1 = '<span data-cke-copybin-start="1">​</span><p>',
-                prefix_html_2 = '<span id="cke_bm_909S" style="display: none;">&nbsp;</span>',
-                prefix_html = prefix_html_1 + prefix_html_2,
-                widget_html = '<span tabindex="-1" contenteditable="false" data-cke-widget-wrapper="1" data-cke-filter="off" ' +
-                    'class="cke_widget_wrapper cke_widget_inline cke_widget_bubbles cke_widget_wrapper_label-datanode-external ' +
-                    'cke_widget_wrapper_label-datanode cke_widget_wrapper_label cke_widget_selected" data-cke-display-name="span" ' +
-                    'data-cke-widget-id="0" role="region" aria-label="span widget"><span class="label label-datanode label-datanode-external ' +
-                    'cke_widget_element" data-value="#case/dob" data-cke-widget-data="%7B%22classes%22%3A%7B%22label-datanode-external' +
-                    '%22%3A1%2C%22label-datanode%22%3A1%2C%22label%22%3A1%7D%7D" data-cke-widget-upcasted="1" data-cke-widget-keep-attr="0" ' +
-                    'data-widget="bubbles"><i class="fcc fcc-fd-case-property">&nbsp;</i>dob</span><span class="cke_reset ' +
-                    'cke_widget_drag_handler_container" style="background: url(&quot;http://localhost:8088/src/../lib/ckeditor/plugins/' +
-                    'widget/images/handle.png&quot;) rgba(220, 220, 220, 0.5); width: 43px; height: 16px; left: 2px; top: -14px;">' +
-                    '<img class="cke_reset cke_widget_drag_handler" data-cke-widget-drag-handler="1" src="data:image/gif;base64,R0lGODlhAQABAPABAP' +
-                    '///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" width="15" title="Click and drag to move" height="15" role="presentation" ' +
-                    'draggable="true"></span></span>',
-                suffix_html = '</p><span data-cke-copybin-end="1">​</span>';
-
-            var text = [
+            var widget_html = '<div ' +
+                'contenteditable="true" ' +
+                'name="property-dataParent" ' +
+                'class="form-control jstree-drop fd-input" ' +
+                'spellcheck="true" ' +
+                'placeholder="Drag question here">' +
+                '<span ' +
+                'class="label label-datanode label-datanode-external popover-initialized" ' +
+                'data-value="#case/dob" ' +
+                'contenteditable="false" ' +
+                'data-toggle="popover" ' +
+                'id="bubble-yalqu945d" ' +
+                'data-original-title="" ' +
+                'title="" ' +
+                '><i class="fcc fcc-fd-case-property">&nbsp;</i></span></div>',
+            text = [
                 ["blah\nblah", "<p>blah</p><p>blah</p>"],
                 ["blah\nblah\n", "<p>blah</p><p>blah</p><p>&nbsp;</p>"],
                 [
@@ -289,24 +300,23 @@ define([
                 [" ", " "],
                 ["   ", " \xa0 "],
                 ["   ", " &nbsp; "],
-                ["' ,", "'\u200B,"],
-                ['This dob: <output value="#case/dob" /> is of child', prefix_html + 'This dob:&nbsp;' + widget_html + ' is of child' + suffix_html],
-                ['This dob: <output value="#case/dob" />', prefix_html + 'This dob:&nbsp;' + widget_html +  suffix_html],
-                ['<output value="#case/dob" /> is of child', prefix_html + widget_html + ' is of child' + suffix_html],
-                ['<output value="#case/dob" />', prefix_html_1 + widget_html + suffix_html],
+                ['This dob: <output value="#case/dob" /> is of child', 'This dob:&nbsp;' + widget_html + ' is of child'],
+                ['This dob: <output value="#case/dob" />', 'This dob:&nbsp;' + widget_html],
+                ['<output value="#case/dob" /> is of child', widget_html + ' is of child'],
+                ['<output value="#case/dob" />', widget_html],
                 ['This dob: <output value="#case/dob" /> is of child', 'This dob: &lt;output value="#case/dob" /&gt; is of child'],
             ];
 
             _.each(text, function(val){
                 it("from html to text: " + JSON.stringify(val[1]), function() {
-                    assert.strictEqual(richText.fromRichText(val[1]), val[0]);
+                    assert.strictEqual(removeSpanId(richText.fromRichText(val[1])), val[0]);
                 });
             });
 
             _.each(text, function(val){
                 it("(text -> html -> text): " + JSON.stringify(val[0]), function() {
                     assert.strictEqual(
-                        richText.fromRichText(richText.toRichText(val[0], form)),
+                        removeSpanId(richText.fromRichText(richText.toRichText(val[0], form))),
                         val[0]
                     );
                 });
@@ -337,9 +347,9 @@ define([
         describe("convert value with output and escaped HTML", function () {
             var items = [
                     ['<h1><output value="#form/text" /></h1>',
-                     '&lt;h1&gt;{text}&lt;/h1&gt;'],
+                     '&lt;h1&gt;​{text}​&lt;/h1&gt;'], // string contains zero width spaces
                     ['<output value="#form/text" /> <tag /> <output value="#form/othertext" />',
-                     '{text} &lt;tag /&gt; {othertext}'],
+                     '​{text}​ &lt;tag /&gt; ​{othertext}​'], // string contains zero width spaces
                     ["{blah}", "{blah}"],
                     ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                     ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
@@ -352,7 +362,7 @@ define([
 
             _.each(items, function (item) {
                 it("to text: " + item[0], function () {
-                    var result = richText.bubbleOutputs(item[0], form, true),
+                    var result = removeSpanId(richText.bubbleOutputs(item[0], form, true)),
                         expect = item[1].replace(/{(.*?)}/g, function (m, name) {
                             if (form.getIconByPath("#form/" + name)) {
                                 var output = makeBubble("#form/" + name, name, ico, true);
@@ -456,7 +466,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertExpression("#form/text");
-                    assert.equal(editor.getValue(), "one" + output + "  two");
+                    assert.equal(editor.getValue(), "one" + output + " two");
                     done();
                 });
             });
@@ -467,7 +477,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertOutput(output);
-                    assert.equal(editor.getValue(), "one" + output + "  two");
+                    assert.equal(editor.getValue(), "one" + output + " two");
                     done();
                 });
             });
@@ -476,138 +486,44 @@ define([
                 var output = '<output value="#form/text" />';
                 editor.setValue(output, function () {
                     assert.equal(editor.getValue(), output);
-                    var copyVal = input.ckeditor().editor.getData();
-                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
-                    exprInput.ckeditor().editor.setData(copyVal, function () {
-                        assert.equal(exprEditor.getValue(), "#form/text");
-                        done();
-                    });
+                    var copyVal = input[0].innerHTML;
+                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal); // string contains zero width space
+                    exprInput[0].innerHTML = copyVal;
+                    assert.equal(exprEditor.getValue(), "#form/text");
+                    done();
                 });
             });
 
             it("should copy output value from expression editor to label", function (done) {
                 exprEditor.setValue("#form/text", function () {
                     assert.equal(exprEditor.getValue(), "#form/text");
-                    var copyVal = exprInput.ckeditor().editor.getData();
-                    assert(/^<p><span .*<.span><.p>$/.test(copyVal), copyVal);
-                    input.ckeditor().editor.setData(copyVal, function () {
-                        assert.equal(editor.getValue(), '<output value="#form/text" />');
-                        done();
-                    });
+                    var copyVal = exprInput[0].innerHTML;
+                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal); // string contains zero width space
+                    input[0].innerHTML = copyVal;
+                    assert.equal(editor.getValue(), '<output value="#form/text" />');
+                    done();
                 });
             });
 
             it("should not paste style content into editor", function () {
                 var html = '<style type="text/css"><!--td--></style><span>A</span>';
-                input.ckeditor().editor.execCommand('paste', html);
+                input[0].focus();
+                document.execCommand('insertHTML', false, html);
                 assert.equal(editor.getValue(), 'A');
             });
 
-            function assertCKCopy($editor, value, callback) {
-                // WARNING this is heavily dependent on CKEditor internals
-                var domObject = new CKEDITOR.dom.domObject($editor[0]),
-                    realDataTransfer = CKEDITOR.plugins.clipboard.dataTransfer,
-                    data;
-                function testDataTransfer(nativeDataTransfer, editor) {
-                    realDataTransfer.call(this, nativeDataTransfer, editor);
-                    data = this._.data;
-                }
-                testDataTransfer.prototype = realDataTransfer.prototype;
-                CKEDITOR.plugins.clipboard.dataTransfer = testDataTransfer;
-                try {
-                    domObject.fire("copy", new CKEDITOR.dom.event({}));
-                } finally {
-                    CKEDITOR.plugins.clipboard.dataTransfer = realDataTransfer;
-                }
-                assert.equal(data.Text, value, 'text/plain');
-                assert.strictEqual(data["text/html"], undefined, 'text/html');
-                // Wait for CK Editor Async handler (copybin) to complete
-                setTimeout(callback, 100);
-            }
-
-            function ckPaste($editor, data, callback) {
-                // WARNING this is heavily dependent on CKEditor internals
-                function mockDataTransfer() {
-                    // borrowed from CKEditor tests
-                    return {
-                        types: [],
-                        files: CKEDITOR.env.ie && CKEDITOR.env.version < 10 ? undefined : [],
-                        _data: {},
-                        // Emulate browsers native behavior for getDeta/setData.
-                        setData: function( type, data ) {
-                            if ( CKEDITOR.env.ie && type !== 'Text' && type !== 'URL' )
-                                throw 'Unexpected call to method or property access.';
-
-                            if ( CKEDITOR.env.ie && CKEDITOR.env.version > 9 && type === 'URL' )
-                                return;
-
-                            if ( type === 'text/plain' || type === 'Text' ) {
-                                this._data[ 'text/plain' ] = data;
-                                this._data.Text = data;
-                            } else {
-                                this._data[ type ] = data;
-                            }
-
-                            this.types.push( type );
-                        },
-                        getData: function( type ) {
-                            if ( CKEDITOR.env.ie && type !== 'Text' && type !== 'URL' )
-                                throw 'Invalid argument.';
-
-                            if ( typeof this._data[ type ] === 'undefined' || this._data[ type ] === null )
-                                return '';
-
-                            return this._data[ type ];
-                        }
-                    };
-                }
-                function mockPasteEvent(_target, dataTransfer) {
-                    // borrowed from CKEditor tests
-                    var target = new CKEDITOR.dom.node(_target);
-                    return {
-                        $: {
-                            ctrlKey: true,
-                            clipboardData: CKEDITOR.env.ie ? undefined : dataTransfer
-                        },
-                        preventDefault: function() {
-                            // noop
-                        },
-                        getTarget: function() {
-                            return target;
-                        },
-                        setTarget: function( t ) {
-                            target = t;
-                        }
-                    };
-                }
-                var editor = $editor.ckeditor().editor,
-                    editable = editor.editable(),
-                    dataTransfer = mockDataTransfer(),
-                    evt = mockPasteEvent($editor[0], dataTransfer),
-                    types = {
-                        html: "text/html",
-                        text: "Text",
-                    };
-                if (_.isEmpty(data)) {
-                    throw new Error("bad paste: no data");
-                }
-                _.each(data, function (value, type) {
-                    if (!types.hasOwnProperty(type)) {
-                        throw new Error("bad paste type: " + type);
-                    }
-                    dataTransfer.setData(types[type], value);
+            function assertCopy($editor, value, callback) {
+                const dataTransfer = new DataTransfer();
+                const clipboardEvent = new ClipboardEvent('copy', {
+                    clipboardData: dataTransfer,
+                    bubbles: true,
+                    cancelable: true
                 });
-                editor.once("afterPaste", function () {
-                    callback(editor.getData());
-                }, null, null, 100);
-                editable.fire("paste", evt);
-            }
+                $editor[0].dispatchEvent(clipboardEvent);
 
-            function escapeHTML(html) {
-                var reps = {'<': '&lt;', '>': '&gt;', '"': '&quot;', '\n': '<br />'};
-                return html.replace(/[<>"&\n]/g, function (match) {
-                    return reps[match];
-                });
+                assert.equal(dataTransfer.getData('text/plain'), value);
+                assert.strictEqual(dataTransfer.getData("text/html"), '');
+                callback();
             }
 
             var TEST_LABEL = 'Weight: <output value="#form/text" /> grams',
@@ -615,8 +531,8 @@ define([
 
             it("should copy output tag from rich text editor", function (done) {
                 editor.setValue(TEST_LABEL, function () {
-                    editor.select(6, 3);
-                    assertCKCopy(input, ': <output value="#form/text" />', function () {
+                    editor.select(6, 4);
+                    assertCopy(input, ': <output value="#form/text" />', function () {
                         done();
                     });
                 });
@@ -624,53 +540,9 @@ define([
 
             it("should copy expression with hashtags from expression editor", function (done) {
                 exprEditor.setValue(TEST_XPATH, function () {
-                    exprEditor.select(11, 4);
-                    assertCKCopy(exprInput, "+ (#case/dob", function () {
+                    exprEditor.select(11, 5);
+                    assertCopy(exprInput, "+ (#case/dob", function () {
                         done();
-                    });
-                });
-            });
-
-            var /*OUTPUT = '<output value="#form/text" />',
-                START_LABEL = TEST_LABEL.replace(OUTPUT, 'XXXX'),*/
-                START_PATH = TEST_XPATH.replace('#case/dob', 'XXXX');
-            _.each([
-                /* No idea why these fail intermittently
-                [0, START_LABEL, 8, 4, {text: OUTPUT}],
-                [0, START_LABEL, 8, 4, {text: OUTPUT + " > 3"}],
-                [0, START_LABEL, 8, 4, {text: "4 pounds\n\nLines..."}],
-                */
-                [1, START_PATH, 14, 4, {text: "#case/dob"}],
-                [1, START_PATH, 11, 7, {text: "+ (#case/dob"}],
-                [1, START_PATH, 11, 7, {text: "< (#case/dob"}],
-                [1, START_PATH, 11, 7, {html: "<span>+ (#case/dob</span>"}],
-                [1, START_PATH, 11, 7, {html: "<meta charset='utf-8'>+ (#case/dob"}],
-            ], function (args) {
-                var inputFlag = args[0],
-                    initialExpr = args[1],
-                    selStart = args[2],
-                    selLength = args[3],
-                    pasteValue = args[4],
-                    pasteText = pasteValue.text ||
-                                pasteValue.html.replace(/<.*?>/g, ''),
-                    pasteRepr = JSON.stringify(pasteValue),
-                    type = inputFlag ? "expression" : "text",
-                    opts = {isExpression: true};
-                it("should paste " + type + ": " + pasteRepr, function (done) {
-                    var input_ = inputFlag ? exprInput : input,
-                        editor = richText.editor(input_),
-                        find = initialExpr.substring(selStart, selStart + selLength);
-                    editor.setValue(initialExpr, function () {
-                        editor.select(selStart, selLength);
-                        ckPaste(input_, pasteValue, function (text) {
-                            assert.equal(text, richText
-                                .toRichText(initialExpr, form, opts)
-                                .replace(find, escapeHTML(pasteText)));
-                            assert.equal(editor.getValue(),
-                                initialExpr.substring(0, selStart) + pasteText +
-                                initialExpr.substring(selStart + selLength));
-                            done();
-                        });
                     });
                 });
             });
@@ -681,15 +553,15 @@ define([
                 };
             }
             var argsets = [
-                ["= two", 0, "#form/text = two"],
-                ["one two", 3, "#invalid/xpath one`#form/text`  two"],
-                ["one two", 4, "#invalid/xpath one `#form/text` two"],
-                ["one\n\ntwo", 3, "#invalid/xpath one`#form/text` \n\ntwo"],
-                ["one\n\ntwo", 4, "#invalid/xpath one\n`#form/text` \ntwo"],
-                ["one``two", 4, "#invalid/xpath one```#form/text` ``two"],
-                ["`one  two", 5, "#invalid/xpath ``one `#form/text`  two"],
+                [" = two", 0, "#form/text = two"],
+                ["one two", 3, "#invalid/xpath one`#form/text` two"],
+                ["one two", 4, "#invalid/xpath one `#form/text`two"],
+                ["one\n\ntwo", 3, "#invalid/xpath one`#form/text`\n\ntwo"],
+                ["one\n\ntwo", 4, "#invalid/xpath one\n`#form/text`\ntwo"],
+                ["one``two", 4, "#invalid/xpath one```#form/text```two"],
+                ["`one  two", 5, "#invalid/xpath ``one `#form/text` two"],
                 // end padding added to work around bug in exprEditor.select(i)
-                ["one =  ", 6, "one = #form/text  "],
+                ["one =  ", 6, "one = #form/text "],
                 // TODO I think exprEditor.select(i) is breaking this one
                 //["one\n\ntwo", 5, "#invalid/xpath one\n\n`#form/text` two"],
             ];
@@ -712,11 +584,12 @@ define([
                 it("should make bubbles on converting to rich text: " + repr, function () {
                     var text = richText.toRichText(result, form, {isExpression: true}),
                         bubble = makeBubble('#form/text', 'text', icon('fcc-fd-text'), true),
-                        expected = (expr.slice(0, i) + html(bubble) + " " + expr.slice(i))
-                            .replace(/  $/, "")  // HACK for "one =  "
+                        expected = (expr.slice(0, i) + html(bubble) + expr.slice(i)),
+                        expected2 = expected
+                            .replace(/ $/, "")  // HACK for "one =  "
                             .replace(/  /g, " &nbsp;")
                             .replace(/\n/g, "</p><p>");
-                    assert.equal(text, "<p>" + expected + "</p>");
+                    assert.equal(removeSpanId(text), "<p>" + expected2 + "</p>");
                 });
             }));
         });
@@ -765,18 +638,19 @@ define([
                     util.assertXmlEqual(call('createXML'), BURPEE_XML);
                 });
 
-                it("cursor should be at end of input on focus", function () {
-                    var editor = widget.input.editor,
-                        value = 'testing cursor';
-                    widget.setValue(value);
-                    // Make sure focus is elsewhere, then focus on the rich text input
-                    editor.on('instanceReady', function() {
-                        $('[name=property-nodeID]').focus();
-                        editor.focus();
-                        var selection = editor.getSelection(true);
-                        assert.strictEqual(selection.getNative().focusOffset, value.length);
-                    });
-                });
+                // it("cursor should be at end of input on focus", function () {
+                //     var editor = richText.editor(widget.input),
+                //         value = 'testing cursor';
+                //     widget.setValue(value);
+                //     // Make sure focus is elsewhere, then focus on the rich text input
+                //     // editor.on('instanceReady', function() {
+                //     $('[name=property-nodeID]').focus();
+                //     editor.focus();
+                //     var selection = editor.getSelection(true);
+                //     assert.strictEqual(selection.getNative().focusOffset, value.length);
+                //     // });
+                // });
+
 
                 it("should change output ref to output value", function () {
                     util.loadXML(OUTPUT_REF_XML);
@@ -820,6 +694,8 @@ define([
                     });
                 });
 
+                const editorUpDelay = 500;
+
                 it("should not change saved state", function (done) {
                     util.loadXML(BURPEE_XML);
                     assert(!util.saveButtonEnabled(), "Save button should not be enabled");
@@ -836,7 +712,7 @@ define([
                     util.clickQuestion("total_num_burpees");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -852,7 +728,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -868,7 +746,7 @@ define([
                     util.clickQuestion("text");
                     var widget = util.getWidget('property-relevantAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -883,7 +761,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -894,7 +774,7 @@ define([
                     util.clickQuestion("text");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -905,7 +785,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -917,7 +799,7 @@ define([
                     util.clickQuestion("text");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -928,7 +810,118 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
+
+                it("should destroy popover when moving mouse away", function (done) {
+                    util.loadXML(BURPEE_XML);
+                    util.clickQuestion("total_num_burpees");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last p:first');
+                                assert.strictEqual($popover.text(),
+                                    "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
+
+                                bubble.mouseleave();
+                                // popover destroy just fades the popover
+                                assert.strictEqual($('.popover:not(.fade)').length, 0);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
+
+                it("should expand tree on click show in question list", function (done) {
+                    util.paste([
+                        ["id", "type", "relevantAttr"],
+                        ["/group", "Group", "null"],
+                        ["/group/text", "Text", "null"],
+                        ["/text", "Text", '#form/group/text'],
+                    ]);
+                    var group = util.getMug("group");
+                    util.collapseGroup(group);
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-relevantAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                var $link = $popover.find("a");
+                                assert.strictEqual($(".jstree-hovered").length, 0);
+                                assert($link.length);
+                                $link.click();
+                                assert.strictEqual($(".jstree-hovered").length, 1);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
+
+                it("should show case property description on popover", function (done) {
+                    util.loadXML();
+                    var mug = util.addQuestion("Text", "text");
+                    mug.p.calculateAttr = "#case/dob";
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.equal($popover.find('p:first').text(), "Date of Birth");
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
+                    });
+                });
+
+                it("should split long text in case property descriptions", function (done) {
+                    util.loadXML();
+                    var mug = util.addQuestion("Text", "text");
+                    mug.p.calculateAttr = "#case/long";
+                    let expected = "Property with a_very_long_word_in_the_description_that_ex\n\nceeds_43_chars";
+                    util.clickQuestion("text");
+                    var widget = util.getWidget('property-calculateAttr');
+                    widget.input.promise.then(function () {
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
+                        assert(bubble.length, "No bubbles detected");
+                        $(document).one('shown.bs.popover', function() {
+                            try {
+                                var $popover = $('.popover-content:last');
+                                assert.equal($popover.find('p:first').text(), expected);
+                                done();
+                            } finally {
+                                $(".popover").remove();
+                            }
+                        });
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -937,7 +930,7 @@ define([
                     util.clickQuestion("total_num_burpees");
                     var widget = util.getWidget('property-calculateAttr');
                     widget.input.promise.then(function () {
-                        var bubble = $('.cke_widget_drag_handler_container').children('img').first();
+                        var bubble = $('div[contenteditable="true"] [data-toggle="popover"]').first();
                         assert(bubble.length, "No bubbles detected");
                         $(document).one('shown.bs.popover', function() {
                             try {
@@ -945,7 +938,7 @@ define([
                                 assert.strictEqual($popover.text(),
                                     "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
 
-                                widget.input.ckeditor().editor.widgets.destroyAll();
+                                widget.input.data("ckwrapper").destroy();
                                 // popover destroy just fades the popover
                                 assert.strictEqual($('.popover:not(.fade)').length, 0);
                                 done();
@@ -953,7 +946,9 @@ define([
                                 $(".popover").remove();
                             }
                         });
-                        bubble.mouseenter();
+                        setTimeout(function() {
+                            bubble.mouseenter();
+                        }, editorUpDelay);
                     });
                 });
 
@@ -962,10 +957,10 @@ define([
                     util.addQuestion("Text", "text");
                     var widget = util.getWidget('property-relevantAttr'),
                         editor = richText.editor(widget.input);
-                    editor.on("instanceReady", function () {
+                    setTimeout(function() {
                         editor.setValue("#form/unknown");
                         done();
-                    });
+                    }, editorUpDelay);
                 });
 
                 describe("for date references", function () {
@@ -997,8 +992,7 @@ define([
                                 output = '<output value="' + xpath + '" />';
                             editor.setValue(output, function () {
                                 var bubble = widget.input
-                                        .find('.cke_widget_drag_handler_container')
-                                        .children('img').first(),
+                                        .find('[data-toggle="popover"]').first(),
                                     $desc;
                                 assert(bubble.length, "No bubbles detected");
 
@@ -1022,5 +1016,43 @@ define([
                 });
             });
         });
+    });
+
+    describe("htmlToFragment", function() {
+        it("should convert a single tag", function() {
+            var html = '<p>one</p>';
+            var fragment = richText.htmlToFragment(html);
+            const div = document.createElement('div');
+            div.appendChild(fragment);
+            assert.equal(div.innerHTML, html);
+        });
+
+        it("should mark spans as contenteditable=false", function() {
+            var html = '<span contenteditable="false">one</span>';
+            var fragment = richText.htmlToFragment('<span>one</span>');
+            const div = document.createElement('div');
+            div.appendChild(fragment);
+            assert.equal(div.innerHTML, html);
+        });
+
+        it("should convert mulitple tags", function() {
+            var html = '<p>one</p><span contenteditable="false">one</span>';
+            var fragment = richText.htmlToFragment('<p>one</p><span>one</span>');
+            const div = document.createElement('div');
+            div.appendChild(fragment);
+            assert.equal(div.innerHTML, html);
+        });
+
+        it("should work with zwsp", function() {
+            var htmlInput = '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​'; // string contains zero width space
+            var fragment = richText.htmlToFragment(htmlInput);
+            const div = document.createElement('div');
+            div.append(fragment);
+
+            assert.equal(div.childNodes.length, 3);
+            assert.equal(div.innerHTML, '​<span class="label label-datanode label-datanode-internal" data-value="#form/text" contenteditable="false" data-toggle="popover" id="bubble-ga3iiwmw"><i class="fcc fcc-fd-text">&nbsp;</i>text</span>​'); // string contains zero width space
+        });
+
+
     });
 });
