@@ -812,8 +812,8 @@ define([
                 htmlMessage = util.markdown(msg.message);
             }
 
-            const context = {msg: msg, html: htmlMessage},
-                html = $(widget_control_message(context));
+            const context = {msg: msg, html: htmlMessage};
+            const html = $(widget_control_message(context));
 
             html.find("button.close").click(function () {
                 mug.dropMessage(path, msg.key);
