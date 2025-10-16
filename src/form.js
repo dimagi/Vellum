@@ -852,6 +852,8 @@ define([
                     this.moveMug(conflict, "rename", oldId);
                 }
             }
+
+            return updates;
         },
         changeMugType: function (mug, questionType) {
             var _this = this;
@@ -1128,6 +1130,7 @@ define([
             }
             ufids[mug.ufid] = null;
             var node = this.tree.getNodeFromMug(mug);
+            const absolutePath = mug.absolutePath;
             if (node) {
                 var children = node.getChildrenMugs();
                 for (var i = 0; i < children.length; i++) {
@@ -1146,6 +1149,7 @@ define([
             this.fire({
                 type: 'question-remove',
                 mug: mug,
+                absolutePath: absolutePath,
                 isInternal: isInternal,
             });
         },
