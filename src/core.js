@@ -2538,7 +2538,7 @@ define([
     };
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
-        form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
+        return form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
     };
 
     fn.duplicateMugProperties = function(mug) {};

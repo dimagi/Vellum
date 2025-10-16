@@ -383,6 +383,19 @@ define([
             assert.include(assignedCaseProperties, "two");
         });
 
+        it("should preserve child group mappings when the parent is renamed", function () {
+            util.loadXML(GROUP_MAPPINGS_XML);
+            const group1 = call("getMugByPath", "/data/group1");
+            const form = group1.form;
+            group1.p.nodeID = "group2";
+
+            // assert that the group1 mappings were transferred to group2
+            const one_paths = form.mappings.one.map(question => question.question_path);
+            assert.sameOrderedMembers(one_paths, ["/data/group2/q1"]);
+            const two_paths = form.mappings.two.map(question => question.question_path);
+            assert.sameOrderedMembers(two_paths, ["/data/group2/q2"]);
+        });
+
         describe("with no case management data", function () {
             beforeEach(function () {
                 const vellum = $("#vellum").vellum("get");
