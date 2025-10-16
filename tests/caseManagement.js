@@ -9,7 +9,8 @@ define([
     'static/caseManagement/baseline_no_mapping_block.xml',
     'static/caseManagement/multiple_properties.xml',
     'static/caseManagement/extra_question_attrs.xml',
-    'static/caseManagement/property_conflict.xml'
+    'static/caseManagement/property_conflict.xml',
+    'static/caseManagement/group_mappings.xml'
 ], function (
     chai,
     $,
@@ -19,7 +20,8 @@ define([
     BASELINE_NO_MAPPING_XML,
     MULTIPLE_PROPERTIES_XML,
     EXTRA_QUESTION_ATTRS_XML,
-    PROPERTY_CONFLICT_XML
+    PROPERTY_CONFLICT_XML,
+    GROUP_MAPPINGS_XML
 ) {
     const assert = chai.assert;
     const call = util.call;
@@ -356,6 +358,29 @@ define([
             });
 
             chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", ""]);
+        });
+
+        it("should remove child mappings when parent group is deleted", function () {
+            util.loadXML(GROUP_MAPPINGS_XML);
+            const group1 = call("getMugByPath", "/data/group1");
+            const form = group1.form;
+            form.removeMugsFromForm([group1]);
+
+            const assignedCaseProperties = Object.keys(form.mappings);
+            assert.notInclude(assignedCaseProperties, "one");
+            assert.notInclude(assignedCaseProperties, "two");
+        });
+
+        it("should restore mappings when a deletion is undone", function () {
+            util.loadXML(GROUP_MAPPINGS_XML);
+            const group1 = call("getMugByPath", "/data/group1");
+            const form = group1.form;
+            form.removeMugsFromForm([group1]);
+            form.undo();
+
+            const assignedCaseProperties = Object.keys(form.mappings);
+            assert.include(assignedCaseProperties, "one");
+            assert.include(assignedCaseProperties, "two");
         });
 
         describe("with no case management data", function () {

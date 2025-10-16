@@ -228,6 +228,10 @@ define([
         }
 
         moveMappings (prevPath, newPath) {
+            /*
+            Move all existing mappings from prevPath to newPath.
+            If newPath is falsy, remove all mappings from prevPath.
+            */
             if (!this.form.hasOwnProperty('mappingsByQuestion')) {
                 return;
             }
@@ -243,16 +247,31 @@ define([
             const case_properties = prevMappings.slice();
             // move those case properties from prevPath to newPath
             delete this.form.mappingsByQuestion[prevPath];
-            this.form.mappingsByQuestion[newPath] = case_properties;
+            
+            if (newPath) {
+                this.form.mappingsByQuestion[newPath] = case_properties;
+            }
 
             // rebuild mappings by case
             case_properties.forEach(case_property => {
                 const questions = this.form.mappings[case_property];
                 const index = questions.findIndex((question) => question.question_path === prevPath);
                 if (index !== -1) {
-                    questions[index].question_path = newPath;
+                    if (newPath) {
+                        questions[index].question_path = newPath;
+                    } else {
+                        // just remove the element
+                        questions.splice(index, 1);
+                        if (questions.length === 0) {
+                            delete this.form.mappings[case_property];
+                        }
+                    }
                 }
             });
+        }
+
+        removeMappings (path) {
+            this.moveMappings(path, null);
         }
     }
 
@@ -303,6 +322,26 @@ define([
                 this.opts().caseManagement.properties,
                 this.opts().caseManagement.view_form_url
             );
+        },
+
+        loadXML: function () {
+            this.__callOld();
+            const form = this.data.core.form;
+
+            form.on('question-remove', function (e) {
+                const maintainer = new CaseMapMaintainer(form);
+                maintainer.removeMappings(e.absolutePath);
+            });
+            form.on('question-create', function (e) {
+                // this will get called when a deletion is undone.
+                // Ensure that we restore the previously deleted mappings, if present
+                const maintainer = new CaseMapMaintainer(form);
+                const mug = e.mug;
+                const case_property = mug.p.case_property;
+                if (case_property) {
+                    maintainer.updateFormMappings(mug.absolutePath, null, case_property);
+                }
+            });
         },
 
         performAdditionalParsing: function (form, xml) {
