@@ -243,18 +243,15 @@ define([
                 return;
             }
 
-            // otherwise, record the affected case properties
-            const case_properties = prevMappings.slice();
             // move those case properties from prevPath to newPath
             delete this.form.mappingsByQuestion[prevPath];
-            
             if (newPath) {
-                this.form.mappingsByQuestion[newPath] = case_properties;
+                this.form.mappingsByQuestion[newPath] = prevMappings;
             }
 
             // rebuild mappings by case
-            case_properties.forEach(case_property => {
-                const questions = this.form.mappings[case_property];
+            prevMappings.forEach(caseProperty => {
+                const questions = this.form.mappings[caseProperty];
                 const index = questions.findIndex((question) => question.question_path === prevPath);
                 if (index !== -1) {
                     if (newPath) {
@@ -263,7 +260,7 @@ define([
                         // just remove the element
                         questions.splice(index, 1);
                         if (questions.length === 0) {
-                            delete this.form.mappings[case_property];
+                            delete this.form.mappings[caseProperty];
                         }
                     }
                 }
