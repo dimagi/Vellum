@@ -392,9 +392,9 @@ define([
                 help: {
                     title: gettext('Case Management'),
                     text: gettext(
-                        'Saving a question as a case property makes it accessible and reuseable ' +
-                        'across your application. Case properties can be tracked and updated ' +
-                        'over time.'
+                        'Saving a question as a case property makes it accessible and reusable ' +
+                        'across your application. To manage all your case properties from this form, ' +
+                        'click on the Manage Case button. '
                     ),
                     link: 'https://dimagi.atlassian.net/wiki/spaces/commcarepublic' +
                         '/pages/2143955170/Case+Management+Overview',
