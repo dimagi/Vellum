@@ -65,6 +65,7 @@ require(['jquery.vellum'], function () {
         'tests/escapedHashtags',
         'tests/bulkActions',
         'tests/undomanager',
+        'tests/undo',
         'tests/commcareConnect',
         'tests/caseManagement',
     ], function ($, options) {
@@ -115,7 +116,7 @@ require(['jquery.vellum'], function () {
         $('#load-saved').click(function () {
             load(session.getItem("vellum.tests.main.lastSavedForm") || "");
         });
-        
+
         if (navigator.userAgent.indexOf('HeadlessChrome') >= 0) {
             load("", function () { mocha.run(); });
         } else if (/[?&]load=saved(&|#|$)/.test(window.location.href)) {
