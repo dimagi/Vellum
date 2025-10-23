@@ -151,11 +151,12 @@ define([
 
                 const fragment = htmlToFragment(content);
                 range.insertNode(fragment);
-                range.collapse(false);
+                range.collapse();
 
                 if (insertSpaces) {
                     const trailingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE);
                     range.insertNode(trailingSpaceNode);
+                    range.collapse();
                 }
                 fragment.childNodes.forEach(child => {
                     if (child.getAttribute && child.getAttribute('data-toggle')) {
