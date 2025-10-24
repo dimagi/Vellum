@@ -69,7 +69,7 @@ define([
     }
 
     class CaseMappingsBuilder {
-        updateMappingsFromXML (data, xml, preserveMappings) {
+        updateMappingsFromXML (form, data, xml, preserveMappings) {
             if (!preserveMappings) {
                 // reset mapping data -- used by tests to prevent side effects from loadXML
                 data.caseMappings = {};
@@ -85,10 +85,10 @@ define([
                 const mappingElements = caseMappingSection.children().toArray();
                 data.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
                 data.caseMappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(data.caseMappings);
-            } else {
-                // TODO: if the form still has mappings, ensure that the active mappings still
-                // point to questions that exist
             }
+
+            const maintainer = new CaseMapMaintainer(form, data);
+            maintainer.pruneInvalidMappings();
         }
 
         buildMappingsFromXMLElements (mappingElements) {
@@ -287,6 +287,15 @@ define([
         removeMappings (path) {
             this.moveMappings(path, null);
         }
+
+        pruneInvalidMappings () {
+            Object.keys(this.data.mappingsByQuestion).forEach(questionPath => {
+                const mug = this.form.getMugByPath(questionPath);
+                if (!mug) {
+                    this.removeMappings(questionPath);
+                }
+            });
+        }
     }
 
     class CaseManager {
@@ -377,7 +386,7 @@ define([
                 data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
             } else {
                 const preserveMappings = !(parserOptions && parserOptions.reset);
-                builder.updateMappingsFromXML(data, xml, preserveMappings);
+                builder.updateMappingsFromXML(form, data, xml, preserveMappings);
             }
         },
 
