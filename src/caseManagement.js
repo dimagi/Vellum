@@ -69,7 +69,13 @@ define([
     }
 
     class CaseMappingsBuilder {
-        updateMappingsFromXML (form, data, xml) {
+        updateMappingsFromXML (form, data, xml, preserveMappings) {
+            if (!preserveMappings) {
+                // reset mapping data -- used by tests to prevent side effects from loadXML
+                data.mappings = {};
+                data.mappingsByQuestion = {};
+            }
+
             if (!xml) {
                 return;
             }
@@ -359,7 +365,7 @@ define([
             });
         },
 
-        performAdditionalParsing: function (form, xml) {
+        performAdditionalParsing: function (form, xml, parserOptions) {
             this.__callOld();
 
             const data = this.data.caseManagement;
@@ -374,7 +380,8 @@ define([
                 const builder = new CaseMappingsBuilder();
                 data.mappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.mappings);
             } else {
-                builder.updateMappingsFromXML(form, data, xml);
+                const preserveMappings = !(parserOptions && parserOptions.reset);
+                builder.updateMappingsFromXML(form, data, xml, preserveMappings);
             }
         },
 
