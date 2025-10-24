@@ -641,8 +641,8 @@ define([
                 type: 'change'
             });
         },
-        createXML: function () {
-            return writer.createXForm(this);
+        createXML: function (addPresentationXML) {
+            return writer.createXForm(this, addPresentationXML);
         },
         /**
          * Walks through internal tree and grabs

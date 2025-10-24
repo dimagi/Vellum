@@ -59,13 +59,13 @@ define([
 
         it("preserves case mapping between loading and writing XML", function () {
             util.loadXML(BASELINE_XML);
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             util.assertXmlEqual(xml, BASELINE_XML);
         });
 
         it("outputs an empty mapping block if form lacks mappings data", function () {
             util.loadXML(BASELINE_NO_MAPPING_XML);
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             const xmlDoc = $.parseXML(xml);
             const $xml = $(xmlDoc);
             const mappings = $xml.find("case_mappings");
@@ -157,7 +157,7 @@ define([
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("one").trigger("change");
 
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
             chai.expect(mappings.length).to.equal(1);
@@ -177,7 +177,7 @@ define([
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("two").trigger("change");
 
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
             chai.expect(mappings.length).to.equal(1);
@@ -197,7 +197,7 @@ define([
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("two").trigger("change");
 
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
             chai.expect(mappings.length).to.equal(1);
@@ -431,7 +431,7 @@ define([
             it ("should exclude case mappings from XML", function () {
                 util.loadXML(BASELINE_XML);  // baseline includes case mappings
 
-                const xml = call("createXML");
+                const xml = call("createXML", true);
                 const xmlDoc = $.parseXML(xml);
                 const $xml = $(xmlDoc);
                 const mappings = $xml.find("case_mappings");
