@@ -310,10 +310,13 @@ define([
 
             question1.p.nodeID = "question3";
 
-            const question_paths = question1.form.caseMappings.one.map(questionObj => questionObj.question_path);
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+            const question_paths = caseManagementData.caseMappings.one.map(
+                questionObj => questionObj.question_path);
             assert.sameOrderedMembers(question_paths, ['/data/question3', '/data/question2']);
-            assert.sameOrderedMembers(question1.form.caseMappingsByQuestion['/data/question3'], ['one']);
-            assert.notExists(question1.form.caseMappingsByQuestion['/data/question1']);
+            assert.sameOrderedMembers(caseManagementData.caseMappingsByQuestion['/data/question3'], ['one']);
+            assert.notExists(caseManagementData.caseMappingsByQuestion['/data/question1']);
         });
 
         it("should add custom options to future dropdowns", function () {
@@ -366,7 +369,8 @@ define([
             const form = group1.form;
             form.removeMugsFromForm([group1]);
 
-            const assignedCaseProperties = Object.keys(form.caseMappings);
+            const vellum = $("#vellum").vellum("get");
+            const assignedCaseProperties = Object.keys(vellum.data.caseManagement.caseMappings);
             assert.notInclude(assignedCaseProperties, "one");
             assert.notInclude(assignedCaseProperties, "two");
         });
@@ -378,7 +382,8 @@ define([
             form.removeMugsFromForm([group1]);
             form.undo();
 
-            const assignedCaseProperties = Object.keys(form.caseMappings);
+            const vellum = $("#vellum").vellum("get");
+            const assignedCaseProperties = Object.keys(vellum.data.caseManagement.caseMappings);
             assert.include(assignedCaseProperties, "one");
             assert.include(assignedCaseProperties, "two");
         });
@@ -386,13 +391,14 @@ define([
         it("should preserve child group mappings when the parent is renamed", function () {
             util.loadXML(GROUP_MAPPINGS_XML);
             const group1 = call("getMugByPath", "/data/group1");
-            const form = group1.form;
             group1.p.nodeID = "group2";
 
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
             // assert that the group1 mappings were transferred to group2
-            const one_paths = form.caseMappings.one.map(question => question.question_path);
+            const one_paths = caseManagementData.caseMappings.one.map(question => question.question_path);
             assert.sameOrderedMembers(one_paths, ["/data/group2/q1"]);
-            const two_paths = form.caseMappings.two.map(question => question.question_path);
+            const two_paths = caseManagementData.caseMappings.two.map(question => question.question_path);
             assert.sameOrderedMembers(two_paths, ["/data/group2/q2"]);
         });
 
