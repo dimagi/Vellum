@@ -289,7 +289,7 @@ define([
         }
 
         pruneInvalidMappings () {
-            Object.keys(this.data.mappingsByQuestion).forEach(questionPath => {
+            Object.keys(this.data.caseMappingsByQuestion).forEach(questionPath => {
                 const mug = this.form.getMugByPath(questionPath);
                 if (!mug) {
                     this.removeMappings(questionPath);

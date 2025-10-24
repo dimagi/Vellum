@@ -10,7 +10,8 @@ define([
     'static/caseManagement/multiple_properties.xml',
     'static/caseManagement/extra_question_attrs.xml',
     'static/caseManagement/property_conflict.xml',
-    'static/caseManagement/group_mappings.xml'
+    'static/caseManagement/group_mappings.xml',
+    'static/caseManagement/invalid_mapping.xml'
 ], function (
     chai,
     $,
@@ -21,7 +22,8 @@ define([
     MULTIPLE_PROPERTIES_XML,
     EXTRA_QUESTION_ATTRS_XML,
     PROPERTY_CONFLICT_XML,
-    GROUP_MAPPINGS_XML
+    GROUP_MAPPINGS_XML,
+    INVALID_MAPPING_XML
 ) {
     const assert = chai.assert;
     const call = util.call;
@@ -411,6 +413,31 @@ define([
             const CONFLICT_MSG_KEY = "mug-caseProperty-conflict";
             const message = question1.messages.get("caseProperty", CONFLICT_MSG_KEY);
             assert.isNull(message);
+        });
+
+        it("should remove invalid mappings", function () {
+            // this XML only contains "question1",
+            // but its sole mapping is for "question2"
+            util.loadXML(INVALID_MAPPING_XML);
+
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+
+            assert.deepEqual(caseManagementData.caseMappings, {});
+        });
+
+        it("should preserve mappings for xml loaded without case mapping information", function () {
+            // If the user pastes old xml into the edit xml modal, we don't want them accidentally
+            // deleting all case mapping information
+            util.loadXML(BASELINE_XML); // establishes a mapping: "one"->"/data/question1"
+            // false does not reset the data, which is how the edit xml modal behaves
+            util.loadXML(BASELINE_NO_MAPPING_XML, undefined, undefined, undefined, false);
+
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+
+            const one_paths = caseManagementData.caseMappings.one.map(question => question.question_path);
+            assert.sameOrderedMembers(one_paths, ["/data/question1"]);
         });
 
         describe("with no case management data", function () {
