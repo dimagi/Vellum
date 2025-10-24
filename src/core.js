@@ -2637,7 +2637,7 @@ define([
         if (typeof saveCallback === "function") {
             saveCallback(data);
         }
-    }
+    };
 
     fn.augmentSentData = function (data, saveType) {
         return data;
