@@ -69,7 +69,7 @@ define([
     }
 
     class CaseMappingsBuilder {
-        updateMappingsFromXML (data, xml) {
+        updateMappingsFromXML (form, data, xml) {
             if (!xml) {
                 return;
             }
@@ -79,10 +79,10 @@ define([
                 const mappingElements = caseMappingSection.children().toArray();
                 data.mappings = this.buildMappingsFromXMLElements(mappingElements);
                 data.mappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(data.mappings);
-            } else {
-                // TODO: if the form still has mappings, ensure that the active mappings still
-                // point to questions that exist
             }
+
+            const maintainer = new CaseMapMaintainer(form, data);
+            maintainer.pruneInvalidMappings();
         }
 
         buildMappingsFromXMLElements (mappingElements) {
@@ -276,6 +276,15 @@ define([
         removeMappings (path) {
             this.moveMappings(path, null);
         }
+
+        pruneInvalidMappings () {
+            Object.keys(this.data.mappingsByQuestion).forEach(questionPath => {
+                const mug = this.form.getMugByPath(questionPath);
+                if (!mug) {
+                    this.removeMappings(questionPath);
+                }
+            });
+        }
     }
 
     class CaseManager {
@@ -365,7 +374,7 @@ define([
                 const builder = new CaseMappingsBuilder();
                 data.mappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.mappings);
             } else {
-                builder.updateMappingsFromXML(data, xml);
+                builder.updateMappingsFromXML(form, data, xml);
             }
         },
 
