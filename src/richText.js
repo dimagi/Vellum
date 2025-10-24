@@ -59,9 +59,9 @@ define([
         ZERO_WIDTH_SPACE = "\u200B";
 
     function htmlToFragment(html) {
-        const parser = new DOMParser(),
-              doc = parser.parseFromString(html, 'text/html'),
-              fragment = document.createDocumentFragment();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const fragment = document.createDocumentFragment();
 
         Array.from(doc.body.childNodes).forEach(child => {
             if (child.tagName === 'SPAN') {
@@ -150,6 +150,12 @@ define([
                 }
 
                 const fragment = htmlToFragment(content);
+                const nodesNeedingPopovers = [];
+                fragment.childNodes.forEach(child => {
+                    if (child.getAttribute && child.getAttribute('data-toggle')) {
+                        nodesNeedingPopovers.push(child);
+                    }
+                });
                 range.insertNode(fragment);
                 range.collapse();
 
@@ -158,11 +164,11 @@ define([
                     range.insertNode(trailingSpaceNode);
                     range.collapse();
                 }
-                fragment.childNodes.forEach(child => {
-                    if (child.getAttribute && child.getAttribute('data-toggle')) {
-                        createPopover(child);
-                    }
+
+                nodesNeedingPopovers.forEach(node => {
+                    createPopover(node);
                 });
+
                 inputElement.focus();
 
                 const inputEvent = new Event('input', {
@@ -203,6 +209,18 @@ define([
             if ((key === 'z' || key === 'Z') &&
                     (ctrlKey || metaKey)) {
                 e.preventDefault();
+                
+                // Close any open popovers before undo/redo to prevent orphaned popovers
+                inputElement
+                    .querySelectorAll('[data-toggle="popover"]')
+                    .forEach(element => {
+                        try {
+                            $(element).popover('hide');
+                        } catch (err) {
+                            // Popover may not be initialized yet
+                        }
+                    });
+                
                 if (e.shiftKey) {
                     undoStack.redo();
                 } else {
