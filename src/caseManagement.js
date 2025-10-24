@@ -353,7 +353,7 @@ define([
             });
         },
 
-        performAdditionalParsing: function (form, xml) {
+        performAdditionalParsing: function (form, xml, parserOptions) {
             this.__callOld();
 
             const data = this.data.caseManagement;
