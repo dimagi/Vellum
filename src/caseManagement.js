@@ -3,11 +3,13 @@ define([
     'vellum/mugs',
     'vellum/util',
     'vellum/widgets',
+    'vellum/caseDiff'
 ], function (
     $,
     mugs,
     util,
-    widgets
+    widgets,
+    caseDiff
 ) {
     'use strict';
 
@@ -67,17 +69,20 @@ define([
     }
 
     class CaseMappingsBuilder {
-        updateMappings (data, xml) {
-            let mappingElements = [];
-            // XML should always be present in real environments,
-            // but can be empty when developing vellum
-            if (xml) {
-                const caseMappingSection = xml.find(':root > case_mappings');
-                mappingElements = caseMappingSection.children().toArray();
+        updateMappingsFromXML (data, xml) {
+            if (!xml) {
+                return;
             }
 
-            data.mappings = this.buildMappingsFromXMLElements(mappingElements);
-            data.mappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(data.mappings);
+            const caseMappingSection = xml.find(':root > case_mappings');
+            if (caseMappingSection.length > 0) {
+                const mappingElements = caseMappingSection.children().toArray();
+                data.mappings = this.buildMappingsFromXMLElements(mappingElements);
+                data.mappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(data.mappings);
+            } else {
+                // TODO: if the form still has mappings, ensure that the active mappings still
+                // point to questions that exist
+            }
         }
 
         buildMappingsFromXMLElements (mappingElements) {
@@ -316,9 +321,6 @@ define([
             data.isActive = !!data.properties;
 
             data.baseline = this.opts().caseManagement.mappings || {};
-            data.mappings = JSON.parse(JSON.stringify(data.baseline));
-            const builder = new CaseMappingsBuilder();
-            data.mappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.mappings);
             data.view_form_url = this.opts().caseManagement.view_form_url;
 
             this.caseManager = new CaseManager(
@@ -358,7 +360,13 @@ define([
             }
 
             const builder = new CaseMappingsBuilder();
-            builder.updateMappings(data, xml);
+            if (!data.mappings) {
+                data.mappings = JSON.parse(JSON.stringify(data.baseline));
+                const builder = new CaseMappingsBuilder();
+                data.mappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.mappings);
+            } else {
+                builder.updateMappingsFromXML(data, xml);
+            }
         },
 
         contributeToAdditionalXML: function (xmlWriter, form) {
@@ -513,6 +521,34 @@ define([
             });
 
             return updates;
+        },
+
+        onFormSave: function (data) {
+            this.__callOld();
+
+            if (!this.data.caseManagement.isActive) {
+                return;
+            }
+
+            // clone the existing mappings and overwrite the baseline
+            const newBaseline = JSON.parse(JSON.stringify(this.data.caseManagement.mappings));
+            this.data.caseManagement.baseline = newBaseline;
+        },
+
+        augmentSentData: function (data, saveType) {
+            const result = this.__callOld();
+
+            if (!this.data.caseManagement.isActive) {
+                return result;
+            }
+
+            const baseline = this.data.caseManagement.baseline;
+            const current = this.data.caseManagement.mappings;
+
+            const mappingDiff = caseDiff.compareCaseMappings(baseline, current);
+            result.mapping_diff = JSON.stringify(mappingDiff);
+
+            return result;
         }
 
     });
