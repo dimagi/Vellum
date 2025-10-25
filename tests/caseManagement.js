@@ -440,6 +440,17 @@ define([
             assert.sameOrderedMembers(one_paths, ["/data/question1"]);
         });
 
+        it("should override existing mappings", function () {
+            util.loadXML(BASELINE_NO_MAPPING_XML);
+            util.loadXML(BASELINE_XML, undefined, undefined, undefined, false);
+
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+
+            const one_paths = caseManagementData.mappings.one.map(question => question.question_path);
+            assert.sameOrderedMembers(one_paths, ["/data/question1"]);
+        });
+
         describe("with no case management data", function () {
             beforeEach(function () {
                 const vellum = $("#vellum").vellum("get");
