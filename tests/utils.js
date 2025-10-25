@@ -254,13 +254,14 @@ define([
     }
 
     // load XML syncronously
-    function loadXML(value, options, ignoreParseWarnings, maintainUrlHash) {
+    function loadXML(value, options, ignoreParseWarnings, maintainUrlHash, reset=true) {
         var warnings = [], data = call("getData");
         if (!maintainUrlHash){
             window.history.replaceState(null, null, " ");
         }
         data.core.parseWarnings = [];
-        call("loadXML", value, options || {});
+        const parserOptions = { reset };
+        call("loadXML", value, options || {}, parserOptions);
         if (!ignoreParseWarnings) {
             warnings = data.core.parseWarnings;
         } else if (_.isRegExp(ignoreParseWarnings)) {

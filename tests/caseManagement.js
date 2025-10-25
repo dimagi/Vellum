@@ -4,32 +4,35 @@ define([
     'chai',
     'jquery',
     'underscore',
+    'vellum/xml',
     'tests/utils',
     'static/caseManagement/baseline.xml',
     'static/caseManagement/baseline_no_mapping_block.xml',
     'static/caseManagement/multiple_properties.xml',
     'static/caseManagement/extra_question_attrs.xml',
     'static/caseManagement/property_conflict.xml',
-    'static/caseManagement/group_mappings.xml'
+    'static/caseManagement/group_mappings.xml',
+    'static/caseManagement/invalid_mapping.xml'
 ], function (
     chai,
     $,
     _,
+    xmlLib,
     util,
     BASELINE_XML,
     BASELINE_NO_MAPPING_XML,
     MULTIPLE_PROPERTIES_XML,
     EXTRA_QUESTION_ATTRS_XML,
     PROPERTY_CONFLICT_XML,
-    GROUP_MAPPINGS_XML
+    GROUP_MAPPINGS_XML,
+    INVALID_MAPPING_XML
 ) {
     const assert = chai.assert;
     const call = util.call;
 
     function getMappingAndQuestionElementsFromXML(xml) {
-        const xmlDoc = $.parseXML(xml);
-        const $xml = $(xmlDoc);
-        const mappings = $xml.find("case_mappings > mapping");
+        const $xml = xmlLib.parseXML(xml);
+        const mappings = $xml.find("vellum\\:case_mappings > mapping");
         const mappedQuestions = mappings.find("question");
 
         return [mappings, mappedQuestions];
@@ -59,16 +62,15 @@ define([
 
         it("preserves case mapping between loading and writing XML", function () {
             util.loadXML(BASELINE_XML);
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             util.assertXmlEqual(xml, BASELINE_XML);
         });
 
         it("outputs an empty mapping block if form lacks mappings data", function () {
             util.loadXML(BASELINE_NO_MAPPING_XML);
-            const xml = call("createXML");
-            const xmlDoc = $.parseXML(xml);
-            const $xml = $(xmlDoc);
-            const mappings = $xml.find("case_mappings");
+            const xml = call("createXML", true);
+            const $xml = xmlLib.parseXML(xml);
+            const mappings = $xml.find("vellum\\:case_mappings");
 
             // ensure the case mappings block is present, but that it contains no concrete mappings
             assert.equal(mappings.length, 1);
@@ -157,7 +159,7 @@ define([
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("one").trigger("change");
 
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
             chai.expect(mappings.length).to.equal(1);
@@ -177,7 +179,7 @@ define([
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("two").trigger("change");
 
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
             chai.expect(mappings.length).to.equal(1);
@@ -197,7 +199,7 @@ define([
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
             casePropertySelect.val("two").trigger("change");
 
-            const xml = call("createXML");
+            const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
             chai.expect(mappings.length).to.equal(1);
@@ -310,10 +312,12 @@ define([
 
             question1.p.nodeID = "question3";
 
-            const question_paths = question1.form.mappings.one.map(questionObj => questionObj.question_path);
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+            const question_paths = caseManagementData.mappings.one.map(questionObj => questionObj.question_path);
             assert.sameOrderedMembers(question_paths, ['/data/question3', '/data/question2']);
-            assert.sameOrderedMembers(question1.form.mappingsByQuestion['/data/question3'], ['one']);
-            assert.notExists(question1.form.mappingsByQuestion['/data/question1']);
+            assert.sameOrderedMembers(caseManagementData.mappingsByQuestion['/data/question3'], ['one']);
+            assert.notExists(caseManagementData.mappingsByQuestion['/data/question1']);
         });
 
         it("should add custom options to future dropdowns", function () {
@@ -366,7 +370,8 @@ define([
             const form = group1.form;
             form.removeMugsFromForm([group1]);
 
-            const assignedCaseProperties = Object.keys(form.mappings);
+            const vellum = $("#vellum").vellum("get");
+            const assignedCaseProperties = Object.keys(vellum.data.caseManagement.mappings);
             assert.notInclude(assignedCaseProperties, "one");
             assert.notInclude(assignedCaseProperties, "two");
         });
@@ -378,7 +383,8 @@ define([
             form.removeMugsFromForm([group1]);
             form.undo();
 
-            const assignedCaseProperties = Object.keys(form.mappings);
+            const vellum = $("#vellum").vellum("get");
+            const assignedCaseProperties = Object.keys(vellum.data.caseManagement.mappings);
             assert.include(assignedCaseProperties, "one");
             assert.include(assignedCaseProperties, "two");
         });
@@ -386,14 +392,51 @@ define([
         it("should preserve child group mappings when the parent is renamed", function () {
             util.loadXML(GROUP_MAPPINGS_XML);
             const group1 = call("getMugByPath", "/data/group1");
-            const form = group1.form;
             group1.p.nodeID = "group2";
 
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
             // assert that the group1 mappings were transferred to group2
-            const one_paths = form.mappings.one.map(question => question.question_path);
+            const one_paths = caseManagementData.mappings.one.map(question => question.question_path);
             assert.sameOrderedMembers(one_paths, ["/data/group2/q1"]);
-            const two_paths = form.mappings.two.map(question => question.question_path);
+            const two_paths = caseManagementData.mappings.two.map(question => question.question_path);
             assert.sameOrderedMembers(two_paths, ["/data/group2/q2"]);
+        });
+
+        it("should remove invalid mappings", function () {
+            // this XML only contains "question1",
+            // but its sole mapping is for "question2"
+            util.loadXML(INVALID_MAPPING_XML);
+
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+
+            assert.deepEqual(caseManagementData.mappings, {});
+        });
+
+        it("should preserve mappings for xml loaded without case mapping information", function () {
+            // If the user pastes old xml into the edit xml modal, we don't want them accidentally
+            // deleting all case mapping information
+            util.loadXML(BASELINE_XML); // establishes a mapping: "one"->"/data/question1"
+            // false does not reset the data, which is how the edit xml modal behaves
+            util.loadXML(BASELINE_NO_MAPPING_XML, undefined, undefined, undefined, false);
+
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+
+            const one_paths = caseManagementData.mappings.one.map(question => question.question_path);
+            assert.sameOrderedMembers(one_paths, ["/data/question1"]);
+        });
+
+        it("should override existing mappings", function () {
+            util.loadXML(BASELINE_NO_MAPPING_XML);
+            util.loadXML(BASELINE_XML, undefined, undefined, undefined, false);
+
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+
+            const one_paths = caseManagementData.mappings.one.map(question => question.question_path);
+            assert.sameOrderedMembers(one_paths, ["/data/question1"]);
         });
 
         describe("with no case management data", function () {
@@ -414,10 +457,9 @@ define([
             it ("should exclude case mappings from XML", function () {
                 util.loadXML(BASELINE_XML);  // baseline includes case mappings
 
-                const xml = call("createXML");
-                const xmlDoc = $.parseXML(xml);
-                const $xml = $(xmlDoc);
-                const mappings = $xml.find("case_mappings");
+                const xml = call("createXML", true);
+                const $xml = xmlLib.parseXML(xml);
+                const mappings = $xml.find("vellum\\:case_mappings");
 
                 // ensure no mappings are created in XML
                 assert.equal(mappings.length, 0);
