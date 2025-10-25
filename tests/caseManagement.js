@@ -4,6 +4,7 @@ define([
     'chai',
     'jquery',
     'underscore',
+    'vellum/xml',
     'tests/utils',
     'static/caseManagement/baseline.xml',
     'static/caseManagement/baseline_no_mapping_block.xml',
@@ -16,6 +17,7 @@ define([
     chai,
     $,
     _,
+    xmlLib,
     util,
     BASELINE_XML,
     BASELINE_NO_MAPPING_XML,
@@ -29,8 +31,7 @@ define([
     const call = util.call;
 
     function getMappingAndQuestionElementsFromXML(xml) {
-        const xmlDoc = $.parseXML(xml);
-        const $xml = $(xmlDoc);
+        const $xml = xmlLib.parseXML(xml);
         const mappings = $xml.find("case_mappings > mapping");
         const mappedQuestions = mappings.find("question");
 
@@ -68,8 +69,7 @@ define([
         it("outputs an empty mapping block if form lacks mappings data", function () {
             util.loadXML(BASELINE_NO_MAPPING_XML);
             const xml = call("createXML", true);
-            const xmlDoc = $.parseXML(xml);
-            const $xml = $(xmlDoc);
+            const $xml = xmlLib.parseXML(xml);
             const mappings = $xml.find("case_mappings");
 
             // ensure the case mappings block is present, but that it contains no concrete mappings
@@ -459,8 +459,7 @@ define([
                 util.loadXML(BASELINE_XML);  // baseline includes case mappings
 
                 const xml = call("createXML", true);
-                const xmlDoc = $.parseXML(xml);
-                const $xml = $(xmlDoc);
+                const $xml = xmlLib.parseXML(xml);
                 const mappings = $xml.find("case_mappings");
 
                 // ensure no mappings are created in XML
