@@ -28,9 +28,9 @@
 			<label ref="jr:itext('question1-label')" />
 		</input>
 	</h:body>
-	<case_mappings>
+	<vellum:case_mappings>
 		<mapping property="one">
 			<question question_path="/data/question1" update_mode="edit" />
 		</mapping>
-	</case_mappings>
+	</vellum:case_mappings>
 </h:html>
