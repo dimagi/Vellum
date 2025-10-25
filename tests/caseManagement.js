@@ -32,7 +32,7 @@ define([
 
     function getMappingAndQuestionElementsFromXML(xml) {
         const $xml = xmlLib.parseXML(xml);
-        const mappings = $xml.find("case_mappings > mapping");
+        const mappings = $xml.find("vellum\\:case_mappings > mapping");
         const mappedQuestions = mappings.find("question");
 
         return [mappings, mappedQuestions];
@@ -70,7 +70,7 @@ define([
             util.loadXML(BASELINE_NO_MAPPING_XML);
             const xml = call("createXML", true);
             const $xml = xmlLib.parseXML(xml);
-            const mappings = $xml.find("case_mappings");
+            const mappings = $xml.find("vellum\\:case_mappings");
 
             // ensure the case mappings block is present, but that it contains no concrete mappings
             assert.equal(mappings.length, 1);
@@ -447,7 +447,7 @@ define([
             const vellum = $("#vellum").vellum("get");
             const caseManagementData = vellum.data.caseManagement;
 
-            const one_paths = caseManagementData.mappings.one.map(question => question.question_path);
+            const one_paths = caseManagementData.caseMappings.one.map(question => question.question_path);
             assert.sameOrderedMembers(one_paths, ["/data/question1"]);
         });
 
@@ -471,7 +471,7 @@ define([
 
                 const xml = call("createXML", true);
                 const $xml = xmlLib.parseXML(xml);
-                const mappings = $xml.find("case_mappings");
+                const mappings = $xml.find("vellum\\:case_mappings");
 
                 // ensure no mappings are created in XML
                 assert.equal(mappings.length, 0);

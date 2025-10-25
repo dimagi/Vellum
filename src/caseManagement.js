@@ -80,7 +80,7 @@ define([
                 return;
             }
 
-            const caseMappingSection = xml.find(':root > case_mappings');
+            const caseMappingSection = xml.find(':root > vellum\\:case_mappings');
             if (caseMappingSection.length > 0) {
                 const mappingElements = caseMappingSection.children().toArray();
                 data.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
@@ -140,7 +140,7 @@ define([
                 return;
             }
 
-            this.writer.writeStartElement('case_mappings');
+            this.writer.writeStartElement('vellum:case_mappings');
             Object.entries(data.caseMappings).forEach(([property, questions]) => {
                 this.writeMappingElement(property, questions);
             });

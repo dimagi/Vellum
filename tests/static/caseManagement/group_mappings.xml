@@ -62,7 +62,7 @@
 			</input>
 		</group>
 	</h:body>
-	<case_mappings>
+	<vellum:case_mappings>
 		<mapping property="one">
 			<question question_path="/data/group1/q1" />
 		</mapping>
@@ -72,5 +72,5 @@
 		<mapping property="three">
 			<question question_path="/data/q3" />
 		</mapping>
-	</case_mappings>
+	</vellum:case_mappings>
 </h:html>
