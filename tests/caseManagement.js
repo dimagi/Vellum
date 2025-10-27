@@ -451,6 +451,27 @@ define([
             assert.sameOrderedMembers(one_paths, ["/data/question1"]);
         });
 
+        it("should replace case property spaces with underscores", function () {
+            util.loadXML(BASELINE_XML);
+            const question1 = call("getMugByPath", "/data/question1");
+            util.clickQuestion(question1);
+
+            const caseManagementSection = getCaseManagementSection();
+            const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+
+            // This will result in both "hello world" and "hello_world" being in the dropdown, but
+            // it doesn't appear select2 has a clean way of mimicing entering a custom option
+            var optionWithSpaces = new Option("hello world", "hello world", false, false);
+            casePropertySelect.append(optionWithSpaces);
+            casePropertySelect.val("hello world").trigger("change");
+
+            const vellum = $("#vellum").vellum("get");
+            const caseManagementData = vellum.data.caseManagement;
+
+            const assignedProperties = caseManagementData.mappingsByQuestion["/data/question1"];
+            assert.sameOrderedMembers(assignedProperties, ["hello_world"]);
+        });
+
         describe("with no case management data", function () {
             beforeEach(function () {
                 const vellum = $("#vellum").vellum("get");

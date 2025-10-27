@@ -32,6 +32,18 @@ define([
             });
         };
 
+        const super_updateValue = widget.updateValue;
+        widget.updateValue = function () {
+            const val = widget.getValue();
+            const WHITESPACE = /\s/g;
+
+            if (val && val.search(WHITESPACE) !== -1) {
+                widget.setValue(val.replace(WHITESPACE, '_'));
+            }
+
+            super_updateValue();
+        };
+
         return widget;
     }
 
