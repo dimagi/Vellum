@@ -468,8 +468,22 @@ define([
             const vellum = $("#vellum").vellum("get");
             const caseManagementData = vellum.data.caseManagement;
 
-            const assignedProperties = caseManagementData.mappingsByQuestion["/data/question1"];
+            const assignedProperties = caseManagementData.caseMappingsByQuestion["/data/question1"];
             assert.sameOrderedMembers(assignedProperties, ["hello_world"]);
+        });
+
+        it("should show an error for reserved case properties", function () {
+            util.loadXML("");
+            const question = util.addQuestion("Text", "question1");
+
+            let caseManagementSection = getCaseManagementSection();
+            let casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
+            const reservedOption = new Option("case_id", "case_id", true, true);
+            casePropertySelect.append(reservedOption).trigger("change");
+
+            const messages = casePropertySelect.find("~ .messages");
+            chai.expect(messages.text()).to.include("case_id is a reserved word");
+            assert.isFalse(util.isTreeNodeValid(question));
         });
 
         describe("with no case management data", function () {

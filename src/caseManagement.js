@@ -487,6 +487,15 @@ define([
                         }
                         mug.p.set(attr, value);
                     },
+                    validationFunc: function (mug) {
+                        const currentValue = mug.p.caseProperty;
+                        const reservedWords = that.opts().caseManagement.reserved_words;
+                        if (reservedWords.indexOf(currentValue) !== -1) {
+                            return {markdown: gettext(`**${currentValue}** is a reserved word`)};
+                        }
+
+                        return 'pass';
+                    },
                 },
             });
 
