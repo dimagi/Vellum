@@ -824,16 +824,16 @@ define([
                 }
                 return postPath.replace(postRegExp, oldPath + "/");
             }
+            const updates = {};
             this._logicManager.updatePath(mug.ufid, oldPath, newPath);
             if (!newPath) {
                 // Items don't have an absolute path. I wonder if it would
                 // matter if they had one?
-                return;
+                return updates;
             }
             var mugs = this.getDescendants(mug).concat([mug]),
                 postMovePaths = _(mugs).map(function(mug) { return mug.hashtagPath; }),
                 postRegExp = new RegExp("^" + RegExp.escape(newPath) + "/"),
-                updates = {},
                 preMovePath;
             for (var i = 0; i < mugs.length; i++) {
                 if (postMovePaths[i]) {
