@@ -264,6 +264,9 @@ define([
                             range.setStart(node, offset - 1);
                             range.collapse(true);
                         }
+                    } else if (!nextNode) { // behind the last ZWSP at the end
+                        range.setStart(node, offset - 1);
+                        range.collapse(true);
                     }
                 }
 
@@ -369,6 +372,9 @@ define([
                         span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span.nextSibling);
                     }
                 });
+                // Add ZWSP at the end to prevent browsers from replacing tailing spaces
+                // with other characters changing the overall behavior 
+                inputElement.innerHTML += ZERO_WIDTH_SPACE;
 
                 undoStack.push();
                 onVellumWidgetSet(inputElement, () => {
@@ -519,6 +525,11 @@ define([
                         range.collapse(true);
                         sel.removeAllRanges();
                         sel.addRange(range);
+                    }
+                    // Make sure ZWSP at the end does not get removed to prevent browsers from 
+                    // replacing tailing spaces with other characters changing the overall behavior 
+                    if (!inputElement.innerHTML.endsWith(ZERO_WIDTH_SPACE)) {
+                        inputElement.innerHTML += ZERO_WIDTH_SPACE;
                     }
                 }
             }

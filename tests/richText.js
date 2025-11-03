@@ -487,7 +487,7 @@ define([
                 editor.setValue(output, function () {
                     assert.equal(editor.getValue(), output);
                     var copyVal = input[0].innerHTML;
-                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal); // string contains zero width space
+                    assert(/^<p>​<span .*<.span>​<.p>​$/.test(copyVal), copyVal); // string contains zero width space
                     exprInput[0].innerHTML = copyVal;
                     assert.equal(exprEditor.getValue(), "#form/text");
                     done();
@@ -498,7 +498,7 @@ define([
                 exprEditor.setValue("#form/text", function () {
                     assert.equal(exprEditor.getValue(), "#form/text");
                     var copyVal = exprInput[0].innerHTML;
-                    assert(/^<p>​<span .*<.span>​<.p>$/.test(copyVal), copyVal); // string contains zero width space
+                    assert(/^<p>​<span .*<.span>​<.p>​$/.test(copyVal), copyVal); // string contains zero width space
                     input[0].innerHTML = copyVal;
                     assert.equal(editor.getValue(), '<output value="#form/text" />');
                     done();
