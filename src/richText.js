@@ -245,13 +245,16 @@ define([
             const node = range.startContainer,
                   offset = range.startOffset;
 
+            // The cursor should not be between the bubble span and the ZWSP that surround it.
+            // If it got moved there using arrow keys follow the direction and place it on the
+            // other side of the span. If not, move the cursor to the outside.
             if (node.nodeType === Node.TEXT_NODE) {
                 // Check if cursor is at the end of a text node that ends with ZWSP
                 if (offset === node.length && node.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
                     const nextNode = node.nextSibling;
                     if (nextNode && nextNode.nodeName.toLowerCase() === 'span' &&
                         nextNode.contentEditable === 'false') {
-                        if (event.keyCode === 39) {
+                        if (event.keyCode === 39) { //right arrow
                            const nodeAfterSpan = nextNode.nextSibling;
                            if (nodeAfterSpan && nodeAfterSpan.nodeType === Node.TEXT_NODE) {
                                range.setStart(nodeAfterSpan, 1);
@@ -268,7 +271,7 @@ define([
                     const prevNode = node.previousSibling;
                     if (prevNode && prevNode.nodeName.toLowerCase() === 'span' &&
                         prevNode.contentEditable === 'false') {
-                        if (event.keyCode === 37) {
+                        if (event.keyCode === 37) { //left arrow
                             const nodeLeftOfSpan = prevNode.previousSibling;
                             range.setStart(nodeLeftOfSpan, nodeLeftOfSpan.nodeValue.length - 1); // jumping over span and ZWSP
                             range.collapse(true);
