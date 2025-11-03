@@ -60,8 +60,8 @@ define([
 
         it("should escape generic messages", function () {
             util.loadXML("");
-            const text = util.addQuestion("Text", "text"),
-                msg = "This is <b>bold</b>";
+            const text = util.addQuestion("Text", "text");
+            const msg = "This is <b>bold</b>";
             text.addMessage(null, {
                 key: "testing-1-2-3",
                 level: "error",
@@ -73,8 +73,8 @@ define([
 
         it("should respect markdown content", function () {
             util.loadXML("");
-            const text = util.addQuestion("Text", "text"),
-                msg = {markdown: "Click [here](testurl)"};
+            const text = util.addQuestion("Text", "text");
+            const msg = {markdown: "Click [here](testurl)"};
             text.addMessage(null, {
                 key: "testing-1-2-3",
                 level: "error",
