@@ -102,6 +102,20 @@ define([
             inputElement.setAttribute('spellcheck', true);
         }
 
+        const observer = new MutationObserver((mutationsList) => {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    mutation.removedNodes.forEach(node => {
+                        if (node.nodeType === 1 && node.hasAttribute('data-toggle') &&
+                            node.getAttribute('data-toggle') === 'popover') {
+                            $(node).popover('hide');
+                        }
+                    });
+                }
+            }
+        });
+        observer.observe(inputElement, { childList: true, subtree: true });
+
         function insertHtmlWithSpace(content, insertSpaces = false) {
             const hasFocus = document.activeElement === inputElement;
             let range;
@@ -209,7 +223,7 @@ define([
             if ((key === 'z' || key === 'Z') &&
                     (ctrlKey || metaKey)) {
                 e.preventDefault();
-                
+
                 // Close any open popovers before undo/redo to prevent orphaned popovers
                 inputElement
                     .querySelectorAll('[data-toggle="popover"]')
@@ -220,7 +234,7 @@ define([
                             // Popover may not be initialized yet
                         }
                     });
-                
+
                 if (e.shiftKey) {
                     undoStack.redo();
                 } else {
@@ -373,7 +387,7 @@ define([
                     }
                 });
                 // Add ZWSP at the end to prevent browsers from replacing tailing spaces
-                // with other characters changing the overall behavior 
+                // with other characters changing the overall behavior
                 inputElement.innerHTML += ZERO_WIDTH_SPACE;
 
                 undoStack.push();
@@ -526,8 +540,8 @@ define([
                         sel.removeAllRanges();
                         sel.addRange(range);
                     }
-                    // Make sure ZWSP at the end does not get removed to prevent browsers from 
-                    // replacing tailing spaces with other characters changing the overall behavior 
+                    // Make sure ZWSP at the end does not get removed to prevent browsers from
+                    // replacing tailing spaces with other characters changing the overall behavior
                     if (!inputElement.innerHTML.endsWith(ZERO_WIDTH_SPACE)) {
                         inputElement.innerHTML += ZERO_WIDTH_SPACE;
                     }
