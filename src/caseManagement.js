@@ -16,7 +16,7 @@ define([
         const defaultOptions = rawOptions.map(prop => ({ text: prop, value: prop }));
         opts.defaultOptions = defaultOptions;
         opts.useValueAsCustomName = true;
-        var widget = widgets.dropdown(mug, opts);
+        const widget = widgets.dropdown(mug, opts);
         widget.postRender = function () {
             widget.input.select2({
                 tags: true,
@@ -24,8 +24,8 @@ define([
                 placeholder: '',
             });
             widget.input.on('remove', function () {
-                if ($(this).data('select2')) {
-                    $(this).select2('destroy');
+                if (widget.input.data('select2')) {
+                    widget.input.select2('destroy');
                 }
             });
         };
