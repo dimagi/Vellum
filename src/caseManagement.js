@@ -450,8 +450,6 @@ define([
                 maintainer.moveMappings(prevPath, currentPath);
             };
 
-            specs.databind = databindSpecs;
-
             return specs;
         },
 
