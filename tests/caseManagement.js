@@ -310,10 +310,10 @@ define([
 
             question1.p.nodeID = "question3";
 
-            const question_paths = question1.form.mappings.one.map(questionObj => questionObj.question_path);
+            const question_paths = question1.form.caseMappings.one.map(questionObj => questionObj.question_path);
             assert.sameOrderedMembers(question_paths, ['/data/question3', '/data/question2']);
-            assert.sameOrderedMembers(question1.form.mappingsByQuestion['/data/question3'], ['one']);
-            assert.notExists(question1.form.mappingsByQuestion['/data/question1']);
+            assert.sameOrderedMembers(question1.form.caseMappingsByQuestion['/data/question3'], ['one']);
+            assert.notExists(question1.form.caseMappingsByQuestion['/data/question1']);
         });
 
         it("should add custom options to future dropdowns", function () {
@@ -366,7 +366,7 @@ define([
             const form = group1.form;
             form.removeMugsFromForm([group1]);
 
-            const assignedCaseProperties = Object.keys(form.mappings);
+            const assignedCaseProperties = Object.keys(form.caseMappings);
             assert.notInclude(assignedCaseProperties, "one");
             assert.notInclude(assignedCaseProperties, "two");
         });
@@ -378,7 +378,7 @@ define([
             form.removeMugsFromForm([group1]);
             form.undo();
 
-            const assignedCaseProperties = Object.keys(form.mappings);
+            const assignedCaseProperties = Object.keys(form.caseMappings);
             assert.include(assignedCaseProperties, "one");
             assert.include(assignedCaseProperties, "two");
         });
@@ -390,9 +390,9 @@ define([
             group1.p.nodeID = "group2";
 
             // assert that the group1 mappings were transferred to group2
-            const one_paths = form.mappings.one.map(question => question.question_path);
+            const one_paths = form.caseMappings.one.map(question => question.question_path);
             assert.sameOrderedMembers(one_paths, ["/data/group2/q1"]);
-            const two_paths = form.mappings.two.map(question => question.question_path);
+            const two_paths = form.caseMappings.two.map(question => question.question_path);
             assert.sameOrderedMembers(two_paths, ["/data/group2/q2"]);
         });
 

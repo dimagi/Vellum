@@ -76,8 +76,8 @@ define([
                 mappingElements = caseMappingSection.children().toArray();
             }
 
-            form.mappings = this.buildMappingsFromXMLElements(mappingElements);
-            form.mappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(form.mappings);
+            form.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
+            form.caseMappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(form.caseMappings);
         }
 
         buildMappingsFromXMLElements (mappingElements) {
@@ -125,12 +125,12 @@ define([
         }
 
         writeCaseMappingsElement (form) {
-            if (!form.hasOwnProperty('mappings')) {
+            if (!form.hasOwnProperty('caseMappings')) {
                 return;
             }
 
             this.writer.writeStartElement('case_mappings');
-            Object.entries(form.mappings).forEach(([property, questions]) => {
+            Object.entries(form.caseMappings).forEach(([property, questions]) => {
                 this.writeMappingElement(property, questions);
             });
             this.writer.writeEndElement();
@@ -163,8 +163,8 @@ define([
         }
 
         replaceFormQuestionMappings (questionPath, prev, current) {
-            this.form.mappingsByQuestion[questionPath] = this.form.mappingsByQuestion[questionPath] || [];
-            const mappings = this.form.mappingsByQuestion[questionPath];
+            this.form.caseMappingsByQuestion[questionPath] = this.form.caseMappingsByQuestion[questionPath] || [];
+            const mappings = this.form.caseMappingsByQuestion[questionPath];
             let prevIndex = 0;
 
             if (prev) {
@@ -178,13 +178,13 @@ define([
             } else {
                 // no current, check if we should remove the mappings
                 if (mappings.length === 0) {
-                    delete this.form.mappingsByQuestion[questionPath];
+                    delete this.form.caseMappingsByQuestion[questionPath];
                 }
             }
         }
 
         replaceFormPropertyMappings (questionPath, prev, current) {
-            let questions = prev ? this.form.mappings[prev] : [];
+            let questions = prev ? this.form.caseMappings[prev] : [];
             let question = null;
 
             let prevIndex = questions.findIndex((question) => question.question_path === questionPath);
@@ -195,7 +195,7 @@ define([
                 questions.splice(prevIndex, 1);
                 if (questions.length === 0) {
                     // delete the old case property questions
-                    delete this.form.mappings[prev];
+                    delete this.form.caseMappings[prev];
                 } else if (questions.length === 1) {
                     // this case property is now unique, so we can remove conflict warnings from the remaining mug
                     const remainingMug = this.form.getMugByPath(questions[0].question_path);
@@ -209,17 +209,17 @@ define([
             }
 
             if (current) {
-                this.form.mappings[current] = this.form.mappings[current] || [];
+                this.form.caseMappings[current] = this.form.caseMappings[current] || [];
                 if (!question) {
                     question = {'question_path': questionPath};
                 }
-                this.form.mappings[current].push(question);
+                this.form.caseMappings[current].push(question);
 
-                if (this.form.mappings[current].length >= 2) {
+                if (this.form.caseMappings[current].length >= 2) {
                     // this new mapping creates a conflict, so add a warning to each assigned question
                     // these warnings will cause the save button to mention validation errors,
                     // but they do not prevent saving the form
-                    this.form.mappings[current].forEach(question => {
+                    this.form.caseMappings[current].forEach(question => {
                         const mugWithConflict = this.form.getMugByPath(question.question_path);
                         addConflictMessageToMug(mugWithConflict, current);
                     });
@@ -232,26 +232,26 @@ define([
             Move all existing mappings from prevPath to newPath.
             If newPath is falsy, remove all mappings from prevPath.
             */
-            if (!this.form.hasOwnProperty('mappingsByQuestion')) {
+            if (!this.form.hasOwnProperty('caseMappingsByQuestion')) {
                 return;
             }
 
             // determine what case properties were affected by this question
-            const prevMappings = this.form.mappingsByQuestion[prevPath] || [];
+            const prevMappings = this.form.caseMappingsByQuestion[prevPath] || [];
             if (prevMappings.length === 0) {
                 // this question wasn't using case management, so there is nothing to update
                 return;
             }
 
             // move those case properties from prevPath to newPath
-            delete this.form.mappingsByQuestion[prevPath];
+            delete this.form.caseMappingsByQuestion[prevPath];
             if (newPath) {
-                this.form.mappingsByQuestion[newPath] = prevMappings;
+                this.form.caseMappingsByQuestion[newPath] = prevMappings;
             }
 
             // rebuild mappings by case
             prevMappings.forEach(caseProperty => {
-                const questions = this.form.mappings[caseProperty];
+                const questions = this.form.caseMappings[caseProperty];
                 const index = questions.findIndex((question) => question.question_path === prevPath);
                 if (index !== -1) {
                     if (newPath) {
@@ -260,7 +260,7 @@ define([
                         // just remove the element
                         questions.splice(index, 1);
                         if (questions.length === 0) {
-                            delete this.form.mappings[caseProperty];
+                            delete this.form.caseMappings[caseProperty];
                         } else if (questions.length === 1) {
                             // multiple questions no longer are assigned to this case property,
                             // so we can remove the conflict message
@@ -418,10 +418,10 @@ define([
                     widget: casePropertyDropdownWidget,
                     presence: 'optional',
                     enabled: function (mug) {
-                        if (!mug.absolutePath || !mug.form.mappingsByQuestion) {
+                        if (!mug.absolutePath || !mug.form.caseMappingsByQuestion) {
                             return true;
                         }
-                        const questionMappings = mug.form.mappingsByQuestion[mug.absolutePath];
+                        const questionMappings = mug.form.caseMappingsByQuestion[mug.absolutePath];
                         if (!questionMappings) {
                             return true;
                         }
@@ -469,7 +469,7 @@ define([
                 return;
             }
 
-            const questionMappings = mug.form.mappingsByQuestion[mug.absolutePath];
+            const questionMappings = mug.form.caseMappingsByQuestion[mug.absolutePath];
 
             if (questionMappings && questionMappings.length > 0) {
                 mug.p.set('caseProperty', questionMappings[0]);
@@ -482,7 +482,7 @@ define([
                 }
 
                 questionMappings.forEach(caseProperty => {
-                    if (mug.form.mappings[caseProperty].length >= 2) {
+                    if (mug.form.caseMappings[caseProperty].length >= 2) {
                         addConflictMessageToMug(mug, caseProperty);
                     }
                 });
