@@ -396,6 +396,17 @@ define([
             assert.sameOrderedMembers(two_paths, ["/data/group2/q2"]);
         });
 
+        it("should clear warnings when deleting a question", function () {
+            util.loadXML(PROPERTY_CONFLICT_XML);
+            const question2 = call("getMugByPath", "/data/question2");
+            question2.form.removeMugsFromForm([question2]);
+
+            const question1 = call("getMugByPath", "/data/question1");
+            const CONFLICT_MSG_KEY = "mug-caseProperty-conflict";
+            const message = question1.messages.get("case_property", CONFLICT_MSG_KEY);
+            assert.isNull(message);
+        });
+
         describe("with no case management data", function () {
             beforeEach(function () {
                 const vellum = $("#vellum").vellum("get");

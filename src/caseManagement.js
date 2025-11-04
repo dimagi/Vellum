@@ -261,6 +261,11 @@ define([
                         questions.splice(index, 1);
                         if (questions.length === 0) {
                             delete this.form.mappings[caseProperty];
+                        } else if (questions.length === 1) {
+                            // multiple questions no longer are assigned to this case property,
+                            // so we can remove the conflict message
+                            const mugWithConflict = this.form.getMugByPath(questions[0].question_path);
+                            mugWithConflict.dropMessage('case_property', CONFLICT_MSG_KEY);
                         }
                     }
                 }
