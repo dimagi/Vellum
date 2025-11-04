@@ -45,7 +45,7 @@ define([
                 'build the application'), {caseProperty}),
             level: mug.WARNING,
         };
-        mug.addMessage('case_property', message);
+        mug.addMessage('caseProperty', message);
     }
 
     function addMultipleAssignmentsMessageToMug(mug, url) {
@@ -63,7 +63,7 @@ define([
             },
             level: mug.INFO,
         };
-        mug.addMessage('case_property', message);
+        mug.addMessage('caseProperty', message);
     }
 
     class CaseMappingsBuilder {
@@ -199,13 +199,13 @@ define([
                 } else if (questions.length === 1) {
                     // this case property is now unique, so we can remove conflict warnings from the remaining mug
                     const remainingMug = this.form.getMugByPath(questions[0].question_path);
-                    remainingMug.dropMessage('case_property', CONFLICT_MSG_KEY);
+                    remainingMug.dropMessage('caseProperty', CONFLICT_MSG_KEY);
                 }
 
                 const mug = this.form.getMugByPath(question.question_path);
                 // always drop the conflict message. Moving may create a conflict, but it will be
                 // generated again later
-                mug.dropMessage('case_property', CONFLICT_MSG_KEY);
+                mug.dropMessage('caseProperty', CONFLICT_MSG_KEY);
             }
 
             if (current) {
@@ -265,7 +265,7 @@ define([
                             // multiple questions no longer are assigned to this case property,
                             // so we can remove the conflict message
                             const mugWithConflict = this.form.getMugByPath(questions[0].question_path);
-                            mugWithConflict.dropMessage('case_property', CONFLICT_MSG_KEY);
+                            mugWithConflict.dropMessage('caseProperty', CONFLICT_MSG_KEY);
                         }
                     }
                 }
@@ -339,9 +339,9 @@ define([
                 // Ensure that we restore the previously deleted mappings, if present
                 const maintainer = new CaseMapMaintainer(form);
                 const mug = e.mug;
-                const case_property = mug.p.case_property;
-                if (case_property) {
-                    maintainer.updateFormMappings(mug.absolutePath, null, case_property);
+                const caseProperty = mug.p.caseProperty;
+                if (caseProperty) {
+                    maintainer.updateFormMappings(mug.absolutePath, null, caseProperty);
                 }
             });
         },
@@ -377,7 +377,7 @@ define([
                 types.normal.Repeat,
                 types.normal.FieldList
             ];
-            excludedTypes.forEach(excludedType => excludedType.spec.case_property = { presence: 'notallowed' });
+            excludedTypes.forEach(excludedType => excludedType.spec.caseProperty = { presence: 'notallowed' });
 
             return types;
         },
@@ -392,7 +392,7 @@ define([
             sections.splice(1, 0, {
                 slug: 'caseManagement',
                 displayName: gettext('Case Management'),
-                properties: ['case_property'],
+                properties: ['caseProperty'],
                 help: {
                     title: gettext('Case Management'),
                     text: gettext(
@@ -413,7 +413,7 @@ define([
             const that = this;
 
             const databindSpecs = Object.assign(specs.databind, {
-                'case_property': {
+                'caseProperty': {
                     visibility: 'visible',
                     widget: casePropertyDropdownWidget,
                     presence: 'optional',
@@ -472,7 +472,7 @@ define([
             const questionMappings = mug.form.mappingsByQuestion[mug.absolutePath];
 
             if (questionMappings && questionMappings.length > 0) {
-                mug.p.set('case_property', questionMappings[0]);
+                mug.p.set('caseProperty', questionMappings[0]);
 
                 if (questionMappings.length > 1) {
                     // if a question is attempting to update multiple cases,

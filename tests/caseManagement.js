@@ -403,7 +403,7 @@ define([
 
             const question1 = call("getMugByPath", "/data/question1");
             const CONFLICT_MSG_KEY = "mug-caseProperty-conflict";
-            const message = question1.messages.get("case_property", CONFLICT_MSG_KEY);
+            const message = question1.messages.get("caseProperty", CONFLICT_MSG_KEY);
             assert.isNull(message);
         });
 
