@@ -813,7 +813,9 @@ define([
             return desc;
         },
         /**
-         * Update references to mug and its children after it is renamed.
+         * Update references to the mug and its children after it is renamed.
+         * Returns a table of "update" objects, where each affected mug ID is mapped to
+         * an [oldPath, newPath] array
          */
         handleMugRename: function (mug, newId, oldId, newPath, oldPath, oldParent) {
             function getPreMovePath(postPath) {
