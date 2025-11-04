@@ -214,13 +214,13 @@ define([
             const caseManagementSection = getCaseManagementSection();
             const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
 
-            const optionValues = {};
+            const displayedOptions = [];
             $.each(casePropertySelect.prop("options"), function(i) {
                 const $opt = $(this);
-                optionValues[$opt.prop("value")] = $opt.text();
+                displayedOptions.push($opt.text());
             });
 
-            chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", ""]);
+            chai.expect(displayedOptions).to.deep.equal(["one", "two", "three", ""]);
         });
 
         it("should display a warning when multiple questions are saving to the same case property", function () {
@@ -332,13 +332,13 @@ define([
             caseManagementSection = getCaseManagementSection();
             casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
 
-            let optionValues = {};
+            let displayedOptions = [];
             $.each(casePropertySelect.prop("options"), function(i) {
                 const $opt = $(this);
-                optionValues[$opt.prop("value")] = $opt.text();
+                displayedOptions.push($opt.text());
             });
 
-            chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", "newCaseProperty", ""]);
+            chai.expect(displayedOptions).to.deep.equal(["one", "two", "three", "newCaseProperty", ""]);
 
             // Verify that custom options will be removed when no longer in use
             util.clickQuestion(question1);
@@ -351,13 +351,13 @@ define([
             caseManagementSection = getCaseManagementSection();
             casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
 
-            optionValues = {};
+            displayedOptions = [];
             $.each(casePropertySelect.prop("options"), function(i) {
                 const $opt = $(this);
-                optionValues[$opt.prop("value")] = $opt.text();
+                displayedOptions.push($opt.text());
             });
 
-            chai.expect(Object.keys(optionValues)).to.deep.equal(["one", "two", "three", ""]);
+            chai.expect(displayedOptions).to.deep.equal(["one", "two", "three", ""]);
         });
 
         it("should remove child mappings when parent group is deleted", function () {
