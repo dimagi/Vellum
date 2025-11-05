@@ -143,7 +143,7 @@ define([
             // this question should be mapped to both 'one' and 'two', but since 'one' is first, that is expected
             assert.equal(selectedOption.val(), "one");
 
-            chai.expect(messages.text()).to.include(
+            assert.include(messages.text(),
                 "This question is used to update multiple case properties"
             );
             // but this is not an error state, so ensure that the mug is still valid
@@ -162,10 +162,10 @@ define([
             const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
-            chai.expect(mappings.length).to.equal(1);
-            chai.expect(mappings.attr("property")).to.equal("one");
-            chai.expect(mappedQuestions.length).to.equal(1);
-            chai.expect(mappedQuestions.attr("question_path")).to.equal("/data/question");
+            assert.equal(mappings.length, 1);
+            assert.equal(mappings.attr("property"), "one");
+            assert.equal(mappedQuestions.length, 1);
+            assert.equal(mappedQuestions.attr("question_path"), "/data/question");
         });
 
         it("should modify the existing mapping", function () {
@@ -182,10 +182,10 @@ define([
             const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
-            chai.expect(mappings.length).to.equal(1);
-            chai.expect(mappings.attr("property")).to.equal("two");
-            chai.expect(mappedQuestions.length).to.equal(1);
-            chai.expect(mappedQuestions.attr("question_path")).to.equal("/data/question1");
+            assert.equal(mappings.length, 1);
+            assert.equal(mappings.attr("property"), "two");
+            assert.equal(mappedQuestions.length, 1);
+            assert.equal(mappedQuestions.attr("question_path"), "/data/question1");
         });
 
         it("should preserve additional question attributes", function () {
@@ -202,11 +202,11 @@ define([
             const xml = call("createXML", true);
             const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
-            chai.expect(mappings.length).to.equal(1);
-            chai.expect(mappings.attr("property")).to.equal("two");
-            chai.expect(mappedQuestions.length).to.equal(1);
-            chai.expect(mappedQuestions.attr("question_path")).to.equal("/data/question1");
-            chai.expect(mappedQuestions.attr("update_mode")).to.equal("edit");
+            assert.equal(mappings.length, 1);
+            assert.equal(mappings.attr("property"), "two");
+            assert.equal(mappedQuestions.length, 1);
+            assert.equal(mappedQuestions.attr("question_path"), "/data/question1");
+            assert.equal(mappedQuestions.attr("update_mode"), "edit");
         });
 
         it("should display a dropdown of potential case management properties", function () {
@@ -222,7 +222,7 @@ define([
                 displayedOptions.push($opt.text());
             });
 
-            chai.expect(displayedOptions).to.deep.equal(["one", "two", "three", ""]);
+            assert.deepEqual(displayedOptions, ["one", "two", "three", ""]);
         });
 
         it("should display a warning when multiple questions are saving to the same case property", function () {
@@ -252,12 +252,12 @@ define([
                 "but will need to have only one question for any case property in order to " +
                 "build the application"
             );
-            chai.expect(messages.text()).to.include(expectedMessage);
+            assert.include(messages.text(), expectedMessage);
 
             // click back to the first question, verify that the warning is visible
             util.clickQuestion(question1);
             messages = casePropertySelect.find("~ .messages");
-            chai.expect(messages.text()).to.include(expectedMessage);
+            assert.include(messages.text(), expectedMessage);
             assert.isFalse(util.isTreeNodeValid(question1));
         });
         
@@ -343,7 +343,7 @@ define([
                 displayedOptions.push($opt.text());
             });
 
-            chai.expect(displayedOptions).to.deep.equal(["one", "two", "three", "newCaseProperty", ""]);
+            assert.deepEqual(displayedOptions, ["one", "two", "three", "newCaseProperty", ""]);
 
             // Verify that custom options will be removed when no longer in use
             util.clickQuestion(question1);
@@ -362,7 +362,7 @@ define([
                 displayedOptions.push($opt.text());
             });
 
-            chai.expect(displayedOptions).to.deep.equal(["one", "two", "three", ""]);
+            assert.deepEqual(displayedOptions, ["one", "two", "three", ""]);
         });
 
         it("should remove child mappings when parent group is deleted", function () {
@@ -482,7 +482,7 @@ define([
             casePropertySelect.append(reservedOption).trigger("change");
 
             const messages = casePropertySelect.find("~ .messages");
-            chai.expect(messages.text()).to.include("case_id is a reserved word");
+            assert.include(messages.text(), "case_id is a reserved word");
             assert.isFalse(util.isTreeNodeValid(question));
         });
 
