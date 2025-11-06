@@ -404,13 +404,14 @@ define([
 
         contributeToAdditionalXML: function (xmlWriter, form) {
             this.__callOld();
+            const data = this.data.caseManagement;
 
-            if (!this.data.caseManagement.isActive) {
+            if (!data.isActive) {
                 return;
             }
 
             const writer = new XMLCaseMappingWriter(xmlWriter);
-            writer.writeCaseMappingsElement(this.data.caseManagement);
+            writer.writeCaseMappingsElement(data);
         },
 
         getMugTypes: function () {
@@ -429,8 +430,9 @@ define([
 
         getSections: function (mug) {
             const sections = this.__callOld(mug);
+            const data = this.data.caseManagement;
 
-            if (!this.data.caseManagement.isActive) {
+            if (!data.isActive) {
                 return sections;
             }
 
@@ -463,10 +465,11 @@ define([
                     widget: casePropertyDropdownWidget,
                     presence: 'optional',
                     enabled: function (mug) {
-                        if (!mug.absolutePath || !that.data.caseManagement.caseMappingsByQuestion) {
+                        const data = that.data.caseManagement;
+                        if (!mug.absolutePath || !data.caseMappingsByQuestion) {
                             return true;
                         }
-                        const questionMappings = that.data.caseManagement.caseMappingsByQuestion[mug.absolutePath];
+                        const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
                         if (!questionMappings) {
                             return true;
                         }
@@ -514,7 +517,8 @@ define([
         handleMugParseFinish: function (mug) {
             this.__callOld();
 
-            if (!this.data.caseManagement.isActive) {
+            const data = this.data.caseManagement;
+            if (!data.isActive) {
                 return;
             }
 
@@ -523,7 +527,7 @@ define([
                 return;
             }
 
-            const questionMappings = this.data.caseManagement.caseMappingsByQuestion[mug.absolutePath];
+            const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
 
             if (questionMappings && questionMappings.length > 0) {
                 mug.p.set('caseProperty', questionMappings[0]);
@@ -532,11 +536,11 @@ define([
                     // if a question is attempting to update multiple cases,
                     // it will be disabled. Leave an informational message
                     // to explain that this needs to be edited with the case management page
-                    addMultipleAssignmentsMessageToMug(mug, this.data.caseManagement.view_form_url);
+                    addMultipleAssignmentsMessageToMug(mug, data.view_form_url);
                 }
 
                 questionMappings.forEach(caseProperty => {
-                    if (this.data.caseManagement.caseMappings[caseProperty].length >= 2) {
+                    if (data.caseMappings[caseProperty].length >= 2) {
                         addConflictMessageToMug(mug, caseProperty);
                     }
                 });
@@ -562,27 +566,29 @@ define([
             return updates;
         },
 
-        onFormSave: function (data) {
+        onFormSave: function (formData) {
             this.__callOld();
+            const data = this.data.caseManagement;
 
-            if (!this.data.caseManagement.isActive) {
+            if (!data.isActive) {
                 return;
             }
 
             // clone the existing mappings and overwrite the baseline
-            const newBaseline = JSON.parse(JSON.stringify(this.data.caseManagement.caseMappings));
-            this.data.caseManagement.baseline = newBaseline;
+            const newBaseline = JSON.parse(JSON.stringify(formData.caseMappings));
+            data.baseline = newBaseline;
         },
 
-        augmentSentData: function (data, saveType) {
+        augmentSentData: function (sentData, saveType) {
             const result = this.__callOld();
+            const data = this.data.caseManagement;
 
-            if (!this.data.caseManagement.isActive) {
+            if (!data.isActive) {
                 return result;
             }
 
-            const baseline = this.data.caseManagement.baseline;
-            const current = this.data.caseManagement.caseMappings;
+            const baseline = data.baseline;
+            const current = data.caseMappings;
 
             const mappingDiff = caseDiff.compareCaseMappings(baseline, current);
             result.mapping_diff = JSON.stringify(mappingDiff);
