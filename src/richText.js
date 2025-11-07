@@ -147,7 +147,7 @@ define([
             } else if (!hasFocus) {
                 range = document.createRange();
                 range.selectNodeContents(inputElement);
-                range.collapse();
+                range.collapse(true);
             } else {
                 range = window.getSelection().getRangeAt(0);
             }
