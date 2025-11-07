@@ -314,19 +314,28 @@ define([
                 if (zwspBeforeMissing || zwspAfterMissing) {
                     spansToRemove.push(span);
                 }
+
+                // There is only the tailing ZWSP left
+                if (nextNode && nextNode.nodeType === Node.TEXT_NODE &&
+                        nextNode.parentNode.lastChild === nextNode && nextNode.nodeValue === ZERO_WIDTH_SPACE) {
+                    spansToRemove.push(span);
+                }
             });
 
             spansToRemove.forEach(span => {
                 const prevNode = span.previousSibling,
                       nextNode = span.nextSibling;
-
+                // remove the previous node or tailing ZWSP if it has one
                 if (prevNode && prevNode.nodeType === Node.TEXT_NODE && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
                     prevNode.nodeValue = prevNode.nodeValue.slice(0, -1);
                     if (prevNode.length === 0) {
                         prevNode.remove();
                     }
                 }
-                if (nextNode && nextNode.nodeType === Node.TEXT_NODE && nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
+                // remove the next node or leading ZWSP if it has one
+                // except if it is the last one in the editor
+                if (nextNode && nextNode.nodeType === Node.TEXT_NODE && nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE) &&
+                    !(nextNode.parentNode.lastChild === nextNode && nextNode.nodeValue === ZERO_WIDTH_SPACE)) {
                     nextNode.nodeValue = nextNode.nodeValue.slice(1);
                     if (nextNode.length === 0) {
                         nextNode.remove();
