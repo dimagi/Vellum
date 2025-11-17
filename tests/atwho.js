@@ -186,7 +186,7 @@ define([
             }
 
             it("should show questions with #form", function() {
-                displayAtwho('#form', function(mug) {
+                displayAtwho('#form\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
@@ -200,7 +200,7 @@ define([
             });
 
             it("should show questions after a dash", function () {
-                displayAtwho('#dash-dash', function(mug) {
+                displayAtwho('#dash-dash\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
@@ -210,7 +210,7 @@ define([
             });
 
             it("should show case properties with #case", function() {
-                displayAtwho('#case', function(mug) {
+                displayAtwho('#case\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
@@ -220,7 +220,7 @@ define([
             });
 
             it("should show case properties and form questions with #", function() {
-                displayAtwho('#', function(mug) {
+                displayAtwho('#\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");

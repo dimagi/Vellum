@@ -638,18 +638,22 @@ define([
                     util.assertXmlEqual(call('createXML'), BURPEE_XML);
                 });
 
-                // it("cursor should be at end of input on focus", function () {
-                //     var editor = richText.editor(widget.input),
-                //         value = 'testing cursor';
-                //     widget.setValue(value);
-                //     // Make sure focus is elsewhere, then focus on the rich text input
-                //     // editor.on('instanceReady', function() {
-                //     $('[name=property-nodeID]').focus();
-                //     editor.focus();
-                //     var selection = editor.getSelection(true);
-                //     assert.strictEqual(selection.getNative().focusOffset, value.length);
-                //     // });
-                // });
+                it("cursor should be at end of input on focus", function () {
+                    var editor = richText.editor(widget.input),
+                        value = 'testing cursor';
+                    widget.setValue(value);
+                    // Make sure focus is elsewhere, then focus on the rich text input
+                    // editor.on('instanceReady', function() {
+                    $('[name=property-nodeID]').focus();
+                    editor.focus();
+                    var selection = window.getSelection();
+                    assert.exists(selection);
+                    var range = selection.getRangeAt(0);
+                    assert.exists(range);
+                    assert.isTrue(range.collapsed);
+                    assert.strictEqual(range.startContainer, range.startContainer.parentNode.lastChild);
+                    assert.strictEqual(range.startContainer.textContent, "\u200B");
+                });
 
 
                 it("should change output ref to output value", function () {

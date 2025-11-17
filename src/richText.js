@@ -526,6 +526,18 @@ define([
             }
         });
 
+        inputElement.addEventListener('focus', function () {
+            const lastChild = inputElement.lastChild;
+            if (lastChild && lastChild.length > 0) { // should always be true because of the tailing ZWSP
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.setStart(lastChild, lastChild.length - 1);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        });
+
         function insertHTML(html) {
             if (window.getSelection) {
                 const sel = window.getSelection();
