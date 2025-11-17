@@ -938,7 +938,7 @@ define([
                                 assert.strictEqual($popover.text(),
                                     "How many burpees did you do on #form/new_burpee_data/burpee_date ?");
 
-                                widget.input.data("ckwrapper").destroy();
+                                widget.input.data("editorWrapper").destroy();
                                 // popover destroy just fades the popover
                                 assert.strictEqual($('.popover:not(.fade)').length, 0);
                                 done();

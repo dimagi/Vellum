@@ -122,7 +122,7 @@ define([
                     sessionUri = CASE_DATA[0].uri,
                     casedbUri = CASE_DATA[1].uri,
                     widget = util.getWidget('property-calculateAttr'),
-                    editor = widget.input.data("ckwrapper");
+                    editor = widget.input.data("editorWrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, dobProp);
@@ -146,7 +146,7 @@ define([
                     sessionUri = CASE_DATA[0].uri,
                     casedbUri = CASE_DATA[1].uri,
                     widget = util.getWidget('property-calculateAttr'),
-                    editor = widget.input.data("ckwrapper");
+                    editor = widget.input.data("editorWrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, "#case/parent/edd");
@@ -195,7 +195,7 @@ define([
                     sessionUri = CASE_DATA[0].uri,
                     casedbUri = CASE_DATA[1].uri,
                     widget = util.getWidget('itext-en-label'),
-                    editor = widget.input.data("ckwrapper");
+                    editor = widget.input.data("editorWrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', _.debounce(function() {
                         assert.equal(mug.p.labelItext.get(), '<output value="#case/dob" />');
@@ -248,7 +248,7 @@ define([
                         sessionUri = CASE_DATA[0].uri,
                         casedbUri = CASE_DATA[1].uri,
                         widget = util.getWidget('itext-hin-label'),
-                        editor = widget.input.data("ckwrapper");
+                        editor = widget.input.data("editorWrapper");
                     widget.input.promise.then(function () {
                         editor.on('change', _.debounce(function() {
                             assert.equal(mug.p.labelItext.get(), '');
@@ -579,7 +579,7 @@ define([
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     input = $("[name=property-calculateAttr]"),
                     widget = util.getWidget('property-calculateAttr'),
-                    editor = widget.input.data("ckwrapper");
+                    editor = widget.input.data("editorWrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, "#case/dob");
@@ -595,7 +595,7 @@ define([
                 var mug = util.addQuestion("DataBindOnly", "mug"),
                     input = $("[name=property-calculateAttr]"),
                     widget = util.getWidget('property-calculateAttr'),
-                    editor = widget.input.data("ckwrapper");
+                    editor = widget.input.data("editorWrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr,
@@ -612,7 +612,7 @@ define([
                     mug = util.addQuestion("DataBindOnly", "mug"),
                     input = $("[name=property-calculateAttr]"),
                     widget = util.getWidget('property-calculateAttr'),
-                    editor = widget.input.data("ckwrapper");
+                    editor = widget.input.data("editorWrapper");
                 widget.input.promise.then(function () {
                     editor.on('change', function() {
                         assert.equal(mug.p.calculateAttr, "#user/code_name");

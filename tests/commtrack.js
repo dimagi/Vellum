@@ -232,7 +232,7 @@ define([
             util.saveButtonEnabled(false);
             util.clickQuestion("transfer[@type='trans-1']");
             var widget = util.getWidget('property-dest');
-            var editor = widget.input.data("ckwrapper");
+            var editor = widget.input.data("editorWrapper");
             widget.input.promise.then(function () {
                 editor.on('change', function() {
                     assert(util.saveButtonEnabled(), "save button is disabled");

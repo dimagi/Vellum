@@ -210,7 +210,7 @@ define([
             }
         }
 
-        const existingWrapper = input.data("ckwrapper");
+        const existingWrapper = input.data("editorWrapper");
         if (existingWrapper) {
             return existingWrapper;
         }
@@ -455,7 +455,7 @@ define([
             },
             destroy: function () {
                 if (input !== null) {
-                    input.removeData("ckwrapper");
+                    input.removeData("editorWrapper");
                     input = null;
                 }
             },
@@ -558,7 +558,7 @@ define([
             }
         }
 
-        input.data("ckwrapper", wrapper);
+        input.data("editorWrapper", wrapper);
         resolveEditorPromise();
         return wrapper;
     };
