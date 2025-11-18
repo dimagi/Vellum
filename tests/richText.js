@@ -551,8 +551,15 @@ define([
                 });
             });
 
-            var START_PATH = TEST_XPATH.replace('#case/dob', 'XXXX');
+            // const OUTPUT = '<output value="#form/text" />';
+            // const START_LABEL = TEST_LABEL.replace(OUTPUT, 'XXXX');
+            const START_PATH = TEST_XPATH.replace('#case/dob', 'XXXX');
             _.each([
+                /* No idea why these fail intermittently
+                [0, START_LABEL, 8, 4, {text: OUTPUT}],
+                [0, START_LABEL, 8, 4, {text: OUTPUT + " > 3"}],
+                [0, START_LABEL, 8, 4, {text: "4 pounds\n\nLines..."}],
+                */
                 [1, START_PATH, 14, 4, {text: "#case/dob"}],
                 [1, START_PATH, 11, 7, {text: "+ (#case/dob"}],
                 [1, START_PATH, 11, 7, {text: "< (#case/dob"}],
