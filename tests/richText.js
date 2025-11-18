@@ -164,6 +164,10 @@ define([
         return htmlString.replace(/<span([^>]*)\s+id="[^"]*"([^>]*)>/g, '<span$1$2>');
     }
 
+    function removeZWSP(htmlString) {
+        return htmlString.replace(/\u200B/g, '');
+    }
+
     describe("Rich text utilities", function() {
         before(setupGlobalForm);
 
@@ -546,6 +550,64 @@ define([
                     });
                 });
             });
+
+            var START_PATH = TEST_XPATH.replace('#case/dob', 'XXXX');
+            _.each([
+                [1, START_PATH, 14, 4, {text: "#case/dob"}],
+                [1, START_PATH, 11, 7, {text: "+ (#case/dob"}],
+                [1, START_PATH, 11, 7, {text: "< (#case/dob"}],
+                [1, START_PATH, 11, 7, {html: "<span>+ (#case/dob</span>"}],
+                [1, START_PATH, 11, 7, {html: "<meta charset='utf-8'>+ (#case/dob"}],
+            ], function (args) {
+                const inputFlag = args[0];
+                const initialExpr = args[1];
+                const selStart = args[2];
+                const selLength = args[3];
+                const pasteValue = args[4];
+                const pasteText = pasteValue.text ||
+                    pasteValue.html.replace(/<.*?>/g, '');
+                const pasteRepr = JSON.stringify(pasteValue);
+                const type = inputFlag ? "expression" : "text";
+                const opts = {isExpression: true};
+                it("should paste " + type + ": " + pasteRepr, function (done) {
+                    const input_ = inputFlag ? exprInput : input;
+                    const editor = richText.editor(input_);
+                    const find = initialExpr.substring(selStart, selStart + selLength);
+                    editor.setValue(initialExpr, function () {
+                        editor.select(selStart, selLength);
+
+                        const dataTransfer = new DataTransfer();
+                        if (pasteValue.text) {
+                            dataTransfer.setData('text/plain', pasteText);
+                        } else {
+                            dataTransfer.setData('text/html', pasteText);
+                        }
+                        const clipboardEvent = new ClipboardEvent('paste', {
+                            clipboardData: dataTransfer,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        input_[0].dispatchEvent(clipboardEvent);
+
+                        const text = removeZWSP(removeSpanId(input_[0].innerHTML));
+                        const expText = removeSpanId(richText
+                            .toRichText(initialExpr, form, opts)
+                            .replace(find, escapeHTML(pasteText)));
+                        assert.equal(text, expText);
+                        assert.equal(editor.getValue(),
+                            initialExpr.substring(0, selStart) + pasteText +
+                            initialExpr.substring(selStart + selLength));
+                        done();
+                    });
+                });
+            });
+
+            function escapeHTML(html) {
+                var reps = {'<': '&lt;', '>': '&gt;', '"': '&quot;', '\n': '<br />'};
+                return html.replace(/[<>"&\n]/g, function (match) {
+                    return reps[match];
+                });
+            }
 
             function applyArgs(func) {
                 return function (args) {
