@@ -470,7 +470,7 @@ define([
                     assert.equal(editor.getValue(), 'one two');
                     editor.select(3);
                     editor.insertExpression("#form/text");
-                    assert.equal(editor.getValue(), "one" + output + " two");
+                    assert.equal(editor.getValue(), "one" + output + "  two");
                     done();
                 });
             });
@@ -622,15 +622,15 @@ define([
                 };
             }
             var argsets = [
-                [" = two", 0, "#form/text = two"],
-                ["one two", 3, "#invalid/xpath one`#form/text` two"],
-                ["one two", 4, "#invalid/xpath one `#form/text`two"],
-                ["one\n\ntwo", 3, "#invalid/xpath one`#form/text`\n\ntwo"],
-                ["one\n\ntwo", 4, "#invalid/xpath one\n`#form/text`\ntwo"],
-                ["one``two", 4, "#invalid/xpath one```#form/text```two"],
-                ["`one  two", 5, "#invalid/xpath ``one `#form/text` two"],
+                ["= two", 0, "#form/text = two"],
+                ["one two", 3, "#invalid/xpath one`#form/text`  two"],
+                ["one two", 4, "#invalid/xpath one `#form/text` two"],
+                ["one\n\ntwo", 3, "#invalid/xpath one`#form/text` \n\ntwo"],
+                ["one\n\ntwo", 4, "#invalid/xpath one\n`#form/text` \ntwo"],
+                ["one``two", 4, "#invalid/xpath one```#form/text` ``two"],
+                ["`one  two", 5, "#invalid/xpath ``one `#form/text`  two"],
                 // end padding added to work around bug in exprEditor.select(i)
-                ["one =  ", 6, "one = #form/text "],
+                ["one =  ", 6, "one = #form/text  "],
                 // TODO I think exprEditor.select(i) is breaking this one
                 //["one\n\ntwo", 5, "#invalid/xpath one\n\n`#form/text` two"],
             ];
@@ -653,9 +653,9 @@ define([
                 it("should make bubbles on converting to rich text: " + repr, function () {
                     var text = richText.toRichText(result, form, {isExpression: true}),
                         bubble = makeBubble('#form/text', 'text', icon('fcc-fd-text'), true),
-                        expected = (expr.slice(0, i) + html(bubble) + expr.slice(i)),
+                        expected = (expr.slice(0, i) + html(bubble) + " " + expr.slice(i)),
                         expected2 = expected
-                            .replace(/ $/, "")  // HACK for "one =  "
+                            .replace(/  $/, "")  // HACK for "one =  "
                             .replace(/  /g, " &nbsp;")
                             .replace(/\n/g, "</p><p>");
                     assert.equal(removeSpanId(text), "<p>" + expected2 + "</p>");

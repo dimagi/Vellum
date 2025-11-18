@@ -174,7 +174,7 @@ define([
                 range.collapse();
 
                 if (insertSpaces) {
-                    const trailingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE);
+                    const trailingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE + " ");
                     range.insertNode(trailingSpaceNode);
                     range.collapse();
                 }
