@@ -161,11 +161,19 @@ define([
             });
 
             function displayAtwho(query, callback) {
-                var mug = util.getMug('text3');
-                widget.setValue(query);
-                var editor = widget.input.editor;
-                editor.focus();
-                $('[name=property-defaultValue]').keyup();
+                const mug = util.getMug('text3');
+                const $element = $('[name=property-defaultValue]');
+                $element.text(query);
+                const range = document.createRange();
+                const textNode = $element[0].childNodes[0];
+                range.setStart(textNode, textNode.length);
+                range.setEnd(textNode, textNode.length);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                widget.input.focus();
+                $element.trigger('keyup');
+
                 assert.strictEqual(getDisplayedAtwhoViews().length, 1);
                 try {
                     callback(mug);
@@ -178,7 +186,7 @@ define([
             }
 
             it("should show questions with #form", function() {
-                displayAtwho('#form', function(mug) {
+                displayAtwho('#form\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
@@ -192,7 +200,7 @@ define([
             });
 
             it("should show questions after a dash", function () {
-                displayAtwho('#dash-dash', function(mug) {
+                displayAtwho('#dash-dash\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
@@ -202,7 +210,7 @@ define([
             });
 
             it("should show case properties with #case", function() {
-                displayAtwho('#case', function(mug) {
+                displayAtwho('#case\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");
@@ -212,7 +220,7 @@ define([
             });
 
             it("should show case properties and form questions with #", function() {
-                displayAtwho('#', function(mug) {
+                displayAtwho('#\u200B', function(mug) {
                     var atwhoEntries = getDisplayedAtwhoViews().find('li'),
                         tags = _.map(atwhoEntries, function(li) {
                             return $.trim($(li).text()).replace(/\n[^]*$/, "");

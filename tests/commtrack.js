@@ -231,14 +231,17 @@ define([
             util.loadXML(TRANSFER_BLOCK_XML);
             util.saveButtonEnabled(false);
             util.clickQuestion("transfer[@type='trans-1']");
-            var editor = $('[name=property-dest]').ckeditor().editor,
-                widget = util.getWidget('property-dest');
+            var widget = util.getWidget('property-dest');
+            var editor = widget.input.data("editorWrapper");
             widget.input.promise.then(function () {
                 editor.on('change', function() {
                     assert(util.saveButtonEnabled(), "save button is disabled");
                     done();
                 });
-                editor.fire('change');
+                widget.input[0].dispatchEvent(new Event('input', {
+                    bubbles: true,
+                    cancelable: false
+                }));
             });
         });
 
