@@ -1,124 +1,115 @@
-define([
-    'tests/utils',
-    'chai',
-    'jquery',
-    'underscore',
-    'vellum/form',
-    'static/questionProperties/comment-test.xml'
-], function (
-    util,
-    chai,
-    $,
-    _,
-    form,
-    COMMENT_TEST_XML
-) {
-    var assert = chai.assert,
-        call = util.call;
+import util from "tests/utils";
+import chai from "chai";
+import $ from "jquery";
+import _ from "underscore";
+import form from "vellum/form";
+import COMMENT_TEST_XML from "static/questionProperties/comment-test.xml";
 
-    describe("Question Comments", function() {
-        before(function(done) {
-            util.init({
-                javaRosa: {langs: ['en']},
-                core: {onReady: function () { done(); }},
-            });
-        });
+var assert = chai.assert,
+    call = util.call;
 
-        it("should parse the comment", function() {
-            util.loadXML(COMMENT_TEST_XML);
-            var mug = util.getMug("/data/mug");
-            assert.strictEqual(mug.p.comment, "This is a comment");
-        });
-
-        it("should display the comment", function() {
-            util.loadXML(COMMENT_TEST_XML);
-            assert($('.fd-props-toolbar > .alert-info'));
-        });
-
-        it('should update comment without reloading', function () {
-            util.loadXML(COMMENT_TEST_XML);
-            assert.strictEqual($('.fd-question-comment').text(), 'This is a comment');
-            $('#property-comment').val('still a comment').change();
-            assert.strictEqual($('.fd-question-comment').text(), 'still a comment');
-        });
-
-        it("should write the comment", function() {
-            util.loadXML("");
-            var mug = util.addQuestion("Text", "mug");
-            mug.p.comment = "This is a comment";
-            util.assertXmlEqual(COMMENT_TEST_XML, call("createXML"), {normalize_xmlns: true});
-        });
-
-        it("should not show comment the comment if there isn't one", function() {
-            util.loadXML("");
-            util.addQuestion("Text", "mug");
-            assert(!$('.fd-props-toolbar > .alert-info').is(':visible'));
-        });
-
-        it("should display a comment once it is specified", function() {
-            util.loadXML("");
-            var mug = util.addQuestion("Text", "mug");
-            mug.p.comment = 'this is a comment';
-            assert($('.fd-props-toolbar > .alert-info').is(':visible'));
+describe("Question Comments", function() {
+    before(function(done) {
+        util.init({
+            javaRosa: {langs: ['en']},
+            core: {onReady: function () { done(); }},
         });
     });
 
-    describe("Section Toggler", function() {
-        before(function(done) {
-            util.init({
-                javaRosa: {langs: ['en']},
-                core: {onReady: function () { done(); }},
-            });
-        });
+    it("should parse the comment", function() {
+        util.loadXML(COMMENT_TEST_XML);
+        var mug = util.getMug("/data/mug");
+        assert.strictEqual(mug.p.comment, "This is a comment");
+    });
 
-        it("should show and hide sections", function() {
-            util.loadXML("");
-            util.addQuestion("Text");
+    it("should display the comment", function() {
+        util.loadXML(COMMENT_TEST_XML);
+        assert($('.fd-props-toolbar > .alert-info'));
+    });
 
-            var slug = 'logic',
-                $section = $(".fd-question-fieldset[data-slug='" + slug + "']"),
-                visible = $section.is(":visible"),
-                $command = $(".fd-section-changer a[data-slug='" + slug + "']");
+    it('should update comment without reloading', function () {
+        util.loadXML(COMMENT_TEST_XML);
+        assert.strictEqual($('.fd-question-comment').text(), 'This is a comment');
+        $('#property-comment').val('still a comment').change();
+        assert.strictEqual($('.fd-question-comment').text(), 'still a comment');
+    });
 
-            assert.strictEqual($command.hasClass("selected"), visible);
+    it("should write the comment", function() {
+        util.loadXML("");
+        var mug = util.addQuestion("Text", "mug");
+        mug.p.comment = "This is a comment";
+        util.assertXmlEqual(COMMENT_TEST_XML, call("createXML"), {normalize_xmlns: true});
+    });
 
-            $command.click();
-            assert.strictEqual($section.is(":visible"), !visible);
-            assert.strictEqual($command.hasClass("selected"), !visible);
+    it("should not show comment the comment if there isn't one", function() {
+        util.loadXML("");
+        util.addQuestion("Text", "mug");
+        assert(!$('.fd-props-toolbar > .alert-info').is(':visible'));
+    });
 
-            $command.click();
-            assert.strictEqual($section.is(":visible"), visible);
-            assert.strictEqual($command.hasClass("selected"), visible);
+    it("should display a comment once it is specified", function() {
+        util.loadXML("");
+        var mug = util.addQuestion("Text", "mug");
+        mug.p.comment = 'this is a comment';
+        assert($('.fd-props-toolbar > .alert-info').is(':visible'));
+    });
+});
+
+describe("Section Toggler", function() {
+    before(function(done) {
+        util.init({
+            javaRosa: {langs: ['en']},
+            core: {onReady: function () { done(); }},
         });
     });
 
-    describe("Required Condition", function() {
-        before(function(done) {
-            util.init({
-                javaRosa: {langs: ['en']},
-                core: {onReady: function () { done(); }},
-            });
-        });
+    it("should show and hide sections", function() {
+        util.loadXML("");
+        util.addQuestion("Text");
 
-        it("should mark mug invalid if it has a required condition without being required", function () {
-            util.loadXML("");
-            var mug = util.addQuestion("Text");
+        var slug = 'logic',
+            $section = $(".fd-question-fieldset[data-slug='" + slug + "']"),
+            visible = $section.is(":visible"),
+            $command = $(".fd-section-changer a[data-slug='" + slug + "']");
 
-            assert(util.isTreeNodeValid(mug),
-                    "precondition failed:\n" + util.getMessages(mug));
-            try {
-                mug.p.requiredCondition = "True()";
-                assert(mug.messages.get("requiredCondition").length === 1, "requiredCondition doesn't have error");
-                assert(mug.messages.get("requiredAttr").length === 1, "requiredAttr doesn't have error");
+        assert.strictEqual($command.hasClass("selected"), visible);
 
-                mug.p.requiredAttr = "True()";
-                assert(mug.messages.get("requiredCondition").length === 0, "requiredCondition has error");
-                assert(mug.messages.get("requiredAttr").length === 0, "requiredAttr has error");
-            } finally {
-                mug.p.requiredCondition = "";
-                mug.p.requiredAttr = "";
-            }
-        });
+        $command.click();
+        assert.strictEqual($section.is(":visible"), !visible);
+        assert.strictEqual($command.hasClass("selected"), !visible);
 
+        $command.click();
+        assert.strictEqual($section.is(":visible"), visible);
+        assert.strictEqual($command.hasClass("selected"), visible);
     });
+});
+
+describe("Required Condition", function() {
+    before(function(done) {
+        util.init({
+            javaRosa: {langs: ['en']},
+            core: {onReady: function () { done(); }},
+        });
+    });
+
+    it("should mark mug invalid if it has a required condition without being required", function () {
+        util.loadXML("");
+        var mug = util.addQuestion("Text");
+
+        assert(util.isTreeNodeValid(mug),
+                "precondition failed:\n" + util.getMessages(mug));
+        try {
+            mug.p.requiredCondition = "True()";
+            assert(mug.messages.get("requiredCondition").length === 1, "requiredCondition doesn't have error");
+            assert(mug.messages.get("requiredAttr").length === 1, "requiredAttr doesn't have error");
+
+            mug.p.requiredAttr = "True()";
+            assert(mug.messages.get("requiredCondition").length === 0, "requiredCondition has error");
+            assert(mug.messages.get("requiredAttr").length === 0, "requiredAttr has error");
+        } finally {
+            mug.p.requiredCondition = "";
+            mug.p.requiredAttr = "";
+        }
+    });
+
 });
