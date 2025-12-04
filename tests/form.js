@@ -2,8 +2,6 @@ import util from "tests/utils";
 import chai from "chai";
 import $ from "jquery";
 import _ from "underscore";
-import form_ from "vellum/form";
-import Tree from "vellum/tree";
 import ALTERNATE_ROOT_NODE_NAME_XML from "static/form/alternate-root-node-name.xml";
 import GROUP_WITH_INTERNAL_REFS_XML from "static/form/group-with-internal-refs.xml";
 import HIDDEN_VALUE_IN_GROUP_XML from "static/form/hidden-value-in-group.xml";

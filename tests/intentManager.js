@@ -2,8 +2,6 @@ import util from "tests/utils";
 import chai from "chai";
 import _ from "underscore";
 import $ from "jquery";
-import intentManager from "vellum/intentManager";
-import widgets from "vellum/widgets";
 import INTENT_WITH_UNKNOWN_ATTRS_XML from "static/intentManager/intent-with-unknown-attrs.xml";
 import INTENT_WITH_NO_MUG_XML from "static/intentManager/intent-with-no-mug.xml";
 import PRINTING_INTENT_XML from "static/intentManager/printing-intent.xml";

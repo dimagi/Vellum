@@ -1,7 +1,5 @@
 /*jshint multistr: true */
 import util from "tests/utils";
-import chai from "chai";
-import $ from "jquery";
 import CASE_WITH_UPDATE from "static/ignoreButRetain/case-with-update.xml";
 import COMMON from "static/ignoreButRetain/common.xml";
 import COMMON_IGNORED from "static/ignoreButRetain/common-ignored.xml";

@@ -1,6 +1,5 @@
 import util from "tests/utils";
 import chai from "chai";
-import $ from "jquery";
 import _ from "underscore";
 import BLANK_CHOICE_XML from "static/mugs/blank-choice.xml";
 import REQUIRED_LABEL_XML from "static/mugs/required-label.xml";

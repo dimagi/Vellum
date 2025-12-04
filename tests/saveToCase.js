@@ -2,7 +2,6 @@ import util from "tests/utils";
 import chai from "chai";
 import $ from "jquery";
 import _ from "underscore";
-import saveToCase from "vellum/saveToCase";
 import CREATE_PROPERTY_XML from "static/saveToCase/create_property.xml";
 import CLOSE_PROPERTY_XML from "static/saveToCase/close_property.xml";
 import UPDATE_PROPERTY_XML from "static/saveToCase/update_property.xml";

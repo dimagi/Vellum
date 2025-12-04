@@ -3,8 +3,6 @@ import chai from "chai";
 import $ from "jquery";
 import _ from "underscore";
 import util from "tests/utils";
-import parser from "vellum/parser";
-import xml from "vellum/xml";
 import ACCENT_CHAR_IN_PATH_XML from "static/parser/accent-char-in-path.xml";
 import BODY_GROUP from "static/parser/body-group.xml";
 import OTHER_ITEM_XML from "static/parser/other_item.xml";

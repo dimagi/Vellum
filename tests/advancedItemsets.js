@@ -1,10 +1,7 @@
-import options from "tests/options";
 import util from "tests/utils";
 import chai from "chai";
 import $ from "jquery";
 import _ from "underscore";
-import itemset from "vellum/itemset";
-import form from "vellum/form";
 import TEST_XML_1 from "static/itemset/test1.xml";
 import INNER_FILTERS_XML from "static/itemset/inner-filters.xml";
 

@@ -4,7 +4,6 @@ import util from "tests/utils";
 import chai from "chai";
 import $ from "jquery";
 import _ from "underscore";
-import itemset from "vellum/itemset";
 import CASE_PROPERTY_XML from "static/datasources/case-property.xml";
 import NULL_HASHTAGS_XML from "static/datasources/null-hashtags.xml";
 import UNKNOWN_CASE_PROPERTY_XML from "static/datasources/unknown-case-property.xml";

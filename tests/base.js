@@ -1,6 +1,5 @@
 /*jshint multistr: true */
 import chai from "chai";
-import $ from "jquery";
 import _ from "underscore";
 import util from "tests/utils";
 

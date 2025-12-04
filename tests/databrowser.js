@@ -1,5 +1,4 @@
 /*jshint multistr: true */
-import options from "tests/options";
 import util from "tests/utils";
 import vellumUtil from "vellum/util";
 import chai from "chai";

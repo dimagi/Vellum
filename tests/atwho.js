@@ -1,5 +1,4 @@
 import util from "tests/utils";
-import vellumUtil from "vellum/util";
 import chai from "chai";
 import $ from "jquery";
 import _ from "underscore";

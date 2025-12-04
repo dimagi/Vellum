@@ -1,5 +1,4 @@
 import chai from "chai";
-import $ from "jquery";
 import _ from "underscore";
 import util from "tests/utils";
 import PARSE_XML from "static/diffDataParent/parse.xml";

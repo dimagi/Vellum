@@ -2,7 +2,6 @@ import util from "tests/utils";
 import chai from "chai";
 import $ from "jquery";
 import _ from "underscore";
-import commtrack from "vellum/commtrack";
 import BALANCE_BLOCK_XML from "static/commtrack/balance-block.xml";
 import BALANCE_BLOCK_SETVALUES_XML from "static/commtrack/balance-block-setvalues.xml";
 import INVALID_TRANSFER_XML from "static/commtrack/invalid-transfer.xml";

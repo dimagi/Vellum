@@ -1,6 +1,4 @@
 /*jshint multistr: true */
-import chai from "chai";
-import $ from "jquery";
 import _ from "underscore";
 import util from "tests/utils";
 import SMALL_FORM_XML from "static/profiling/small-form.xml";
