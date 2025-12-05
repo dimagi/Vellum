@@ -314,8 +314,8 @@ describe("Vellum", function () {
                         .val("question 2 comment").change();
 
                     clickQuestion("question3");
-                    addQuestion("Choice", "choice1");
-                    addQuestion("Choice", "choice2");
+                    util.addQuestion("Choice", "choice1");
+                    util.addQuestion("Choice", "choice2");
                     clickQuestion("question3/choice1");
                     addAllForms();
                     $("[name='itext-en-label-long']")
@@ -437,7 +437,7 @@ describe("Vellum", function () {
             var choices = from.indexOf(" + Choices") > -1;
             from = (choices ? from.replace(" + Choices", "") : from);
             var nodeId = (from + (choices ? "_Choices" : "") + "_to_" + to),
-                mug = addQuestion(from, nodeId);
+                mug = util.addQuestion(from, nodeId);
             if (from.indexOf("Select") > -1 && from.indexOf("Dynamic") === -1) {
                 if (choices) {
                     util.addQuestion("Choice", "choice1");
@@ -545,7 +545,7 @@ describe("Vellum", function () {
 
     it("question type change survives save + load", function () {
         util.loadXML("");
-        addQuestion("Text", "question");
+        util.addQuestion("Text", "question");
         var mug = call("getMugByPath", "/data/question");
 
         call("changeMugType", mug, "Trigger");
@@ -559,7 +559,7 @@ describe("Vellum", function () {
 
     it("changing type from required Text to Label removes required attribute", function () {
         util.loadXML("");
-        addQuestion("Text", "question", {requiredAttr: "true()"});
+        util.addQuestion("Text", "question", {requiredAttr: "true()"});
         var mug = util.getMug("question");
 
         call("changeMugType", mug, "Trigger");
