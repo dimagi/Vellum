@@ -1,7 +1,6 @@
 import util from "tests/utils";
 import chai from "chai";
 import $ from "jquery";
-import _ from "underscore";
 import COMMENT_TEST_XML from "static/questionProperties/comment-test.xml";
 
 var assert = chai.assert,

@@ -1,9 +1,6 @@
 /*jshint multistr: true */
 import chai from "chai";
 import $ from "jquery";
-import _ from "underscore";
-import util from "tests/utils";
-import ext from "vellum/jquery-extensions";
 import REQUIRED_XML from "static/parser/required.xml";
 
 var assert = chai.assert,

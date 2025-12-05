@@ -2,7 +2,6 @@ import util from "tests/utils";
 import vellumUtil from "vellum/util";
 import chai from "chai";
 import $ from "jquery";
-import _ from "underscore";
 import MARKDOWN_TEST_XML from "static/markdown/markdown-test.xml";
 import SIMPLE_MARKDOWN_XML from "static/markdown/simple-markdown.xml";
 import SIMPLE_MARKDOWN_NO_CHARS_XML from "static/markdown/simple-markdown-no-chars.xml";

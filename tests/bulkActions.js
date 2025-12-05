@@ -1,5 +1,4 @@
 import chai from "chai";
-import _ from "underscore";
 import util from "tests/utils";
 import "vellum/richText";
 import "vellum/javaRosa/util";

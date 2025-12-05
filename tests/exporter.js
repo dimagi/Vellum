@@ -8,7 +8,6 @@
  * If you're still having problems with the last line, maybe try another editor, like VSCode.
  */
 import chai from "chai";
-import _ from "underscore";
 import util from "tests/utils";
 import ALL_QUESTIONS_XML from "static/all_question_types.xml";
 import ALL_QUESTIONS_TSV from "static/all_question_types.tsv";

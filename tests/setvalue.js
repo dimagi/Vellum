@@ -1,6 +1,5 @@
 import util from "tests/utils";
 import chai from "chai";
-import $ from "jquery";
 import xml from "vellum/xml";
 import SET_VALUE_XML from "static/setvalue/set-value.xml";
 import SET_VALUE_SPECIAL_XML from "static/setvalue/set-value-special.xml";

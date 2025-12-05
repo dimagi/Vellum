@@ -1,6 +1,5 @@
 import util from "tests/utils";
 import chai from "chai";
-import _ from "underscore";
 import LEARN_MODULE_XML from "static/commcareConnect/learn_module.xml";
 import ASSESSMENT_XML from "static/commcareConnect/assessment.xml";
 import DELIVER_XML from "static/commcareConnect/deliver.xml";

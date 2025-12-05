@@ -1,5 +1,4 @@
 /*jshint multistr: true */
-import _ from "underscore";
 import util from "tests/utils";
 import SMALL_FORM_XML from "static/profiling/small-form.xml";
 import HUGE_FORM_XML from "static/profiling/huge_form.xml";

@@ -1,6 +1,5 @@
 /*jshint multistr: true */
 import chai from "chai";
-import _ from "underscore";
 import util from "tests/utils";
 
 var assert = chai.assert;

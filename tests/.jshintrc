@@ -4,7 +4,7 @@
     "asi": false,
     "bitwise": true,
     "boss": false,
-    "esversion": 6,
+    "esversion": 11,
     "eqeqeq": true,
     "evil": false,
     "forin": false,

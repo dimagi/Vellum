@@ -1,5 +1,4 @@
 import chai from "chai";
-import _ from "underscore";
 import util from "tests/utils";
 import GROUP_RENAME_XML from "static/core/group-rename.xml";
 
