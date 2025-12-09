@@ -8,8 +8,6 @@ import SELECT1_HELP_XML from "static/javaRosa/select1-help.xml";
 import SELECT1_HELP_WITH_TYPE_XML from "static/questionTypes/select1-help-with-type.xml";
 
 var call = util.call,
-    clickQuestion = util.clickQuestion,
-    addQuestion = util.addQuestion,
     assert = chai.assert,
     questionTypes = [
         //{
@@ -199,7 +197,7 @@ describe("Vellum", function () {
             describe("with " + q.type + "[" + nodeId + "]", function () {
                 before(function (done) {
                     if (index > 0) {
-                        clickQuestion((q.path || "") + nodeId);
+                        util.clickQuestion((q.path || "") + nodeId);
                     }
                     done();
                 });
@@ -259,7 +257,7 @@ describe("Vellum", function () {
                         var prev = (i > 0 ? questionTypes[i - 1] : {}),
                             prevId = q.clickBeforeAdd ||
                                 (prev.nodeId ? (prev.path || "") + prev.nodeId : null);
-                        addQuestion.call({prevId: prevId}, q.type, q.nodeId, q.attrs);
+                        util.addQuestion.call({prevId: prevId}, q.type, q.nodeId, q.attrs);
                     });
 
                     function addAllForms() {
@@ -276,7 +274,7 @@ describe("Vellum", function () {
                         $(".fd-modal-generic-container").find(".btn:contains(Add)").click();
                     }
 
-                    clickQuestion("question1");
+                    util.clickQuestion("question1");
                     addAllForms();
                     $("[name='itext-en-label']")
                         .val('question1 en label').change();
@@ -309,14 +307,14 @@ describe("Vellum", function () {
                     $("[name='property-comment']")
                         .val("question 1 comment\n* with __markdown__").change();
 
-                    clickQuestion("question2");
+                    util.clickQuestion("question2");
                     $("[name='property-comment']")
                         .val("question 2 comment").change();
 
-                    clickQuestion("question3");
+                    util.clickQuestion("question3");
                     util.addQuestion("Choice", "choice1");
                     util.addQuestion("Choice", "choice2");
-                    clickQuestion("question3/choice1");
+                    util.clickQuestion("question3/choice1");
                     addAllForms();
                     $("[name='itext-en-label-long']")
                         .val("choice1 long en").change();
@@ -331,13 +329,13 @@ describe("Vellum", function () {
                     $("[name='itext-hin-label-custom']")
                         .val("choice1 custom hin").change();
 
-                    clickQuestion("question22");
+                    util.clickQuestion("question22");
                     $("[name='itext-en-addEmptyCaption']")
                         .val("add new").change();
                     $("[name='itext-en-addCaption']")
                         .val("add another").change();
 
-                    clickQuestion("question22/question23/question7");
+                    util.clickQuestion("question22/question23/question7");
                     $("[name='property-androidIntentAppId']").val("").change();
                     $("[name='property-androidIntentAppId-text']").val("app_id").change();
                     $("[name='property-androidIntentExtra'] .fd-kv-key").val('key1').change();
@@ -357,9 +355,9 @@ describe("Vellum", function () {
                             .replace(/<setvalue[^>]+?>/, ''),
                         {normalize_xmlns: true}
                     );
-                    
+
                     // should have updated question tree
-                    clickQuestion("question1");
+                    util.clickQuestion("question1");
 
                     done();
                 }
@@ -640,7 +638,7 @@ describe("Vellum", function () {
         util.deleteQuestion("question1/choice1");
         util.deleteQuestion("question1/choice2");
 
-        clickQuestion("question1");
+        util.clickQuestion("question1");
         $(changerSelector + " > a").click();
         $options = $(changerSelector + " .change-question");
         $options.filter("[data-qtype='Text']").click();
@@ -654,7 +652,7 @@ describe("Vellum", function () {
         assert.strictEqual($(".add_choice").length, 1);
         $(".add_choice").click();
         mug.form.vellum.ensureCurrentMugIsSaved();  // force id to generate
-        clickQuestion("question1/choice1");
+        util.clickQuestion("question1/choice1");
 
         util.assertJSTreeState(
             "question1",
