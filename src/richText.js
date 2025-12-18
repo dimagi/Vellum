@@ -302,15 +302,15 @@ define([
         }
 
         inputElement.addEventListener('input', function(e) {
-            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]'),
-                  spansToRemove = [];
+            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
+            const spansToRemove = [];
 
             nonEditableSpans.forEach(span => {
-                const prevNode = span.previousSibling,
-                      nextNode = span.nextSibling;
+                const prevNode = span.previousSibling;
+                const nextNode = span.nextSibling;
 
-                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE),
-                      zwspAfterMissing = !nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
+                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE);
+                const zwspAfterMissing = !nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
                 if (zwspBeforeMissing || zwspAfterMissing) {
                     spansToRemove.push(span);
                 }
@@ -323,8 +323,8 @@ define([
             });
 
             spansToRemove.forEach(span => {
-                const prevNode = span.previousSibling,
-                      nextNode = span.nextSibling;
+                const prevNode = span.previousSibling;
+                const nextNode = span.nextSibling;
                 // remove the previous node or tailing ZWSP if it has one
                 if (prevNode && prevNode.nodeType === Node.TEXT_NODE && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
                     prevNode.nodeValue = prevNode.nodeValue.slice(0, -1);
