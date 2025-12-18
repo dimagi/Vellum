@@ -278,7 +278,7 @@ define([
                             range.setStart(node, offset - 1);
                             range.collapse(true);
                         }
-                    } else if (!nextNode) { // behind the last ZWSP at the end
+                    } else if (!nextNode && node.parentNode.getAttribute('contenteditable') === 'true') { // behind the last ZWSP at the end
                         range.setStart(node, offset - 1);
                         range.collapse(true);
                     }
@@ -317,7 +317,10 @@ define([
 
                 // There is only the tailing ZWSP left
                 if (nextNode && nextNode.nodeType === Node.TEXT_NODE &&
-                        nextNode.parentNode.lastChild === nextNode && nextNode.nodeValue === ZERO_WIDTH_SPACE) {
+                        nextNode.parentNode.getAttribute('contenteditable') === 'true' &&
+                        nextNode.parentNode.lastChild === nextNode &&
+                        nextNode.nodeValue === ZERO_WIDTH_SPACE) {
+
                     spansToRemove.push(span);
                 }
             });
