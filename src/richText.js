@@ -991,6 +991,7 @@ define([
      */
     function fromHtml(html) {
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
+                   .replace(/<div>/ig,"\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
