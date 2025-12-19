@@ -18,7 +18,7 @@ import modal_content from "vellum/templates/modal_content.html";
 import modal_button from "vellum/templates/modal_button.html";
 import find_usages from "vellum/templates/find_usages.html";
 import find_usages_search from "vellum/templates/find_usages_search.html";
-import base from "vellum/base";  // This sets up $.vellum, so it much be included before modules that add plugins, notably atwho and modules that depend on it, which include mugs.js
+import "vellum/base";  // This sets up $.vellum, so it much be included before modules that add plugins, notably atwho and modules that depend on it, which include mugs.js
 import mugs from "vellum/mugs";
 import widgets from "vellum/widgets";
 import richText from "vellum/richText";
