@@ -35,7 +35,6 @@ import $ from "jquery";
 import _ from "underscore";
 import Tree from "vellum/tree";
 import widgets from "vellum/widgets";
-import logic from "vellum/logic";
 import util from "vellum/util";
 
 function Mug(options, form, baseSpec, attrs) {

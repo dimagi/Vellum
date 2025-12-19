@@ -1,4 +1,3 @@
-import _ from "underscore";
 import xpath from "xpath/dist/js-xpath";
 
 export default {
