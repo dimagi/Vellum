@@ -1366,6 +1366,7 @@ var ReadOnly = util.extend(defaultOptions, {
     }
 });
 
+/* jshint -W079 */
 var Text = util.extend(defaultOptions, {
     typeName: gettext("Text"),
     dataType: "xsd:string",
@@ -1404,6 +1405,7 @@ var Int = util.extend(defaultOptions, {
     }
 });
 
+/* jshint -W079 */
 var Audio = util.extend(defaultOptions, {
     typeName: gettext('Audio Capture'),
     dataType: 'binary',
@@ -1416,6 +1418,7 @@ var Audio = util.extend(defaultOptions, {
     },
 });
 
+/* jshint -W079 */
 var Image = util.extend(Audio, {
     typeName: gettext('Image Capture'),
     icon: 'fa fa-camera',
@@ -1489,6 +1492,7 @@ var Signature = util.extend(Image, {
     },
 });
 
+/* jshint -W079 */
 var Document = util.extend(Audio, {
     typeName: gettext('Document Upload'),
     icon: 'fa fa-file',
@@ -1511,6 +1515,7 @@ var Barcode = util.extend(defaultOptions, {
     }
 });
 
+/* jshint -W079 */
 var Date = util.extend(defaultOptions, {
     typeName: gettext('Date'),
     dataType: 'xsd:date',
