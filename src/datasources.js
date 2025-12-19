@@ -120,372 +120,366 @@
  *  ]/role
  *
  */
-define([
-    'jquery',
-    'underscore',
-    'vellum/util',
-], function (
-    $,
-    _,
-    util
-) {
-    var builders = {};
+import $ from "jquery";
+import _ from "underscore";
+import util from "vellum/util";
 
-    /**
-     * Initialize and return a datasources loader
-     *
-     * This function is called during core init.
-     *
-     * The returned "eventuality" object fires one of two events:
-     *
-     *  - change - fired when data sources changed. Currently this only
-     *      happens once when data sources are first loaded.
-     *  - error - fired when data sources could not be loaded.
-     */
-    function init(endpoint, invalidCaseProperties) {
-        var that = util.eventuality({
-            endpoint: endpoint,
-            invalidCaseProperties: invalidCaseProperties,
-        });
+var builders = {};
 
-        that.reset = function () {
-            that.retryTimeout = 1000;
-            that.cache = {};
-        };
+/**
+ * Initialize and return a datasources loader
+ *
+ * This function is called during core init.
+ *
+ * The returned "eventuality" object fires one of two events:
+ *
+ *  - change - fired when data sources changed. Currently this only
+ *      happens once when data sources are first loaded.
+ *  - error - fired when data sources could not be loaded.
+ */
+function init(endpoint, invalidCaseProperties) {
+    var that = util.eventuality({
+        endpoint: endpoint,
+        invalidCaseProperties: invalidCaseProperties,
+    });
 
-        that.isReady = function () {
-            return getValue(that, "sources") !== undefined;
-        };
+    that.reset = function () {
+        that.retryTimeout = 1000;
+        that.cache = {};
+    };
 
-        that.getDataSources = function (defaultValue) {
-            return getValue(that, "sources", defaultValue);
-        };
+    that.isReady = function () {
+        return getValue(that, "sources") !== undefined;
+    };
 
-        that.getDataNodes = function (defaultValue) {
-            return getValue(that, "dataNodes", defaultValue);
-        };
+    that.getDataSources = function (defaultValue) {
+        return getValue(that, "sources", defaultValue);
+    };
 
-        that.getHashtagMap = function (defaultValue) {
-            return getValue(that, "hashtagMap", defaultValue);
-        };
+    that.getDataNodes = function (defaultValue) {
+        return getValue(that, "dataNodes", defaultValue);
+    };
 
-        that.getHashtagTransforms = function (defaultValue) {
-            return getValue(that, "hashtagTransforms", defaultValue);
-        };
+    that.getHashtagMap = function (defaultValue) {
+        return getValue(that, "hashtagMap", defaultValue);
+    };
 
-        that.getNode = function (hashtag, defaultValue) {
-            var nodeMap = getValue(that, "nodeMap", {});
-            return nodeMap.hasOwnProperty(hashtag) ? nodeMap[hashtag] : defaultValue;
-        };
+    that.getHashtagTransforms = function (defaultValue) {
+        return getValue(that, "hashtagTransforms", defaultValue);
+    };
 
-        /**
-         * Add callback to be called immediately if ready and also on change.
-         *
-         * @return a function that unbinds the callback.
-         */
-        that.onChangeReady = function (callback) {
-            var context = {};
-            if (that.isReady()) {
-                callback();
-            }
-            that.on("change", callback, null, null, context);
-            return function () { that.unbind(context, "change"); };
-        };
-
-        that.reset();
-        if (endpoint && _.isString(endpoint)) {
-            loadDataSources(that);
-        }
-
-        return that;
-    }
-
-    /**
-     * Asynchronously load data sources
-     */
-    function loadDataSources(that) {
-        function finish(data) {
-            that.cache = {sources: data.length ? data : [{
-                id: "",
-                uri: "",
-                path: "",
-                name: gettext("Not Found"),
-                structure: {}
-            }]};
-            that.loading = false;
-            that.fire("change");
-        }
-
-        function onError(jqXHR, errorType, error) {
-            that.fire({
-                type: "error",
-                xhr: jqXHR,
-                errorType: errorType,
-                error: error,
-            });
-            window.console.log(util.formatExc(error || errorType));
-            if (that.retryTimeout < 8001) {  // 8000 = 4 retries
-                // exponential backoff retry
-                setTimeout(function () {
-                    loadDataSources(that);
-                }, that.retryTimeout);
-                that.retryTimeout = that.retryTimeout * 2;
-            }
-        }
-
-        if (that.endpoint) {
-            if (_.isString(that.endpoint)) {
-                that.loading = true;
-                $.ajax({
-                    type: 'GET',
-                    url: that.endpoint,
-                    dataType: 'json',
-                    success: finish,
-                    error: onError,
-                    data: {}
-                });
-            } else {
-                that.endpoint(finish);
-            }
-        } else {
-            finish([]);
-        }
-    }
-
-    /**
-     * Get value derived from loaded data sources
-     *
-     * This function delegates to a "builder" function. Each "builder"
-     * function must return either the built object (not `undefined`)
-     * or `undefined` to indicate that the value is not available yet.
-     *
-     * @param that - datasources instance.
-     * @param name - the name of the value to get.
-     * @param defaultValue - the value to return if the requested value
-     *      cannot be built (because data sources are not yet loaded).
-     * @returns the requested value
-     */
-    function getValue(that, name, defaultValue) {
-        var cache = that.cache;
-        if (cache.hasOwnProperty(name)) {
-            return cache[name];
-        }
-        var value = builders[name](that);
-        if (value !== undefined) {
-            cache[name] = value;
-            return value;
-        }
-        return defaultValue;
-    }
-
-    builders.sources = function (that) {
-        if (!that.loading) {
-            loadDataSources(that);
-        }
-        return that.cache.sources;
+    that.getNode = function (hashtag, defaultValue) {
+        var nodeMap = getValue(that, "nodeMap", {});
+        return nodeMap.hasOwnProperty(hashtag) ? nodeMap[hashtag] : defaultValue;
     };
 
     /**
-     * Build a list of data nodes
+     * Add callback to be called immediately if ready and also on change.
      *
-     * Each node represents a known entity that can be referenced by
-     * hashtag and/or xpath expression.
+     * @return a function that unbinds the callback.
      */
-    builders.dataNodes = function (that) {
-        function wordWrap(inStr, maxLength) {
-            if (inStr.length <= maxLength) {
-                return inStr;
-            }
-            let outStr = "";
-            let bufferStr = inStr;
-            while (bufferStr.length > maxLength) {
-                outStr += bufferStr.slice(0, maxLength) + "\n";
-                bufferStr = bufferStr.slice(maxLength, bufferStr.length);
-            }
-            outStr += "\n" + bufferStr;
-            return outStr;
+    that.onChangeReady = function (callback) {
+        var context = {};
+        if (that.isReady()) {
+            callback();
         }
+        that.on("change", callback, null, null, context);
+        return function () { that.unbind(context, "change"); };
+    };
 
-        function insertWordBreaks(inStr, maxLength) {
-            let words = inStr.split(" ");
-            let outStr = "";
-            for (let word of words) {
-                outStr += wordWrap(word, maxLength);
-                outStr += " ";
-            }
-            return outStr.trim();
+    that.reset();
+    if (endpoint && _.isString(endpoint)) {
+        loadDataSources(that);
+    }
+
+    return that;
+}
+
+/**
+ * Asynchronously load data sources
+ */
+function loadDataSources(that) {
+    function finish(data) {
+        that.cache = {sources: data.length ? data : [{
+            id: "",
+            uri: "",
+            path: "",
+            name: gettext("Not Found"),
+            structure: {}
+        }]};
+        that.loading = false;
+        that.fire("change");
+    }
+
+    function onError(jqXHR, errorType, error) {
+        that.fire({
+            type: "error",
+            xhr: jqXHR,
+            errorType: errorType,
+            error: error,
+        });
+        window.console.log(util.formatExc(error || errorType));
+        if (that.retryTimeout < 8001) {  // 8000 = 4 retries
+            // exponential backoff retry
+            setTimeout(function () {
+                loadDataSources(that);
+            }, that.retryTimeout);
+            that.retryTimeout = that.retryTimeout * 2;
         }
+    }
 
-        function node(source, parentPath, info, index) {
-            return function (item, id) {
-                if (_.contains(that.invalidCaseProperties, id)) {
-                    return null;
-                }
+    if (that.endpoint) {
+        if (_.isString(that.endpoint)) {
+            that.loading = true;
+            $.ajax({
+                type: 'GET',
+                url: that.endpoint,
+                dataType: 'json',
+                success: finish,
+                error: onError,
+                data: {}
+            });
+        } else {
+            that.endpoint(finish);
+        }
+    } else {
+        finish([]);
+    }
+}
 
-                var path = parentPath ? parentPath + "/" + id : id,
-                    tree = getTree(item, id, path, info),
-                    name = tree.name;
+/**
+ * Get value derived from loaded data sources
+ *
+ * This function delegates to a "builder" function. Each "builder"
+ * function must return either the built object (not `undefined`)
+ * or `undefined` to indicate that the value is not available yet.
+ *
+ * @param that - datasources instance.
+ * @param name - the name of the value to get.
+ * @param defaultValue - the value to return if the requested value
+ *      cannot be built (because data sources are not yet loaded).
+ * @returns the requested value
+ */
+function getValue(that, name, defaultValue) {
+    var cache = that.cache;
+    if (cache.hasOwnProperty(name)) {
+        return cache[name];
+    }
+    var value = builders[name](that);
+    if (value !== undefined) {
+        cache[name] = value;
+        return value;
+    }
+    return defaultValue;
+}
 
-                return {
-                    name: name,
-                    description: insertWordBreaks(tree.description, 43),
-                    hashtag: info.hashtag && !index ? info.hashtag + '/' + name : null,
-                    parentPath: parentPath,
-                    xpath: path,
-                    index: index || false,
-                    sourceInfo: info,
-                    getNodes: tree.getNodes,
-                    recursive: tree.recursive,
-                };
+builders.sources = function (that) {
+    if (!that.loading) {
+        loadDataSources(that);
+    }
+    return that.cache.sources;
+};
+
+/**
+ * Build a list of data nodes
+ *
+ * Each node represents a known entity that can be referenced by
+ * hashtag and/or xpath expression.
+ */
+builders.dataNodes = function (that) {
+    function wordWrap(inStr, maxLength) {
+        if (inStr.length <= maxLength) {
+            return inStr;
+        }
+        let outStr = "";
+        let bufferStr = inStr;
+        while (bufferStr.length > maxLength) {
+            outStr += bufferStr.slice(0, maxLength) + "\n";
+            bufferStr = bufferStr.slice(maxLength, bufferStr.length);
+        }
+        outStr += "\n" + bufferStr;
+        return outStr;
+    }
+
+    function insertWordBreaks(inStr, maxLength) {
+        let words = inStr.split(" ");
+        let outStr = "";
+        for (let word of words) {
+            outStr += wordWrap(word, maxLength);
+            outStr += " ";
+        }
+        return outStr.trim();
+    }
+
+    function node(source, parentPath, info, index) {
+        return function (item, id) {
+            if (_.contains(that.invalidCaseProperties, id)) {
+                return null;
+            }
+
+            var path = parentPath ? parentPath + "/" + id : id,
+                tree = getTree(item, id, path, info),
+                name = tree.name;
+
+            return {
+                name: name,
+                description: insertWordBreaks(tree.description, 43),
+                hashtag: info.hashtag && !index ? info.hashtag + '/' + name : null,
+                parentPath: parentPath,
+                xpath: path,
+                index: index || false,
+                sourceInfo: info,
+                getNodes: tree.getNodes,
+                recursive: tree.recursive,
             };
-        }
-        function getTree(item, id, path, info) {
-            var tree = {
-                    name: item.name || id,
-                    description: item.description || '',
-                    recursive: false
-            },
-                source = item,
-                children = null;
-            if (!item.structure && item.reference) {
-                var ref = item.reference;
-                source = sources[ref.source || info.id];
-                if (source) {
-                    info = _.extend(_.omit(source, "structure"), {
-                        _parent: info,
-                        hashtag: ref.hashtag,
-                    });
-                    var keyPath = path;
-                    path = "instance('" + source.id + "')" + source.path;
-                    if (ref.subset_filter && ref.subset_key && ref.subset) {
-                        path += "[" + ref.subset_key + " = '" + ref.subset + "']";
+        };
+    }
+    function getTree(item, id, path, info) {
+        var tree = {
+                name: item.name || id,
+                description: item.description || '',
+                recursive: false
+        },
+            source = item,
+            children = null;
+        if (!item.structure && item.reference) {
+            var ref = item.reference;
+            source = sources[ref.source || info.id];
+            if (source) {
+                info = _.extend(_.omit(source, "structure"), {
+                    _parent: info,
+                    hashtag: ref.hashtag,
+                });
+                var keyPath = path;
+                path = "instance('" + source.id + "')" + source.path;
+                if (ref.subset_filter && ref.subset_key && ref.subset) {
+                    path += "[" + ref.subset_key + " = '" + ref.subset + "']";
+                }
+                path += "[" + ref.key + " = " + keyPath + "]";
+                if (source.subsets && ref.subset) {
+                    var where = {id: ref.subset};
+                    if (ref.subset_key) {
+                        where.key = ref.subset_key;
                     }
-                    path += "[" + ref.key + " = " + keyPath + "]";
-                    if (source.subsets && ref.subset) {
-                        var where = {id: ref.subset};
-                        if (ref.subset_key) {
-                            where.key = ref.subset_key;
-                        }
-                        source = _.findWhere(source.subsets, where) || source;
-                    }
-                    var name = source.name || source.id;
-                    if (name) {
-                        tree.name = name;
-                    }
-                    if (seen.hasOwnProperty(source.id)) {
-                        // defer to prevent infinite loop
-                        tree.recursive = true;
-                    } else {
-                        seen[source.id] = true;
-                    }
+                    source = _.findWhere(source.subsets, where) || source;
+                }
+                var name = source.name || source.id;
+                if (name) {
+                    tree.name = name;
+                }
+                if (seen.hasOwnProperty(source.id)) {
+                    // defer to prevent infinite loop
+                    tree.recursive = true;
+                } else {
+                    seen[source.id] = true;
                 }
             }
-            tree.getNodes = function () {
-                if (children === null) {
-                    children = getNodes(source, path, info);
-                }
-                return children;
-            };
-            return tree;
         }
-        function getNodes(source, path, info) {
-            var nodes = _.chain(source && source.structure)
-                .map(function (item, id) {
-                    if (item.merge) {
-                        return getNodes(item, path + "/" + id, {_parent: info});
-                    } else {
-                        return node(source, path, info)(item, id);
-                    }
+        tree.getNodes = function () {
+            if (children === null) {
+                children = getNodes(source, path, info);
+            }
+            return children;
+        };
+        return tree;
+    }
+    function getNodes(source, path, info) {
+        var nodes = _.chain(source && source.structure)
+            .map(function (item, id) {
+                if (item.merge) {
+                    return getNodes(item, path + "/" + id, {_parent: info});
+                } else {
+                    return node(source, path, info)(item, id);
+                }
+            })
+            .flatten()
+            .compact() // TODO remove with invalidCaseProperties
+            .sortBy("text")
+            .value();
+        if (source && source.related) {
+            nodes = _.chain(source.related)
+                .map(function (ref, relation) {
+                    var item, index;
+                    item = {reference: ref};
+                    index = ref.index || "/index";
+                    return node(source, path + index, info, true)(item, relation);
                 })
-                .flatten()
-                .compact() // TODO remove with invalidCaseProperties
                 .sortBy("text")
-                .value();
-            if (source && source.related) {
-                nodes = _.chain(source.related)
-                    .map(function (ref, relation) {
-                        var item, index;
-                        item = {reference: ref};
-                        index = ref.index || "/index";
-                        return node(source, path + index, info, true)(item, relation);
-                    })
-                    .sortBy("text")
-                    .value()
-                    .concat(nodes);
-            }
-            return nodes;
-        }
-
-        var sources = getValue(that, "sources"),
-            seen = {},
-            nodes;
-        if (sources) {
-            sources = sources = _.indexBy(sources, "id");
-            if (sources.commcaresession) {
-                var source = sources.commcaresession,
-                    info = _.omit(source, "structure"),
-                    path = "instance('" + source.id + "')" + source.path;
-                // do not show Session node for now
-                nodes = node(source, null, info)(source, path).getNodes();
-            }
+                .value()
+                .concat(nodes);
         }
         return nodes;
-    };
+    }
 
-    /**
-     * Intermediate builder; extracts hashtags and transforms from data nodes.
-     */
-    builders.hashtags = function (that) {
-        function walk(nodes, hashtags) {
-            _.each(nodes, function (node) {
-                if (!node.index) {
-                    hashtags.nodeMap[node.hashtag || node.xpath] = node;
-                }
-                if (node.hashtag && !node.index) {
-                    hashtags.map[node.hashtag] = node.xpath;
-                    hashtags.transforms[node.sourceInfo.hashtag + '/'] = function (prop) {
-                        return node.parentPath + "/" + prop;
-                    };
-                }
-                if (!node.recursive) {
-                    walk(node.getNodes(), hashtags);
-                }
-            });
-            return hashtags;
+    var sources = getValue(that, "sources"),
+        seen = {},
+        nodes;
+    if (sources) {
+        sources = sources = _.indexBy(sources, "id");
+        if (sources.commcaresession) {
+            var source = sources.commcaresession,
+                info = _.omit(source, "structure"),
+                path = "instance('" + source.id + "')" + source.path;
+            // do not show Session node for now
+            nodes = node(source, null, info)(source, path).getNodes();
         }
-        var nodes = getValue(that, "dataNodes");
-        return nodes ? walk(nodes, {
-            map: {},
-            nodeMap: {},
-            transforms: {},
-        }) : undefined;
-    };
+    }
+    return nodes;
+};
 
-    /**
-     * Build an object containing hashtags mapped to data nodes.
-     */
-    builders.nodeMap = function (that) {
-        var hashtags = getValue(that, "hashtags");
-        return hashtags && hashtags.nodeMap;
-    };
+/**
+ * Intermediate builder; extracts hashtags and transforms from data nodes.
+ */
+builders.hashtags = function (that) {
+    function walk(nodes, hashtags) {
+        _.each(nodes, function (node) {
+            if (!node.index) {
+                hashtags.nodeMap[node.hashtag || node.xpath] = node;
+            }
+            if (node.hashtag && !node.index) {
+                hashtags.map[node.hashtag] = node.xpath;
+                hashtags.transforms[node.sourceInfo.hashtag + '/'] = function (prop) {
+                    return node.parentPath + "/" + prop;
+                };
+            }
+            if (!node.recursive) {
+                walk(node.getNodes(), hashtags);
+            }
+        });
+        return hashtags;
+    }
+    var nodes = getValue(that, "dataNodes");
+    return nodes ? walk(nodes, {
+        map: {},
+        nodeMap: {},
+        transforms: {},
+    }) : undefined;
+};
 
-    /**
-     * Build an object containing hashtags mapped to XPath expressions.
-     */
-    builders.hashtagMap = function (that) {
-        var hashtags = getValue(that, "hashtags");
-        return hashtags && hashtags.map;
-    };
+/**
+ * Build an object containing hashtags mapped to data nodes.
+ */
+builders.nodeMap = function (that) {
+    var hashtags = getValue(that, "hashtags");
+    return hashtags && hashtags.nodeMap;
+};
 
-    /**
-     * Build an object containing hashtag transformations.
-     *
-     * {"#case/": function (prop) { return "#case/" + prop; }}
-     */
-    builders.hashtagTransforms = function (that) {
-        var hashtags = getValue(that, "hashtags");
-        return hashtags && hashtags.transforms;
-    };
+/**
+ * Build an object containing hashtags mapped to XPath expressions.
+ */
+builders.hashtagMap = function (that) {
+    var hashtags = getValue(that, "hashtags");
+    return hashtags && hashtags.map;
+};
 
-    return {init: init};
-});
+/**
+ * Build an object containing hashtag transformations.
+ *
+ * {"#case/": function (prop) { return "#case/" + prop; }}
+ */
+builders.hashtagTransforms = function (that) {
+    var hashtags = getValue(that, "hashtags");
+    return hashtags && hashtags.transforms;
+};
+
+export default {init: init};
