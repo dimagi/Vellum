@@ -492,18 +492,21 @@ define([
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             const updates = this.__callOld();
 
-            const basePath = form.getBasePath();
-            function restoreAbsolutePath(hashtagPath) {
-                return hashtagPath.replace(/^#form\//, basePath);
+            // updates may be undefined if the mug doesn't have an absolute path (e.g., Choice items)
+            if (updates) {
+                const basePath = form.getBasePath();
+                function restoreAbsolutePath(hashtagPath) {
+                    return hashtagPath.replace(/^#form\//, basePath);
+                }
+
+                const maintainer = new CaseMapMaintainer(form);
+                Object.values(updates).forEach(([oldHashtagPath, newHashtagPath]) => {
+                    const oldPath = restoreAbsolutePath(oldHashtagPath);
+                    const newPath = restoreAbsolutePath(newHashtagPath);
+
+                    maintainer.moveMappings(oldPath, newPath);
+                });
             }
-
-            const maintainer = new CaseMapMaintainer(form);
-            Object.values(updates).forEach(([oldHashtagPath, newHashtagPath]) => {
-                const oldPath = restoreAbsolutePath(oldHashtagPath);
-                const newPath = restoreAbsolutePath(newHashtagPath);
-
-                maintainer.moveMappings(oldPath, newPath);
-            });
 
             return updates;
         }
