@@ -20,7 +20,7 @@
 						<value>question1</value>
 					</text>
 					<text id="question2-label">
-						<value><output vellum:value="#form/question1" value="/data/question1" /> question2</value>
+						<value><output value="/data/question1" vellum:value="#form/question1" /> question2</value>
 					</text>
 				</translation>
 			</itext>
@@ -34,4 +34,5 @@
 			<label ref="jr:itext('question2-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

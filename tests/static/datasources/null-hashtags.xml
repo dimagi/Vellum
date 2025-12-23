@@ -27,4 +27,5 @@
 			<label ref="jr:itext('text-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

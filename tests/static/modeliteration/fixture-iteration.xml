@@ -6,11 +6,11 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/28B1D8B9-1144-4600-968A-349FD99FFCA5" uiVersion="1" version="1" name="Untitled Form">
 					<product ids="" count="" current_index="" vellum:role="Repeat">
-						<item id="" index="" jr:template=""/>
+						<item id="" index="" jr:template="" />
 					</product>
 				</data>
 			</instance>
-			<instance id="products" src="jr://fixture/commtrack:products" />
+			<instance src="jr://fixture/commtrack:products" id="products" />
 			<bind nodeset="/data/product/@current_index" vellum:calculate="count(#form/product/item)" calculate="count(/data/product/item)" />
 			<bind vellum:nodeset="#form/product/item" nodeset="/data/product/item" />
 			<setvalue event="xforms-ready" ref="/data/product/@ids" value="join(' ', instance('products')/products/product/@id)" />
@@ -18,13 +18,14 @@
 			<setvalue event="jr-insert" ref="/data/product/item/@index" value="int(/data/product/@current_index)" />
 			<setvalue event="jr-insert" ref="/data/product/item/@id" value="selected-at(/data/product/@ids, ../@index)" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<repeat vellum:nodeset="#form/product/item" nodeset="/data/product/item" jr:count="/data/product/@count" jr:noAddRemove="true()" />
+			<repeat jr:count="/data/product/@count" jr:noAddRemove="true()" vellum:nodeset="#form/product/item" nodeset="/data/product/item" />
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

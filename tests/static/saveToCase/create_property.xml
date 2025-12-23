@@ -6,7 +6,7 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E1B03643-109D-4DC6-9737-815E4401DE79" uiVersion="1" version="1" name="Untitled Form">
 					<name />
-					<save_to_case vellum:role="SaveToCase" vellum:case_type="" >
+					<save_to_case vellum:case_type="" vellum:role="SaveToCase">
 						<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
 							<create>
 								<case_type />
@@ -38,4 +38,5 @@
 			<label ref="jr:itext('name-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

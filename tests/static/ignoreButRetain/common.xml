@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+<?xml version="1.0" encoding="UTF-8"?><h:xdoc xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
 	<h:head>
 		<h:title>Untitled Form</h:title>
 		<model>
@@ -15,12 +14,10 @@
 			</instance>
 			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" type="xsd:string"/>
 			<bind vellum:nodeset="#form/question9" nodeset="/data/question9"/>
-			<bind nodeset="/data/question9/question10" type="xsd:int" vellum:ignore="retain"/>
+			<bind type="xsd:int" vellum:ignore="retain" nodeset="/data/question9/question10"/>
 			<bind vellum:nodeset="#form/question9/question11" nodeset="/data/question9/question11" type="xsd:int"/>
-			<bind nodeset="/data/question4" vellum:ignore="retain"/>
-			<setvalue event="xforms-revalidate" vellum:ref="#form/question1" ref="/data/question1" value="0"/>
-			<setvalue event="xforms-ready" ref="/data/question1" value="1" vellum:ignore="retain"/>
-			<setvalue event="xforms-ready" ref="/data/question2" value="2" vellum:ignore="retain"/>
+			<bind vellum:ignore="retain" nodeset="/data/question4"/>
+			<setvalue event="xforms-revalidate" vellum:ref="#form/question1" ref="/data/question1" value="0"/><setvalue event="xforms-ready" ref="/data/question1" value="1" vellum:ignore="retain"/><setvalue event="xforms-ready" ref="/data/question2" value="2" vellum:ignore="retain"/>
 			<setvalue event="xforms-ready" ref="/data/question3" value="3"/>
 			<itext>
 				<translation lang="en" default="">
@@ -37,22 +34,20 @@
 			</itext>
 		</model>
 	</h:head>
-	<!-- body nodes, including nesting -->
 	<h:body>
 		<input vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')"/>
 		</input>
 		<group vellum:ref="#form/question9" ref="/data/question9">
 			<label ref="jr:itext('question9-label')"/>
-			<!-- ignored node after an inner label -->
-			<input ref="/data/question9/question10" vellum:ignore="retain">
+			<input vellum:ignore="retain" ref="/data/question9/question10">
 				<label ref="jr:itext('question10-label')"/>
 			</input>
 			<input vellum:ref="#form/question9/question11" ref="/data/question9/question11">
 				<label ref="jr:itext('question11-label')"/>
 			</input>
 		</group>
-		<select1 ref="/data/question4" vellum:ignore="retain">
+		<select1 vellum:ignore="retain" ref="/data/question4">
 			<label ref="jr:itext('question4-label')"/>
 			<item>
 				<label ref="jr:itext('question4-item5-label')"/>
@@ -64,4 +59,5 @@
 			</item>
 		</select1>
 	</h:body>
-</h:html>
+	<case_mappings/>
+</h:xdoc>

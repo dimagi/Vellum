@@ -59,4 +59,5 @@
 			</item>
 		</select1>
 	</h:body>
+	<case_mappings />
 </h:html>

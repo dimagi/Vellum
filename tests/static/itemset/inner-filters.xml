@@ -8,7 +8,7 @@
 					<question2 />
 				</data>
 			</instance>
-			<instance id="somefixture" src="jr://fixture/some-fixture" />
+			<instance src="jr://fixture/some-fixture" id="somefixture" />
 			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" />
 			<itext>
 				<translation lang="en" default="">
@@ -28,4 +28,5 @@
 			</itemset>
 		</select1>
 	</h:body>
+	<case_mappings />
 </h:html>

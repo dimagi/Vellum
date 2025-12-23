@@ -8,9 +8,9 @@
 					<name />
 					<unit_one vellum:role="ConnectDeliverUnit">
 						<deliver xmlns="http://commcareconnect.com/data/v1/learn" id="unit_one">
-                            <name>unit 1</name>
-                            <entity_id/>
-                            <entity_name/>
+                                        <name>unit 1</name>
+                                        <entity_id/>
+                                        <entity_name/>
 						</deliver>
 					</unit_one>
 				</data>
@@ -34,4 +34,5 @@
 			<label ref="jr:itext('name-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

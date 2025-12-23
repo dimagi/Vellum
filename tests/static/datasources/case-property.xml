@@ -19,4 +19,5 @@
 		<vellum:hashtagTransforms>{&quot;prefixes&quot;:{&quot;#case/parent/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/&quot;,&quot;#case/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/&quot;}}</vellum:hashtagTransforms>
 	</h:head>
 	<h:body />
+	<case_mappings />
 </h:html>
