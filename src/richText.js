@@ -1,7 +1,7 @@
 /*
  * expected structure of a richText widget:
  *
- * <div contenteditable="true" ... ckeditor stuff...>
+ * <div contenteditable="true">
  *   <p>
  *      User input text
  *   </p>
@@ -27,14 +27,6 @@
  *   #invalid/xpath (`#form/text`
  */
 
-(function () {
-    // set CKEditor base path before loading ckeditor
-    var path = '/src/../lib/ckeditor/';
-    if (!window.CKEDITOR_BASEPATH) {
-        window.CKEDITOR_BASEPATH = path;
-    }
-})();
-
 define([
     'require',
     'underscore',
@@ -47,8 +39,7 @@ define([
     'vellum/util',
     'vellum/xml',
     'vellum/hqAnalytics',
-    'ckeditor',
-    'ckeditor-jquery'
+    'vellum/undo'
 ], function(
     require,
     _,
@@ -61,70 +52,26 @@ define([
     util,
     xml,
     analytics,
-    CKEDITOR
+    undo
 ){
     var FORM_REF_REGEX = /^#form\//,
         INVALID_PREFIX = "#invalid/xpath ",
-        // http://stackoverflow.com/a/16459606/10840
-        bubbleWidgetDefinition = {
-        template:
-            '<span class="label label-datanode label-datanode-internal">' +
-              '<i class="fa fa-question-circle">&nbsp;</i>' +
-              'example widget, not used' +
-            '</span>',
-        upcast: function ( element ) {
-            return element.name === 'span' && element.hasClass('label-datanode');
-        },
-        init: function() {
-            // TODO: PR to ckeditor to make changing drag ui supported
-            var $this = $(this.element.$),
-                width = $this.innerWidth(),
-                height = $this.outerHeight(),
-                dragContainer = this.dragHandlerContainer,
-                editor = this.editor;
-            dragContainer.setStyles({
-                width: width + 'px',
-                height: height + 'px',
-                left: '0px'
-            });
+        ZERO_WIDTH_SPACE = "\u200B";
 
-            if (editor.commands.createPopover) {
-                var _this = this;
+    function htmlToFragment(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const fragment = document.createDocumentFragment();
 
-                // Look for deleted bubbles
-                editor.on('change', function(e) {
-                    editor.widgets.checkWidgets({ initOnlyNew: 1 });
-                });
-
-                // if the editor is still being initialized then this command
-                // won't be enabled until it is ready
-                if (editor.status === "ready") {
-                    editor.execCommand('createPopover', _this);
-                } else {
-                    editor.on('instanceReady', function () {
-                        editor.execCommand('createPopover', _this);
-                    });
-                }
+        Array.from(doc.body.childNodes).forEach(child => {
+            if (child.tagName === 'SPAN') {
+                child.contentEditable = false;
             }
-        }
-    };
+            fragment.appendChild(child);
+        });
 
-    CKEDITOR.plugins.add('bubbles', {
-        requires: 'widget',
-        init: function (editor) {
-            editor.widgets.add('bubbles', bubbleWidgetDefinition);
-        }
-    });
-
-    CKEDITOR.config.allowedContent = true;
-    CKEDITOR.config.customConfig = '';
-    CKEDITOR.config.title = false;
-    CKEDITOR.config.extraPlugins = 'bubbles';
-    CKEDITOR.config.disableNativeSpellChecker = false;
-    // We don't use Toolbar, however it is required by clipboard.
-    // Once https://github.com/ckeditor/ckeditor4/issues/654 is resolved,
-    // toolbar can be removed from the source(build).
-    CKEDITOR.config.toolbar = [];
+        return fragment;
+    }
 
     /**
      * Get or create a rich text editor for the given element
@@ -148,15 +95,263 @@ define([
      *        arguments are editor, ckwidget
      */
     var editor = function(input, form, options) {
-        // HACK use 1/4 em space to fix cursor movement/hiding near bubble
-        var TRAILING_SPACE = "\u2005";
-        function insertHtmlWithSpace(content) {
-            editor.insertHtml(content + TRAILING_SPACE);
+        var inputElement = input[0];
+        if (options && options.disableNativeSpellChecker) {
+            inputElement.setAttribute('spellcheck', false);
+        } else {
+            inputElement.setAttribute('spellcheck', true);
         }
-        var wrapper = input.data("ckwrapper");
-        if (wrapper) {
-            return wrapper;
+
+        const observer = new MutationObserver((mutationsList) => {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    mutation.removedNodes.forEach(node => {
+                        if (node.nodeType === 1 && node.hasAttribute('data-toggle') &&
+                            node.getAttribute('data-toggle') === 'popover') {
+                            $(node).popover('hide');
+                        }
+                    });
+                }
+            }
+        });
+        observer.observe(inputElement, { childList: true, subtree: true });
+
+        function insertHtmlWithSpace(content, insertSpaces = false) {
+            const hasFocus = document.activeElement === inputElement;
+            let range;
+            if (!hasFocus && x && y) {
+                const elementAtDrop = document.elementFromPoint(x, y);
+                const existingBubble = elementAtDrop ? elementAtDrop.closest('.label-datanode') : null;
+
+                if (existingBubble) {
+                    // If dropping on an existing bubble, position after it
+                    range = document.createRange();
+                    range.setStartAfter(existingBubble);
+                    range.setEndAfter(existingBubble);
+                } else {
+                    const position = document.caretPositionFromPoint(x, y);
+                    if (position) {
+                        range = document.createRange();
+                        range.setStart(position.offsetNode, position.offset);
+                        range.collapse(true);
+
+                        // Remove the paragraph so the inserted text does not create a new one.
+                        const parentNode = position.offsetNode.parentNode;
+                        if (parentNode && parentNode.tagName === 'P' &&
+                            position.offsetNode.nodeType === Node.TEXT_NODE &&
+                            position.offset === position.offsetNode.nodeValue.length) {
+                            content = content.replace(/^<p>/i, '').replace(/<\/p>$/i, '');
+                        }
+                    }
+                }
+            } else if (!hasFocus) {
+                range = document.createRange();
+                range.selectNodeContents(inputElement);
+                range.collapse(true);
+            } else {
+                range = window.getSelection().getRangeAt(0);
+            }
+
+            if (range) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                range.deleteContents();
+                if (insertSpaces) {
+                    const leadingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE);
+                    range.insertNode(leadingSpaceNode);
+                    range.setStartAfter(leadingSpaceNode);
+                }
+
+                const fragment = htmlToFragment(content);
+                const nodesNeedingPopovers = [];
+                fragment.childNodes.forEach(child => {
+                    if (child.getAttribute && child.getAttribute('data-toggle')) {
+                        nodesNeedingPopovers.push(child);
+                    }
+                });
+                range.insertNode(fragment);
+                range.collapse();
+
+                if (insertSpaces) {
+                    const trailingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE + " ");
+                    range.insertNode(trailingSpaceNode);
+                    range.collapse();
+                }
+
+                nodesNeedingPopovers.forEach(node => {
+                    createPopover(node);
+                });
+
+                inputElement.focus();
+
+                const inputEvent = new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                inputElement.dispatchEvent(inputEvent);
+                undoStack.push();
+            }
         }
+
+        var getWidget = require('vellum/widgets').util.getWidget;
+
+        function onVellumWidgetSet(element, callback, attempts = 0) {
+            const maxAttempts = 5,
+                  intervalTime = 500;
+
+            if (attempts < maxAttempts) {
+                var widget = getWidget($(element));
+                if (widget !== null && widget !== undefined) {
+                    callback();
+                } else {
+                    setTimeout(() => onVellumWidgetSet(element, callback, attempts + 1), intervalTime);
+                }
+            }
+        }
+
+        const existingWrapper = input.data("editorWrapper");
+        if (existingWrapper) {
+            return existingWrapper;
+        }
+
+        const undoStack = new undo.ElementUndoStack(inputElement);
+        inputElement.addEventListener('keydown', function(e) {
+            const key = e.key,
+                  ctrlKey = e.ctrlKey,
+                  metaKey = e.metaKey;
+            if ((key === 'z' || key === 'Z') &&
+                    (ctrlKey || metaKey)) {
+                e.preventDefault();
+
+                // Close any open popovers before undo/redo to prevent orphaned popovers
+                inputElement
+                    .querySelectorAll('[data-toggle="popover"]')
+                    .forEach(element => {
+                        try {
+                            $(element).popover('hide');
+                        } catch (err) {
+                            // Popover may not be initialized yet
+                        }
+                    });
+
+                if (e.shiftKey) {
+                    undoStack.redo();
+                } else {
+                    undoStack.undo();
+                }
+                inputElement
+                    .querySelectorAll('[data-toggle="popover"]')
+                    .forEach(element => createPopover(element));
+            }
+        });
+
+        inputElement.addEventListener('mouseup', checkCursorPosition);
+        inputElement.addEventListener('keyup', checkCursorPosition);
+
+        function checkCursorPosition(event) {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+
+            const range = selection.getRangeAt(0);
+            if (!range.collapsed) return; // Only check when cursor is a point, not a selection
+
+            const node = range.startContainer,
+                  offset = range.startOffset;
+
+            // The cursor should not be between the bubble span and the ZWSP that surround it.
+            // If it got moved there using arrow keys follow the direction and place it on the
+            // other side of the span. If not, move the cursor to the outside.
+            if (node.nodeType === Node.TEXT_NODE) {
+                // Check if cursor is at the end of a text node that ends with ZWSP
+                if (offset === node.length && node.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
+                    const nextNode = node.nextSibling;
+                    if (nextNode && nextNode.nodeName.toLowerCase() === 'span' &&
+                        nextNode.contentEditable === 'false') {
+                        if (event.keyCode === 39) { //right arrow
+                           const nodeAfterSpan = nextNode.nextSibling;
+                           if (nodeAfterSpan && nodeAfterSpan.nodeType === Node.TEXT_NODE) {
+                               range.setStart(nodeAfterSpan, 1);
+                               range.collapse(true);
+                           }
+                        } else {
+                            range.setStart(node, offset - 1);
+                            range.collapse(true);
+                        }
+                    } else if (!nextNode) { // behind the last ZWSP at the end
+                        range.setStart(node, offset - 1);
+                        range.collapse(true);
+                    }
+                }
+
+                if (offset === 0 && node.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
+                    const prevNode = node.previousSibling;
+                    if (prevNode && prevNode.nodeName.toLowerCase() === 'span' &&
+                        prevNode.contentEditable === 'false') {
+                        if (event.keyCode === 37) { //left arrow
+                            const nodeLeftOfSpan = prevNode.previousSibling;
+                            range.setStart(nodeLeftOfSpan, nodeLeftOfSpan.nodeValue.length - 1); // jumping over span and ZWSP
+                            range.collapse(true);
+                        } else {
+                            range.setStart(node, 1);
+                            range.collapse(true);
+                        }
+                    }
+                }
+            }
+        }
+
+        inputElement.addEventListener('input', function(e) {
+            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]'),
+                  spansToRemove = [];
+
+            nonEditableSpans.forEach(span => {
+                const prevNode = span.previousSibling,
+                      nextNode = span.nextSibling;
+
+                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE),
+                      zwspAfterMissing = !nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
+                if (zwspBeforeMissing || zwspAfterMissing) {
+                    spansToRemove.push(span);
+                }
+
+                // There is only the tailing ZWSP left
+                if (nextNode && nextNode.nodeType === Node.TEXT_NODE &&
+                        nextNode.parentNode.lastChild === nextNode && nextNode.nodeValue === ZERO_WIDTH_SPACE) {
+                    spansToRemove.push(span);
+                }
+            });
+
+            spansToRemove.forEach(span => {
+                const prevNode = span.previousSibling,
+                      nextNode = span.nextSibling;
+                // remove the previous node or tailing ZWSP if it has one
+                if (prevNode && prevNode.nodeType === Node.TEXT_NODE && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
+                    prevNode.nodeValue = prevNode.nodeValue.slice(0, -1);
+                    if (prevNode.length === 0) {
+                        prevNode.remove();
+                    }
+                }
+                // remove the next node or leading ZWSP if it has one
+                // except if it is the last one in the editor
+                if (nextNode && nextNode.nodeType === Node.TEXT_NODE && nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE) &&
+                    !(nextNode.parentNode.lastChild === nextNode && nextNode.nodeValue === ZERO_WIDTH_SPACE)) {
+                    nextNode.nodeValue = nextNode.nodeValue.slice(1);
+                    if (nextNode.length === 0) {
+                        nextNode.remove();
+                    }
+                }
+                span.remove();
+            });
+            undoStack.push();
+        });
+
+        let x, y;
+        inputElement.addEventListener('mousemove', e => {
+            x = e.clientX;
+            y = e.clientY;
+        });
+
         if (arguments.length === 1) {
             throw new Error("editor not initialized: " +
                             $("<div>").append(input).html());
@@ -169,55 +364,61 @@ define([
         if (!options.createPopover && !form.vellum.opts().features.disable_popovers) {
             options.createPopover = createPopover;
         }
-        var NOTSET = {},
-            newval = NOTSET,  // HACK work around async get/set
-            editor = input.ckeditor({
-                contentsLangDirection: options.rtl ? 'rtl' : 'ltr',
-                disableNativeSpellChecker: options.disableNativeSpellChecker,
-                placeholder: ' ',
-            }).editor;
-        wrapper = {
+        let resolveEditorPromise;
+        input.promise = new Promise((resolve) => {
+          resolveEditorPromise = resolve;
+        });
+        const wrapper = {
             getValue: function (callback) {
                 if (callback) {
                     input.promise.then(function() {
-                        callback(fromRichText(editor.getData()));
+                        callback(fromRichText(inputElement.innerHTML));
                     });
-                } else if (newval !== NOTSET) {
-                    return newval;
                 } else {
-                    var data;
-                    try {
-                        data = editor.getData();
-                    } catch (err) {
-                        if (err.name !== "IndexSizeError") {
-                            throw err;
-                        }
-                        // HACK work around Chrome/CKEditor bug
-                        // https://dev.ckeditor.com/ticket/13903
-                        wrapper.select(0);
-                        data = editor.getData();
-                    }
-                    return fromRichText(data, form, options.isExpression);
+                    var data = inputElement.innerHTML,
+                        value = fromRichText(data, form, options.isExpression);
+                    return value;
                 }
             },
             setValue: function (value, callback) {
-                newval = value;
-                value = toRichText(value, form, options);
-                editor.setData(value, {
-                    callback: function () {
-                        newval = NOTSET;
-                        if (callback) { callback(); }
-                    },
-                    noSnapshot: true,
+                var richTextValue = toRichText(value, form, options);
+                inputElement.innerHTML = richTextValue;
+
+                const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
+                nonEditableSpans.forEach(span => {
+                    const prevNode = span.previousSibling,
+                          nextNode = span.nextSibling;
+                    if (!prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
+                        span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span);
+                    }
+                    if (!nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
+                        span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span.nextSibling);
+                    }
                 });
+                // Add ZWSP at the end to prevent browsers from replacing tailing spaces
+                // with other characters changing the overall behavior
+                inputElement.innerHTML += ZERO_WIDTH_SPACE;
+
+                undoStack.push();
+                onVellumWidgetSet(inputElement, () => {
+                    inputElement
+                        .querySelectorAll('[data-toggle="popover"]')
+                        .forEach(element => createPopover(element));
+                });
+
+                if (callback) {
+                    setTimeout(callback, 0);
+                }
                 return wrapper;
             },
             insertExpression: function (xpath) {
                 if (options.isExpression) {
-                    insertHtmlWithSpace(bubbleExpression(xpath, form));
+                    insertHtmlWithSpace(bubbleExpression(xpath, form), true);
                 } else {
                     var output = makeBubble(form, xpath);
-                    insertHtmlWithSpace($('<p>').append(output).html());
+                    insertHtmlWithSpace($('<p>')
+                        .append(output)
+                        .html(), true);
                 }
                 return wrapper;
             },
@@ -229,67 +430,68 @@ define([
                 return wrapper;
             },
             change: function () {
-                editor.fire("saveSnapshot");
                 return wrapper;
             },
             focus: function() {
-                if (editor.status === "ready") {
-                    editor.focus();
-                } else {
-                    editor.removeListener('instanceReady', editor.focus);
-                    editor.on('instanceReady', editor.focus);
-                }
+                inputElement.focus();
             },
             select: function (index, length) {
-                ckSelect.call(null, editor, index, length);
+                divSelect.call(null, inputElement, index, length);
                 return wrapper;
             },
             on: function () {
                 var args = Array.prototype.slice.call(arguments);
-                editor.on.apply(editor, args);
+                if (args.length === 2 && args[0] === 'change' && typeof args[1] === 'function') {
+                    const handleContentChange = function(e) {
+                        args[1].apply(); // callee in widgets.js does not take any arguments
+                    };
+
+                    inputElement.addEventListener('input', handleContentChange);
+                    inputElement.addEventListener('paste', handleContentChange);
+                    inputElement.addEventListener('cut', handleContentChange);
+
+                }
                 return wrapper;
             },
             destroy: function () {
                 if (input !== null) {
-                    input.removeData("ckwrapper");
-                    input.promise.then(function () {
-                        editor.destroy();
-                        editor = null;
-                    });
+                    input.removeData("editorWrapper");
                     input = null;
                 }
             },
         };
 
-        editor.on('focus', function (e) {
-            // workaround for https://code.google.com/p/chromium/issues/detail?id=313082
-            editor.setReadOnly(false);
-            // remove any placeholder text that may be in the text area
-            var editable = e.editor.editable();
-            if (editable.hasClass('placeholder')) {
-                editable.removeClass('placeholder');
-                editable.setHtml('');
-            }
-            // set the cursor to the end of text
-            var selection = editor.getSelection();
-            var range = selection.getRanges()[0];
-            if (range) {
-                var pCon = range.startContainer.getAscendant({p:2},true);
-                if (pCon) {
-                    var newRange = new CKEDITOR.dom.range(range.document);
-                    newRange.moveToPosition(pCon, CKEDITOR.POSITION_BEFORE_END);
-                    newRange.select();
+        function handleCopyOrCut(e) {
+            e.preventDefault();
+            const selection = window.getSelection();
+            let selectedText = '';
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0),
+                      container = document.createElement('div');
+                container.appendChild(range.cloneContents());
+                selectedText = fromRichText(container.innerHTML, form, options.isExpression);
+
+                if (e.type === 'cut') {
+                    range.deleteContents();
+                }
+                if (isInvalid(selectedText)) {
+                    selectedText = escapedHashtags.transform(
+                        selectedText.slice(INVALID_PREFIX.length),
+                        function (v) { return v; }
+                    );
                 }
             }
-        });
+            if (e.clipboardData) {
+                e.clipboardData.setData('text/plain', selectedText);
+            }
+        }
 
-        editor._vellum_fromRichText = function (html) {
-            return fromRichText(html, form, options.isExpression);
-        };
+        inputElement.addEventListener('copy', handleCopyOrCut);
+        inputElement.addEventListener('cut', handleCopyOrCut);
 
-        editor.on('paste', function(event) {
-            var data = event.data;
-            if (data.dataTransfer && data.dataTransfer.getData("Text")) {
+        inputElement.addEventListener('paste', function(event) {
+            event.preventDefault();
+            if (event.clipboardData && event.clipboardData.getData("text/plain")) {
                 // Get plain text instead of HTML because HTML encoded
                 // content from applications like Word or your text
                 // editor often contains unwanted styling information.
@@ -305,66 +507,81 @@ define([
                 // a surprising thing happens later: hashtags are
                 // automatically converted to bubbles the next time the
                 // expression is loaded in a rich text editor.
-                var text = data.dataTransfer.getData("Text");
-                data.type = 'html';
-                data.dataValue = $('<div />').text(text).html()
+                const text = event.clipboardData.getData("text/plain");
+                const htmlText = document.createElement('div');
+                htmlText.textContent = text; // This escapes the text
+                const htmlContent = htmlText.innerHTML
                     .replace(/\n/g, "<br />")
                     .replace(/  /g, " &nbsp;");
-            } else {
-                // fall back to HTML
-                // Adapted from http://www.keyvan.net/2012/11/clean-up-html-on-paste-in-ckeditor/
-                var style = /<style type="text\/css">.*?<\/style>/g;
-                data.dataValue = data.dataValue.replace(style, "");
+                insertHTML(htmlContent);
+            } else if (event.clipboardData.getData("text/html")){
+                let htmlData = event.clipboardData.getData("text/html");
+                const style = /<style[^>]*>.*?<\/style>/g;
+                let previousHtmlData;
+                do {
+                    previousHtmlData = htmlData;
+                    htmlData = htmlData.replace(style, "");
+                } while (htmlData !== previousHtmlData);
+                insertHTML(htmlData);
             }
-        }, null, null, 2);
+        });
 
-        if (_.isFunction(options.createPopover)) {
-            editor.addCommand('createPopover', {
-                exec: options.createPopover,
-                editorFocus: false,
-                canUndo: false,
-            });
+        inputElement.addEventListener('focus', function () {
+            const lastChild = inputElement.lastChild;
+            if (lastChild && lastChild.length > 0) { // should always be true because of the tailing ZWSP
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.setStart(lastChild, lastChild.length - 1);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        });
+
+        function insertHTML(html) {
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                if (sel.getRangeAt && sel.rangeCount) {
+                    let range = sel.getRangeAt(0);
+                    range.deleteContents();
+
+                    const el = document.createElement("div");
+                    el.innerHTML = html;
+                    const frag = document.createDocumentFragment();
+                    let node, lastNode;
+
+                    while ((node = el.firstChild)) {
+                        lastNode = frag.appendChild(node);
+                    }
+                    range.insertNode(frag);
+                    if (lastNode) {
+                        range = range.cloneRange();
+                        range.setStartAfter(lastNode);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                    // Make sure ZWSP at the end does not get removed to prevent browsers from
+                    // replacing tailing spaces with other characters changing the overall behavior
+                    if (!inputElement.innerHTML.endsWith(ZERO_WIDTH_SPACE)) {
+                        inputElement.innerHTML += ZERO_WIDTH_SPACE;
+                    }
+                }
+            }
         }
 
-        input.data("ckwrapper", wrapper);
+        input.data("editorWrapper", wrapper);
+        resolveEditorPromise();
         return wrapper;
     };
 
-    function richTextDataTransfer(nativeDataTransfer, editor) {
-        realDataTransfer.call(this, nativeDataTransfer);
-
-        if (editor) {
-            this.sourceEditor = editor;
-
-            var html = editor.getSelectedHtml(1);
-            if (html) {
-                var text = editor._vellum_fromRichText(html);
-                if (isInvalid(text)) {
-                    text = escapedHashtags.transform(
-                        text.slice(INVALID_PREFIX.length),
-                        function (v) { return v; }
-                    );
-                }
-                // always copy plain text, not HTML
-                this.setData('text/plain', text);
-            }
-        }
-    }
-    // monkeypatch clipboard plugin to transform easy reference
-    // bubbles to hashtags on copy/cut.
-    var realDataTransfer = CKEDITOR.plugins.clipboard.dataTransfer;
-    richTextDataTransfer.prototype = realDataTransfer.prototype;
-    CKEDITOR.plugins.clipboard.dataTransfer = richTextDataTransfer;
-
-    /**
-     * Set selection in CKEditor
-     */
-    function ckSelect(editor, index, length) {
+    function divSelect(div, index, length) {
         function iterNodes(parent) {
             var i = 0,
-                children = parent.getChildren(),
-                count = children.count(),
+                children = Array.from(parent.childNodes),
+                count = children.length,
                 inner = null;
+
             function next() {
                 var child;
                 if (inner) {
@@ -373,14 +590,19 @@ define([
                         return child;
                     }
                     inner = null;
+                    // After exhausting children of a <p> tag, return a special node for the line break
+                    if (children[i - 1] && children[i - 1].nodeName.toLowerCase() === "p") {
+                        return {node: children[i - 1], length: 1, isText: false};
+                    }
                 }
                 if (i >= count) {
                     return null;
                 }
-                child = children.getItem(i);
+                child = children[i];
                 i++;
-                if (child.type === CKEDITOR.NODE_ELEMENT) {
-                    var name = child.getName().toLowerCase();
+
+                if (child.nodeType === Node.ELEMENT_NODE) {
+                    var name = child.nodeName.toLowerCase();
                     if (name === "p") {
                         inner = iterNodes(child);
                         return next();
@@ -389,17 +611,18 @@ define([
                         return {node: child, length: 1, isText: false};
                     }
                     throw new Error("not implemented: " + name);
-                } else if (child.type === CKEDITOR.NODE_TEXT) {
+                } else if (child.nodeType === Node.TEXT_NODE) {
                     return {
                         node: child,
-                        length: child.getText().length,
+                        length: child.textContent.length,
                         isText: true,
                     };
                 }
-                throw new Error("unhandled element type: " + child.type);
+                throw new Error("unhandled element type: " + child.nodeType);
             }
             return next;
         }
+
         function getNodeOffset(index, nextNode) {
             var offset = index,
                 node = nextNode();
@@ -416,18 +639,21 @@ define([
             }
             throw new Error("index is larger than content: " + index);
         }
-        editor.focus();
-        var sel = editor.getSelection(),
-            nextNode = iterNodes(sel.root),
+
+        div.focus();
+        var sel = window.getSelection(),
+            nextNode = iterNodes(div),
             node = getNodeOffset(index, nextNode),
-            range = sel.getRanges()[0];
+            range = document.createRange();
+
         if (node.isText) {
             range.setStart(node.node, node.offset);
         } else {
             range.setStartAfter(node.node);
         }
+
         if (length) {
-            nextNode = iterNodes(sel.root);
+            nextNode = iterNodes(div);
             node = getNodeOffset(index + length, nextNode);
             if (node.isText) {
                 range.setEnd(node.node, node.offset);
@@ -437,7 +663,9 @@ define([
         } else {
             range.collapse(true);
         }
-        sel.selectRanges([range]);
+
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
 
     /*
@@ -542,12 +770,18 @@ define([
             bubbleClasses = xpathInfo.classes[0],
             iconClasses = xpathInfo.classes[1],
             dispValue = getBubbleDisplayValue(xpath, form.xpath),
-            icon = $('<i>').addClass(iconClasses).html('&nbsp;');
-        return $('<span>')
-            .addClass('label label-datanode ' + bubbleClasses)
-            .attr('data-value', xpath)
-            .append(icon)
-            .append(dispValue);
+            icon = $('<i>').addClass(iconClasses).html('&nbsp;'),
+            uniqueId = 'bubble-' + Math.random().toString(36).slice(2, 10),
+            $bubble = $('<span>')
+                .addClass('label label-datanode ' + bubbleClasses)
+                .attr('data-value', xpath)
+                .attr('contenteditable', 'false')
+                .attr('data-toggle', 'popover')
+                .attr('id', uniqueId)
+                .append(icon)
+                .append(dispValue);
+
+        return $bubble;
     }
 
     /**
@@ -565,7 +799,13 @@ define([
         if (!startsWithRef || (startsWithRef && containsWhitespace)) {
             return $('<span>').text(xml.normalize(output)).html();
         }
-        return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
+        // return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
+        const m = $('<div>')
+            .append(document.createTextNode(ZERO_WIDTH_SPACE))
+            .append(makeBubble(form, xpath).attr(attrs))
+            .append(document.createTextNode(ZERO_WIDTH_SPACE))
+            .html();
+        return m;
     }
 
     /**
@@ -646,7 +886,8 @@ define([
         function bubble(hashtag) {
             return makeBubble(form, hashtag).prop('outerHTML');
         }
-        return transform(text, bubble, true);
+        const transformed = transform(text, bubble, true);
+        return transformed;
     }
 
     function unwrapBubbles(text, form, isExpression) {
@@ -733,7 +974,7 @@ define([
     }
 
     /**
-     * Convert plain text to HTML to be edited in CKEditor
+     * Convert plain text to HTML
      *
      * Replace line breaks with <p> tags and preserve contiguous spaces.
      */
@@ -744,7 +985,7 @@ define([
     }
 
     /**
-     * Convert CKEditor HTML to plain text
+     * Convert HTML to plain text
      *
      * Replace <p> tags with newlines.
      */
@@ -754,12 +995,8 @@ define([
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
                    .replace(/(&nbsp;|\xa0|\u2005)/ig, " ")
-                   // While copying widgets with text, CKEditor adds these html elements
-                   .replace(/<span\b[^>]*?id="?cke_bm_\d+\w"?\b[^>]*?>.*?<\/span>/ig, "")
-                   .replace(/<span\b[^>]*?data-cke-copybin-(start|end)[^<]*?<\/span>/ig, "")
-                   // CKEditor uses zero-width spaces as markers
-                   // and sometimes they leak out (on copy/paste?)
-                   .replace(/\u200b+/ig, " ")
+                   .replace(/(\u200B)/ig, "")
+
                    // fixup final </p>, which is is not a newline
                    .replace(/\n$/, "");
     }
@@ -784,7 +1021,7 @@ define([
      * Deconstructs html strings that have bubbles in them
      * This should preserve whitespace as it appears in the editor
      *
-     * Dependent on CKEditor, which uses p and &nbsp; to format content
+     * Dependent on the editor to use p and &nbsp; to format content
      *
      * Expects the html to only be at most two levels deep (considering a
      * bubble span as one level):
@@ -845,30 +1082,26 @@ define([
         });
     }
 
-    function createPopover(editor, ckwidget) {
-        var $this = $(ckwidget.element.$),
-            dragContainer = ckwidget.dragHandlerContainer;
-        // Setup popover
-        var xpath = $this.data('value'),
+    function createPopover(element) {
+        var $element = $(element),
+            $widget = $element.closest('.form-control'),
+            xpath = element.getAttribute('data-value'),
             getWidget = require('vellum/widgets').util.getWidget,
             // TODO find out why widget is sometimes null (tests only?)
-            widget = getWidget($this);
+            widget = getWidget($widget);
         if (widget) {
             var isFormRef = FORM_REF_REGEX.test(xpath),
-                isText = function () { return this.nodeType === 3; },
-                displayId = $this.contents().filter(isText)[0].nodeValue,
+                displayId = element.textContent.trim(),
                 hashtag = widget.mug.form.normalizeHashtag(xpath),
                 title = util.escape(hashtag),
                 labelMug = widget.mug.form.getMugByPath(xpath),
                 description = labelMug && labelMug.p.labelItext ?
-                            labelMug.p.labelItext.get() : "",
+                    labelMug.p.labelItext.get() : "",
                 isDate = labelMug && labelMug.__className.indexOf("Date") === 0,
-                $dragContainer = $(dragContainer.$),
-                $imgs = $dragContainer.children("img"),
                 dateFormatID = util.get_guid(),
                 getTitle = function () {
                     var title_ = title,
-                        format = $this.attr("data-date-format");
+                        format = $element.attr("data-date-format");
                     if (isDate || format) {
                         title_ += date_format_popover({
                             guid: dateFormatID,
@@ -889,16 +1122,13 @@ define([
             });
             description = xml.normalize(description);
 
-            // Remove ckeditor-supplied title attributes, which will otherwise override popover title
-            $imgs.removeAttr("title");
-
-            $imgs.popover({
+            $element.popover({
                 trigger: 'hover',
                 container: 'body',
                 placement: 'bottom',
-                title: getTitle,
+                title: getTitle(), // only needs to be called once
                 html: true,
-                sanitize: false,  // bootstrap, don't remove data-ufid attribute
+                sanitize: false, // bootstrap, don't remove data-ufid attribute
                 content: easy_reference_popover({
                     text: description,
                     ufid: labelMug ? labelMug.ufid : "",
@@ -917,24 +1147,26 @@ define([
                 var type = isFormRef ? 'form' : 'case';
                 analytics.fbUsage("Hovered over easy " + type + " reference");
                 analytics.workflow("Hovered over easy reference");
-                if (isDate || $this.attr("data-date-format")) {
+                if (isDate || $widget.attr("data-date-format")) {
                     var pos = $(this).offset(),
                         x = pos.left,
                         y = pos.top + $(this).height();
                     $("#" + dateFormatID).click(function () {
-                        $imgs.popover('hide');
+                        $element.popover('hide');
                         dateformats.showMenu(x, y, function (format) {
-                            $this.attr("data-date-format", format);
-                            editor.fire("saveSnapshot");
+                            $widget.attr("data-date-format", format);
+                            // todo: save snapshot
                         }, true);
                         return false;
                     });
                 }
             });
 
-            ckwidget.on('destroy', function (e)  {
+            element.classList.add('popover-initialized');
+
+            $element.on('destroy', function (e)  {
                 try {
-                    $imgs.popover('destroy');
+                    $element.popover('destroy');
                 } catch(err) {
                     // sometimes these are already destroyed
                 }
@@ -947,6 +1179,7 @@ define([
         bubbleOutputs: bubbleOutputs,
         sanitizeInput: sanitizeInput,
         editor: editor,
+        htmlToFragment: htmlToFragment,
         fromRichText: fromRichText,
         toRichText: toRichText,
         isInvalid: isInvalid,

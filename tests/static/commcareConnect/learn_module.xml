@@ -9,7 +9,8 @@
 					<module_1 vellum:role="ConnectLearnModule">
 						<module xmlns="http://commcareconnect.com/data/v1/learn" id="module_1">
 							<name>module 1</name>
-							<description>Module 1 is fun&#10;Learning is fun</description>
+							<description>Module 1 is fun
+Learning is fun</description>
 							<time_estimate>2</time_estimate>
 						</module>
 					</module_1>
@@ -31,4 +32,5 @@
 			<label ref="jr:itext('name-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

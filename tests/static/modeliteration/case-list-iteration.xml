@@ -10,7 +10,7 @@
 					</child>
 				</data>
 			</instance>
-			<instance id="casedb" src="jr://instance/casedb"></instance>
+			<instance id="casedb" src="jr://instance/casedb" />
 			<bind nodeset="/data/child/@current_index" vellum:calculate="count(#form/child/item)" calculate="count(/data/child/item)" />
 			<bind vellum:nodeset="#form/child/item" nodeset="/data/child/item" />
 			<setvalue event="xforms-ready" ref="/data/child/@ids" value="join(' ', instance('casedb')/mother/child/@case_id)" />
@@ -18,13 +18,14 @@
 			<setvalue event="jr-insert" ref="/data/child/item/@index" value="int(/data/child/@current_index)" />
 			<setvalue event="jr-insert" ref="/data/child/item/@id" value="selected-at(/data/child/@ids, ../@index)" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<repeat vellum:nodeset="#form/child/item" nodeset="/data/child/item" jr:count="/data/child/@count" jr:noAddRemove="true()" />
+			<repeat jr:count="/data/child/@count" jr:noAddRemove="true()" vellum:nodeset="#form/child/item" nodeset="/data/child/item" />
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

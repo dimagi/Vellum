@@ -30,4 +30,5 @@
 			<label ref="jr:itext('markdown_question-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

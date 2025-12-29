@@ -9,18 +9,15 @@
 				</data>
 			</instance>
 			<instance src="jr://instance/casedb" id="casedb" />
-			<instance id="commcaresession" src="jr://instance/session" />
+			<instance src="jr://instance/session" id="commcaresession" />
 			<bind vellum:nodeset="#form/mug" nodeset="/data/mug" vellum:calculate="#case/parent/edd" calculate="instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/edd" />
 			<itext>
-				<translation lang="en" default="">
-				</translation>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
-		<vellum:hashtags>
-			{&quot;#case/parent/edd&quot;:null}
-		</vellum:hashtags>
+		<vellum:hashtags>{&quot;#case/parent/edd&quot;:null}</vellum:hashtags>
 		<vellum:hashtagTransforms>{&quot;prefixes&quot;:{&quot;#case/parent/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/index/parent]/&quot;,&quot;#case/&quot;:&quot;instance('casedb')/cases/case[@case_id = instance('commcaresession')/session/data/case_id]/&quot;}}</vellum:hashtagTransforms>
 	</h:head>
-	<h:body>
-	</h:body>
+	<h:body />
+	<case_mappings />
 </h:html>

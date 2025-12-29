@@ -12,11 +12,12 @@
 			<bind vellum:nodeset="#form/text" nodeset="/data/text" type="xsd:string" vellum:relevant="#invalid/xpath (`#form/hidden`" relevant="(/data/hidden" />
 			<bind vellum:nodeset="#form/hidden" nodeset="/data/hidden" vellum:calculate="#form/text" calculate="/data/text" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/text" ref="/data/text"/>
+		<input vellum:ref="#form/text" ref="/data/text" />
 	</h:body>
+	<case_mappings />
 </h:html>

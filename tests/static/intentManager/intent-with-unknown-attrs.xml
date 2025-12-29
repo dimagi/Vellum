@@ -17,7 +17,7 @@
 				</translation>
 			</itext>
 		</model>
-		<odkx:intent xmlns:odkx="http://opendatakit.org/xforms" id="breath_count" type="vnd.android-dir/mms-sms" class="android.intent.action.VIEW" button-label="Send SMS">
+		<odkx:intent xmlns:odkx="http://opendatakit.org/xforms" id="breath_count" class="android.intent.action.VIEW" type="vnd.android-dir/mms-sms" button-label="Send SMS">
 			<extra key="sms_body" ref="/data/content" />
 			<extra key="address" ref="/data/address" />
 		</odkx:intent>
@@ -27,4 +27,5 @@
 			<label ref="jr:itext('breath_count-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

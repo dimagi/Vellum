@@ -15,15 +15,16 @@
 			<bind vellum:nodeset="#form/blue/text" nodeset="/data/blue/text" type="xsd:string" />
 			<bind vellum:nodeset="#form/green" nodeset="/data/green" />
 			<itext>
-				<translation lang="en" default=""/>
-				<translation lang="hin"/>
+				<translation lang="en" default="" />
+				<translation lang="hin" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group vellum:ref="#form/blue" ref="/data/blue">
-			<input vellum:ref="#form/blue/text" ref="/data/blue/text"/>
+			<input vellum:ref="#form/blue/text" ref="/data/blue/text" />
 		</group>
-		<group vellum:ref="#form/green" ref="/data/green"/>
+		<group vellum:ref="#form/green" ref="/data/green" />
 	</h:body>
+	<case_mappings />
 </h:html>

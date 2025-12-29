@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+<?xml version="1.0" encoding="UTF-8"?><h:xdoc xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
 	<h:head>
 		<h:title>Untitled Form</h:title>
 		<model>
@@ -10,17 +9,14 @@
 			</instance>
 			<bind vellum:nodeset="#form/question" nodeset="/data/question" type="xsd:string"/>
 			<itext>
-				<translation lang="en" default="">
-					<text id="question-label" vellum:ignore="retain">
-						<value>question</value>
-					</text>
-				</translation>
+				<translation lang="en" default=""><text id="question-label" vellum:ignore="retain">
+					<value>question</value>
+				</text></translation>
 			</itext>
 		</model>
 	</h:head>
-	<h:body>
-		<input ref="/data/question" vellum:ignore="retain">
-			<label ref="jr:itext('question-label')"/>
-		</input>
-	</h:body>
-</h:html>
+	<h:body><input ref="/data/question" vellum:ignore="retain">
+		<label ref="jr:itext('question-label')"/>
+	</input></h:body>
+	<case_mappings/>
+</h:xdoc>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
   <h:head>
     <h:title>Untitled Form</h:title>
@@ -14,7 +15,7 @@
       </instance>
       <bind vellum:nodeset="#form/score" nodeset="/data/score" type="xsd:int" required="true()" />
       <bind vellum:nodeset="#form/test_assessment" nodeset="/data/test_assessment" relevant="x = 1" />
-      <bind nodeset="/data/test_assessment/assessment/user_score" vellum:calculate="#form/score"  calculate="/data/score" />
+      <bind nodeset="/data/test_assessment/assessment/user_score" vellum:calculate="#form/score" calculate="/data/score" />
       <itext>
         <translation lang="en" default="">
           <text id="score-label">
@@ -29,4 +30,5 @@
       <label ref="jr:itext('score-label')" />
     </input>
   </h:body>
+  <case_mappings />
 </h:html>

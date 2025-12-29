@@ -10,9 +10,7 @@
 					<result />
 				</data>
 			</instance>
-			<instance id="scores">
-				<score low="0.0" high="500.0">You're really bad</score>
-				<score low="500.0" high="99999999.0">You're really good</score>
+			<instance id="scores"><score low="0.0" high="500.0">You're really bad</score><score low="500.0" high="99999999.0">You're really good</score>
 			</instance>
 			<bind vellum:nodeset="#form/score" nodeset="/data/score" type="xsd:int" />
 			<bind vellum:nodeset="#form/output" nodeset="/data/output" vellum:calculate="instance('scores')/score[@high &gt; #form/score][@low &lt; #form/score]" calculate="instance('scores')/score[@high &gt; /data/score][@low &lt; /data/score]" />
@@ -23,7 +21,7 @@
 						<value>What was your score</value>
 					</text>
 					<text id="result-label">
-						<value><output vellum:value="#form/output" value="/data/output" /></value>
+						<value><output value="/data/output" vellum:value="#form/output" /></value>
 					</text>
 				</translation>
 			</itext>
@@ -37,4 +35,5 @@
 			<label ref="jr:itext('result-label')" />
 		</trigger>
 	</h:body>
+	<case_mappings />
 </h:html>

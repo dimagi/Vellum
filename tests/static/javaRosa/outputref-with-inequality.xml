@@ -8,7 +8,7 @@
 					<product />
 				</data>
 			</instance>
-			<instance src="jr://fixture/commtrack:products" id="products"></instance>
+			<instance src="jr://fixture/commtrack:products" id="products" />
 			<bind nodeset="/data/product" />
 			<itext>
 				<translation lang="en" default="">
@@ -33,4 +33,5 @@
 			</itemset>
 		</select1>
 	</h:body>
+	<case_mappings />
 </h:html>

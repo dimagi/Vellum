@@ -6,7 +6,7 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E1B03643-109D-4DC6-9737-815E4401DE79" uiVersion="1" version="1" name="Untitled Form">
 					<name />
-					<save_to_case vellum:role="SaveToCase" vellum:case_type="" >
+					<save_to_case vellum:case_type="" vellum:role="SaveToCase">
 						<case xmlns="http://commcarehq.org/case/transaction/v2" case_id="" date_modified="" user_id="">
 							<update>
 								<name />
@@ -17,7 +17,7 @@
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
-			<bind nodeset="/data/save_to_case/case/update/name" vellum:relevant="#form/name != ''" vellum:calculate="#form/name" relevant="/data/name != ''" calculate="/data/name" />
+			<bind nodeset="/data/save_to_case/case/update/name" vellum:calculate="#form/name" calculate="/data/name" vellum:relevant="#form/name != ''" relevant="/data/name != ''" />
 			<bind nodeset="/data/save_to_case/case/update/dash-dash" calculate="'-'" />
 			<bind nodeset="/data/save_to_case/case/@date_modified" calculate="/data/meta/timeEnd" type="xsd:dateTime" />
 			<bind nodeset="/data/save_to_case/case/@user_id" calculate="/data/meta/userID" />
@@ -36,4 +36,5 @@
 			<label ref="jr:itext('name-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

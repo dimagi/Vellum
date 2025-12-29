@@ -21,11 +21,12 @@
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/question1" ref="/data/question1"/>
+		<input vellum:ref="#form/question1" ref="/data/question1" />
 		<group>
 			<repeat vellum:jr__count="#form/question1" jr:count="/data/question1" jr:noAddRemove="true()" vellum:nodeset="#form/question2" nodeset="/data/question2">
-				<input vellum:ref="#form/question2/question3" ref="/data/question2/question3"/>
+				<input vellum:ref="#form/question2/question3" ref="/data/question2/question3" />
 			</repeat>
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

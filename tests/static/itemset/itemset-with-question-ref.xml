@@ -13,12 +13,12 @@
 			<bind vellum:nodeset="#form/state" nodeset="/data/state" type="xsd:string" />
 			<bind vellum:nodeset="#form/district" nodeset="/data/district" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/state" ref="/data/state"/>
+		<input vellum:ref="#form/state" ref="/data/state" />
 		<select1 vellum:ref="#form/district" ref="/data/district">
 			<itemset vellum:nodeset="instance('some-fixture')/some-fixture_list/some-fixture[name = #form/state]" nodeset="instance('some-fixture')/some-fixture_list/some-fixture[name = /data/state]">
 				<label ref="name" />
@@ -26,4 +26,5 @@
 			</itemset>
 		</select1>
 	</h:body>
+	<case_mappings />
 </h:html>

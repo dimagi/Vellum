@@ -1,27 +1,18 @@
 /*jshint multistr: true */
-define([
-    'chai',
-    'jquery',
-    'underscore',
-    'tests/utils'
-], function (
-    chai,
-    $,
-    _,
-    util
-) {
-    var assert = chai.assert;
+import chai from "chai";
+import util from "tests/utils";
 
-    describe("The plugin manager", function () {
-        it("should ignore unknown plugins", function (done) {
-            util.init({
-                plugins: ["plugin-will-not-be-found"],
-                core: { onReady: function () {
-                    assert(!this.isPluginEnabled("plugin-will-not-be-found"),
-                        "loaded unknown plugin");
-                    done();
-                }
-            }});
-        });
+var assert = chai.assert;
+
+describe("The plugin manager", function () {
+    it("should ignore unknown plugins", function (done) {
+        util.init({
+            plugins: ["plugin-will-not-be-found"],
+            core: { onReady: function () {
+                assert(!this.isPluginEnabled("plugin-will-not-be-found"),
+                    "loaded unknown plugin");
+                done();
+            }
+        }});
     });
 });
