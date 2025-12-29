@@ -4,7 +4,7 @@
     "asi": false,
     "bitwise": true,
     "boss": false,
-    "esversion": 6,
+    "esversion": 11,
     "eqeqeq": true,
     "evil": false,
     "forin": false,
@@ -32,6 +32,9 @@
         "before": false,
         "beforeEach": false,
         "after": false,
-        "afterEach": false
+        "afterEach": false,
+        /* BROWSER APIS */
+        "DataTransfer": false,
+        "ClipboardEvent": false
     }
 }

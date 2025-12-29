@@ -1,80 +1,69 @@
-/* global require */
-require([
-    'chai',
-    'jquery',
-    'underscore',
-    'tests/utils',
-    'static/core/group-rename.xml'
-], function (
-    chai,
-    $,
-    _,
-    util,
-    GROUP_RENAME_XML
-) {
-    var assert = chai.assert,
-        call = util.call;
+import chai from "chai";
+import util from "tests/utils";
+import GROUP_RENAME_XML from "static/core/group-rename.xml";
 
-    describe("URL Hash", function() {
-        it("should select a mug that is in the form", function() {
-            window.location.hash = '#form/group/question2';
-            util.loadXML(GROUP_RENAME_XML, null, null, true);
-            var mug = call("getCurrentlySelectedMug");
-            assert.equal(mug.absolutePath, "/data/group/question2");
-        });
+var assert = chai.assert,
+    call = util.call;
 
-        it("should select first mug if hash isn't in form", function() {
-            window.location.hash = '#form/group/not_in_form';
-            util.loadXML(GROUP_RENAME_XML, null, null, true);
-            var mug = call("getCurrentlySelectedMug");
-            assert.equal(mug.absolutePath, "/data/group");
-        });
+describe("URL Hash", function() {
+    it("should select a mug that is in the form", function() {
+        window.location.hash = '#form/group/question2';
+        util.loadXML(GROUP_RENAME_XML, null, null, true);
+        var mug = call("getCurrentlySelectedMug");
+        assert.equal(mug.absolutePath, "/data/group/question2");
+    });
 
-        it("should change the hash when you add a question", function() {
-            util.loadXML("");
-            util.addQuestion("Text", "initial");
-            util.clickQuestion("initial");
-            assert.equal(window.location.hash, "#form/initial");
-        });
+    it("should select first mug if hash isn't in form", function() {
+        window.location.hash = '#form/group/not_in_form';
+        util.loadXML(GROUP_RENAME_XML, null, null, true);
+        var mug = call("getCurrentlySelectedMug");
+        assert.equal(mug.absolutePath, "/data/group");
+    });
 
-        it("should change the hash when you delete a question", function() {
-            util.loadXML("");
+    it("should change the hash when you add a question", function() {
+        util.loadXML("");
+        util.addQuestion("Text", "initial");
+        util.clickQuestion("initial");
+        assert.equal(window.location.hash, "#form/initial");
+    });
 
-            util.addQuestion("Text", "first");
-            util.clickQuestion("first");
+    it("should change the hash when you delete a question", function() {
+        util.loadXML("");
 
-            util.addQuestion("Text", "second");
-            util.clickQuestion("second");
+        util.addQuestion("Text", "first");
+        util.clickQuestion("first");
 
-            assert.equal(window.location.hash, "#form/second");
+        util.addQuestion("Text", "second");
+        util.clickQuestion("second");
 
-            util.deleteQuestion("/data/second");
+        assert.equal(window.location.hash, "#form/second");
 
-            assert.equal(window.location.hash, "#form/first");
-        });
+        util.deleteQuestion("/data/second");
 
-        it("should call setURLHash only once when multiple questions are loaded", function(done) {
+        assert.equal(window.location.hash, "#form/first");
+    });
 
-            var fnCallCount = 0;
-            util.loadXML("");
+    it("should call setURLHash only once when multiple questions are loaded", function(done) {
 
-            var q1 = util.addQuestion("Text", "first");
-            util.clickQuestion("first");
+        var fnCallCount = 0;
+        util.loadXML("");
 
-            util.addQuestion("Text", "second");
-            util.clickQuestion("second");
+        var q1 = util.addQuestion("Text", "first");
+        util.clickQuestion("first");
 
-            // Patching _setURLHash with a custom function
-            // which will tell how many times it was called
-            var originalFn = q1.form.vellum._setURLHash;
-            q1.form.vellum._setURLHash = function() {
-                fnCallCount++;
-            };
-            util.saveAndReload(function() {
-                q1.form.vellum._setURLHash = originalFn;
-                assert.equal(fnCallCount, 1);
-                done();
-            });
+        util.addQuestion("Text", "second");
+        util.clickQuestion("second");
+
+        // Patching _setURLHash with a custom function
+        // which will tell how many times it was called
+        var originalFn = q1.form.vellum._setURLHash;
+        q1.form.vellum._setURLHash = function() {
+            fnCallCount++;
+        };
+        util.saveAndReload(function() {
+            q1.form.vellum._setURLHash = originalFn;
+            assert.equal(fnCallCount, 1);
+            done();
         });
     });
 });
