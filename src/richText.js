@@ -278,7 +278,7 @@ define([
                             range.setStart(node, offset - 1);
                             range.collapse(true);
                         }
-                    } else if (!nextNode) { // behind the last ZWSP at the end
+                    } else if (!nextNode && node.parentNode.getAttribute('contenteditable') === 'true') { // behind the last ZWSP at the end
                         range.setStart(node, offset - 1);
                         range.collapse(true);
                     }
@@ -302,29 +302,32 @@ define([
         }
 
         inputElement.addEventListener('input', function(e) {
-            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]'),
-                  spansToRemove = [];
+            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
+            const spansToRemove = [];
 
             nonEditableSpans.forEach(span => {
-                const prevNode = span.previousSibling,
-                      nextNode = span.nextSibling;
+                const prevNode = span.previousSibling;
+                const nextNode = span.nextSibling;
 
-                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE),
-                      zwspAfterMissing = !nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
+                const zwspBeforeMissing = !prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE);
+                const zwspAfterMissing = !nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE);
                 if (zwspBeforeMissing || zwspAfterMissing) {
                     spansToRemove.push(span);
                 }
 
                 // There is only the tailing ZWSP left
                 if (nextNode && nextNode.nodeType === Node.TEXT_NODE &&
-                        nextNode.parentNode.lastChild === nextNode && nextNode.nodeValue === ZERO_WIDTH_SPACE) {
+                        nextNode.parentNode.getAttribute('contenteditable') === 'true' &&
+                        nextNode.parentNode.lastChild === nextNode &&
+                        nextNode.nodeValue === ZERO_WIDTH_SPACE) {
+
                     spansToRemove.push(span);
                 }
             });
 
             spansToRemove.forEach(span => {
-                const prevNode = span.previousSibling,
-                      nextNode = span.nextSibling;
+                const prevNode = span.previousSibling;
+                const nextNode = span.nextSibling;
                 // remove the previous node or tailing ZWSP if it has one
                 if (prevNode && prevNode.nodeType === Node.TEXT_NODE && prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
                     prevNode.nodeValue = prevNode.nodeValue.slice(0, -1);
@@ -991,6 +994,7 @@ define([
      */
     function fromHtml(html) {
         return html.replace(/<p>&nbsp;<\/p>/ig, "\n")
+                   .replace(/<div>/ig,"\n")
                    .replace(/<p>/ig,"")
                    .replace(/<\/p>/ig, "\n")
                    .replace(/<br \/>/ig, "\n")
