@@ -495,9 +495,9 @@ define([
             // updates may be undefined if the mug doesn't have an absolute path (e.g., Choice items)
             if (updates) {
                 const basePath = form.getBasePath();
-                function restoreAbsolutePath(hashtagPath) {
+                const restoreAbsolutePath = (hashtagPath) => {
                     return hashtagPath.replace(/^#form\//, basePath);
-                }
+                };
 
                 const maintainer = new CaseMapMaintainer(form);
                 Object.values(updates).forEach(([oldHashtagPath, newHashtagPath]) => {
