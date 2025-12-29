@@ -39,10 +39,10 @@
 			<label ref="jr:itext('question2-label')" />
 		</input>
 	</h:body>
-	<case_mappings>
+	<vellum:case_mappings>
 		<mapping property="one">
 			<question question_path="/data/question1" />
             <question question_path="/data/question2" />
 		</mapping>
-	</case_mappings>
+	</vellum:case_mappings>
 </h:html>
