@@ -11,6 +11,7 @@ define([
     'vellum/undomanager',
     'vellum/util',
     'vellum/hqAnalytics',
+    'vellum/writer',
 ], function (
     require,
     _,
@@ -23,15 +24,14 @@ define([
     Fuse,
     undomanager,
     util,
-    analytics
+    analytics,
+    writer,
 ) {
     // Load these dependencies in the background after all other run-time
     // dependencies have been resolved, since they shouldn't be necessary
     // initially.
-    var writer,
-        exporter;
-    require(['vellum/writer', 'vellum/exporter'], function (w, e) {
-        writer = w;
+    var exporter;
+    require(['vellum/exporter'], function (e) {
         exporter = e;
     });
 
