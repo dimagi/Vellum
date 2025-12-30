@@ -642,11 +642,7 @@ define([
             });
         },
         createXML: function (addPresentationXML) {
-            return new Promise(function(resolve) {
-                require(['vellum/writer'], function(w) {
-                    resolve(w.createXForm(this, addPresentationXML));
-                }.bind(this));
-            }.bind(this));
+            return writer.createXForm(this);
         },
 
         /**
