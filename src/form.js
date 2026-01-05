@@ -25,7 +25,7 @@ define([
     undomanager,
     util,
     analytics,
-    writer,
+    writer
 ) {
     // Load these dependencies in the background after all other run-time
     // dependencies have been resolved, since they shouldn't be necessary
