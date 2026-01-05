@@ -11,6 +11,7 @@ define([
     'vellum/undomanager',
     'vellum/util',
     'vellum/hqAnalytics',
+    'vellum/writer',
 ], function (
     require,
     _,
@@ -23,15 +24,14 @@ define([
     Fuse,
     undomanager,
     util,
-    analytics
+    analytics,
+    writer
 ) {
     // Load these dependencies in the background after all other run-time
     // dependencies have been resolved, since they shouldn't be necessary
     // initially.
-    var writer,
-        exporter;
-    require(['vellum/writer', 'vellum/exporter'], function (w, e) {
-        writer = w;
+    var exporter;
+    require(['vellum/exporter'], function (e) {
         exporter = e;
     });
 
@@ -39,17 +39,17 @@ define([
         var that = {};
         that.message = options.message;
         // the key is how uniqueness is determined
-        that.key = options.key; 
+        that.key = options.key;
         that.level = options.level || "form-warning";
         that.options = options;
-        
+
         that.isMatch = function (other) {
             if (this.key && other.key) {
                 return this.key === other.key;
             }
             return false;
         };
-        
+
         return that;
     };
 
@@ -644,6 +644,7 @@ define([
         createXML: function () {
             return writer.createXForm(this);
         },
+
         /**
          * Walks through internal tree and grabs
          * all mugs that are not (1)Choices.  Returns
@@ -883,7 +884,7 @@ define([
          *
          * @param mug - the mugtype in the original tree to duplicate
          * @param parentMug - the mugtype in the duplicate tree to insert into
-         *        
+         *
          */
         _duplicateMug: function (mug, parentMug, depth) {
             depth = depth || 0;
@@ -896,7 +897,7 @@ define([
                 } else {
                     duplicate.p.nodeID = this.generate_question_id(nodeID, mug);
                 }
-                
+
                 this.insertQuestion(duplicate, mug, 'after', true);
             } else {
                 this.insertQuestion(duplicate, parentMug, 'into', true);
@@ -1170,12 +1171,12 @@ define([
             if (question_id) {
                 var match = /^copy-(\d+)-of-(.+)$/.exec(question_id) ;
                 if (match) {
-                    question_id = match[2]; 
+                    question_id = match[2];
                 }
                 var new_id = question_id;
                 for (var i = 1;; i++) {
                     if (this.isUniqueQuestionId(new_id, mug)) {
-                        return new_id; 
+                        return new_id;
                     }
                     new_id = "copy-" + i + "-of-" + question_id;
                 }
