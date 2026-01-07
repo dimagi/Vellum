@@ -8,8 +8,8 @@
 					<question1 />
 				</data>
 			</instance>
-			<instance id="casedb" src="jr://instance/casedb" />
-			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" constraint="1 = 1" jr:constraintMsg="jr:itext('question1-constraintMsg')"/>
+			<instance src="jr://instance/casedb" id="casedb" />
+			<bind vellum:nodeset="#form/question1" nodeset="/data/question1" constraint="1 = 1" jr:constraintMsg="jr:itext('question1-constraintMsg')" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -32,4 +32,5 @@
 			</itemset>
 		</select1>
 	</h:body>
+	<case_mappings />
 </h:html>

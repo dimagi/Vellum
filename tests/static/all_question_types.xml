@@ -196,9 +196,7 @@
 				<value>choice2</value>
 			</item>
 		</select1>
-		<!-- arbitrary control attributes -->
-		<select ref="/data/question6" foo="baz">
-		</select>
+		<select ref="/data/question6" />
 		<input ref="/data/question13" />
 		<input ref="/data/question14" appearance="numeric" />
 		<input ref="/data/question15" />
@@ -208,7 +206,7 @@
 		<input ref="/data/question19" />
 		<group ref="/data/question21">
 			<group>
-				<repeat jr:noAddRemove="true()"  nodeset="/data/question21/question31" jr:count="2" />
+				<repeat jr:count="2" jr:noAddRemove="true()" nodeset="/data/question21/question31" />
 			</group>
 		</group>
 		<group>
@@ -216,19 +214,19 @@
 				<jr:addEmptyCaption ref="jr:itext('question22-addEmptyCaption')" />
 				<jr:addCaption ref="jr:itext('question22-addCaption')" />
 				<group ref="/data/question22/question23" appearance="field-list">
-					<group ref="/data/question22/question23/question40"/>
+					<group ref="/data/question22/question23/question40" />
 					<group>
 						<repeat nodeset="/data/question22/question23/question41" />
 					</group>
 					<upload ref="/data/question22/question23/question24" mediatype="image/*" jr:imageDimensionScaledMax="250px" />
-					<upload ref="/data/question22/question23/question25" mediatype="audio/*" />
-					<upload ref="/data/question22/question23/question26" mediatype="video/*" />
+                    <upload ref="/data/question22/question23/question25" mediatype="audio/*" />
+                    <upload ref="/data/question22/question23/question26" mediatype="video/*" />
 					<input ref="/data/question22/question23/question27" />
 					<secret ref="/data/question22/question23/question28" />
-					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature" />
-					<upload ref="/data/question22/question23/question33" mediatype="application/*,text/*" />
+					<upload mediatype="image/*" ref="/data/question22/question23/question29" appearance="signature" />
+					<upload mediatype="application/*,text/*" ref="/data/question22/question23/question33" />
 					<input ref="/data/question22/question23/question7" appearance="intent:question7" />
-					<input ref="/data/question22/question23/question35" mediatype="image/*" appearance="micro-image" />
+					<input mediatype="image/*" ref="/data/question22/question23/question35" appearance="micro-image" />
 				</group>
 			</repeat>
 		</group>
@@ -236,4 +234,5 @@
 			<raw control="xml" />
 		</unrecognized>
 	</h:body>
+	<case_mappings />
 </h:html>

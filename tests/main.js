@@ -23,6 +23,10 @@ if (window.navigator.userAgent.indexOf('HeadlessChrome') < 0) {
 
 // Dynamically import all test modules (they register tests on global mocha instance as side-effect)
 Promise.all([
+    // tests for profiling load times
+    // (disabled by default because they take a long time)
+    //import('tests/profiling'),
+
     import('tests/base'),
     import('tests/core'),
     import('tests/form'),
@@ -62,13 +66,13 @@ Promise.all([
     import('tests/undomanager'),
     import('tests/undo'),
     import('tests/commcareConnect'),
-    
+
     // tests for profiling load times
     // (disabled by default because they take a long time)
     // import('tests/profiling'),
 ]).then(function() {
     // All tests are now loaded and registered with mocha
-    
+
     var session = window.sessionStorage;
 
     function runTests() {

@@ -10,11 +10,12 @@
 			</instance>
 			<bind vellum:nodeset="#form/mug" nodeset="/data/mug" type="xsd:string" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/mug" ref="/data/mug"/>
+		<input vellum:ref="#form/mug" ref="/data/mug" />
 	</h:body>
+	<case_mappings />
 </h:html>

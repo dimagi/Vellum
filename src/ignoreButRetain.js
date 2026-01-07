@@ -286,7 +286,7 @@ define([
             return this.__callOld();
         },
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
-            this.__callOld();
+            const updates = this.__callOld();
             var _this = this;
             if (this.data.ignore.active && oldPath) {
                 // does not use normalizeXPath for oldPath as old XPath is invalid
@@ -310,6 +310,8 @@ define([
                     });
                 });
             }
+
+            return updates;
         }
     });
 

@@ -28,4 +28,5 @@
 			<label ref="jr:itext('question1-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

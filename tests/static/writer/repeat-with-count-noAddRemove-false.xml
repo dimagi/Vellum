@@ -13,16 +13,17 @@
 			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
 			<bind vellum:nodeset="#form/group/question2" nodeset="/data/group/question2" type="xsd:string" />
 			<itext>
-				<translation lang="en" default=""/>
-				<translation lang="hin"/>
+				<translation lang="en" default="" />
+				<translation lang="hin" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
-			<repeat vellum:nodeset="#form/group" nodeset="/data/group" jr:count="3" jr:noAddRemove="false()">
-				<input vellum:ref="#form/group/question2" ref="/data/group/question2"/>
+			<repeat jr:count="3" jr:noAddRemove="true()" vellum:nodeset="#form/group" nodeset="/data/group">
+				<input vellum:ref="#form/group/question2" ref="/data/group/question2" />
 			</repeat>
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

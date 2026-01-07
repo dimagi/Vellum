@@ -63,6 +63,9 @@ define([
         xmlWriter.writeStartElement('h:body');
         createControlBlock(form, xmlWriter);
         xmlWriter.writeEndElement(); //CLOSE BODY
+
+        form.vellum.contributeToAdditionalXML(xmlWriter, form);
+
         xmlWriter.writeEndElement(); //CLOSE HTML
         xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
         form.vellum.afterSerialize();
