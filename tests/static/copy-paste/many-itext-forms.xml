@@ -67,4 +67,5 @@
 			<alert ref="jr:itext('text-constraintMsg')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

@@ -24,4 +24,5 @@
 			<label ref="jr:itext('label-label')" />
 		</trigger>
 	</h:body>
+	<case_mappings />
 </h:html>

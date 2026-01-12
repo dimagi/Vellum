@@ -2105,6 +2105,9 @@ define([
             var $ui = elemWidget.getUIElement();
             widgets.util.setWidget($ui, elemWidget);
             $fieldsetContent.append($ui);
+            if (elemWidget.postRender) {
+                elemWidget.postRender();
+            }
             elemWidget.refreshMessages();
         });
         return $sec;
@@ -2535,7 +2538,7 @@ define([
     };
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
-        form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
+        return form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
     };
 
     fn.duplicateMugProperties = function(mug) {};
@@ -2573,6 +2576,14 @@ define([
     fn.parseSetValue = function (form, el, path) {
         parser.parseSetValue(form, el, path);
     };
+
+    /**
+     * Extension point for plugins to add arbitrary data from the parsed xml into the form
+     *
+     * @param {Form} form - The form instance being loaded.
+     * @param xml - The parsed XML object
+     */
+    fn.performAdditionalParsing = function (form, xml) {};
 
     fn.getControlNodeAdaptorFactory = function (tagName) {
         return this.data.core.controlNodeAdaptorMap[tagName];
@@ -2616,6 +2627,14 @@ define([
     fn.contributeToModelXML = function (xmlWriter, form) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {};
+
+    /**
+     * Extension point for plugins to add arbitrary XML beneath the body element
+     * 
+     * @param {XMLWriter} xmlWriter - The writer, having already written the head and body elements
+     * @param {Form} form  - The form instance
+     */
+    fn.contributeToAdditionalXML = function (xmlWriter, form) {};
 
     fn.initMediaUploaderWidget = function (widget) {};
 

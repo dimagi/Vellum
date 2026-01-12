@@ -10,8 +10,8 @@
 			</instance>
 			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
 			<itext>
-				<translation lang="en" default=""/>
-				<translation lang="hin"/>
+				<translation lang="en" default="" />
+				<translation lang="hin" />
 			</itext>
 		</model>
 	</h:head>
@@ -20,4 +20,5 @@
 			<repeat vellum:nodeset="#form/group" nodeset="/data/group" />
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

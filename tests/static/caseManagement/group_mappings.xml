@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/6BB69EBD-38A4-40F8-9D9C-2907ED310E9B" uiVersion="1" version="1" name="Untitled Form">
+					<q3 />
+					<group1>
+						<q1 />
+						<q2 />
+					</group1>
+				</data>
+			</instance>
+			<bind vellum:nodeset="#form/q3" nodeset="/data/q3" type="xsd:string" />
+			<bind vellum:nodeset="#form/group1" nodeset="/data/group1" />
+			<bind vellum:nodeset="#form/group1/q1" nodeset="/data/group1/q1" type="xsd:string" />
+			<bind vellum:nodeset="#form/group1/q2" nodeset="/data/group1/q2" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="q3-label">
+						<value>Q3</value>
+					</text>
+					<text id="group1-label">
+						<value>Group1</value>
+					</text>
+					<text id="group1/q1-label">
+						<value>Q1</value>
+					</text>
+					<text id="group1/q2-label">
+						<value>Q2</value>
+					</text>
+				</translation>
+				<translation lang="hin">
+					<text id="q3-label">
+						<value>Q3</value>
+					</text>
+					<text id="group1-label">
+						<value>Group1</value>
+					</text>
+					<text id="group1/q1-label">
+						<value>Q1</value>
+					</text>
+					<text id="group1/q2-label">
+						<value>Q2</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input vellum:ref="#form/q3" ref="/data/q3">
+			<label ref="jr:itext('q3-label')" />
+		</input>
+		<group vellum:ref="#form/group1" ref="/data/group1">
+			<label ref="jr:itext('group1-label')" />
+			<input vellum:ref="#form/group1/q1" ref="/data/group1/q1">
+				<label ref="jr:itext('group1/q1-label')" />
+			</input>
+			<input vellum:ref="#form/group1/q2" ref="/data/group1/q2">
+				<label ref="jr:itext('group1/q2-label')" />
+			</input>
+		</group>
+	</h:body>
+	<case_mappings>
+		<mapping property="one">
+			<question question_path="/data/group1/q1" />
+		</mapping>
+		<mapping property="two">
+			<question question_path="/data/group1/q2" />
+		</mapping>
+		<mapping property="three">
+			<question question_path="/data/q3" />
+		</mapping>
+	</case_mappings>
+</h:html>

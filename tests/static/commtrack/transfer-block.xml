@@ -6,15 +6,15 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
 					<amount_received />
-					<transfer xmlns="http://commcarehq.org/ledger/v1" src="" dest="" date="" section-id="stock" type="trans-1">
+					<transfer xmlns="http://commcarehq.org/ledger/v1" type="trans-1" date="" section-id="stock" src="" dest="">
 						<entry id="" quantity="" />
 					</transfer>
 				</data>
 			</instance>
-			<instance id="ledger" src="jr://instance/ledgerdb" />
-			<instance id="commcaresession" src="jr://instance/session" />
-			<instance id="casedb" src="jr://instance/casedb" />
-			<instance id="products" src="jr://fixture/commtrack:products" />
+            <instance src="jr://instance/ledgerdb" id="ledger" />
+            <instance src="jr://instance/session" id="commcaresession" />
+            <instance src="jr://instance/casedb" id="casedb" />
+            <instance src="jr://fixture/commtrack:products" id="products" />
 			<bind vellum:nodeset="#form/amount_received" nodeset="/data/amount_received" type="xsd:int" />
 			<bind nodeset="/data/transfer[@type='trans-1']" relevant="true()" />
 			<bind nodeset="/data/transfer[@type='trans-1']/entry/@id" calculate="instance('commcaresession')/session/data/product_id" />
@@ -23,11 +23,12 @@
 			<bind nodeset="/data/transfer[@type='trans-1']/@dest" calculate="instance('casedb')/casedb/case[@case_id=instance('commcaresession')/session/data/case_id]/index/parent" />
 			<bind nodeset="/data/transfer[@type='trans-1']/@date" calculate="now()" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/amount_received" ref="/data/amount_received"/>
+		<input vellum:ref="#form/amount_received" ref="/data/amount_received" />
 	</h:body>
+	<case_mappings />
 </h:html>
