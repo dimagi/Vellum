@@ -22,15 +22,15 @@
 				</translation>
 			</itext>
 		</model>
+		<vellum:case_mappings>
+			<mapping property="one">
+				<question question_path="/data/question1" update_mode="edit" />
+			</mapping>
+		</vellum:case_mappings>
 	</h:head>
 	<h:body>
 		<input vellum:ref="#form/question1" ref="/data/question1">
 			<label ref="jr:itext('question1-label')" />
 		</input>
 	</h:body>
-	<vellum:case_mappings>
-		<mapping property="one">
-			<question question_path="/data/question1" update_mode="edit" />
-		</mapping>
-	</vellum:case_mappings>
 </h:html>
