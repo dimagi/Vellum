@@ -47,6 +47,17 @@
 				</translation>
 			</itext>
 		</model>
+		<vellum:case_mappings>
+			<mapping property="one">
+				<question question_path="/data/group1/q1" />
+			</mapping>
+			<mapping property="two">
+				<question question_path="/data/group1/q2" />
+			</mapping>
+			<mapping property="three">
+				<question question_path="/data/q3" />
+			</mapping>
+		</vellum:case_mappings>
 	</h:head>
 	<h:body>
 		<input vellum:ref="#form/q3" ref="/data/q3">
@@ -62,15 +73,4 @@
 			</input>
 		</group>
 	</h:body>
-	<vellum:case_mappings>
-		<mapping property="one">
-			<question question_path="/data/group1/q1" />
-		</mapping>
-		<mapping property="two">
-			<question question_path="/data/group1/q2" />
-		</mapping>
-		<mapping property="three">
-			<question question_path="/data/q3" />
-		</mapping>
-	</vellum:case_mappings>
 </h:html>

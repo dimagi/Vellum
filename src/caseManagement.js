@@ -92,7 +92,8 @@ define([
                 return;
             }
 
-            const caseMappingSection = xml.find(':root > vellum\\:case_mappings');
+            const head = xml.find(':root > h\\:head, :root > head');
+            const caseMappingSection = head.find('> vellum\\:case_mappings');
             if (caseMappingSection.length > 0) {
                 const mappingElements = caseMappingSection.children().toArray();
                 data.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
@@ -393,7 +394,7 @@ define([
             }
         },
 
-        contributeToAdditionalXML: function (xmlWriter, form) {
+        contributeToHeadXML: function (xmlWriter, form) {
             this.__callOld();
             // Case mappings are not normally written in form XML
             // because they are sent to HQ as a "mapping_diff" in
