@@ -717,19 +717,18 @@ describe("The rich text editor", function () {
                 util.assertXmlEqual(call('createXML'), OUTPUT_VALUE_XML);
             });
 
-            it("should bubble various case properties", function () {
+            it("should bubble various case properties", async function () {
                 util.loadXML("");
                 var widget = util.getWidget('itext-en-label'),
                     $widget = $(".fd-textarea[name='itext-en-label']");
-                widget.input.promise.then(function () {
-                    widget.setValue('<output value="#case/not_a_child" />' +
-                        '<output value="#case/not_a_thing" />' +
-                        '<output value="#case/dob" />'
-                    );
-                    assert.strictEqual($widget.find(".label-datanode-external-unknown").length, 1);
-                    assert.strictEqual($widget.find(".label-datanode-external").length, 1);
-                    assert.strictEqual($widget.find(".label-datanode-unknown").length, 1);
-                });
+                await widget.input.promise;
+                widget.setValue('<output value="#case/not_a_child" />' +
+                    '<output value="#form/not_a_thing" />' +
+                    '<output value="#case/dob" />'
+                );
+                assert.strictEqual($widget.find(".label-datanode-external-unknown").text().trim(), 'not_a_child');
+                assert.strictEqual($widget.find(".label-datanode-external").text().trim(), 'dob');
+                assert.strictEqual($widget.find(".label-datanode-unknown").text().trim(), 'not_a_thing');
             });
 
             it("should have native spellchecking on labels", function () {
