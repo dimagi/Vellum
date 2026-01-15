@@ -48,13 +48,13 @@ describe("The Case Management plugin", function () {
 
     it("preserves case mapping between loading and writing XML", function () {
         util.loadXML(BASELINE_XML);
-        const xml = call("createXML", true);
+        const xml = call("createXML", {withCaseMappings: true});
         util.assertXmlEqual(xml, BASELINE_XML);
     });
 
     it("outputs an empty mapping block if form lacks mappings data", function () {
         util.loadXML(BASELINE_NO_MAPPING_XML);
-        const xml = call("createXML", true);
+        const xml = call("createXML", {withCaseMappings: true});
         const $xml = xmlLib.parseXML(xml);
         const mappings = $xml.find("vellum\\:case_mappings");
 
@@ -145,7 +145,7 @@ describe("The Case Management plugin", function () {
         const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
         casePropertySelect.val("one").trigger("change");
 
-        const xml = call("createXML", true);
+        const xml = call("createXML", {withCaseMappings: true});
         const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
         assert.equal(mappings.length, 1);
@@ -165,7 +165,7 @@ describe("The Case Management plugin", function () {
         const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
         casePropertySelect.val("two").trigger("change");
 
-        const xml = call("createXML", true);
+        const xml = call("createXML", {withCaseMappings: true});
         const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
         assert.equal(mappings.length, 1);
@@ -185,7 +185,7 @@ describe("The Case Management plugin", function () {
         const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
         casePropertySelect.val("two").trigger("change");
 
-        const xml = call("createXML", true);
+        const xml = call("createXML", {withCaseMappings: true});
         const [mappings, mappedQuestions] = getMappingAndQuestionElementsFromXML(xml);
 
         assert.equal(mappings.length, 1);
@@ -491,7 +491,7 @@ describe("The Case Management plugin", function () {
         it ("should exclude case mappings from XML", function () {
             util.loadXML(BASELINE_XML);  // baseline includes case mappings
 
-            const xml = call("createXML", true);
+            const xml = call("createXML", {withCaseMappings: true});
             const $xml = xmlLib.parseXML(xml);
             const mappings = $xml.find("vellum\\:case_mappings");
 

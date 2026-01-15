@@ -394,14 +394,16 @@ define([
             }
         },
 
-        contributeToHeadXML: function (xmlWriter, form) {
+        contributeToHeadXML: function (xmlWriter, form, options={withCaseMappings: false}) {
             this.__callOld();
-            // Case mappings are not normally written in form XML
-            // because they are sent to HQ as a "mapping_diff" in
-            // augmentSentData. However, they are included in the source
-            // XML so they are preserved when copying XML between forms.
-            const writer = new XMLCaseMappingWriter(xmlWriter);
-            writer.writeCaseMappingsElement(this.data.caseManagement);
+            if (options.withCaseMappings) {
+                // Case mappings are not normally written in form XML
+                // because they are sent to HQ as a "mapping_diff" in
+                // augmentSentData. However, they are included in the source
+                // XML so they are preserved when copying XML between forms.
+                const writer = new XMLCaseMappingWriter(xmlWriter);
+                writer.writeCaseMappingsElement(this.data.caseManagement);
+            }
         },
 
         getMugTypes: function () {

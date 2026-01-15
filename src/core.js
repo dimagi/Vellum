@@ -736,8 +736,7 @@ define([
 
         // populate text
         if(!this.data.core.formLoadingFailed){
-            // generate presentation XML
-            $textarea.val(this.createXML(true));
+            $textarea.val(this.createXML({withCaseMappings: true}));
         } else {
             $textarea.val(this.data.core.failedLoadXML);
         }
@@ -2228,8 +2227,8 @@ define([
         }
     };
 
-    fn.createXML = function (addPresentationXML) {
-        return this.data.core.form.createXML(addPresentationXML);
+    fn.createXML = function (options) {
+        return this.data.core.form.createXML(options);
     };
 
     fn.canSerializeXForm = function (forAction, retry) {
@@ -2642,14 +2641,6 @@ define([
     fn.augmentSentData = function (data, saveType) {
         return data;
     };
-
-    /**
-     * Extension point for plugins to add arbitrary XML beneath the body element
-     * 
-     * @param {XMLWriter} xmlWriter - The writer, having already written the head and body elements
-     * @param {Form} form  - The form instance
-     */
-    fn.contributeToAdditionalXML = function (xmlWriter, form) {};
 
     fn.initMediaUploaderWidget = function (widget) {};
 
