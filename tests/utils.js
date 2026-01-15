@@ -1,7 +1,7 @@
 import options from "./options";
 import chai from "chai";
 import EquivalentXml from "equivalent-xml-js/src/equivalent-xml";
-import jsdiff from "jsdiff/diff";
+import { createPatch } from "jsdiff/diff";
 import _ from "underscore";
 import $ from "jquery";
 import copypaste from "vellum/copy-paste";
@@ -97,7 +97,7 @@ function assertTreeState(tree) {
  */
 function assertEqual(actual, expected, message) {
     if (actual !== expected) {
-        var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
+        var patch = createPatch("", actual, expected, "actual", "expected");
         patch = patch.replace(/^Index:/, message || "Not equal:");
         assert(false, colorDiff(patch));
     }
