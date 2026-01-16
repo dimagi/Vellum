@@ -178,11 +178,20 @@ define([
                 }
             }
 
+            if (message && message.hasOwnProperty("markdown")) {
+                message.markdown = this._replaceQuestionText(message.markdown, label);
+            } else {
+                message = this._replaceQuestionText(message, label);
+            }
+
             return this.messages.update(attr, {
                 key: "mug-" + attr + "-error",
                 level: this.ERROR,
-                message: util.format(message || "", {question: label})
+                message: message
             });
+        },
+        _replaceQuestionText: function (messageText, label) {
+            return util.format(messageText || "", {question: label});
         },
         // message levels
         ERROR: "error",

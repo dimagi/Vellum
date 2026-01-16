@@ -3,11 +3,13 @@ define([
     'vellum/mugs',
     'vellum/util',
     'vellum/widgets',
+    'vellum/caseDiff'
 ], function (
     $,
     mugs,
     util,
-    widgets
+    widgets,
+    caseDiff
 ) {
     'use strict';
 
@@ -28,6 +30,18 @@ define([
                     widget.input.select2('destroy');
                 }
             });
+        };
+
+        const super_updateValue = widget.updateValue;
+        widget.updateValue = function () {
+            const val = widget.getValue();
+            const WHITESPACE = /\s/g;
+
+            if (val && val.search(WHITESPACE) !== -1) {
+                widget.setValue(val.replace(WHITESPACE, '_'));
+            }
+
+            super_updateValue();
         };
 
         return widget;
@@ -67,17 +81,26 @@ define([
     }
 
     class CaseMappingsBuilder {
-        addMappingsToForm (form, xml) {
-            let mappingElements = [];
-            // XML should always be present in real environments,
-            // but can be empty when developing vellum
-            if (xml) {
-                const caseMappingSection = xml.find(':root > case_mappings');
-                mappingElements = caseMappingSection.children().toArray();
+        updateMappingsFromXML (form, data, xml, preserveMappings) {
+            if (!preserveMappings) {
+                // reset mapping data -- used by tests to prevent side effects from loadXML
+                data.caseMappings = {};
+                data.caseMappingsByQuestion = {};
             }
 
-            form.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
-            form.caseMappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(form.caseMappings);
+            if (!xml) {
+                return;
+            }
+
+            const caseMappingSection = xml.find(':root > vellum\\:case_mappings');
+            if (caseMappingSection.length > 0) {
+                const mappingElements = caseMappingSection.children().toArray();
+                data.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
+                data.caseMappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            }
+
+            const maintainer = new CaseMapMaintainer(form, data);
+            maintainer.pruneInvalidMappings();
         }
 
         buildMappingsFromXMLElements (mappingElements) {
@@ -124,13 +147,13 @@ define([
             this.writer = xmlWriter;
         }
 
-        writeCaseMappingsElement (form) {
-            if (!form.hasOwnProperty('caseMappings')) {
+        writeCaseMappingsElement (data) {
+            if (!data.hasOwnProperty('caseMappings')) {
                 return;
             }
 
-            this.writer.writeStartElement('case_mappings');
-            Object.entries(form.caseMappings).forEach(([property, questions]) => {
+            this.writer.writeStartElement('vellum:case_mappings');
+            Object.entries(data.caseMappings).forEach(([property, questions]) => {
                 this.writeMappingElement(property, questions);
             });
             this.writer.writeEndElement();
@@ -153,8 +176,9 @@ define([
     }
 
     class CaseMapMaintainer {
-        constructor (form) {
+        constructor (form, data) {
             this.form = form;
+            this.data = data;
         }
 
         updateFormMappings (questionPath, prev, current) {
@@ -163,8 +187,8 @@ define([
         }
 
         replaceFormQuestionMappings (questionPath, prev, current) {
-            this.form.caseMappingsByQuestion[questionPath] = this.form.caseMappingsByQuestion[questionPath] || [];
-            const mappings = this.form.caseMappingsByQuestion[questionPath];
+            this.data.caseMappingsByQuestion[questionPath] = this.data.caseMappingsByQuestion[questionPath] || [];
+            const mappings = this.data.caseMappingsByQuestion[questionPath];
             let prevIndex = 0;
 
             if (prev) {
@@ -178,13 +202,13 @@ define([
             } else {
                 // no current, check if we should remove the mappings
                 if (mappings.length === 0) {
-                    delete this.form.caseMappingsByQuestion[questionPath];
+                    delete this.data.caseMappingsByQuestion[questionPath];
                 }
             }
         }
 
         replaceFormPropertyMappings (questionPath, prev, current) {
-            let questions = prev ? this.form.caseMappings[prev] : [];
+            let questions = prev ? this.data.caseMappings[prev] : [];
             let question = null;
 
             let prevIndex = questions.findIndex((question) => question.question_path === questionPath);
@@ -195,7 +219,7 @@ define([
                 questions.splice(prevIndex, 1);
                 if (questions.length === 0) {
                     // delete the old case property questions
-                    delete this.form.caseMappings[prev];
+                    delete this.data.caseMappings[prev];
                 } else if (questions.length === 1) {
                     // this case property is now unique, so we can remove conflict warnings from the remaining mug
                     const remainingMug = this.form.getMugByPath(questions[0].question_path);
@@ -209,17 +233,17 @@ define([
             }
 
             if (current) {
-                this.form.caseMappings[current] = this.form.caseMappings[current] || [];
+                this.data.caseMappings[current] = this.data.caseMappings[current] || [];
                 if (!question) {
                     question = {'question_path': questionPath};
                 }
-                this.form.caseMappings[current].push(question);
+                this.data.caseMappings[current].push(question);
 
-                if (this.form.caseMappings[current].length >= 2) {
+                if (this.data.caseMappings[current].length >= 2) {
                     // this new mapping creates a conflict, so add a warning to each assigned question
                     // these warnings will cause the save button to mention validation errors,
                     // but they do not prevent saving the form
-                    this.form.caseMappings[current].forEach(question => {
+                    this.data.caseMappings[current].forEach(question => {
                         const mugWithConflict = this.form.getMugByPath(question.question_path);
                         addConflictMessageToMug(mugWithConflict, current);
                     });
@@ -232,26 +256,26 @@ define([
             Move all existing mappings from prevPath to newPath.
             If newPath is falsy, remove all mappings from prevPath.
             */
-            if (!this.form.hasOwnProperty('caseMappingsByQuestion')) {
+            if (!this.data.hasOwnProperty('caseMappingsByQuestion')) {
                 return;
             }
 
             // determine what case properties were affected by this question
-            const prevMappings = this.form.caseMappingsByQuestion[prevPath] || [];
+            const prevMappings = this.data.caseMappingsByQuestion[prevPath] || [];
             if (prevMappings.length === 0) {
                 // this question wasn't using case management, so there is nothing to update
                 return;
             }
 
             // move those case properties from prevPath to newPath
-            delete this.form.caseMappingsByQuestion[prevPath];
+            delete this.data.caseMappingsByQuestion[prevPath];
             if (newPath) {
-                this.form.caseMappingsByQuestion[newPath] = prevMappings;
+                this.data.caseMappingsByQuestion[newPath] = prevMappings;
             }
 
             // rebuild mappings by case
             prevMappings.forEach(caseProperty => {
-                const questions = this.form.caseMappings[caseProperty];
+                const questions = this.data.caseMappings[caseProperty];
                 const index = questions.findIndex((question) => question.question_path === prevPath);
                 if (index !== -1) {
                     if (newPath) {
@@ -260,7 +284,7 @@ define([
                         // just remove the element
                         questions.splice(index, 1);
                         if (questions.length === 0) {
-                            delete this.form.caseMappings[caseProperty];
+                            delete this.data.caseMappings[caseProperty];
                         } else if (questions.length === 1) {
                             // multiple questions no longer are assigned to this case property,
                             // so we can remove the conflict message
@@ -274,6 +298,15 @@ define([
 
         removeMappings (path) {
             this.moveMappings(path, null);
+        }
+
+        pruneInvalidMappings () {
+            Object.keys(this.data.caseMappingsByQuestion).forEach(questionPath => {
+                const mug = this.form.getMugByPath(questionPath);
+                if (!mug) {
+                    this.removeMappings(questionPath);
+                }
+            });
         }
     }
 
@@ -318,6 +351,8 @@ define([
 
             data.properties = this.opts().caseManagement.properties;
             data.isActive = !!data.properties;
+
+            data.baseline = this.opts().caseManagement.mappings || {};
             data.view_form_url = this.opts().caseManagement.view_form_url;
 
             this.caseManager = new CaseManager(
@@ -327,17 +362,18 @@ define([
         },
 
         loadXML: function () {
+            const _this = this;
             this.__callOld();
             const form = this.data.core.form;
 
             form.on('question-remove', function (e) {
-                const maintainer = new CaseMapMaintainer(form);
+                const maintainer = new CaseMapMaintainer(form, _this.data.caseManagement);
                 maintainer.removeMappings(e.absolutePath);
             });
             form.on('question-create', function (e) {
                 // this will get called when a deletion is undone.
                 // Ensure that we restore the previously deleted mappings, if present
-                const maintainer = new CaseMapMaintainer(form);
+                const maintainer = new CaseMapMaintainer(form, _this.data.caseManagement);
                 const mug = e.mug;
                 const caseProperty = mug.p.caseProperty;
                 if (caseProperty) {
@@ -346,26 +382,36 @@ define([
             });
         },
 
-        performAdditionalParsing: function (form, xml) {
+        performAdditionalParsing: function (form, xml, parserOptions) {
             this.__callOld();
 
-            if (!this.data.caseManagement.isActive) {
+            const data = this.data.caseManagement;
+
+            if (!data.isActive || !data.baseline) {
                 return;
             }
 
             const builder = new CaseMappingsBuilder();
-            builder.addMappingsToForm(form, xml);
+            if (!data.caseMappings) {
+                data.caseMappings = JSON.parse(JSON.stringify(data.baseline));
+                const builder = new CaseMappingsBuilder();
+                data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            } else {
+                const preserveMappings = !(parserOptions && parserOptions.reset);
+                builder.updateMappingsFromXML(form, data, xml, preserveMappings);
+            }
         },
 
         contributeToAdditionalXML: function (xmlWriter, form) {
             this.__callOld();
+            const data = this.data.caseManagement;
 
-            if (!this.data.caseManagement.isActive) {
+            if (!data.isActive) {
                 return;
             }
 
             const writer = new XMLCaseMappingWriter(xmlWriter);
-            writer.writeCaseMappingsElement(form);
+            writer.writeCaseMappingsElement(data);
         },
 
         getMugTypes: function () {
@@ -384,8 +430,9 @@ define([
 
         getSections: function (mug) {
             const sections = this.__callOld(mug);
+            const data = this.data.caseManagement;
 
-            if (!this.data.caseManagement.isActive) {
+            if (!data.isActive) {
                 return sections;
             }
 
@@ -418,10 +465,11 @@ define([
                     widget: casePropertyDropdownWidget,
                     presence: 'optional',
                     enabled: function (mug) {
-                        if (!mug.absolutePath || !mug.form.caseMappingsByQuestion) {
+                        const data = that.data.caseManagement;
+                        if (!mug.absolutePath || !data.caseMappingsByQuestion) {
                             return true;
                         }
-                        const questionMappings = mug.form.caseMappingsByQuestion[mug.absolutePath];
+                        const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
                         if (!questionMappings) {
                             return true;
                         }
@@ -431,7 +479,7 @@ define([
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
                     setter: function (mug, attr, value) {
-                        const maintainer = new CaseMapMaintainer(mug.form);
+                        const maintainer = new CaseMapMaintainer(mug.form, that.data.caseManagement);
                         maintainer.updateFormMappings(mug.absolutePath, mug.p[attr], value);
                         const prevValue = mug.p[attr];
                         if (prevValue) {
@@ -442,6 +490,15 @@ define([
                         }
                         mug.p.set(attr, value);
                     },
+                    validationFunc: function (mug) {
+                        const currentValue = mug.p.caseProperty;
+                        const reservedWords = that.opts().caseManagement.reserved_words;
+                        if (reservedWords.indexOf(currentValue) !== -1) {
+                            return {markdown: gettext(`**${currentValue}** is a reserved word`)};
+                        }
+
+                        return 'pass';
+                    },
                 },
             });
 
@@ -450,7 +507,7 @@ define([
                 const prevPath = mug.absolutePath;
                 oldNodeIDSetter(mug, attr, value);
                 const currentPath = mug.absolutePath;
-                const maintainer = new CaseMapMaintainer(mug.form);
+                const maintainer = new CaseMapMaintainer(mug.form, that.data.caseManagement);
                 maintainer.moveMappings(prevPath, currentPath);
             };
 
@@ -460,7 +517,8 @@ define([
         handleMugParseFinish: function (mug) {
             this.__callOld();
 
-            if (!this.data.caseManagement.isActive) {
+            const data = this.data.caseManagement;
+            if (!data.isActive) {
                 return;
             }
 
@@ -469,7 +527,7 @@ define([
                 return;
             }
 
-            const questionMappings = mug.form.caseMappingsByQuestion[mug.absolutePath];
+            const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
 
             if (questionMappings && questionMappings.length > 0) {
                 mug.p.set('caseProperty', questionMappings[0]);
@@ -478,11 +536,11 @@ define([
                     // if a question is attempting to update multiple cases,
                     // it will be disabled. Leave an informational message
                     // to explain that this needs to be edited with the case management page
-                    addMultipleAssignmentsMessageToMug(mug, this.data.caseManagement.view_form_url);
+                    addMultipleAssignmentsMessageToMug(mug, data.view_form_url);
                 }
 
                 questionMappings.forEach(caseProperty => {
-                    if (mug.form.caseMappings[caseProperty].length >= 2) {
+                    if (data.caseMappings[caseProperty].length >= 2) {
                         addConflictMessageToMug(mug, caseProperty);
                     }
                 });
@@ -499,7 +557,7 @@ define([
                     return hashtagPath.replace(/^#form\//, basePath);
                 };
 
-                const maintainer = new CaseMapMaintainer(form);
+                const maintainer = new CaseMapMaintainer(form, this.data.caseManagement);
                 Object.values(updates).forEach(([oldHashtagPath, newHashtagPath]) => {
                     const oldPath = restoreAbsolutePath(oldHashtagPath);
                     const newPath = restoreAbsolutePath(newHashtagPath);
@@ -509,6 +567,36 @@ define([
             }
 
             return updates;
+        },
+
+        onFormSave: function (formData) {
+            this.__callOld();
+            const data = this.data.caseManagement;
+
+            if (!data.isActive) {
+                return;
+            }
+
+            // clone the existing mappings and overwrite the baseline
+            const newBaseline = JSON.parse(JSON.stringify(formData.caseMappings));
+            data.baseline = newBaseline;
+        },
+
+        augmentSentData: function (sentData, saveType) {
+            const result = this.__callOld();
+            const data = this.data.caseManagement;
+
+            if (!data.isActive) {
+                return result;
+            }
+
+            const baseline = data.baseline;
+            const current = data.caseMappings;
+
+            const mappingDiff = caseDiff.compareCaseMappings(baseline, current);
+            result.mapping_diff = JSON.stringify(mappingDiff);
+
+            return result;
         }
 
     });

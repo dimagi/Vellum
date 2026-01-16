@@ -215,7 +215,9 @@ var OPTIONS = {
     },
     caseManagement: {
             properties: ['one', 'two', 'three'],
+            mappings: {},
             view_form_url: 'http://view_form',
+            reserved_words: ['case_id', 'case_name', 'userid'],
         },
         itemset: {
             dataSourcesFilter: function (sources) {

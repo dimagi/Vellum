@@ -30,7 +30,7 @@
 	</h:body>
 	<vellum:case_mappings>
 		<mapping property="one">
-			<question question_path="/data/question1" update_mode="edit" />
+			<question question_path="/data/question2" />
 		</mapping>
 	</vellum:case_mappings>
 </h:html>
