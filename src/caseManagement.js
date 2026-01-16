@@ -575,7 +575,7 @@ define([
             }
 
             // clone the existing mappings and overwrite the baseline
-            const newBaseline = JSON.parse(JSON.stringify(formData.caseMappings));
+            const newBaseline = JSON.parse(JSON.stringify(data.caseMappings));
             data.baseline = newBaseline;
         },
 
