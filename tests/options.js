@@ -213,47 +213,51 @@ var OPTIONS = {
             },
         ],
     },
-    itemset: {
-        dataSourcesFilter: function (sources) {
-            return _.filter(sources, function (source) {
-                return !source.uri || /^jr:\/\/fixture\//.test(source.uri);
-            });
-        }
-    },
-    uploader: {
-        uploadUrls: {
-            image: 'foo',
-            audio: 'foo',
-            video: 'foo'
+    caseManagement: {
+            properties: ['one', 'two', 'three'],
+            view_form_url: 'http://view_form',
         },
-        objectMap: {}
-    },
-    plugins: [
-        'databrowser',
-        'itemset',
-        'modeliteration',
-        'commtrack',
-        'saveToCase',
-        'commcareConnect',
-        'atwho',
-    ],
-    features: {
-        // 'remove_popvers': false, // disabled for most tests
-        'full_save_on_missing_conflict_xform': true,
-        'lookup_tables': true,
-        'group_in_field_list': true,
-        'rich_text': true,
-        'advanced_itemsets': true,
-        'sorted_itemsets': true,
-        'printing': true,
-        'templated_intents': true,
-        'custom_intents': true,
-        'image_resize': true,
-        'markdown_in_groups': true,
-        'allow_data_reference_in_setvalue': true,
-        'allow_bulk_form_actions': true,
-    }
-};
+        itemset: {
+            dataSourcesFilter: function (sources) {
+                return _.filter(sources, function (source) {
+                    return !source.uri || /^jr:\/\/fixture\//.test(source.uri);
+                });
+            }
+        },
+        uploader: {
+            uploadUrls: {
+                image: 'foo',
+                audio: 'foo',
+                video: 'foo'
+            },
+            objectMap: {}
+        },
+        plugins: [
+            'databrowser',
+            'itemset',
+            'modeliteration',
+            'commtrack',
+            'saveToCase',
+            'commcareConnect',
+            'atwho',
+        ],
+        features: {
+            // 'remove_popvers': false, // disabled for most tests
+            'full_save_on_missing_conflict_xform': true,
+            'lookup_tables': true,
+            'group_in_field_list': true,
+            'rich_text': true,
+            'advanced_itemsets': true,
+            'sorted_itemsets': true,
+            'printing': true,
+            'templated_intents': true,
+            'custom_intents': true,
+            'image_resize': true,
+            'markdown_in_groups': true,
+            'allow_data_reference_in_setvalue': true,
+            'allow_bulk_form_actions': true,
+        }
+    };
 
 export default {
     options: OPTIONS,

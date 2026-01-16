@@ -1,21 +1,14 @@
-<h:html xmlns:h="http://www.w3.org/1999/xhtml"
-	xmlns:orx="http://openrosa.org/jr/xforms"
-	xmlns="http://www.w3.org/2002/xforms"
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	xmlns:jr="http://openrosa.org/javarosa"
-	xmlns:vellum="http://commcarehq.org/xforms/vellum">
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
 	<h:head>
 		<h:title>Untitled Form</h:title>
 		<model>
 			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms"
-					xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0"
-					uiVersion="1" version="1" name="Untitled Form">
-					<question1/>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/8D6CF8A5-4396-45C3-9D05-64C3FD97A5D0" uiVersion="1" version="1" name="Untitled Form">
+					<question1 />
 				</data>
 			</instance>
-			<bind nodeset="/data/question1" type="xsd:string"
-				jr:constraintMsg="jr:itext('question1-constraintMsg')" />
+			<bind nodeset="/data/question1" type="xsd:string" jr:constraintMsg="jr:itext('question1-constraintMsg')" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="question1-label">
@@ -80,10 +73,11 @@
 	</h:head>
 	<h:body>
 		<input ref="/data/question1">
-			<label ref="jr:itext('question1-label')"/>
-			<hint ref="jr:itext('question1-hint')"/>
-			<help ref="jr:itext('question1-help')"/>
-			<alert ref="jr:itext('question1-constraintMsg')"/>
+			<label ref="jr:itext('question1-label')" />
+			<hint ref="jr:itext('question1-hint')" />
+			<help ref="jr:itext('question1-help')" />
+			<alert ref="jr:itext('question1-constraintMsg')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

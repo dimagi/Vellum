@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+<?xml version="1.0" encoding="UTF-8"?><h:xdoc xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
 	<h:head>
 		<h:title>Untitled Form</h:title>
 		<model>
@@ -9,10 +8,10 @@
 					<question2/>
 				</data>
 			</instance>
-			<bind nodeset="/data/question" type="xsd:string"/>
-			<bind nodeset="/data/question/extra/path" type="xsd:string"/>
-			<bind nodeset="/data/question[extra = path]" type="xsd:string"/>
-			<bind nodeset="/data/question[with][extra = path]" type="xsd:string"/>
+			<bind type="xsd:string" nodeset="/data/question"/>
+			<bind type="xsd:string" nodeset="/data/question/extra/path"/>
+			<bind type="xsd:string" nodeset="/data/question[extra = path]"/>
+			<bind type="xsd:string" nodeset="/data/question[with][extra = path]"/>
 			<bind vellum:nodeset="#form/question2" nodeset="/data/question2" type="xsd:string"/>
 			<itext>
 				<translation lang="en" default="">
@@ -28,4 +27,5 @@
 			<label ref="jr:itext('question2-label')"/>
 		</input>
 	</h:body>
-</h:html>
+	<case_mappings/>
+</h:xdoc>

@@ -40,4 +40,5 @@
 			<label ref="jr:itext('parent-label')" />
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

@@ -13,7 +13,7 @@
 					</group>
 				</data>
 			</instance>
-			<instance src="jr://instance/casedb" id="casedb"></instance>
+			<instance src="jr://instance/casedb" id="casedb" />
 			<bind nodeset="/data/group/@current_index" vellum:calculate="count(#form/group/item)" calculate="count(/data/group/item)" />
 			<bind vellum:nodeset="#form/group/item" nodeset="/data/group/item" />
 			<bind vellum:nodeset="#form/group/item/phone" nodeset="/data/group/item/phone" type="xsd:string" />
@@ -23,15 +23,16 @@
 			<setvalue event="jr-insert" ref="/data/group/item/@index" value="int(/data/group/@current_index)" />
 			<setvalue event="jr-insert" ref="/data/group/item/@id" value="selected-at(/data/group/@ids, ../@index)" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
 			<repeat jr:count="/data/group/@count" jr:noAddRemove="true()" vellum:nodeset="#form/group/item" nodeset="/data/group/item">
-				<input vellum:ref="#form/group/item/phone" ref="/data/group/item/phone" appearance="numeric"/>
+				<input vellum:ref="#form/group/item/phone" ref="/data/group/item/phone" appearance="numeric" />
 			</repeat>
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

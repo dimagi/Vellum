@@ -14,21 +14,22 @@
 			<itext>
 				<translation lang="en" default="">
 					<text id="question2-label">
-						<value><output vellum:value="#form/first_question" value="/data/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" /></value>
+						<value><output value="/data/first_question" vellum:value="#form/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" /> </value>
 					</text>
 				</translation>
 				<translation lang="hin">
 					<text id="question2-label">
-						<value><output value="/data/first_question" vellum:value="#form/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" /></value>
+						<value><output value="/data/first_question" vellum:value="#form/first_question" /> <output value="/data/question11" /> <output value="/data/question1/b" /> <output value="/data/question1b" /> </value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/first_question" ref="/data/first_question"/>
+		<input vellum:ref="#form/first_question" ref="/data/first_question" />
 		<input vellum:ref="#form/question2" ref="/data/question2">
 			<label ref="jr:itext('question2-label')" />
 		</input>
 	</h:body>
+	<case_mappings />
 </h:html>

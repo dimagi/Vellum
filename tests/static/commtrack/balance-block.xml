@@ -6,14 +6,14 @@
 			<instance>
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/DC38FCC5-930C-4385-AE6C-5B15ED1F95B1" uiVersion="1" version="1" name="Untitled Form">
 					<stock_amount />
-					<balance xmlns="http://commcarehq.org/ledger/v1" entity-id="" date="" section-id="stock" type="bal-0">
+					<balance xmlns="http://commcarehq.org/ledger/v1" type="bal-0" entity-id="" section-id="stock" date="">
 						<entry id="" quantity="" />
 					</balance>
 				</data>
 			</instance>
-			<instance id="ledger" src="jr://instance/ledgerdb" />
-			<instance id="commcaresession" src="jr://instance/session" />
-			<instance id="products" src="jr://fixture/commtrack:products" />
+			<instance src="jr://instance/ledgerdb" id="ledger" />
+            <instance src="jr://instance/session" id="commcaresession" />
+            <instance src="jr://fixture/commtrack:products" id="products" />
 			<bind vellum:nodeset="#form/stock_amount" nodeset="/data/stock_amount" type="xsd:int" />
 			<bind nodeset="/data/balance[@type='bal-0']" vellum:relevant="#form/stock_amount != 0" relevant="/data/stock_amount != 0" />
 			<bind nodeset="/data/balance[@type='bal-0']/entry/@id" calculate="instance('commcaresession')/session/data/product_id" />
@@ -21,11 +21,12 @@
 			<bind nodeset="/data/balance[@type='bal-0']/@entity-id" calculate="instance('commcaresession')/session/data/case_id" />
 			<bind nodeset="/data/balance[@type='bal-0']/@date" calculate="now()" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/stock_amount" ref="/data/stock_amount"/>
+		<input vellum:ref="#form/stock_amount" ref="/data/stock_amount" />
 	</h:body>
+	<case_mappings />
 </h:html>

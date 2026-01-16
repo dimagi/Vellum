@@ -10,7 +10,7 @@
 			</instance>
 			<bind vellum:nodeset="#form/product" nodeset="/data/product" />
 			<itext>
-				<translation lang="en" default=""/>
+				<translation lang="en" default="" />
 			</itext>
 		</model>
 	</h:head>
@@ -19,4 +19,5 @@
 			<repeat vellum:nodeset="#form/product" nodeset="/data/product" />
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

@@ -15,16 +15,17 @@
 			<bind nodeset="/data/repeat/text" type="xsd:string" />
 			<bind nodeset="/data/repeat/hidden" />
 			<itext>
-				<translation lang="en" default=""/>
-				<translation lang="hin"/>
+				<translation lang="en" default="" />
+				<translation lang="hin" />
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
 		<group>
 			<repeat nodeset="/data/repeat">
-				<input ref="/data/repeat/text"/>
+				<input ref="/data/repeat/text" />
 			</repeat>
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>

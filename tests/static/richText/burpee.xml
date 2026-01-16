@@ -23,7 +23,7 @@
 			<itext>
 				<translation lang="en" default="">
 					<text id="verify_current_num_burpees-label">
-						<value>Nice work! 
+						<value>Nice work!
 Our records show you have done <output vellum:value="#form/prev_num_burpees" value="/data/prev_num_burpees" /> burpees so far. If this does not sound right, you may need to go back to the home screen and sync your phone to get the latest data before proceeding.</value>
 					</text>
 					<text id="new_burpee_data/burpee_date-label">
@@ -33,7 +33,7 @@ Our records show you have done <output vellum:value="#form/prev_num_burpees" val
 						<value>That's in the future! Liars will be disqualified from the competition.</value>
 					</text>
 					<text id="new_burpee_data/num_burpees-label">
-						<value>How many burpees did you do on <output vellum:value="format-date(date(#form/new_burpee_data/burpee_date), '%a, %b %e, %Y')" value="format-date(date(/data/new_burpee_data/burpee_date), '%a, %b %e, %Y')" /> ?</value>
+						<value>How many burpees did you do on <output value="format-date(date(/data/new_burpee_data/burpee_date), '%a, %b %e, %Y')" vellum:value="format-date(date(#form/new_burpee_data/burpee_date), '%a, %b %e, %Y')" /> ?</value>
 					</text>
 					<text id="num_burpees-constraintMsg">
 						<value>That's too many burpees. Liars will be disqualified from the competition</value>
@@ -57,4 +57,5 @@ Our records show you have done <output vellum:value="#form/prev_num_burpees" val
 			</input>
 		</group>
 	</h:body>
+	<case_mappings />
 </h:html>
