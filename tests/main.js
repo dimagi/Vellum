@@ -1,6 +1,5 @@
 /* global mocha */
 import 'mocha/mocha.js';
-import 'jquery.vellum';
 import $ from 'jquery';
 import options from 'tests/options';
 
@@ -20,13 +19,13 @@ if (window.navigator.userAgent.indexOf('HeadlessChrome') < 0) {
 // This is only important when using the built version.
 // The test modules are loaded dynamically after mocha is set up so that
 // 'describe' and other mocha globals are available when the tests execute.
+//
+// We also need to dynamically import jquery.vellum to avoid webpack creating
+// shared chunks between the 'tests' and 'main' entry points, which would break
+// the main.js bundle since it has chunkLoading:false.
 
-// Dynamically import all test modules (they register tests on global mocha instance as side-effect)
-Promise.all([
-    // tests for profiling load times
-    // (disabled by default because they take a long time)
-    //import('tests/profiling'),
-
+import('jquery.vellum').then(() => Promise.all([
+    // Dynamically import all test modules (they register tests on global mocha instance as side-effect)
     import('tests/base'),
     import('tests/core'),
     import('tests/form'),
@@ -70,7 +69,7 @@ Promise.all([
     // tests for profiling load times
     // (disabled by default because they take a long time)
     // import('tests/profiling'),
-]).then(function() {
+])).then(function() {
     // All tests are now loaded and registered with mocha
 
     var session = window.sessionStorage;
