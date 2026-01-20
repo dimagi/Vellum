@@ -295,16 +295,6 @@ describe("The javaRosa plugin with multiple languages", function () {
         });
     });
 
-    it("should show warning on load for with unknown language", function () {
-        util.loadXML(TEST_XML_3, null, /You have languages in your form/);
-        // todo: this should inspect the model, not UI
-        var errors = $(".alert-block"),
-            text = errors.text();
-        assert.equal(errors.length, 1, text);
-        assert(text.indexOf("You have languages in your form that are not specified") > -1, text);
-        assert(text.indexOf("page: es") > -1, text);
-    });
-
     it("should preserve itext values on load + save", function () {
         util.loadXML("");
         util.addQuestion("Text", "question1");
@@ -700,7 +690,7 @@ describe("The javaRosa plugin with multiple languages", function () {
     });
 
     it("should highlight label after tab", function () {
-        util.loadXML(TEST_XML_3, null, /You have languages in your form/);
+        util.loadXML(TEST_XML_3);
         util.clickQuestion("question1");
         var enLabel = $("[name='itext-en-label']"),
             hinLabel = $("[name='itext-hin-label']"),
@@ -717,7 +707,7 @@ describe("The javaRosa plugin with multiple languages", function () {
     });
 
     it("should not highlight label on focus", function () {
-        util.loadXML(TEST_XML_3, null, /You have languages in your form/);
+        util.loadXML(TEST_XML_3);
         util.clickQuestion("question1");
         var enLabel = $("[name='itext-en-label']"),
             hinLabel = $("[name='itext-hin-label']");
