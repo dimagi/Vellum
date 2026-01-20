@@ -209,12 +209,7 @@ define([
                 }
 
                 if (langs && langs.indexOf(lang) === -1) {
-                    _this.data.core.parseWarnings.push(gettext(
-                        "You have languages in your form that are not specified " +
-                        "in the \"Languages\" page of the application builder. " +
-                        "The following language will be deleted on save " +
-                        "unless you add it to the \"Languages\" page:") + " " + lang);
-                    return;
+                    return;  // ignore if not in app languages
                 }
                 Itext.addLanguage(lang);
 
