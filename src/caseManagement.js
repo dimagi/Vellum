@@ -29,7 +29,7 @@ function casePropertyDropdownWidget (mug, opts) {
         const val = widget.getValue();
         const WHITESPACE = /\s/g;
 
-        if (val && val.search(WHITESPACE) !== -1) {
+        if (val && WHITESPACE.test(val)) {
             widget.setValue(val.replace(WHITESPACE, '_'));
         }
 

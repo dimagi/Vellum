@@ -2298,9 +2298,7 @@ fn.send = function (formText, saveType) {
     }
 
     data = saveType === 'patch' ? {patch: patch} : {xform: formText};
-
     data = this.augmentSentData(data, saveType);
-
     data.case_references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
     if (checkForConflict) {
         data.sha1 = CryptoJS.SHA1(this.data.core.lastSavedXForm).toString();

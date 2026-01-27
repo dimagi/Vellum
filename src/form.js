@@ -841,7 +841,6 @@ Form.prototype = {
                 this.moveMug(conflict, "rename", oldId);
             }
         }
-
         return updates;
     },
     changeMugType: function (mug, questionType) {

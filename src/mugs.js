@@ -168,7 +168,6 @@ Mug.prototype = {
                 message = "";
             }
         }
-
         if (message && message.hasOwnProperty("markdown")) {
             message.markdown = this._replaceQuestionText(message.markdown, label);
         } else {
