@@ -300,9 +300,9 @@ describe("The Case Management plugin", function () {
 
         const vellum = $("#vellum").vellum("get");
         const caseManagementData = vellum.data.caseManagement;
-        const question_paths = caseManagementData.caseMappings.one.map(
+        const questionPaths = caseManagementData.caseMappings.one.map(
             questionObj => questionObj.question_path);
-        assert.sameOrderedMembers(question_paths, ['/data/question3', '/data/question2']);
+        assert.sameOrderedMembers(questionPaths, ['/data/question3', '/data/question2']);
         assert.sameOrderedMembers(caseManagementData.caseMappingsByQuestion['/data/question3'], ['one']);
         assert.notExists(caseManagementData.caseMappingsByQuestion['/data/question1']);
     });
