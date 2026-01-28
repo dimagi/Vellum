@@ -2,6 +2,7 @@
 
 import chai from "chai";
 import $ from "jquery";
+import _ from "underscore";
 import util from "tests/utils";
 import xmlLib from "vellum/xml";
 import BASELINE_XML from "static/caseManagement/baseline.xml";
@@ -471,19 +472,20 @@ describe("The Case Management plugin", function () {
         assert.isFalse(util.isTreeNodeValid(question));
     });
 
-    describe("with no case management data", function () {
-        beforeEach(function () {
-            const vellum = $("#vellum").vellum("get");
-            // NOTE: This is a half-measure. Init will have still occurred with the initial options
-            // but this felt like a reasonable compromise to avoid having to do a full init for every test.
-            this.oldActive = vellum.data.caseManagement.isActive;
-            vellum.data.caseManagement.isActive = false;
-        });
+    describe("with case management disabled", function () {
+        const plugins = util.options.options.plugins || [];
 
-        afterEach(function () {
-            const vellum = $("#vellum").vellum("get");
-            vellum.data.caseManagement.isActive = this.oldActive;
-            delete this.oldActive;
+        before(function (done) {
+            util.init({
+                plugins: _(plugins).without("caseManagement"),
+                core: {
+                    onReady: function () {
+                        assert(!this.isPluginEnabled("caseManagement"),
+                              "caseManagement plugin should not be enabled");
+                        done();
+                    }
+                },
+            });
         });
 
         it ("should exclude case mappings from XML", function () {

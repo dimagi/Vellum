@@ -235,6 +235,7 @@ var OPTIONS = {
         objectMap: {}
     },
     plugins: [
+        'caseManagement',
         'databrowser',
         'itemset',
         'modeliteration',

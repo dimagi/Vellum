@@ -23,7 +23,6 @@ define([
             'windowManager',
             'copyPaste',
             'commander',
-            'caseManagement',
         ];
 
     function bindPluginMethod(pluginName, fn, fnName) {

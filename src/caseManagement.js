@@ -348,10 +348,7 @@ define([
     $.vellum.plugin('caseManagement', {}, {
         init: function () {
             const data = this.data.caseManagement;
-
             data.properties = this.opts().caseManagement.properties;
-            data.isActive = !!data.properties;
-
             data.baseline = this.opts().caseManagement.mappings || {};
             data.view_form_url = this.opts().caseManagement.view_form_url;
 
@@ -362,8 +359,8 @@ define([
         },
 
         loadXML: function () {
-            const _this = this;
             this.__callOld();
+            const _this = this;
             const form = this.data.core.form;
 
             form.on('question-remove', function (e) {
@@ -384,13 +381,7 @@ define([
 
         performAdditionalParsing: function (form, xml, parserOptions) {
             this.__callOld();
-
             const data = this.data.caseManagement;
-
-            if (!data.isActive || !data.baseline) {
-                return;
-            }
-
             const builder = new CaseMappingsBuilder();
             if (!data.caseMappings) {
                 data.caseMappings = JSON.parse(JSON.stringify(data.baseline));
@@ -404,19 +395,16 @@ define([
 
         contributeToAdditionalXML: function (xmlWriter, form) {
             this.__callOld();
-            const data = this.data.caseManagement;
-
-            if (!data.isActive) {
-                return;
-            }
-
+            // Case mappings are not normally written in form XML
+            // because they are sent to HQ as a "mapping_diff" in
+            // augmentSentData. However, they are included in the source
+            // XML so they are preserved when copying XML between forms.
             const writer = new XMLCaseMappingWriter(xmlWriter);
-            writer.writeCaseMappingsElement(data);
+            writer.writeCaseMappingsElement(this.data.caseManagement);
         },
 
         getMugTypes: function () {
             const types = this.__callOld();
-
             const excludedTypes = [
                 types.normal.Trigger,
                 types.normal.Group,
@@ -430,12 +418,6 @@ define([
 
         getSections: function (mug) {
             const sections = this.__callOld(mug);
-            const data = this.data.caseManagement;
-
-            if (!data.isActive) {
-                return sections;
-            }
-
             sections.splice(1, 0, {
                 slug: 'caseManagement',
                 displayName: gettext('Case Management'),
@@ -458,7 +440,6 @@ define([
         getMugSpec: function () {
             const specs = this.__callOld();
             const that = this;
-
             const databindSpecs = Object.assign(specs.databind, {
                 'caseProperty': {
                     visibility: 'visible',
@@ -516,17 +497,12 @@ define([
 
         handleMugParseFinish: function (mug) {
             this.__callOld();
-
-            const data = this.data.caseManagement;
-            if (!data.isActive) {
-                return;
-            }
-
             if (!mug.absolutePath) {
                 // no use trying to find a mapping for a question that doesn't have a path
                 return;
             }
 
+            const data = this.data.caseManagement;
             const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
 
             if (questionMappings && questionMappings.length > 0) {
@@ -549,7 +525,6 @@ define([
 
         handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
             const updates = this.__callOld();
-
             const basePath = form.getBasePath();
             function restoreAbsolutePath(hashtagPath) {
                 return hashtagPath.replace(/^#form\//, basePath);
@@ -569,30 +544,15 @@ define([
         onFormSave: function (formData) {
             this.__callOld();
             const data = this.data.caseManagement;
-
-            if (!data.isActive) {
-                return;
-            }
-
             // clone the existing mappings and overwrite the baseline
-            const newBaseline = JSON.parse(JSON.stringify(data.caseMappings));
-            data.baseline = newBaseline;
+            data.baseline = JSON.parse(JSON.stringify(data.caseMappings));
         },
 
         augmentSentData: function (sentData, saveType) {
             const result = this.__callOld();
             const data = this.data.caseManagement;
-
-            if (!data.isActive) {
-                return result;
-            }
-
-            const baseline = data.baseline;
-            const current = data.caseMappings;
-
-            const mappingDiff = caseDiff.compareCaseMappings(baseline, current);
-            result.mapping_diff = JSON.stringify(mappingDiff);
-
+            const diff = caseDiff.compareCaseMappings(data.baseline, data.caseMappings);
+            result.mapping_diff = JSON.stringify(diff);
             return result;
         }
 
