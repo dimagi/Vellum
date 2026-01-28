@@ -650,7 +650,7 @@ define([
         };
 
         widget.addCustomIfNeeded = function (value) {
-            var customOption = $('[name=property-androidIntentAppId]')
+            var customOption = widget.dropdown
                 .find('option')
                 .filter(function () { return $(this).text() === gettext("Custom"); });
             if (options.useValueAsCustomName) {
