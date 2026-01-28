@@ -385,7 +385,6 @@ define([
             const builder = new CaseMappingsBuilder();
             if (!data.caseMappings) {
                 data.caseMappings = JSON.parse(JSON.stringify(data.baseline));
-                const builder = new CaseMappingsBuilder();
                 data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
             } else {
                 const preserveMappings = !(parserOptions && parserOptions.reset);
