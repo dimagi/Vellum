@@ -8,14 +8,14 @@ var assert = chai.assert,
 describe("URL Hash", function() {
     it("should select a mug that is in the form", function() {
         window.location.hash = '#form/group/question2';
-        util.loadXML(GROUP_RENAME_XML, null, null, true);
+        util.loadXML(GROUP_RENAME_XML, {maintainUrlHash: true});
         var mug = call("getCurrentlySelectedMug");
         assert.equal(mug.absolutePath, "/data/group/question2");
     });
 
     it("should select first mug if hash isn't in form", function() {
         window.location.hash = '#form/group/not_in_form';
-        util.loadXML(GROUP_RENAME_XML, null, null, true);
+        util.loadXML(GROUP_RENAME_XML, {maintainUrlHash: true});
         var mug = call("getCurrentlySelectedMug");
         assert.equal(mug.absolutePath, "/data/group");
     });

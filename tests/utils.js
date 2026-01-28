@@ -242,19 +242,26 @@ function call () {
 }
 
 // load XML syncronously
-function loadXML(value, options, ignoreParseWarnings, maintainUrlHash, reset=true) {
+function loadXML(value, options={
+    ignoreParseWarnings: false,
+    maintainUrlHash: false,
+    preserveCaseMappings: false,
+}) {
     var warnings = [], data = call("getData");
-    if (!maintainUrlHash){
+    if (!options.maintainUrlHash){
         window.history.replaceState(null, null, " ");
     }
     data.core.parseWarnings = [];
-    const parserOptions = { reset };
-    call("loadXML", value, options || {}, parserOptions);
-    if (!ignoreParseWarnings) {
+    if (data.caseManagement && !options.preserveCaseMappings) {
+        data.caseManagement.caseMappings = {};
+        data.caseManagement.caseMappingsByQuestion = {};
+    }
+    call("loadXML", value, {});
+    if (!options.ignoreParseWarnings) {
         warnings = data.core.parseWarnings;
-    } else if (_.isRegExp(ignoreParseWarnings)) {
+    } else if (_.isRegExp(options.ignoreParseWarnings)) {
         warnings = _.filter(data.core.parseWarnings, function (warning) {
-            return !ignoreParseWarnings.test(warning);
+            return !options.ignoreParseWarnings.test(warning);
         });
     }
     assert(!warnings.length, "unexpected parse warnings:\n- " + warnings.join("\n- "));

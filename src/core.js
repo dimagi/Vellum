@@ -1441,7 +1441,7 @@ define([
         }, this.opts().core.loadDelay);
     };
 
-    fn.loadXML = function (formXML, options, parserOptions) {
+    fn.loadXML = function (formXML, options) {
         var form, _this = this, selectedHashtag = window.location.hash;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
@@ -1455,7 +1455,7 @@ define([
             this.data.core.form.disconnectDataSources();
         }
         this.data.core.form = form = parser.parseXForm(
-            formXML, options, this, _this.data.core.parseWarnings, parserOptions);
+            formXML, options, this, _this.data.core.parseWarnings);
         this.onXFormLoaded(form);
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
@@ -2586,7 +2586,7 @@ define([
      * @param {Form} form - The form instance being loaded.
      * @param xml - The parsed XML object
      */
-    fn.performAdditionalParsing = function (form, xml, parserOptions) {};
+    fn.performAdditionalParsing = function (form, xml) {};
 
     fn.getControlNodeAdaptorFactory = function (tagName) {
         return this.data.core.controlNodeAdaptorMap[tagName];

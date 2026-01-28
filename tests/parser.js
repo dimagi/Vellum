@@ -78,7 +78,7 @@ describe("The parser", function () {
     var ignoreWarnings = /Form (JRM namespace|does not have a (Name|(UI)?Version))/;
 
     it("should load select item without itext", function () {
-        util.loadXML(OTHER_ITEM_XML, null, ignoreWarnings);
+        util.loadXML(OTHER_ITEM_XML, {ignoreParseWarnings: ignoreWarnings});
         var mug = call("getMugByPath", "/ClassroomObservationV3/Q0003"),
             // HACK how to reference items in select?
             item = mug._node_control.children[1].value;
@@ -99,7 +99,7 @@ describe("The parser", function () {
     });
 
     it("should load mugs with relative paths and label without itext", function () {
-        util.loadXML(LABEL_WITHOUT_ITEXT_XML, null, ignoreWarnings);
+        util.loadXML(LABEL_WITHOUT_ITEXT_XML, {ignoreParseWarnings: ignoreWarnings});
         var grp = call("getMugByPath", "/data/group"),
             mug = call("getMugByPath", "/data/group/a"),
             txt = call("getMugByPath", "/data/text");

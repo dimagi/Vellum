@@ -28,7 +28,7 @@ define([
         return attributes;
     }
 
-    function parseXForm(xmlString, formOpts, vellum, warnings, parserOptions) {
+    function parseXForm(xmlString, formOpts, vellum, warnings) {
         var Form = form_.Form,
             InstanceMetadata = form_.InstanceMetadata,
             form = new Form(formOpts, vellum, formOpts.mugTypes);
@@ -44,7 +44,7 @@ define([
             // that would allow an inversion of this conditional,
             // so we'd generate the form if XML was present, then perform additional processing,
             // and finally return the form
-            vellum.performAdditionalParsing(form, null, parserOptions);
+            vellum.performAdditionalParsing(form, null);
             form.isLoadingXForm = false;
             return form;
         }
@@ -126,7 +126,7 @@ define([
             }
         }
 
-        vellum.performAdditionalParsing(form, xml, parserOptions);
+        vellum.performAdditionalParsing(form, xml);
 
         form.isLoadingXForm = false;
         return form;

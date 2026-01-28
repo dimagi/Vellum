@@ -416,8 +416,7 @@ describe("The Case Management plugin", function () {
         // If the user pastes old xml into the edit xml modal, we don't want them accidentally
         // deleting all case mapping information
         util.loadXML(BASELINE_XML); // establishes a mapping: "one"->"/data/question1"
-        // false does not reset the data, which is how the edit xml modal behaves
-        util.loadXML(BASELINE_NO_MAPPING_XML, undefined, undefined, undefined, false);
+        util.loadXML(BASELINE_NO_MAPPING_XML, {preserveCaseMappings: true});
 
         const vellum = $("#vellum").vellum("get");
         const caseManagementData = vellum.data.caseManagement;
@@ -428,7 +427,7 @@ describe("The Case Management plugin", function () {
 
     it("should override existing mappings", function () {
         util.loadXML(BASELINE_NO_MAPPING_XML);
-        util.loadXML(BASELINE_XML, undefined, undefined, undefined, false);
+        util.loadXML(BASELINE_XML, {preserveCaseMappings: true});
 
         const vellum = $("#vellum").vellum("get");
         const caseManagementData = vellum.data.caseManagement;
