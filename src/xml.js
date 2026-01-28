@@ -10,6 +10,10 @@ define([
 ) {
     /**
      * Parse XML string and return jQuery-wrapped document object.
+     * This should be used rather than jQuery's parseXML directly,
+     * as jQuery does not handle namespaced elements well.
+     * Attempting to use something like "$xml.find('namespace\\:elementName')"
+     * will often have incorrect results with jQuery's base version
      */
     function parseXML(xmlStr) {
         if (!xmlStr) {

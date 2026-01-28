@@ -75,6 +75,12 @@ define([
             // placeholder to be overridden by widgets that inherit from base
         };
 
+        widget.postRender = function () {
+            // placeholder to be overriden by widgets that inherit from base
+            // intended to allow post render configuration, such as
+            // enabling select2 functionality
+        };
+
         widget.handleChange = function () {
             widget.updateValue();
             mug.showChangedMsg = true;
@@ -383,9 +389,11 @@ define([
     };
 
     var droppableText = function (mug, options) {
-        var widget = richInput(mug, options);
+        const placeholder = options.placeholder ? options.placeholder : gettext('Drag question here');
+
+        const widget = richInput(mug, options);
         widget.input.addClass('jstree-drop')
-            .attr('placeholder', 'Drag question here')
+            .attr('placeholder', placeholder)
             .change(function () {
                 widget.handleChange();
             });
@@ -642,10 +650,12 @@ define([
         };
 
         widget.addCustomIfNeeded = function (value) {
-            var customOption = $('[name=property-androidIntentAppId]')
+            var customOption = widget.dropdown
                 .find('option')
                 .filter(function () { return $(this).text() === gettext("Custom"); });
-            if (customOption.length === 0) {
+            if (options.useValueAsCustomName) {
+                widget.addOption(value, value);
+            } else if (customOption.length === 0) {
                 widget.addOption(value, gettext("Custom"));
             } else {
                 customOption.val(value);

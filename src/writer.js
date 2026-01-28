@@ -9,7 +9,7 @@ define([
     XMLWriter,
     util
 ) {
-    var createXForm = function (form) {
+    var createXForm = function (form, addPresentationXML) {
         var xmlWriter = new XMLWriter('UTF-8', '1.0');
         form.vellum.beforeSerialize();
 
@@ -63,6 +63,11 @@ define([
         xmlWriter.writeStartElement('h:body');
         createControlBlock(form, xmlWriter);
         xmlWriter.writeEndElement(); //CLOSE BODY
+
+        if (addPresentationXML) {
+            form.vellum.contributeToAdditionalXML(xmlWriter, form);
+        }
+
         xmlWriter.writeEndElement(); //CLOSE HTML
         xmlWriter.writeEndDocument(); //CLOSE DOCUMENT
         form.vellum.afterSerialize();

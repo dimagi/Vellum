@@ -1,7 +1,7 @@
 import options from "./options";
 import chai from "chai";
 import EquivalentXml from "equivalent-xml-js/src/equivalent-xml";
-import jsdiff from "jsdiff/diff";
+import { createPatch } from "jsdiff/diff";
 import _ from "underscore";
 import $ from "jquery";
 import copypaste from "vellum/copy-paste";
@@ -97,7 +97,7 @@ function assertTreeState(tree) {
  */
 function assertEqual(actual, expected, message) {
     if (actual !== expected) {
-        var patch = jsdiff.createPatch("", actual, expected, "actual", "expected");
+        var patch = createPatch("", actual, expected, "actual", "expected");
         patch = patch.replace(/^Index:/, message || "Not equal:");
         assert(false, colorDiff(patch));
     }
@@ -233,7 +233,7 @@ function init(opts) {
     }
     vellum.empty().vellum(vellum_options);
 }
-    
+
 // call a method on the active instance
 function call () {
     var args = Array.prototype.slice.call(arguments),
@@ -242,13 +242,14 @@ function call () {
 }
 
 // load XML syncronously
-function loadXML(value, options, ignoreParseWarnings, maintainUrlHash) {
+function loadXML(value, options, ignoreParseWarnings, maintainUrlHash, reset=true) {
     var warnings = [], data = call("getData");
     if (!maintainUrlHash){
         window.history.replaceState(null, null, " ");
     }
     data.core.parseWarnings = [];
-    call("loadXML", value, options || {});
+    const parserOptions = { reset };
+    call("loadXML", value, options || {}, parserOptions);
     if (!ignoreParseWarnings) {
         warnings = data.core.parseWarnings;
     } else if (_.isRegExp(ignoreParseWarnings)) {

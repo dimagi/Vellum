@@ -736,7 +736,8 @@ define([
 
         // populate text
         if(!this.data.core.formLoadingFailed){
-            $textarea.val(this.createXML());
+            // generate presentation XML
+            $textarea.val(this.createXML(true));
         } else {
             $textarea.val(this.data.core.failedLoadXML);
         }
@@ -1441,7 +1442,7 @@ define([
         }, this.opts().core.loadDelay);
     };
 
-    fn.loadXML = function (formXML, options) {
+    fn.loadXML = function (formXML, options, parserOptions) {
         var form, _this = this, selectedHashtag = window.location.hash;
         _this.data.core.$tree.children().children().each(function (i, el) {
             _this.jstree("delete_node", el);
@@ -1455,7 +1456,7 @@ define([
             this.data.core.form.disconnectDataSources();
         }
         this.data.core.form = form = parser.parseXForm(
-            formXML, options, this, _this.data.core.parseWarnings);
+            formXML, options, this, _this.data.core.parseWarnings, parserOptions);
         this.onXFormLoaded(form);
         if (formXML) {
             _this._resetMessages(_this.data.core.form.errors);
@@ -2105,6 +2106,9 @@ define([
             var $ui = elemWidget.getUIElement();
             widgets.util.setWidget($ui, elemWidget);
             $fieldsetContent.append($ui);
+            if (elemWidget.postRender) {
+                elemWidget.postRender();
+            }
             elemWidget.refreshMessages();
         });
         return $sec;
@@ -2224,8 +2228,8 @@ define([
         }
     };
 
-    fn.createXML = function () {
-        return this.data.core.form.createXML();
+    fn.createXML = function (addPresentationXML) {
+        return this.data.core.form.createXML(addPresentationXML);
     };
 
     fn.canSerializeXForm = function (forAction, retry) {
@@ -2333,6 +2337,9 @@ define([
         }
 
         data = saveType === 'patch' ? {patch: patch} : {xform: formText};
+
+        data = this.augmentSentData(data, saveType);
+
         data.case_references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
         if (checkForConflict) {
             data.sha1 = CryptoJS.SHA1(this.data.core.lastSavedXForm).toString();
@@ -2369,7 +2376,7 @@ define([
                     }
                 }
                 hidePageSpinner();
-                _this.opts().core.onFormSave(data);
+                _this.onFormSave(data);
                 _this.data.core.lastSavedXForm = formText;
                 _this._setURLHash(_this._propertiesMug);
             }
@@ -2535,7 +2542,7 @@ define([
     };
 
     fn.handleMugRename = function (form, mug, newId, oldId, newPath, oldPath, oldParent) {
-        form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
+        return form.handleMugRename(mug, newId, oldId, newPath, oldPath, oldParent);
     };
 
     fn.duplicateMugProperties = function(mug) {};
@@ -2573,6 +2580,14 @@ define([
     fn.parseSetValue = function (form, el, path) {
         parser.parseSetValue(form, el, path);
     };
+
+    /**
+     * Extension point for plugins to add arbitrary data from the parsed xml into the form
+     *
+     * @param {Form} form - The form instance being loaded.
+     * @param xml - The parsed XML object
+     */
+    fn.performAdditionalParsing = function (form, xml, parserOptions) {};
 
     fn.getControlNodeAdaptorFactory = function (tagName) {
         return this.data.core.controlNodeAdaptorMap[tagName];
@@ -2616,6 +2631,25 @@ define([
     fn.contributeToModelXML = function (xmlWriter, form) {};
 
     fn.contributeToHeadXML = function (xmlWriter, form) {};
+
+    fn.onFormSave = function (data) {
+        const saveCallback = this.opts().core.onFormSave;
+        if (typeof saveCallback === "function") {
+            saveCallback(data);
+        }
+    };
+
+    fn.augmentSentData = function (data, saveType) {
+        return data;
+    };
+
+    /**
+     * Extension point for plugins to add arbitrary XML beneath the body element
+     * 
+     * @param {XMLWriter} xmlWriter - The writer, having already written the head and body elements
+     * @param {Form} form  - The form instance
+     */
+    fn.contributeToAdditionalXML = function (xmlWriter, form) {};
 
     fn.initMediaUploaderWidget = function (widget) {};
 
