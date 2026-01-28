@@ -73,13 +73,7 @@ function addMultipleAssignmentsMessageToMug(mug, url) {
 }
 
 class CaseMappingsBuilder {
-    updateMappingsFromXML (form, data, xml, preserveMappings) {
-        if (!preserveMappings) {
-            // reset mapping data -- used by tests to prevent side effects from loadXML
-            data.caseMappings = {};
-            data.caseMappingsByQuestion = {};
-        }
-
+    updateMappingsFromXML (form, data, xml) {
         if (!xml) {
             return;
         }
@@ -372,7 +366,7 @@ $.vellum.plugin('caseManagement', {}, {
         });
     },
 
-    performAdditionalParsing: function (form, xml, parserOptions) {
+    performAdditionalParsing: function (form, xml) {
         this.__callOld();
         const data = this.data.caseManagement;
         const builder = new CaseMappingsBuilder();
@@ -380,8 +374,7 @@ $.vellum.plugin('caseManagement', {}, {
             data.caseMappings = JSON.parse(JSON.stringify(data.baseline));
             data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
         } else {
-            const preserveMappings = !(parserOptions && parserOptions.reset);
-            builder.updateMappingsFromXML(form, data, xml, preserveMappings);
+            builder.updateMappingsFromXML(form, data, xml);
         }
     },
 
