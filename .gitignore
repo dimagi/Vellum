@@ -1,6 +1,7 @@
 /node_modules
 /dist/*
 /_build
+/.claude/*.local.json
 vellum.tar.gz
 
 npm-debug.log
