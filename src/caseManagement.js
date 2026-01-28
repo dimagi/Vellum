@@ -474,10 +474,12 @@ define([
                     validationFunc: function (mug) {
                         const currentValue = mug.p.caseProperty;
                         const reservedWords = that.opts().caseManagement.reserved_words;
-                        if (reservedWords.indexOf(currentValue) !== -1) {
-                            return {markdown: gettext(`**${currentValue}** is a reserved word`)};
+                        if (currentValue && reservedWords.indexOf(currentValue) !== -1) {
+                            return {markdown: util.format(
+                                gettext("**{word}** is a reserved word"),
+                                {word: currentValue}
+                            )};
                         }
-
                         return 'pass';
                     },
                 },
