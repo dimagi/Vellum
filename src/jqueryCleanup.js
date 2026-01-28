@@ -14,7 +14,7 @@ define([
             try {
                 $(elem).triggerHandler('remove');
             } catch (e) {
-
+                window.console.error("Error in 'remove' handler for element:", elem, e);
             }
         }
         _cleanData(elems);
