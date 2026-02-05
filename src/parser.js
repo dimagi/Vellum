@@ -28,7 +28,7 @@ define([
         return attributes;
     }
 
-    function parseXForm(xmlString, formOpts, vellum, warnings) {
+    function parseXForm(xmlString, formOpts, vellum, warnings, parserOptions) {
         var Form = form_.Form,
             InstanceMetadata = form_.InstanceMetadata,
             form = new Form(formOpts, vellum, formOpts.mugTypes);
@@ -37,6 +37,14 @@ define([
         form.isLoadingXForm = true; // disable mug nodeId change logic
 
         if (!xmlString) {
+            // `performAdditionalParsing` is called both here, for empty XML,
+            // and at the end of this method, for fully-specified XML.
+            // In the future, it would be better if we called this in only one location,
+            // perhaps by extracting out the form generation logic into its own functon.
+            // that would allow an inversion of this conditional,
+            // so we'd generate the form if XML was present, then perform additional processing,
+            // and finally return the form
+            vellum.performAdditionalParsing(form, null, parserOptions);
             form.isLoadingXForm = false;
             return form;
         }
@@ -117,6 +125,8 @@ define([
                 });
             }
         }
+
+        vellum.performAdditionalParsing(form, xml, parserOptions);
 
         form.isLoadingXForm = false;
         return form;

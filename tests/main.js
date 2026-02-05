@@ -65,6 +65,7 @@ import('jquery.vellum').then(() => Promise.all([
     import('tests/undomanager'),
     import('tests/undo'),
     import('tests/commcareConnect'),
+    import('tests/caseManagement'),
 
     // tests for profiling load times
     // (disabled by default because they take a long time)
