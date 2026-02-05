@@ -14,51 +14,47 @@
  * Spec:
  * https://docs.google.com/document/d/1g4o3_OQfAYHjHdw7m7WcIAIRTomRV48yRQayL31jvIc
  */
-define([
-    'jquery',
-    'vellum/core'
-], function (
-    $
-) {
-    $.vellum.plugin("lock", {}, {
-        loadXML: function (xml) {
-            this.data.lock.locks = {};
-            this.__callOld();
-        },
-        parseBindElement: function (form, el, path) {
-            this.__callOld();
-            var locked = el.xmlAttr('vellum:lock');
-            if (locked && locked !== 'none') {
-                this.data.lock.locks[path] = locked;
-            }
-        },
-        isPropertyLocked: function (mugPath, propertyPath) {
-            if (this.__callOld()) {
-                return true;
-            }
-            var lock = this.data.lock.locks[mugPath];
-            if (!lock) { 
-                return false; 
-            }
+import $ from "jquery";
+import "vellum/core";
 
-            if ((lock === 'node' || lock === 'value') && 
-                propertyPath === 'nodeID') 
-            {
-                return true;
-            } else if (lock === 'value' && propertyPath.indexOf('Itext') === -1) {
-                return true;
-            }
-
-            return false;
-        },
-        isMugPathMoveable: function (mugPath) {
-            return this.__callOld() && !this.data.lock.locks[mugPath];
-        },
-        isMugRemoveable: function (mug, mugPath) {
-            return this.__callOld() && !this.data.lock.locks[mugPath];
-        },
-        isMugTypeChangeable: function (mug, mugPath) {
-            return this.__callOld() && this.data.lock.locks[mugPath] !== 'value';
+$.vellum.plugin("lock", {}, {
+    loadXML: function (xml) {
+        this.data.lock.locks = {};
+        this.__callOld();
+    },
+    parseBindElement: function (form, el, path) {
+        this.__callOld();
+        var locked = el.xmlAttr('vellum:lock');
+        if (locked && locked !== 'none') {
+            this.data.lock.locks[path] = locked;
         }
-    });
+    },
+    isPropertyLocked: function (mugPath, propertyPath) {
+        if (this.__callOld()) {
+            return true;
+        }
+        var lock = this.data.lock.locks[mugPath];
+        if (!lock) { 
+            return false; 
+        }
+
+        if ((lock === 'node' || lock === 'value') && 
+            propertyPath === 'nodeID') 
+        {
+            return true;
+        } else if (lock === 'value' && propertyPath.indexOf('Itext') === -1) {
+            return true;
+        }
+
+        return false;
+    },
+    isMugPathMoveable: function (mugPath) {
+        return this.__callOld() && !this.data.lock.locks[mugPath];
+    },
+    isMugRemoveable: function (mug, mugPath) {
+        return this.__callOld() && !this.data.lock.locks[mugPath];
+    },
+    isMugTypeChangeable: function (mug, mugPath) {
+        return this.__callOld() && this.data.lock.locks[mugPath] !== 'value';
+    }
 });
