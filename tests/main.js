@@ -1,4 +1,7 @@
 /* global mocha */
+
+// Import polyfill first to ensure gettext is available when other modules load
+import 'vellum/gettext-polyfill';
 import 'mocha/mocha.js';
 import $ from 'jquery';
 import options from 'tests/options';

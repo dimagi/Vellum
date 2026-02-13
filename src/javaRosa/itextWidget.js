@@ -1,471 +1,459 @@
-define([
-    'underscore',
-    'jquery',
-    'vellum/templates/auto_box.html',
-    'vellum/templates/markdown_help.html',
-    'vellum/javaRosa/util',
-    'vellum/widgets',
-    'vellum/richText',
-    'vellum/util',
-    'vellum/atwho',
-    'vellum/core'
-], function (
-    _,
-    $,
-    auto_box,
-    markdown_help,
-    jrUtil,
-    widgets,
-    richText,
-    util,
-    atwho
-) {
-    var DEFAULT_EXTENSIONS = {
-            image: 'png',
-            audio: 'mp3',
-            video: '3gp',
-            'video-inline': '3gp',
-        };
+import _ from "underscore";
+import $ from "jquery";
+import auto_box from "vellum/templates/auto_box.html";
+import markdown_help from "vellum/templates/markdown_help.html";
+import jrUtil from "vellum/javaRosa/util";
+import widgets from "vellum/widgets";
+import richText from "vellum/richText";
+import util from "vellum/util";
+import atwho from "vellum/atwho";
+import "vellum/core";
 
-    var iTextIDWidget = function (mug, options) {
-        var widget = widgets.text(mug, options),
-            $input = widget.input,
-            currentValue = null;
-
-        function autoGenerateId() {
-            return jrUtil.getDefaultItextId(mug, widget.path.replace(/Itext$/, ""));
-        }
-
-        function updateAutoId() {
-            _setValue(autoGenerateId());
-            setAutoMode(true);
-        }
-
-        function unlinkSharedItext() {
-            if (currentValue.refCount > 1) {
-                currentValue.refCount--;
-                currentValue = currentValue.clone();
-            }
-        }
-
-        var _setValue = widget.setValue;
-
-        widget.setValue = function (value) {
-            currentValue = value;
-            if (value.autoId) {
-                updateAutoId();
-            } else {
-                _setValue(value.id);
-                setAutoMode(false);
-            }
-        };
-
-        widget.getValue = function() {
-            currentValue.id = $input.val();
-            currentValue.autoId = getAutoMode();
-            return currentValue;
-        };
-
-        // auto checkbox
-        var $autoBox = $("<input />").attr("type", "checkbox");
-
-        $autoBox.change(function () {
-            if ($(this).prop('checked')) {
-                unlinkSharedItext();
-                updateAutoId();
-                widget.handleChange();
-            }
-        });
-
-        function setAutoMode(autoMode) {
-            $autoBox.prop("checked", autoMode);
-        }
-
-        function getAutoMode() {
-            return $autoBox.prop('checked');
-        }
-
-        var _getUIElement = widget.getUIElement;
-        widget.getUIElement = function () {
-            var $uiElem = _getUIElement().css('position', 'relative'),
-                $autoBoxContainer = $(auto_box());
-
-            $autoBoxContainer.find("label").prepend($autoBox);
-            $uiElem.find('.controls')
-                .removeClass("col-sm-9")
-                .addClass("col-sm-8")
-                .after($autoBoxContainer);
-
-            return $uiElem;
-        };
-
-        widget.input.keyup(function () {
-            // turn off auto-mode if the id is ever manually overridden
-            var newVal = $(this).val();
-            if (newVal !== autoGenerateId()) {
-                setAutoMode(false);
-            }
-        });
-
-        mug.on("property-changed", function (e) {
-            if (getAutoMode() && e.property === "nodeID") {
-                $input.val(autoGenerateId());
-            }
-        }, null, "teardown-mug-properties");
-
-        return widget;
+var DEFAULT_EXTENSIONS = {
+        image: 'png',
+        audio: 'mp3',
+        video: '3gp',
+        'video-inline': '3gp',
     };
 
-    var baseItextLabelWidget = function (mug, language, form, options) {
-        var vellum = mug.form.vellum,
-            Itext = vellum.data.javaRosa.Itext,
-            // todo: id->class
-            id = "itext-" + language + "-" + options.itextType,
-            widgetClass = options.baseWidgetClass || widgets.richTextarea,
-            widget, $input;
+var iTextIDWidget = function (mug, options) {
+    var widget = widgets.text(mug, options),
+        $input = widget.input,
+        currentValue = null;
 
-        options.language = language;
+    function autoGenerateId() {
+        return jrUtil.getDefaultItextId(mug, widget.path.replace(/Itext$/, ""));
+    }
 
-        if (options.idSuffix) {
-            id = id + options.idSuffix;
+    function updateAutoId() {
+        _setValue(autoGenerateId());
+        setAutoMode(true);
+    }
+
+    function unlinkSharedItext() {
+        if (currentValue.refCount > 1) {
+            currentValue.refCount--;
+            currentValue = currentValue.clone();
         }
-        options.id = id;
-        widget = widgetClass(mug, options);
+    }
 
-        $input = widget.input;
-        $input.addClass('jstree-drop');
+    var _setValue = widget.setValue;
 
-        if (options.path === 'labelItext') {
-            if (!mug.form.richText) {
-                $input.keydown(function (e) {
-                    // deletion of entire output ref in one go
-                    if (e && e.which === 8 || e.which === 46) {
-                        var control = widget.getControl()[0],
-                            pos = util.getCaretPosition(control),
-                            val = widget.getValue(),
-                            outputBegin = '<output',
-                            outputEnd = '/>',
-                            start,
-                            end,
-                            match;
-                        if (e.which === 8) { // backspace
-                            if (pos > 1) {
-                                match = val.substr(pos - 2, 2);
-                                if (match === outputEnd) {
-                                    start = val.lastIndexOf(outputBegin, pos);
-                                    end = pos;
-                                }
-                            }
-                        } else if (e.which === 46) { // delete
-                            match = val.substr(pos, outputBegin.length);
-                            if (match === outputBegin) {
-                                end = val.indexOf(outputEnd, pos);
-                                end = end === -1 ? end : end + 2;
-                                start = pos;
+    widget.setValue = function (value) {
+        currentValue = value;
+        if (value.autoId) {
+            updateAutoId();
+        } else {
+            _setValue(value.id);
+            setAutoMode(false);
+        }
+    };
+
+    widget.getValue = function() {
+        currentValue.id = $input.val();
+        currentValue.autoId = getAutoMode();
+        return currentValue;
+    };
+
+    // auto checkbox
+    var $autoBox = $("<input />").attr("type", "checkbox");
+
+    $autoBox.change(function () {
+        if ($(this).prop('checked')) {
+            unlinkSharedItext();
+            updateAutoId();
+            widget.handleChange();
+        }
+    });
+
+    function setAutoMode(autoMode) {
+        $autoBox.prop("checked", autoMode);
+    }
+
+    function getAutoMode() {
+        return $autoBox.prop('checked');
+    }
+
+    var _getUIElement = widget.getUIElement;
+    widget.getUIElement = function () {
+        var $uiElem = _getUIElement().css('position', 'relative'),
+            $autoBoxContainer = $(auto_box());
+
+        $autoBoxContainer.find("label").prepend($autoBox);
+        $uiElem.find('.controls')
+            .removeClass("col-sm-9")
+            .addClass("col-sm-8")
+            .after($autoBoxContainer);
+
+        return $uiElem;
+    };
+
+    widget.input.keyup(function () {
+        // turn off auto-mode if the id is ever manually overridden
+        var newVal = $(this).val();
+        if (newVal !== autoGenerateId()) {
+            setAutoMode(false);
+        }
+    });
+
+    mug.on("property-changed", function (e) {
+        if (getAutoMode() && e.property === "nodeID") {
+            $input.val(autoGenerateId());
+        }
+    }, null, "teardown-mug-properties");
+
+    return widget;
+};
+
+var baseItextLabelWidget = function (mug, language, form, options) {
+    var vellum = mug.form.vellum,
+        Itext = vellum.data.javaRosa.Itext,
+        // todo: id->class
+        id = "itext-" + language + "-" + options.itextType,
+        widgetClass = options.baseWidgetClass || widgets.richTextarea,
+        widget, $input;
+
+    options.language = language;
+
+    if (options.idSuffix) {
+        id = id + options.idSuffix;
+    }
+    options.id = id;
+    widget = widgetClass(mug, options);
+
+    $input = widget.input;
+    $input.addClass('jstree-drop');
+
+    if (options.path === 'labelItext') {
+        if (!mug.form.richText) {
+            $input.keydown(function (e) {
+                // deletion of entire output ref in one go
+                if (e && e.which === 8 || e.which === 46) {
+                    var control = widget.getControl()[0],
+                        pos = util.getCaretPosition(control),
+                        val = widget.getValue(),
+                        outputBegin = '<output',
+                        outputEnd = '/>',
+                        start,
+                        end,
+                        match;
+                    if (e.which === 8) { // backspace
+                        if (pos > 1) {
+                            match = val.substr(pos - 2, 2);
+                            if (match === outputEnd) {
+                                start = val.lastIndexOf(outputBegin, pos);
+                                end = pos;
                             }
                         }
-                        if (start || end && start !== -1 && end !== -1) {
-                            var noRef = val.slice(0, start) + val.slice(end, val.length);
-                            widget.setValue(noRef);
-                            util.setCaretPosition(control, start);
-                            e.preventDefault();
+                    } else if (e.which === 46) { // delete
+                        match = val.substr(pos, outputBegin.length);
+                        if (match === outputBegin) {
+                            end = val.indexOf(outputEnd, pos);
+                            end = end === -1 ? end : end + 2;
+                            start = pos;
                         }
                     }
-                });
-            }
-        }
-
-        if (_.contains(jrUtil.ITEXT_PROPERTIES, options.path)) {
-            atwho.autocomplete($input, mug, {
-                category: "Output Value",
-                insertTpl: '<output value="${name}" />',
-                property: "labelItext",
-                outputValue: true,
-                useRichText: mug.form.richText,
+                    if (start || end && start !== -1 && end !== -1) {
+                        var noRef = val.slice(0, start) + val.slice(end, val.length);
+                        widget.setValue(noRef);
+                        util.setCaretPosition(control, start);
+                        e.preventDefault();
+                    }
+                }
             });
         }
+    }
 
-        widget.displayName = options.displayName;
-        widget.itextType = options.itextType;
-        widget.form = form || "default";
+    if (_.contains(jrUtil.ITEXT_PROPERTIES, options.path)) {
+        atwho.autocomplete($input, mug, {
+            category: "Output Value",
+            insertTpl: '<output value="${name}" />',
+            property: "labelItext",
+            outputValue: true,
+            useRichText: mug.form.richText,
+        });
+    }
 
-        widget.language = language;
-        widget.languageName = util.langCodeToName[widget.language] || widget.language;
-        widget.showOneLanguage = Itext.getLanguages().length < 2;
-        widget.defaultLang = Itext.getDefaultLanguage();
-        widget.isDefaultLang = widget.language === widget.defaultLang;
-        widget.isSyncedWithDefaultLang = false;
+    widget.displayName = options.displayName;
+    widget.itextType = options.itextType;
+    widget.form = form || "default";
 
-        widget.getItextItem = function () {
-            // Make sure the real itextItem is being updated at all times, not a stale one.
-            return options.getItextByMug(widget.mug);
-        };
+    widget.language = language;
+    widget.languageName = util.langCodeToName[widget.language] || widget.language;
+    widget.showOneLanguage = Itext.getLanguages().length < 2;
+    widget.defaultLang = Itext.getDefaultLanguage();
+    widget.isDefaultLang = widget.language === widget.defaultLang;
+    widget.isSyncedWithDefaultLang = false;
 
-        widget.getItextValue = function (lang) {
-            var itextItem = widget.getItextItem(), value;
-            if (!lang) {
-                lang = widget.language;
+    widget.getItextItem = function () {
+        // Make sure the real itextItem is being updated at all times, not a stale one.
+        return options.getItextByMug(widget.mug);
+    };
+
+    widget.getItextValue = function (lang) {
+        var itextItem = widget.getItextItem(), value;
+        if (!lang) {
+            lang = widget.language;
+        }
+        value = itextItem && itextItem.get(widget.form, lang);
+        if (mug.form.richText) {
+            return jrUtil.outputToHashtag(value, widget.mug.form.xpath);
+        } else {
+            return jrUtil.outputToXPath(value, widget.mug.form.xpath);
+        }
+    };
+
+    widget.setItextValue = function (value) {
+        value = richText.sanitizeInput(value);
+        var itextItem = widget.getItextItem();
+        // TODO should not be using hashtags when rich text is off
+        //if (mug.form.richText) {
+        value = jrUtil.outputToHashtag(value, widget.mug.form.xpath);
+        //}
+        if (itextItem) {
+            if (widget.isDefaultLang) {
+                widget.mug.fire({
+                    type: 'defaultLanguage-itext-changed',
+                    form: widget.form,
+                    prevValue: itextItem.get(widget.form, widget.language),
+                    value: value,
+                    itextType: widget.itextType
+                });
             }
-            value = itextItem && itextItem.get(widget.form, lang);
-            if (mug.form.richText) {
-                return jrUtil.outputToHashtag(value, widget.mug.form.xpath);
-            } else {
-                return jrUtil.outputToXPath(value, widget.mug.form.xpath);
-            }
-        };
+            itextItem.getForm(widget.form).setValue(widget.language, value);
+        }
+    };
 
-        widget.setItextValue = function (value) {
-            value = richText.sanitizeInput(value);
-            var itextItem = widget.getItextItem();
-            // TODO should not be using hashtags when rich text is off
-            //if (mug.form.richText) {
-            value = jrUtil.outputToHashtag(value, widget.mug.form.xpath);
-            //}
-            if (itextItem) {
-                if (widget.isDefaultLang) {
-                    widget.mug.fire({
-                        type: 'defaultLanguage-itext-changed',
-                        form: widget.form,
-                        prevValue: itextItem.get(widget.form, widget.language),
-                        value: value,
-                        itextType: widget.itextType
-                    });
+    widget.getLangDesc = function () {
+        if (widget.showOneLanguage) {
+            return "";
+        }
+        return " (" + widget.languageName + ")";
+    };
+
+    widget.getDisplayName = function () {
+        return widget.displayName + widget.getLangDesc();
+    };
+
+    widget.init = function (loadDefaults) {
+        // Note, there are TWO defaults here.
+        // There is the default value when this widget is initialized.
+        // There is the value of the default language.
+        if (loadDefaults) {
+            var defaultValue = widget.getDefaultValue();
+            widget.getItextItem().getOrCreateForm(widget.form);
+            widget.setValue(defaultValue);
+            widget.handleChange();
+        } else {
+            var value = widget.getItextValue();
+
+            if (!_.isString(value)) {
+                if (!widget.isDefaultLang) {
+                    value = widget.getItextValue(widget.defaultLang) || "";
+                } else {
+                    value = "";
                 }
-                itextItem.getForm(widget.form).setValue(widget.language, value);
             }
-        };
 
-        widget.getLangDesc = function () {
-            if (widget.showOneLanguage) {
-                return "";
-            }
-            return " (" + widget.languageName + ")";
-        };
+            widget.setItextValue(value);
+            widget.setValue(value);
+        }
+    };
 
-        widget.getDisplayName = function () {
-            return widget.displayName + widget.getLangDesc();
-        };
+    var _updateValue = widget.updateValue;
+    widget.updateValue = function () {
+        _updateValue();
+        if (!widget.getValue() && !widget.isDefaultLang) {
+            widget.setItextValue(widget.getItextValue(widget.defaultLang));
+        }
+    };
 
-        widget.init = function (loadDefaults) {
-            // Note, there are TWO defaults here.
-            // There is the default value when this widget is initialized.
-            // There is the value of the default language.
-            if (loadDefaults) {
-                var defaultValue = widget.getDefaultValue();
-                widget.getItextItem().getOrCreateForm(widget.form);
-                widget.setValue(defaultValue);
-                widget.handleChange();
-            } else {
-                var value = widget.getItextValue();
+    widget.toggleDefaultLangSync = function (val) {
+        widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
+    };
 
-                if (!_.isString(value)) {
-                    if (!widget.isDefaultLang) {
-                        value = widget.getItextValue(widget.defaultLang) || "";
-                    } else {
-                        value = "";
-                    }
+    widget.getDefaultValue = function () {
+        return null;
+    };
+
+    if (!widget.isDefaultLang) {
+        widget.mug.on('defaultLanguage-itext-changed', function (e) {
+            if (e.form === widget.form && e.itextType === widget.itextType) {
+                if (widget.getItextValue() === e.prevValue) {
+                    // Make sure all the defaults keep in sync.
+                    // why doesn't setValue set the itext value?
+                    widget.setItextValue(e.value);
+                    widget.setValue(e.value);
                 }
-
-                widget.setItextValue(value);
-                widget.setValue(value);
             }
-        };
+        }, null, "teardown-mug-properties");
+    }
 
-        var _updateValue = widget.updateValue;
-        widget.updateValue = function () {
-            _updateValue();
-            if (!widget.getValue() && !widget.isDefaultLang) {
-                widget.setItextValue(widget.getItextValue(widget.defaultLang));
+    widget.refreshMessages = function () {
+        widget.getMessagesContainer()
+            .empty()
+            .append(widget.getMessages(mug, widget.id));
+    };
+
+    widget.save = function () {
+        widget.setItextValue(widget.getValue());
+    };
+
+    return widget;
+};
+
+var itextLabelWidget = function (mug, language, form, options) {
+    var widget = baseItextLabelWidget(mug, language, form, options),
+        super_handleChange = widget.handleChange;
+
+    widget.handleChange = function () {
+        var item = widget.getItextItem(),
+            before = item && item.get(widget.form, widget.language);
+        super_handleChange();
+        var after = item && item.get(widget.form, widget.language);
+        if (before !== after) {
+            // TODO fire event for every mug that has an itext item
+            // with the same ID as this itext item
+            mug.form.fire({
+                type: 'question-label-text-change',
+                mug: mug,
+                text: after
+            });
+        }
+    };
+
+    return widget;
+};
+
+var itextMarkdownWidget = function (mug, language, form, options) {
+    options = options || {};
+    var parent = options.parent;
+    var widget = itextLabelWidget(mug, language, form, options),
+        super_setValue = widget.setValue,
+        super_getUIElement = widget.getUIElement,
+        super_handleChange = widget.handleChange,
+        wantsMarkdown = true,
+        supportMarkDownTables = options.vellum.opts().features.markdown_tables,
+        markdownOff, markdownOn, markdownOutput;
+
+    widget.toggleMarkdown = function() {
+        parent.toggleClass("has-markdown");
+        widget.mug.form.fire('change');
+    };
+
+    markdownOutput = $('<div>').addClass("controls well markdown-output col-sm-9");
+
+    if (util.isRightToLeftLanguage(options.language)) {
+        markdownOutput.attr('dir', 'rtl');
+    }
+
+    widget.handleChange = function() {
+        super_handleChange();
+        var val = widget.getValue(),
+            item = widget.getItextItem();
+        if (jrUtil.looksLikeMarkdown(val, supportMarkDownTables)) {
+            if (wantsMarkdown) {
+                parent.removeClass("markdown-ignorant");
+                parent.addClass("has-markdown");
             }
-        };
+        } else if (!val) {
+            parent.removeClass("has-markdown");
+        }
+        item.hasMarkdown = markdownOff.is(":visible");
+        markdownOutput.html(util.markdown(val)).closest('.form-group').removeClass('hide');
+    };
 
-        widget.toggleDefaultLangSync = function (val) {
-            widget.isSyncedWithDefaultLang = !val && !widget.isDefaultLang;
-        };
+    widget.setValue = function (val, callback) {
+        super_setValue(val, callback);
+        if (!val) {
+            markdownOutput.closest('.form-group').addClass('hide');
+        }
+        markdownOutput.html(util.markdown(val));
+    };
+
+    widget.getUIElement = function() {
+        var elem = super_getUIElement(),
+            val = widget.getValue(),
+            markdownSpacer = $("<div />").addClass("col-sm-3"),
+            markdownContainer = $("<div />").addClass("col-sm-9"),
+            markdownRow = $("<div />").addClass("form-group").addClass("markdown-group");
+
+        elem.detach('.markdown-output');
+        markdownRow.append(markdownSpacer);
+        markdownContainer.append(markdownOutput);
+        markdownRow.append(markdownContainer);
+        elem.append(markdownRow);
+        elem.find('.control-label').append(markdown_help({title:options.lstring }));
+
+        markdownOff = elem.find('.turn-markdown-off').click(function() {
+            wantsMarkdown = false;
+            widget.getItextItem().hasMarkdown = false;
+            widget.toggleMarkdown();
+            return false;
+        });
+        markdownOn = elem.find('.turn-markdown-on').click(function() {
+            wantsMarkdown = true;
+            widget.getItextItem().hasMarkdown = true;
+            widget.toggleMarkdown();
+            return false;
+        });
+
+        if (widget.getItextItem().hasMarkdown) {
+            parent.addClass("has-markdown");
+        } else if (jrUtil.looksLikeMarkdown(val, supportMarkDownTables)) {
+            markdownOutput.html(util.markdown(val));
+            markdownOff.removeClass('hide');
+        } else {
+            parent.addClass("markdown-ignorant");
+        }
+        return elem;
+    };
+
+    return widget;
+};
+
+var itextFormWidget = function (mug, language, form, options) {
+    options = options || {};
+    options.idSuffix = "-" + form;
+    var widget = baseItextLabelWidget(mug, language, form, options);
+
+    widget.getDisplayName = function () {
+        return form + widget.getLangDesc();
+    };
+    return widget;
+};
+
+var itextMediaWidget = function (url_type) {
+    return function (mug, language, form, options) {
+        options.baseWidgetClass = widgets.text;
+        var widget = itextFormWidget(mug, language, form, options);
 
         widget.getDefaultValue = function () {
+            if (jrUtil.SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
+                // default formats
+                // image: jr://file/commcare/image/form_id/question_id.png
+                // audio: jr://file/commcare/audio/form_id/question_id.mp3
+                var extension = DEFAULT_EXTENSIONS[form];
+                return widget.getBaseMediaPath() + "." + extension;
+            }
             return null;
         };
 
-        if (!widget.isDefaultLang) {
-            widget.mug.on('defaultLanguage-itext-changed', function (e) {
-                if (e.form === widget.form && e.itextType === widget.itextType) {
-                    if (widget.getItextValue() === e.prevValue) {
-                        // Make sure all the defaults keep in sync.
-                        // why doesn't setValue set the itext value?
-                        widget.setItextValue(e.value);
-                        widget.setValue(e.value);
-                    }
-                }
-            }, null, "teardown-mug-properties");
-        }
-
-        widget.refreshMessages = function () {
-            widget.getMessagesContainer()
-                .empty()
-                .append(widget.getMessages(mug, widget.id));
+        widget.getBaseMediaPath = function () {
+            return "jr://file/commcare/" + form + url_type +
+                   jrUtil.getDefaultItextRoot(widget.mug);
         };
 
-        widget.save = function () {
-            widget.setItextValue(widget.getValue());
-        };
+        widget.mug.form.vellum.initMediaUploaderWidget(widget);
 
         return widget;
     };
+};
 
-    var itextLabelWidget = function (mug, language, form, options) {
-        var widget = baseItextLabelWidget(mug, language, form, options),
-            super_handleChange = widget.handleChange;
-
-        widget.handleChange = function () {
-            var item = widget.getItextItem(),
-                before = item && item.get(widget.form, widget.language);
-            super_handleChange();
-            var after = item && item.get(widget.form, widget.language);
-            if (before !== after) {
-                // TODO fire event for every mug that has an itext item
-                // with the same ID as this itext item
-                mug.form.fire({
-                    type: 'question-label-text-change',
-                    mug: mug,
-                    text: after
-                });
-            }
-        };
-
-        return widget;
-    };
-
-    var itextMarkdownWidget = function (mug, language, form, options) {
-        options = options || {};
-        var parent = options.parent;
-        var widget = itextLabelWidget(mug, language, form, options),
-            super_setValue = widget.setValue,
-            super_getUIElement = widget.getUIElement,
-            super_handleChange = widget.handleChange,
-            wantsMarkdown = true,
-            supportMarkDownTables = options.vellum.opts().features.markdown_tables,
-            markdownOff, markdownOn, markdownOutput;
-
-        widget.toggleMarkdown = function() {
-            parent.toggleClass("has-markdown");
-            widget.mug.form.fire('change');
-        };
-
-        markdownOutput = $('<div>').addClass("controls well markdown-output col-sm-9");
-
-        if (util.isRightToLeftLanguage(options.language)) {
-            markdownOutput.attr('dir', 'rtl');
-        }
-
-        widget.handleChange = function() {
-            super_handleChange();
-            var val = widget.getValue(),
-                item = widget.getItextItem();
-            if (jrUtil.looksLikeMarkdown(val, supportMarkDownTables)) {
-                if (wantsMarkdown) {
-                    parent.removeClass("markdown-ignorant");
-                    parent.addClass("has-markdown");
-                }
-            } else if (!val) {
-                parent.removeClass("has-markdown");
-            }
-            item.hasMarkdown = markdownOff.is(":visible");
-            markdownOutput.html(util.markdown(val)).closest('.form-group').removeClass('hide');
-        };
-
-        widget.setValue = function (val, callback) {
-            super_setValue(val, callback);
-            if (!val) {
-                markdownOutput.closest('.form-group').addClass('hide');
-            }
-            markdownOutput.html(util.markdown(val));
-        };
-
-        widget.getUIElement = function() {
-            var elem = super_getUIElement(),
-                val = widget.getValue(),
-                markdownSpacer = $("<div />").addClass("col-sm-3"),
-                markdownContainer = $("<div />").addClass("col-sm-9"),
-                markdownRow = $("<div />").addClass("form-group").addClass("markdown-group");
-
-            elem.detach('.markdown-output');
-            markdownRow.append(markdownSpacer);
-            markdownContainer.append(markdownOutput);
-            markdownRow.append(markdownContainer);
-            elem.append(markdownRow);
-            elem.find('.control-label').append(markdown_help({title:options.lstring }));
-
-            markdownOff = elem.find('.turn-markdown-off').click(function() {
-                wantsMarkdown = false;
-                widget.getItextItem().hasMarkdown = false;
-                widget.toggleMarkdown();
-                return false;
-            });
-            markdownOn = elem.find('.turn-markdown-on').click(function() {
-                wantsMarkdown = true;
-                widget.getItextItem().hasMarkdown = true;
-                widget.toggleMarkdown();
-                return false;
-            });
-
-            if (widget.getItextItem().hasMarkdown) {
-                parent.addClass("has-markdown");
-            } else if (jrUtil.looksLikeMarkdown(val, supportMarkDownTables)) {
-                markdownOutput.html(util.markdown(val));
-                markdownOff.removeClass('hide');
-            } else {
-                parent.addClass("markdown-ignorant");
-            }
-            return elem;
-        };
-
-        return widget;
-    };
-
-    var itextFormWidget = function (mug, language, form, options) {
-        options = options || {};
-        options.idSuffix = "-" + form;
-        var widget = baseItextLabelWidget(mug, language, form, options);
-
-        widget.getDisplayName = function () {
-            return form + widget.getLangDesc();
-        };
-        return widget;
-    };
-
-    var itextMediaWidget = function (url_type) {
-        return function (mug, language, form, options) {
-            options.baseWidgetClass = widgets.text;
-            var widget = itextFormWidget(mug, language, form, options);
-
-            widget.getDefaultValue = function () {
-                if (jrUtil.SUPPORTED_MEDIA_TYPES.indexOf(form) !== -1) {
-                    // default formats
-                    // image: jr://file/commcare/image/form_id/question_id.png
-                    // audio: jr://file/commcare/audio/form_id/question_id.mp3
-                    var extension = DEFAULT_EXTENSIONS[form];
-                    return widget.getBaseMediaPath() + "." + extension;
-                }
-                return null;
-            };
-
-            widget.getBaseMediaPath = function () {
-                return "jr://file/commcare/" + form + url_type +
-                       jrUtil.getDefaultItextRoot(widget.mug);
-            };
-
-            widget.mug.form.vellum.initMediaUploaderWidget(widget);
-
-            return widget;
-        };
-    };
-
-    return {
-        form: itextFormWidget,
-        id: iTextIDWidget,
-        label: itextLabelWidget,
-        markdown: itextMarkdownWidget,
-        media: itextMediaWidget,
-    };
-});
+export default {
+    form: itextFormWidget,
+    id: iTextIDWidget,
+    label: itextLabelWidget,
+    markdown: itextMarkdownWidget,
+    media: itextMediaWidget,
+};
