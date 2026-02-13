@@ -1366,8 +1366,7 @@ var ReadOnly = util.extend(defaultOptions, {
     }
 });
 
-/* jshint -W079 */
-var Text = util.extend(defaultOptions, {
+var TextField = util.extend(defaultOptions, {
     typeName: gettext("Text"),
     dataType: "xsd:string",
     icon: "fcc fcc-fd-text",
@@ -1375,11 +1374,11 @@ var Text = util.extend(defaultOptions, {
     }
 });
 
-var PhoneNumber = util.extend(Text, {
+var PhoneNumber = util.extend(TextField, {
     typeName: gettext('Phone Number or Numeric ID'),
     icon: 'fa fa-signal',
     init: function (mug, form) {
-        Text.init(mug, form);
+        TextField.init(mug, form);
         mug.p.appearance = "numeric";
     },
     changeTypeTransform: function (mug) {
@@ -1405,8 +1404,7 @@ var Int = util.extend(defaultOptions, {
     }
 });
 
-/* jshint -W079 */
-var Audio = util.extend(defaultOptions, {
+var AudioField = util.extend(defaultOptions, {
     typeName: gettext('Audio Capture'),
     dataType: 'binary',
     tagName: 'upload',
@@ -1418,8 +1416,7 @@ var Audio = util.extend(defaultOptions, {
     },
 });
 
-/* jshint -W079 */
-var Image = util.extend(Audio, {
+var ImageField = util.extend(AudioField, {
     typeName: gettext('Image Capture'),
     icon: 'fa fa-camera',
     mediaType: "image/*",
@@ -1444,38 +1441,38 @@ var Image = util.extend(Audio, {
         }
     },
     writeCustomXML: function (xmlWriter, mug) {
-        Audio.writeCustomXML(xmlWriter, mug);
+        AudioField.writeCustomXML(xmlWriter, mug);
         if (mug.__className === "Image" && mug.p.imageSize) {
             xmlWriter.writeAttributeString("jr:imageDimensionScaledMax", mug.p.imageSize + "px");
         }
     },
     init: function (mug, form) {
-        Audio.init(mug, form);
+        AudioField.init(mug, form);
         if (mug.p.imageSize !== "") {
             mug.p.imageSize = mug.p.imageSize || 250;
         }
     }
 });
 
-var MicroImage = util.extend(Audio, {
+var MicroImage = util.extend(AudioField, {
     typeName: gettext('Micro-Image'),
     isTypeChangeable: false,
     icon: 'fa fa-camera',
     tagName: 'input',
     mediaType: "image/*",
     init: function (mug, form) {
-        Audio.init(mug, form);
+        AudioField.init(mug, form);
         mug.p.appearance = "micro-image";
     }
 });
 
-var Video = util.extend(Audio, {
+var Video = util.extend(AudioField, {
     typeName: gettext('Video Capture'),
     icon: 'fa fa-video-camera',
     mediaType: "video/*",
 });
 
-var Signature = util.extend(Image, {
+var Signature = util.extend(ImageField, {
     typeName: gettext('Signature Capture'),
     icon: 'fcc fcc-fd-signature',
     spec: {
@@ -1484,7 +1481,7 @@ var Signature = util.extend(Image, {
         }
     },
     init: function (mug, form) {
-        Image.init(mug, form);
+        ImageField.init(mug, form);
         mug.p.appearance = "signature";
     },
     changeTypeTransform: function (mug) {
@@ -1492,8 +1489,7 @@ var Signature = util.extend(Image, {
     },
 });
 
-/* jshint -W079 */
-var Document = util.extend(Audio, {
+var DocumentField = util.extend(AudioField, {
     typeName: gettext('Document Upload'),
     icon: 'fa fa-file',
     mediaType: "application/*,text/*",
@@ -1515,8 +1511,7 @@ var Barcode = util.extend(defaultOptions, {
     }
 });
 
-/* jshint -W079 */
-var Date = util.extend(defaultOptions, {
+var DateField = util.extend(defaultOptions, {
     typeName: gettext('Date'),
     dataType: 'xsd:date',
     icon: 'fa-solid fa-calendar-days',
@@ -1917,17 +1912,17 @@ export default {
     defaultOptions: defaultOptions,
     baseMugTypes: {
         normal: {
-            "Audio": Audio,
+            "Audio": AudioField,
             "Barcode": Barcode,
             "DataBindOnly": DataBindOnly,
-            "Date": Date,
+            "Date": DateField,
             "DateTime": DateTime,
-            "Document": Document,
+            "Document": DocumentField,
             "Double": Double,
             "FieldList": FieldList,
             "Geopoint": Geopoint,
             "Group": Group,
-            "Image": Image,
+            "Image": ImageField,
             "MicroImage": MicroImage,
             "Int": Int,
             "Long": Long,
@@ -1938,7 +1933,7 @@ export default {
             "Secret": Secret,
             "Select": Select,
             "Signature": Signature,
-            "Text": Text,
+            "Text": TextField,
             "Time": Time,
             "Trigger": Trigger,
             "Video": Video
