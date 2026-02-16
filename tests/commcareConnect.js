@@ -2,6 +2,7 @@ import util from "tests/utils";
 import chai from "chai";
 import LEARN_MODULE_XML from "static/commcareConnect/learn_module.xml";
 import ASSESSMENT_XML from "static/commcareConnect/assessment.xml";
+import TASK_XML from "static/commcareConnect/task_module.xml";
 import DELIVER_XML from "static/commcareConnect/deliver.xml";
 
 var assert = chai.assert,
@@ -55,6 +56,18 @@ describe("The CommCareConnect", function() {
             assert.equal(module.p.entity_name, "/data/name");
             assert.equal(module.p.relevantAttr, "x = 1");
             util.assertXmlEqual(call("createXML"), DELIVER_XML);
+        });
+    });
+
+    describe("task module", function () {
+        it("should load and save", function () {
+            util.loadXML(TASK_XML);
+            var task = util.getMug("task_1");
+            assert.equal(task.__className, "ConnectTask");
+            assert.equal(task.p.name, "task 1");
+            assert.equal(task.p.description, "Task 1 is fun\nLearning is still fun");
+            assert.equal(task.p.relevantAttr, "x = 3");
+            util.assertXmlEqual(call("createXML"), TASK_XML);
         });
     });
 });
