@@ -1,14 +1,18 @@
 /* global console */
-define(["underscore"], function (_) {
-    if (_.isUndefined(console)) {
-        return {
-            log: function () {},
-            error: function () {}
-        };
-    } else {
-        return {
-            log: function () { console.log.apply(console, arguments); },
-            error: function () { console.error.apply(console, arguments); }
-        };
-    }
-});
+import _ from "underscore";
+
+let debugutil;
+
+if (_.isUndefined(console)) {
+    debugutil = {
+        log: function () {},
+        error: function () {}
+    };
+} else {
+    debugutil = {
+        log: function () { console.log.apply(console, arguments); },
+        error: function () { console.error.apply(console, arguments); }
+    };
+}
+
+export default debugutil;

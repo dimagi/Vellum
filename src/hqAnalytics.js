@@ -1,10 +1,7 @@
-define([], function() {
+var noop = function() {};
 
-    var noop = function() {};
-
-    return {
-        fbUsage: noop,
-        usage: noop,
-        workflow: noop,
-    };
-});
+export default {
+    fbUsage: noop,
+    usage: noop,
+    workflow: noop,
+};
