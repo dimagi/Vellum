@@ -30,7 +30,6 @@ describe("The exporter", function () {
             },
             features: {
                 rich_text: false,
-                case_micro_image: true,
                 use_custom_repeat_button_text: true,
             },
         });
