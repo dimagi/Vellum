@@ -154,10 +154,6 @@ var call = util.call,
             path: 'question22/question23/',
             nodeId: 'question7'
         }, {
-            type: 'MicroImage',
-            path: 'question22/question23/',
-            nodeId: 'question35',
-        }, {
             clickBeforeAdd: "question19", // insert before question22
             type: 'Group',
             nodeId: 'question21'
@@ -181,9 +177,7 @@ describe("Vellum", function () {
                         done();
                     }
                 },
-                features: { case_micro_image: true,
-                            use_custom_repeat_button_text: true,
-                 }
+                features: { use_custom_repeat_button_text: true }
             });
         });
 
@@ -729,12 +723,4 @@ describe("Select questions", function () {
     });
 });
 
-describe("Micro-Image question", function () {
-    it("should have correct options set", function () {
-        util.loadXML("");
-        var microImage = util.addQuestion("MicroImage", "microimage");
-        assert.strictEqual(microImage.options.mediaType, 'image/*');
-        assert.strictEqual(microImage.options.tagName, 'input');
-        assert.strictEqual(microImage.p.appearance, 'micro-image');
-    });
-});
+
