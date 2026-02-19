@@ -1817,7 +1817,7 @@ function MugTypesManager(baseSpec, mugTypes, opts) {
     var _this = this,
         // Nestable Field List not supported in CommCare before v2.16
         group_in_field_list = opts.features.group_in_field_list;
-    Image.resize_enabled = opts.features.image_resize;
+    ImageField.resize_enabled = opts.features.image_resize;
 
     this.auxiliaryTypes = mugTypes.auxiliary;
     this.normalTypes = mugTypes.normal;
