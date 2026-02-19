@@ -1454,18 +1454,6 @@ var ImageField = util.extend(AudioField, {
     }
 });
 
-var MicroImage = util.extend(AudioField, {
-    typeName: gettext('Micro-Image'),
-    isTypeChangeable: false,
-    icon: 'fa fa-camera',
-    tagName: 'input',
-    mediaType: "image/*",
-    init: function (mug, form) {
-        AudioField.init(mug, form);
-        mug.p.appearance = "micro-image";
-    }
-});
-
 var Video = util.extend(AudioField, {
     typeName: gettext('Video Capture'),
     icon: 'fa fa-video-camera',
@@ -1923,7 +1911,6 @@ export default {
             "Geopoint": Geopoint,
             "Group": Group,
             "Image": ImageField,
-            "MicroImage": MicroImage,
             "Int": Int,
             "Long": Long,
             "MSelect": MSelect,

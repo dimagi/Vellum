@@ -326,10 +326,6 @@ fn.getQuestionGroups = function () {
         mediaGroup.questions.push("Document");
     }
 
-    if (this.opts().features.case_micro_image) {
-        mediaGroup.questions.push("MicroImage");
-    }
-
     return [
         {
             group: ["Text"],
