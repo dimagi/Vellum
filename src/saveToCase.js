@@ -26,13 +26,9 @@ function indexesCase(mug) {
     return mug ? mug.p.useIndex : false;
 }
 
-function attachmentCase(mug) {
-    return mug ? mug.p.useAttachment : false;
-}
-
 function usesCases(mug) {
     return createsCase(mug) || closesCase(mug) || updatesCase(mug) ||
-        indexesCase(mug) || attachmentCase(mug);
+        indexesCase(mug);
 }
 
 var propertyWidget = function (mug, options) {
@@ -128,7 +124,7 @@ var propertyWidget = function (mug, options) {
         };
 
         return widget;
-    },
+    };
 
 var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
     VALID_PROP_REGEX = /^[a-z0-9_-]+$/i,
@@ -294,57 +290,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     return 'pass';
                 }
             },
-            useAttachment: {
-                lstring: gettext("Use Attachments"),
-                visibility: 'visible',
-                presence: 'optional',
-                widget: widgets.checkbox
-            },
-            attachmentProperty: {
-                lstring: gettext("Attachment Properties"),
-                visibility: 'visible',
-                presence: 'optional',
-                widget: attachmentCaseWidget,
-                validationFunc: function (mug) {
-                    if (!mug.p.useAttachment) {
-                        return "pass";
-                    }
-
-                    var props = _.without(_.keys(mug.p.attachmentProperty), ""),
-                        invalidProps = _.filter(props, function(p) {
-                            return !VALID_PROP_REGEX.test(p);
-                        }),
-                        invalidFroms = _.filter(props, function(p) {
-                            return !_.contains(['local', 'remote', 'inline'],
-                                               mug.p.attachmentProperty[p].from);
-                        }),
-                        invalidInlines = _.filter(props, function(p) {
-                            var prop = mug.p.attachmentProperty[p],
-                                from = prop.from,
-                                name = prop.name;
-                            return from === 'inline' && !name;
-                        });
-
-                    if (invalidProps.length > 0) {
-                        return util.format(
-                            gettext("{props} are invalid properties"),
-                            {props: invalidProps.join(", ")}
-                        );
-                    }
-
-                    if (invalidFroms.length > 0) {
-                        return gettext("The from attribute must be one of: " +
-                            "local, remote, or inline");
-                    }
-                    
-                    if (invalidInlines.length > 0) {
-                        return gettext("Inlined attachments must have an " +
-                            "attachment name");
-                    }
-
-                    return "pass";
-                }
-            }
         },
         getExtraDataAttributes: function (mug) {
             return {
