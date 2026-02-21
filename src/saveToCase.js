@@ -341,12 +341,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                                                     ['case_type', 'relationship'])));
             }
 
-            if (attachmentCase(mug)) {
-                actions.push(simpleNode('attachment', 
-                                        makeColumns(mug.p.attachmentProperty, 
-                                                    ['from', 'name'])));
-            }
-
             return [new Tree.Node(actions, {
                 getNodeID: function () { return "case"; },
                 p: {rawDataAttributes: null},
@@ -395,19 +389,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
             if (indexesCase(mug)) {
                 ret = ret.concat(generateBinds('index', mug.p.indexProperty));
             }
-            if (attachmentCase(mug)) {
-                ret = ret.concat(
-                    _.chain(mug.p.attachmentProperty)
-                     .omit("")
-                     .map(function(v, k) {
-                         return {
-                             nodeset: mug.absolutePath + "/case/attachment/" + k + "/@src",
-                             calculate: v.calculate
-                         };
-                     }).value()
-                );
-            }
-
             if (usesCases(mug)) {
                 ret.push({
                     nodeset: mug.absolutePath + "/case/@date_modified",
