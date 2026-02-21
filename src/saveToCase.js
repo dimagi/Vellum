@@ -7,7 +7,6 @@ import atwho from "vellum/atwho";
 import widgets from "vellum/widgets";
 import widget_update_case from "vellum/templates/widget_update_case.html";
 import widget_index_case from "vellum/templates/widget_index_case.html";
-import widget_attach_case from "vellum/templates/widget_attachment_case.html";
 import widget_save_to_case from "vellum/templates/widget_save_to_case.html";
 import "vellum/core";
 
@@ -130,25 +129,6 @@ var propertyWidget = function (mug, options) {
 
         return widget;
     },
-    attachmentCaseWidget = function (mug, options) {
-        options.template = widget_attach_case;
-        var widget = propertyWidget(mug, options);
-
-        widget.getValue = function () {
-            var currentValues = {};
-            _.each(widget.input.find('.fd-attachment-property'), function (kvPair) {
-                var $pair = $(kvPair);
-                currentValues[$pair.find('.fd-attachment-property-name').val()] = {
-                    calculate: $pair.find('.fd-attachment-property-source').val(),
-                    from: $pair.find('.fd-attachment-property-from').val(),
-                    name: $pair.find('.fd-attachment-name').val(),
-                };
-            });
-            return currentValues;
-        };
-
-        return widget;
-    };
 
 var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
     VALID_PROP_REGEX = /^[a-z0-9_-]+$/i,
@@ -627,17 +607,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 ],
                 isCollapsed: function (mug) {
                     return !indexesCase(mug);
-                },
-            },
-            {
-                slug: "attachment",
-                displayName: gettext("Attachments"),
-                properties: [
-                    "useAttachment",
-                    "attachmentProperty",
-                ],
-                isCollapsed: function (mug) {
-                    return !attachmentCase(mug);
                 },
             },
         ]
