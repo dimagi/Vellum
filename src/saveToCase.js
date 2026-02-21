@@ -415,8 +415,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 create = case_.find('create'),
                 close = case_.find('close'),
                 update = case_.find('update'),
-                index = case_.find('index'),
-                attach = case_.find('attachment');
+                index = case_.find('index');
             if (case_type) {
                 mug.p.case_type = case_type;
             }
@@ -437,19 +436,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     mug.p.indexProperty[prop.prop('tagName')] = {
                         case_type: prop.xmlAttr('case_type'),
                         relationship: prop.xmlAttr('relationship')
-                    };
-                });
-            }
-            if (attach && attach.length !== 0) {
-                mug.p.useAttachment = true;
-                if (!mug.p.attachmentProperty) {
-                    mug.p.attachmentProperty = {};
-                }
-                _.each(attach.children(), function(child) {
-                    var prop = $(child);
-                    mug.p.attachmentProperty[prop.prop('tagName')] = {
-                        from: prop.xmlAttr('from'),
-                        name: prop.xmlAttr('name')
                     };
                 });
             }
@@ -593,7 +579,6 @@ $.vellum.plugin("saveToCase", {}, {
                                 create: "createProperty",
                                 update: "updateProperty",
                                 index: "indexProperty",
-                                attachment: "attachmentProperty",
                             }[matchRet[1]];
 
                         if (!mug.p[pKey]) {
@@ -639,21 +624,6 @@ $.vellum.plugin("saveToCase", {}, {
                 }
             }
             
-            var attachmentRegex = /\/case\/attachment\/(\w+)\/@src$/,
-                attachRet = path.match(attachmentRegex);
-            if (attachRet) {
-                basePath = path.replace(attachmentRegex, "");
-                mug = form.getMugByPath(basePath);
-                if (mug && mug.__className === "SaveToCase") {
-                    var attachProperties = mug.p.attachmentProperty,
-                        nodeName = attachRet[1];
-                    if (!attachProperties[nodeName]) {
-                        attachProperties[nodeName] = {};
-                    }
-                    mug.p.attachmentProperty[nodeName].calculate = el.xmlAttr('calculate');
-                    return;
-                }
-            }
         }
         this.__callOld();
     }
