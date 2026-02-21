@@ -6,7 +6,6 @@ import CREATE_PROPERTY_XML from "static/saveToCase/create_property.xml";
 import CLOSE_PROPERTY_XML from "static/saveToCase/close_property.xml";
 import UPDATE_PROPERTY_XML from "static/saveToCase/update_property.xml";
 import INDEX_PROPERTY_XML from "static/saveToCase/index_property.xml";
-import ATTACHMENT_PROPERTY_XML from "static/saveToCase/attachment_property.xml";
 import CASE_TYPE_PROPERTY_XML from "static/saveToCase/case_type_property.xml";
 import CREATE_2_PROPERTY_XML from "static/saveToCase/create_2_property.xml";
 import LOGIC_TEST_XML from "static/saveToCase/logic_test.xml";
@@ -85,23 +84,6 @@ describe("The SaveToCase module", function() {
         util.assertXmlEqual(call("createXML"), INDEX_PROPERTY_XML);
     });
 
-    it("should load and save a attachment property", function () {
-        util.loadXML(ATTACHMENT_PROPERTY_XML);
-        var attach = util.getMug("save_to_case");
-        assert.equal(attach.p.useAttachment, true);
-        assert(_.isEqual(attach.p.attachmentProperty, {
-            attach: {
-                calculate: "/data/question1",
-                from: "local",
-                name: "name",
-            }
-        }));
-        assert.equal(attach.p.date_modified, '/data/meta/timeEnd');
-        assert.equal(attach.p.user_id, "/data/meta/userID");
-        assert.equal(attach.p.case_id, "/data/meta/caseID");
-        util.assertXmlEqual(call("createXML"), ATTACHMENT_PROPERTY_XML);
-    });
-
     it("should load and save the case type property", function () {
         util.loadXML(CASE_TYPE_PROPERTY_XML);
         var create = util.getMug("save_to_case");
@@ -115,87 +97,6 @@ describe("The SaveToCase module", function() {
             two = util.getMug("two/save");
         assert.equal(one.p.case_id, 'uuid()', 'one');
         assert.equal(two.p.case_id, 'uuid()', 'two');
-    });
-
-    describe("should not allow", function () {
-        var mug, spec;
-        before(function (done) {
-            util.init({
-                javaRosa: {langs: ['en']},
-                core: {
-                    onReady: function() {
-                        mug = util.addQuestion("SaveToCase", "mug");
-                        spec = mug.spec.attachmentProperty;
-                        done();
-                    }
-                },
-            });
-        });
-
-        _.each({
-            "inline attachments with no name": {
-                inline_prop: {
-                    calculate: "/data/question1",
-                    from: "inline",
-                }
-            },
-            "invalid from strings": {
-                from_strings: {
-                    calculate: "/data/question1",
-                    from: "blah"
-                }
-            },
-        }, function(v, k) {
-            it("should validate " + k, function() {
-                mug.p.useAttachment = true;
-                mug.p.attachmentProperty = v;
-                assert.notEqual(spec.validationFunc(mug), "pass");
-            });
-        });
-    });
-
-    describe("should allow", function() {
-        var mug, spec;
-        before(function (done) {
-            util.init({
-                javaRosa: {langs: ['en']},
-                core: {
-                    onReady: function() {
-                        mug = util.addQuestion("SaveToCase", "mug");
-                        spec = mug.spec.attachmentProperty;
-                        done();
-                    }
-                },
-            });
-        });
-
-        _.each({
-            "inline attachments": {
-                inline_prop: {
-                    calculate: "/data/question1",
-                    from: "inline",
-                    name: "test",
-                }
-            },
-            "from strings": {
-                from_strings: {
-                    calculate: "/data/question1",
-                    from: "local"
-                }
-            },
-            "hyphenated properties": {
-                "hyphen-props": {
-                    calculate: "/data/question1",
-                    from: "local"
-                }
-            }
-        }, function(v, k) {
-            it("should validate " + k, function() {
-                mug.p.useAttachment = true;
-                mug.p.attachmentProperty = v;
-                assert.equal(spec.validationFunc(mug), "pass");
-            });
-        });
     });
 
     it("should load 2 create setvalues", function () {

@@ -7,7 +7,6 @@ import atwho from "vellum/atwho";
 import widgets from "vellum/widgets";
 import widget_update_case from "vellum/templates/widget_update_case.html";
 import widget_index_case from "vellum/templates/widget_index_case.html";
-import widget_attach_case from "vellum/templates/widget_attachment_case.html";
 import widget_save_to_case from "vellum/templates/widget_save_to_case.html";
 import "vellum/core";
 
@@ -27,13 +26,9 @@ function indexesCase(mug) {
     return mug ? mug.p.useIndex : false;
 }
 
-function attachmentCase(mug) {
-    return mug ? mug.p.useAttachment : false;
-}
-
 function usesCases(mug) {
     return createsCase(mug) || closesCase(mug) || updatesCase(mug) ||
-        indexesCase(mug) || attachmentCase(mug);
+        indexesCase(mug);
 }
 
 var propertyWidget = function (mug, options) {
@@ -123,25 +118,6 @@ var propertyWidget = function (mug, options) {
                     calculate: $pair.find('.fd-index-property-source').val(),
                     case_type: $pair.find('.fd-index-property-case-type').val(),
                     relationship: $pair.find('.fd-index-property-relationship').val(),
-                };
-            });
-            return currentValues;
-        };
-
-        return widget;
-    },
-    attachmentCaseWidget = function (mug, options) {
-        options.template = widget_attach_case;
-        var widget = propertyWidget(mug, options);
-
-        widget.getValue = function () {
-            var currentValues = {};
-            _.each(widget.input.find('.fd-attachment-property'), function (kvPair) {
-                var $pair = $(kvPair);
-                currentValues[$pair.find('.fd-attachment-property-name').val()] = {
-                    calculate: $pair.find('.fd-attachment-property-source').val(),
-                    from: $pair.find('.fd-attachment-property-from').val(),
-                    name: $pair.find('.fd-attachment-name').val(),
                 };
             });
             return currentValues;
@@ -314,57 +290,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     return 'pass';
                 }
             },
-            useAttachment: {
-                lstring: gettext("Use Attachments"),
-                visibility: 'visible',
-                presence: 'optional',
-                widget: widgets.checkbox
-            },
-            attachmentProperty: {
-                lstring: gettext("Attachment Properties"),
-                visibility: 'visible',
-                presence: 'optional',
-                widget: attachmentCaseWidget,
-                validationFunc: function (mug) {
-                    if (!mug.p.useAttachment) {
-                        return "pass";
-                    }
-
-                    var props = _.without(_.keys(mug.p.attachmentProperty), ""),
-                        invalidProps = _.filter(props, function(p) {
-                            return !VALID_PROP_REGEX.test(p);
-                        }),
-                        invalidFroms = _.filter(props, function(p) {
-                            return !_.contains(['local', 'remote', 'inline'],
-                                               mug.p.attachmentProperty[p].from);
-                        }),
-                        invalidInlines = _.filter(props, function(p) {
-                            var prop = mug.p.attachmentProperty[p],
-                                from = prop.from,
-                                name = prop.name;
-                            return from === 'inline' && !name;
-                        });
-
-                    if (invalidProps.length > 0) {
-                        return util.format(
-                            gettext("{props} are invalid properties"),
-                            {props: invalidProps.join(", ")}
-                        );
-                    }
-
-                    if (invalidFroms.length > 0) {
-                        return gettext("The from attribute must be one of: " +
-                            "local, remote, or inline");
-                    }
-                    
-                    if (invalidInlines.length > 0) {
-                        return gettext("Inlined attachments must have an " +
-                            "attachment name");
-                    }
-
-                    return "pass";
-                }
-            }
         },
         getExtraDataAttributes: function (mug) {
             return {
@@ -416,12 +341,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                                                     ['case_type', 'relationship'])));
             }
 
-            if (attachmentCase(mug)) {
-                actions.push(simpleNode('attachment', 
-                                        makeColumns(mug.p.attachmentProperty, 
-                                                    ['from', 'name'])));
-            }
-
             return [new Tree.Node(actions, {
                 getNodeID: function () { return "case"; },
                 p: {rawDataAttributes: null},
@@ -470,19 +389,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
             if (indexesCase(mug)) {
                 ret = ret.concat(generateBinds('index', mug.p.indexProperty));
             }
-            if (attachmentCase(mug)) {
-                ret = ret.concat(
-                    _.chain(mug.p.attachmentProperty)
-                     .omit("")
-                     .map(function(v, k) {
-                         return {
-                             nodeset: mug.absolutePath + "/case/attachment/" + k + "/@src",
-                             calculate: v.calculate
-                         };
-                     }).value()
-                );
-            }
-
             if (usesCases(mug)) {
                 ret.push({
                     nodeset: mug.absolutePath + "/case/@date_modified",
@@ -509,8 +415,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 create = case_.find('create'),
                 close = case_.find('close'),
                 update = case_.find('update'),
-                index = case_.find('index'),
-                attach = case_.find('attachment');
+                index = case_.find('index');
             if (case_type) {
                 mug.p.case_type = case_type;
             }
@@ -531,19 +436,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     mug.p.indexProperty[prop.prop('tagName')] = {
                         case_type: prop.xmlAttr('case_type'),
                         relationship: prop.xmlAttr('relationship')
-                    };
-                });
-            }
-            if (attach && attach.length !== 0) {
-                mug.p.useAttachment = true;
-                if (!mug.p.attachmentProperty) {
-                    mug.p.attachmentProperty = {};
-                }
-                _.each(attach.children(), function(child) {
-                    var prop = $(child);
-                    mug.p.attachmentProperty[prop.prop('tagName')] = {
-                        from: prop.xmlAttr('from'),
-                        name: prop.xmlAttr('name')
                     };
                 });
             }
@@ -629,17 +521,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     return !indexesCase(mug);
                 },
             },
-            {
-                slug: "attachment",
-                displayName: gettext("Attachments"),
-                properties: [
-                    "useAttachment",
-                    "attachmentProperty",
-                ],
-                isCollapsed: function (mug) {
-                    return !attachmentCase(mug);
-                },
-            },
         ]
     };
 
@@ -698,7 +579,6 @@ $.vellum.plugin("saveToCase", {}, {
                                 create: "createProperty",
                                 update: "updateProperty",
                                 index: "indexProperty",
-                                attachment: "attachmentProperty",
                             }[matchRet[1]];
 
                         if (!mug.p[pKey]) {
@@ -744,21 +624,6 @@ $.vellum.plugin("saveToCase", {}, {
                 }
             }
             
-            var attachmentRegex = /\/case\/attachment\/(\w+)\/@src$/,
-                attachRet = path.match(attachmentRegex);
-            if (attachRet) {
-                basePath = path.replace(attachmentRegex, "");
-                mug = form.getMugByPath(basePath);
-                if (mug && mug.__className === "SaveToCase") {
-                    var attachProperties = mug.p.attachmentProperty,
-                        nodeName = attachRet[1];
-                    if (!attachProperties[nodeName]) {
-                        attachProperties[nodeName] = {};
-                    }
-                    mug.p.attachmentProperty[nodeName].calculate = el.xmlAttr('calculate');
-                    return;
-                }
-            }
         }
         this.__callOld();
     }
