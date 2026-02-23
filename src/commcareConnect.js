@@ -288,6 +288,57 @@ let mugConfigs = {
             }),
             _.clone(logicSection),
         ],
+    },
+    ConnectTask: {
+        rootName: "task",
+        childNodes: [
+            {id: "name", writeToData: true},
+            {id: "description", writeToData: true},
+        ],
+        mugOptions: util.extend(baseMugOptions, {
+            typeName: 'Task',
+            icon: 'fa fa-tasks',
+            init: mug => {
+                mug.p.name = "";
+                mug.p.description = "";
+            },
+            spec: util.extend(baseSpec, {
+                nodeID: {
+                    lstring: gettext('Task ID'),
+                },
+                name: {
+                    lstring: gettext("Name"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.text,
+                },
+                description: {
+                    lstring: gettext("Description"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.richTextarea,
+                },
+                relevantAttr: {
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    xpathType: "bool",
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    lstring: gettext('Display Condition'),
+                }
+            })
+        }),
+        sections: [
+            _.extend({}, baseSection, {
+                properties: [
+                    "nodeID",
+                    "name",
+                    "description",
+                ],
+            }),
+            _.clone(logicSection),
+        ],
     }
 };
 
