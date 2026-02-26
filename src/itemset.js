@@ -557,8 +557,11 @@ function refWidget(mug, options) {
 
 function validateRefWidget(attr) {
     return function(mug) {
+        var mugAttr = mug.p[attr];
+        if (!mugAttr) {
+            return 'pass';
+        }
         var itemsetData = mug.p.itemsetData,
-            mugAttr = mug.p[attr],
             instance = itemsetData.instance,
             instanceSrc = instance ? instance.src : '',
             sources = getDataSources(mug),
