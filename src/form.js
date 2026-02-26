@@ -701,7 +701,11 @@ Form.prototype = {
             error.mug.fixSerializationWarnings(error.errors);
         });
     },
-    isFormValid: function (validateMug) {
+    isFormValid: function () {
+        var validateMug = function (mug) {
+            mug.validate();
+            return !mug.hasErrors();
+        };
         return this.tree.isTreeValid(validateMug);
     },
     findFirstMatchingChild: function (parentMug, match) {

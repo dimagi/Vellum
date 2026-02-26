@@ -657,13 +657,9 @@ fn._resizeFullScreenModal = function($modal) {
 };
 
 fn.showSourceXMLModal = function (done) {
-    function validateMug(mug) {
-        mug.validate();
-        return !mug.hasErrors();
-    }
     var _this = this,
         $modal, $updateForm, $textarea, codeMirror,
-        warn = !this.data.core.form.isFormValid(validateMug) ?
+        warn = !this.data.core.form.isFormValid() ?
             " <i class='fd-valid-alert-icon fa fa-warning'></i> " +
             gettext("Validation failed. Form may not perform correctly on your device!") :
             "";
