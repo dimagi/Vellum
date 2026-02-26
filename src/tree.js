@@ -170,19 +170,20 @@ Node.prototype = {
         }
         return (parentPath ? parentPath : '') + '/' + name;
     },
-    validateTree: function (validateValue) {
-        var i, childResult;
-        if(!this.getValue()){
+    validateTree: function () {
+        var mug = this.getValue(),
+            i, childResult;
+        if (!mug) {
             throw 'Tree contains node with no values!';
         }
-        if (!validateValue(this.getValue())) {
+        mug.validate();
+        if (mug.hasErrors()) {
             return false;
         }
-
         for (i in this.getChildren()) {
             if (this.getChildren().hasOwnProperty(i)) {
-                childResult = this.getChildren()[i].validateTree(validateValue);
-                if(!childResult){
+                childResult = this.getChildren()[i].validateTree();
+                if (!childResult) {
                     return false;
                 }
             }
@@ -413,15 +414,11 @@ Tree.prototype = {
         this.rootNode.walk(callback);
     },
     isTreeValid: function () {
-        function validateMug(mug) {
-            mug.validate();
-            return !mug.hasErrors();
-        }
         var rChildren = this.rootNode.getChildren(),
             i, retVal;
         for (i in rChildren) {
             if (rChildren.hasOwnProperty(i)) {
-                retVal = rChildren[i].validateTree(validateMug);
+                retVal = rChildren[i].validateTree();
                 if (!retVal) {
                     return false;
                 }
