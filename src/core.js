@@ -697,8 +697,7 @@ fn.showSourceXMLModal = function (done) {
 
     // populate text
     if(!this.data.core.formLoadingFailed){
-        // generate presentation XML
-            $textarea.val(this.createXML(true));
+        $textarea.val(this.createXML({withCaseMappings: true}));
     } else {
         $textarea.val(this.data.core.failedLoadXML);
     }
@@ -1404,7 +1403,7 @@ fn.loadXFormOrError = function (formString, done, updateSaveButton) {
     }, this.opts().core.loadDelay);
 };
 
-fn.loadXML = function (formXML, options, parserOptions) {
+fn.loadXML = function (formXML, options) {
     var form, _this = this, selectedHashtag = window.location.hash;
     _this.data.core.$tree.children().children().each(function (i, el) {
         _this.jstree("delete_node", el);
@@ -1418,7 +1417,7 @@ fn.loadXML = function (formXML, options, parserOptions) {
         this.data.core.form.disconnectDataSources();
     }
     this.data.core.form = form = parser.parseXForm(
-        formXML, options, this, _this.data.core.parseWarnings, parserOptions);
+        formXML, options, this, _this.data.core.parseWarnings);
     this.onXFormLoaded(form);
     if (formXML) {
         _this._resetMessages(_this.data.core.form.errors);
@@ -2190,8 +2189,8 @@ fn.setTreeActions = function(mug) {
     }
 };
 
-fn.createXML = function (addPresentationXML) {
-    return this.data.core.form.createXML(addPresentationXML);
+fn.createXML = function (options) {
+    return this.data.core.form.createXML(options);
 };
 
 fn.canSerializeXForm = function (forAction, retry) {
@@ -2299,9 +2298,7 @@ fn.send = function (formText, saveType) {
     }
 
     data = saveType === 'patch' ? {patch: patch} : {xform: formText};
-
     data = this.augmentSentData(data, saveType);
-
     data.case_references = JSON.stringify(this.data.core.form._logicManager.caseReferences());
     if (checkForConflict) {
         data.sha1 = CryptoJS.SHA1(this.data.core.lastSavedXForm).toString();
@@ -2549,7 +2546,7 @@ fn.parseSetValue = function (form, el, path) {
  * @param {Form} form - The form instance being loaded.
  * @param xml - The parsed XML object
  */
-fn.performAdditionalParsing = function (form, xml, parserOptions) {};
+fn.performAdditionalParsing = function (form, xml) {};
 
 fn.getControlNodeAdaptorFactory = function (tagName) {
     return this.data.core.controlNodeAdaptorMap[tagName];
@@ -2604,14 +2601,6 @@ fn.onFormSave = function (data) {
 fn.augmentSentData = function (data, saveType) {
     return data;
 };
-
-/**
- * Extension point for plugins to add arbitrary XML beneath the body element
- *
- * @param {XMLWriter} xmlWriter - The writer, having already written the head and body elements
- * @param {Form} form  - The form instance
- */
-fn.contributeToAdditionalXML = function (xmlWriter, form) {};
 
 fn.initMediaUploaderWidget = function (widget) {};
 

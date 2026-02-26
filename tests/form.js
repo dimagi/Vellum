@@ -523,8 +523,7 @@ describe("The form component", function() {
         it('should use default name when no other name is specified', function() {
             var form = util.loadXML(
                     _.template(NAME_TEMPLATE)({title: '', dataName: ''}),
-                    null,
-                    /^Form does not have a Name!/
+                    {ignoreParseWarnings: /^Form does not have a Name!/},
                 ),
                 xml = util.parseXML(call('createXML'));
             assert.equal(form.formName, "New Form");

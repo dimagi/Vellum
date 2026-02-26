@@ -627,8 +627,8 @@ Form.prototype = {
             type: 'change'
         });
     },
-    createXML: function (addPresentationXML) {
-        return writer.createXForm(this, addPresentationXML);
+    createXML: function (options) {
+        return writer.createXForm(this, options);
     },
 
     /**
@@ -841,7 +841,6 @@ Form.prototype = {
                 this.moveMug(conflict, "rename", oldId);
             }
         }
-
         return updates;
     },
     changeMugType: function (mug, questionType) {

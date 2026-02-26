@@ -304,10 +304,9 @@ $.vellum.plugin("ignore", {}, {
                 });
             });
         }
-
-return updates;
-        }
-    });
+        return updates;
+    }
+});
 
 var IgnoredQuestion = {
         typeName: gettext("Ignored XML"),

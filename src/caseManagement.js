@@ -29,7 +29,7 @@ function casePropertyDropdownWidget (mug, opts) {
         const val = widget.getValue();
         const WHITESPACE = /\s/g;
 
-        if (val && val.search(WHITESPACE) !== -1) {
+        if (val && WHITESPACE.test(val)) {
             widget.setValue(val.replace(WHITESPACE, '_'));
         }
 
@@ -73,18 +73,13 @@ function addMultipleAssignmentsMessageToMug(mug, url) {
 }
 
 class CaseMappingsBuilder {
-    updateMappingsFromXML (form, data, xml, preserveMappings) {
-        if (!preserveMappings) {
-            // reset mapping data -- used by tests to prevent side effects from loadXML
-            data.caseMappings = {};
-            data.caseMappingsByQuestion = {};
-        }
-
+    updateMappingsFromXML (form, data, xml) {
         if (!xml) {
             return;
         }
 
-        const caseMappingSection = xml.find(':root > vellum\\:case_mappings');
+        const head = xml.find(':root > h\\:head, :root > head');
+        const caseMappingSection = head.find('> vellum\\:case_mappings');
         if (caseMappingSection.length > 0) {
             const mappingElements = caseMappingSection.children().toArray();
             data.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
@@ -371,7 +366,7 @@ $.vellum.plugin('caseManagement', {}, {
         });
     },
 
-    performAdditionalParsing: function (form, xml, parserOptions) {
+    performAdditionalParsing: function (form, xml) {
         this.__callOld();
         const data = this.data.caseManagement;
         const builder = new CaseMappingsBuilder();
@@ -379,19 +374,20 @@ $.vellum.plugin('caseManagement', {}, {
             data.caseMappings = JSON.parse(JSON.stringify(data.baseline));
             data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
         } else {
-            const preserveMappings = !(parserOptions && parserOptions.reset);
-            builder.updateMappingsFromXML(form, data, xml, preserveMappings);
+            builder.updateMappingsFromXML(form, data, xml);
         }
     },
 
-    contributeToAdditionalXML: function (xmlWriter, form) {
+    contributeToHeadXML: function (xmlWriter, form, options={withCaseMappings: false}) {
         this.__callOld();
-        // Case mappings are not normally written in form XML
-        // because they are sent to HQ as a "mapping_diff" in
-        // augmentSentData. However, they are included in the source
-        // XML so they are preserved when copying XML between forms.
-        const writer = new XMLCaseMappingWriter(xmlWriter);
-        writer.writeCaseMappingsElement(this.data.caseManagement);
+        if (options.withCaseMappings) {
+            // Case mappings are not normally written in form XML
+            // because they are sent to HQ as a "mapping_diff" in
+            // augmentSentData. However, they are included in the source
+            // XML so they are preserved when copying XML between forms.
+            const writer = new XMLCaseMappingWriter(xmlWriter);
+            writer.writeCaseMappingsElement(this.data.caseManagement);
+        }
     },
 
     getMugTypes: function () {
