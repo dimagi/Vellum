@@ -129,7 +129,7 @@ Mug.prototype = {
             if (attr) {
                 changed = mug._validate(attr);
             } else {
-                _.each(_.keys(mug.p.__data), function (attr) {
+                _.each(mug.spec, function (spec, attr) {
                     changed = mug._validate(attr) || changed;
                 });
             }
