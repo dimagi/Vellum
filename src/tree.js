@@ -412,13 +412,17 @@ Tree.prototype = {
     walk: function (callback) {
         this.rootNode.walk(callback);
     },
-    isTreeValid: function(validateValue) {
+    isTreeValid: function () {
+        function validateMug(mug) {
+            mug.validate();
+            return !mug.hasErrors();
+        }
         var rChildren = this.rootNode.getChildren(),
-        i, retVal;
-        for (i in rChildren){
-            if(rChildren.hasOwnProperty(i)){
-                retVal = rChildren[i].validateTree(validateValue);
-                if(!retVal){
+            i, retVal;
+        for (i in rChildren) {
+            if (rChildren.hasOwnProperty(i)) {
+                retVal = rChildren[i].validateTree(validateMug);
+                if (!retVal) {
                     return false;
                 }
             }

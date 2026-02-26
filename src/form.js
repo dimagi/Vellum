@@ -702,11 +702,7 @@ Form.prototype = {
         });
     },
     isFormValid: function () {
-        var validateMug = function (mug) {
-            mug.validate();
-            return !mug.hasErrors();
-        };
-        return this.tree.isTreeValid(validateMug);
+        return this.tree.isTreeValid();
     },
     findFirstMatchingChild: function (parentMug, match) {
         var parent = (parentMug ? this.tree.getNodeFromMug(parentMug)
