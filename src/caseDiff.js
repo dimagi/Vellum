@@ -9,32 +9,31 @@ export function compareCaseMappings (baseline, incoming) {
 
     allKeys.forEach(key => {
         if (Object.hasOwn(baseline, key) && Object.hasOwn(incoming, key)) {
-            incoming[key].forEach(update => {
-                const baselineMatch = baseline[key].find(
-                    original => update.question_path === original.question_path);
-                if (!baselineMatch) {
+            incoming[key].forEach(item => {
+                const match = baseline[key].find(q => q.question_path === item.question_path);
+                if (!match) {
                     additions[key] = additions[key] || [];
-                    additions[key].push(update);
-                } else if (baselineMatch.update_mode !== update.update_mode) {
+                    additions[key].push(item);
+                } else if (match.update_mode !== item.update_mode) {
                     updates[key] = updates[key] || [];
-                    updates[key].push(update);
+                    updates[key].push(item);
                 }
             });
-            baseline[key].forEach(original => {
-                if (!incoming[key].find(update => update.question_path === original.question_path)) {
+            baseline[key].forEach(item => {
+                if (!incoming[key].find(q => q.question_path === item.question_path)) {
                     deletions[key] = deletions[key] || [];
-                    deletions[key].push(original);
+                    deletions[key].push(item);
                 }
             });
         } else if (Object.hasOwn(incoming, key)) {  // not in baseline
-            incoming[key].forEach(update => {
+            incoming[key].forEach(item => {
                 additions[key] = additions[key] || [];
-                additions[key].push(update);
+                additions[key].push(item);
             });
         } else {  // key in baseline, not in incoming
-            baseline[key].forEach(update => {
+            baseline[key].forEach(item => {
                 deletions[key] = deletions[key] || [];
-                deletions[key].push(update);
+                deletions[key].push(item);
             });
         }
     });
