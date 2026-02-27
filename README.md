@@ -23,11 +23,31 @@ intuitive items first.
   _Date_, _Audio_, etc. While some mug type names match the corresponding label
   used in the UI, some do not. For example, a _Trigger_ is called a _Label_ in
   the UI.
+
+  Three different layers (easy to confuse at first):
+
+  - **Mug type**: the question "kind" (for example `Text`, `Select`, `Repeat`).
+    This is the question "kind" (`Text`, `Select`, `Repeat`, etc.).
+    A mug type defines type-level behavior.
+  - **Options**: type-level behavior.
+    Options describe how a mug type behaves overall.
+    Examples: `tagName`, `isDataOnly`, type-change behavior, writer behavior.
+  - **Attribute** (`attr`): one possible field on a mug, such as `nodeID`,
+    `requiredAttr`, `relevantAttr`, or `appearance`. They come from the mug’s spec.
+  - **Spec**: attribute-level rules.
+    A spec describes how one attribute should behave: whether it is visible,
+    whether it is required, how it is validated, which widget edits it, and how
+    it is serialized.
+  - **Properties**: instance-level values.
+    These are the actual values for one specific mug and live on `mug.p`.
+    If an attribute has been set, its current value is stored here, for example
+    `mug.p.nodeID` or `mug.p.requiredAttr`.
+  - **Widget**: a control or group of controls displayed on the right side of the
+    screen and used to interact with mug properties.
+
 - **JavaRosa**: the language/translation module. A core part of the JavaRosa
   module is the **IText** system, which provides an API for translated strings
   and multimedia used to adorn questions.
-- **Widget**: a control or group of controls displayed on the right side of the
-  screen and used to interact with mug properties.
 - **Plugins**: features that are not part of the core are implemented as plugins.
   The plugin architecture is loosely based on the
   [JSTree](https://www.jstree.com/plugins/) plugin system. Many very important
