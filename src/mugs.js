@@ -44,6 +44,7 @@ import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/mugXPath
 import {TextField, PhoneNumber, Secret} from "./mugs/types/text";
 import {Int, Long, Double} from "./mugs/types/numeric";
 import {AudioField, ImageField, Video, Signature, DocumentField} from "./mugs/types/media";
+import {DateField, DateTime, Time} from "./mugs/types/date";
 
 function Mug(options, form, baseSpec, attrs) {
     var properties = null;
@@ -594,30 +595,6 @@ var Barcode = util.extend(defaultOptions, {
     typeName: gettext('Barcode Scan'),
     dataType: 'barcode',
     icon: 'fa fa-barcode',
-    init: function (mug, form) {
-    }
-});
-
-var DateField = util.extend(defaultOptions, {
-    typeName: gettext('Date'),
-    dataType: 'xsd:date',
-    icon: 'fa-solid fa-calendar-days',
-    init: function (mug, form) {
-    }
-});
-
-var DateTime = util.extend(defaultOptions, {
-    typeName: gettext('Date and Time'),
-    dataType: 'xsd:dateTime',
-    icon: 'fcc fcc-fd-datetime',
-    init: function (mug, form) {
-    }
-});
-
-var Time = util.extend(defaultOptions, {
-    typeName: gettext('Time'),
-    dataType: 'xsd:time',
-    icon: 'fa-regular fa-clock',
     init: function (mug, form) {
     }
 });
