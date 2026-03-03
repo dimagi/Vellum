@@ -12,28 +12,23 @@ export function compareCaseMappings (baseline, incoming) {
             incoming[key].forEach(item => {
                 const match = baseline[key].find(q => q.question_path === item.question_path);
                 if (!match) {
-                    additions[key] = additions[key] || [];
-                    additions[key].push(item);
+                    push(key, item, additions);
                 } else if (match.update_mode !== item.update_mode) {
-                    updates[key] = updates[key] || [];
-                    updates[key].push(item);
+                    push(key, item, updates);
                 }
             });
             baseline[key].forEach(item => {
                 if (!incoming[key].find(q => q.question_path === item.question_path)) {
-                    deletions[key] = deletions[key] || [];
-                    deletions[key].push(item);
+                    push(key, item, deletions);
                 }
             });
         } else if (Object.hasOwn(incoming, key)) {  // not in baseline
             incoming[key].forEach(item => {
-                additions[key] = additions[key] || [];
-                additions[key].push(item);
+                push(key, item, additions);
             });
         } else {  // key in baseline, not in incoming
             baseline[key].forEach(item => {
-                deletions[key] = deletions[key] || [];
-                deletions[key].push(item);
+                push(key, item, deletions);
             });
         }
     });
@@ -49,4 +44,9 @@ export function compareCaseMappings (baseline, incoming) {
         diff.update = updates;
     }
     return diff;
+}
+
+function push(key, item, mapping) {
+    mapping[key] = mapping[key] || [];
+    mapping[key].push(item);
 }
