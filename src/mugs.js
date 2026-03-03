@@ -36,6 +36,7 @@ import _ from "underscore";
 import Tree from "vellum/tree";
 import widgets from "vellum/widgets";
 import util from "vellum/util";
+import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/mugXPath";
 
 function Mug(options, form, baseSpec, attrs) {
     var properties = null;
@@ -752,52 +753,6 @@ MugProperties.prototype = {
         });
     }
 };
-
-/**
- * Add instances referenced to serialized data
- */
-function serializeXPath(value, key, mug, data) {
-    if (value && /\binstance\(/.test(value)) {
-        data.instances = _.extend(data.instances || {},
-                                  mug.form.parseInstanceRefs(value));
-    }
-    try {
-        if (value) {
-            value = mug.form.xpath.parse(value.toString()).toHashtag();
-        }
-    } catch (err) {
-        if (_.isString(value) && !value.startsWith('#invalid/')) {
-            value = '#invalid/xpath ' + value;
-        }
-    }
-    return value || undefined;
-}
-
-function deserializeXPath(data, key, mug, context) {
-    updateInstances(data, mug);
-    var value = data[key];
-    if (value) {
-        try {
-            value = mug.form.xpath.parse(value).toHashtag();
-            context.later(function () {
-                mug.p[key] = context.transformHashtags(value);
-            });
-        } catch (err) {
-            if (_.isString(value) && !value.startsWith('#invalid/')) {
-                value = '#invalid/xpath ' + value;
-            }
-        }
-    } else if (value === null) {
-        value = undefined;
-    }
-    return value;
-}
-
-function updateInstances(data, mug) {
-    if (data.hasOwnProperty("instances") && !_.isEmpty(data.instances)) {
-        mug.form.updateKnownInstances(data.instances);
-    }
-}
 
 function resolveConflictedNodeId(mug) {
     // clear warning; mug already has copy-N-of-... ID
