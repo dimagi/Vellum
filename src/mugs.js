@@ -33,21 +33,13 @@
  */
 import $ from "jquery";
 import _ from "underscore";
-import Tree from "vellum/tree";
-import widgets from "vellum/widgets";
 import util from "vellum/util";
 import baseSpecs from "./mugs/mugBaseSpecs";
 import defaultOptions from "./mugs/mugDefaultOptions";
 import MugMessages from "./mugs/mugMessages";
 import MugProperties from "./mugs/mugProperties";
 import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/mugXPath";
-import {TextField, PhoneNumber, Secret} from "./mugs/types/text";
-import {Int, Long, Double} from "./mugs/types/numeric";
-import {AudioField, ImageField, Video, Signature, DocumentField} from "./mugs/types/media";
-import {DateField, DateTime, Time} from "./mugs/types/date";
-import {Choice, MSelect, Select} from "./mugs/types/select";
-import {Group, FieldList, Repeat} from "./mugs/types/group";
-import {DataBindOnly, ReadOnly, Geopoint, Barcode, Trigger} from "./mugs/types/misc";
+import {baseMugTypes} from "./mugs/types/index";
 
 function Mug(options, form, baseSpec, attrs) {
     var properties = null;
@@ -564,7 +556,7 @@ function MugTypesManager(baseSpec, mugTypes, opts) {
     var _this = this,
         // Nestable Field List not supported in CommCare before v2.16
         group_in_field_list = opts.features.group_in_field_list;
-    ImageField.resize_enabled = opts.features.image_resize;
+    baseMugTypes.normal.Image.resize_enabled = opts.features.image_resize;
 
     this.auxiliaryTypes = mugTypes.auxiliary;
     this.normalTypes = mugTypes.normal;
@@ -657,37 +649,7 @@ MugTypesManager.prototype = {
 
 export default {
     defaultOptions: defaultOptions,
-    baseMugTypes: {
-        normal: {
-            "Audio": AudioField,
-            "Barcode": Barcode,
-            "DataBindOnly": DataBindOnly,
-            "Date": DateField,
-            "DateTime": DateTime,
-            "Document": DocumentField,
-            "Double": Double,
-            "FieldList": FieldList,
-            "Geopoint": Geopoint,
-            "Group": Group,
-            "Image": ImageField,
-            "Int": Int,
-            "Long": Long,
-            "MSelect": MSelect,
-            "PhoneNumber": PhoneNumber,
-            "ReadOnly": ReadOnly,
-            "Repeat": Repeat,
-            "Secret": Secret,
-            "Select": Select,
-            "Signature": Signature,
-            "Text": TextField,
-            "Time": Time,
-            "Trigger": Trigger,
-            "Video": Video
-        },
-        auxiliary: {
-            "Choice": Choice
-        }
-    },
+    baseMugTypes: baseMugTypes,
     MugTypesManager: MugTypesManager,
     MugMessages: MugMessages,
     WARNING: Mug.WARNING,
