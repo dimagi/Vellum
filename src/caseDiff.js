@@ -6,7 +6,6 @@ export function compareCaseMappings (baseline, incoming) {
     // the original with the incoming mappings to produce a diff.
     const additions = {};
     const deletions = {};
-    const updates = {};
     const allKeys = new Set([...Object.keys(baseline), ...Object.keys(incoming)]);
 
     allKeys.forEach(key => {
@@ -16,7 +15,8 @@ export function compareCaseMappings (baseline, incoming) {
                 if (!match) {
                     push(key, item, additions);
                 } else if (!_.isEqual(match, item)) {
-                    push(key, item, updates);
+                    push(key, match, deletions);
+                    push(key, item, additions);
                 }
             });
             baseline[key].forEach(item => {
@@ -41,9 +41,6 @@ export function compareCaseMappings (baseline, incoming) {
     }
     if (Object.keys(deletions).length) {
         diff.delete = deletions;
-    }
-    if (Object.keys(updates).length) {
-        diff.update = updates;
     }
     return diff;
 }

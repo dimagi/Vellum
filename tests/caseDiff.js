@@ -30,7 +30,8 @@ describe("The Case Management diff tool", function () {
         const baseline = {one: [{question_path: "/data/first"}]};
         const incoming = {one: [{question_path: "/data/first", update_mode: "edit"}]};
         assert.deepEqual(compareCaseMappings(baseline, incoming), {
-            update: {one: [{question_path: "/data/first", update_mode: "edit"}]}
+            delete: {one: [{question_path: "/data/first"}]},
+            add: {one: [{question_path: "/data/first", update_mode: "edit"}]},
         });
     });
 
@@ -38,7 +39,8 @@ describe("The Case Management diff tool", function () {
         const baseline = {one: [{question_path: "/data/first", update_mode: "edit"}]};
         const incoming = {one: [{question_path: "/data/first", update_mode: "always"}]};
         assert.deepEqual(compareCaseMappings(baseline, incoming), {
-            update: {one: [{question_path: "/data/first", update_mode: "always"}]}
+            delete: {one: [{question_path: "/data/first", update_mode: "edit"}]},
+            add: {one: [{question_path: "/data/first", update_mode: "always"}]},
         });
     });
 
@@ -46,7 +48,8 @@ describe("The Case Management diff tool", function () {
         const baseline = {one: [{question_path: "/data/first", update_mode: "edit"}]};
         const incoming = {one: [{question_path: "/data/first"}]};
         assert.deepEqual(compareCaseMappings(baseline, incoming), {
-            update: {one: [{question_path: "/data/first"}]}
+            delete: {one: [{question_path: "/data/first", update_mode: "edit"}]},
+            add: {one: [{question_path: "/data/first"}]},
         });
     });
 
