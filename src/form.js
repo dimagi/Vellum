@@ -701,8 +701,8 @@ Form.prototype = {
             error.mug.fixSerializationWarnings(error.errors);
         });
     },
-    isFormValid: function (validateMug) {
-        return this.tree.isTreeValid(validateMug);
+    isFormValid: function () {
+        return this.tree.isTreeValid();
     },
     findFirstMatchingChild: function (parentMug, match) {
         var parent = (parentMug ? this.tree.getNodeFromMug(parentMug)

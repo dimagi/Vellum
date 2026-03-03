@@ -81,6 +81,28 @@ describe("The form component", function() {
         assert(util.isTreeNodeValid(text), text.getErrors().join("\n"));
     });
 
+    it("isFormValid should validate mug's untouched property", function () {
+        var form = util.loadXML(""),
+            mug = util.addQuestion("Text", "text"),
+            untouchedAttr = _.find(_.keys(mug.spec), function (attr) {
+                return !mug.p.has(attr) && mug.getPresence(attr) !== "notallowed";
+            });
+        assert(untouchedAttr, "expected to find an untouched property");
+
+        // inject a validationFunc on the untouched property that returns an error;
+        var origValidationFunc = mug.spec[untouchedAttr].validationFunc;
+        mug.spec[untouchedAttr].validationFunc = function () {
+            return "untouched property error";
+        };
+        try {
+            assert(!form.isFormValid(), "form should be invalid");
+            assert(mug.getErrors().join("").indexOf("untouched property error") !== -1,
+                "should have validated untouched property");
+        } finally {
+            mug.spec[untouchedAttr].validationFunc = origValidationFunc;
+        }
+    });
+
     describe("The form's ID generation", function() {
         before(function (done) {
             util.init({

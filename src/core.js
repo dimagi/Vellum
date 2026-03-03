@@ -94,15 +94,6 @@ var MESSAGE_TYPES = {
 
 var fn = {};
 
-fn.isCurrentlySelectedMugValid = function () {
-    var mug = this.getCurrentlySelectedMug();
-    if (mug) {
-        mug.validate();
-        return !mug.hasErrors();
-    }
-    return true;
-};
-
 fn.init = function () {
     this.data.core.mugTypes = new mugs.MugTypesManager(
         this.getMugSpec(), this.getMugTypes(), this.opts());
@@ -146,7 +137,7 @@ fn.init = function () {
                     action: action.replace('$1', icon),
                 }),
             };
-        } else if (!_this.isCurrentlySelectedMugValid()) {
+        } else if (!form.isFormValid()) {
             action = gettext("Look for questions marked with $1 and fix the errors.");
             // TODO make a more efficient way to check if any mug in the
             // form is not valid and use that instead of only current mug.
@@ -657,13 +648,9 @@ fn._resizeFullScreenModal = function($modal) {
 };
 
 fn.showSourceXMLModal = function (done) {
-    function validateMug(mug) {
-        mug.validate();
-        return !mug.hasErrors();
-    }
     var _this = this,
         $modal, $updateForm, $textarea, codeMirror,
-        warn = !this.data.core.form.isFormValid(validateMug) ?
+        warn = !this.data.core.form.isFormValid() ?
             " <i class='fd-valid-alert-icon fa fa-warning'></i> " +
             gettext("Validation failed. Form may not perform correctly on your device!") :
             "";

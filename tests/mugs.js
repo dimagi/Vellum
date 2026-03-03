@@ -98,6 +98,27 @@ describe("Mugs", function() {
         assert.isTrue(label.isVisible("requiredCondition"), "required condition should be visible");
     });
 
+    it("should validate all properties, not only touched properties", function () {
+        util.loadXML("");
+        var mug = util.addQuestion("Text", "text"),
+            untouchedAttr = _.find(_.keys(mug.spec), function (attr) {
+                return !mug.p.has(attr) && mug.getPresence(attr) !== "notallowed";
+            });
+        assert(untouchedAttr, "expected to find an untouched property");
+        // inject a validationFunc that returns an error on the untouched property
+        var origValidationFunc = mug.spec[untouchedAttr].validationFunc;
+        mug.spec[untouchedAttr].validationFunc = function () {
+            return "untouched property error";
+        };
+        try {
+            mug.validate();
+            assert(mug.getErrors().join("").indexOf("untouched property error") !== -1,
+                "should validate untouched property '" + untouchedAttr + "'");
+        } finally {
+            mug.spec[untouchedAttr].validationFunc = origValidationFunc;
+        }
+    });
+
     it("should remove required attribute when changing Text to Label", function () {
         var form = util.loadXML(""),
             mug = util.addQuestion("Text", "text");

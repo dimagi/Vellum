@@ -134,6 +134,30 @@ describe("Vellum core", function () {
         assert(!util.isTreeNodeValid(h1), "h1 should not be valid");
     });
 
+    it("should show validation error on hover save when non-selected mug is invalid", function () {
+        util.loadXML("");
+        var q1 = util.addQuestion("Text", "q1");
+        var q2 = util.addQuestion("Text", "q2");
+        util.clickQuestion(q1);
+        // add error to the non-selected mug
+        q2.addMessage("nodeID", {
+            key: "test-error",
+            level: q2.ERROR,
+            message: "test error",
+        });
+        // simulate hover over save button to trigger validation popover
+        var saveButtonUI = call("getData").core.saveButton.ui;
+        saveButtonUI.popover("show");
+        try {
+            var popoverEl = $(".popover");
+            assert(popoverEl.length > 0, "popover should be shown");
+            chai.expect(popoverEl.text()).to.include("Validation Failed");
+            chai.expect(popoverEl.text()).to.include("validation errors");
+        } finally {
+            saveButtonUI.popover("hide");
+        }
+    });
+
     it("should increment item value on insert new select item as child of select", function () {
         util.loadXML(INCREMENT_ITEM_XML);
         util.clickQuestion("question1");
