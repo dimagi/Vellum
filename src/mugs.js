@@ -42,6 +42,7 @@ import MugMessages from "./mugs/mugMessages";
 import MugProperties from "./mugs/mugProperties";
 import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/mugXPath";
 import {TextField, PhoneNumber, Secret} from "./mugs/types/text";
+import {Int, Long, Double} from "./mugs/types/numeric";
 
 function Mug(options, form, baseSpec, attrs) {
     var properties = null;
@@ -580,14 +581,6 @@ var ReadOnly = util.extend(defaultOptions, {
     }
 });
 
-var Int = util.extend(defaultOptions, {
-    typeName: gettext('Integer'),
-    dataType: 'xsd:int',
-    icon: 'fcc fcc-fd-numeric',
-    init: function (mug, form) {
-    }
-});
-
 var AudioField = util.extend(defaultOptions, {
     typeName: gettext('Audio Capture'),
     dataType: 'binary',
@@ -703,24 +696,6 @@ var Time = util.extend(defaultOptions, {
     typeName: gettext('Time'),
     dataType: 'xsd:time',
     icon: 'fa-regular fa-clock',
-    init: function (mug, form) {
-    }
-});
-
-// Deprecated. Users may not add new longs to forms,
-// but must be able to view forms already containing longs.
-var Long = util.extend(Int, {
-    typeName: gettext('Long'),
-    dataType: 'xsd:long',
-    icon: 'fcc fcc-fd-long',
-    init: function (mug, form) {
-    }
-});
-
-var Double = util.extend(Int, {
-    typeName: gettext('Decimal'),
-    dataType: 'xsd:double',
-    icon: 'fcc fcc-fd-decimal',
     init: function (mug, form) {
     }
 });
