@@ -41,6 +41,7 @@ import defaultOptions from "./mugs/mugDefaultOptions";
 import MugMessages from "./mugs/mugMessages";
 import MugProperties from "./mugs/mugProperties";
 import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/mugXPath";
+import {TextField, PhoneNumber, Secret} from "./mugs/types/text";
 
 function Mug(options, form, baseSpec, attrs) {
     var properties = null;
@@ -576,36 +577,6 @@ var ReadOnly = util.extend(defaultOptions, {
             visibility: "visible",
             widget: widgets.readOnlyControl
         }
-    }
-});
-
-var TextField = util.extend(defaultOptions, {
-    typeName: gettext("Text"),
-    dataType: "xsd:string",
-    icon: "fcc fcc-fd-text",
-    init: function (mug, form) {
-    }
-});
-
-var PhoneNumber = util.extend(TextField, {
-    typeName: gettext('Phone Number or Numeric ID'),
-    icon: 'fa fa-signal',
-    init: function (mug, form) {
-        TextField.init(mug, form);
-        mug.p.appearance = "numeric";
-    },
-    changeTypeTransform: function (mug) {
-        mug.p.appearance = undefined;
-    },
-});
-
-var Secret = util.extend(defaultOptions, {
-    typeName: gettext('Password'),
-    dataType: 'xsd:string',
-    tagName: 'secret',
-    icon: 'fa fa-key',
-    canOutputValue: false,
-    init: function (mug, form) {
     }
 });
 
