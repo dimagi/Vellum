@@ -105,7 +105,7 @@ describe("Mugs", function() {
                 return !mug.p.has(attr) && mug.getPresence(attr) !== "notallowed";
             });
         assert(untouchedAttr, "expected to find an untouched property");
-        // inject a validationFunc on the untouched property that returns an error;
+        // inject a validationFunc that returns an error on the untouched property
         var origValidationFunc = mug.spec[untouchedAttr].validationFunc;
         mug.spec[untouchedAttr].validationFunc = function () {
             return "untouched property error";
