@@ -27,7 +27,6 @@ intuitive items first.
   Three different layers (easy to confuse at first):
 
   - **Mug type**: the question "kind" (for example `Text`, `Select`, `Repeat`).
-    This is the question "kind" (`Text`, `Select`, `Repeat`, etc.).
     A mug type defines type-level behavior.
   - **Options**: type-level behavior.
     Options describe how a mug type behaves overall.
