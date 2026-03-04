@@ -38,7 +38,7 @@ import baseSpecs from "./mugs/mugBaseSpecs";
 import defaultOptions from "./mugs/mugDefaultOptions";
 import MugMessages from "./mugs/mugMessages";
 import MugProperties from "./mugs/mugProperties";
-import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/mugXPath";
+import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/xpath";
 import {baseMugTypes} from "./mugs/types/index";
 
 function Mug(options, form, baseSpec, attrs) {

@@ -1,7 +1,7 @@
 import _ from "underscore";
 import widgets from "vellum/widgets";
 import util from "vellum/util";
-import {deserializeXPath, serializeXPath} from "./mugXPath";
+import {deserializeXPath, serializeXPath} from "./xpath";
 
 function resolveConflictedNodeId(mug) {
     // clear warning; mug already has copy-N-of-... ID
