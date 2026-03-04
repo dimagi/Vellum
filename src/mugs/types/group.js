@@ -1,7 +1,7 @@
 import $ from "jquery";
 import _ from "underscore";
 import Tree from "vellum/tree";
-import defaultOptions from "../mugDefaultOptions";
+import defaultOptions from "../defaultOptions";
 import widgets from "vellum/widgets";
 import util from "vellum/util";
 

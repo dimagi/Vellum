@@ -1,4 +1,4 @@
-import defaultOptions from "../mugDefaultOptions";
+import defaultOptions from "../defaultOptions";
 import util from "vellum/util";
 
 var DateField = util.extend(defaultOptions, {

@@ -1,5 +1,5 @@
 import $ from "jquery";
-import defaultOptions from "../mugDefaultOptions";
+import defaultOptions from "../defaultOptions";
 import widgets from "vellum/widgets";
 import util from "vellum/util";
 

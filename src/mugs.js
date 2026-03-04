@@ -35,7 +35,7 @@ import $ from "jquery";
 import _ from "underscore";
 import util from "vellum/util";
 import baseSpecs from "./mugs/mugBaseSpecs";
-import defaultOptions from "./mugs/mugDefaultOptions";
+import defaultOptions from "./mugs/defaultOptions";
 import MugMessages from "./mugs/mugMessages";
 import MugProperties from "./mugs/mugProperties";
 import {deserializeXPath, serializeXPath, updateInstances} from "./mugs/xpath";
