@@ -229,6 +229,7 @@ let mugConfigs = {
             {id: "name", writeToData: true},
             {id: "entity_id"},
             {id: "entity_name"},
+            {id: "work_area_id"},
         ],
         mugOptions: util.extend(baseMugOptions, {
             typeName: 'Deliver Unit',
@@ -237,6 +238,7 @@ let mugConfigs = {
                 mug.p.name = "";
                 mug.p.entity_id = "";
                 mug.p.entity_name = "";
+                mug.p.work_area_id = "";
             },
             spec: util.extend(baseSpec, {
                 nodeID: {
@@ -266,6 +268,15 @@ let mugConfigs = {
                     deserialize: mugs.deserializeXPath,
                     help: gettext('XPath expression for the name of the entity associated with this Delivery Unit.'),
                 },
+                work_area_id: {
+                    lstring: gettext("Work Area ID"),
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: gettext('XPath expression for the work area ID associated with this Delivery Unit.'),
+                },
                 relevantAttr: {
                     visibility: 'visible',
                     presence: 'optional',
@@ -284,6 +295,7 @@ let mugConfigs = {
                     "name",
                     "entity_id",
                     "entity_name",
+                    "work_area_id",
                 ],
             }),
             _.clone(logicSection),
