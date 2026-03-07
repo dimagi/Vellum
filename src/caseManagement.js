@@ -2,7 +2,7 @@ import $ from "jquery";
 import mugs from "vellum/mugs";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
-import caseDiff from "vellum/caseDiff";
+import { compareCaseMappings } from "vellum/caseDiff";
 
 
 function casePropertyDropdownWidget (mug, opts) {
@@ -540,7 +540,7 @@ $.vellum.plugin('caseManagement', {}, {
     augmentSentData: function (sentData, saveType) {
         const result = this.__callOld();
         const data = this.data.caseManagement;
-        const diff = caseDiff.compareCaseMappings(data.baseline, data.caseMappings);
+        const diff = compareCaseMappings(data.baseline, data.caseMappings);
         result.mapping_diff = JSON.stringify(diff);
         return result;
     }

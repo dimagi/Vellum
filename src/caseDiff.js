@@ -1,4 +1,4 @@
-function compareCaseMappings (baseline, incoming) {
+export function compareCaseMappings (baseline, incoming) {
     // case mappings are a dictionary linking a case property
     // to a list of questions which populate it.
     // This function compares the original with the incoming mappings
@@ -63,7 +63,3 @@ function compareCaseMappings (baseline, incoming) {
 
     return diff;
 }
-
-export default {
-    compareCaseMappings,
-};
