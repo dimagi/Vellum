@@ -17,7 +17,8 @@ MugMessages.prototype = {
      *      {
      *          key: <message type key>,
      *          level: <"warning", or "error">,
-     *          message: <message string>
+     *          message: <message string>,
+     *          onDrop: <optional callback; called if the message is removed>,
      *      }
      *
      * @returns - true if changed else false
@@ -50,6 +51,7 @@ MugMessages.prototype = {
                     return false;
                 }
                 messages.splice(i, 1);
+                obj.onDrop?.();
                 removed = true;
                 break;
             }

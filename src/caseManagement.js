@@ -40,6 +40,7 @@ function casePropertyDropdownWidget (mug, opts) {
 }
 
 const CONFLICT_MSG_KEY = 'mug-caseProperty-conflict';
+const CONFLICTING_DELETE_MSG_KEY = 'mug-caseProperty-conflicting-delete';
 const MULTI_ASSIGNMENT_MSG_KEY = 'mug-caseProperty-multipleAssignments';
 
 function addConflictMessageToMug(mug, caseProperty) {
@@ -50,6 +51,21 @@ function addConflictMessageToMug(mug, caseProperty) {
             'but will need to have only one question for any case property in order to ' +
             'build the application'), {caseProperty}),
         level: mug.WARNING,
+    };
+    mug.addMessage('caseProperty', message);
+}
+
+function addConflictingDeleteMessageToMug(mug, question, saveButton) {
+    const message = {
+        key: CONFLICTING_DELETE_MSG_KEY,
+        message: gettext(
+            'This mapping was concurrently changed and deleted.\n\n' +
+            'Dismiss this alert to keep the mapping.'),
+        level: mug.WARNING,
+        onDrop: () => {
+            delete question.conflicting_delete;
+            saveButton.fire('change');
+        },
     };
     mug.addMessage('caseProperty', message);
 }
@@ -217,6 +233,7 @@ class CaseMapMaintainer {
             // always drop the conflict message. Moving may create a conflict, but it will be
             // generated again later
             mug.dropMessage('caseProperty', CONFLICT_MSG_KEY);
+            mug.dropMessage('caseProperty', CONFLICTING_DELETE_MSG_KEY);
         }
 
         if (current) {
@@ -491,6 +508,7 @@ $.vellum.plugin('caseManagement', {}, {
             return;
         }
 
+        const saveButton = this.data.core.saveButton;
         const data = this.data.caseManagement;
         const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
 
@@ -505,8 +523,11 @@ $.vellum.plugin('caseManagement', {}, {
             }
 
             questionMappings.forEach(caseProperty => {
-                if (data.caseMappings[caseProperty].length >= 2) {
+                const questions = data.caseMappings[caseProperty];
+                if (questions.length >= 2) {
                     addConflictMessageToMug(mug, caseProperty);
+                } else if (questions[0].conflicting_delete) {
+                    addConflictingDeleteMessageToMug(mug, questions[0], saveButton);
                 }
             });
         }

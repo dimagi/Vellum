@@ -1,3 +1,5 @@
+import _ from "underscore";
+
 export function compareCaseMappings (baseline, incoming) {
     // Case mappings are a dictionary linking a case property to a
     // list of questions that populate it. This function compares
@@ -13,7 +15,7 @@ export function compareCaseMappings (baseline, incoming) {
                 const match = baseline[key].find(q => q.question_path === item.question_path);
                 if (!match) {
                     push(key, item, additions);
-                } else if (match.update_mode !== item.update_mode) {
+                } else if (!_.isEqual(match, item)) {
                     push(key, item, updates);
                 }
             });
