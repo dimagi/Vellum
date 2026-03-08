@@ -39,6 +39,42 @@ function casePropertyDropdownWidget (mug, opts) {
     return widget;
 }
 
+function addCaseMappings(mug, data, saveButton) {
+    if (!mug.absolutePath) {
+        // no use trying to find a mapping for a question that doesn't have a path
+        return;
+    }
+
+    const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
+
+    if (questionMappings && questionMappings.length > 0) {
+        mug.p.set('caseProperty', questionMappings[0]);
+
+        if (questionMappings.length > 1) {
+            // if a question is attempting to update multiple cases,
+            // it will be disabled. Leave an informational message
+            // to explain that this needs to be edited with the case management page
+            addMultipleAssignmentsMessageToMug(mug, data.view_form_url);
+        } else {
+            mug.dropMessage('caseProperty', MULTI_ASSIGNMENT_MSG_KEY);
+        }
+
+        questionMappings.forEach(caseProperty => {
+            const questions = data.caseMappings[caseProperty];
+            if (questions.length >= 2) {
+                addConflictMessageToMug(mug, caseProperty);
+            } else {
+                mug.dropMessage('caseProperty', CONFLICT_MSG_KEY);
+            }
+            if (questions[0].conflicting_delete) {
+                addConflictingDeleteMessageToMug(mug, questions[0], saveButton);
+            } else {
+                mug.dropMessage('caseProperty', CONFLICTING_DELETE_MSG_KEY);
+            }
+        });
+    }
+}
+
 const CONFLICT_MSG_KEY = 'mug-caseProperty-conflict';
 const CONFLICTING_DELETE_MSG_KEY = 'mug-caseProperty-conflicting-delete';
 const MULTI_ASSIGNMENT_MSG_KEY = 'mug-caseProperty-multipleAssignments';
@@ -503,34 +539,8 @@ $.vellum.plugin('caseManagement', {}, {
 
     handleMugParseFinish: function (mug) {
         this.__callOld();
-        if (!mug.absolutePath) {
-            // no use trying to find a mapping for a question that doesn't have a path
-            return;
-        }
-
-        const saveButton = this.data.core.saveButton;
         const data = this.data.caseManagement;
-        const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
-
-        if (questionMappings && questionMappings.length > 0) {
-            mug.p.set('caseProperty', questionMappings[0]);
-
-            if (questionMappings.length > 1) {
-                // if a question is attempting to update multiple cases,
-                // it will be disabled. Leave an informational message
-                // to explain that this needs to be edited with the case management page
-                addMultipleAssignmentsMessageToMug(mug, data.view_form_url);
-            }
-
-            questionMappings.forEach(caseProperty => {
-                const questions = data.caseMappings[caseProperty];
-                if (questions.length >= 2) {
-                    addConflictMessageToMug(mug, caseProperty);
-                } else if (questions[0].conflicting_delete) {
-                    addConflictingDeleteMessageToMug(mug, questions[0], saveButton);
-                }
-            });
-        }
+        addCaseMappings(mug, data, this.data.core.saveButton);
     },
 
     handleMugRename: function (form, mug, newID, oldID, newPath, oldPath) {
@@ -554,6 +564,13 @@ $.vellum.plugin('caseManagement', {}, {
     onFormSave: function (formData) {
         this.__callOld();
         const data = this.data.caseManagement;
+        if (formData.caseManagement?.mappings) {
+            const saveButton = this.data.core.saveButton;
+            const builder = new CaseMappingsBuilder();
+            data.caseMappings = formData.caseManagement.mappings;
+            data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            this.data.core.form.walkMugs(mug => addCaseMappings(mug, data, saveButton));
+        }
         // clone the existing mappings and overwrite the baseline
         data.baseline = JSON.parse(JSON.stringify(data.caseMappings));
     },
