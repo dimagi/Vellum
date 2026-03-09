@@ -443,7 +443,7 @@ $.vellum.plugin('caseManagement', {}, {
         this.__callOld();
         if (options.withCaseMappings) {
             // Case mappings are not normally written in form XML
-            // because they are sent to HQ as a "mapping_diff" in
+            // because they are sent to HQ as a "case_mapping_diff" in
             // augmentSentData. However, they are included in the source
             // XML so they are preserved when copying XML between forms.
             const writer = new XMLCaseMappingWriter(xmlWriter);
@@ -581,7 +581,7 @@ $.vellum.plugin('caseManagement', {}, {
         const result = this.__callOld();
         const data = this.data.caseManagement;
         const diff = compareCaseMappings(data.baseline, data.caseMappings);
-        result.mapping_diff = JSON.stringify(diff);
+        result.case_mapping_diff = JSON.stringify(diff);
         return result;
     }
 
