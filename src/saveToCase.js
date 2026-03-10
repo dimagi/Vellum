@@ -177,7 +177,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 widget: widgets.checkbox
             },
             createProperty: {
-                lstring: gettext("Properties To Create"),
+                lstring: gettext("Case Properties To Create"),
                 visibility: 'visible',
                 presence: 'optional',
                 widget: saveCasePropWidget,
@@ -233,7 +233,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 widget: widgets.checkbox
             },
             updateProperty: {
-                lstring: gettext("Properties To Update"),
+                lstring: gettext("Case Properties To Update"),
                 visibility: 'visible',
                 presence: 'optional',
                 widget: saveCasePropWidget,
