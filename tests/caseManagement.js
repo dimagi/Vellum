@@ -368,6 +368,20 @@ describe("The Case Management plugin", function () {
         assert.include(xml, 'conflicting_delete', xml);
     });
 
+    it("should dismiss conflicting delete message after save resolves conflict", function () {
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "two": [{"question_path": "/data/question2"}],
+        }}});
+        const question1 = call("getMugByPath", "/data/question1");
+
+        assert.equal(util.getMessages(question1), "", "conflicting delete should be resolved");
+
+        // should include conflicting_delete attribute in XML
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.notInclude(xml, 'conflicting_delete', xml);
+    });
+
     it("should add custom options to future dropdowns", function () {
         util.loadXML();
 

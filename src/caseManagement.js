@@ -47,6 +47,7 @@ function addCaseMappings(mug, data, saveButton) {
 
     const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
 
+    mug.messages.update('caseProperty');  // drop all caseProperty messages
     if (questionMappings && questionMappings.length > 0) {
         mug.p.set('caseProperty', questionMappings[0]);
 
@@ -55,21 +56,15 @@ function addCaseMappings(mug, data, saveButton) {
             // it will be disabled. Leave an informational message
             // to explain that this needs to be edited with the case management page
             addMultipleAssignmentsMessageToMug(mug, data.view_form_url);
-        } else {
-            mug.dropMessage('caseProperty', MULTI_ASSIGNMENT_MSG_KEY);
         }
 
         questionMappings.forEach(caseProperty => {
             const questions = data.caseMappings[caseProperty];
             if (questions.length >= 2) {
                 addConflictMessageToMug(mug, caseProperty);
-            } else {
-                mug.dropMessage('caseProperty', CONFLICT_MSG_KEY);
             }
             if (questions[0].conflicting_delete) {
                 addConflictingDeleteMessageToMug(mug, questions[0], saveButton);
-            } else {
-                mug.dropMessage('caseProperty', CONFLICTING_DELETE_MSG_KEY);
             }
         });
     }
