@@ -129,11 +129,11 @@ var propertyWidget = function (mug, options) {
 var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
     VALID_PROP_REGEX = /^[a-z0-9_-]+$/i,
     saveToCaseMugOptions = {
-        typeName: 'Save to Case',
+        typeName: 'Advanced Case Actions',
         isTypeChangeable: false,
         isDataOnly: true,
         supportsDataNodeRole: true,
-        icon: 'fa fa-save',
+        icon: 'fa-solid fa-diagram-project',
         init: function (mug, form) {
             mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
             mug.p.user_id = mug.p.user_id || "instance('commcaresession')/session/context/userid";
@@ -177,7 +177,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 widget: widgets.checkbox
             },
             createProperty: {
-                lstring: gettext("Properties To Create"),
+                lstring: gettext("Case Properties To Create"),
                 visibility: 'visible',
                 presence: 'optional',
                 widget: saveCasePropWidget,
@@ -233,7 +233,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 widget: widgets.checkbox
             },
             updateProperty: {
-                lstring: gettext("Properties To Update"),
+                lstring: gettext("Case Properties To Update"),
                 visibility: 'visible',
                 presence: 'optional',
                 widget: saveCasePropWidget,
