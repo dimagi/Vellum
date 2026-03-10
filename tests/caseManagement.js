@@ -382,6 +382,25 @@ describe("The Case Management plugin", function () {
         assert.notInclude(xml, 'conflicting_delete', xml);
     });
 
+    it("should show conflicting delete message on all relevant mugs", function () {
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [
+                {"question_path": "/data/question1"},
+                {"question_path": "/data/question2"},
+            ],
+            "two": [
+                {"question_path": "/data/question1"},
+                {"question_path": "/data/question2", "conflicting_delete": true},
+            ],
+        }}});
+        const question1 = call("getMugByPath", "/data/question1");
+        const question2 = call("getMugByPath", "/data/question2");
+
+        assert.notInclude(util.getMessages(question1), "mapping was concurrently changed and deleted");
+        assert.include(util.getMessages(question2), "mapping was concurrently changed and deleted");
+    });
+
     it("should add custom options to future dropdowns", function () {
         util.loadXML();
 

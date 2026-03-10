@@ -63,7 +63,7 @@ function addCaseMappings(mug, data, saveButton) {
             if (questions.length >= 2) {
                 addConflictMessageToMug(mug, caseProperty);
             }
-            if (questions[0].conflicting_delete) {
+            if (questions.find(q => q.question_path === mug.absolutePath)?.conflicting_delete) {
                 addConflictingDeleteMessageToMug(mug, questions[0], saveButton);
             }
         });
