@@ -129,11 +129,11 @@ var propertyWidget = function (mug, options) {
 var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
     VALID_PROP_REGEX = /^[a-z0-9_-]+$/i,
     saveToCaseMugOptions = {
-        typeName: 'Save to Case',
+        typeName: 'Advanced Case Actions',
         isTypeChangeable: false,
         isDataOnly: true,
         supportsDataNodeRole: true,
-        icon: 'fa fa-save',
+        icon: 'fa-solid fa-diagram-project',
         init: function (mug, form) {
             mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
             mug.p.user_id = mug.p.user_id || "instance('commcaresession')/session/context/userid";
