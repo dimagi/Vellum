@@ -6,9 +6,7 @@ import { compareCaseMappings } from "vellum/caseDiff";
 
 
 function casePropertyDropdownWidget (mug, opts) {
-    const rawOptions = opts.vellum.caseManager.getProperties();
-    const defaultOptions = rawOptions.map(prop => ({ text: prop, value: prop }));
-    opts.defaultOptions = defaultOptions;
+    opts.defaultOptions = getOptions(opts.vellum.data.caseManagement);
     opts.useValueAsCustomName = true;
     const widget = widgets.dropdown(mug, opts);
     widget.postRender = function () {
@@ -37,6 +35,12 @@ function casePropertyDropdownWidget (mug, opts) {
     };
 
     return widget;
+}
+
+function getOptions(data) {
+    const properties = new Set(data.properties);
+    Object.keys(data.caseMappings || {}).forEach(p => properties.add(p));
+    return [...properties].sort().map(prop => ({ text: prop, value: prop }));
 }
 
 function addCaseMappings(mug, data, saveButton) {
@@ -357,52 +361,12 @@ function refreshCurrentMug(vellum) {
     }
 }
 
-class CaseManager {
-    constructor (baseProperties, viewFormUrl) {
-        this.baseProperties = new Set(baseProperties);
-        this.customProperties = {};
-        this.viewFormUrl = viewFormUrl;
-    }
-
-    addProperty (property) {
-        if (this.baseProperties.has(property)) {
-            // no need to modify the base properties
-            return;
-        }
-
-        this.customProperties[property] = this.customProperties[property] || 0;
-        this.customProperties[property]++;
-    }
-
-    removeProperty (property) {
-        if (!this.customProperties.hasOwnProperty(property)) {
-            return;
-        }
-
-        this.customProperties[property]--;
-        if (this.customProperties[property] <= 0){
-            delete this.customProperties[property];
-        }
-    }
-
-    getProperties () {
-        return Array.from(this.baseProperties.values()).concat(
-            Object.keys(this.customProperties)
-        );
-    }
-}
-
 $.vellum.plugin('caseManagement', {}, {
     init: function () {
         const data = this.data.caseManagement;
-        data.properties = this.opts().caseManagement.properties;
+        data.properties = this.opts().caseManagement.properties || [];
         data.baseline = this.opts().caseManagement.mappings || {};
         data.view_form_url = this.opts().caseManagement.view_form_url;
-
-        this.caseManager = new CaseManager(
-            this.opts().caseManagement.properties,
-            this.opts().caseManagement.view_form_url
-        );
     },
 
     loadXML: function () {
@@ -509,13 +473,6 @@ $.vellum.plugin('caseManagement', {}, {
                 setter: function (mug, attr, value) {
                     const maintainer = new CaseMapMaintainer(mug.form, that.data.caseManagement);
                     maintainer.updateFormMappings(mug.absolutePath, mug.p[attr], value);
-                    const prevValue = mug.p[attr];
-                    if (prevValue) {
-                        that.caseManager.removeProperty(prevValue);
-                    }
-                    if (value) {
-                        that.caseManager.addProperty(value);
-                    }
                     mug.p.set(attr, value);
                 },
                 validationFunc: function (mug) {
