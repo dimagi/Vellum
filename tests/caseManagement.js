@@ -477,7 +477,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["one", "three", "two", ""]);
+        assert.deepEqual(displayedOptions, ["question2", "one", "three", "two", ""]);
     });
 
     it("should remove child mappings when parent group is deleted", function () {

@@ -1,4 +1,5 @@
 import $ from "jquery";
+import _ from "underscore";
 import mugs from "vellum/mugs";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
@@ -6,7 +7,7 @@ import { compareCaseMappings } from "vellum/caseDiff";
 
 
 function casePropertyDropdownWidget (mug, opts) {
-    opts.defaultOptions = getOptions(opts.vellum.data.caseManagement);
+    opts.defaultOptions = getOptions(opts.vellum.data.caseManagement, mug);
     opts.useValueAsCustomName = true;
     const widget = widgets.dropdown(mug, opts);
     widget.postRender = function () {
@@ -34,13 +35,45 @@ function casePropertyDropdownWidget (mug, opts) {
         super_updateValue();
     };
 
+    const updateProperties = _.debounce(() => {
+        const value = widget.input.val();
+        widget.clearOptions();
+        widget.addOptions(getOptions(opts.vellum.data.caseManagement, mug, value));
+        widget.input.val(value);
+        widget.input.trigger('change.select2');
+    }, 500);
+
+    mug.on('property-changed', e => (
+        e.property === 'nodeID' && updateProperties()
+    ), null, 'teardown-mug-properties');
+
+    mug.form.on('question-label-text-change', () => (
+        !mug.p.nodeID && updateProperties()
+    ), null, null, widget);
+
+    mug.on("teardown-mug-properties", () => {
+        mug.form.unbind(widget);
+    }, null, "teardown-mug-properties");
+
     return widget;
 }
 
-function getOptions(data) {
+function getOptions(data, mug, value) {
     const properties = new Set(data.properties);
     Object.keys(data.caseMappings || {}).forEach(p => properties.add(p));
-    return [...properties].sort().map(prop => ({ text: prop, value: prop }));
+    if (value) {
+        properties.add(value);
+    }
+    let nodeID = mug.p.nodeID;
+    if (!nodeID && mug.form.vellum.getMugDisplayName(mug)) {
+        nodeID = mug.form.vellum.nodeIDFromLabel(mug);
+    }
+    properties.delete(nodeID);
+    const options = [...properties].sort();
+    if (nodeID) {
+        options.unshift(nodeID);  // nodeID is always the first option
+    }
+    return options.map(prop => ({ text: prop, value: prop }));
 }
 
 function addCaseMappings(mug, data, saveButton) {
