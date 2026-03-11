@@ -48,7 +48,7 @@ function addCaseMappings(mug, data, saveButton) {
     const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
 
     mug.p.set('caseProperty', questionMappings?.[0] || null);
-    mug.messages.update('caseProperty');  // drop all caseProperty messages
+    mug.dropAllMessages('caseProperty');
     if (questionMappings && questionMappings.length > 0) {
         if (questionMappings.length > 1) {
             // if a question is attempting to update multiple cases,
