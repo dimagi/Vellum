@@ -386,7 +386,11 @@ function getMessages(mug) {
             messages.push(attr + ":");
             last = attr;
         }
-        messages.push("  - " + msg.message); // + " [" + msg.key + "]");
+        if (msg.message?.markdown) {
+            messages.push("  - " + msg.message.markdown);
+        } else {
+            messages.push("  - " + msg.message); // + " [" + msg.key + "]");
+        }
     });
     return messages.join("\n");
 }

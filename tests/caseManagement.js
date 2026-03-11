@@ -10,6 +10,7 @@ import BASELINE_NO_MAPPING_XML from "static/caseManagement/baseline_no_mapping_b
 import MULTIPLE_PROPERTIES_XML from "static/caseManagement/multiple_properties.xml";
 import EXTRA_QUESTION_ATTRS_XML from "static/caseManagement/extra_question_attrs.xml";
 import PROPERTY_CONFLICT_XML from "static/caseManagement/property_conflict.xml";
+import PROPERTY_CONFLICT_DELETED_XML from "static/caseManagement/property_conflict_deleted.xml";
 import GROUP_MAPPINGS_XML from "static/caseManagement/group_mappings.xml";
 import INVALID_MAPPING_XML from "static/caseManagement/invalid_mapping.xml";
 
@@ -50,6 +51,12 @@ describe("The Case Management plugin", function () {
         util.loadXML(BASELINE_XML);
         const xml = call("createXML", {withCaseMappings: true});
         util.assertXmlEqual(xml, BASELINE_XML);
+    });
+
+    it("preserves case mapping with deleted property conflict between loading and writing XML", function () {
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        const xml = call("createXML", {withCaseMappings: true});
+        util.assertXmlEqual(xml, PROPERTY_CONFLICT_DELETED_XML);
     });
 
     it("outputs an empty mapping block if form lacks mappings data", function () {
@@ -305,6 +312,93 @@ describe("The Case Management plugin", function () {
         assert.sameOrderedMembers(questionPaths, ['/data/question3', '/data/question2']);
         assert.sameOrderedMembers(caseManagementData.caseMappingsByQuestion['/data/question3'], ['one']);
         assert.notExists(caseManagementData.caseMappingsByQuestion['/data/question1']);
+    });
+
+    it("should display a warning on load xml with a conflicting delete", function () {
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        const mug = call("getMugByPath", "/data/question1");
+        assert.isFalse(util.isTreeNodeValid(mug), "question1 should not be valid");
+        util.clickQuestion(mug);
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+        const messages = select.find("~ .messages");
+
+        assert.include(messages.text(), "mapping was concurrently changed and deleted");
+        assert.equal(messages.children().length, 1);
+    });
+
+    it("should enable save button on drop conflicting delete message", function () {
+        const vellum = $("#vellum").vellum("get");
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        vellum.data.core.saveButton.setState("saved");
+        const mug = call("getMugByPath", "/data/question1");
+        util.clickQuestion(mug);
+        assert.equal(vellum.data.core.saveButton.state, 'saved');
+
+        mug.dropMessage("caseProperty", "mug-caseProperty-conflicting-delete");
+
+        assert.equal(vellum.data.core.saveButton.state, "save", "save button should be enabled");
+        assert.isTrue(util.isTreeNodeValid(mug), "Unexpected error: " + util.getMessages(mug));
+    });
+
+    it("should dismiss conflicting delete message on change case property", function () {
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        const mug = call("getMugByPath", "/data/question1");
+        util.clickQuestion(mug);
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+        select.val("two").trigger("change");
+
+        assert.isTrue(util.isTreeNodeValid(mug), "Unexpected error: " + util.getMessages(mug));
+
+        // should not include conflicting_delete attribute in XML
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.notInclude(xml, 'conflicting_delete', xml);
+    });
+
+    it("should show conflicting delete message after save introducing conflict", function () {
+        util.loadXML(BASELINE_XML);
+        const mug = call("getMugByPath", "/data/question1");
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/question1", "conflicting_delete": true}],
+        }}});
+
+        assert.include(util.getMessages(mug), "mapping was concurrently changed and deleted");
+
+        // should include conflicting_delete attribute in XML
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.include(xml, 'conflicting_delete', xml);
+    });
+
+    it("should dismiss conflicting delete message after save resolves conflict", function () {
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "two": [{"question_path": "/data/question2"}],
+        }}});
+        const question1 = call("getMugByPath", "/data/question1");
+
+        assert.equal(util.getMessages(question1), "", "conflicting delete should be resolved");
+
+        // should include conflicting_delete attribute in XML
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.notInclude(xml, 'conflicting_delete', xml);
+    });
+
+    it("should show conflicting delete message on all relevant mugs", function () {
+        util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [
+                {"question_path": "/data/question1"},
+                {"question_path": "/data/question2"},
+            ],
+            "two": [
+                {"question_path": "/data/question1"},
+                {"question_path": "/data/question2", "conflicting_delete": true},
+            ],
+        }}});
+        const question1 = call("getMugByPath", "/data/question1");
+        const question2 = call("getMugByPath", "/data/question2");
+
+        assert.notInclude(util.getMessages(question1), "mapping was concurrently changed and deleted");
+        assert.include(util.getMessages(question2), "mapping was concurrently changed and deleted");
     });
 
     it("should add custom options to future dropdowns", function () {
