@@ -47,10 +47,9 @@ function addCaseMappings(mug, data, saveButton) {
 
     const questionMappings = data.caseMappingsByQuestion[mug.absolutePath];
 
+    mug.p.set('caseProperty', questionMappings?.[0] || null);
     mug.messages.update('caseProperty');  // drop all caseProperty messages
     if (questionMappings && questionMappings.length > 0) {
-        mug.p.set('caseProperty', questionMappings[0]);
-
         if (questionMappings.length > 1) {
             // if a question is attempting to update multiple cases,
             // it will be disabled. Leave an informational message
@@ -242,7 +241,7 @@ class CaseMapMaintainer {
     }
 
     replaceFormPropertyMappings (questionPath, prev, current) {
-        let questions = prev ? this.data.caseMappings[prev] : [];
+        let questions = prev ? this.data.caseMappings[prev] || [] : [];
         let question = null;
 
         let prevIndex = questions.findIndex((question) => question.question_path === questionPath);
@@ -342,6 +341,17 @@ class CaseMapMaintainer {
                 this.removeMappings(questionPath);
             }
         });
+    }
+}
+
+function refreshCurrentMug(vellum) {
+    const mugs = vellum.getCurrentlySelectedMug(true);
+    if (mugs.length !== 1) { return; }
+    const select = $(".fd-content-right").find('fieldset[data-slug="caseManagement"]').find("select");
+    if (select.length) {
+        const widget = widgets.util.getWidget(select, vellum);
+        widget.setValue(mugs[0].p.caseProperty || "");
+        select.trigger("change.select2");
     }
 }
 
@@ -565,6 +575,7 @@ $.vellum.plugin('caseManagement', {}, {
             data.caseMappings = formData.caseManagement.mappings;
             data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
             this.data.core.form.walkMugs(mug => addCaseMappings(mug, data, saveButton));
+            refreshCurrentMug(this);
         }
         // clone the existing mappings and overwrite the baseline
         data.baseline = JSON.parse(JSON.stringify(data.caseMappings));

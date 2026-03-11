@@ -370,12 +370,16 @@ describe("The Case Management plugin", function () {
 
     it("should dismiss conflicting delete message after save resolves conflict", function () {
         util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        const question1 = call("getMugByPath", "/data/question1");
+        util.clickQuestion(question1);
         util.call("onFormSave", {"caseManagement": {"mappings": {
             "two": [{"question_path": "/data/question2"}],
         }}});
-        const question1 = call("getMugByPath", "/data/question1");
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
 
         assert.equal(util.getMessages(question1), "", "conflicting delete should be resolved");
+        assert.equal(select.val(), "", "widget value should be updated");
+        assert.equal(question1.p.caseProperty, null, "mug value should be updated");
 
         // should include conflicting_delete attribute in XML
         const xml = call("createXML", {withCaseMappings: true});
