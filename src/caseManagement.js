@@ -306,7 +306,11 @@ class CaseMapMaintainer {
         if (current) {
             this.data.caseMappings[current] = this.data.caseMappings[current] || [];
             if (!question) {
-                question = {'question_path': questionPath};
+                const originals = this.data.baseline[current];
+                question = originals?.find(q => q.question_path === questionPath);
+                if (!question) {
+                    question = {'question_path': questionPath};
+                }
             }
             this.data.caseMappings[current].push(question);
 

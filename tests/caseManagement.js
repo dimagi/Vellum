@@ -46,6 +46,13 @@ describe("The Case Management plugin", function () {
             }
         });
     });
+    beforeEach(() => {
+        const data = $("#vellum").vellum("get").data.caseManagement;
+        if (data) {
+            data.baseline = {};
+            delete data.caseMappings;
+        }
+    });
 
     it("preserves case mapping between loading and writing XML", function () {
         util.loadXML(BASELINE_XML);
@@ -231,6 +238,23 @@ describe("The Case Management plugin", function () {
         assert.equal(mappedQuestions.length, 1);
         assert.equal(mappedQuestions.attr("question_path"), "/data/question1");
         assert.equal(mappedQuestions.attr("update_mode"), "edit");
+    });
+
+    it("should load reinstated mapping from baseline", function () {
+        util.loadXML(EXTRA_QUESTION_ATTRS_XML);
+        const data = $("#vellum").vellum("get").data.caseManagement;
+        data.baseline = JSON.parse(JSON.stringify(data.caseMappings));
+        const mug = call("getMugByPath", "/data/question1");
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+
+        select.val('').trigger('change');
+        assert(!mug.p.caseProperty, `expected ${mug.p.caseProperty} to be false-ish`);
+
+        select.val('one').trigger('change');
+        assert.equal(mug.p.caseProperty, "one");
+
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.include(xml, ' update_mode="edit"', xml);
     });
 
     it("should display a dropdown of potential case management properties", function () {
