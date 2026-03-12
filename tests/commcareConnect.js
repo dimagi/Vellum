@@ -4,6 +4,7 @@ import LEARN_MODULE_XML from "static/commcareConnect/learn_module.xml";
 import ASSESSMENT_XML from "static/commcareConnect/assessment.xml";
 import TASK_XML from "static/commcareConnect/task_module.xml";
 import DELIVER_XML from "static/commcareConnect/deliver.xml";
+import DELIVER_WORK_AREA_XML from "static/commcareConnect/deliver_with_work_area.xml";
 
 var assert = chai.assert,
     call = util.call;
@@ -56,6 +57,20 @@ describe("The CommCareConnect", function() {
             assert.equal(module.p.entity_name, "/data/name");
             assert.equal(module.p.relevantAttr, "x = 1");
             util.assertXmlEqual(call("createXML"), DELIVER_XML);
+        });
+
+        it("should load and save work_area_id", function () {
+            util.loadXML(DELIVER_WORK_AREA_XML);
+            var module = util.getMug("unit_one");
+            assert.equal(module.__className, "ConnectDeliverUnit");
+            assert.equal(module.p.work_area_id, "instance('commcaresession')/session/data/work_area_id");
+            util.assertXmlEqual(call("createXML"), DELIVER_WORK_AREA_XML);
+        });
+
+        it("should allow work_area_id to be optional", function () {
+            var mug = util.addQuestion("ConnectDeliverUnit", "unit");
+            assert.equal(mug.spec.work_area_id.presence, "optional");
+            assert.equal(mug.p.work_area_id, "");
         });
     });
 

@@ -19,9 +19,9 @@
 			<instance src="jr://instance/session" id="commcaresession" />
 			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
 			<bind vellum:nodeset="#form/unit_one" nodeset="/data/unit_one" relevant="x = 1" />
-			<bind nodeset="/data/unit_one/deliver/entity_id" calculate="instance('commcaresession')/session/data/value" />
-			<bind nodeset="/data/unit_one/deliver/entity_name" vellum:calculate="#form/name" calculate="/data/name" />
-		    <bind nodeset="/data/unit_one/deliver/work_area_id" />
+			<bind nodeset="/data/unit_one/deliver/entity_id" />
+			<bind nodeset="/data/unit_one/deliver/entity_name" />
+			<bind nodeset="/data/unit_one/deliver/work_area_id" calculate="instance('commcaresession')/session/data/work_area_id" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">
