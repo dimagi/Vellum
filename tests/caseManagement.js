@@ -143,6 +143,37 @@ describe("The Case Management plugin", function () {
         assert.isTrue(util.isTreeNodeValid(question1));
     });
 
+    it("should disable case property selector with multiple properties after save", function () {
+        util.loadXML(BASELINE_XML);
+        const question1 = call("getMugByPath", "/data/question1");
+        util.clickQuestion(question1);
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+        assert.isFalse(select.prop("disabled"), "question1 case property select should be enabled");
+
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/question1"}],
+            "two": [{"question_path": "/data/question1"}],
+        }}});
+
+        assert.isTrue(select.prop("disabled"),
+            "multiple properties: question1 case property select should be disabled");
+    });
+
+    it("should enable case property selector with one property after save", function () {
+        util.loadXML(MULTIPLE_PROPERTIES_XML);
+        const question1 = call("getMugByPath", "/data/question1");
+        util.clickQuestion(question1);
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+        assert.isTrue(select.prop("disabled"),
+            "multiple properties: question1 case property select should be disabled");
+
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/question1"}],
+        }}});
+
+        assert.isFalse(select.prop("disabled"), "question1 case property select should be enabled");
+    });
+
     it("should save the case property to the XML", function () {
         util.loadXML("");
         util.addQuestion("Text", "question");

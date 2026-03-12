@@ -349,9 +349,11 @@ function refreshCurrentMug(vellum) {
     if (mugs.length !== 1) { return; }
     const select = $(".fd-content-right").find('fieldset[data-slug="caseManagement"]').find("select");
     if (select.length) {
+        const mappings = vellum.data.caseManagement.caseMappingsByQuestion;
         const widget = widgets.util.getWidget(select, vellum);
         widget.setValue(mugs[0].p.caseProperty || "");
         select.trigger("change.select2");
+        select.prop('disabled', (mappings[mugs[0].absolutePath]?.length || 0) > 1);
     }
 }
 
