@@ -126,7 +126,13 @@ var propertyWidget = function (mug, options) {
         return widget;
     };
 
-var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
+var slugToProp = {
+        create: "useCreate",
+        update: "useUpdate",
+        close: "useClose",
+        index: "useIndex",
+    },
+    CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
     VALID_PROP_REGEX = /^[a-z0-9_-]+$/i,
     saveToCaseMugOptions = {
         typeName: 'Advanced Case Actions',
@@ -169,6 +175,36 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 widget: widgets.xPath,
                 serialize: mugs.serializeXPath,
                 deserialize: mugs.deserializeXPath,
+            },
+            caseActions: {
+                lstring: gettext("Case Actions"),
+                visibility: 'visible',
+                presence: 'optional',
+                validationFunc: function (mug) {
+                    if (!usesCases(mug)) {
+                        return gettext("You must select at least one case action");
+                    }
+                    return 'pass';
+                },
+                widget: widgets.chips,
+                chips: [
+                    { slug: "create", label: gettext("Create") },
+                    { slug: "update", label: gettext("Update") },
+                    { slug: "close",  label: gettext("Close") },
+                    { slug: "index",  label: gettext("Index") },
+                ],
+                exclusive: [["create", "update"]],
+                getState: function (slug, mug) {
+                    return mug.p[slugToProp[slug]];
+                },
+                onSelect: function (slug, mug) {
+                    mug.p[slugToProp[slug]] = true;
+                    mug.form.vellum.collapseSection(slug, false);
+                },
+                onDeselect: function (slug, mug) {
+                    mug.p[slugToProp[slug]] = false;
+                    mug.form.vellum.collapseSection(slug, true);
+                },
             },
             useCreate: {
                 lstring: gettext("Create Case"),
@@ -475,6 +511,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     "user_id",
                     "case_type",
                     "case_id",
+                    "caseActions",
                 ],
             },
             {
