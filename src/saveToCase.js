@@ -207,10 +207,8 @@ var slugToProp = {
                 },
             },
             useCreate: {
-                lstring: gettext("Create Case"),
-                visibility: 'visible',
+                visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.checkbox
             },
             createProperty: {
                 lstring: gettext("Case Properties To Create"),
@@ -249,10 +247,8 @@ var slugToProp = {
                 }
             },
             useClose: {
-                lstring: gettext("Close Case"),
-                visibility: 'visible',
+                visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.checkbox
             },
             closeCondition: {
                 lstring: gettext("Close Condition"),
@@ -263,10 +259,8 @@ var slugToProp = {
                 deserialize: mugs.deserializeXPath,
             },
             useUpdate: {
-                lstring: gettext("Update Case"),
-                visibility: 'visible',
+                visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.checkbox
             },
             updateProperty: {
                 lstring: gettext("Case Properties To Update"),
@@ -291,10 +285,8 @@ var slugToProp = {
                 }
             },
             useIndex: {
-                lstring: gettext("Use Index"),
-                visibility: 'visible',
+                visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.checkbox
             },
             indexProperty: {
                 lstring: gettext("Index Properties"),
@@ -518,7 +510,6 @@ var slugToProp = {
                 slug: "create",
                 displayName: gettext("Create"),
                 properties: [
-                    "useCreate",
                     "createProperty",
                 ],
                 isCollapsed: function (mug) {
@@ -529,7 +520,6 @@ var slugToProp = {
                 slug: "update",
                 displayName: gettext("Update"),
                 properties: [
-                    "useUpdate",
                     "updateProperty",
                 ],
                 isCollapsed: function (mug) {
@@ -540,7 +530,6 @@ var slugToProp = {
                 slug: "close",
                 displayName: gettext("Close"),
                 properties: [
-                    "useClose",
                     "closeCondition",
                 ],
                 isCollapsed: function (mug) {
@@ -551,7 +540,6 @@ var slugToProp = {
                 slug: "index",
                 displayName: gettext("Index"),
                 properties: [
-                    "useIndex",
                     "indexProperty",
                 ],
                 isCollapsed: function (mug) {
