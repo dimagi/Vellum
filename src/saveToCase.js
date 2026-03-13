@@ -570,6 +570,13 @@ $.vellum.plugin("saveToCase", {}, {
             });
         }
     },
+    getMugToolbar: function (mug, multiselect) {
+        var $toolbar = this.__callOld();
+        if (!multiselect && mug.__className === "SaveToCase") {
+            $toolbar.find('.fd-section-changer').remove();
+        }
+        return $toolbar;
+    },
     getMugTypes: function () {
         var types = this.__callOld();
         types.normal.SaveToCase = util.extend(
