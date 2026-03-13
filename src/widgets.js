@@ -571,16 +571,26 @@ var chips = function (mug, options) {
     widget.path = options.path;
 
     var chipDefs = options.chips || [],
+        exclusivePairs = options.exclusive || [],
         onSelect = options.onSelect || function () {},
         onDeselect = options.onDeselect || function () {},
         getState = options.getState || function () { return false; };
 
     var $el;
 
+    var exclusiveMap = {};
+    _.each(exclusivePairs, function (pair) {
+        exclusiveMap[pair[0]] = pair[1];
+        exclusiveMap[pair[1]] = pair[0];
+    });
+
     function render() {
         var data = _.map(chipDefs, function (def) {
+            var partner = exclusiveMap[def.slug],
+                isActive = getState(def.slug, mug),
+                isDisabled = partner && getState(partner, mug) && !isActive;
             return { slug: def.slug, label: def.label,
-                     active: getState(def.slug, mug), disabled: false };
+                     active: isActive, disabled: isDisabled };
         });
         var $rendered = $(widget_chips_template({ chips: data }));
 
@@ -590,10 +600,14 @@ var chips = function (mug, options) {
                 slug = $btn.data('slug');
             if ($btn.hasClass('disabled')) return;
 
-            var isActive = $btn.hasClass('btn-primary');
+            var isActive = $btn.hasClass('btn-primary'),
+                partner = exclusiveMap[slug];
             if (isActive) {
                 onDeselect(slug, mug);
             } else {
+                if (partner && getState(partner, mug)) {
+                    onDeselect(partner, mug);
+                }
                 onSelect(slug, mug);
             }
             render();
