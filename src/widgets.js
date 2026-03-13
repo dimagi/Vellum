@@ -1,4 +1,5 @@
 import ui_element from "vellum/templates/ui_element.html";
+import widget_chips_template from "vellum/templates/widget_chips.html";
 import widget_control_keyvalue from "vellum/templates/widget_control_keyvalue.html";
 import widget_control_message from "vellum/templates/widget_control_message.html";
 import _ from "underscore";
@@ -564,6 +565,57 @@ var baseKeyValue = function (mug, options) {
     return widget;
 };
 
+var chips = function (mug, options) {
+    var widget = base(mug, options);
+    widget.definition = mug.p.getDefinition(options.path);
+    widget.path = options.path;
+
+    var chipDefs = options.chips || [],
+        onSelect = options.onSelect || function () {},
+        onDeselect = options.onDeselect || function () {},
+        getState = options.getState || function () { return false; };
+
+    var $el;
+
+    function render() {
+        var data = _.map(chipDefs, function (def) {
+            return { slug: def.slug, label: def.label,
+                     active: getState(def.slug, mug), disabled: false };
+        });
+        var $rendered = $(widget_chips_template({ chips: data }));
+
+        $rendered.find('.fd-chip').on('click', function (e) {
+            e.preventDefault();
+            var $btn = $(this),
+                slug = $btn.data('slug');
+            if ($btn.hasClass('disabled')) return;
+
+            var isActive = $btn.hasClass('btn-primary');
+            if (isActive) {
+                onDeselect(slug, mug);
+            } else {
+                onSelect(slug, mug);
+            }
+            render();
+            widget.handleChange();
+        });
+
+        if ($el) {
+            $el.replaceWith($rendered);
+        }
+        $el = $rendered;
+    }
+
+    render();
+
+    widget.getControl = function () { return $el; };
+    widget.setValue = function () { render(); };
+    widget.getValue = function () { return null; };
+    widget.save = function () { /* noop - callbacks handle state */ };
+
+    return widget;
+};
+
 var dropdown = function (mug, options) {
     var widget = normal(mug, options);
     widget.dropdown = widget.input = $("<select />")
@@ -852,6 +904,7 @@ export default {
     identifier: identifier,
     droppableText: droppableText,
     checkbox: checkbox,
+    chips: chips,
     dropdown: dropdown,
     dropdownWithInput: dropdownWithInput,
     xPath: xPath,
