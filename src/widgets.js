@@ -570,6 +570,27 @@ var chips = function (mug, options) {
     widget.definition = mug.p.getDefinition(options.path);
     widget.path = options.path;
 
+    widget.getMessagesContainer = function () {
+        return widget.getControl()
+                .closest(".widget")
+                .find(".messages:last");
+    };
+
+    widget.refreshMessages = function () {
+        var messages = getMessages(mug, widget.path);
+        var $container = widget.getMessagesContainer();
+        $container.empty();
+        if (messages.length) {
+            $container.append(messages);
+            $container.removeClass("hide");
+        } else {
+            $container.addClass("hide");
+        }
+    };
+
+    mug.on("messages-changed",
+           function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
+
     var chipDefs = options.chips || [],
         exclusivePairs = options.exclusive || [],
         onSelect = options.onSelect || function () {},
