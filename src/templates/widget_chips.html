@@ -1,0 +1,9 @@
+<div class="fd-chips">
+    <% _.each(chips, function(chip) { %>
+    <button class="btn fd-chip btn-<%= chip.active ? 'primary' : 'default' %><%= chip.disabled ? ' disabled' : '' %>"
+            data-slug="<%= chip.slug %>"
+            type="button">
+        <%= chip.label %>
+    </button>
+    <% }); %>
+</div>
