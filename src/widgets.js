@@ -571,9 +571,7 @@ var chips = function (mug, options) {
     widget.path = options.path;
 
     widget.getMessagesContainer = function () {
-        return widget.getControl()
-                .closest(".widget")
-                .find(".messages:last");
+        return widget.getControl().closest(".widget").find(".messages:last");
     };
 
     widget.refreshMessages = function () {
@@ -588,9 +586,7 @@ var chips = function (mug, options) {
         }
     };
 
-    mug.on("messages-changed",
-           function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
-
+    mug.on("messages-changed", widget.refreshMessages, null, "teardown-mug-properties");
     var chipDefs = options.chips || [],
         exclusivePairs = options.exclusive || [],
         onSelect = options.onSelect || function () {},
