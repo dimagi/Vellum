@@ -588,24 +588,22 @@ var chips = function (mug, options) {
 
     mug.on("messages-changed", widget.refreshMessages, null, "teardown-mug-properties");
     var chipDefs = options.chips || [],
-        exclusivePairs = options.exclusive || [],
+        exclusiveChips = options.exclusive || [],
         onSelect = options.onSelect || function () {},
         onDeselect = options.onDeselect || function () {},
         getState = options.getState || function () { return false; };
 
     var $el;
 
-    var exclusiveMap = {};
-    _.each(exclusivePairs, function (pair) {
-        exclusiveMap[pair[0]] = pair[1];
-        exclusiveMap[pair[1]] = pair[0];
-    });
+    var exclusiveSet = new Set(exclusiveChips);
 
     function render() {
         var data = _.map(chipDefs, function (def) {
-            var partner = exclusiveMap[def.slug],
-                isActive = getState(def.slug, mug),
-                isDisabled = partner && getState(partner, mug) && !isActive;
+            var isActive = getState(def.slug, mug),
+                isDisabled = !isActive && exclusiveSet.has(def.slug) &&
+                    exclusiveChips.some(function (s) {
+                        return s !== def.slug && getState(s, mug);
+                    });
             return { slug: def.slug, label: def.label,
                      active: isActive, disabled: isDisabled };
         });
@@ -617,14 +615,15 @@ var chips = function (mug, options) {
                 slug = $btn.data('slug');
             if ($btn.hasClass('disabled')) return;
 
-            var isActive = $btn.hasClass('btn-primary'),
-                partner = exclusiveMap[slug];
+            var isActive = $btn.hasClass('btn-primary');
             if (isActive) {
                 onDeselect(slug, mug);
             } else {
-                if (partner && getState(partner, mug)) {
-                    onDeselect(partner, mug);
-                }
+                exclusiveChips.forEach(function (s) {
+                    if (s !== slug && getState(s, mug)) {
+                        onDeselect(s, mug);
+                    }
+                });
                 onSelect(slug, mug);
             }
             render();

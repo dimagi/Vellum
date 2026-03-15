@@ -193,7 +193,7 @@ var slugToProp = {
                     { slug: "close",  label: gettext("Close") },
                     { slug: "index",  label: gettext("Index") },
                 ],
-                exclusive: [["create", "update"]],
+                exclusive: ["create", "update"],
                 getState: function (slug, mug) {
                     return mug.p[slugToProp[slug]];
                 },
