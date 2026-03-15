@@ -643,6 +643,18 @@ var chips = function (mug, options) {
     widget.getValue = function () { return null; };
     widget.save = function () { /* noop - callbacks handle state */ };
 
+    // Sync external state (e.g. section collapse) with chip state on init,
+    // since external state may be stale (e.g. from localStorage).
+    widget.postRender = function () {
+        _.each(chipDefs, function (def) {
+            if (getState(def.slug, mug)) {
+                onSelect(def.slug, mug);
+            } else {
+                onDeselect(def.slug, mug);
+            }
+        });
+    };
+
     return widget;
 };
 

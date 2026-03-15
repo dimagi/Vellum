@@ -589,10 +589,6 @@ $.vellum.plugin("saveToCase", {}, {
                 var tmpSection = _.clone(section);
                 if (_.isFunction(tmpSection.isCollapsed)) {
                     tmpSection.isCollapsed = tmpSection.isCollapsed(mug);
-                    // Sync localStorage so sectionIsCollapsed doesn't
-                    // use a stale value from a previously viewed mug
-                    localStorage.setItem('collapse-' + tmpSection.slug,
-                                         tmpSection.isCollapsed ? "1" : "");
                 }
                 return tmpSection;
             });
