@@ -69,6 +69,102 @@ describe("The Case Management diff tool", function () {
         });
     });
 
+    it("should add duplicate question mapping", function () {
+        const baseline = {one: [{question_path: "/data/first"}]};
+        const incoming = {one: [{question_path: "/data/first"}, {question_path: "/data/first"}]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            add: {one: [{question_path: "/data/first"}]}
+        });
+    });
+
+    it("should delete duplicate question mapping", function () {
+        const baseline = {one: [{question_path: "/data/first"}, {question_path: "/data/first"}]};
+        const incoming = {one: [{question_path: "/data/first"}]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            delete: {one: [{question_path: "/data/first"}]}
+        });
+    });
+
+    it("should delete duplicate question mapping with differing update_modes", function () {
+        const baseline = {one: [
+            {question_path: "/data/first", update_mode: "always"},
+            {question_path: "/data/first", update_mode: "edit"},
+        ]};
+        const incoming = {one: [
+            {question_path: "/data/first", update_mode: "always"},
+        ]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            delete: {one: [{question_path: "/data/first", update_mode: "edit"}]}
+        });
+    });
+
+    it("should add duplicate question mapping with differing update_modes", function () {
+        const baseline = {one: [
+            {question_path: "/data/first", update_mode: "always"},
+        ]};
+        const incoming = {one: [
+            {question_path: "/data/first", update_mode: "always"},
+            {question_path: "/data/first", update_mode: "edit"},
+        ]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            add: {one: [{question_path: "/data/first", update_mode: "edit"}]}
+        });
+    });
+
+    it("should add triplicate question mapping", function () {
+        const baseline = {one: [{question_path: "/data/first"}]};
+        const incoming = {one: [
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+        ]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            add: {one: [{question_path: "/data/first"}, {question_path: "/data/first"}]}
+        });
+    });
+
+    it("should delete triplicate question mapping", function () {
+        const baseline = {one: [
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+        ]};
+        const incoming = {one: [{question_path: "/data/first"}]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            delete: {one: [{question_path: "/data/first"}, {question_path: "/data/first"}]}
+        });
+    });
+
+    it("should add triplicate question mapping v2", function () {
+        const baseline = {one: [
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+        ]};
+        const incoming = {one: [
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+        ]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            add: {one: [{question_path: "/data/first"}]}
+        });
+    });
+
+    it("should delete triplicate question mapping v2", function () {
+        const baseline = {one: [
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+        ]};
+        const incoming = {one: [
+            {question_path: "/data/first"},
+            {question_path: "/data/first"},
+        ]};
+        assert.deepEqual(compareCaseMappings(baseline, incoming), {
+            delete: {one: [{question_path: "/data/first"}]}
+        });
+    });
+
     it("should return empty diff when mappings are identical", function () {
         const baseline = {one: [{question_path: "/data/first", update_mode: "edit"}]};
         const incoming = {one: [{question_path: "/data/first", update_mode: "edit"}]};
