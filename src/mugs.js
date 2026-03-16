@@ -234,6 +234,17 @@ Mug.prototype = {
             }, false);
         });
     },
+    /**
+     * Drop all messages associated with the given property
+     *
+     * @param attr - The property to which the messages pertain.
+     */
+    dropAllMessages: function (attr) {
+        var messages = this.messages;
+        return this._withMessages(function () {
+            return messages.update(attr);
+        });
+    },
     _withMessages: function (func) {
         var unset = _.isUndefined(this._messagesChanged),
             changed = false;

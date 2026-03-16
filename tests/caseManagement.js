@@ -46,6 +46,13 @@ describe("The Case Management plugin", function () {
             }
         });
     });
+    beforeEach(() => {
+        const data = $("#vellum").vellum("get").data.caseManagement;
+        if (data) {
+            data.baseline = {};
+            delete data.caseMappings;
+        }
+    });
 
     it("preserves case mapping between loading and writing XML", function () {
         util.loadXML(BASELINE_XML);
@@ -143,6 +150,37 @@ describe("The Case Management plugin", function () {
         assert.isTrue(util.isTreeNodeValid(question1));
     });
 
+    it("should disable case property selector with multiple properties after save", function () {
+        util.loadXML(BASELINE_XML);
+        const question1 = call("getMugByPath", "/data/question1");
+        util.clickQuestion(question1);
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+        assert.isFalse(select.prop("disabled"), "question1 case property select should be enabled");
+
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/question1"}],
+            "two": [{"question_path": "/data/question1"}],
+        }}});
+
+        assert.isTrue(select.prop("disabled"),
+            "multiple properties: question1 case property select should be disabled");
+    });
+
+    it("should enable case property selector with one property after save", function () {
+        util.loadXML(MULTIPLE_PROPERTIES_XML);
+        const question1 = call("getMugByPath", "/data/question1");
+        util.clickQuestion(question1);
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+        assert.isTrue(select.prop("disabled"),
+            "multiple properties: question1 case property select should be disabled");
+
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/question1"}],
+        }}});
+
+        assert.isFalse(select.prop("disabled"), "question1 case property select should be enabled");
+    });
+
     it("should save the case property to the XML", function () {
         util.loadXML("");
         util.addQuestion("Text", "question");
@@ -202,6 +240,23 @@ describe("The Case Management plugin", function () {
         assert.equal(mappedQuestions.attr("update_mode"), "edit");
     });
 
+    it("should load reinstated mapping from baseline", function () {
+        util.loadXML(EXTRA_QUESTION_ATTRS_XML);
+        const data = $("#vellum").vellum("get").data.caseManagement;
+        data.baseline = JSON.parse(JSON.stringify(data.caseMappings));
+        const mug = call("getMugByPath", "/data/question1");
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
+
+        select.val('').trigger('change');
+        assert(!mug.p.caseProperty, `expected ${mug.p.caseProperty} to be false-ish`);
+
+        select.val('one').trigger('change');
+        assert.equal(mug.p.caseProperty, "one");
+
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.include(xml, ' update_mode="edit"', xml);
+    });
+
     it("should display a dropdown of potential case management properties", function () {
         util.loadXML("");
         util.addQuestion("Text", "question1");
@@ -215,7 +270,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["one", "two", "three", ""]);
+        assert.deepEqual(displayedOptions, ["one", "three", "two", ""]);
     });
 
     it("should display a warning when multiple questions are saving to the same case property", function () {
@@ -370,12 +425,16 @@ describe("The Case Management plugin", function () {
 
     it("should dismiss conflicting delete message after save resolves conflict", function () {
         util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
+        const question1 = call("getMugByPath", "/data/question1");
+        util.clickQuestion(question1);
         util.call("onFormSave", {"caseManagement": {"mappings": {
             "two": [{"question_path": "/data/question2"}],
         }}});
-        const question1 = call("getMugByPath", "/data/question1");
+        const select = getCaseManagementSection().find(CASE_PROPERTY_WIDGET_TYPE);
 
         assert.equal(util.getMessages(question1), "", "conflicting delete should be resolved");
+        assert.equal(select.val(), "", "widget value should be updated");
+        assert.equal(question1.p.caseProperty, null, "mug value should be updated");
 
         // should include conflicting_delete attribute in XML
         const xml = call("createXML", {withCaseMappings: true});
@@ -423,7 +482,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["one", "two", "three", "newCaseProperty", ""]);
+        assert.deepEqual(displayedOptions, ["newCaseProperty", "one", "three", "two", ""]);
 
         // Verify that custom options will be removed when no longer in use
         util.clickQuestion(question1);
@@ -442,7 +501,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["one", "two", "three", ""]);
+        assert.deepEqual(displayedOptions, ["question2", "one", "three", "two", ""]);
     });
 
     it("should remove child mappings when parent group is deleted", function () {
