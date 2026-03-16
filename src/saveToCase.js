@@ -126,7 +126,13 @@ var propertyWidget = function (mug, options) {
         return widget;
     };
 
-var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
+var slugToProp = {
+        create: "useCreate",
+        update: "useUpdate",
+        close: "useClose",
+        index: "useIndex",
+    },
+    CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
     VALID_PROP_REGEX = /^[a-z0-9_-]+$/i,
     saveToCaseMugOptions = {
         typeName: 'Advanced Case Actions',
@@ -170,11 +176,39 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 serialize: mugs.serializeXPath,
                 deserialize: mugs.deserializeXPath,
             },
-            useCreate: {
-                lstring: gettext("Create Case"),
+            caseActions: {
+                lstring: gettext("Case Actions"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: widgets.checkbox
+                validationFunc: function (mug) {
+                    if (!usesCases(mug)) {
+                        return gettext("You must select at least one case action");
+                    }
+                    return 'pass';
+                },
+                widget: widgets.chips,
+                chips: [
+                    { slug: "create", label: gettext("Create") },
+                    { slug: "update", label: gettext("Update") },
+                    { slug: "close",  label: gettext("Close") },
+                    { slug: "index",  label: gettext("Index") },
+                ],
+                exclusive: ["create", "update"],
+                getState: function (slug, mug) {
+                    return mug.p[slugToProp[slug]];
+                },
+                onSelect: function (slug, mug) {
+                    mug.p[slugToProp[slug]] = true;
+                    mug.form.vellum.collapseSection(slug, false);
+                },
+                onDeselect: function (slug, mug) {
+                    mug.p[slugToProp[slug]] = false;
+                    mug.form.vellum.collapseSection(slug, true);
+                },
+            },
+            useCreate: {
+                visibility: 'hidden',
+                presence: 'optional',
             },
             createProperty: {
                 lstring: gettext("Case Properties To Create"),
@@ -213,10 +247,8 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 }
             },
             useClose: {
-                lstring: gettext("Close Case"),
-                visibility: 'visible',
+                visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.checkbox
             },
             closeCondition: {
                 lstring: gettext("Close Condition"),
@@ -227,10 +259,8 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 deserialize: mugs.deserializeXPath,
             },
             useUpdate: {
-                lstring: gettext("Update Case"),
-                visibility: 'visible',
+                visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.checkbox
             },
             updateProperty: {
                 lstring: gettext("Case Properties To Update"),
@@ -255,10 +285,8 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 }
             },
             useIndex: {
-                lstring: gettext("Use Index"),
-                visibility: 'visible',
+                visibility: 'hidden',
                 presence: 'optional',
-                widget: widgets.checkbox
             },
             indexProperty: {
                 lstring: gettext("Index Properties"),
@@ -475,13 +503,13 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     "user_id",
                     "case_type",
                     "case_id",
+                    "caseActions",
                 ],
             },
             {
                 slug: "create",
                 displayName: gettext("Create"),
                 properties: [
-                    "useCreate",
                     "createProperty",
                 ],
                 isCollapsed: function (mug) {
@@ -492,7 +520,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 slug: "update",
                 displayName: gettext("Update"),
                 properties: [
-                    "useUpdate",
                     "updateProperty",
                 ],
                 isCollapsed: function (mug) {
@@ -503,7 +530,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 slug: "close",
                 displayName: gettext("Close"),
                 properties: [
-                    "useClose",
                     "closeCondition",
                 ],
                 isCollapsed: function (mug) {
@@ -514,7 +540,6 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                 slug: "index",
                 displayName: gettext("Index"),
                 properties: [
-                    "useIndex",
                     "indexProperty",
                 ],
                 isCollapsed: function (mug) {
@@ -544,6 +569,13 @@ $.vellum.plugin("saveToCase", {}, {
                 return value === inner;
             });
         }
+    },
+    getMugToolbar: function (mug, multiselect) {
+        var $toolbar = this.__callOld();
+        if (!multiselect && mug.__className === "SaveToCase") {
+            $toolbar.find('.fd-section-changer').remove();
+        }
+        return $toolbar;
     },
     getMugTypes: function () {
         var types = this.__callOld();

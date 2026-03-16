@@ -1,4 +1,5 @@
 import ui_element from "vellum/templates/ui_element.html";
+import widget_chips_template from "vellum/templates/widget_chips.html";
 import widget_control_keyvalue from "vellum/templates/widget_control_keyvalue.html";
 import widget_control_message from "vellum/templates/widget_control_message.html";
 import _ from "underscore";
@@ -564,6 +565,99 @@ var baseKeyValue = function (mug, options) {
     return widget;
 };
 
+var chips = function (mug, options) {
+    var widget = base(mug, options);
+    widget.definition = mug.p.getDefinition(options.path);
+    widget.path = options.path;
+
+    widget.getMessagesContainer = function () {
+        return widget.getControl().closest(".widget").find(".messages:last");
+    };
+
+    widget.refreshMessages = function () {
+        var messages = getMessages(mug, widget.path);
+        var $container = widget.getMessagesContainer();
+        $container.empty();
+        if (messages.length) {
+            $container.append(messages);
+            $container.removeClass("hide");
+        } else {
+            $container.addClass("hide");
+        }
+    };
+
+    mug.on("messages-changed", widget.refreshMessages, null, "teardown-mug-properties");
+    var chipDefs = options.chips || [],
+        exclusiveChips = options.exclusive || [],
+        onSelect = options.onSelect || function () {},
+        onDeselect = options.onDeselect || function () {},
+        getState = options.getState || function () { return false; };
+
+    var $el;
+
+    var exclusiveSet = new Set(exclusiveChips);
+
+    function render() {
+        var data = _.map(chipDefs, function (def) {
+            var isActive = getState(def.slug, mug),
+                isDisabled = !isActive && exclusiveSet.has(def.slug) &&
+                    exclusiveChips.some(function (s) {
+                        return s !== def.slug && getState(s, mug);
+                    });
+            return { slug: def.slug, label: def.label,
+                     active: isActive, disabled: isDisabled };
+        });
+        var $rendered = $(widget_chips_template({ chips: data }));
+
+        $rendered.find('.fd-chip').on('click', function (e) {
+            e.preventDefault();
+            var $btn = $(this),
+                slug = $btn.data('slug');
+            if ($btn.hasClass('disabled')) return;
+
+            var isActive = $btn.hasClass('btn-primary');
+            if (isActive) {
+                onDeselect(slug, mug);
+            } else {
+                exclusiveChips.forEach(function (s) {
+                    if (s !== slug && getState(s, mug)) {
+                        onDeselect(s, mug);
+                    }
+                });
+                onSelect(slug, mug);
+            }
+            render();
+            widget.handleChange();
+        });
+
+        if ($el) {
+            $el.replaceWith($rendered);
+        }
+        $el = $rendered;
+    }
+
+    render();
+
+    widget.getControl = function () { return $el; };
+    widget.setValue = function () { render(); };
+    widget.getValue = function () { return null; };
+    widget.save = function () { /* noop - callbacks handle state */ };
+
+    // Sync external state (e.g. section collapse) with chip state on init,
+    // since external state may be stale (e.g. from localStorage).
+    widget.postRender = function () {
+        _.each(chipDefs, function (def) {
+            if (getState(def.slug, mug)) {
+                onSelect(def.slug, mug);
+            } else {
+                onDeselect(def.slug, mug);
+            }
+        });
+    };
+
+    return widget;
+};
+
 var dropdown = function (mug, options) {
     var widget = normal(mug, options);
     widget.dropdown = widget.input = $("<select />")
@@ -852,6 +946,7 @@ export default {
     identifier: identifier,
     droppableText: droppableText,
     checkbox: checkbox,
+    chips: chips,
     dropdown: dropdown,
     dropdownWithInput: dropdownWithInput,
     xPath: xPath,
