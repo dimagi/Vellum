@@ -195,6 +195,90 @@ describe("The SaveToCase module", function() {
         assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "pass");
     });
 
+    describe("case_id validation", function () {
+        var mug;
+        beforeEach(function () {
+            util.loadXML("");
+            mug = util.addQuestion("SaveToCase", "mug");
+        });
+
+        it("should accept absolute path references", function () {
+            mug.p.case_id = "/data/some_question";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should accept current() relative paths", function () {
+            mug.p.case_id = "current()/../../../patient_case_id";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should accept instance() references", function () {
+            mug.p.case_id = "instance('commcaresession')/session/data/case_id_new_person_0";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should accept coalesce with uuid()", function () {
+            mug.p.case_id = "coalesce(/data/existing_case_id, uuid())";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should accept if() expressions", function () {
+            mug.p.case_id = "if(/data/has_case = 'yes', /data/case_id, uuid())";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should accept casedb lookup", function () {
+            mug.p.case_id = "instance('casedb')/casedb/case[@case_type = 'patient']/@case_id";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should reject plain text numbers", function () {
+            mug.p.case_id = "1";
+            assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should reject plain text strings", function () {
+            mug.p.case_id = "bob jones";
+            assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should reject plain text with dashes", function () {
+            mug.p.case_id = "some-case-id";
+            assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should reject uuid with arguments", function () {
+            mug.p.case_id = "uuid(36)";
+            assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should reject empty value", function () {
+            mug.p.case_id = "";
+            assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should reject uuid() without create action", function () {
+            mug.p.useCreate = false;
+            mug.p.useUpdate = true;
+            mug.p.case_id = "uuid()";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug),
+                "Case ID cannot be uuid() without a Create action. It must reference an existing case.");
+        });
+
+        it("should accept uuid() with create action", function () {
+            mug.p.useCreate = true;
+            mug.p.case_id = "uuid()";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should accept path reference without create action", function () {
+            mug.p.useCreate = false;
+            mug.p.useUpdate = true;
+            mug.p.case_id = "/data/meta/caseID";
+            assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+    });
+
     it("should provide case references to the logic manager", function () {
         var form = util.loadXML(LOGIC_TEST_XML),
             manager = form._logicManager;
