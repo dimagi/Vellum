@@ -14,7 +14,7 @@ var baseSpecs = {
         // DATA ELEMENT
         nodeID: {
             visibility: 'visible',
-            presence: 'required',
+            presence: 'optional',
             lstring: gettext('Question ID'),
             setter: function (mug, attr, value) {
                 mug.form.moveMug(mug, "rename", value);
@@ -30,6 +30,9 @@ var baseSpecs = {
             },
             widget: widgets.identifier,
             validationFunc: function (mug) {
+                if (!mug.p.nodeID) {
+                    return "pass";
+                }
                 var lcid = mug.p.nodeID.toLowerCase(),
                     nameWarning = {
                         key: "mug-nodeID-reserved-name-warning",
