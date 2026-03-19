@@ -351,7 +351,7 @@ ItextModel.prototype = {
             if (!mug.p.labelItext && mug.getPresence("labelItext") !== "notallowed") {
                 var item = mug.p.labelItext = this.createItem();
                 item.set(mug.getLabelValue());
-                mug.validate();
+                mug.validate("labelItext");
             }
             if (!mug.p.hintItext && mug.getPresence("hintItext") !== "notallowed") {
                 mug.p.hintItext = this.createItem();

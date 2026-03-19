@@ -1,69 +1,54 @@
-function compareCaseMappings (baseline, incoming) {
-    // case mappings are a dictionary linking a case property
-    // to a list of questions which populate it.
-    // This function compares the original with the incoming mappings
-    // to produce a diff object
+import _ from "underscore";
 
+export function compareCaseMappings (baseline, incoming) {
+    // Case mappings are a dictionary linking a case property to a
+    // list of questions that populate it. This function compares
+    // the original with the incoming mappings to produce a diff.
     const additions = {};
     const deletions = {};
     const updates = {};
-
     const allKeys = new Set([...Object.keys(baseline), ...Object.keys(incoming)]);
 
-
     allKeys.forEach(key => {
-        // If the question is part of the incoming updates, then it is either an addition or an update
-        if (!(key in baseline)) {
-            incoming[key].forEach(update => {
-                additions[key] = additions[key] || [];
-                additions[key].push(update);
-            });
-        } else if (key in incoming) {
-            incoming[key].forEach(update => {
-                const baselineMatch = baseline[key].find(
-                    original => update.question_path === original.question_path);
-                if (!baselineMatch) {
-                    additions[key] = additions[key] || [];
-                    additions[key].push(update);
-                } else if (baselineMatch.update_mode !== update.update_mode) {
-                    updates[key] = updates[key] || [];
-                    updates[key].push(update);
+        if (Object.hasOwn(baseline, key) && Object.hasOwn(incoming, key)) {
+            incoming[key].forEach(item => {
+                const match = baseline[key].find(q => q.question_path === item.question_path);
+                if (!match) {
+                    push(key, item, additions);
+                } else if (!_.isEqual(match, item)) {
+                    push(key, item, updates);
                 }
             });
-        }
-
-        // If the question is missing from the incoming updates, then it is a deletion
-        if (!(key in incoming)) {
-            baseline[key].forEach(update => {
-                deletions[key] = deletions[key] || [];
-                deletions[key].push(update);
-            });
-        } else if (key in baseline) {
-            baseline[key].forEach(original => {
-                if (!incoming[key].find(update => update.question_path === original.question_path)) {
-                    deletions[key] = deletions[key] || [];
-                    deletions[key].push(original);
+            baseline[key].forEach(item => {
+                if (!incoming[key].find(q => q.question_path === item.question_path)) {
+                    push(key, item, deletions);
                 }
+            });
+        } else if (Object.hasOwn(incoming, key)) {  // not in baseline
+            incoming[key].forEach(item => {
+                push(key, item, additions);
+            });
+        } else {  // key in baseline, not in incoming
+            baseline[key].forEach(item => {
+                push(key, item, deletions);
             });
         }
     });
 
-    let diff = {};
+    const diff = {};
     if (Object.keys(additions).length) {
         diff.add = additions;
     }
-
     if (Object.keys(deletions).length) {
         diff.delete = deletions;
     }
-
     if (Object.keys(updates).length) {
         diff.update = updates;
     }
-
     return diff;
 }
 
-export default {
-    compareCaseMappings,
-};
+function push(key, item, mapping) {
+    mapping[key] = mapping[key] || [];
+    mapping[key].push(item);
+}
