@@ -174,7 +174,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     if (!value) {
                         return gettext("Case ID is required");
                     }
-                    var hasPathOrFunctionCall = /\/|[a-z]+\(.+\)/.test(value)
+                    var hasPathOrFunctionCall = /\/|[a-z]+\(.+\)/.test(value);
                     var isUuid = value === 'uuid()';
                     if (/uuid\([^)]+\)/.test(value)) {
                         return gettext("uuid() should not have arguments");
