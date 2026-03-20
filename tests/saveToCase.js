@@ -247,6 +247,16 @@ describe("The SaveToCase module", function() {
             assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
         });
 
+        it("should reject plain text with quotes", function () {
+            mug.p.case_id = "''";
+            assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
+        it("should reject function calls without arguments", function () {
+            mug.p.case_id = "foo()";
+            assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
+        });
+
         it("should reject uuid with arguments", function () {
             mug.p.case_id = "uuid(36)";
             assert.notEqual(mug.spec.case_id.validationFunc(mug), "pass");
