@@ -176,6 +176,9 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
                     }
                     var hasPathOrFunctionCall = /\/|[a-z]+\(.+\)/.test(value)
                     var isUuid = value === 'uuid()';
+                    if (/uuid\([^)]+\)/.test(value)) {
+                        return gettext("uuid() should not have arguments");
+                    }
                     if (!hasPathOrFunctionCall && !isUuid) {
                         return gettext("Case ID must be an XPath expression");
                     }
