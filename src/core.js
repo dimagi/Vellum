@@ -2274,11 +2274,21 @@ fn.send = function (formText, saveType) {
     if (saveType === 'patch') {
         checkForConflict = true;
         var dmp = new diff_match_patch();
-        patch = dmp.patch_toText(
-            dmp.patch_make(this.data.core.lastSavedXForm, formText)
-        );
+        try {
+            patch = dmp.patch_toText(
+                dmp.patch_make(this.data.core.lastSavedXForm, formText)
+            );
+        } catch (e) {
+            // TEMPORARY FIX: diff_match_patch can throw URIError when
+            // its bisection algorithm splits an emoji surrogate pair,
+            // causing encodeURI to fail. Fall back to full save.
+            // TODO: replace with proper fix in diff_match_patch.js
+            // (see https://github.com/google/diff-match-patch/pull/80)
+            console.warn("diff_match_patch patch failed, falling back to full save:", e);
+            patch = null;
+        }
         // abort if diff too long and send full instead
-        if (patch.length > formText.length && opts.saveUrl) {
+        if ((patch === null || patch.length > formText.length) && opts.saveUrl) {
             saveType = 'full';
             url = opts.saveUrl;
         }
