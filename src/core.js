@@ -2286,6 +2286,12 @@ fn.send = function (formText, saveType) {
             // (see https://github.com/google/diff-match-patch/pull/80)
             console.warn("diff_match_patch patch failed, falling back to full save:", e);
             patch = null;
+            // Skip conflict check on fallback — the sha1 of lastSavedXForm
+            // may not match the server's hash when the form contains emoji,
+            // because CryptoJS.SHA1 and Python's hashlib.sha1 handle
+            // surrogate pairs differently. TODO: fix sha1 computation to
+            // be consistent between JS and Python for emoji-containing forms.
+            checkForConflict = false;
         }
         // abort if diff too long and send full instead
         if ((patch === null || patch.length > formText.length) && opts.saveUrl) {
