@@ -2291,6 +2291,7 @@ fn.send = function (formText, saveType) {
         // abort if diff too long and send full instead
         if (patch.length > formText.length && opts.saveUrl) {
             saveType = 'full';
+            checkForConflict = false;
             url = opts.saveUrl;
         }
     }
