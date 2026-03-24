@@ -633,6 +633,44 @@ describe("Vellum core", function () {
             assert.equal(savedAs, "full");
             assert.equal(vellum.data.core.lastSavedXForm, NEW_FORM);
         });
+
+    });
+
+    describe("patch encoding", function () {
+        // Use long text so the encoded patch stays shorter than formText
+        // (avoids the patch-too-long fallback to full save)
+        var SRV_FORM = new Array(20).join(" line one\n line two\n line three\n line four\n line five\n"),
+            vellum, sentPatch;
+        before(function (done) {
+            util.init({
+                core: {
+                    onReady: function () {
+                        vellum = this;
+                        done();
+                    },
+                    patchUrl: function (data) {
+                        sentPatch = data.patch;
+                        return {status: "ok", sha1: "abc"};
+                    },
+                },
+            });
+        });
+        beforeEach(function () {
+            sentPatch = null;
+            vellum.data.core.saveButton.fire("change");
+            vellum.data.core.lastSavedXForm = SRV_FORM;
+        });
+
+        it("should percent-encode emoji in patch", function () {
+            var emojiForm = SRV_FORM.replace("two", "2 \uD83D\uDCDA");
+            vellum.send(emojiForm, "patch");
+            assert(sentPatch, "patch was not sent");
+            // Emoji should be double-encoded (%F0... → %25F0%25...)
+            // because encodeURI runs before patch_make, then patch_toText
+            // encodes again
+            assert.include(sentPatch, "%25F0%259F%2593%259A");
+            assert.notInclude(sentPatch, "\uD83D\uDCDA");
+        });
     });
 
     describe("with duplicate ID should", function () {
