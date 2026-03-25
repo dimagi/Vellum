@@ -126,6 +126,27 @@ var propertyWidget = function (mug, options) {
         return widget;
     };
 
+function caseTypeDropdownWidget(mug, opts) {
+    var existingCaseTypes = (opts.vellum.data.saveToCase || {}).existingCaseTypes || [];
+    opts.defaultOptions = existingCaseTypes.map(function (ct) {
+        return { text: ct, value: ct };
+    });
+    var widget = widgets.dropdown(mug, opts);
+    widget.postRender = function () {
+        widget.input.select2({
+            tags: true,
+            allowClear: true,
+            placeholder: '',
+        });
+        widget.input.on('remove', function () {
+            if (widget.input.data('select2')) {
+                widget.input.select2('destroy');
+            }
+        });
+    };
+    return widget;
+}
+
 var slugToProp = {
         create: "useCreate",
         update: "useUpdate",
@@ -165,8 +186,8 @@ var slugToProp = {
             "case_type": {
                 lstring: gettext("Case Type"),
                 visibility: 'visible',
-                presence: 'optional',
-                widget: widgets.text,
+                presence: 'required',
+                widget: caseTypeDropdownWidget,
             },
             "case_id": {
                 lstring: gettext("Case ID"),
