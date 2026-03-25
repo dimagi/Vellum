@@ -373,7 +373,15 @@ var slugToProp = {
 
             var actions = [];
             if (createsCase(mug)) {
-                actions.push(simpleNode('create', makeColumns(mug.p.createProperty)));
+                // Include a case_type column in the create action subtree when mug.p.case_type
+                // is set so that the tree shape matches legacy forms that has case_type
+                // under create section alongside other properties.
+                var createProps = {};
+                if (mug.p.case_type) {
+                    createProps.case_type = {};
+                }
+                _.extend(createProps, mug.p.createProperty);
+                actions.push(simpleNode('create', makeColumns(createProps)));
             }
 
             if (updatesCase(mug)) {
@@ -422,6 +430,14 @@ var slugToProp = {
                     ret = ret.concat({
                         nodeset: mug.absolutePath + "/case/@case_id",
                         calculate: mug.p.case_id
+                    });
+                }
+                // Emit /case/create/case_type from mug.p.case_type so XForm matches legacy
+                // save-to-case layout (create subtree) while the UI keeps Case Type top-level.
+                if (mug.p.case_type) {
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case/create/case_type",
+                        calculate: mug.p.case_type
                     });
                 }
                 ret = ret.concat(generateBinds('create', mug.p.createProperty));
@@ -634,11 +650,20 @@ $.vellum.plugin("saveToCase", {}, {
                 if (mug && mug.__className === "SaveToCase") {
                     if (matchRet[2]) {
                         var prop = matchRet[2],
-                            pKey = {
+                            action = matchRet[1];
+
+                        // Skip create/case_type bind — case_type is set by parseDataNode
+                        // from vellum:case_type. We still consume the bind to prevent it
+                        // from going into createProperty.
+                        if (action === "create" && prop === "case_type") {
+                            return;
+                        }
+
+                        var pKey = {
                                 create: "createProperty",
                                 update: "updateProperty",
                                 index: "indexProperty",
-                            }[matchRet[1]];
+                            }[action];
 
                         if (!mug.p[pKey]) {
                             mug.p[pKey] = {};
