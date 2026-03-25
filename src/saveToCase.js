@@ -131,6 +131,7 @@ function caseTypeDropdownWidget(mug, opts) {
     opts.defaultOptions = existingCaseTypes.map(function (ct) {
         return { text: ct, value: ct };
     });
+    opts.noCustom = true;
     var widget = widgets.dropdown(mug, opts);
     widget.postRender = function () {
         widget.input.select2({
