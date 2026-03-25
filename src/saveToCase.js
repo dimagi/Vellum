@@ -550,6 +550,12 @@ var slugToProp = {
     };
 
 $.vellum.plugin("saveToCase", {}, {
+    init: function () {
+        var opts = this.opts().saveToCase || {};
+        this.data.saveToCase = {
+            existingCaseTypes: opts.existingCaseTypes || [],
+        };
+    },
     getAdvancedQuestions: function () {
         return this.__callOld().concat(["SaveToCase"]);
     },
