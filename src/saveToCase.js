@@ -133,11 +133,25 @@ function caseTypeDropdownWidget(mug, opts) {
     });
     opts.noCustom = true;
     var widget = widgets.dropdown(mug, opts);
+
+    var super_updateValue = widget.updateValue;
+    widget.updateValue = function () {
+        var val = widget.getValue();
+        if (val && /\s/.test(val)) {
+            widget.setValue(val.replace(/\s/g, '_'));
+        }
+        super_updateValue();
+    };
+
     widget.postRender = function () {
         widget.input.select2({
             tags: true,
             allowClear: true,
             placeholder: '',
+            createTag: function (params) {
+                var term = params.term.replace(/\s/g, '_');
+                return { id: term, text: term };
+            },
         });
         widget.input.on('remove', function () {
             if (widget.input.data('select2')) {
