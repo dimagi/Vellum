@@ -147,7 +147,7 @@ function caseTypeDropdownWidget(mug, opts) {
         widget.input.select2({
             tags: true,
             allowClear: true,
-            placeholder: '',
+            placeholder: gettext('Select a case type or create a new one'),
             createTag: function (params) {
                 var term = params.term.replace(/\s/g, '_');
                 return { id: term, text: term };
