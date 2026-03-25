@@ -203,6 +203,7 @@ describe("The SaveToCase module", function() {
             save: {
                 "/data/group/save_to_case_in_group": {
                     "case_type": "child",
+                    "case_id": "'case_id_in_group'",
                     "close": false,
                     "create": false,
                     "properties": [
@@ -212,6 +213,7 @@ describe("The SaveToCase module", function() {
                 },
                 "/data/save_to_case_create": {
                     "case_type": "mother",
+                    "case_id": "'case_id_normal'",
                     "close": false,
                     "create": true,
                     "properties": [
@@ -223,6 +225,7 @@ describe("The SaveToCase module", function() {
                 },
                 "/data/save_to_case_close": {
                     "case_type": "close_case",
+                    "case_id": "'case_id_close'",
                     "close": true,
                     "create": false,
                     "properties": []
