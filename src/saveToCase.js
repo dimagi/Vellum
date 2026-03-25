@@ -239,7 +239,7 @@ var slugToProp = {
                 validationFunc: function (mug) {
                     if (mug.p.useCreate) {
                         var props = _.without(_.keys(mug.p.createProperty), ""),
-                            required = ["case_type", "case_name"],
+                            required = ["case_name"],
                             optional = ["owner_id"],
                             legal = _.union(required, optional),
                             illegalProps = _.difference(props, legal),
