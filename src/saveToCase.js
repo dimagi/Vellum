@@ -458,6 +458,7 @@ var CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
             );
             return {
                 case_type: mug.p.case_type || '',
+                case_id: mug.p.case_id || '',
                 properties: _.filter(propertyNames, _.identity), // filter out empty properties
                 create: mug.p.useCreate || false,
                 close: mug.p.useClose || false,
