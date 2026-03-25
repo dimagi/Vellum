@@ -26,7 +26,7 @@ describe("The SaveToCase module", function() {
         util.loadXML(CREATE_PROPERTY_XML);
         var create = util.getMug("save_to_case"),
             props = create.p.createProperty;
-        assert.equal(props.case_type.calculate, "caseType");
+        assert.equal(create.p.case_type, "caseType");
         assert.equal(props.case_name.calculate, "/data/name");
         assert.equal(create.p.useCreate, true);
         assert.equal(props.owner_id.calculate, '/data/meta/userID');
@@ -122,8 +122,8 @@ describe("The SaveToCase module", function() {
             case_id: 'uuid()',
             user_id: 'uuid()',
             useCreate: true,
+            case_type: 'type',
             createProperty: {
-                'case_type': 'type',
                 'case_name': 'name'
             }
         });
@@ -148,10 +148,8 @@ describe("The SaveToCase module", function() {
             user_id: 'uuid()',
             useCreate: true,
         });
+        mug.p.case_type = 'type';
         mug.p.createProperty = {
-            'case_type': {
-                'calculate': 'type'
-            },
             'case_name': {
                 'calculate': 'name',
             },
