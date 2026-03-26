@@ -521,6 +521,12 @@ var slugToProp = {
                 _.keys(mug.p.createProperty || {}),
                 _.keys(mug.p.updateProperty || {})
             );
+            // case_type is now a dedicated field rather than a createProperty entry,
+            // but we still include it in the properties list to keep the data
+            // structure sent to HQ consistent with what it was before.
+            if (mug.p.useCreate && mug.p.case_type) {
+                propertyNames.push("case_type");
+            }
             return {
                 case_type: mug.p.case_type || '',
                 properties: _.filter(propertyNames, _.identity), // filter out empty properties
