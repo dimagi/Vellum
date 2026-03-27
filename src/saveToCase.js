@@ -673,10 +673,14 @@ $.vellum.plugin("saveToCase", {}, {
                         var prop = matchRet[2],
                             action = matchRet[1];
 
-                        // Skip create/case_type bind — case_type is set by parseDataNode
-                        // from vellum:case_type. We still consume the bind to prevent it
-                        // from going into createProperty.
+                        // Consume /case/create/case_type into the top-level Case Type field.
+                        // Prefer a non-empty bind over vellum:case_type
                         if (action === "create" && prop === "case_type") {
+                            var caseTypeBindValue = el.xmlAttr("calculate") || '',
+                                stripped = caseTypeBindValue.replace(/^'(.*)'$/, '$1');
+                            if (stripped) {
+                                mug.p.case_type = stripped;
+                            }
                             return;
                         }
 

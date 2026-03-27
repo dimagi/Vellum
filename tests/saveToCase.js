@@ -8,6 +8,7 @@ import UPDATE_PROPERTY_XML from "static/saveToCase/update_property.xml";
 import INDEX_PROPERTY_XML from "static/saveToCase/index_property.xml";
 import CASE_TYPE_PROPERTY_XML from "static/saveToCase/case_type_property.xml";
 import CREATE_2_PROPERTY_XML from "static/saveToCase/create_2_property.xml";
+import LEGACY_CASE_TYPE_BIND_XML from "static/saveToCase/legacy_case_type_bind.xml";
 import LOGIC_TEST_XML from "static/saveToCase/logic_test.xml";
 import TWO_SAME_NAME_XML from "static/saveToCase/two-same-name.xml";
 
@@ -250,6 +251,31 @@ describe("The SaveToCase module", function() {
                 $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').length,
                 0
             );
+        });
+
+        it("should use non-empty create/case_type bind when vellum:case_type is empty", function () {
+            util.loadXML(LEGACY_CASE_TYPE_BIND_XML);
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'legacy_case_type_input');
+        });
+
+        it("should prefer create/case_type bind when it differs from vellum:case_type", function () {
+            util.loadXML(LEGACY_CASE_TYPE_BIND_XML.replace('vellum:case_type=""', 'vellum:case_type="top_section_case_type"'));
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'legacy_case_type_input');
+        });
+
+        it("should not let empty create/case_type bind override vellum:case_type", function () {
+            util.loadXML(
+                LEGACY_CASE_TYPE_BIND_XML
+                    .replace('vellum:case_type=""', 'vellum:case_type="top_section_case_type"')
+                    .replace(
+                        'calculate="\'legacy_case_type_input\'"',
+                        'calculate=""'
+                    )
+            );
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'top_section_case_type');
         });
     });
 
