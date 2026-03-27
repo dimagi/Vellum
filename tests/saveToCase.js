@@ -300,9 +300,9 @@ describe("The SaveToCase module", function() {
                     "create": true,
                     "properties": [
                         "case_name",
-                        "case_type",
                         "p1",
-                        "p2"
+                        "p2",
+                        "case_type",
                     ]
                 },
                 "/data/save_to_case_close": {
