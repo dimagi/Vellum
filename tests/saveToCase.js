@@ -193,6 +193,66 @@ describe("The SaveToCase module", function() {
         assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "pass");
     });
 
+    describe("create/case_type backward compatibility", function () {
+        it("should generate create/case_type node and bind from top-section case_type", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'uuid()',
+                useCreate: true,
+                case_type: 'household',
+                createProperty: {
+                    'case_name': { 'calculate': 'name' },
+                }
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find('stc').xmlAttr('vellum:case_type'), 'household');
+            assert.equal($xml.find('create case_type').length, 1);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').attr('calculate'),
+                'household'
+            );
+        });
+
+        it("should not generate create/case_type node when case_type is empty", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'uuid()',
+                useCreate: true,
+                createProperty: {
+                    'case_name': { 'calculate': 'name' },
+                }
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find('create case_type').length, 0);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').length,
+                0
+            );
+        });
+
+        it("should not generate create/case_type for non-create actions", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'a-real-exisitng-case-id',
+                case_type: 'household',
+                useUpdate: true,
+                updateProperty: {
+                    'name': { 'calculate': '/data/name' },
+                }
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find('stc').xmlAttr('vellum:case_type'), 'household');
+            assert.equal($xml.find('create').length, 0);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').length,
+                0
+            );
+        });
+    });
+
     it("should provide case references to the logic manager", function () {
         var form = util.loadXML(LOGIC_TEST_XML),
             manager = form._logicManager;
