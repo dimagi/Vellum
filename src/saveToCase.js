@@ -148,9 +148,13 @@ function caseTypeDropdownWidget(mug, opts) {
         super_updateValue();
     };
 
-    widget.postRender = function () {
+    function initSelect2() {
+        var value = widget.input.val();
+        if (widget.input.data('select2')) {
+            widget.input.select2('destroy');
+        }
         widget.input.select2({
-            tags: true,
+            tags: createsCase(mug),
             allowClear: true,
             placeholder: gettext('Select a case type or create a new one'),
             createTag: function (params) {
@@ -158,6 +162,16 @@ function caseTypeDropdownWidget(mug, opts) {
                 return { id: term, text: term };
             },
         });
+        widget.input.val(value).trigger('change.select2');
+    }
+
+    widget.postRender = function () {
+        initSelect2();
+        mug.on('property-changed', function (e) {
+            if (e.property === 'useCreate') {
+                initSelect2();
+            }
+        }, null, 'teardown-mug-properties');
         widget.input.on('remove', function () {
             if (widget.input.data('select2')) {
                 widget.input.select2('destroy');

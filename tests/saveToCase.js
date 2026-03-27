@@ -92,6 +92,32 @@ describe("The SaveToCase module", function() {
         util.assertXmlEqual(call("createXML"), CASE_TYPE_PROPERTY_XML);
     });
 
+    it("should only allow custom case types for create actions", function () {
+        util.loadXML("");
+        util.addQuestion("SaveToCase", "stc_update", {
+            case_id: 'a-real-exisitng-case-id',
+            case_type: 'household',
+            useUpdate: true,
+            updateProperty: {
+                'name': { 'calculate': '/data/name' },
+            }
+        });
+        util.addQuestion("SaveToCase", "stc_create", {
+            case_id: 'uuid()',
+            case_type: 'household',
+            useCreate: true,
+            createProperty: {
+                'case_name': { 'calculate': '/data/name' },
+            }
+        });
+
+        util.clickQuestion("stc_update");
+        assert.strictEqual($("[name=property-case_type]").data('select2').options.options.tags, false);
+
+        util.clickQuestion("stc_create");
+        assert.strictEqual($("[name=property-case_type]").data('select2').options.options.tags, true);
+    });
+
     it("should support two questions with same name", function () {
         util.loadXML(TWO_SAME_NAME_XML);
         var one = util.getMug("one/save"),
