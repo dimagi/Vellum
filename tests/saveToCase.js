@@ -259,6 +259,12 @@ describe("The SaveToCase module", function() {
             assert.equal(mug.p.case_type, 'legacy_case_type_input');
         });
 
+        it("should show parsed create/case_type bind value in the Case Type widget", function () {
+            util.loadXML(LEGACY_CASE_TYPE_BIND_XML);
+            util.clickQuestion("question1");
+            assert.equal($("[name=property-case_type]").val(), "legacy_case_type_input");
+        });
+
         it("should prefer create/case_type bind when it differs from vellum:case_type", function () {
             util.loadXML(LEGACY_CASE_TYPE_BIND_XML.replace('vellum:case_type=""', 'vellum:case_type="top_section_case_type"'));
             var mug = util.getMug("question1");
