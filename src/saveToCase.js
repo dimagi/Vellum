@@ -499,12 +499,19 @@ var slugToProp = {
                 displayName: gettext("Basic"),
                 properties: [
                     "nodeID",
-                    "date_modified",
-                    "user_id",
                     "case_type",
                     "case_id",
                     "caseActions",
                 ],
+            },
+            {
+                slug: "advanced",
+                displayName: gettext("Advanced"),
+                properties: [
+                    "date_modified",
+                    "user_id",
+                ],
+                isCollapsed: true,
             },
             {
                 slug: "create",
@@ -582,6 +589,16 @@ $.vellum.plugin("saveToCase", {}, {
         types.normal.SaveToCase = util.extend(
             mugs.defaultOptions, saveToCaseMugOptions);
         return types;
+    },
+    displayMugProperties: function (mug) {
+        this.__callOld();
+        if (mug.__className !== "SaveToCase") {
+            return;
+        }
+        widgets.util.addCollapseToggle('advanced', {
+            showText: gettext("View Advanced"),
+            hideText: gettext("Hide Advanced"),
+        });
     },
     getSections: function (mug) {
         if (sectionData.hasOwnProperty(mug.__className)) {
