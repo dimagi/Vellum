@@ -935,13 +935,22 @@ function getWidget(input, vellum) {
 
 function addCollapseToggle(slug, options) {
     var $section = $(".fd-question-fieldset[data-slug='" + slug + "']"),
-        collapseId = 'fd-collapse-' + slug;
+        collapseId = 'fd-collapse-' + slug,
+        $content = $section.find('.fd-fieldset-content');
     $section.find('legend').hide();
     $section.removeClass('hide');
-    $section.find('.fd-fieldset-content')
-        .attr('id', collapseId)
-        .addClass('collapse');
+    $content.attr('id', collapseId).addClass('collapse');
     $section.before(collapse_toggle($.extend({collapseId: collapseId}, options)));
+
+    if (options.mug) {
+        var expandIfMessages = function () {
+            if ($content.find('.messages').children().length) {
+                $content.collapse('show');
+            }
+        };
+        options.mug.on("messages-changed", expandIfMessages, null, "teardown-mug-properties");
+        expandIfMessages();
+    }
 }
 
 function setWidget($el, widget) {

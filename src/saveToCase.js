@@ -598,6 +598,7 @@ $.vellum.plugin("saveToCase", {}, {
         widgets.util.addCollapseToggle('advanced', {
             showText: gettext("View Advanced"),
             hideText: gettext("Hide Advanced"),
+            mug: mug,
         });
     },
     getSections: function (mug) {
