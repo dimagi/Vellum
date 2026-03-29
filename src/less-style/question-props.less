@@ -121,6 +121,34 @@
                 }
             }
         }
+
+        .fd-question-fieldset[data-slug='advanced'] {
+            legend {
+                display: none;
+            }
+        }
+
+        .fd-collapse-toggle {
+            padding: 10px 0;
+            &:has(button.collapsed) {
+                margin-bottom: 20px;
+            }
+            button {
+                background: none;
+                border: none;
+                padding: 0;
+                color: @cc-brand-mid;
+                &:hover {
+                    color: darken(@cc-brand-mid, 10%);
+                }
+                &.collapsed .fd-collapse-hide {
+                    display: none;
+                }
+                &:not(.collapsed) .fd-collapse-show {
+                    display: none;
+                }
+            }
+        }
     }
 
     .fd-chips {

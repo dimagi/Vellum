@@ -1,3 +1,4 @@
+import collapse_toggle from "vellum/templates/collapse_toggle.html";
 import ui_element from "vellum/templates/ui_element.html";
 import widget_chips_template from "vellum/templates/widget_chips.html";
 import widget_control_keyvalue from "vellum/templates/widget_control_keyvalue.html";
@@ -932,6 +933,17 @@ function getWidget(input, vellum) {
     return null;
 }
 
+function addCollapseToggle(slug, options) {
+    var $section = $(".fd-question-fieldset[data-slug='" + slug + "']"),
+        collapseId = 'fd-collapse-' + slug;
+    $section.find('legend').hide();
+    $section.removeClass('hide');
+    $section.find('.fd-fieldset-content')
+        .attr('id', collapseId)
+        .addClass('collapse');
+    $section.before(collapse_toggle($.extend({collapseId: collapseId}, options)));
+}
+
 function setWidget($el, widget) {
     $el.data("vellum_widget", widget);
     return $el;
@@ -958,6 +970,7 @@ export default {
         setWidget: setWidget,
         getMessages: getMessages,
         getUIElementWithEditButton: getUIElementWithEditButton,
-        getUIElement: getUIElement
+        getUIElement: getUIElement,
+        addCollapseToggle: addCollapseToggle
     }
 };
