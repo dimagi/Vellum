@@ -127,7 +127,7 @@ var propertyWidget = function (mug, options) {
     };
 
 function caseTypeDropdownWidget(mug, opts) {
-    var existingCaseTypes = (opts.vellum.data.saveToCase || {}).existingCaseTypes || [];
+    var existingCaseTypes = opts.vellum.data.saveToCase?.existingCaseTypes || [];
     // Keep parsed Case Type values visible in the dropdown even when they are
     // not present in configured case type options.
     if (mug.p.case_type && !_.contains(existingCaseTypes, mug.p.case_type)) {
