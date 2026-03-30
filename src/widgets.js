@@ -943,11 +943,11 @@ function addCollapseToggle(slug, options) {
     $section.before(collapse_toggle($.extend({collapseId: collapseId}, options)));
 
     if (options.mug) {
-        var expandIfMessages = function () {
+        function expandIfMessages() {
             if ($content.find('.messages').children().length) {
                 $content.collapse('show');
             }
-        };
+        }
         options.mug.on("messages-changed", expandIfMessages, null, "teardown-mug-properties");
         expandIfMessages();
     }
