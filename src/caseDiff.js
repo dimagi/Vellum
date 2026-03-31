@@ -12,7 +12,7 @@ export function compareCaseMappings (baseline, incoming) {
         if (Object.hasOwn(baseline, key) && Object.hasOwn(incoming, key)) {
             const cache = {};
             incoming[key].forEach(item => {
-                const num = countExactMataches(item, baseline[key], incoming[key], cache);
+                const num = countExactMatches(item, baseline[key], incoming[key], cache);
                 if (num === null || num > 0) {
                     push(key, item, additions);
                 } else if (num < 0) {
@@ -20,7 +20,7 @@ export function compareCaseMappings (baseline, incoming) {
                 }
             });
             baseline[key].forEach(item => {
-                const num = countExactMataches(item, baseline[key], incoming[key], cache);
+                const num = countExactMatches(item, baseline[key], incoming[key], cache);
                 if (num === null || num < 0) {
                     push(key, item, deletions);
                 }
@@ -61,8 +61,14 @@ function push(key, item, mapping) {
  * time this function is called. Once cached, the cached difference
  * (which remains zero once zero) is returned.
  */
-function countExactMataches(item, baseline, incoming, cache) {
-    const key = Object.keys(item).sort().map(k => `${k}=${item[k]}`).join(' ');
+function countExactMatches(item, baseline, incoming, cache) {
+    const key = Object.keys(item)
+        .sort()
+        .map(k => {
+            const v = item[k];
+            return `${k}:${typeof v}=${String(v)}`;
+        })
+        .join(' ');
     let num = cache[key];
     if (num === undefined) {
         const nBaseline = baseline.filter(q => _.isEqual(q, item)).length;
