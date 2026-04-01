@@ -340,6 +340,8 @@ describe("The SaveToCase module", function() {
             );
             var mug = util.getMug("question1");
             assert.equal(mug.p.case_type, 'top_section_case_type');
+        });
+    });
     describe("case_id validation", function () {
         var mug;
         beforeEach(function () {
