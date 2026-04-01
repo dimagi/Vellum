@@ -31,6 +31,25 @@ function usesCases(mug) {
         indexesCase(mug);
 }
 
+// Try to resolve an xpath expression to a string literal.
+// Handles:
+//   - Quoted strings:  'household'  →  household
+//   - Path references:  /data/q     →  follow the question's calculateAttr
+function resolveToLiteral(form, expr) {
+    if (!expr) {
+        return null;
+    }
+    var quotedMatch = expr.match(/^'([^']*)'$/);
+    if (quotedMatch) {
+        return quotedMatch[1] || null;
+    }
+    var refMug = form.getMugByPath(expr);
+    if (refMug && refMug.p.calculateAttr) {
+        return resolveToLiteral(form, refMug.p.calculateAttr);
+    }
+    return null;
+}
+
 var propertyWidget = function (mug, options) {
         var widget = widgets.normal(mug, options),
             id = options.id,
@@ -145,6 +164,8 @@ function caseTypeDropdownWidget(mug, opts) {
         if (val && /\s/.test(val)) {
             widget.setValue(val.replace(/\s/g, '_'));
         }
+        // User chose a value directly; drop any stashed xpath reference
+        mug.p._caseTypeCalc = null;
         super_updateValue();
     };
 
@@ -466,12 +487,13 @@ var slugToProp = {
                         calculate: mug.p.case_id
                     });
                 }
-                // Emit /case/create/case_type from mug.p.case_type so XForm matches legacy
-                // save-to-case layout (create subtree) while the UI keeps Case Type top-level.
+                // Emit /case/create/case_type bind.
+                // Use the original xpath reference if available,
+                // otherwise wrap the literal in single quotes.
                 if (mug.p.case_type) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/create/case_type",
-                        calculate: "'" + mug.p.case_type + "'"
+                        calculate: mug.p._caseTypeCalc || "'" + mug.p.case_type + "'"
                     });
                 }
                 ret = ret.concat(generateBinds('create', mug.p.createProperty));
@@ -652,6 +674,15 @@ $.vellum.plugin("saveToCase", {}, {
                 return value === inner;
             });
         }
+        if (mug.p._caseTypeCalc) {
+            var resolved = resolveToLiteral(mug.form, mug.p._caseTypeCalc);
+            if (resolved) {
+                mug.p.case_type = resolved;
+            } else {
+                // drop the stashed xpath reference if it's not resolvable
+                mug.p._caseTypeCalc = null;
+            }
+        }
     },
     getMugToolbar: function (mug, multiselect) {
         var $toolbar = this.__callOld();
@@ -692,12 +723,15 @@ $.vellum.plugin("saveToCase", {}, {
                         var prop = matchRet[2],
                             action = matchRet[1];
 
-                        // Consume /case/create/case_type into the top-level Case Type field.
-                        // Prefer a non-empty bind over vellum:case_type
                         if (action === "create" && prop === "case_type") {
                             var caseTypeBindValue = el.xmlAttr("calculate") || '',
                                 stripped = caseTypeBindValue.replace(/^'(.*)'$/, '$1');
-                            if (stripped) {
+                            if (stripped && stripped === caseTypeBindValue) {
+                                // No quotes stripped — xpath expression;
+                                // stash for resolution in handleMugParseFinish
+                                mug.p._caseTypeCalc = caseTypeBindValue;
+                            } else if (stripped) {
+                                // Route create/case_type to the Case Type dropdown.
                                 mug.p.case_type = stripped;
                             }
                             return;

@@ -9,6 +9,7 @@ import INDEX_PROPERTY_XML from "static/saveToCase/index_property.xml";
 import CASE_TYPE_PROPERTY_XML from "static/saveToCase/case_type_property.xml";
 import CREATE_2_PROPERTY_XML from "static/saveToCase/create_2_property.xml";
 import LEGACY_CASE_TYPE_BIND_XML from "static/saveToCase/legacy_case_type_bind.xml";
+import XPATH_CASE_TYPE_XML from "static/saveToCase/xpath_case_type.xml";
 import LOGIC_TEST_XML from "static/saveToCase/logic_test.xml";
 import TWO_SAME_NAME_XML from "static/saveToCase/two-same-name.xml";
 
@@ -295,6 +296,37 @@ describe("The SaveToCase module", function() {
             util.loadXML(LEGACY_CASE_TYPE_BIND_XML.replace('vellum:case_type=""', 'vellum:case_type="top_section_case_type"'));
             var mug = util.getMug("question1");
             assert.equal(mug.p.case_type, 'legacy_case_type_input');
+        });
+
+        it("should resolve xpath case_type reference to a literal", function () {
+            util.loadXML(XPATH_CASE_TYPE_XML);
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, "household");
+            assert.equal(mug.p._caseTypeCalc, "/data/case_type_val");
+            assert.equal(
+                mug.p.createProperty.case_type,
+                undefined
+            );
+        });
+
+        it("should preserve xpath reference in generated bind", function () {
+            util.loadXML(XPATH_CASE_TYPE_XML);
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/question1/case/create/case_type"]').attr('calculate'),
+                '/data/case_type_val'
+            );
+        });
+
+        it("should drop bare words without quotes as invalid xpath", function () {
+            util.loadXML(XPATH_CASE_TYPE_XML.replace(
+                "calculate=\"/data/case_type_val\"",
+                "calculate=\"worker_role\""
+            ));
+            var mug = util.getMug("question1");
+            assert.notOk(mug.p.case_type);
+            assert.notOk(mug.p._caseTypeCalc);
         });
 
         it("should not let empty create/case_type bind override vellum:case_type", function () {
