@@ -145,6 +145,8 @@ var propertyWidget = function (mug, options) {
         return widget;
     };
 
+var CASE_TYPE_REGEX = /^[\w-]+$/;
+
 function caseTypeDropdownWidget(mug, opts) {
     var existingCaseTypes = opts.vellum.data.saveToCase?.existingCaseTypes || [];
     // Keep parsed Case Type values visible in the dropdown even when they are
@@ -243,6 +245,21 @@ var slugToProp = {
                 visibility: 'visible',
                 presence: 'required',
                 widget: caseTypeDropdownWidget,
+                validationFunc: function (mug) {
+                    var val = mug.p.case_type;
+                    if (val && !CASE_TYPE_REGEX.test(val)) {
+                        return gettext("Case types can only include the characters a-z, 0-9, '-' and '_'");
+                    }
+                    if (val === 'commcare-user') {
+                        if (createsCase(mug) || closesCase(mug) || indexesCase(mug)) {
+                            return gettext("'commcare-user' cases can only be updated, not created, closed, or linked");
+                        }
+                    }
+                    if (val === 'user-owner-mapping-case') {
+                        return gettext("This is a reserved case type. Please choose another name.");
+                    }
+                    return 'pass';
+                },
             },
             "case_id": {
                 lstring: gettext("Case ID"),
