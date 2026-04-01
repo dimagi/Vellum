@@ -471,7 +471,7 @@ var slugToProp = {
                 if (mug.p.case_type) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/create/case_type",
-                        calculate: mug.p.case_type
+                        calculate: "'" + mug.p.case_type + "'"
                     });
                 }
                 ret = ret.concat(generateBinds('create', mug.p.createProperty));

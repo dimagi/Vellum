@@ -237,7 +237,7 @@ describe("The SaveToCase module", function() {
             assert.equal($xml.find('create case_type').length, 1);
             assert.equal(
                 $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').attr('calculate'),
-                'household'
+                "'household'"
             );
         });
 
