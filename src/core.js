@@ -2274,8 +2274,19 @@ fn.send = function (formText, saveType) {
     if (saveType === 'patch') {
         checkForConflict = true;
         var dmp = new diff_match_patch();
+        // Diffing raw text with emoji causes two problems:
+        // 1. The diff algorithm can split an emoji's surrogate pair, and
+        //    a lone surrogate causes encodeURI (in patch_toText) to throw.
+        // 2. Even if the patch is generated, JS counts emoji as 2 chars
+        //    (UTF-16 code units) but Python counts them as 1 (code point),
+        //    so patch coordinates won't align when Python applies the patch.
+        // Pre-encoding with encodeURI converts emoji to ASCII (%XX sequences),
+        // avoiding both issues. patch_toText double-encodes (% → %25), which
+        // Python's patch_fromText reverses with unquote.
+        var encodedLastSaved = encodeURI(this.data.core.lastSavedXForm);
+        var encodedFormText = encodeURI(formText);
         patch = dmp.patch_toText(
-            dmp.patch_make(this.data.core.lastSavedXForm, formText)
+            dmp.patch_make(encodedLastSaved, encodedFormText)
         );
         // abort if diff too long and send full instead
         if (patch.length > formText.length && opts.saveUrl) {

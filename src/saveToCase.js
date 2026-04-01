@@ -175,6 +175,24 @@ var slugToProp = {
                 widget: widgets.xPath,
                 serialize: mugs.serializeXPath,
                 deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    var value = mug.p.case_id;
+                    if (!value) {
+                        return gettext("Case ID is required");
+                    }
+                    var hasPathOrFunctionCall = /\/|[a-z]+\(.+\)/.test(value);
+                    var isUuid = value === 'uuid()';
+                    if (/uuid\([^)]+\)/.test(value)) {
+                        return gettext("uuid() should not have arguments");
+                    }
+                    if (!hasPathOrFunctionCall && !isUuid) {
+                        return gettext("Case ID must be an XPath expression");
+                    }
+                    if (!createsCase(mug) && isUuid) {
+                        return gettext("Case ID cannot be uuid() without a Create action. It must reference an existing case.");
+                    }
+                    return 'pass';
+                },
             },
             caseActions: {
                 lstring: gettext("Case Actions"),
