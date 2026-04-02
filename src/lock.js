@@ -10,6 +10,7 @@ import "vellum/core";
 import widgets from "vellum/widgets";
 
 const LOCKED_BIND_ATTR = "vellum:lock"
+const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit"
 
 $.vellum.plugin("lock", {}, {
     parseBindElement: function (form, el, path) {
@@ -18,6 +19,18 @@ $.vellum.plugin("lock", {}, {
         if (locked && locked === 'all') {
             const mug = form.getMugByPath(path);
             mug.p.set('locked', true);
+
+            if (!this.opts().features.edit_locked_questions) {
+                const message = {
+                    key: LOCKED_UNEDITABLE_MSG_KEY,
+                    message: gettext(
+                            "This question is locked and can only be edited by a user with the locked "
+                            + "questions permission."
+                        ),
+                    level: mug.INFO,
+                };
+                mug.addMessage('locked', message);
+            }
         }
     },
     getMainProperties: function () {

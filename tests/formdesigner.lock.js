@@ -123,6 +123,12 @@ describe("The Lock plugin", function() {
                 });
             });
 
+            it("does not add the 'cannot edit' message to locked questions", function () {
+                const mug = getMug('/data/locked');
+                const msg = mug.messages.get('locked', 'mug-locked-cannot-edit');
+                assert.isNull(msg);
+            });
+
             it("makes the locked property visible for all questions", function () {
                 const mug = getMug('/data/unlocked');
                 const spec = mug.spec.locked;
@@ -138,6 +144,12 @@ describe("The Lock plugin", function() {
 
         describe("without the feature enabled", function () {
             before(beforeFn);
+
+            it("adds the 'cannot edit' message to locked questions", function () {
+                const mug = getMug('/data/locked');
+                const msg = mug.messages.get('locked', 'mug-locked-cannot-edit');
+                assert(msg, "expected 'cannot edit' message on locked mug");
+            });
 
             it("makes the locked property visible only if present", function () {
                 const mug = getMug('/data/unlocked');
