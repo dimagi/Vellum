@@ -1179,7 +1179,7 @@ fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
     }
     if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
-    var locked = !this.isMugPathMoveable(sourceMug.hashtagPath);
+    var locked = !this.isMugPathMoveable(sourceMug, sourceMug.hashtagPath);
     if (locked) {
         if (position === 'into' || position === 'last' || position === 'first') {
             return sourceMug.parentMug === targetMug;
@@ -2486,11 +2486,11 @@ fn.isMugRemoveable = function (mug, path) {
     return mug.options.isRemoveable;
 };
 
-fn.isPropertyLocked = function (mugPath, propertyPath) {
+fn.isPropertyLocked = function (mug, mugPath, propertyPath) {
     return false;
 };
 
-fn.isMugPathMoveable = function (mugPath) {
+fn.isMugPathMoveable = function (mug, mugPath) {
     return true;
 };
 

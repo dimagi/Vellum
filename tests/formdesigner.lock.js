@@ -12,6 +12,7 @@ import TEST_XML from "tests/static/lock/test.xml";
 
 var assert = chai.assert,
     clickQuestion = util.clickQuestion,
+    getMug = util.getMug,
     call = util.call,
     getInput = util.getInput;
 
@@ -30,17 +31,17 @@ function beforeFn(done) {
 describe("The Lock plugin", function() {
     before(beforeFn);
 
-    function locked(mugPath, property) {
-        return call('isPropertyLocked', mugPath, property);
+    function locked(path, propertyPath) {
+        return call('isPropertyLocked', getMug(path), propertyPath);
     }
-    function moveable(mugPath) {
-        return call('isMugPathMoveable', mugPath);
+    function moveable(path) {
+        return call('isMugPathMoveable', getMug(path));
     }
-    function deleteable(mugPath) {
-        return call('isMugRemoveable', call('getMugByPath', mugPath), mugPath);
+    function deleteable(path) {
+        return call('isMugRemoveable', getMug(path));
     }
-    function changeable(mugPath) {
-        return call('isMugTypeChangeable', call('getMugByPath', mugPath), mugPath);
+    function changeable(path) {
+        return call('isMugTypeChangeable', getMug(path));
     }
 
     it("preserves XML with vellum:lock attributes", function () {
