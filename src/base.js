@@ -12,7 +12,6 @@ var corePlugins = [
         'core',
         'intents',
         'javaRosa',
-        'lock',
         'ignore',
         'uploader',
         'windowManager',

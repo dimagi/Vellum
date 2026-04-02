@@ -18,6 +18,7 @@ var assert = chai.assert,
 function beforeFn(done) {
     util.init({
         javaRosa: {langs: ['en']},
+        plugins: ['lock'],
         core: {
             onReady: function () {
                 call('loadXFormOrError', TEST_XML, done);
