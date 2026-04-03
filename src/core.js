@@ -1172,23 +1172,15 @@ fn.getRelativePosition = function (mug, position) {
 
 fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
     var form = this.data.core.form,
-        targetMug = form.getMugByUFID(dstId),
         sourceMug = form.getMugByUFID(srcId);
     if (!sourceMug) {
         return false;
     }
-    if (position === 'inside') { position = 'into'; } // normalize for Vellum
-
-    var locked = !this.isMugPathMoveable(sourceMug);
-    if (locked) {
-        if (position === 'into' || position === 'last' || position === 'first') {
-            return sourceMug.parentMug === targetMug;
-        } else {
-            return sourceMug.parentMug === targetMug.parentMug;
-        }
+    if (this.isMugPathMoveable(sourceMug)) {
+        return true;
     }
 
-    return true;
+    return srcId === dstId;
 };
 
 fn.onFormChange = function (mug) {
