@@ -1179,7 +1179,7 @@ fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
     }
     if (position === 'inside') { position = 'into'; } // normalize for Vellum
 
-    var locked = !this.isMugPathMoveable(sourceMug, sourceMug.hashtagPath);
+    var locked = !this.isMugPathMoveable(sourceMug);
     if (locked) {
         if (position === 'into' || position === 'last' || position === 'first') {
             return sourceMug.parentMug === targetMug;
@@ -2069,7 +2069,7 @@ fn.getMugToolbar = function (mug, multiselect) {
         $baseToolbar = $(question_toolbar({
             comment: multiselect ? '' : richText.sanitizeInput(mug.p.comment),
             isDeleteable: mugs && mugs.length && _.every(mugs, function (mug) {
-                return _this.isMugRemoveable(mug, mug.hashtagPath);
+                return _this.isMugRemoveable(mug);
             }),
             isCopyable: !multiselect && mug.options.isCopyable,
             sections: multiselect ? [] : _.chain(_this.getSections(mug))
@@ -2128,7 +2128,7 @@ fn.getQuestionTypeChanger = function (mug) {
         }
         return ret;
     };
-    var changeable = this.isMugTypeChangeable(mug, mug.hashtagPath);
+    var changeable = this.isMugTypeChangeable(mug);
 
     var $questionTypeChanger = $(question_type_changer({
         currentQuestionIcon: mug.getIcon(),
@@ -2482,19 +2482,19 @@ fn.getMugSpec = function () {
     return mugs.baseSpecs;
 };
 
-fn.isMugRemoveable = function (mug, path) {
+fn.isMugRemoveable = function (mug) {
     return mug.options.isRemoveable;
 };
 
-fn.isPropertyLocked = function (mug, mugPath, propertyPath) {
+fn.isPropertyLocked = function (mug, propertyPath) {
     return false;
 };
 
-fn.isMugPathMoveable = function (mug, mugPath) {
+fn.isMugPathMoveable = function (mug) {
     return true;
 };
 
-fn.isMugTypeChangeable = function (mug, mugPath) {
+fn.isMugTypeChangeable = function (mug) {
     return mug.options.isTypeChangeable;
 };
 

@@ -63,16 +63,16 @@ $.vellum.plugin("lock", {}, {
         };
         return spec;
     },
-    isPropertyLocked: function (mug, mugPath, propertyPath) {
+    isPropertyLocked: function (mug, propertyPath) {
         return this.__callOld() || mug.p.locked;
     },
-    isMugPathMoveable: function (mug, mugPath) {
+    isMugPathMoveable: function (mug) {
         return this.__callOld() && !mug.p.locked;
     },
-    isMugRemoveable: function (mug, mugPath) {
+    isMugRemoveable: function (mug) {
         return this.__callOld() && !mug.p.locked;
     },
-    isMugTypeChangeable: function (mug, mugPath) {
+    isMugTypeChangeable: function (mug) {
         return this.__callOld() && !mug.p.locked;
     },
 });

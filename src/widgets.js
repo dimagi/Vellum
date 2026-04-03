@@ -29,11 +29,7 @@ var base = function(mug, options) {
             return !mug.spec[widget.path].enabled(mug);
         }
 
-        return mug.form.vellum.isPropertyLocked(
-            mug, 
-            mug.hashtagPath,
-            widget.path,
-        );
+        return mug.form.vellum.isPropertyLocked(mug, widget.path);
     };
 
     widget.getDisplayName = function () {
