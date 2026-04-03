@@ -329,6 +329,18 @@ describe("The SaveToCase module", function() {
             assert.notOk(mug.p._caseTypeCalc);
         });
 
+        it("should parse double-quoted case_type literal", function () {
+            util.loadXML(
+                LEGACY_CASE_TYPE_BIND_XML
+                    .replace(
+                        "calculate=\"'legacy_case_type_input'\"",
+                        'calculate="&quot;legacy_case_type_input&quot;"'
+                    )
+            );
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'legacy_case_type_input');
+        });
+
         it("should not let empty create/case_type bind override vellum:case_type", function () {
             util.loadXML(
                 LEGACY_CASE_TYPE_BIND_XML
