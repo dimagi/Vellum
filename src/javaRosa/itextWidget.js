@@ -85,6 +85,10 @@ var iTextIDWidget = function (mug, options) {
             .addClass("col-sm-8")
             .after($autoBoxContainer);
 
+        if (widget.isDisabled()) {
+            $autoBoxContainer.find('input').prop('disabled', true);
+        }
+
         return $uiElem;
     };
 

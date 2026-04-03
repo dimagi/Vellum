@@ -783,8 +783,14 @@ var getUIElement = function($input, labelText, isDisabled, help) {
         help: help,
     }));
 
-    // Disable anything that can be disabled
-    $input.find("*").addBack().prop('disabled', !!isDisabled);
+    if (isDisabled) {
+        // Disable anything that can be disabled
+        $input.find("*").addBack().prop('disabled', true);
+        $input.filter('[contenteditable]').attr({
+            'contenteditable': false,
+            'disabled': true,
+        });
+    }
 
     $uiElem.find(".controls").prepend($input);
 
