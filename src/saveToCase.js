@@ -841,8 +841,9 @@ $.vellum.plugin("saveToCase", {}, {
                                 stripped = caseTypeBindValue.replace(/^(['"])(.*)\1$/, '$2');
                             if (stripped && stripped === caseTypeBindValue) {
                                 // No quotes stripped — xpath expression;
-                                // stash for resolution in handleMugParseFinish
+                                // show in xpath field, override vellum:case_type
                                 mug.p.caseTypeXPath = caseTypeBindValue;
+                                mug.p.case_type = '';
                             } else if (stripped) {
                                 // Route create/case_type to the Case Type dropdown.
                                 mug.p.case_type = stripped;
