@@ -353,8 +353,12 @@ var slugToProp = {
                     if (mug.p.case_type || !createsCase(mug)) {
                         return 'pass';
                     }
-                    if (!mug.p.caseTypeXPath) {
+                    var val = mug.p.caseTypeXPath;
+                    if (!val) {
                         return gettext("Case Type is required");
+                    }
+                    if (CASE_TYPE_REGEX.test(val)) {
+                        return gettext("This looks like a literal value. Use the dropdown instead, or wrap it in quotes like '" + val + "'.");
                     }
                     return 'pass';
                 },
