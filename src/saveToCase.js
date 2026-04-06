@@ -172,6 +172,13 @@ function caseTypeDropdownWidget(mug, opts) {
 
     widget.postRender = function () {
         initSelect2();
+        var $dropdownRow = widget.input.closest('.widget');
+        addModeToggle($dropdownRow, gettext('Use an xpath expression'), function () {
+            switchToXpathMode(mug, widget, $dropdownRow);
+        });
+        if (mug.p._caseTypeCalc && !mug.p.case_type) {
+            $dropdownRow.hide();
+        }
         mug.on('property-changed', function (e) {
             if (e.property === 'useCreate') {
                 initSelect2();
@@ -196,7 +203,68 @@ function caseTypeXpathWidget(mug, opts) {
         super_updateValue();
     };
 
+    widget.postRender = function () {
+        var $xpathRow = widget.input.closest('.widget');
+        addModeToggle($xpathRow, gettext('Use a dropdown'), function () {
+            switchToDropdownMode(mug, widget, $xpathRow);
+        });
+        if (!mug.p._caseTypeCalc || mug.p.case_type) {
+            $xpathRow.hide();
+        }
+    };
     return widget;
+}
+
+function addModeToggle($row, text, onClick) {
+    var $link = $('<a href="#" style="font-size:12px;margin-top:4px;display:inline-block;" />')
+        .text(text)
+        .on('click', function (e) {
+            e.preventDefault();
+            onClick();
+        });
+    $row.find('.controls .messages').before($link);
+}
+
+function switchToXpathMode(mug, dropdownWidget, $dropdownRow) {
+    // Save current dropdown value for later restoration
+    mug.p._savedCaseType = mug.p.case_type;
+    mug.p.case_type = '';
+    dropdownWidget.setValue('');
+
+    // Restore previously saved xpath value if any
+    var $xpathRow = $dropdownRow.next('.widget'),
+        xpathWidget = $xpathRow.data('vellum_widget');
+    if (mug.p._savedCaseTypeCalc && xpathWidget) {
+        mug.p._caseTypeCalc = mug.p._savedCaseTypeCalc;
+        xpathWidget.setValue(mug.p._savedCaseTypeCalc);
+        mug.p._savedCaseTypeCalc = null;
+    }
+
+    $dropdownRow.hide();
+    $xpathRow.show();
+}
+
+function switchToDropdownMode(mug, xpathWidget, $xpathRow) {
+    // Save current xpath value for later restoration
+    mug.p._savedCaseTypeCalc = mug.p._caseTypeCalc;
+    mug.p._caseTypeCalc = null;
+    xpathWidget.setValue('');
+
+    // Restore previously saved dropdown value if any
+    if (mug.p._savedCaseType) {
+        mug.p.case_type = mug.p._savedCaseType;
+        mug.p._savedCaseType = null;
+    }
+
+    var $dropdownRow = $xpathRow.prev('.widget'),
+        dropdownWidget = $dropdownRow.data('vellum_widget');
+    if (dropdownWidget) {
+        dropdownWidget.setValue(mug.p.case_type);
+        dropdownWidget.handleChange();
+    }
+
+    $xpathRow.hide();
+    $dropdownRow.show();
 }
 
 var slugToProp = {
