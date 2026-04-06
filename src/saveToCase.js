@@ -31,24 +31,6 @@ function usesCases(mug) {
         indexesCase(mug);
 }
 
-// Try to resolve an xpath expression to a string literal.
-// Handles:
-//   - Quoted strings:  'household' or "household"  →  household
-//   - Path references:  /data/q     →  follow the question's calculateAttr
-function resolveToLiteral(form, expr) {
-    if (!expr) {
-        return null;
-    }
-    var quotedMatch = expr.match(/^(['"])([^'"]*)\1$/);
-    if (quotedMatch) {
-        return quotedMatch[2] || null;
-    }
-    var refMug = form.getMugByPath(expr);
-    if (refMug && refMug.p.calculateAttr) {
-        return resolveToLiteral(form, refMug.p.calculateAttr);
-    }
-    return null;
-}
 
 var propertyWidget = function (mug, options) {
         var widget = widgets.normal(mug, options),
@@ -708,15 +690,6 @@ $.vellum.plugin("saveToCase", {}, {
             mug.form.dropSetValues(function(inner) {
                 return value === inner;
             });
-        }
-        if (mug.p._caseTypeCalc) {
-            var resolved = resolveToLiteral(mug.form, mug.p._caseTypeCalc);
-            if (resolved) {
-                mug.p.case_type = resolved;
-            } else {
-                // drop the stashed xpath reference if it's not resolvable
-                mug.p._caseTypeCalc = null;
-            }
         }
     },
     getMugToolbar: function (mug, multiselect) {
