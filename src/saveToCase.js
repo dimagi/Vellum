@@ -186,6 +186,19 @@ function caseTypeDropdownWidget(mug, opts) {
     return widget;
 }
 
+function caseTypeXpathWidget(mug, opts) {
+    var widget = widgets.xPath(mug, opts);
+
+    var super_updateValue = widget.updateValue;
+    widget.updateValue = function () {
+        var val = $.trim(widget.getValue());
+        mug.p._caseTypeCalc = val || null;
+        super_updateValue();
+    };
+
+    return widget;
+}
+
 var slugToProp = {
         create: "useCreate",
         update: "useUpdate",
@@ -225,11 +238,17 @@ var slugToProp = {
             "case_type": {
                 lstring: gettext("Case Type"),
                 visibility: 'visible',
-                presence: 'required',
+                presence: 'optional',
                 widget: caseTypeDropdownWidget,
                 validationFunc: function (mug) {
+                    if (mug.p._caseTypeCalc) {
+                        return 'pass';
+                    }
                     var val = mug.p.case_type;
-                    if (val && !CASE_TYPE_REGEX.test(val)) {
+                    if (!val) {
+                        return gettext("Case Type is required");
+                    }
+                    if (!CASE_TYPE_REGEX.test(val)) {
                         return gettext("Case types can only include the characters a-z, 0-9, '-' and '_'");
                     }
                     if (val === 'commcare-user') {
@@ -239,6 +258,23 @@ var slugToProp = {
                     }
                     if (val === 'user-owner-mapping-case') {
                         return gettext("This is a reserved case type. Please choose another name.");
+                    }
+                    return 'pass';
+                },
+            },
+            "_caseTypeCalc": {
+                lstring: gettext("Case Type"),
+                visibility: 'visible',
+                presence: 'optional',
+                widget: caseTypeXpathWidget,
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    if (mug.p.case_type) {
+                        return 'pass';
+                    }
+                    if (!mug.p._caseTypeCalc) {
+                        return gettext("Case Type is required");
                     }
                     return 'pass';
                 },
@@ -618,6 +654,7 @@ var slugToProp = {
                     "date_modified",
                     "user_id",
                     "case_type",
+                    "_caseTypeCalc",
                     "case_id",
                     "caseActions",
                 ],
