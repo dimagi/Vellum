@@ -7,6 +7,7 @@
  */
 import $ from "jquery";
 import "vellum/core";
+import _ from "underscore";
 import widgets from "vellum/widgets";
 
 const LOCKED_BIND_ATTR = "vellum:lock"
@@ -33,12 +34,27 @@ $.vellum.plugin("lock", {}, {
             }
         }
     },
+    handleMugParseFinish: function (mug) {
+        this.__callOld();
+        if (mug.parentMug
+            && mug.options.isControlOnly
+        ) {
+            mug.p.set('locked', mug.parentMug.p.locked);
+        }
+    },
+    setTreeActions: function (mug) {
+        if (mug.p.locked) {
+            mug.options.canAddChoices = false;
+        }
+        this.__callOld();
+    },
     getMainProperties: function () {
         const properties = this.__callOld();
         properties.splice(1 + properties.indexOf('requiredAttr'), 0, 'locked');
         return properties;
     },
     getMugSpec: function () {
+        const _this = this;
         const spec = this.__callOld();
         const isEditable = this.opts().features.edit_locked_questions;
 
@@ -59,9 +75,22 @@ $.vellum.plugin("lock", {}, {
                     delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
                 }
                 mug.p.set(attr, value);
+                mug.form.getChildren(mug).forEach(child => _this.handleMugParseFinish(child));
             },
         };
         return spec;
+    },
+    checkMove: function (srcId, srcType, dstId, dstType, position) {
+        const canMove = this.__callOld();
+
+        if (canMove) {
+            const form = this.data.core.form;
+            const destinationMug = form.getMugByUFID(dstId);
+            if (destinationMug) {
+            return !(destinationMug.p.locked && _.contains(['Select', 'MSelect'], dstType));
+            }
+        }
+        return false;
     },
     isPropertyLocked: function (mug, propertyPath) {
         return this.__callOld() || mug.p.locked;

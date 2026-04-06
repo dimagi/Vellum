@@ -15,11 +15,15 @@
 					<locked />
 					<unsupported_lock />
 					<unlocked />
+					<locked_select />
+					<unlocked_select />
 				</data>
 			</instance>
 			<bind vellum:nodeset="#form/locked" nodeset="/data/locked" type="xsd:string" vellum:lock="all" />
 			<bind vellum:nodeset="#form/unsupported_lock" nodeset="/data/unsupported_lock" type="xsd:string" vellum:lock="other" />
 			<bind vellum:nodeset="#form/unlocked" nodeset="/data/unlocked" type="xsd:string" />
+			<bind vellum:nodeset="#form/locked_select" nodeset="/data/locked_select" vellum:lock="all" />
+			<bind vellum:nodeset="#form/unlocked_select" nodeset="/data/unlocked_select" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="locked-label">
@@ -30,6 +34,18 @@
 					</text>
 					<text id="unlocked-label">
 						<value>unlocked</value>
+					</text>
+					<text id="locked_select-label">
+						<value>locked_select</value>
+					</text>
+					<text id="locked_select-choice1-label">
+						<value>choice1</value>
+					</text>
+					<text id="unlocked_select-label">
+						<value>unlocked_select</value>
+					</text>
+					<text id="unlocked_select-choice1-label">
+						<value>choice1</value>
 					</text>
 				</translation>
 			</itext>
@@ -45,5 +61,19 @@
 		<input vellum:ref="#form/unlocked" ref="/data/unlocked">
 			<label ref="jr:itext('unlocked-label')" />
 		</input>
+		<select1 vellum:ref="#form/locked_select" ref="/data/locked_select">
+			<label ref="jr:itext('locked_select-label')" />
+			<item>
+				<label ref="jr:itext('locked_select-choice1-label')" />
+				<value>choice1</value>
+			</item>
+		</select1>
+		<select1 vellum:ref="#form/unlocked_select" ref="/data/unlocked_select">
+			<label ref="jr:itext('unlocked_select-label')" />
+			<item>
+				<label ref="jr:itext('unlocked_select-choice1-label')" />
+				<value>choice1</value>
+			</item>
+		</select1>
 	</h:body>
 </h:html>

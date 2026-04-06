@@ -108,6 +108,32 @@ describe("The Lock plugin", function() {
         assert(!getMug('/data/unsupported_lock').p.locked);
     });
 
+    describe("locked select questions", function () {
+        it("propagates locked to control-only children when set", function () {
+            const mug = getMug('/data/unlocked_select');
+            const choice = getMug('/data/unlocked_select/choice1');
+
+            mug.p.locked = true;
+            assert(choice.p.locked);
+            mug.p.locked = false;
+            assert(!choice.p.locked);
+        });
+
+        it("prevents moving choices into a locked select", function () {
+            const src = getMug('/data/unlocked_select/choice1'),
+                dst = getMug('/data/locked_select');
+            assert.isFalse(call('checkMove',
+                src.ufid, src.__className,
+                dst.ufid, dst.__className,
+                'inside'));
+        });
+
+        it("removes the 'Add Choice' action for a locked select", function () {
+            const lockedSelect = getMug('/data/locked_select');
+            assert.isFalse(lockedSelect.options.canAddChoices);
+        });
+    });
+
     describe("edit_locked_questions feature", function () {
         describe("with the feature enabled", function () {
             before(function (done) {
