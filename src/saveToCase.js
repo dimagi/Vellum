@@ -151,6 +151,8 @@ function caseTypeDropdownWidget(mug, opts) {
         // User chose a value directly; drop any stashed xpath reference
         mug.p.caseTypeXPath = null;
         super_updateValue();
+        // Re-validate the xpath field since its validation depends on case_type
+        mug.validate('caseTypeXPath');
     };
 
     function initSelect2() {
@@ -210,6 +212,8 @@ function caseTypeXpathWidget(mug, opts) {
         var val = $.trim(widget.getValue());
         mug.p.caseTypeXPath = val || null;
         super_updateValue();
+        // Re-validate the dropdown since its validation depends on caseTypeXPath
+        mug.validate('case_type');
     };
 
     widget.postRender = function () {
@@ -252,6 +256,8 @@ function switchToXpathMode(mug, dropdownWidget, $dropdownRow) {
 
     $dropdownRow.hide();
     $xpathRow.show();
+    mug.validate('case_type');
+    mug.validate('caseTypeXPath');
 }
 
 function switchToDropdownMode(mug, xpathWidget, $xpathRow) {
@@ -277,6 +283,8 @@ function switchToDropdownMode(mug, xpathWidget, $xpathRow) {
 
     $xpathRow.hide();
     $dropdownRow.show();
+    mug.validate('case_type');
+    mug.validate('caseTypeXPath');
 }
 
 var slugToProp = {
