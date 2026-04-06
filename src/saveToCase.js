@@ -449,7 +449,7 @@ var slugToProp = {
                 // is set so that the tree shape matches legacy forms that has case_type
                 // under create section alongside other properties.
                 var createProps = {};
-                if (mug.p.case_type) {
+                if (mug.p.case_type || mug.p._caseTypeCalc) {
                     createProps.case_type = {};
                 }
                 _.extend(createProps, mug.p.createProperty);
@@ -507,7 +507,7 @@ var slugToProp = {
                 // Emit /case/create/case_type bind.
                 // Use the original xpath reference if available,
                 // otherwise wrap the literal in single quotes.
-                if (mug.p.case_type) {
+                if (mug.p.case_type || mug.p._caseTypeCalc) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/create/case_type",
                         calculate: mug.p._caseTypeCalc || "'" + mug.p.case_type + "'"
@@ -597,7 +597,7 @@ var slugToProp = {
             // case_type is now a dedicated field rather than a createProperty entry,
             // but we still include it in the properties list to keep the data
             // structure sent to HQ consistent with what it was before.
-            if (mug.p.useCreate && mug.p.case_type) {
+            if (mug.p.useCreate && (mug.p.case_type || mug.p._caseTypeCalc)) {
                 propertyNames.push("case_type");
             }
             return {
