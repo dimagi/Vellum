@@ -172,16 +172,23 @@ function caseTypeDropdownWidget(mug, opts) {
 
     widget.postRender = function () {
         initSelect2();
-        var $dropdownRow = widget.input.closest('.widget');
-        addModeToggle($dropdownRow, gettext('Use an xpath expression'), function () {
-            switchToXpathMode(mug, widget, $dropdownRow);
-        });
+        var $dropdownRow = widget.input.closest('.widget'),
+            $toggleLink = addModeToggle($dropdownRow, gettext('Use an xpath expression'), function () {
+                switchToXpathMode(mug, widget, $dropdownRow);
+            });
+        if (!createsCase(mug)) {
+            $toggleLink.hide();
+        }
         if (mug.p.caseTypeXPath && !mug.p.case_type) {
             $dropdownRow.hide();
         }
         mug.on('property-changed', function (e) {
             if (e.property === 'useCreate') {
                 initSelect2();
+                $toggleLink.toggle(createsCase(mug));
+                if (!createsCase(mug) && mug.p.caseTypeXPath) {
+                    switchToDropdownMode(mug, null, $dropdownRow.next('.widget'));
+                }
             }
         }, null, 'teardown-mug-properties');
         widget.input.on('remove', function () {
@@ -208,7 +215,7 @@ function caseTypeXpathWidget(mug, opts) {
         addModeToggle($xpathRow, gettext('Use a dropdown'), function () {
             switchToDropdownMode(mug, widget, $xpathRow);
         });
-        if (!mug.p.caseTypeXPath || mug.p.case_type) {
+        if (!createsCase(mug) || !mug.p.caseTypeXPath || mug.p.case_type) {
             $xpathRow.hide();
         }
     };
@@ -223,6 +230,7 @@ function addModeToggle($row, text, onClick) {
             onClick();
         });
     $row.find('.controls .messages').before($link);
+    return $link;
 }
 
 function switchToXpathMode(mug, dropdownWidget, $dropdownRow) {
@@ -248,7 +256,9 @@ function switchToDropdownMode(mug, xpathWidget, $xpathRow) {
     // Save current xpath value for later restoration
     mug.p._savedCaseTypeXPath = mug.p.caseTypeXPath;
     mug.p.caseTypeXPath = null;
-    xpathWidget.setValue('');
+    if (xpathWidget) {
+        xpathWidget.setValue('');
+    }
 
     // Restore previously saved dropdown value if any
     if (mug.p._savedCaseType) {
@@ -313,7 +323,7 @@ var slugToProp = {
                         return 'pass';
                     }
                     var val = mug.p.case_type;
-                    if (!val) {
+                    if (!val && createsCase(mug)) {
                         return gettext("Case Type is required");
                     }
                     if (!CASE_TYPE_REGEX.test(val)) {
@@ -338,7 +348,7 @@ var slugToProp = {
                 serialize: mugs.serializeXPath,
                 deserialize: mugs.deserializeXPath,
                 validationFunc: function (mug) {
-                    if (mug.p.case_type) {
+                    if (mug.p.case_type || !createsCase(mug)) {
                         return 'pass';
                     }
                     if (!mug.p.caseTypeXPath) {
