@@ -149,7 +149,7 @@ function caseTypeDropdownWidget(mug, opts) {
             widget.setValue(val.replace(/\s/g, '_'));
         }
         // User chose a value directly; drop any stashed xpath reference
-        mug.p._caseTypeCalc = null;
+        mug.p.caseTypeXPath = null;
         super_updateValue();
     };
 
@@ -176,7 +176,7 @@ function caseTypeDropdownWidget(mug, opts) {
         addModeToggle($dropdownRow, gettext('Use an xpath expression'), function () {
             switchToXpathMode(mug, widget, $dropdownRow);
         });
-        if (mug.p._caseTypeCalc && !mug.p.case_type) {
+        if (mug.p.caseTypeXPath && !mug.p.case_type) {
             $dropdownRow.hide();
         }
         mug.on('property-changed', function (e) {
@@ -199,7 +199,7 @@ function caseTypeXpathWidget(mug, opts) {
     var super_updateValue = widget.updateValue;
     widget.updateValue = function () {
         var val = $.trim(widget.getValue());
-        mug.p._caseTypeCalc = val || null;
+        mug.p.caseTypeXPath = val || null;
         super_updateValue();
     };
 
@@ -208,7 +208,7 @@ function caseTypeXpathWidget(mug, opts) {
         addModeToggle($xpathRow, gettext('Use a dropdown'), function () {
             switchToDropdownMode(mug, widget, $xpathRow);
         });
-        if (!mug.p._caseTypeCalc || mug.p.case_type) {
+        if (!mug.p.caseTypeXPath || mug.p.case_type) {
             $xpathRow.hide();
         }
     };
@@ -234,10 +234,10 @@ function switchToXpathMode(mug, dropdownWidget, $dropdownRow) {
     // Restore previously saved xpath value if any
     var $xpathRow = $dropdownRow.next('.widget'),
         xpathWidget = $xpathRow.data('vellum_widget');
-    if (mug.p._savedCaseTypeCalc && xpathWidget) {
-        mug.p._caseTypeCalc = mug.p._savedCaseTypeCalc;
-        xpathWidget.setValue(mug.p._savedCaseTypeCalc);
-        mug.p._savedCaseTypeCalc = null;
+    if (mug.p._savedCaseTypeXPath && xpathWidget) {
+        mug.p.caseTypeXPath = mug.p._savedCaseTypeXPath;
+        xpathWidget.setValue(mug.p._savedCaseTypeXPath);
+        mug.p._savedCaseTypeXPath = null;
     }
 
     $dropdownRow.hide();
@@ -246,8 +246,8 @@ function switchToXpathMode(mug, dropdownWidget, $dropdownRow) {
 
 function switchToDropdownMode(mug, xpathWidget, $xpathRow) {
     // Save current xpath value for later restoration
-    mug.p._savedCaseTypeCalc = mug.p._caseTypeCalc;
-    mug.p._caseTypeCalc = null;
+    mug.p._savedCaseTypeXPath = mug.p.caseTypeXPath;
+    mug.p.caseTypeXPath = null;
     xpathWidget.setValue('');
 
     // Restore previously saved dropdown value if any
@@ -309,7 +309,7 @@ var slugToProp = {
                 presence: 'optional',
                 widget: caseTypeDropdownWidget,
                 validationFunc: function (mug) {
-                    if (mug.p._caseTypeCalc) {
+                    if (mug.p.caseTypeXPath) {
                         return 'pass';
                     }
                     var val = mug.p.case_type;
@@ -330,7 +330,7 @@ var slugToProp = {
                     return 'pass';
                 },
             },
-            "_caseTypeCalc": {
+            "caseTypeXPath": {
                 lstring: gettext("Case Type"),
                 visibility: 'visible',
                 presence: 'optional',
@@ -341,7 +341,7 @@ var slugToProp = {
                     if (mug.p.case_type) {
                         return 'pass';
                     }
-                    if (!mug.p._caseTypeCalc) {
+                    if (!mug.p.caseTypeXPath) {
                         return gettext("Case Type is required");
                     }
                     return 'pass';
@@ -553,7 +553,7 @@ var slugToProp = {
                 // is set so that the tree shape matches legacy forms that has case_type
                 // under create section alongside other properties.
                 var createProps = {};
-                if (mug.p.case_type || mug.p._caseTypeCalc) {
+                if (mug.p.case_type || mug.p.caseTypeXPath) {
                     createProps.case_type = {};
                 }
                 _.extend(createProps, mug.p.createProperty);
@@ -611,10 +611,10 @@ var slugToProp = {
                 // Emit /case/create/case_type bind.
                 // Use the original xpath reference if available,
                 // otherwise wrap the literal in single quotes.
-                if (mug.p.case_type || mug.p._caseTypeCalc) {
+                if (mug.p.case_type || mug.p.caseTypeXPath) {
                     ret.push({
                         nodeset: mug.absolutePath + "/case/create/case_type",
-                        calculate: mug.p._caseTypeCalc || "'" + mug.p.case_type + "'"
+                        calculate: mug.p.caseTypeXPath || "'" + mug.p.case_type + "'"
                     });
                 }
                 ret = ret.concat(generateBinds('create', mug.p.createProperty));
@@ -701,7 +701,7 @@ var slugToProp = {
             // case_type is now a dedicated field rather than a createProperty entry,
             // but we still include it in the properties list to keep the data
             // structure sent to HQ consistent with what it was before.
-            if (mug.p.useCreate && (mug.p.case_type || mug.p._caseTypeCalc)) {
+            if (mug.p.useCreate && (mug.p.case_type || mug.p.caseTypeXPath)) {
                 propertyNames.push("case_type");
             }
             return {
@@ -722,7 +722,7 @@ var slugToProp = {
                     "date_modified",
                     "user_id",
                     "case_type",
-                    "_caseTypeCalc",
+                    "caseTypeXPath",
                     "case_id",
                     "caseActions",
                 ],
@@ -842,7 +842,7 @@ $.vellum.plugin("saveToCase", {}, {
                             if (stripped && stripped === caseTypeBindValue) {
                                 // No quotes stripped — xpath expression;
                                 // stash for resolution in handleMugParseFinish
-                                mug.p._caseTypeCalc = caseTypeBindValue;
+                                mug.p.caseTypeXPath = caseTypeBindValue;
                             } else if (stripped) {
                                 // Route create/case_type to the Case Type dropdown.
                                 mug.p.case_type = stripped;

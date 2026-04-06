@@ -302,7 +302,7 @@ describe("The SaveToCase module", function() {
             util.loadXML(XPATH_CASE_TYPE_XML);
             var mug = util.getMug("question1");
             assert.equal(mug.p.case_type, "household");
-            assert.equal(mug.p._caseTypeCalc, "/data/case_type_val");
+            assert.equal(mug.p.caseTypeXPath, "/data/case_type_val");
             assert.equal(
                 mug.p.createProperty.case_type,
                 undefined
@@ -326,7 +326,7 @@ describe("The SaveToCase module", function() {
             ));
             var mug = util.getMug("question1");
             assert.notOk(mug.p.case_type);
-            assert.notOk(mug.p._caseTypeCalc);
+            assert.notOk(mug.p.caseTypeXPath);
         });
 
         it("should parse double-quoted case_type literal", function () {
