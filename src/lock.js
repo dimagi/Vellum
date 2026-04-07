@@ -12,6 +12,7 @@ import widgets from "vellum/widgets";
 
 const LOCKED_BIND_ATTR = "vellum:lock"
 const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit"
+const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children"
 
 $.vellum.plugin("lock", {}, {
     parseBindElement: function (form, el, path) {
@@ -87,19 +88,40 @@ $.vellum.plugin("lock", {}, {
             const form = this.data.core.form;
             const destinationMug = form.getMugByUFID(dstId);
             if (destinationMug) {
-            return !(destinationMug.p.locked && _.contains(['Select', 'MSelect'], dstType));
+                return !(destinationMug.p.locked && _.contains(['Select', 'MSelect'], dstType));
             }
         }
         return false;
     },
+    _hasLockedChildren: function (mug) {
+        return mug.form.getChildren(mug).some(child =>
+            child.p.locked || this._hasLockedChildren(child)
+        );
+    },
     isPropertyLocked: function (mug, propertyPath) {
-        return this.__callOld() || mug.p.locked;
+        const locked = this.__callOld();
+        if (locked || mug.p.locked) {
+            return true;
+        }
+
+        if (propertyPath === 'nodeID' && !this.isMugPathMoveable(mug)) {
+            const message = {
+                key: LOCKED_CHILDREN_MSG_KEY,
+                message: gettext(
+                        "This group contains locked questions and cannot be moved or deleted from the form."
+                    ),
+                level: mug.INFO,
+            };
+            mug.addMessage('nodeID', message);
+            return true;
+        }
+        return false;
     },
     isMugPathMoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked;
+        return this.__callOld() && !mug.p.locked && !this._hasLockedChildren(mug);
     },
     isMugRemoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked;
+        return this.__callOld() && !mug.p.locked && !this._hasLockedChildren(mug);
     },
     isMugTypeChangeable: function (mug) {
         return this.__callOld() && !mug.p.locked;

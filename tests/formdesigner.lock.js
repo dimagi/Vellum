@@ -108,6 +108,51 @@ describe("The Lock plugin", function() {
         assert(!getMug('/data/unsupported_lock').p.locked);
     });
 
+    describe("groups", function () {
+        it("disallows moving a group that contains a locked question", function () {
+            assert.isFalse(moveable('/data/group_with_nested_lock'));
+            assert(moveable('/data/group_no_lock'));
+        });
+
+        it("disallows deleting a group that contains a locked question", function () {
+            assert.isFalse(deleteable('/data/group_with_nested_lock'));
+            assert(deleteable('/data/group_no_lock'));
+        });
+
+        it("disallows changing ID of a group that contains a locked question", function () {
+            assert(locked('/data/group_with_nested_lock', 'nodeID'));
+            assert.isFalse(locked('/data/group_no_lock', 'nodeID'));
+        });
+
+        it("detects locked children recursively", function () {
+            const groupWithNestedLock = getMug('/data/group_with_nested_lock');
+            assert(call('_hasLockedChildren', groupWithNestedLock),
+                "group with deeply nested locked question should have locked children");
+            const subgroup = getMug('/data/group_with_nested_lock/subgroup');
+            assert(call('_hasLockedChildren', subgroup),
+                "subgroup directly containing locked question should have locked children");
+            const groupNoLock = getMug('/data/group_no_lock');
+            assert.isFalse(call('_hasLockedChildren', groupNoLock),
+                "group without locked children should return false");
+        });
+
+        it("adds a 'locked children' message to a group that contains a locked question", function () {
+            locked('/data/group_with_nested_lock', 'nodeID');
+            const mug = getMug('/data/group_with_nested_lock');
+            const msg = mug.messages.get('nodeID', 'mug-has-locked-children');
+            assert(msg, "expected locked children message on group");
+        });
+
+        it("allows moving a question into a locked group", function () {
+            const src = getMug('/data/unlocked');
+            const dst = getMug('/data/locked_group');
+            assert(call('checkMove',
+                src.ufid, src.__className,
+                dst.ufid, dst.__className,
+                'inside'));
+        });
+    });
+
     describe("locked select questions", function () {
         it("propagates locked to control-only children when set", function () {
             const mug = getMug('/data/unlocked_select');
