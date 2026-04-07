@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
     - master
+    - jc/save-to-case-base
   workflow_dispatch:
 jobs:
   tests:
