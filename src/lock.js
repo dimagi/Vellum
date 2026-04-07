@@ -10,9 +10,9 @@ import "vellum/core";
 import _ from "underscore";
 import widgets from "vellum/widgets";
 
-const LOCKED_BIND_ATTR = "vellum:lock"
-const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit"
-const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children"
+const LOCKED_BIND_ATTR = "vellum:lock";
+const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit";
+const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
 
 $.vellum.plugin("lock", {}, {
     parseBindElement: function (form, el, path) {
@@ -26,8 +26,8 @@ $.vellum.plugin("lock", {}, {
                 const message = {
                     key: LOCKED_UNEDITABLE_MSG_KEY,
                     message: gettext(
-                            "This question is locked and can only be edited by a user with the locked "
-                            + "questions permission."
+                            "This question is locked and can only be edited by a user with the locked " +
+                            "questions permission."
                         ),
                     level: mug.INFO,
                 };
@@ -37,9 +37,7 @@ $.vellum.plugin("lock", {}, {
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
-        if (mug.parentMug
-            && mug.options.isControlOnly
-        ) {
+        if (mug.parentMug && mug.options.isControlOnly) {
             mug.p.set('locked', mug.parentMug.p.locked);
         }
     },
@@ -64,7 +62,7 @@ $.vellum.plugin("lock", {}, {
             visibility: isEditable ? 'visible' : 'visible_if_present',
             presence: 'optional',
             widget: widgets.checkbox,
-            enabled: function (mug) { return isEditable },
+            enabled: () => isEditable,
             help: gettext("A locked question cannot be edited, moved, or deleted from the form."),
             helpURL: "https://www.example.com",  // placeholder for public documentation
             serialize: () => {},
