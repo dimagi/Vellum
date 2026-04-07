@@ -485,6 +485,35 @@ $.vellum.plugin('caseManagement', {}, {
         return sections;
     },
 
+    getSectionDisplay: function (mug, options) {
+        // can be removed when the Case Management nudge is no longer needed
+        const $sec = this.__callOld();
+        const NUDGE_KEY = 'nudge-caseManagement';
+        const DISMISS_ON = 3;
+        let useCount = parseInt(localStorage.getItem(NUDGE_KEY) || '0');
+        if (options.slug === 'caseManagement' && useCount < DISMISS_ON) {
+            const $nudge = $(
+                '<div class="alert alert-info fd-nudge">' +
+                    '<button type="button" class="close" ' +
+                        'data-dismiss="alert" aria-hidden="true">&times;</button>' +
+                    '<i class="fa fa-info-circle"></i> ' +
+                    gettext('Save this question as a case property to reuse its data across your application.') +
+                '</div>'
+            );
+            $nudge.on('close.bs.alert', () => localStorage.setItem(NUDGE_KEY, String(DISMISS_ON)));
+            $sec.find('.fd-fieldset-content').prepend($nudge);
+            mug.on('property-changed', event => {
+                if (event.property === 'caseProperty' && event.val) {
+                    localStorage.setItem(NUDGE_KEY, String(++useCount));
+                    if (useCount >= DISMISS_ON) {
+                        $nudge.fadeOut(300, function () { $(this).remove(); });
+                    }
+                }
+            }, null, 'teardown-mug-properties');
+        }
+        return $sec;
+    },
+
     getMugSpec: function () {
         const specs = this.__callOld();
         const that = this;
