@@ -3,6 +3,7 @@ import chai from "chai";
 import util from "tests/utils";
 import $ from "jquery";
 import TEST_XML from "tests/static/lock/test.xml";
+import copyPaste from "vellum/copy-paste";
 
 // NOTE: timer mocking here doesn't actually work, it only handles timeouts,
 // doesn't actually implement sleep-like functionality.
@@ -10,7 +11,7 @@ import TEST_XML from "tests/static/lock/test.xml";
 // finished before testing something (or make things under test not use
 // setTimeout/Interval.  Use callbacks or https://github.com/cujojs/when.
 
-var assert = chai.assert,
+const assert = chai.assert,
     clickQuestion = util.clickQuestion,
     getMug = util.getMug,
     call = util.call,
@@ -44,47 +45,112 @@ describe("The Lock plugin", function() {
         return call('isMugTypeChangeable', getMug(path));
     }
 
+    it("includes 'locked' in the main properties after 'requiredAttr'", function () {
+        const props = call('getMainProperties');
+        const requiredIdx = props.indexOf('requiredAttr');
+        const lockedIdx = props.indexOf('locked');
+        assert(lockedIdx !== -1, "'locked' should be in main properties");
+        assert.equal(lockedIdx, requiredIdx + 1,
+            "'locked' should be immediately after 'requiredAttr'");
+    });
+
     it("preserves XML with vellum:lock attributes", function () {
         util.assertXmlEqual(TEST_XML, call('createXML'));
     });
 
-    it("disallows renaming a locked node", function () {
-        assert(locked('#form/node_locked', 'nodeID'));
-        assert(locked('#form/value_locked', 'nodeID'));
-        assert.isFalse(locked('#form/none_locked', 'nodeID'));
-        assert.isFalse(locked('#form/normal', 'nodeID'));
+    it("sets vellum:lock='all' on rawBindAttributes when locked", function () {
+        const mug = getMug('/data/unlocked');
+        mug.p.locked = true;
+        assert.equal(mug.p.rawBindAttributes['vellum:lock'], 'all');
+        mug.p.locked = false;
     });
 
-    it("disallows moving a locked node to a different parent", function () {
-        assert.isFalse(moveable('#form/node_locked'));
-        assert.isFalse(moveable('#form/value_locked'));
-        assert(moveable('#form/none_locked'));
-        assert(moveable('#form/normal'));
+    it("removes vellum:lock from rawBindAttributes when unlocked", function () {
+        const mug = getMug('/data/locked');
+        mug.p.locked = false;
+        assert.notProperty(mug.p.rawBindAttributes, 'vellum:lock');
+        mug.p.locked = true;
+    });
+
+    it("disallows moving a locked node", function () {
+        assert.isFalse(moveable('/data/locked'));
+        assert(moveable('/data/unlocked'));
     });
 
     it("disallows deleting a locked node", function () {
-        assert.isFalse(deleteable('#form/node_locked'));
-        assert.isFalse(deleteable('#form/value_locked'));
-        assert(deleteable('#form/none_locked'));
-        assert(deleteable('#form/normal'));
+        assert.isFalse(deleteable('/data/locked'));
+        assert(deleteable('/data/unlocked'));
     });
 
-    it("disallows changing the type only of a 'value' locked node", function () {
-        assert.isFalse(changeable('#form/value_locked'));
-        assert(changeable('#form/node_locked'));
-        assert(changeable('#form/none_locked'));
-        assert(changeable('#form/normal'));
+    it("disallows changing the type of a locked node", function () {
+        assert.isFalse(changeable('/data/locked'));
+        assert(changeable('/data/unlocked'));
     });
 
-    it("allows changing only the Itext IDs of a 'value' locked node", function () {
-        assert.isFalse(locked('#form/value_locked', 'constraintMsgItext'));
-        assert(locked('#form/value_locked', 'constraintAttr'));
+    it("disallows changing all properties of a locked node", function () {
+        assert(locked('/data/locked'));
+        assert(locked('/data/locked', 'constraintAttr'));
+        assert(locked('/data/locked', 'relevantAttr'));
+        assert(locked('/data/locked', 'requiredAttr'));
     });
 
-    it("allows changing any property of a non-locked node", function () {
-        assert.isFalse(locked('#form/node_locked'));
-        assert.isFalse(locked('#form/none_locked'));
-        assert.isFalse(locked('#form/normal'));
+    it("copies a locked question as unlocked", function () {
+        clickQuestion('locked');
+        const serialized = copyPaste.copy();
+        copyPaste.paste(serialized);
+        const pasted = getMug('/data/copy-1-of-locked');
+        assert(pasted, "pasted mug should exist");
+        assert(!pasted.p.locked);
+        call('getData').core.form.removeMugsFromForm([pasted]);
+    });
+
+    it("does not lock based on unsupported vellum:lock values", function () {
+        assert(!getMug('/data/unsupported_lock').p.locked);
+    });
+
+    describe("edit_locked_questions feature", function () {
+        describe("with the feature enabled", function () {
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    plugins: ['lock'],
+                    features: {edit_locked_questions: true},
+                    core: {
+                        onReady: function () {
+                            call('loadXFormOrError', TEST_XML, done);
+                        }
+                    }
+                });
+            });
+
+            it("makes the locked property visible for all questions", function () {
+                const mug = getMug('/data/unlocked');
+                const spec = mug.spec.locked;
+                assert.equal(spec.visibility, 'visible');
+            });
+
+            it("makes the locked property editable", function () {
+                const mug = getMug('/data/locked');
+                const spec = mug.spec.locked;
+                assert(spec.enabled(mug));
+            });
+        });
+
+        describe("without the feature enabled", function () {
+            before(beforeFn);
+
+            it("makes the locked property visible only if present", function () {
+                const mug = getMug('/data/unlocked');
+                const spec = mug.spec.locked;
+                assert.equal(spec.visibility, 'visible_if_present');
+            });
+
+            it("makes the locked property not editable", function () {
+                const mug = getMug('/data/locked');
+                const spec = mug.spec.locked;
+                assert(!spec.enabled(mug));
+            });
+        });
     });
 });
 
@@ -94,57 +160,60 @@ describe("The question locking functionality in the core and UI", function () {
 
     describe("The edit locking", function () {
         it("shows the delete button for deleteable questions", function () {
-            clickQuestion('normal');
+            clickQuestion('unlocked');
             assert($("button:contains(Delete)").length === 1);
         });
-        
+
         it("hides the delete button for non-deletable questions", function () {
-            clickQuestion('node_locked');
+            clickQuestion('locked');
             assert($("button:contains(Delete)").length === 0);
         });
 
         function testTypeChangeable(bool) {
-            clickQuestion(bool ? "normal" : "value_locked");
-            var btn = $(".btn.current-question");
+            clickQuestion(bool ? "unlocked" : "locked");
+            const btn = $(".btn.current-question");
             assert(btn.length === 1);
             btn.click();
-            var menu = btn.closest('.question-type-changer');
+            const menu = btn.closest('.question-type-changer');
             assert.equal(!!menu.find('li:not(.dropdown-header)').length, bool);
         }
+
         it("shows the type changer for type-changeable questions", function () {
             testTypeChangeable(true);
         });
+
         it("hides the type changer for non-type-changeable questions", function () {
             testTypeChangeable(false);
         });
 
-        it("disables the checkbox (only) for a locked boolean property", function () {
-            clickQuestion("value_locked");
+        it("disables the checkbox for a locked boolean property", function () {
+            clickQuestion("locked");
             assert(getInput('requiredAttr').prop('disabled'));
 
-            clickQuestion("normal");
-            var $r = getInput('requiredAttr');
+            clickQuestion("unlocked");
+            const $r = getInput('requiredAttr');
             assert.isFalse($r.prop('disabled'));
         });
 
-        it("disables the text input (only) for a locked text property", function () {
-            clickQuestion("normal");
+        it("disables the text input for a locked text property", function () {
+            clickQuestion("unlocked");
             assert.isFalse(getInput('nodeID').prop('disabled'));
 
-            clickQuestion("value_locked");
+            clickQuestion("locked");
             assert(getInput("nodeID").prop('disabled'));
         });
 
         function testEditButton(bool) {
-            clickQuestion(bool ? "value_locked" : "normal");
-            var $but = getInput('relevantAttr').parents('.form-group').find('button.fd-edit-button');
+            clickQuestion(bool ? "locked" : "unlocked");
+            const $but = getInput('relevantAttr').parents('.form-group').find('button.fd-edit-button');
             assert.equal(1, $but.length);
             assert.equal(bool, $but.prop('disabled'));
         }
+
         it("enables the edit button for non-locked logic properties", function () {
             testEditButton(false);
         });
-       
+
         it("disables the edit button for locked logic properties", function () {
             testEditButton(true);
         });

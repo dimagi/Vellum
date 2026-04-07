@@ -12,49 +12,38 @@
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" 
 					xmlns="http://openrosa.org/formdesigner/4BE1309B-ABCF-4184-8175-9E381F3E0DD7"
 					uiVersion="1" version="1" name="Untitled Form">
-					<node_locked />
-					<value_locked />
-					<none_locked />
-					<normal />
-					<group />
+					<locked />
+					<unsupported_lock />
+					<unlocked />
 				</data>
 			</instance>
-			<bind vellum:nodeset="#form/node_locked" nodeset="/data/node_locked" type="xsd:string" vellum:lock="node" />
-			<bind vellum:nodeset="#form/value_locked" nodeset="/data/value_locked" type="xsd:string" vellum:lock="value"/>
-			<bind vellum:nodeset="#form/none_locked" nodeset="/data/none_locked" type="xsd:string" vellum:lock="none" />
-			<bind vellum:nodeset="#form/normal" nodeset="/data/normal" type="xsd:string" />
-			<bind vellum:nodeset="#form/group" nodeset="/data/group" />
+			<bind vellum:nodeset="#form/locked" nodeset="/data/locked" type="xsd:string" vellum:lock="all" />
+			<bind vellum:nodeset="#form/unsupported_lock" nodeset="/data/unsupported_lock" type="xsd:string" vellum:lock="other" />
+			<bind vellum:nodeset="#form/unlocked" nodeset="/data/unlocked" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
-					<text id="node_locked-label">
-						<value>node_locked</value>
+					<text id="locked-label">
+						<value>locked</value>
 					</text>
-					<text id="value_locked-label">
-						<value>value_locked</value>
+					<text id="unsupported_lock-label">
+						<value>unsupported_lock</value>
 					</text>
-					<text id="none_locked-label">
-						<value>none_locked</value>
-					</text>
-					<text id="normal-label">
-						<value>normal</value>
+					<text id="unlocked-label">
+						<value>unlocked</value>
 					</text>
 				</translation>
 			</itext>
 		</model>
 	</h:head>
 	<h:body>
-		<input vellum:ref="#form/node_locked" ref="/data/node_locked">
-			<label ref="jr:itext('node_locked-label')" />
+		<input vellum:ref="#form/locked" ref="/data/locked">
+			<label ref="jr:itext('locked-label')" />
 		</input>
-		<input vellum:ref="#form/value_locked" ref="/data/value_locked">
-			<label ref="jr:itext('value_locked-label')" />
+		<input vellum:ref="#form/unsupported_lock" ref="/data/unsupported_lock">
+			<label ref="jr:itext('unsupported_lock-label')" />
 		</input>
-		<input vellum:ref="#form/none_locked" ref="/data/none_locked">
-			<label ref="jr:itext('none_locked-label')" />
+		<input vellum:ref="#form/unlocked" ref="/data/unlocked">
+			<label ref="jr:itext('unlocked-label')" />
 		</input>
-		<input vellum:ref="#form/normal" ref="/data/normal">
-			<label ref="jr:itext('normal-label')" />
-		</input>
-		<group vellum:ref="#form/group" ref="/data/group"></group>
 	</h:body>
 </h:html>
