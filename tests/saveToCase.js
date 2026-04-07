@@ -280,53 +280,51 @@ describe("The SaveToCase module", function() {
             );
         });
 
-        it("should use non-empty create/case_type bind when vellum:case_type is empty", function () {
+        it("should show dropdown when create/case_type bind is a literal", function () {
             util.loadXML(LEGACY_CASE_TYPE_BIND_XML);
             var mug = util.getMug("question1");
             assert.equal(mug.p.case_type, 'legacy_case_type_input');
-        });
-
-        it("should show parsed create/case_type bind value in the Case Type widget", function () {
-            util.loadXML(LEGACY_CASE_TYPE_BIND_XML);
+            assert.notOk(mug.p.caseTypeXPath);
             util.clickQuestion("question1");
-            assert.equal($("[name=property-case_type]").val(), "legacy_case_type_input");
+            var $dropdown = $("[name=property-case_type]");
+            assert.equal($dropdown.val(), "legacy_case_type_input");
+            assert.ok($dropdown.closest(".widget").is(":visible"), "dropdown row is visible");
+            assert.notOk(
+                $("[name=property-caseTypeXPath]").closest(".widget").is(":visible"),
+                "xpath case type row is hidden when literal is used"
+            );
         });
 
-        it("should prefer create/case_type bind when it differs from vellum:case_type", function () {
+        it("should prefer create/case_type bind over vellum:case_type for literals", function () {
             util.loadXML(LEGACY_CASE_TYPE_BIND_XML.replace('vellum:case_type=""', 'vellum:case_type="top_section_case_type"'));
             var mug = util.getMug("question1");
             assert.equal(mug.p.case_type, 'legacy_case_type_input');
         });
 
-        it("should resolve xpath case_type reference to a literal", function () {
+        it("should show xpath field when create/case_type bind is an xpath", function () {
             util.loadXML(XPATH_CASE_TYPE_XML);
             var mug = util.getMug("question1");
-            assert.equal(mug.p.case_type, "household");
+            assert.notOk(mug.p.case_type);
             assert.equal(mug.p.caseTypeXPath, "/data/case_type_val");
-            assert.equal(
-                mug.p.createProperty.case_type,
-                undefined
+            util.clickQuestion("question1");
+            var $xpath = $("[name=property-caseTypeXPath]");
+            assert.ok($xpath.closest(".widget").is(":visible"), "xpath row is visible");
+            assert.notOk(
+                $("[name=property-case_type]").closest(".widget").is(":visible"),
+                "dropdown row is hidden when xpath is used"
             );
+            var xpathWidget = util.getWidget("property-caseTypeXPath");
+            assert.equal(xpathWidget.getValue(), mug.p.caseTypeXPath, "xpath field should show create/case_type bind value");
         });
 
-        it("should preserve xpath reference in generated bind", function () {
-            util.loadXML(XPATH_CASE_TYPE_XML);
-            var xml = call("createXML"),
-                $xml = $(xml);
-            assert.equal(
-                $xml.find('bind[nodeset="/data/question1/case/create/case_type"]').attr('calculate'),
-                '/data/case_type_val'
-            );
-        });
-
-        it("should drop bare words without quotes as invalid xpath", function () {
+        it("should show xpath field for bare words so user can fix them", function () {
             util.loadXML(XPATH_CASE_TYPE_XML.replace(
                 "calculate=\"/data/case_type_val\"",
                 "calculate=\"worker_role\""
             ));
             var mug = util.getMug("question1");
             assert.notOk(mug.p.case_type);
-            assert.notOk(mug.p.caseTypeXPath);
+            assert.equal(mug.p.caseTypeXPath, "worker_role");
         });
 
         it("should parse double-quoted case_type literal", function () {
