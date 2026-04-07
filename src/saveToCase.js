@@ -157,6 +157,14 @@ function caseTypeDropdownWidget(mug, opts) {
 
     function initSelect2() {
         var value = widget.input.val();
+        // When Create is turned off, remove custom case types that
+        // aren't in the data dictionary — they were only valid for creation.
+        if (!createsCase(mug) && value && !_.contains(existingCaseTypes, value)) {
+            widget.input.find('option[value="' + value + '"]').remove();
+            widget.input.val('');
+            value = '';
+            mug.p.case_type = '';
+        }
         if (widget.input.data('select2')) {
             widget.input.select2('destroy');
         }
@@ -336,7 +344,7 @@ var slugToProp = {
                     if (!val && createsCase(mug)) {
                         return gettext("Case Type is required");
                     }
-                    if (!CASE_TYPE_REGEX.test(val)) {
+                    if (val && !CASE_TYPE_REGEX.test(val)) {
                         return gettext("Case types can only include the characters a-z, 0-9, '-' and '_'");
                     }
                     if (val === 'commcare-user') {
