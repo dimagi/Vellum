@@ -185,7 +185,7 @@ function caseTypeDropdownWidget(mug, opts) {
     widget.postRender = function () {
         initSelect2();
         var $dropdownRow = widget.input.closest('.widget'),
-            $toggleLink = addModeToggle($dropdownRow, gettext('Use an xpath expression'), function () {
+            $toggleLink = addModeToggle($dropdownRow, gettext('Select case type with XPath'), function () {
                 switchToXpathMode(mug, widget, $dropdownRow);
             });
         if (!createsCase(mug)) {
@@ -226,7 +226,7 @@ function caseTypeXpathWidget(mug, opts) {
 
     widget.postRender = function () {
         var $xpathRow = widget.input.closest('.widget');
-        addModeToggle($xpathRow, gettext('Use a dropdown'), function () {
+        addModeToggle($xpathRow, gettext('Select case type from a list'), function () {
             switchToDropdownMode(mug, widget, $xpathRow);
         });
         if (!createsCase(mug) || !mug.p.caseTypeXPath || mug.p.case_type) {
