@@ -343,6 +343,48 @@ describe("The SaveToCase module", function() {
             assert.equal(mug.p.case_type, 'legacy_case_type_input');
         });
 
+        it("should preserve values when switching between dropdown and xpath modes", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "question1", {
+                case_id: 'uuid()',
+                useCreate: true,
+                case_type: 'household',
+            });
+            util.clickQuestion("question1");
+            var $dropdownRow = $("[name=property-case_type]").closest(".widget"),
+                $xpathRow = $("[name=property-caseTypeXPath]").closest(".widget"),
+                mug = util.getMug("question1");
+
+            // Start in dropdown mode
+            assert.equal(mug.p.case_type, 'household');
+            assert.ok($dropdownRow.is(":visible"), "dropdown visible");
+            assert.notOk($xpathRow.is(":visible"), "xpath hidden");
+
+            // Click "Use an xpath expression" to switch to xpath mode
+            $dropdownRow.find('.controls > a').trigger('click');
+            assert.notOk(mug.p.case_type, "case_type cleared");
+            assert.notOk($dropdownRow.is(":visible"), "dropdown hidden");
+            assert.ok($xpathRow.is(":visible"), "xpath visible");
+
+            // Enter a value in xpath field
+            var xpathWidget = $xpathRow.data('vellum_widget');
+            xpathWidget.setValue('/data/dynamic_type');
+            xpathWidget.handleChange();
+            assert.equal(mug.p.caseTypeXPath, '/data/dynamic_type');
+
+            // Click "Select case type from a list" to switch back to dropdown and verify dropdown is restored
+            $xpathRow.find('.controls > a').trigger('click');
+            assert.equal(mug.p.case_type, 'household', "dropdown value restored");
+            assert.notOk(mug.p.caseTypeXPath, "xpath cleared");
+            assert.ok($dropdownRow.is(":visible"), "dropdown visible again");
+            assert.notOk($xpathRow.is(":visible"), "xpath hidden again");
+
+            // Click "Use an xpath expression" again to verify xpath is restored
+            $dropdownRow.find('.controls > a').trigger('click');
+            assert.equal(mug.p.caseTypeXPath, '/data/dynamic_type', "xpath value restored");
+            assert.notOk(mug.p.case_type, "case_type cleared again");
+        });
+
         it("should not let empty create/case_type bind override vellum:case_type", function () {
             util.loadXML(
                 LEGACY_CASE_TYPE_BIND_XML
