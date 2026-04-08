@@ -148,10 +148,7 @@ function caseTypeDropdownWidget(mug, opts) {
         if (val && /\s/.test(val)) {
             widget.setValue(val.replace(/\s/g, '_'));
         }
-        // User chose a value directly; drop any stashed xpath reference
-        mug.p.caseTypeXPath = null;
         super_updateValue();
-        // Re-validate the xpath field since its validation depends on case_type
         mug.validate('caseTypeXPath');
     };
 
