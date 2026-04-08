@@ -531,6 +531,9 @@ fn.showPathCorrectionModal = function (corrections, formXML, options) {
         ),
         buildCorrectionList()
     );
+    $modal.on('shown.bs.modal', function () {
+        $modal.find(':focus').blur();
+    });
     $modal.modal('show');
 };
 
