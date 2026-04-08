@@ -314,7 +314,11 @@ describe("The SaveToCase module", function() {
                 "dropdown row is hidden when xpath is used"
             );
             var xpathWidget = util.getWidget("property-caseTypeXPath");
-            assert.equal(xpathWidget.getValue(), mug.p.caseTypeXPath, "xpath field should show create/case_type bind value");
+            assert.equal(
+                xpathWidget.getValue(),
+                mug.form.normalizeHashtag(mug.p.caseTypeXPath),
+                "xpath field should show create/case_type bind value"
+            );
         });
 
         it("should show xpath field for bare words so user can fix them", function () {

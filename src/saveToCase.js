@@ -213,6 +213,7 @@ function caseTypeDropdownWidget(mug, opts) {
 }
 
 function caseTypeXpathWidget(mug, opts) {
+    opts.widget = widgets.xPath;
     var widget = widgets.xPath(mug, opts);
 
     var super_updateValue = widget.updateValue;
