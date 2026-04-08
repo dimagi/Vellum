@@ -233,7 +233,7 @@ function caseTypeXpathWidget(mug, opts) {
 }
 
 function addModeToggle($row, text, onClick) {
-    var $link = $('<a href="#" style="font-size:12px;margin-top:4px;display:inline-block;" />')
+    var $link = $('<a href="#" class="fd-mode-toggle-link" />')
         .text(text)
         .on('click', function (e) {
             e.preventDefault();
