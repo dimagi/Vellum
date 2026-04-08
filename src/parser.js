@@ -297,6 +297,18 @@ function parseControlElement(form, $cEl, parentMug) {
             path = getPathFromControlElement($cEl, form, parentMug);
         }
         mug = form.getMugByPath(path);
+        if (!mug && path) {
+            var match = findDataNodeByLeafName(form, path);
+            if (match) {
+                if (!form.pathCorrections) {
+                    form.pathCorrections = [];
+                }
+                form.pathCorrections.push({
+                    wrongPath: path,
+                    correctPath: match.absolutePath
+                });
+            }
+        }
     }
     mug = adapt(mug, form);
     var node = form.tree.getNodeFromMug(mug);
@@ -529,6 +541,27 @@ function parseBoolAttributeValue (attrString, undefined) {
     } else {
         return undefined;
     }
+}
+
+/**
+ * Search for an unclaimed data node whose nodeID matches the last
+ * segment of the given path. Used to recover from hand-edited XML
+ * where a control element's ref/nodeset has the wrong path.
+ *
+ * @param form - the form object
+ * @param path - the broken path (e.g., "/data/members_repeat")
+ * @returns - the matching DataBindOnly mug, or null
+ */
+function findDataNodeByLeafName(form, path) {
+    var leafName = path.replace(/^#form\//, '').split('/').pop();
+    var match = null;
+    _.each(form.mugMap, function (mug) {
+        if (mug.p.nodeID === leafName &&
+            mug.__className === 'DataBindOnly') {
+            match = mug;
+        }
+    });
+    return match;
 }
 
 /**

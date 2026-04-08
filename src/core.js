@@ -473,6 +473,67 @@ fn.showConfirmBulkActionModal = function (confirmMessage, confirmActionFn) {
     $modal.modal('show');
 };
 
+fn.showPathCorrectionModal = function (corrections, formXML, options) {
+    var _this = this,
+        $modal;
+
+    function toAbsolutePath(path) {
+        return path.replace(/^#form/, '/data');
+    }
+
+    function applyCorrections() {
+        var fixedXML = formXML;
+        _.each(corrections, function (c) {
+            fixedXML = fixedXML.split(toAbsolutePath(c.wrongPath))
+                               .join(toAbsolutePath(c.correctPath));
+        });
+        _this.closeModal();
+        _this.data.core.parseWarnings = [];
+        _this.loadXML(fixedXML, options);
+        delete _this.data.core.parseWarnings;
+    }
+
+    function buildCorrectionList() {
+        var $list = $('<ul></ul>');
+        _.each(corrections, function (c) {
+            var wrong = toAbsolutePath(c.wrongPath),
+                correct = toAbsolutePath(c.correctPath),
+                leafName = wrong.split('/').pop();
+            $list.append(
+                $('<li></li>').append(
+                    document.createTextNode(gettext("Path ")),
+                    $('<code></code>').text(wrong),
+                    document.createTextNode(util.format(
+                        gettext(" was not found. A data node named " +
+                                "\"{name}\" exists at "),
+                        {name: leafName})),
+                    $('<code></code>').text(correct),
+                    document.createTextNode(".")
+                )
+            );
+        });
+        return $list;
+    }
+
+    $modal = this.generateNewModal(gettext("Broken Paths Detected"), [
+        {
+            title: gettext('Fix and Reload'),
+            cssClasses: "btn-primary",
+            action: applyCorrections
+        }
+    ], gettext("Ignore"));
+
+    var $body = $modal.find('.modal-body');
+    $body.append(
+        $('<p></p>').text(
+            gettext("The following paths in this form's XML do not match " +
+                    "any data nodes. Saving without fixing may result in data loss.")
+        ),
+        buildCorrectionList()
+    );
+    $modal.modal('show');
+};
+
 fn._init_extra_tools = function () {
     var _this = this,
         menuItems = this.getToolsMenuItems();
@@ -1409,6 +1470,10 @@ fn.loadXML = function (formXML, options) {
     if (formXML) {
         _this._resetMessages(_this.data.core.form.errors);
         _this._populateTree(selectedHashtag);
+    }
+
+    if (form.pathCorrections && form.pathCorrections.length) {
+        _this.showPathCorrectionModal(form.pathCorrections, formXML, options);
     }
 
     form.on('question-type-change', function (e) {
