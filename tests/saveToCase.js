@@ -385,6 +385,25 @@ describe("The SaveToCase module", function() {
             assert.notOk(mug.p.case_type, "case_type cleared again");
         });
 
+        it("should switch to dropdown when Create is deselected while in xpath mode", function () {
+            util.loadXML(XPATH_CASE_TYPE_XML);
+            util.clickQuestion("question1");
+            var $dropdownRow = $("[name=property-case_type]").closest(".widget"),
+                $xpathRow = $("[name=property-caseTypeXPath]").closest(".widget"),
+                mug = util.getMug("question1");
+
+            // Starts in xpath mode
+            assert.ok(mug.p.caseTypeXPath);
+            assert.ok($xpathRow.is(":visible"), "xpath visible");
+            assert.notOk($dropdownRow.is(":visible"), "dropdown hidden");
+
+            // Deselect Create
+            mug.p.useCreate = false;
+            assert.notOk(mug.p.caseTypeXPath, "xpath cleared");
+            assert.ok($dropdownRow.is(":visible"), "dropdown visible after deselecting Create");
+            assert.notOk($xpathRow.is(":visible"), "xpath hidden after deselecting Create");
+        });
+
         it("should not let empty create/case_type bind override vellum:case_type", function () {
             util.loadXML(
                 LEGACY_CASE_TYPE_BIND_XML
