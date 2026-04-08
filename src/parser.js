@@ -708,12 +708,24 @@ function parseBindElement (form, el, path) {
     var mug = form.getMugByPath(path);
 
     if(!mug){
-        form.parseWarnings.push(util.format(
-            gettext("Bind Node [{path}] found but has no associated " +
-                    "Data node. This bind node will be discarded!"),
-            {path: path}
-        ));
-        return;
+        var match = findDataNodeByLeafName(form, path);
+        if (match) {
+            mug = match;
+            if (!form.pathCorrections) {
+                form.pathCorrections = [];
+            }
+            form.pathCorrections.push({
+                wrongPath: path,
+                correctPath: match.absolutePath
+            });
+        } else {
+            form.parseWarnings.push(util.format(
+                gettext("Bind Node [{path}] found but has no associated " +
+                        "Data node. This bind node will be discarded!"),
+                {path: path}
+            ));
+            return;
+        }
     }
 
     var required = el.popAttr('required');
