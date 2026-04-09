@@ -80,14 +80,19 @@ $.vellum.plugin("lock", {}, {
         return spec;
     },
     checkMove: function (srcId, srcType, dstId, dstType, position) {
-        const canMove = this.__callOld();
+        const form = this.data.core.form;
+        const sourceMug = form.getMugByUFID(srcId);
+        if (sourceMug.p.locked) {
+            return false;
+        }
 
+        const canMove = this.__callOld();
         if (canMove) {
-            const form = this.data.core.form;
             const destinationMug = form.getMugByUFID(dstId);
             if (destinationMug) {
                 return !(destinationMug.p.locked && _.contains(['Select', 'MSelect'], dstType));
             }
+            return true;
         }
         return false;
     },

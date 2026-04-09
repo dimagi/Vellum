@@ -1176,11 +1176,11 @@ fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
     if (!sourceMug) {
         return false;
     }
-    if (this.isMugPathMoveable(sourceMug)) {
-        return true;
+    if (!this.isMugPathMoveable(sourceMug)) {
+        var srcParentId = sourceMug.parentMug ? sourceMug.parentMug.ufid : '#';
+        return srcParentId === dstId;
     }
-
-    return srcId === dstId;
+    return true;
 };
 
 fn.onFormChange = function (mug) {

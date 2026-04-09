@@ -149,7 +149,32 @@ describe("The Lock plugin", function() {
             assert(call('checkMove',
                 src.ufid, src.__className,
                 dst.ufid, dst.__className,
-                'inside'));
+                0));
+        });
+
+        it("allows reordering a group with locked children within its parent", function () {
+            const src = getMug('/data/group_with_nested_lock');
+            assert(call('checkMove',
+                src.ufid, src.__className,
+                '#', '#',
+                0));
+        });
+
+        it("prevents moving a group with locked children to a new parent", function () {
+            const src = getMug('/data/group_with_nested_lock');
+            const newParent = getMug('/data/group_no_lock');
+            assert.isFalse(call('checkMove',
+                src.ufid, src.__className,
+                newParent.ufid, newParent.__className,
+                0));
+        });
+
+        it("prevents a locked question from being reordered", function () {
+            const src = getMug('/data/locked');
+            assert.isFalse(call('checkMove',
+                src.ufid, src.__className,
+                '#', '#',
+                0));
         });
     });
 
@@ -170,7 +195,7 @@ describe("The Lock plugin", function() {
             assert.isFalse(call('checkMove',
                 src.ufid, src.__className,
                 dst.ufid, dst.__className,
-                'inside'));
+                0));
         });
 
         it("removes the 'Add Choice' action for a locked select", function () {
