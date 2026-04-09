@@ -8,6 +8,8 @@ import UPDATE_PROPERTY_XML from "static/saveToCase/update_property.xml";
 import INDEX_PROPERTY_XML from "static/saveToCase/index_property.xml";
 import CASE_TYPE_PROPERTY_XML from "static/saveToCase/case_type_property.xml";
 import CREATE_2_PROPERTY_XML from "static/saveToCase/create_2_property.xml";
+import LEGACY_CASE_TYPE_BIND_XML from "static/saveToCase/legacy_case_type_bind.xml";
+import XPATH_CASE_TYPE_XML from "static/saveToCase/xpath_case_type.xml";
 import LOGIC_TEST_XML from "static/saveToCase/logic_test.xml";
 import TWO_SAME_NAME_XML from "static/saveToCase/two-same-name.xml";
 
@@ -26,7 +28,7 @@ describe("The SaveToCase module", function() {
         util.loadXML(CREATE_PROPERTY_XML);
         var create = util.getMug("save_to_case"),
             props = create.p.createProperty;
-        assert.equal(props.case_type.calculate, "caseType");
+        assert.equal(create.p.case_type, "caseType");
         assert.equal(props.case_name.calculate, "/data/name");
         assert.equal(create.p.useCreate, true);
         assert.equal(props.owner_id.calculate, '/data/meta/userID');
@@ -91,6 +93,32 @@ describe("The SaveToCase module", function() {
         util.assertXmlEqual(call("createXML"), CASE_TYPE_PROPERTY_XML);
     });
 
+    it("should only allow custom case types for create actions", function () {
+        util.loadXML("");
+        util.addQuestion("SaveToCase", "stc_update", {
+            case_id: 'a-real-exisitng-case-id',
+            case_type: 'household',
+            useUpdate: true,
+            updateProperty: {
+                'name': { 'calculate': '/data/name' },
+            }
+        });
+        util.addQuestion("SaveToCase", "stc_create", {
+            case_id: 'uuid()',
+            case_type: 'household',
+            useCreate: true,
+            createProperty: {
+                'case_name': { 'calculate': '/data/name' },
+            }
+        });
+
+        util.clickQuestion("stc_update");
+        assert.strictEqual($("[name=property-case_type]").data('select2').options.options.tags, false);
+
+        util.clickQuestion("stc_create");
+        assert.strictEqual($("[name=property-case_type]").data('select2').options.options.tags, true);
+    });
+
     it("should support two questions with same name", function () {
         util.loadXML(TWO_SAME_NAME_XML);
         var one = util.getMug("one/save"),
@@ -122,8 +150,8 @@ describe("The SaveToCase module", function() {
             case_id: 'uuid()',
             user_id: 'uuid()',
             useCreate: true,
+            case_type: 'type',
             createProperty: {
-                'case_type': 'type',
                 'case_name': 'name'
             }
         });
@@ -148,10 +176,8 @@ describe("The SaveToCase module", function() {
             user_id: 'uuid()',
             useCreate: true,
         });
+        mug.p.case_type = 'type';
         mug.p.createProperty = {
-            'case_type': {
-                'calculate': 'type'
-            },
             'case_name': {
                 'calculate': 'name',
             },
@@ -195,6 +221,202 @@ describe("The SaveToCase module", function() {
         assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "pass");
     });
 
+    describe("create/case_type backward compatibility", function () {
+        it("should generate create/case_type node and bind from top-section case_type", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'uuid()',
+                useCreate: true,
+                case_type: 'household',
+                createProperty: {
+                    'case_name': { 'calculate': 'name' },
+                }
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find('stc').xmlAttr('vellum:case_type'), 'household');
+            assert.equal($xml.find('create case_type').length, 1);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').attr('calculate'),
+                "'household'"
+            );
+        });
+
+        it("should not generate create/case_type node when case_type is empty", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'uuid()',
+                useCreate: true,
+                createProperty: {
+                    'case_name': { 'calculate': 'name' },
+                }
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find('create case_type').length, 0);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').length,
+                0
+            );
+        });
+
+        it("should not generate create/case_type for non-create actions", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'a-real-exisitng-case-id',
+                case_type: 'household',
+                useUpdate: true,
+                updateProperty: {
+                    'name': { 'calculate': '/data/name' },
+                }
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find('stc').xmlAttr('vellum:case_type'), 'household');
+            assert.equal($xml.find('create').length, 0);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/case_type"]').length,
+                0
+            );
+        });
+
+        it("should show dropdown when create/case_type bind is a literal", function () {
+            util.loadXML(LEGACY_CASE_TYPE_BIND_XML);
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'legacy_case_type_input');
+            assert.notOk(mug.p.caseTypeXPath);
+            util.clickQuestion("question1");
+            var $dropdown = $("[name=property-case_type]");
+            assert.equal($dropdown.val(), "legacy_case_type_input");
+            assert.ok($dropdown.closest(".widget").is(":visible"), "dropdown row is visible");
+            assert.notOk(
+                $("[name=property-caseTypeXPath]").closest(".widget").is(":visible"),
+                "xpath case type row is hidden when literal is used"
+            );
+        });
+
+        it("should prefer create/case_type bind over vellum:case_type for literals", function () {
+            util.loadXML(LEGACY_CASE_TYPE_BIND_XML.replace('vellum:case_type=""', 'vellum:case_type="top_section_case_type"'));
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'legacy_case_type_input');
+        });
+
+        it("should show xpath field when create/case_type bind is an xpath", function () {
+            util.loadXML(XPATH_CASE_TYPE_XML);
+            var mug = util.getMug("question1");
+            assert.notOk(mug.p.case_type);
+            assert.equal(mug.p.caseTypeXPath, "/data/case_type_val");
+            util.clickQuestion("question1");
+            var $xpath = $("[name=property-caseTypeXPath]");
+            assert.ok($xpath.closest(".widget").is(":visible"), "xpath row is visible");
+            assert.notOk(
+                $("[name=property-case_type]").closest(".widget").is(":visible"),
+                "dropdown row is hidden when xpath is used"
+            );
+            var xpathWidget = util.getWidget("property-caseTypeXPath");
+            assert.equal(
+                xpathWidget.getValue(),
+                mug.form.normalizeHashtag(mug.p.caseTypeXPath),
+                "xpath field should show create/case_type bind value"
+            );
+        });
+
+        it("should show xpath field for bare words so user can fix them", function () {
+            util.loadXML(XPATH_CASE_TYPE_XML.replace(
+                "calculate=\"/data/case_type_val\"",
+                "calculate=\"worker_role\""
+            ));
+            var mug = util.getMug("question1");
+            assert.notOk(mug.p.case_type);
+            assert.equal(mug.p.caseTypeXPath, "worker_role");
+        });
+
+        it("should parse double-quoted case_type literal", function () {
+            util.loadXML(
+                LEGACY_CASE_TYPE_BIND_XML
+                    .replace(
+                        "calculate=\"'legacy_case_type_input'\"",
+                        'calculate="&quot;legacy_case_type_input&quot;"'
+                    )
+            );
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'legacy_case_type_input');
+        });
+
+        it("should preserve values when switching between dropdown and xpath modes", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "question1", {
+                case_id: 'uuid()',
+                useCreate: true,
+                case_type: 'household',
+            });
+            util.clickQuestion("question1");
+            var $dropdownRow = $("[name=property-case_type]").closest(".widget"),
+                $xpathRow = $("[name=property-caseTypeXPath]").closest(".widget"),
+                mug = util.getMug("question1");
+
+            // Start in dropdown mode
+            assert.equal(mug.p.case_type, 'household');
+            assert.ok($dropdownRow.is(":visible"), "dropdown visible");
+            assert.notOk($xpathRow.is(":visible"), "xpath hidden");
+
+            // Click "Use an xpath expression" to switch to xpath mode
+            $dropdownRow.find('.controls > a').trigger('click');
+            assert.notOk(mug.p.case_type, "case_type cleared");
+            assert.notOk($dropdownRow.is(":visible"), "dropdown hidden");
+            assert.ok($xpathRow.is(":visible"), "xpath visible");
+
+            // Enter a value in xpath field
+            var xpathWidget = $xpathRow.data('vellum_widget');
+            xpathWidget.setValue('/data/dynamic_type');
+            xpathWidget.handleChange();
+            assert.equal(mug.p.caseTypeXPath, '/data/dynamic_type');
+
+            // Click "Select case type from a list" to switch back to dropdown and verify dropdown is restored
+            $xpathRow.find('.controls > a').trigger('click');
+            assert.equal(mug.p.case_type, 'household', "dropdown value restored");
+            assert.notOk(mug.p.caseTypeXPath, "xpath cleared");
+            assert.ok($dropdownRow.is(":visible"), "dropdown visible again");
+            assert.notOk($xpathRow.is(":visible"), "xpath hidden again");
+
+            // Click "Use an xpath expression" again to verify xpath is restored
+            $dropdownRow.find('.controls > a').trigger('click');
+            assert.equal(mug.p.caseTypeXPath, '/data/dynamic_type', "xpath value restored");
+            assert.notOk(mug.p.case_type, "case_type cleared again");
+        });
+
+        it("should switch to dropdown when Create is deselected while in xpath mode", function () {
+            util.loadXML(XPATH_CASE_TYPE_XML);
+            util.clickQuestion("question1");
+            var $dropdownRow = $("[name=property-case_type]").closest(".widget"),
+                $xpathRow = $("[name=property-caseTypeXPath]").closest(".widget"),
+                mug = util.getMug("question1");
+
+            // Starts in xpath mode
+            assert.ok(mug.p.caseTypeXPath);
+            assert.ok($xpathRow.is(":visible"), "xpath visible");
+            assert.notOk($dropdownRow.is(":visible"), "dropdown hidden");
+
+            // Deselect Create
+            mug.p.useCreate = false;
+            assert.notOk(mug.p.caseTypeXPath, "xpath cleared");
+            assert.ok($dropdownRow.is(":visible"), "dropdown visible after deselecting Create");
+            assert.notOk($xpathRow.is(":visible"), "xpath hidden after deselecting Create");
+        });
+
+        it("should not let empty create/case_type bind override vellum:case_type", function () {
+            util.loadXML(
+                LEGACY_CASE_TYPE_BIND_XML
+                    .replace('vellum:case_type=""', 'vellum:case_type="top_section_case_type"')
+                    .replace(
+                        'calculate="\'legacy_case_type_input\'"',
+                        'calculate=""'
+                    )
+            );
+            var mug = util.getMug("question1");
+            assert.equal(mug.p.case_type, 'top_section_case_type');
+        });
+    });
     describe("case_id validation", function () {
         var mug;
         beforeEach(function () {
@@ -310,9 +532,9 @@ describe("The SaveToCase module", function() {
                     "create": true,
                     "properties": [
                         "case_name",
-                        "case_type",
                         "p1",
-                        "p2"
+                        "p2",
+                        "case_type",
                     ]
                 },
                 "/data/save_to_case_close": {

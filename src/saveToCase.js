@@ -31,6 +31,7 @@ function usesCases(mug) {
         indexesCase(mug);
 }
 
+
 var propertyWidget = function (mug, options) {
         var widget = widgets.normal(mug, options),
             id = options.id,
@@ -126,6 +127,170 @@ var propertyWidget = function (mug, options) {
         return widget;
     };
 
+var CASE_TYPE_REGEX = /^[\w-]+$/;
+
+function caseTypeDropdownWidget(mug, opts) {
+    var existingCaseTypes = opts.vellum.data.saveToCase?.existingCaseTypes || [];
+    // Keep parsed Case Type values visible in the dropdown even when they are
+    // not present in configured case type options.
+    if (mug.p.case_type && !_.contains(existingCaseTypes, mug.p.case_type)) {
+        existingCaseTypes.push(mug.p.case_type);
+    }
+    opts.defaultOptions = existingCaseTypes.map(function (ct) {
+        return { text: ct, value: ct };
+    });
+    opts.noCustom = true;
+    var widget = widgets.dropdown(mug, opts);
+
+    var super_updateValue = widget.updateValue;
+    widget.updateValue = function () {
+        var val = widget.getValue();
+        if (val && /\s/.test(val)) {
+            widget.setValue(val.replace(/\s/g, '_'));
+        }
+        super_updateValue();
+        mug.validate('caseTypeXPath');
+    };
+
+    function initSelect2() {
+        var value = widget.input.val();
+        // When Create is turned off, remove custom case types that
+        // aren't in the data dictionary — they were only valid for creation.
+        if (!createsCase(mug) && value && !_.contains(existingCaseTypes, value)) {
+            widget.input.find('option[value="' + value + '"]').remove();
+            widget.input.val('');
+            value = '';
+            mug.p.case_type = '';
+        }
+        if (widget.input.data('select2')) {
+            widget.input.select2('destroy');
+        }
+        widget.input.select2({
+            tags: createsCase(mug),
+            allowClear: true,
+            placeholder: createsCase(mug) ? gettext('Select a case type or create a new one') : gettext('Select a case type'),
+            createTag: function (params) {
+                var term = params.term.replace(/\s/g, '_');
+                return { id: term, text: term };
+            },
+        });
+        widget.input.val(value).trigger('change.select2');
+    }
+
+    widget.postRender = function () {
+        initSelect2();
+        var $dropdownRow = widget.input.closest('.widget'),
+            $toggleLink = addModeToggle($dropdownRow, gettext('Select case type with XPath'), function () {
+                switchToXpathMode(mug, widget, $dropdownRow);
+            });
+        if (!createsCase(mug)) {
+            $toggleLink.hide();
+        }
+        if (mug.p.caseTypeXPath && !mug.p.case_type) {
+            $dropdownRow.hide();
+        }
+        mug.on('property-changed', function (e) {
+            if (e.property === 'useCreate') {
+                initSelect2();
+                $toggleLink.toggle(createsCase(mug));
+                if (!createsCase(mug) && mug.p.caseTypeXPath) {
+                    switchToDropdownMode(mug, null, $dropdownRow.next('.widget'));
+                }
+            }
+        }, null, 'teardown-mug-properties');
+        widget.input.on('remove', function () {
+            if (widget.input.data('select2')) {
+                widget.input.select2('destroy');
+            }
+        });
+    };
+    return widget;
+}
+
+function caseTypeXpathWidget(mug, opts) {
+    opts.widget = widgets.xPath;
+    var widget = widgets.xPath(mug, opts);
+
+    var super_updateValue = widget.updateValue;
+    widget.updateValue = function () {
+        var val = $.trim(widget.getValue());
+        mug.p.caseTypeXPath = val || null;
+        super_updateValue();
+        // Re-validate the dropdown since its validation depends on caseTypeXPath
+        mug.validate('case_type');
+    };
+
+    widget.postRender = function () {
+        var $xpathRow = widget.input.closest('.widget');
+        addModeToggle($xpathRow, gettext('Select case type from a list'), function () {
+            switchToDropdownMode(mug, widget, $xpathRow);
+        });
+        if (!createsCase(mug) || !mug.p.caseTypeXPath || mug.p.case_type) {
+            $xpathRow.hide();
+        }
+    };
+    return widget;
+}
+
+function addModeToggle($row, text, onClick) {
+    var $link = $('<a href="#" class="fd-mode-toggle-link" />')
+        .text(text)
+        .on('click', function (e) {
+            e.preventDefault();
+            onClick();
+        });
+    $row.find('.controls .messages').before($link);
+    return $link;
+}
+
+function switchToXpathMode(mug, dropdownWidget, $dropdownRow) {
+    // Save current dropdown value for later restoration
+    mug.p._savedCaseType = mug.p.case_type;
+    mug.p.case_type = '';
+    dropdownWidget.setValue('');
+
+    // Restore previously saved xpath value if any
+    var $xpathRow = $dropdownRow.next('.widget'),
+        xpathWidget = $xpathRow.data('vellum_widget');
+    if (mug.p._savedCaseTypeXPath && xpathWidget) {
+        mug.p.caseTypeXPath = mug.p._savedCaseTypeXPath;
+        xpathWidget.setValue(mug.p._savedCaseTypeXPath);
+        mug.p._savedCaseTypeXPath = null;
+    }
+
+    $dropdownRow.hide();
+    $xpathRow.show();
+    mug.validate('case_type');
+    mug.validate('caseTypeXPath');
+}
+
+function switchToDropdownMode(mug, xpathWidget, $xpathRow) {
+    // Save current xpath value for later restoration
+    mug.p._savedCaseTypeXPath = mug.p.caseTypeXPath;
+    mug.p.caseTypeXPath = null;
+    if (xpathWidget) {
+        xpathWidget.setValue('');
+    }
+
+    // Restore previously saved dropdown value if any
+    if (mug.p._savedCaseType) {
+        mug.p.case_type = mug.p._savedCaseType;
+        mug.p._savedCaseType = null;
+    }
+
+    var $dropdownRow = $xpathRow.prev('.widget'),
+        dropdownWidget = $dropdownRow.data('vellum_widget');
+    if (dropdownWidget) {
+        dropdownWidget.setValue(mug.p.case_type);
+        dropdownWidget.handleChange();
+    }
+
+    $xpathRow.hide();
+    $dropdownRow.show();
+    mug.validate('case_type');
+    mug.validate('caseTypeXPath');
+}
+
 var slugToProp = {
         create: "useCreate",
         update: "useUpdate",
@@ -166,7 +331,49 @@ var slugToProp = {
                 lstring: gettext("Case Type"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: widgets.text,
+                widget: caseTypeDropdownWidget,
+                validationFunc: function (mug) {
+                    if (mug.p.caseTypeXPath) {
+                        return 'pass';
+                    }
+                    var val = mug.p.case_type;
+                    if (!val && createsCase(mug)) {
+                        return gettext("Case Type is required");
+                    }
+                    if (val && !CASE_TYPE_REGEX.test(val)) {
+                        return gettext("Case types can only include the characters a-z, 0-9, '-' and '_'");
+                    }
+                    if (val === 'commcare-user') {
+                        if (createsCase(mug) || closesCase(mug) || indexesCase(mug)) {
+                            return gettext("'commcare-user' cases can only be updated, not created, closed, or linked");
+                        }
+                    }
+                    if (val === 'user-owner-mapping-case') {
+                        return gettext("This is a reserved case type. Please choose another name.");
+                    }
+                    return 'pass';
+                },
+            },
+            "caseTypeXPath": {
+                lstring: gettext("Case Type"),
+                visibility: 'visible',
+                presence: 'optional',
+                widget: caseTypeXpathWidget,
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    if (mug.p.case_type || !createsCase(mug)) {
+                        return 'pass';
+                    }
+                    var val = mug.p.caseTypeXPath;
+                    if (!val) {
+                        return gettext("Case Type is required");
+                    }
+                    if (CASE_TYPE_REGEX.test(val)) {
+                        return gettext("This looks like a literal value. Use the dropdown instead, or wrap it in quotes like '" + val + "'.");
+                    }
+                    return 'pass';
+                },
             },
             "case_id": {
                 lstring: gettext("Case ID"),
@@ -236,7 +443,7 @@ var slugToProp = {
                 validationFunc: function (mug) {
                     if (mug.p.useCreate) {
                         var props = _.without(_.keys(mug.p.createProperty), ""),
-                            required = ["case_type", "case_name"],
+                            required = ["case_name"],
                             optional = ["owner_id"],
                             legal = _.union(required, optional),
                             illegalProps = _.difference(props, legal),
@@ -370,7 +577,15 @@ var slugToProp = {
 
             var actions = [];
             if (createsCase(mug)) {
-                actions.push(simpleNode('create', makeColumns(mug.p.createProperty)));
+                // Include a case_type column in the create action subtree when mug.p.case_type
+                // is set so that the tree shape matches legacy forms that has case_type
+                // under create section alongside other properties.
+                var createProps = {};
+                if (mug.p.case_type || mug.p.caseTypeXPath) {
+                    createProps.case_type = {};
+                }
+                _.extend(createProps, mug.p.createProperty);
+                actions.push(simpleNode('create', makeColumns(createProps)));
             }
 
             if (updatesCase(mug)) {
@@ -419,6 +634,15 @@ var slugToProp = {
                     ret = ret.concat({
                         nodeset: mug.absolutePath + "/case/@case_id",
                         calculate: mug.p.case_id
+                    });
+                }
+                // Emit /case/create/case_type bind.
+                // Use the original xpath reference if available,
+                // otherwise wrap the literal in single quotes.
+                if (mug.p.case_type || mug.p.caseTypeXPath) {
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case/create/case_type",
+                        calculate: mug.p.caseTypeXPath || "'" + mug.p.case_type + "'"
                     });
                 }
                 ret = ret.concat(generateBinds('create', mug.p.createProperty));
@@ -502,6 +726,12 @@ var slugToProp = {
                 _.keys(mug.p.createProperty || {}),
                 _.keys(mug.p.updateProperty || {})
             );
+            // case_type is now a dedicated field rather than a createProperty entry,
+            // but we still include it in the properties list to keep the data
+            // structure sent to HQ consistent with what it was before.
+            if (mug.p.useCreate && (mug.p.case_type || mug.p.caseTypeXPath)) {
+                propertyNames.push("case_type");
+            }
             return {
                 case_type: mug.p.case_type || '',
                 properties: _.filter(propertyNames, _.identity), // filter out empty properties
@@ -518,6 +748,7 @@ var slugToProp = {
                 properties: [
                     "nodeID",
                     "case_type",
+                    "caseTypeXPath",
                     "case_id",
                     "caseActions",
                 ],
@@ -575,6 +806,12 @@ var slugToProp = {
     };
 
 $.vellum.plugin("saveToCase", {}, {
+    init: function () {
+        var opts = this.opts().saveToCase || {};
+        this.data.saveToCase = {
+            existingCaseTypes: opts.existingCaseTypes || [],
+        };
+    },
     getAdvancedQuestions: function () {
         return this.__callOld().concat(["SaveToCase"]);
     },
@@ -643,11 +880,28 @@ $.vellum.plugin("saveToCase", {}, {
                 if (mug && mug.__className === "SaveToCase") {
                     if (matchRet[2]) {
                         var prop = matchRet[2],
-                            pKey = {
+                            action = matchRet[1];
+
+                        if (action === "create" && prop === "case_type") {
+                            var caseTypeBindValue = el.xmlAttr("calculate") || '',
+                                stripped = caseTypeBindValue.replace(/^(['"])(.*)\1$/, '$2');
+                            if (stripped && stripped === caseTypeBindValue) {
+                                // No quotes stripped — xpath expression;
+                                // show in xpath field, override vellum:case_type
+                                mug.p.caseTypeXPath = caseTypeBindValue;
+                                mug.p.case_type = '';
+                            } else if (stripped) {
+                                // Route create/case_type to the Case Type dropdown.
+                                mug.p.case_type = stripped;
+                            }
+                            return;
+                        }
+
+                        var pKey = {
                                 create: "createProperty",
                                 update: "updateProperty",
                                 index: "indexProperty",
-                            }[matchRet[1]];
+                            }[action];
 
                         if (!mug.p[pKey]) {
                             mug.p[pKey] = {};
