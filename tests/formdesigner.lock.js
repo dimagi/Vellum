@@ -196,8 +196,8 @@ describe("The Lock plugin", function() {
         });
 
         it("prevents moving choices into a locked select", function () {
-            const src = getMug('/data/unlocked_select/choice1'),
-                dst = getMug('/data/locked_select');
+            const src = getMug('/data/unlocked_select/choice1');
+            const dst = getMug('/data/locked_select');
             assert.isFalse(call('checkMove',
                 src.ufid, src.__className,
                 dst.ufid, dst.__className,
