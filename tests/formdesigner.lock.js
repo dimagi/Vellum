@@ -60,16 +60,22 @@ describe("The Lock plugin", function() {
 
     it("sets vellum:lock='all' on rawBindAttributes when locked", function () {
         const mug = getMug('/data/unlocked');
-        mug.p.locked = true;
-        assert.equal(mug.p.rawBindAttributes['vellum:lock'], 'all');
-        mug.p.locked = false;
+        try {
+            mug.p.locked = true;
+            assert.equal(mug.p.rawBindAttributes['vellum:lock'], 'all');
+        } finally {
+            mug.p.locked = false;
+        }
     });
 
     it("removes vellum:lock from rawBindAttributes when unlocked", function () {
         const mug = getMug('/data/locked');
-        mug.p.locked = false;
-        assert.notProperty(mug.p.rawBindAttributes, 'vellum:lock');
-        mug.p.locked = true;
+        try {
+            mug.p.locked = false;
+            assert.notProperty(mug.p.rawBindAttributes, 'vellum:lock');
+        } finally {
+            mug.p.locked = true;
+        }
     });
 
     it("disallows moving a locked node", function () {
