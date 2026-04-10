@@ -434,6 +434,11 @@ var slugToProp = {
             useCreate: {
                 visibility: 'hidden',
                 presence: 'optional',
+                validationFunc: function (mug) {
+                    // case_id validation depends on useCreate
+                    mug.validate('case_id');
+                    return 'pass';
+                },
             },
             createProperty: {
                 lstring: gettext("Case Properties To Create"),

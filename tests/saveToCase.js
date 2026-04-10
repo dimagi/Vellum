@@ -509,6 +509,14 @@ describe("The SaveToCase module", function() {
             mug.p.case_id = "/data/meta/caseID";
             assert.strictEqual(mug.spec.case_id.validationFunc(mug), "pass");
         });
+
+        it("should clear uuid() warning when useCreate is set after case_id", function () {
+            mug.p.case_id = "uuid()";
+            assert.deepEqual(mug.messages.get("case_id"),
+                ["Case ID cannot be uuid() without a Create action. It must reference an existing case."]);
+            mug.p.useCreate = true;
+            assert.deepEqual(mug.messages.get("case_id"), []);
+        });
     });
 
     it("should provide case references to the logic manager", function () {
