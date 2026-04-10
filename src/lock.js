@@ -38,9 +38,7 @@ $.vellum.plugin("lock", {}, {
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
-        if (mug.parentMug && mug.options.isControlOnly) {
-            mug.p.set('locked', mug.parentMug.p.locked);
-        }
+        this._setLockedFromParent(mug);
     },
     setTreeActions: function (mug) {
         if (mug.p.locked) {
@@ -75,7 +73,7 @@ $.vellum.plugin("lock", {}, {
                     delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
                 }
                 mug.p.set(attr, value);
-                mug.form.getChildren(mug).forEach(child => _this.handleMugParseFinish(child));
+                mug.form.getChildren(mug).forEach(child => _this._setLockedFromParent(child));
             },
         };
         return spec;
@@ -107,6 +105,11 @@ $.vellum.plugin("lock", {}, {
         return mug.form.getChildren(mug).some(child =>
             child.p.locked || this._hasLockedChildren(child)
         );
+    },
+    _setLockedFromParent: function (mug) {
+        if (mug.parentMug && mug.options.isControlOnly) {
+            mug.p.set('locked', mug.parentMug.p.locked);
+        }
     },
     isPropertyLocked: function (mug, propertyPath) {
         const locked = this.__callOld();
