@@ -68,6 +68,7 @@ $.vellum.plugin("lock", {}, {
             deserialize: () => {},
             setter: function (mug, attr, value) {
                 if (value === true) {
+                    mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
                     mug.p.rawBindAttributes[LOCKED_BIND_ATTR] = 'all';
                 } else {
                     delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
