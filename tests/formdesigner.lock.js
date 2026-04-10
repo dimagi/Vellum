@@ -204,6 +204,22 @@ describe("The Lock plugin", function() {
                 0));
         });
 
+        it("prevents pasting a choice into a locked select", function () {
+            clickQuestion('/data/unlocked_select/choice1');
+            const serialized = copyPaste.copy();
+            clickQuestion('/data/locked_select/choice1');
+            const errors = copyPaste.paste(serialized);
+            assert(errors.length > 0, "expected paste errors");
+        });
+
+        it("allows pasting a choice into an unlocked select", function () {
+            clickQuestion('/data/locked_select/choice1');
+            const serialized = copyPaste.copy();
+            clickQuestion('/data/unlocked_select/choice1');
+            const errors = copyPaste.paste(serialized);
+            assert.equal(errors.length, 0, "expected no paste errors");
+        });
+
         it("removes the 'Add Choice' action for a locked select", function () {
             const lockedSelect = getMug('/data/locked_select');
             assert.isFalse(lockedSelect.options.canAddChoices);

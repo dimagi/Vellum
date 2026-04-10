@@ -13,6 +13,7 @@ import widgets from "vellum/widgets";
 const LOCKED_BIND_ATTR = "vellum:lock";
 const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit";
 const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
+const SELECT_CLASSES = ["Select", "MSelect", "Choice"];
 
 $.vellum.plugin("lock", {}, {
     parseBindElement: function (form, el, path) {
@@ -90,11 +91,17 @@ $.vellum.plugin("lock", {}, {
         if (canMove) {
             const destinationMug = form.getMugByUFID(dstId);
             if (destinationMug) {
-                return !(destinationMug.p.locked && _.contains(['Select', 'MSelect'], dstType));
+                return !(destinationMug.p.locked && _.contains(SELECT_CLASSES, dstType));
             }
             return true;
         }
         return false;
+    },
+    getInsertTargetAndPosition: function (refMug, qType, after) {
+        if (refMug && refMug.p.locked && _.contains(SELECT_CLASSES, refMug.__className)) {
+            return null;
+        }
+        return this.__callOld();
     },
     _hasLockedChildren: function (mug) {
         return mug.form.getChildren(mug).some(child =>
