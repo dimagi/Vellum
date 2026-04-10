@@ -96,7 +96,7 @@ $.vellum.plugin("lock", {}, {
         return false;
     },
     getInsertTargetAndPosition: function (refMug, qType, after) {
-        if (refMug && refMug.p.locked && _.contains(SELECT_CLASSES, refMug.__className)) {
+        if (refMug?.p.locked && _.contains(SELECT_CLASSES, refMug.__className)) {
             return null;
         }
         return this.__callOld();

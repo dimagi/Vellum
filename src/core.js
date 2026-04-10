@@ -1177,7 +1177,7 @@ fn.checkMove = function (srcId, srcType, dstId, dstType, position) {
         return false;
     }
     if (!this.isMugPathMoveable(sourceMug)) {
-        var srcParentId = sourceMug.parentMug ? sourceMug.parentMug.ufid : '#';
+        var srcParentId = sourceMug.parentMug?.ufid || '#';
         return srcParentId === dstId;
     }
     return true;
