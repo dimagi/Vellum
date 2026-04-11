@@ -620,11 +620,13 @@ var chips = function (mug, options) {
             if (isActive) {
                 onDeselect(slug, mug);
             } else {
-                exclusiveChips.forEach(function (s) {
-                    if (s !== slug && getState(s, mug)) {
-                        onDeselect(s, mug);
-                    }
-                });
+                if (exclusiveSet.has(slug)) {
+                    exclusiveChips.forEach(function (s) {
+                        if (s !== slug && getState(s, mug)) {
+                            onDeselect(s, mug);
+                        }
+                    });
+                }
                 onSelect(slug, mug);
             }
             render();
