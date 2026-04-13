@@ -495,7 +495,7 @@ $.vellum.plugin('caseManagement', {}, {
             const $nudge = $(
                 '<div class="alert alert-info fd-nudge">' +
                     '<button type="button" class="close" ' +
-                        'data-dismiss="alert" aria-hidden="true">&times;</button>' +
+                        'data-dismiss="alert" aria-label="' + gettext('Close') + '">&times;</button>' +
                     '<i class="fa fa-info-circle"></i> ' +
                     gettext('Save this question as a case property to reuse its data across your application.') +
                 '</div>'
