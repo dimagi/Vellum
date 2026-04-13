@@ -119,6 +119,36 @@ describe("The SaveToCase module", function() {
         assert.strictEqual($("[name=property-case_type]").data('select2').options.options.tags, true);
     });
 
+    it("should not deselect Create when selecting Close or Index", function () {
+        util.loadXML("");
+        util.addQuestion("SaveToCase", "stc", {
+            case_id: 'uuid()',
+            case_type: 'my_custom_type',
+            useCreate: true,
+            createProperty: {
+                'case_name': { 'calculate': '/data/name' },
+            }
+        });
+        util.clickQuestion("stc");
+        var mug = util.getMug("stc");
+
+        // Verify initial state
+        assert.equal(mug.p.useCreate, true);
+        assert.equal(mug.p.case_type, 'my_custom_type');
+
+        // Click Close chip
+        $(".fd-chip[data-slug='close']").trigger('click');
+        assert.equal(mug.p.useCreate, true, "Create should still be active after clicking Close");
+        assert.equal(mug.p.useClose, true, "Close should be active");
+        assert.equal(mug.p.case_type, 'my_custom_type', "case_type should be preserved after clicking Close");
+
+        // Click Index chip
+        $(".fd-chip[data-slug='index']").trigger('click');
+        assert.equal(mug.p.useCreate, true, "Create should still be active after clicking Index");
+        assert.equal(mug.p.useIndex, true, "Index should be active");
+        assert.equal(mug.p.case_type, 'my_custom_type', "case_type should be preserved after clicking Index");
+    });
+
     it("should support two questions with same name", function () {
         util.loadXML(TWO_SAME_NAME_XML);
         var one = util.getMug("one/save"),
