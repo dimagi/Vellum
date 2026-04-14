@@ -26,12 +26,11 @@ describe("The SaveToCase module", function() {
 
     it("should load and save a create property", function () {
         util.loadXML(CREATE_PROPERTY_XML);
-        var create = util.getMug("save_to_case"),
-            props = create.p.createProperty;
+        var create = util.getMug("save_to_case");
         assert.equal(create.p.case_type, "caseType");
-        assert.equal(props.case_name.calculate, "/data/name");
+        assert.equal(create.p.caseName, "/data/name");
         assert.equal(create.p.useCreate, true);
-        assert.equal(props.owner_id.calculate, '/data/meta/userID');
+        assert.equal(create.p.ownerId, '/data/meta/userID');
         assert.equal(create.p.date_modified, '/data/meta/timeEnd');
         assert.equal(create.p.user_id, "/data/meta/userID");
         util.assertXmlEqual(call("createXML"), CREATE_PROPERTY_XML);
@@ -569,10 +568,10 @@ describe("The SaveToCase module", function() {
                     "close": false,
                     "create": true,
                     "properties": [
-                        "case_name",
                         "p1",
                         "p2",
                         "case_type",
+                        "case_name",
                     ]
                 },
                 "/data/save_to_case_close": {
