@@ -29,8 +29,7 @@ var base = function(mug, options) {
             return !mug.spec[widget.path].enabled(mug);
         }
 
-        return mug.form.vellum.isPropertyLocked(mug.hashtagPath,
-                                                widget.path);
+        return mug.form.vellum.isPropertyLocked(mug, widget.path);
     };
 
     widget.getDisplayName = function () {
@@ -784,8 +783,14 @@ var getUIElement = function($input, labelText, isDisabled, help) {
         help: help,
     }));
 
-    // Disable anything that can be disabled
-    $input.find("*").addBack().prop('disabled', !!isDisabled);
+    if (isDisabled) {
+        // Disable anything that can be disabled
+        $input.find("*").addBack().prop('disabled', true);
+        $input.filter('[contenteditable]').attr({
+            'contenteditable': false,
+            'disabled': true,
+        });
+    }
 
     $uiElem.find(".controls").prepend($input);
 
