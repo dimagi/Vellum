@@ -621,16 +621,14 @@ var slugToProp = {
             var actions = [];
             if (createsCase(mug)) {
                 var createProps = {};
-                if (mug.p.case_type || mug.p.caseTypeXPath) {
-                    createProps.case_type = {};
-                }
-                if (mug.p.caseName) {
-                    createProps.case_name = {};
-                }
-                if (mug.p.ownerId) {
-                    createProps.owner_id = {};
-                }
-                _.extend(createProps, mug.p.createProperty);
+                var addCreateProp = function (key, value) {
+                    if (value) {
+                        createProps[key] = {};
+                    }
+                };
+                addCreateProp('case_type', mug.p.case_type || mug.p.caseTypeXPath);
+                addCreateProp('case_name', mug.p.caseName);
+                addCreateProp('owner_id', mug.p.ownerId);
                 actions.push(simpleNode('create', makeColumns(createProps)));
             }
 
