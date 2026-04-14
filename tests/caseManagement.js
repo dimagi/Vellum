@@ -270,7 +270,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["one", "three", "two", ""]);
+        assert.deepEqual(displayedOptions, ["name", "one", "three", "two", ""]);
     });
 
     it("should display a warning when multiple questions are saving to the same case property", function () {
@@ -482,7 +482,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["newCaseProperty", "one", "three", "two", ""]);
+        assert.deepEqual(displayedOptions, ["name", "newCaseProperty", "one", "three", "two", ""]);
 
         // Verify that custom options will be removed when no longer in use
         util.clickQuestion(question1);
@@ -501,7 +501,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["question2", "one", "three", "two", ""]);
+        assert.deepEqual(displayedOptions, ["question2", "name", "one", "three", "two", ""]);
     });
 
     it("should remove child mappings when parent group is deleted", function () {

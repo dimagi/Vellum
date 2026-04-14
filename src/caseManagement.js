@@ -2,6 +2,7 @@ import $ from "jquery";
 import _ from "underscore";
 import mugs from "vellum/mugs";
 import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
+import nudgeName from "vellum/templates/case_management_name_nudge.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
 import { compareCaseMappings } from "vellum/caseDiff";
@@ -405,6 +406,10 @@ $.vellum.plugin('caseManagement', {}, {
         data.properties = this.opts().caseManagement.properties || [];
         data.baseline = this.opts().caseManagement.mappings || {};
         data.view_form_url = this.opts().caseManagement.view_form_url;
+        data.is_registration_form = this.opts().caseManagement.is_registration_form;
+        if (data.is_registration_form && !data.properties.includes('name')) {
+            data.properties.push('name');
+        }
     },
 
     loadXML: function () {
@@ -487,23 +492,37 @@ $.vellum.plugin('caseManagement', {}, {
     },
 
     getSectionDisplay: function (mug, options) {
-        // can be removed when the Case Management nudge is no longer needed
         const $sec = this.__callOld();
-        const NUDGE_KEY = 'nudge-caseManagement';
-        const DISMISS_ON = 3;
-        let useCount = parseInt(localStorage.getItem(NUDGE_KEY) || '0');
-        if (options.slug === 'caseManagement' && useCount < DISMISS_ON) {
-            const $nudge = $(nudgeLearn());
-            $nudge.on('close.bs.alert', () => localStorage.setItem(NUDGE_KEY, String(DISMISS_ON)));
+        if (options.slug !== 'caseManagement') {
+            return $sec;
+        }
+        const data = this.data.caseManagement;
+        if (data.is_registration_form && !data.caseMappings?.name?.length) {
+            const $nudge = $(nudgeName({format: util.format}));
             $sec.find('.fd-fieldset-content').prepend($nudge);
             mug.on('property-changed', event => {
-                if (event.property === 'caseProperty' && event.val) {
-                    localStorage.setItem(NUDGE_KEY, String(++useCount));
-                    if (useCount >= DISMISS_ON) {
-                        $nudge.fadeOut(300, function () { $(this).remove(); });
-                    }
+                if (event.property === 'caseProperty' && event.val === 'name') {
+                    $nudge.fadeOut(300, function () { $(this).remove(); });
                 }
             }, null, 'teardown-mug-properties');
+        } else {
+            // can be removed when the learning nudge is no longer needed
+            const NUDGE_KEY = 'nudge-caseManagement';
+            const DISMISS_ON = 3;
+            let useCount = parseInt(localStorage.getItem(NUDGE_KEY) || '0');
+            if (useCount < DISMISS_ON) {
+                const $nudge = $(nudgeLearn());
+                $nudge.on('close.bs.alert', () => localStorage.setItem(NUDGE_KEY, String(DISMISS_ON)));
+                $sec.find('.fd-fieldset-content').prepend($nudge);
+                mug.on('property-changed', event => {
+                    if (event.property === 'caseProperty' && event.val) {
+                        localStorage.setItem(NUDGE_KEY, String(++useCount));
+                        if (useCount >= DISMISS_ON) {
+                            $nudge.fadeOut(300, function () { $(this).remove(); });
+                        }
+                    }
+                }, null, 'teardown-mug-properties');
+            }
         }
         return $sec;
     },
