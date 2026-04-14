@@ -214,6 +214,53 @@ describe("The Lock plugin", function() {
         });
     });
 
+    describe("tree icons", function () {
+        function getLockIcon(path) {
+            const mug = getMug(path);
+            const node = call('jstree', 'get_node', mug.ufid);
+            return node.data.extraIcons?.lock || null;
+        }
+
+        it("shows a lock icon on a locked question", function () {
+            const icon = getLockIcon('/data/locked');
+            assert(icon, "expected lock icon on locked question");
+            assert.include(icon, 'fa-lock');
+        });
+
+        it("does not show a lock icon on an unlocked question", function () {
+            assert.isNull(getLockIcon('/data/unlocked'));
+        });
+
+        it("does not show a lock icon on a locked choice", function () {
+            assert.isNull(getLockIcon('/data/locked_select/choice1'));
+        });
+
+        it("updates the lock icon when toggling locked", function () {
+            const mug = getMug('/data/unlocked');
+            try {
+                assert.isNull(getLockIcon('/data/unlocked'));
+                mug.p.locked = true;
+                assert(getLockIcon('/data/unlocked'), "expected lock icon after locking");
+            } finally {
+                mug.p.locked = false;
+            }
+        });
+
+        it("shows a lock icon on a locked group with no unlocked children", function () {
+            const icon = getLockIcon('/data/locked_group');
+            assert(icon, "expected icon on locked group");
+            assert.include(icon, 'fa-lock');
+            assert.notInclude(icon, 'fa-unlock');
+        });
+
+        it("shows an unlock icon on a locked group with unlocked children", function () {
+            const icon = getLockIcon('/data/locked_group_with_unlocked_children');
+            assert(icon, "expected lock icon on locked select");
+            assert.include(icon, 'fa-unlock');
+            assert.notInclude(icon, 'fa-lock');
+        });
+    });
+
     describe("edit_locked_questions feature", function () {
         describe("with the feature enabled", function () {
             before(function (done) {

@@ -24,6 +24,9 @@
 						<nested_unlocked />
 					</group_no_lock>
 					<locked_group />
+					<locked_group_with_unlocked_children>
+						<nested_unlocked />
+					</locked_group_with_unlocked_children>
 					<locked_select />
 					<unlocked_select />
 				</data>
@@ -37,6 +40,8 @@
 			<bind vellum:nodeset="#form/group_no_lock" nodeset="/data/group_no_lock" />
 			<bind vellum:nodeset="#form/group_no_lock/nested_unlocked" nodeset="/data/group_no_lock/nested_unlocked" type="xsd:string" />
 			<bind vellum:nodeset="#form/locked_group" nodeset="/data/locked_group" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_group_with_unlocked_children" nodeset="/data/locked_group_with_unlocked_children" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_group_with_unlocked_children/nested_unlocked" nodeset="/data/locked_group_with_unlocked_children/nested_unlocked" type="xsd:string" />
 			<bind vellum:nodeset="#form/locked_select" nodeset="/data/locked_select" vellum:lock="all" />
 			<bind vellum:nodeset="#form/unlocked_select" nodeset="/data/unlocked_select" />
 			<itext>
@@ -54,6 +59,9 @@
 						<value>nested_locked</value>
 					</text>
 					<text id="nested_unlocked-label">
+						<value>nested_unlocked</value>
+					</text>
+					<text id="locked_group_with_unlocked_children/nested_unlocked-label">
 						<value>nested_unlocked</value>
 					</text>
 					<text id="locked_select-label">
@@ -95,6 +103,11 @@
 			</input>
 		</group>
 		<group vellum:ref="#form/locked_group" ref="/data/locked_group"></group>
+		<group vellum:ref="#form/locked_group_with_unlocked_children" ref="/data/locked_group_with_unlocked_children">
+			<input vellum:ref="#form/locked_group_with_unlocked_children/nested_unlocked" ref="/data/locked_group_with_unlocked_children/nested_unlocked">
+				<label ref="jr:itext('locked_group_with_unlocked_children/nested_unlocked-label')" />
+			</input>
+		</group>
 		<select1 vellum:ref="#form/locked_select" ref="/data/locked_select">
 			<label ref="jr:itext('locked_select-label')" />
 			<item>

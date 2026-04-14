@@ -46,6 +46,22 @@ $.vellum.plugin("lock", {}, {
         }
         this.__callOld();
     },
+    setTreeExtraIcons: function (mug) {
+        this.__callOld();
+        const node = mug.ufid && this.jstree('get_node', mug.ufid);
+        if (!node) { return; }
+
+        let icon = null;
+        if (mug.p.locked) {
+            icon = treeLockIcon(mug);
+        }
+
+        if (node.data.extraIcons?.lock !== icon) {
+            node.data.extraIcons = node.data.extraIcons || {};
+            node.data.extraIcons.lock = icon;
+            this.jstree('redraw_node', node);
+        }
+    },
     getMainProperties: function () {
         const properties = this.__callOld();
         properties.splice(1 + properties.indexOf('requiredAttr'), 0, 'locked');
@@ -75,6 +91,7 @@ $.vellum.plugin("lock", {}, {
                 }
                 mug.p.set(attr, value);
                 mug.form.getChildren(mug).forEach(child => setLockedFromParent(child));
+                _this.setTreeExtraIcons(mug);
             },
         };
         return spec;
@@ -138,8 +155,38 @@ function hasLockedChildren(mug) {
     );
 }
 
+function hasUnlockedChildren(mug) {
+    return mug.form.getChildren(mug).some(child =>
+        !child.p.locked || hasUnlockedChildren(child)
+    );
+}
+
 function setLockedFromParent(mug) {
     if (mug.parentMug && mug.options.isControlOnly) {
         mug.p.set('locked', mug.parentMug.p.locked);
     }
+}
+
+function treeLockIcon(mug) {
+    if (mug.options.isControlOnly) {
+        return;
+    }
+
+    let iconClass = "fa-lock";
+    let tooltipText = gettext("Only a user with permission can edit this question.");
+    if (mug.__className === "Group") {
+        if (hasUnlockedChildren(mug)) {
+            iconClass = "fa-unlock";
+            tooltipText = gettext(
+                "Only a user with permission can edit this group. " +
+                "Some questions are unlocked."
+            );
+        } else {
+            tooltipText = gettext(
+                "Only a user with permission can edit this group. " +
+                "All questions are locked."
+            );
+        }
+    }
+    return `<i class="fa ${iconClass}" title="${tooltipText}"></i>&nbsp;`;
 }
