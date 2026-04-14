@@ -130,18 +130,6 @@ describe("The Lock plugin", function() {
             assert.isFalse(locked('/data/group_no_lock', 'nodeID'));
         });
 
-        it("detects locked children recursively", function () {
-            const groupWithNestedLock = getMug('/data/group_with_nested_lock');
-            assert(call('_hasLockedChildren', groupWithNestedLock),
-                "group with deeply nested locked question should have locked children");
-            const subgroup = getMug('/data/group_with_nested_lock/subgroup');
-            assert(call('_hasLockedChildren', subgroup),
-                "subgroup directly containing locked question should have locked children");
-            const groupNoLock = getMug('/data/group_no_lock');
-            assert.isFalse(call('_hasLockedChildren', groupNoLock),
-                "group without locked children should return false");
-        });
-
         it("adds a 'locked children' message to a group that contains a locked question", function () {
             locked('/data/group_with_nested_lock', 'nodeID');
             const mug = getMug('/data/group_with_nested_lock');

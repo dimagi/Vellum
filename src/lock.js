@@ -38,7 +38,7 @@ $.vellum.plugin("lock", {}, {
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
-        this._setLockedFromParent(mug);
+        setLockedFromParent(mug);
     },
     setTreeActions: function (mug) {
         if (mug.p.locked) {
@@ -74,7 +74,7 @@ $.vellum.plugin("lock", {}, {
                     delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
                 }
                 mug.p.set(attr, value);
-                mug.form.getChildren(mug).forEach(child => _this._setLockedFromParent(child));
+                mug.form.getChildren(mug).forEach(child => setLockedFromParent(child));
             },
         };
         return spec;
@@ -102,16 +102,6 @@ $.vellum.plugin("lock", {}, {
         }
         return this.__callOld();
     },
-    _hasLockedChildren: function (mug) {
-        return mug.form.getChildren(mug).some(child =>
-            child.p.locked || this._hasLockedChildren(child)
-        );
-    },
-    _setLockedFromParent: function (mug) {
-        if (mug.parentMug && mug.options.isControlOnly) {
-            mug.p.set('locked', mug.parentMug.p.locked);
-        }
-    },
     isPropertyLocked: function (mug, propertyPath) {
         const locked = this.__callOld();
         if (locked || mug.p.locked) {
@@ -132,12 +122,24 @@ $.vellum.plugin("lock", {}, {
         return false;
     },
     isMugPathMoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked && !this._hasLockedChildren(mug);
+        return this.__callOld() && !mug.p.locked && !hasLockedChildren(mug);
     },
     isMugRemoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked && !this._hasLockedChildren(mug);
+        return this.__callOld() && !mug.p.locked && !hasLockedChildren(mug);
     },
     isMugTypeChangeable: function (mug) {
         return this.__callOld() && !mug.p.locked;
     },
 });
+
+function hasLockedChildren(mug) {
+    return mug.form.getChildren(mug).some(child =>
+        child.p.locked || hasLockedChildren(child)
+    );
+}
+
+function setLockedFromParent(mug) {
+    if (mug.parentMug && mug.options.isControlOnly) {
+        mug.p.set('locked', mug.parentMug.p.locked);
+    }
+}
