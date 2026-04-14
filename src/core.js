@@ -140,6 +140,7 @@ fn.init = function () {
                 action: gettext("Look for questions marked with $1 and fix the errors.").replace('$1', icon),
             }));
         }
+        alerts.push(..._this.preSaveValidation());
         return alerts.length ? {
             title: gettext("Validation Failed"),
             content: pre_save_alerts({alerts}),
@@ -2579,6 +2580,15 @@ fn.populateControlMug = function (mug, controlElement) {
 fn.updateControlNodeAdaptorMap = function (map) {};
 
 fn.contributeToModelXML = function (xmlWriter, form) {};
+
+/**
+ * Validate on Save button hover.
+ *
+ * @returns An array of warnings.
+ */
+fn.preSaveValidation = function () {
+    return [];
+};
 
 fn.contributeToHeadXML = function (xmlWriter, form) {};
 

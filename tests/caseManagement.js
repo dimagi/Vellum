@@ -624,6 +624,20 @@ describe("The Case Management plugin", function () {
         assert.isFalse(util.isTreeNodeValid(question));
     });
 
+    it("validation should not fail with empty form", function () {
+        util.loadXML("");
+        const alerts = call("preSaveValidation");
+        assert.equal(alerts.length, 0);
+    });
+
+    it("validation should fail when case name is not mapped", function () {
+        util.loadXML("");
+        util.addQuestion("Text", "one");
+        const alerts = call("preSaveValidation");
+        const msg = _(alerts).find(a => a.indexOf('missing a case name') >= 0);
+        assert.ok(msg, JSON.stringify(alerts));
+    });
+
     describe("with case management disabled", function () {
         const plugins = util.options.options.plugins || [];
 

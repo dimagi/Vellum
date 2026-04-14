@@ -527,6 +527,19 @@ $.vellum.plugin('caseManagement', {}, {
         return $sec;
     },
 
+    preSaveValidation: function () {
+        const alerts = this.__callOld();
+        const data = this.data.caseManagement;
+        if (!data.caseMappings?.name?.length && data.is_registration_form &&
+                this.data.core.form.tree.getRootChildren().length) {
+            alerts.push(util.format(gettext(
+                'This registration form is missing a case name. ' +
+                'Assign the {name} property to a question.'
+            ), {name: '<code>name</code>'}));
+        }
+        return alerts;
+    },
+
     getMugSpec: function () {
         const specs = this.__callOld();
         const that = this;
