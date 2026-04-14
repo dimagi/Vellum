@@ -92,6 +92,12 @@ $.vellum.plugin("lock", {}, {
                 mug.p.set(attr, value);
                 mug.form.getChildren(mug).forEach(child => setLockedFromParent(child));
                 _this.setTreeExtraIcons(mug);
+
+                if (!mug.form.isLoadingXForm) {
+                    if (mug.parentMug) {
+                        updateParentTreeIcons(mug.parentMug);
+                    }
+                }
             },
         };
         return spec;
@@ -164,6 +170,15 @@ function hasUnlockedChildren(mug) {
 function setLockedFromParent(mug) {
     if (mug.parentMug && mug.options.isControlOnly) {
         mug.p.set('locked', mug.parentMug.p.locked);
+    }
+}
+
+function updateParentTreeIcons(parent) {
+    while (parent) {
+        if (parent.p.locked && parent.__className === "Group") {
+            parent.form.vellum.setTreeExtraIcons(parent);
+        }
+        parent = parent.parentMug;
     }
 }
 

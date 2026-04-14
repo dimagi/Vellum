@@ -253,6 +253,21 @@ describe("The Lock plugin", function() {
             assert.notInclude(icon, 'fa-unlock');
         });
 
+        it("updates parent group icon when child lock state changes", function () {
+            const child = getMug('/data/locked_group_with_unlocked_children/nested_unlocked');
+            try {
+                // initially has unlocked children -> fa-unlock
+                assert.include(getLockIcon('/data/locked_group_with_unlocked_children'), 'fa-unlock');
+                // lock the child -> all children locked -> fa-lock
+                child.p.locked = true;
+                const icon = getLockIcon('/data/locked_group_with_unlocked_children');
+                assert.include(icon, 'fa-lock');
+                assert.notInclude(icon, 'fa-unlock');
+            } finally {
+                child.p.locked = false;
+            }
+        });
+
         it("shows an unlock icon on a locked group with unlocked children", function () {
             const icon = getLockIcon('/data/locked_group_with_unlocked_children');
             assert(icon, "expected lock icon on locked select");
