@@ -1,6 +1,7 @@
 import $ from "jquery";
 import _ from "underscore";
 import mugs from "vellum/mugs";
+import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
 import { compareCaseMappings } from "vellum/caseDiff";
@@ -492,14 +493,7 @@ $.vellum.plugin('caseManagement', {}, {
         const DISMISS_ON = 3;
         let useCount = parseInt(localStorage.getItem(NUDGE_KEY) || '0');
         if (options.slug === 'caseManagement' && useCount < DISMISS_ON) {
-            const $nudge = $(
-                '<div class="alert alert-info fd-nudge">' +
-                    '<button type="button" class="close" ' +
-                        'data-dismiss="alert" aria-label="' + gettext('Close') + '">&times;</button>' +
-                    '<i class="fa fa-info-circle"></i> ' +
-                    gettext('Save this question as a case property to reuse its data across your application.') +
-                '</div>'
-            );
+            const $nudge = $(nudgeLearn());
             $nudge.on('close.bs.alert', () => localStorage.setItem(NUDGE_KEY, String(DISMISS_ON)));
             $sec.find('.fd-fieldset-content').prepend($nudge);
             mug.on('property-changed', event => {
