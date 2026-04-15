@@ -128,7 +128,7 @@ fn.init = function () {
         const icon = "<i class='fd-valid-alert-icon fa fa-warning'></i>";
         if (form.hasBrokenReferences()) {
             const action = gettext("Look for questions marked with $1 and " +
-                "check they don't reference deleted questions.");
+                "check if they reference deleted questions.");
             return {
                 title: gettext("Errors in Form"),
                 content: util.format(template, {
