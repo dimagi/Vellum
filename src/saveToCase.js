@@ -486,23 +486,17 @@ var slugToProp = {
                 validationFunc: function (mug) {
                     if (mug.p.useCreate) {
                         var props = _.without(_.keys(mug.p.createProperty), ""),
-                            required = ["case_name"],
-                            optional = ["owner_id"],
-                            legal = _.union(required, optional),
-                            illegalProps = _.difference(props, legal),
-                            requiredProps = _.intersection(props, required),
+                            reserved = ["case_type", "case_name", "owner_id"],
+                            reservedUsed = _.intersection(props, reserved),
                             invalidProps = _.filter(props, function(p) {
                                 return !VALID_PROP_REGEX.test(p);
                             });
 
-                        if (requiredProps.length !== required.length) {
+                        if (reservedUsed.length > 0) {
                             return util.format(
-                                gettext("You must include {columns} columns to create a case"),
-                                {columns: required.join(", ")}
+                                gettext("{props} cannot be added here. Use the dedicated fields above."),
+                                {props: reservedUsed.join(", ")}
                             );
-                        } else if (illegalProps.length > 0) {
-                            return gettext("You can only use the following properties:") +
-                                " " + legal.join(', ');
                         } else if (invalidProps.length > 0) {
                             return util.format(
                                 gettext("{props} are invalid properties"),
@@ -632,8 +626,16 @@ var slugToProp = {
                 actions.push(simpleNode('create', makeColumns(createProps)));
             }
 
-            if (updatesCase(mug)) {
-                actions.push(simpleNode('update', makeColumns(mug.p.updateProperty)));
+            // <update> from extra create properties or standalone update action
+            var updateProps = {};
+            if (createsCase(mug) && mug.p.createProperty) {
+                _.extend(updateProps, _.omit(mug.p.createProperty, ""));
+            }
+            if (updatesCase(mug) && mug.p.updateProperty) {
+                _.extend(updateProps, _.omit(mug.p.updateProperty, ""));
+            }
+            if (!_.isEmpty(updateProps)) {
+                actions.push(simpleNode('update', makeColumns(updateProps)));
             }
 
             if (closesCase(mug)) {
@@ -711,7 +713,7 @@ var slugToProp = {
                     }
                     ret.push(ownerBind);
                 }
-                ret = ret.concat(generateBinds('create', mug.p.createProperty));
+                ret = ret.concat(generateBinds('update', mug.p.createProperty));
             }
             if (updatesCase(mug)) {
                 ret = ret.concat(generateBinds('update', mug.p.updateProperty));
