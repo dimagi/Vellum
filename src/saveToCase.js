@@ -10,6 +10,18 @@ import widget_index_case from "vellum/templates/widget_index_case.html";
 import widget_save_to_case from "vellum/templates/widget_save_to_case.html";
 import "vellum/core";
 
+
+function validateXPath(mug, value) {
+    if (value) {
+        try {
+            mug.form.xpath.parse(value);
+        } catch (err) {
+            return gettext("Invalid XPath expression.");
+        }
+    }
+    return 'pass';
+}
+
 function createsCase(mug) {
     return mug ? mug.p.useCreate : false;
 }
@@ -382,6 +394,9 @@ var slugToProp = {
                 widget: widgets.xPath,
                 serialize: mugs.serializeXPath,
                 deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    return validateXPath(mug, mug.p.openCaseCondition);
+                },
             },
             "caseName": {
                 lstring: gettext("Case Name"),
@@ -412,6 +427,9 @@ var slugToProp = {
                 widget: widgets.xPath,
                 serialize: mugs.serializeXPath,
                 deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    return validateXPath(mug, mug.p.ownerIdCondition);
+                },
             },
             "case_id": {
                 lstring: gettext("Case ID"),
