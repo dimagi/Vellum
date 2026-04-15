@@ -934,6 +934,16 @@ $.vellum.plugin("saveToCase", {}, {
                 mug.p.ownerIdCondition = ownerIdRelevant;
             }
         }
+        // When both Create and Update exist in parsed XML, merge update
+        // properties into createProperty so they appear in the Create section.
+        if (updatesCase(mug)) {
+            if (!mug.p.createProperty) {
+                mug.p.createProperty = {};
+            }
+            _.extend(mug.p.createProperty, mug.p.updateProperty);
+            mug.p.updateProperty = {};
+            mug.p.useUpdate = false;
+        }
     },
     getMugToolbar: function (mug, multiselect) {
         var $toolbar = this.__callOld();
