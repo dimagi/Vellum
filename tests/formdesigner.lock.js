@@ -328,6 +328,14 @@ describe("The Lock plugin", function() {
                 const spec = mug.spec.locked;
                 assert(spec.enabled(mug));
             });
+
+            it("keeps Edit Source XML and Edit Bulk Translations when there are locked questions", function () {
+                const $menu = $(".fd-tools-menu").parent();
+                assert($menu.find('a:contains("Edit Source XML")').length,
+                    "Edit Source XML should be in tools menu");
+                assert($menu.find('a:contains("Edit Bulk Translations")').length,
+                    "Edit Bulk Translations should be in tools menu");
+            });
         });
 
         describe("without the feature enabled", function () {
@@ -349,6 +357,14 @@ describe("The Lock plugin", function() {
                 const mug = getMug('/data/locked');
                 const spec = mug.spec.locked;
                 assert(!spec.enabled(mug));
+            });
+
+            it("removes Edit Source XML and Edit Bulk Translations when there are locked questions", function () {
+                const $menu = $(".fd-tools-menu").parent();
+                assert.equal($menu.find('a:contains("Edit Source XML")').length, 0,
+                    "Edit Source XML should not be in tools menu");
+                assert.equal($menu.find('a:contains("Edit Bulk Translations")').length, 0,
+                    "Edit Bulk Translations should not be in tools menu");
             });
         });
     });

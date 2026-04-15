@@ -16,6 +16,22 @@ const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
 const SELECT_CLASSES = ["Select", "MSelect", "Choice"];
 
 $.vellum.plugin("lock", {}, {
+    init: function () {
+        const data = this.data.lock;
+        data.locks = {};
+    },
+    loadXML: function () {
+        this.__callOld();
+
+        // we don't know whether there are any locks until XML is loaded
+        // tools menu items are already defined at this point, so target what we want and remove them here
+        if (_.some(this.data.lock.locks) && !this.opts().features.edit_locked_questions) {
+            const $menu = this.$f.find('.fd-tools-menu').parent();
+            $menu.find('a:contains("' + gettext("Edit Source XML") + '")').parent().remove();
+            $menu.find('a:contains("' + gettext("Edit Bulk Translations") + '")').parent().remove();
+        }
+
+    },
     parseBindElement: function (form, el, path) {
         this.__callOld();
         const locked = el.xmlAttr(LOCKED_BIND_ATTR);
@@ -87,8 +103,10 @@ $.vellum.plugin("lock", {}, {
                 if (value === true) {
                     mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
                     mug.p.rawBindAttributes[LOCKED_BIND_ATTR] = 'all';
+                    _this.data.lock.locks[mug.ufid] = 'all';
                 } else {
                     delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                    delete _this.data.lock.locks[mug.ufid];
                 }
                 mug.p.set(attr, value);
                 mug.form.getChildren(mug).forEach(child => setLockedFromParent(child));
