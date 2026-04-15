@@ -3,6 +3,7 @@ import _ from "underscore";
 import mugs from "vellum/mugs";
 import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
 import nudgeName from "vellum/templates/case_management_name_nudge.html";
+import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
 import { compareCaseMappings } from "vellum/caseDiff";
@@ -387,6 +388,35 @@ class CaseMapMaintainer {
     }
 }
 
+function initAutoAssignName(vellum) {
+    const saveButtonUi = vellum.data.core.saveButton.ui;
+    saveButtonUi.on('shown.bs.popover', function () {
+        const $tip = saveButtonUi.data('bs.popover').$tip;
+        $tip.off('click.autoAssignName');
+        $tip.on('click.autoAssignName', '.fd-auto-assign-case-name', function () {
+            autoAssignName(vellum);
+            saveButtonUi.popover('hide');
+        });
+    });
+}
+
+function autoAssignName(vellum) {
+    const form = vellum.data.core.form;
+    const first = form.findFirstMatchingChild(null, () => true);
+    if (!first) {
+        return;
+    }
+    let targetMug = first;
+    if (first.p.caseProperty) {
+        targetMug = form.createQuestion(first, 'before', 'DataBindOnly', true);
+        targetMug.p.nodeID = form.generate_question_id('case-name');
+        targetMug.p.calculateAttr = 'uuid()';
+    }
+    targetMug.p.caseProperty = 'name';
+    vellum.data.core.saveButton.fire('change');
+    refreshCurrentMug(vellum);
+}
+
 function refreshCurrentMug(vellum) {
     const mugs = vellum.getCurrentlySelectedMug(true);
     if (mugs.length !== 1) { return; }
@@ -410,6 +440,7 @@ $.vellum.plugin('caseManagement', {}, {
         if (data.is_registration_form && !data.properties.includes('name')) {
             data.properties.push('name');
         }
+        initAutoAssignName(this);
     },
 
     loadXML: function () {
@@ -535,7 +566,7 @@ $.vellum.plugin('caseManagement', {}, {
             alerts.push(util.format(gettext(
                 'This registration form is missing a case name. ' +
                 'Assign the {name} property to a question.'
-            ), {name: '<code>name</code>'}));
+            ), {name: '<code>name</code>'}) + tmpAutoAssign());
         }
         return alerts;
     },

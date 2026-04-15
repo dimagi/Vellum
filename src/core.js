@@ -156,12 +156,36 @@ fn.init = function () {
         html: true,
         placement: 'bottom',
         container: 'body',
-        trigger: 'hover',
+        trigger: 'manual',
         sanitize: false,
+    });
+    const saveButtonUi = _this.data.core.saveButton.ui;
+    let hideTimeout;
+    function showPopover() {
+        cancelHide();
+        saveButtonUi.popover('show');
+    }
+    function scheduleHide() {
+        hideTimeout = setTimeout(function () {
+            saveButtonUi.popover('hide');
+        }, 500);
+    }
+    function cancelHide() {
+        clearTimeout(hideTimeout);
+    }
+    // Keep the popover open while hovering over the button or the popover itself.
+    saveButtonUi.on('mouseenter', showPopover);
+    saveButtonUi.on('mouseleave', scheduleHide);
+    saveButtonUi.on('shown.bs.popover', function () {
+        const $tip = saveButtonUi.data('bs.popover').$tip;
+        $tip.off('mouseenter.savePopover mouseleave.savePopover')
+            .on('mouseenter.savePopover', cancelHide)
+            .on('mouseleave.savePopover', scheduleHide);
     });
     // Saving, and the associated modal, can interfere with the popover,
     // so make absolutely sure that the popover is removed on save.
     _this.data.core.saveButton.ui.on('click', function() {
+        cancelHide();
         $(this).popover('hide');
     });
 

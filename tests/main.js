@@ -5,11 +5,15 @@ import 'vellum/gettext-polyfill';
 import 'mocha/mocha.js';
 import $ from 'jquery';
 import options from 'tests/options';
+import chai from 'chai';
+import chaiString from 'chai-string';
 
 mocha.setup({
     ui: 'bdd',
     timeout: '10000',
 });
+
+chai.use(chaiString);
 
 if (window.navigator.userAgent.indexOf('HeadlessChrome') < 0) {
     mocha.reporter('html');

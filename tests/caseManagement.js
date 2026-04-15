@@ -638,6 +638,69 @@ describe("The Case Management plugin", function () {
         assert.ok(msg, JSON.stringify(alerts));
     });
 
+    describe("should auto-assign case name to", function () {
+        let popover;
+        before(() => {
+            popover = call("getData").core.saveButton.ui.data('bs.popover');
+            // disable popover animation for deterministic hide
+            // otherwise next test may fail if it interacts with popovers
+            popover.options.animation = false;
+        });
+        after(() => {
+            delete popover.options.animation;
+        });
+
+        it("first mug", function (done) {
+            util.loadXML("");
+            const mug = util.addQuestion("Text", "first");
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                $(".fd-auto-assign-case-name").trigger("click");
+                assert.equal(mug.p.caseProperty, 'name');
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
+
+        it("new mug when first mug has mapping", function (done) {
+            util.loadXML("");
+            const mug = util.addQuestion("Text", "test");
+            mug.p.caseProperty = 'test';
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                $(".fd-auto-assign-case-name").trigger("click");
+                const name = call("getMugByPath", "/data/case-name");
+                assert.equal(name.p.nodeID, 'case-name');
+                assert.equal(name.p.caseProperty, 'name');
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
+
+        it("new mug with unique node ID", function (done) {
+            util.loadXML("");
+            const mug = util.addQuestion("Text", "case-name");
+            mug.p.caseProperty = 'test';
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                $(".fd-auto-assign-case-name").trigger("click");
+                const name = mug.form.findFirstMatchingChild(null, () => true);
+                assert.notEqual(name.p.nodeID, 'case-name');
+                assert.endsWith(name.p.nodeID, 'case-name');
+                assert.equal(name.p.caseProperty, 'name');
+                assert.equal(mug.p.caseProperty, 'test');
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
+    });
+
     describe("with case management disabled", function () {
         const plugins = util.options.options.plugins || [];
 
