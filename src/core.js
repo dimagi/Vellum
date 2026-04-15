@@ -10,6 +10,7 @@ import edit_source from "vellum/templates/edit_source.html";
 import confirm_overwrite from "vellum/templates/confirm_overwrite.html";
 import control_group_stdInput from "vellum/templates/control_group_stdInput.html";
 import form_errors_template from "vellum/templates/form_errors_template.html";
+import pre_save_alerts from "vellum/templates/pre_save_alerts.html";
 import question_fieldset from "vellum/templates/question_fieldset.html";
 import question_type_changer from "vellum/templates/question_type_changer.html";
 import question_toolbar from "vellum/templates/question_toolbar.html";
@@ -124,32 +125,25 @@ fn.init = function () {
 
     const validateForSave = _.debounce(function () {
         const form = _this.data.core.form;
-        const template = "<div class='alert alert-danger'>{error}<br/>{action}</div>";
+        const template = "{error}<br/>{action}";
         const icon = "<i class='fd-valid-alert-icon fa fa-warning'></i>";
+        const alerts = [];
         if (form.hasBrokenReferences()) {
-            const action = gettext("Look for questions marked with $1 and " +
-                "check if they reference deleted questions.");
-            return {
-                title: gettext("Errors in Form"),
-                content: util.format(template, {
-                    error: gettext("Form has reference errors."),
-                    action: action.replace('$1', icon),
-                }),
-            };
+            alerts.push(util.format(template, {
+                error: gettext("Form has reference errors."),
+                action: gettext("Look for questions marked with $1 and " +
+                    "check if they reference deleted questions.").replace('$1', icon),
+            }));
         } else if (!form.isFormValid()) {
-            const action = gettext("Look for questions marked with $1 and fix the errors.");
-            // TODO make a more efficient way to check if any mug in the
-            // form is not valid and use that instead of only current mug.
-            return {
-                title: "Validation Failed",
-                content: util.format(template, {
-                    error: gettext("Form has validation errors."),
-                    action: action.replace('$1', icon),
-                }),
-            };
-        } else {
-            return {title: "", content: ""};
+            alerts.push(util.format(template, {
+                error: gettext("Form has validation errors."),
+                action: gettext("Look for questions marked with $1 and fix the errors.").replace('$1', icon),
+            }));
         }
+        return alerts.length ? {
+            title: gettext("Validation Failed"),
+            content: pre_save_alerts({alerts}),
+        } : {title: "", content: ""};
     }, 500, true);
     _this.data.core.saveButton.ui.popover({
         title: function () {
