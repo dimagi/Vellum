@@ -907,6 +907,31 @@ $.vellum.plugin("saveToCase", {}, {
                 return value === inner;
             });
         }
+
+        var caseTypeRelevant = mug.p._caseTypeRelevant,
+            caseNameRelevant = mug.p._caseNameRelevant,
+            ownerIdRelevant = mug.p._ownerIdRelevant;
+        delete mug.p._caseTypeRelevant;
+        delete mug.p._caseNameRelevant;
+        delete mug.p._ownerIdRelevant;
+
+        var caseTypeAndNameRelevants = _.compact(
+            _.uniq([caseTypeRelevant, caseNameRelevant])
+        );
+        if (caseTypeAndNameRelevants.length && !mug.p.openCaseCondition) {
+            mug.p.openCaseCondition = caseTypeAndNameRelevants.join(" and ");
+        }
+
+        if (ownerIdRelevant) {
+            var redundantWithCaseTypeOrName = _.contains(
+                caseTypeAndNameRelevants,
+                ownerIdRelevant
+            );
+            var redundantWithOpenCase = ownerIdRelevant === mug.p.openCaseCondition;
+            if (!redundantWithCaseTypeOrName && !redundantWithOpenCase) {
+                mug.p.ownerIdCondition = ownerIdRelevant;
+            }
+        }
     },
     getMugToolbar: function (mug, multiselect) {
         var $toolbar = this.__callOld();
@@ -982,19 +1007,19 @@ $.vellum.plugin("saveToCase", {}, {
                                 // Route create/case_type to the Case Type dropdown.
                                 mug.p.case_type = stripped;
                             }
+                            mug.p._caseTypeRelevant = el.xmlAttr('relevant');
                             return;
                         }
 
                         if (action === "create" && prop === "case_name") {
                             mug.p.caseName = el.xmlAttr("calculate");
+                            mug.p._caseNameRelevant = el.xmlAttr('relevant');
                             return;
                         }
 
                         if (action === "create" && prop === "owner_id") {
                             mug.p.ownerId = el.xmlAttr("calculate");
-                            if (el.xmlAttr('relevant')) {
-                                mug.p.ownerIdCondition = el.xmlAttr("relevant");
-                            }
+                            mug.p._ownerIdRelevant = el.xmlAttr('relevant');
                             return;
                         }
 
