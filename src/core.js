@@ -122,13 +122,12 @@ fn.init = function () {
         csrftoken: _this.opts().csrftoken
     });
 
-    var validateForSave = _.debounce(function () {
-        var form = _this.data.core.form,
-            template = "<div class='alert alert-danger'>{error}<br/>{action}</div>",
-            icon = "<i class='fd-valid-alert-icon fa fa-warning'></i>",
-            action;
+    const validateForSave = _.debounce(function () {
+        const form = _this.data.core.form;
+        const template = "<div class='alert alert-danger'>{error}<br/>{action}</div>";
+        const icon = "<i class='fd-valid-alert-icon fa fa-warning'></i>";
         if (form.hasBrokenReferences()) {
-            action = gettext("Look for questions marked with $1 and " +
+            const action = gettext("Look for questions marked with $1 and " +
                 "check they don't reference deleted questions.");
             return {
                 title: gettext("Errors in Form"),
@@ -138,7 +137,7 @@ fn.init = function () {
                 }),
             };
         } else if (!form.isFormValid()) {
-            action = gettext("Look for questions marked with $1 and fix the errors.");
+            const action = gettext("Look for questions marked with $1 and fix the errors.");
             // TODO make a more efficient way to check if any mug in the
             // form is not valid and use that instead of only current mug.
             return {
