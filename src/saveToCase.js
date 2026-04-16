@@ -752,10 +752,10 @@ var slugToProp = {
                 displayName: gettext("Basic"),
                 properties: [
                     "nodeID",
+                    "caseActions",
                     "case_type",
                     "caseTypeXPath",
                     "case_id",
-                    "caseActions",
                 ],
             },
             {
