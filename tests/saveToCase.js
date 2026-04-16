@@ -583,4 +583,198 @@ describe("The SaveToCase module", function() {
             }
         });
     });
+
+    describe("dedicated create fields", function () {
+        it("should validate caseName is required for create", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useCreate = true;
+            assert.notEqual(mug.spec.caseName.validationFunc(mug), "pass");
+            mug.p.caseName = "/data/name";
+            assert.strictEqual(mug.spec.caseName.validationFunc(mug), "pass");
+        });
+
+        it("should reject reserved properties in createProperty", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useCreate = true;
+            mug.p.caseName = "/data/name";
+            mug.p.createProperty = {
+                case_name: { calculate: "/data/name" },
+            };
+            assert.notEqual(mug.spec.createProperty.validationFunc(mug), "pass");
+        });
+
+        it("should emit extra create properties under <update>", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "stc", {
+                case_id: 'uuid()',
+                useCreate: true,
+                case_type: 'household',
+                caseName: '/data/name',
+            });
+            mug.p.createProperty = {
+                'favorite_color': { calculate: "'blue'" },
+            };
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal($xml.find('create case_name').length, 1);
+            assert.equal($xml.find('update favorite_color').length, 1);
+            assert.equal($xml.find('create favorite_color').length, 0);
+        });
+
+        it("should merge update into createProperty on parse when both create property and update property exist", function () {
+            util.loadXML(LOGIC_TEST_XML);
+            var mug = util.getMug("save_to_case_create");
+            assert.equal(mug.p.caseName, "'name'");
+            assert.equal(mug.p.useCreate, true);
+            assert.equal(mug.p.useUpdate, false);
+            assert.deepEqual(_.without(_.keys(mug.p.createProperty), ""), ["p1", "p2"]);
+        });
+
+        it("should preserve user-provided ownerIdCondition even when openCaseCondition has same condition", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'uuid()',
+                useCreate: true,
+                case_type: 'household',
+                caseName: '/data/name',
+                ownerId: '/data/loc',
+                ownerIdCondition: "/data/set_owner = 'yes'",
+                openCaseCondition: "/data/set_owner = 'yes'",
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case"]').attr('relevant'),
+                "/data/set_owner = 'yes'"
+            );
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/owner_id"]').attr('relevant'),
+                "/data/set_owner = 'yes'"
+            );
+        });
+    });
+
+    describe("create section backward compatibility", function () {
+        function withRelevants(caseTypeRel, caseNameRel, ownerIdRel) {
+            var xml = CREATE_PROPERTY_XML;
+            if (caseTypeRel) {
+                xml = xml.replace(
+                    'nodeset="/data/save_to_case/case/create/case_type"',
+                    'nodeset="/data/save_to_case/case/create/case_type" relevant="' + caseTypeRel + '"'
+                );
+            }
+            if (caseNameRel) {
+                xml = xml.replace(
+                    'nodeset="/data/save_to_case/case/create/case_name"',
+                    'nodeset="/data/save_to_case/case/create/case_name" relevant="' + caseNameRel + '"'
+                );
+            }
+            if (ownerIdRel) {
+                xml = xml.replace(
+                    'nodeset="/data/save_to_case/case/create/owner_id"',
+                    'nodeset="/data/save_to_case/case/create/owner_id" relevant="' + ownerIdRel + '"'
+                );
+            }
+            return xml;
+        }
+
+        it("should have no openCaseCondition when no per-property relevant exists", function () {
+            util.loadXML(CREATE_PROPERTY_XML);
+            var mug = util.getMug("save_to_case");
+            assert.notOk(mug.p.openCaseCondition);
+            assert.notOk(mug.p.ownerIdCondition);
+        });
+
+        it("should promote all-same relevant to openCaseCondition and absorb owner_id", function () {
+            var cond = "/data/name != ''";
+            util.loadXML(withRelevants(cond, cond, cond));
+            var mug = util.getMug("save_to_case");
+            assert.equal(mug.p.openCaseCondition, cond);
+            assert.notOk(mug.p.ownerIdCondition);
+        });
+
+        it("should keep owner_id-only relevant as ownerIdCondition", function () {
+            util.loadXML(withRelevants(null, null, "/data/name != ''"));
+            var mug = util.getMug("save_to_case");
+            assert.notOk(mug.p.openCaseCondition);
+            assert.equal(mug.p.ownerIdCondition, "/data/name != ''");
+        });
+
+        it("should promote case_name-only relevant to openCaseCondition", function () {
+            util.loadXML(withRelevants(null, "/data/name != ''", null));
+            var mug = util.getMug("save_to_case");
+            assert.equal(mug.p.openCaseCondition, "/data/name != ''");
+            assert.notOk(mug.p.ownerIdCondition);
+        });
+
+        it("should combine different case_name and case_type relevants with 'and'", function () {
+            util.loadXML(withRelevants("1 = 1", "/data/name != ''", null));
+            var mug = util.getMug("save_to_case");
+            assert.include(mug.p.openCaseCondition, "1 = 1");
+            assert.include(mug.p.openCaseCondition, "/data/name != ''");
+            assert.include(mug.p.openCaseCondition, " and ");
+        });
+
+        it("should promote case_type relevant and keep different owner_id as ownerIdCondition", function () {
+            util.loadXML(withRelevants("1 = 1", null, "/data/name != ''"));
+            var mug = util.getMug("save_to_case");
+            assert.equal(mug.p.openCaseCondition, "1 = 1");
+            assert.equal(mug.p.ownerIdCondition, "/data/name != ''");
+        });
+
+        it("should promote shared case_name+owner_id relevant and absorb owner_id", function () {
+            var cond = "/data/name != ''";
+            util.loadXML(withRelevants(null, cond, cond));
+            var mug = util.getMug("save_to_case");
+            assert.equal(mug.p.openCaseCondition, cond);
+            assert.notOk(mug.p.ownerIdCondition);
+        });
+
+        it("should output case-level relevant instead of per-property relevant after loading legacy form", function () {
+            var cond = "/data/name != ''";
+            util.loadXML(withRelevants(cond, cond, cond));
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/save_to_case/case"]').attr('relevant'),
+                cond
+            );
+            assert.notOk(
+                $xml.find('bind[nodeset="/data/save_to_case/case/create/case_type"]').attr('relevant')
+            );
+            assert.notOk(
+                $xml.find('bind[nodeset="/data/save_to_case/case/create/case_name"]').attr('relevant')
+            );
+            assert.notOk(
+                $xml.find('bind[nodeset="/data/save_to_case/case/create/owner_id"]').attr('relevant')
+            );
+        });
+    });
+
+    describe("openCaseCondition promotion", function () {
+        it("should preserve user-provided ownerIdCondition even when openCaseCondition has same condition", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "stc", {
+                case_id: 'uuid()',
+                useCreate: true,
+                case_type: 'household',
+                caseName: '/data/name',
+                ownerId: '/data/loc',
+                ownerIdCondition: "/data/set_owner = 'yes'",
+                openCaseCondition: "/data/set_owner = 'yes'",
+            });
+            var xml = call("createXML"),
+                $xml = $(xml);
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case"]').attr('relevant'),
+                "/data/set_owner = 'yes'"
+            );
+            assert.equal(
+                $xml.find('bind[nodeset="/data/stc/case/create/owner_id"]').attr('relevant'),
+                "/data/set_owner = 'yes'"
+            );
+        });
+    });
 });
