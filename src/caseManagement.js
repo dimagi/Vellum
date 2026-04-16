@@ -560,7 +560,7 @@ $.vellum.plugin('caseManagement', {}, {
                     hideNudge();
                 }
             }, null, 'teardown-mug-properties');
-        } else {
+        } else if (mug.p.caseProperty !== 'name') {
             // can be removed when the learning nudge is no longer needed
             const NUDGE_KEY = 'nudge-caseManagement';
             const DISMISS_ON = 3;
