@@ -166,8 +166,10 @@ fn.init = function () {
         saveButtonUi.popover('show');
     }
     function scheduleHide() {
+        cancelHide();
         hideTimeout = setTimeout(function () {
             saveButtonUi.popover('hide');
+            hideTimeout = null;
         }, 500);
     }
     function cancelHide() {
