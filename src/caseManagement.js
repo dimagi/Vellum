@@ -411,19 +411,15 @@ function initAutoAssignName(vellum) {
 
 function autoAssignName(vellum) {
     const form = vellum.data.core.form;
-    const first = form.findFirstMatchingChild(null, () => true);
-    if (!first) {
-        return;
+    let mug = form.findFirstMatchingChild(null, () => true);
+    if (!mug || mug.p.caseProperty || mug.spec.caseProperty?.presence !== 'optional') {
+        mug = vellum.addQuestion('DataBindOnly', 'first');
+        mug.p.nodeID = form.generate_question_id('case-name');
+        mug.p.calculateAttr = 'uuid()';
     }
-    let targetMug = first;
-    if (first.p.caseProperty || first.spec?.caseProperty?.presence !== 'optional') {
-        targetMug = form.createQuestion(first, 'before', 'DataBindOnly', true);
-        targetMug.p.nodeID = form.generate_question_id('case-name');
-        targetMug.p.calculateAttr = 'uuid()';
-    }
-    targetMug.p.caseProperty = 'name';
+    mug.p.caseProperty = 'name';
     vellum.data.core.saveButton.fire('change');
-    refreshCurrentMug(vellum);
+    vellum.refreshCurrentMug();
 }
 
 const NAME_NUDGE_DISMISSED_KEY = 'nudge-caseName-dismissed';
