@@ -7,7 +7,7 @@ import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.htm
 import tplAutoAssignedName from "vellum/templates/case_management_auto_assigned_name.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
-import { compareCaseMappings } from "vellum/caseDiff";
+import { compareCaseMappings, formatCaseMappingDiff } from "vellum/caseDiff";
 
 
 function casePropertyDropdownWidget (mug, opts) {
@@ -689,8 +689,9 @@ $.vellum.plugin('caseManagement', {}, {
     augmentSentData: function (sentData, saveType) {
         const result = this.__callOld();
         const data = this.data.caseManagement;
+        const is_reg = this.data.caseManagement.is_registration_form;
         const diff = compareCaseMappings(data.baseline, data.caseMappings);
-        result.mapping_diff = JSON.stringify(diff);
+        result.case_mapping_diff = JSON.stringify(formatCaseMappingDiff(diff, is_reg));
         return result;
     }
 
