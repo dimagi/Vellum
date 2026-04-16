@@ -416,7 +416,7 @@ function autoAssignName(vellum) {
         return;
     }
     let targetMug = first;
-    if (first.p.caseProperty) {
+    if (first.p.caseProperty || first.spec?.caseProperty?.presence !== 'optional') {
         targetMug = form.createQuestion(first, 'before', 'DataBindOnly', true);
         targetMug.p.nodeID = form.generate_question_id('case-name');
         targetMug.p.calculateAttr = 'uuid()';
