@@ -4,6 +4,7 @@ import mugs from "vellum/mugs";
 import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
 import nudgeName from "vellum/templates/case_management_name_nudge.html";
 import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.html";
+import tmpReminder from "vellum/templates/case_management_reminder.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
 import { compareCaseMappings } from "vellum/caseDiff";
@@ -392,10 +393,18 @@ function initAutoAssignName(vellum) {
     const saveButtonUi = vellum.data.core.saveButton.ui;
     saveButtonUi.on('shown.bs.popover', function () {
         const $tip = saveButtonUi.data('bs.popover').$tip;
-        $tip.off('click.autoAssignName');
+        $tip.off('click.autoAssignName click.nameReminder');
         $tip.on('click.autoAssignName', '.fd-auto-assign-case-name', function () {
             autoAssignName(vellum);
             saveButtonUi.popover('hide');
+        });
+        $tip.on('click.nameReminder', '.fd-case-name-reminder', function () {
+            nameNudgeDismissed(false);
+            saveButtonUi.popover('hide');
+            const mugs = vellum.getCurrentlySelectedMug(true);
+            if (mugs.length === 1) {
+                vellum.displayMugProperties(mugs[0]);
+            }
         });
     });
 }
@@ -415,6 +424,19 @@ function autoAssignName(vellum) {
     targetMug.p.caseProperty = 'name';
     vellum.data.core.saveButton.fire('change');
     refreshCurrentMug(vellum);
+}
+
+const NAME_NUDGE_DISMISSED_KEY = 'nudge-caseName-dismissed';
+
+function nameNudgeDismissed(dismissed) {
+    if (dismissed === undefined) {
+        return localStorage.getItem(NAME_NUDGE_DISMISSED_KEY);
+    }
+    if (dismissed) {
+        localStorage.setItem(NAME_NUDGE_DISMISSED_KEY, '1');
+    } else {
+        localStorage.removeItem(NAME_NUDGE_DISMISSED_KEY);
+    }
 }
 
 function refreshCurrentMug(vellum) {
@@ -528,12 +550,18 @@ $.vellum.plugin('caseManagement', {}, {
             return $sec;
         }
         const data = this.data.caseManagement;
-        if (data.is_registration_form && !data.caseMappings?.name?.length) {
-            const $nudge = $(nudgeName({format: util.format}));
+        const hideNudge = () => $nudge.fadeOut(300, function () { $nudge.remove(); });
+        let $nudge;
+        if (data.is_registration_form && !data.caseMappings?.name?.length && !nameNudgeDismissed()) {
+            $nudge = $(nudgeName({format: util.format}));
             $sec.find('.fd-fieldset-content').prepend($nudge);
+            $nudge.on('close.bs.alert', () => {
+                nameNudgeDismissed(true);
+                hideNudge();
+            });
             mug.on('property-changed', event => {
                 if (event.property === 'caseProperty' && event.val === 'name') {
-                    $nudge.fadeOut(300, function () { $(this).remove(); });
+                    hideNudge();
                 }
             }, null, 'teardown-mug-properties');
         } else {
@@ -542,14 +570,14 @@ $.vellum.plugin('caseManagement', {}, {
             const DISMISS_ON = 3;
             let useCount = parseInt(localStorage.getItem(NUDGE_KEY) || '0');
             if (useCount < DISMISS_ON) {
-                const $nudge = $(nudgeLearn());
+                $nudge = $(nudgeLearn());
                 $nudge.on('close.bs.alert', () => localStorage.setItem(NUDGE_KEY, String(DISMISS_ON)));
                 $sec.find('.fd-fieldset-content').prepend($nudge);
                 mug.on('property-changed', event => {
                     if (event.property === 'caseProperty' && event.val) {
                         localStorage.setItem(NUDGE_KEY, String(++useCount));
                         if (useCount >= DISMISS_ON) {
-                            $nudge.fadeOut(300, function () { $(this).remove(); });
+                            hideNudge();
                         }
                     }
                 }, null, 'teardown-mug-properties');
@@ -563,10 +591,14 @@ $.vellum.plugin('caseManagement', {}, {
         const data = this.data.caseManagement;
         if (!data.caseMappings?.name?.length && data.is_registration_form &&
                 this.data.core.form.tree.getRootChildren().length) {
-            alerts.push(util.format(gettext(
-                'This registration form is missing a case name. ' +
-                'Assign the {name} property to a question.'
-            ), {name: '<code>name</code>'}) + tmpAutoAssign());
+            alerts.push(
+                util.format(gettext(
+                    'This registration form is missing a case name. ' +
+                    'Assign the {name} property to a question.'
+                ), {name: '<code>name</code>'}) +
+                (nameNudgeDismissed() ? tmpReminder() : "") +
+                tmpAutoAssign()
+            );
         }
         return alerts;
     },
