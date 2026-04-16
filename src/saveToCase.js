@@ -901,6 +901,45 @@ var slugToProp = {
         ]
     };
 
+function promoteStashedCreateBindRelevants(mug) {
+    var caseTypeRelevant = mug.p._caseTypeRelevant,
+        caseNameRelevant = mug.p._caseNameRelevant,
+        ownerIdRelevant = mug.p._ownerIdRelevant;
+    delete mug.p._caseTypeRelevant;
+    delete mug.p._caseNameRelevant;
+    delete mug.p._ownerIdRelevant;
+
+    var caseTypeAndNameRelevants = _.compact(
+        _.uniq([caseTypeRelevant, caseNameRelevant])
+    );
+    if (caseTypeAndNameRelevants.length && !mug.p.openCaseCondition) {
+        mug.p.openCaseCondition = caseTypeAndNameRelevants.join(" and ");
+    }
+
+    if (ownerIdRelevant) {
+        var redundantWithCaseTypeOrName = _.contains(
+            caseTypeAndNameRelevants,
+            ownerIdRelevant
+        );
+        var redundantWithOpenCase = ownerIdRelevant === mug.p.openCaseCondition;
+        if (!redundantWithCaseTypeOrName && !redundantWithOpenCase) {
+            mug.p.ownerIdCondition = ownerIdRelevant;
+        }
+    }
+}
+
+function mergeUpdatePropertiesIntoCreateAfterParse(mug) {
+    if (!updatesCase(mug)) {
+        return;
+    }
+    if (!mug.p.createProperty) {
+        mug.p.createProperty = {};
+    }
+    _.extend(mug.p.createProperty, mug.p.updateProperty);
+    mug.p.updateProperty = {};
+    mug.p.useUpdate = false;
+}
+
 $.vellum.plugin("saveToCase", {}, {
     init: function () {
         var opts = this.opts().saveToCase || {};
@@ -927,41 +966,8 @@ $.vellum.plugin("saveToCase", {}, {
                 return value === inner;
             });
         }
-
-        var caseTypeRelevant = mug.p._caseTypeRelevant,
-            caseNameRelevant = mug.p._caseNameRelevant,
-            ownerIdRelevant = mug.p._ownerIdRelevant;
-        delete mug.p._caseTypeRelevant;
-        delete mug.p._caseNameRelevant;
-        delete mug.p._ownerIdRelevant;
-
-        var caseTypeAndNameRelevants = _.compact(
-            _.uniq([caseTypeRelevant, caseNameRelevant])
-        );
-        if (caseTypeAndNameRelevants.length && !mug.p.openCaseCondition) {
-            mug.p.openCaseCondition = caseTypeAndNameRelevants.join(" and ");
-        }
-
-        if (ownerIdRelevant) {
-            var redundantWithCaseTypeOrName = _.contains(
-                caseTypeAndNameRelevants,
-                ownerIdRelevant
-            );
-            var redundantWithOpenCase = ownerIdRelevant === mug.p.openCaseCondition;
-            if (!redundantWithCaseTypeOrName && !redundantWithOpenCase) {
-                mug.p.ownerIdCondition = ownerIdRelevant;
-            }
-        }
-        // When both Create and Update exist in parsed XML, merge update
-        // properties into createProperty so they appear in the Create section.
-        if (updatesCase(mug)) {
-            if (!mug.p.createProperty) {
-                mug.p.createProperty = {};
-            }
-            _.extend(mug.p.createProperty, mug.p.updateProperty);
-            mug.p.updateProperty = {};
-            mug.p.useUpdate = false;
-        }
+        promoteStashedCreateBindRelevants(mug);
+        mergeUpdatePropertiesIntoCreateAfterParse(mug);
     },
     getMugToolbar: function (mug, multiselect) {
         var $toolbar = this.__callOld();
