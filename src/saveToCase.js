@@ -902,12 +902,11 @@ var slugToProp = {
     };
 
 function promoteStashedCreateBindRelevants(mug) {
-    var caseTypeRelevant = mug.p._caseTypeRelevant,
-        caseNameRelevant = mug.p._caseNameRelevant,
-        ownerIdRelevant = mug.p._ownerIdRelevant;
-    delete mug.p._caseTypeRelevant;
-    delete mug.p._caseNameRelevant;
-    delete mug.p._ownerIdRelevant;
+    var stashed = mug._stashedCreateBindRelevants || {},
+        caseTypeRelevant = stashed.case_type,
+        caseNameRelevant = stashed.case_name,
+        ownerIdRelevant = stashed.owner_id;
+    delete mug._stashedCreateBindRelevants;
 
     var caseTypeAndNameRelevants = _.compact(
         _.uniq([caseTypeRelevant, caseNameRelevant])
@@ -1031,6 +1030,14 @@ $.vellum.plugin("saveToCase", {}, {
                         var prop = matchRet[2],
                             action = matchRet[1];
 
+                        function stashRelevant(key) {
+                            var relevant = el.xmlAttr('relevant');
+                            if (relevant) {
+                                mug._stashedCreateBindRelevants = mug._stashedCreateBindRelevants || {};
+                                mug._stashedCreateBindRelevants[key] = relevant;
+                            }
+                        }
+
                         if (action === "create" && prop === "case_type") {
                             var caseTypeBindValue = el.xmlAttr("calculate") || '',
                                 stripped = caseTypeBindValue.replace(/^(['"])(.*)\1$/, '$2');
@@ -1043,19 +1050,19 @@ $.vellum.plugin("saveToCase", {}, {
                                 // Route create/case_type to the Case Type dropdown.
                                 mug.p.case_type = stripped;
                             }
-                            mug.p._caseTypeRelevant = el.xmlAttr('relevant');
+                            stashRelevant('case_type');
                             return;
                         }
 
                         if (action === "create" && prop === "case_name") {
                             mug.p.caseName = el.xmlAttr("calculate");
-                            mug.p._caseNameRelevant = el.xmlAttr('relevant');
+                            stashRelevant('case_name');
                             return;
                         }
 
                         if (action === "create" && prop === "owner_id") {
                             mug.p.ownerId = el.xmlAttr("calculate");
-                            mug.p._ownerIdRelevant = el.xmlAttr('relevant');
+                            stashRelevant('owner_id');
                             return;
                         }
 
