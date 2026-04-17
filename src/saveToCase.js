@@ -1030,13 +1030,13 @@ $.vellum.plugin("saveToCase", {}, {
                         var prop = matchRet[2],
                             action = matchRet[1];
 
-                        function stashRelevant(key) {
+                        var stashRelevant = function (key) {
                             var relevant = el.xmlAttr('relevant');
                             if (relevant) {
                                 mug._stashedCreateBindRelevants = mug._stashedCreateBindRelevants || {};
                                 mug._stashedCreateBindRelevants[key] = relevant;
                             }
-                        }
+                        };
 
                         if (action === "create" && prop === "case_type") {
                             var caseTypeBindValue = el.xmlAttr("calculate") || '',
