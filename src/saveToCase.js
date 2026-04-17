@@ -10,6 +10,18 @@ import widget_index_case from "vellum/templates/widget_index_case.html";
 import widget_save_to_case from "vellum/templates/widget_save_to_case.html";
 import "vellum/core";
 
+
+function validateXPath(mug, value) {
+    if (value) {
+        try {
+            mug.form.xpath.parse(value);
+        } catch (err) {
+            return gettext("Invalid XPath expression.");
+        }
+    }
+    return 'pass';
+}
+
 function createsCase(mug) {
     return mug ? mug.p.useCreate : false;
 }
@@ -375,6 +387,50 @@ var slugToProp = {
                     return 'pass';
                 },
             },
+            "openCaseCondition": {
+                lstring: gettext("Open Case Condition"),
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.xPath,
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    return validateXPath(mug, mug.p.openCaseCondition);
+                },
+            },
+            "caseName": {
+                lstring: gettext("Case Name"),
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.xPath,
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    if (mug.p.useCreate && !mug.p.caseName) {
+                        return gettext("Case Name is required");
+                    }
+                    return 'pass';
+                },
+            },
+            "ownerId": {
+                lstring: gettext("Owner ID"),
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.xPath,
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
+            },
+            "ownerIdCondition": {
+                lstring: gettext("Owner ID Condition"),
+                visibility: 'visible',
+                presence: 'optional',
+                widget: widgets.xPath,
+                serialize: mugs.serializeXPath,
+                deserialize: mugs.deserializeXPath,
+                validationFunc: function (mug) {
+                    return validateXPath(mug, mug.p.ownerIdCondition);
+                },
+            },
             "case_id": {
                 lstring: gettext("Case ID"),
                 visibility: 'visible',
@@ -448,23 +504,17 @@ var slugToProp = {
                 validationFunc: function (mug) {
                     if (mug.p.useCreate) {
                         var props = _.without(_.keys(mug.p.createProperty), ""),
-                            required = ["case_name"],
-                            optional = ["owner_id"],
-                            legal = _.union(required, optional),
-                            illegalProps = _.difference(props, legal),
-                            requiredProps = _.intersection(props, required),
+                            reserved = ["case_type", "case_name", "owner_id"],
+                            reservedUsed = _.intersection(props, reserved),
                             invalidProps = _.filter(props, function(p) {
                                 return !VALID_PROP_REGEX.test(p);
                             });
 
-                        if (requiredProps.length !== required.length) {
+                        if (reservedUsed.length > 0) {
                             return util.format(
-                                gettext("You must include {columns} columns to create a case"),
-                                {columns: required.join(", ")}
+                                gettext("{props} cannot be added here. Use the dedicated fields above."),
+                                {props: reservedUsed.join(", ")}
                             );
-                        } else if (illegalProps.length > 0) {
-                            return gettext("You can only use the following properties:") +
-                                " " + legal.join(', ');
                         } else if (invalidProps.length > 0) {
                             return util.format(
                                 gettext("{props} are invalid properties"),
@@ -582,19 +632,28 @@ var slugToProp = {
 
             var actions = [];
             if (createsCase(mug)) {
-                // Include a case_type column in the create action subtree when mug.p.case_type
-                // is set so that the tree shape matches legacy forms that has case_type
-                // under create section alongside other properties.
                 var createProps = {};
-                if (mug.p.case_type || mug.p.caseTypeXPath) {
-                    createProps.case_type = {};
-                }
-                _.extend(createProps, mug.p.createProperty);
+                var addCreateProp = function (key, value) {
+                    if (value) {
+                        createProps[key] = {};
+                    }
+                };
+                addCreateProp('case_type', mug.p.case_type || mug.p.caseTypeXPath);
+                addCreateProp('case_name', mug.p.caseName);
+                addCreateProp('owner_id', mug.p.ownerId);
                 actions.push(simpleNode('create', makeColumns(createProps)));
             }
 
-            if (updatesCase(mug)) {
-                actions.push(simpleNode('update', makeColumns(mug.p.updateProperty)));
+            // <update> from extra create properties or standalone update action
+            var updateProps = {};
+            if (createsCase(mug) && mug.p.createProperty) {
+                _.extend(updateProps, _.omit(mug.p.createProperty, ""));
+            }
+            if (updatesCase(mug) && mug.p.updateProperty) {
+                _.extend(updateProps, _.omit(mug.p.updateProperty, ""));
+            }
+            if (!_.isEmpty(updateProps)) {
+                actions.push(simpleNode('update', makeColumns(updateProps)));
             }
 
             if (closesCase(mug)) {
@@ -641,6 +700,12 @@ var slugToProp = {
                         calculate: mug.p.case_id
                     });
                 }
+                if (mug.p.openCaseCondition) {
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case",
+                        relevant: mug.p.openCaseCondition
+                    });
+                }
                 // Emit /case/create/case_type bind.
                 // Use the original xpath reference if available,
                 // otherwise wrap the literal in single quotes.
@@ -650,7 +715,23 @@ var slugToProp = {
                         calculate: mug.p.caseTypeXPath || "'" + mug.p.case_type + "'"
                     });
                 }
-                ret = ret.concat(generateBinds('create', mug.p.createProperty));
+                if (mug.p.caseName) {
+                    ret.push({
+                        nodeset: mug.absolutePath + "/case/create/case_name",
+                        calculate: mug.p.caseName
+                    });
+                }
+                if (mug.p.ownerId) {
+                    var ownerBind = {
+                        nodeset: mug.absolutePath + "/case/create/owner_id",
+                        calculate: mug.p.ownerId
+                    };
+                    if (mug.p.ownerIdCondition) {
+                        ownerBind.relevant = mug.p.ownerIdCondition;
+                    }
+                    ret.push(ownerBind);
+                }
+                ret = ret.concat(generateBinds('update', mug.p.createProperty));
             }
             if (updatesCase(mug)) {
                 ret = ret.concat(generateBinds('update', mug.p.updateProperty));
@@ -731,11 +812,17 @@ var slugToProp = {
                 _.keys(mug.p.createProperty || {}),
                 _.keys(mug.p.updateProperty || {})
             );
-            // case_type is now a dedicated field rather than a createProperty entry,
+            // case_type, case_name and owner_id are now a dedicated field rather than a createProperty entry,
             // but we still include it in the properties list to keep the data
             // structure sent to HQ consistent with what it was before.
             if (mug.p.useCreate && (mug.p.case_type || mug.p.caseTypeXPath)) {
                 propertyNames.push("case_type");
+            }
+            if (mug.p.useCreate && mug.p.caseName) {
+                propertyNames.push("case_name");
+            }
+            if (mug.p.useCreate && mug.p.ownerId) {
+                propertyNames.push("owner_id");
             }
             return {
                 case_type: mug.p.case_type || '',
@@ -771,6 +858,10 @@ var slugToProp = {
                 slug: "create",
                 displayName: gettext("Create"),
                 properties: [
+                    "openCaseCondition",
+                    "caseName",
+                    "ownerId",
+                    "ownerIdCondition",
                     "createProperty",
                 ],
                 isCollapsed: function (mug) {
@@ -810,6 +901,44 @@ var slugToProp = {
         ]
     };
 
+function promoteStashedCreateBindRelevants(mug) {
+    var stashed = mug._stashedCreateBindRelevants || {},
+        caseTypeRelevant = stashed.case_type,
+        caseNameRelevant = stashed.case_name,
+        ownerIdRelevant = stashed.owner_id;
+    delete mug._stashedCreateBindRelevants;
+
+    var caseTypeAndNameRelevants = _.compact(
+        _.uniq([caseTypeRelevant, caseNameRelevant])
+    );
+    if (caseTypeAndNameRelevants.length && !mug.p.openCaseCondition) {
+        mug.p.openCaseCondition = caseTypeAndNameRelevants.join(" and ");
+    }
+
+    if (ownerIdRelevant) {
+        var redundantWithCaseTypeOrName = _.contains(
+            caseTypeAndNameRelevants,
+            ownerIdRelevant
+        );
+        var redundantWithOpenCase = ownerIdRelevant === mug.p.openCaseCondition;
+        if (!redundantWithCaseTypeOrName && !redundantWithOpenCase) {
+            mug.p.ownerIdCondition = ownerIdRelevant;
+        }
+    }
+}
+
+function mergeUpdatePropertiesIntoCreateAfterParse(mug) {
+    if (!updatesCase(mug)) {
+        return;
+    }
+    if (!mug.p.createProperty) {
+        mug.p.createProperty = {};
+    }
+    _.extend(mug.p.createProperty, mug.p.updateProperty);
+    mug.p.updateProperty = {};
+    mug.p.useUpdate = false;
+}
+
 $.vellum.plugin("saveToCase", {}, {
     init: function () {
         var opts = this.opts().saveToCase || {};
@@ -836,6 +965,8 @@ $.vellum.plugin("saveToCase", {}, {
                 return value === inner;
             });
         }
+        promoteStashedCreateBindRelevants(mug);
+        mergeUpdatePropertiesIntoCreateAfterParse(mug);
     },
     getMugToolbar: function (mug, multiselect) {
         var $toolbar = this.__callOld();
@@ -876,6 +1007,18 @@ $.vellum.plugin("saveToCase", {}, {
     parseBindElement: function (form, el, path) {
         var mug = form.getMugByPath(path);
         if (!mug) {
+            var CASE_NODE_BIND_PATTERN = /\/case$/;
+            if (CASE_NODE_BIND_PATTERN.test(path)) {
+                var caseBasePath = path.replace(CASE_NODE_BIND_PATTERN, "");
+                mug = form.getMugByPath(caseBasePath);
+                if (mug && mug.__className === "SaveToCase") {
+                    if (el.xmlAttr('relevant')) {
+                        mug.p.openCaseCondition = el.xmlAttr("relevant");
+                    }
+                    return;
+                }
+                mug = null;
+            }
             var casePathRegex = /\/case\/(?:(create|update|index)\/([\w-]+)|(close|@date_modified|@user_id|@case_id))$/,
                 matchRet = path.match(casePathRegex),
                 basePath;
@@ -886,6 +1029,14 @@ $.vellum.plugin("saveToCase", {}, {
                     if (matchRet[2]) {
                         var prop = matchRet[2],
                             action = matchRet[1];
+
+                        var stashRelevant = function (key) {
+                            var relevant = el.xmlAttr('relevant');
+                            if (relevant) {
+                                mug._stashedCreateBindRelevants = mug._stashedCreateBindRelevants || {};
+                                mug._stashedCreateBindRelevants[key] = relevant;
+                            }
+                        };
 
                         if (action === "create" && prop === "case_type") {
                             var caseTypeBindValue = el.xmlAttr("calculate") || '',
@@ -899,6 +1050,19 @@ $.vellum.plugin("saveToCase", {}, {
                                 // Route create/case_type to the Case Type dropdown.
                                 mug.p.case_type = stripped;
                             }
+                            stashRelevant('case_type');
+                            return;
+                        }
+
+                        if (action === "create" && prop === "case_name") {
+                            mug.p.caseName = el.xmlAttr("calculate");
+                            stashRelevant('case_name');
+                            return;
+                        }
+
+                        if (action === "create" && prop === "owner_id") {
+                            mug.p.ownerId = el.xmlAttr("calculate");
+                            stashRelevant('owner_id');
                             return;
                         }
 
