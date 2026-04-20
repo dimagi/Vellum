@@ -1,0 +1,40 @@
+<%
+  // Nested dropdown field template used by repeater-card rows,
+  // with fallthrough rendering for a current value that isn't in the list
+  // (e.g. parsed from saved XML that references a case type no longer
+  // defined, or a relationship value outside `child`/`extension`). Both
+  // cases we still want to show to the user rather than silently discard.
+  //
+  // Params:
+  //   value: current selected value
+  //   fieldClass: Additional CSS class(es) for field identity/styling.
+  //   required: boolean
+  //   placeholder: optional text shown in the empty first option (before a
+  //                value is chosen). HTML <select> has no `placeholder`
+  //                attribute; the convention is to use the empty option's
+  //                text content as the prompt.
+  //   options: array of strings or `{value, label}` objects
+
+  var normalizedOptions = _.map(options || [], function (opt) {
+    return _.isObject(opt)
+      ? { value: opt.value, label: opt.label }
+      : { value: opt, label: opt };
+  });
+
+  var valueMatchesKnownOption = _.some(normalizedOptions, function (o) {
+    return o.value === value;
+  });
+
+  var showOrphanCurrentValue = !!(value && !valueMatchesKnownOption);
+%>
+<select class="form-control <%- fieldClass %>"
+        data-widget="dropdown"
+        <% if (required) { %>data-required="true"<% } %>>
+  <option value=""><%- placeholder || "" %></option>
+  <% _.each(normalizedOptions, function (o) { %>
+    <option value="<%- o.value %>"<% if (o.value === value) { %> selected<% } %>><%- o.label %></option>
+  <% }); %>
+  <% if (showOrphanCurrentValue) { %>
+    <option value="<%- value %>" selected><%- value %></option>
+  <% } %>
+</select>
