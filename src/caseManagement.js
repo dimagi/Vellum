@@ -303,7 +303,8 @@ class CaseMapMaintainer {
     }
 
     replaceFormPropertyMappings (questionPath, prev, current) {
-        let questions = prev ? this.data.caseMappings[prev] || [] : [];
+        const mappings = this.data.caseMappings;
+        let questions = prev ? mappings[prev] || [] : [];
         let question = null;
 
         let prevIndex = questions.findIndex((question) => question.question_path === questionPath);
@@ -314,7 +315,7 @@ class CaseMapMaintainer {
             questions.splice(prevIndex, 1);
             if (questions.length === 0) {
                 // delete the old case property questions
-                delete this.data.caseMappings[prev];
+                delete mappings[prev];
             } else if (questions.length === 1) {
                 // this case property is now unique, so we can remove conflict warnings from the remaining mug
                 const remainingMug = this.form.getMugByPath(questions[0].question_path);
@@ -329,7 +330,7 @@ class CaseMapMaintainer {
         }
 
         if (current) {
-            this.data.caseMappings[current] = this.data.caseMappings[current] || [];
+            mappings[current] = mappings[current] || [];
             if (!question) {
                 const originals = this.data.baseline[current];
                 question = originals?.find(q => q.question_path === questionPath);
@@ -337,13 +338,13 @@ class CaseMapMaintainer {
                     question = {'question_path': questionPath};
                 }
             }
-            this.data.caseMappings[current].push(question);
+            mappings[current].push(question);
 
-            if (this.data.caseMappings[current].length >= 2) {
+            if (mappings[current].length >= 2) {
                 // this new mapping creates a conflict, so add a warning to each assigned question
                 // these warnings will cause the save button to mention validation errors,
                 // but they do not prevent saving the form
-                this.data.caseMappings[current].forEach(question => {
+                mappings[current].forEach(question => {
                     const mugWithConflict = this.form.getMugByPath(question.question_path);
                     addConflictMessageToMug(mugWithConflict, current);
                 });
