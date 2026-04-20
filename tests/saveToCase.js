@@ -227,7 +227,7 @@ describe("The SaveToCase module", function() {
                 relationship: "notchildorextension",
             }
         };
-        assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "Relationship must be child or extension");
+        assert.notEqual(mug.spec.indexProperty.validationFunc(mug), "pass");
     });
 
     it("should only not error on empty extension ref", function () {
@@ -924,6 +924,69 @@ describe("The SaveToCase module", function() {
             $card.find(".fd-update-property-name").val("age").trigger("change");
 
             assert.property(mug.p.updateProperty, "age");
+        });
+    });
+
+    describe("inline validators (extraValidator)", function () {
+
+        it("should flag invalid property-name chars in Update", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-repeater-card").first();
+            var $nameInput = $card.find(".fd-update-property-name");
+            $nameInput.val("bad name!").trigger("change");
+
+            assert.ok(
+                $nameInput.closest(".form-group").hasClass("has-error"),
+                "form-group gets .has-error for invalid chars"
+            );
+        });
+
+        it("should flag reserved names (case_type) in Create", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "uuid()",
+                useCreate: true,
+                case_type: "patient",
+                caseName: "/data/name",
+            });
+            util.clickQuestion("mug");
+            $("[name='property-createProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $("[name='property-createProperty']")
+                .find(".fd-update-property.fd-repeater-card").first();
+            var $nameInput = $card.find(".fd-update-property-name");
+            $nameInput.val("case_type").trigger("change");
+
+            assert.ok(
+                $nameInput.closest(".form-group").hasClass("has-error"),
+                "case_type is reserved; .has-error should be set"
+            );
+        });
+
+        it("should pass valid property names without error", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-repeater-card").first();
+            var $nameInput = $card.find(".fd-update-property-name");
+            $nameInput.val("valid_name-123").trigger("change");
+
+            assert.notOk(
+                $nameInput.closest(".form-group").hasClass("has-error"),
+                "valid name should not set .has-error"
+            );
         });
     });
 

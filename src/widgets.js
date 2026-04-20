@@ -10,6 +10,7 @@ import _ from "underscore";
 import $ from "jquery";
 import atwho from "vellum/atwho";
 import util from "vellum/util";
+import logic from "vellum/logic";
 import richTextUtils from "vellum/richText";
 import nestedXPathField from "vellum/nestedXPathField";
 import analytics from "vellum/hqAnalytics";
@@ -999,6 +1000,73 @@ function readFieldValue($el) {
     return $el.val();
 }
 
+// Inspect an xpath expression and return an "Unknown question[s]: ..."
+// string when any referenced path/hashtag doesn't resolve to a form node.
+// Mirrors the detection logic in logic.js `_addReferences` so repeater-card
+// fields can surface bad-path warnings inline instead of at the widget level.
+function findUnknownReferences(mug, value) {
+    if (!value) { return null; }
+    var form = mug.form,
+        expr = new logic.LogicExpression(value, form.xpath);
+    if (!expr.parsed) { return null; }
+    expr.analyze();
+    var unknowns = [];
+    _.each(expr.absolutePaths.concat(expr.hashtags), function (xobj) {
+        var xpath = xobj.toHashtag(),
+            isHashtag = xpath.startsWith('#'),
+            pathString = isHashtag ? xpath : xobj.pathWithoutPredicates(),
+            refMug = form.getMugByPath(pathString),
+            isHashRef = form.hasValidHashtagPrefix(xpath),
+            knownHashtag = isHashRef && form.isValidHashtag(xpath);
+        if (!refMug && !knownHashtag) {
+            unknowns.push(xpath);
+        }
+    });
+    if (unknowns.length === 0) { return null; }
+    if (unknowns.length === 1) {
+        return gettext("Unknown question:") + " " + unknowns[0];
+    }
+    return gettext("Unknown questions:") + "\n- " + unknowns.join("\n- ");
+}
+
+function validateField($field, mug, cardConfig) {
+    var $fieldRow = $field.closest('.form-group'),
+        $err = $fieldRow.find('.fd-field-error'),
+        required = $field.attr('data-required') === 'true',
+        widgetType = $field.attr('data-widget'),
+        val = readFieldValue($field),
+        touched = !!$field.data('touched'),
+        error = null;
+
+    if (required && !val && touched) {
+        error = gettext("Required");
+    } else if (widgetType === "xpath" && val) {
+        try {
+            mug.form.xpath.parse(val);
+            error = findUnknownReferences(mug, val);
+        } catch (e) {
+            error = gettext("Invalid XPath expression");
+        }
+    }
+
+    if (!error && cardConfig) {
+        var fieldSpec = _.find(cardConfig.fields, function (f) {
+            return $field.hasClass(f.fieldClass);
+        });
+        if (fieldSpec && fieldSpec.extraValidator) {
+            error = fieldSpec.extraValidator(val);
+        }
+    }
+
+    if (error) {
+        $fieldRow.addClass('has-error');
+        $err.text(error).removeClass('hide');
+    } else {
+        $fieldRow.removeClass('has-error');
+        $err.text('').addClass('hide');
+    }
+}
+
 function emptyRepeaterItem(cardConfig) {
     return _.reduce(cardConfig.fields, function (o, f) {
         if (f.valueKey) { o[f.valueKey] = ""; }
@@ -1037,6 +1105,15 @@ var repeaterCard = function (mug, options) {
         return currentValues;
     };
 
+    // Refresh inline field validation when logic.js updates references on
+    // external events (rename, delete). Without this the widget-level
+    // summary fires but the inline "Unknown question: X" text goes stale.
+    mug.on("messages-changed", function () {
+        widget.input.find('.fd-repeater-card').each(function () {
+            if (widget.validateCard) { widget.validateCard($(this)); }
+        });
+    }, null, "teardown-mug-properties");
+
     // Empty value → render no cards (just the Add button). Clicking Add
     // seeds a blank `""` entry via `addProperty`; widgets requiring at
     // least one card surface a reminder via their `validationFunc`.
@@ -1047,6 +1124,10 @@ var repeaterCard = function (mug, options) {
         wireXPathFields();
         widget.input.find('.fd-add-property').click(widget.addProperty);
         widget.input.find('.fd-remove-property').click(widget.removeProperty);
+        seedTouchedStateForSavedCards();
+        widget.input.find('.fd-repeater-card').each(function () {
+            widget.validateCard($(this));
+        });
 
         function renderCards(val) {
             var resolvedCardConfig = _.extend({}, cardConfig, {
@@ -1069,7 +1150,9 @@ var repeaterCard = function (mug, options) {
         function wirePlainInputHandlers() {
             widget.input.find('input, select').not('.fd-xpath-input')
                 .on('change keyup', function () {
+                    $(this).data('touched', true);
                     widget.handleChange();
+                    widget.validateCard($(this).closest('.fd-repeater-card'));
                 });
             widget.input.find('input[type="text"]').not('.fd-xpath-input')
                 .addClass('jstree-drop')
@@ -1087,11 +1170,67 @@ var repeaterCard = function (mug, options) {
                     path: options.path,
                     displayXPathEditor: options.displayXPathEditor,
                 }).on('change', function () {
+                    $el.data('touched', true);
                     widget.handleChange();
+                    widget.validateCard($el.closest('.fd-repeater-card'));
                 });
             });
         }
+
+        // Cards loaded from saved data (key != "") are treated as "already
+        // seen" — all their fields start touched so existing broken data
+        // surfaces immediately.
+        function seedTouchedStateForSavedCards() {
+            widget.input.find('.fd-repeater-card').each(function () {
+                var $card = $(this),
+                    $name = $card.find('[data-is-identifier="true"]').first(),
+                    cardHasName = !!readFieldValue($name);
+                if (cardHasName) {
+                    $card.find('[data-widget]').each(function () {
+                        $(this).data('touched', true);
+                    });
+                }
+            });
+        }
     };
+
+    widget.validateCard = function ($card) {
+        $card.find('[data-widget]').each(function () {
+            validateField($(this), mug, cardConfig);
+        });
+        widget.syncMugMessages();
+        widget.refreshMessages();
+    };
+
+    widget.syncMugMessages = function () {
+        var key = 'mug-' + options.path + '-error';
+        if (widget.input.find('.has-error').length > 0) {
+            mug.addMessage(options.path, {
+                key: key,
+                level: mug.ERROR,
+                message: cardConfig.errorSummary,
+            });
+        } else {
+            mug.dropMessage(options.path, key);
+        }
+    };
+
+    // Hovering the top-bar Save button force-touches every field so the
+    // user sees any pending errors before they commit. Namespaced so
+    // switching mugs cleanly rebinds.
+    var $saveButton = options.vellum.data.core.saveButton.ui,
+        eventNamespace = '.fd-repeater-' + widget.id;
+    $saveButton.on('mouseenter' + eventNamespace, function () {
+        widget.input.find('[data-widget]').each(function () {
+            $(this).data('touched', true);
+        });
+        widget.input.find('.fd-repeater-card').each(function () {
+            widget.validateCard($(this));
+        });
+    });
+    mug.on('teardown-mug-properties', function () {
+        $saveButton.off(eventNamespace);
+    }, null, 'teardown-mug-properties');
 
     widget.setValue = function (value) {
         value = _.isUndefined(value) ? {} : value;
@@ -1106,6 +1245,7 @@ var repeaterCard = function (mug, options) {
         e.preventDefault();
         $(this).closest('.fd-repeater-card').remove();
         widget.handleChange();
+        widget.syncMugMessages();
     };
 
     widget.addProperty = function (e) {
