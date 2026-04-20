@@ -206,14 +206,7 @@ var text = function (mug, options) {
     };
 
     widget.getValue = function() {
-        var ret = input.val().replace(/&#10;/g, '\n');
-
-        if (ret && widget.hasLogicReferences) {
-            // TODO should not be using hashtags when rich text is off
-            return mug.form.normalizeHashtag(ret);
-        } else {
-            return ret;
-        }
+        return decodeValueFromInputElement(mug, input.val(), !!widget.hasLogicReferences);
     };
 
     input.on("change input", function () {
@@ -968,6 +961,18 @@ function encodeValueForInputElement(mug, value, normalize) {
     return value;
 }
 
+// Reverse of encodeValueForInputElement
+function decodeValueFromInputElement(mug, value, normalize) {
+    var ret = value.replace(/&#10;/g, '\n');
+
+    if (ret && normalize) {
+        // TODO should not be using hashtags when rich text is off
+        return mug.form.normalizeHashtag(ret);
+    } else {
+        return ret;
+    }
+}
+
 export default {
     base: base,
     normal: normal,
@@ -991,6 +996,7 @@ export default {
         getUIElementWithEditButton: getUIElementWithEditButton,
         getUIElement: getUIElement,
         addCollapseToggle: addCollapseToggle,
-        encodeValueForInputElement: encodeValueForInputElement
+        encodeValueForInputElement: encodeValueForInputElement,
+        decodeValueFromInputElement: decodeValueFromInputElement
     }
 };

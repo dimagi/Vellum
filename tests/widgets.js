@@ -6,6 +6,7 @@ import expressionEditor from "vellum/expressionEditor";
 import mugs from "vellum/mugs";
 import richText from "vellum/richText";
 import vellumUtil from "vellum/util";
+import widgets from "vellum/widgets";
 
 var assert = chai.assert,
     real_showXPathEditor = expressionEditor.showXPathEditor,
@@ -281,5 +282,55 @@ describe("The rich text widget", function () {
                 "did not activate save button after remove expression");
             done();
         }, null, "showXPathEditor");
+    });
+});
+
+describe("widgets.util xpath encode/decode helpers", function () {
+    // Shared helpers used by widgets.text and nestedXPathField to move
+    // xpath strings in/out of a plain <input>. Encode preserves newlines
+    // (which <input> would otherwise collapse to spaces) and optionally
+    // normalizes hashtag → raw xpath. Decode is the reverse.
+
+    var mug, encode, decode;
+    before(function (done) {
+        util.init({
+            javaRosa: {langs: ['en']},
+            core: {onReady: function () { done(); }},
+            features: {rich_text: false},
+        });
+    });
+    beforeEach(function () {
+        util.loadXML("");
+        mug = util.addQuestion("Text", "text");
+        encode = widgets.util.encodeValueForInputElement;
+        decode = widgets.util.decodeValueFromInputElement;
+    });
+
+    it("encode preserves newlines as &#10; (input would collapse to spaces)", function () {
+        assert.equal(encode(mug, "a\nb", false), "a&#10;b");
+    });
+
+    it("encode returns falsy input unchanged", function () {
+        assert.equal(encode(mug, "", false), "");
+        assert.equal(encode(mug, null, false), null);
+        assert.equal(encode(mug, undefined, false), undefined);
+    });
+
+    it("encode passes plain strings through when not normalizing", function () {
+        assert.equal(encode(mug, "/data/foo", false), "/data/foo");
+    });
+
+    it("decode turns &#10; back into newlines", function () {
+        assert.equal(decode(mug, "a&#10;b", false), "a\nb");
+    });
+
+    it("decode + encode is lossless for a newline-containing string", function () {
+        var original = "line1\nline2\nline3";
+        assert.equal(decode(mug, encode(mug, original, false), false), original);
+    });
+
+    it("encode handles empty input with normalize=true", function () {
+        // Should not throw on empty; falls through the `if (value)` guard.
+        assert.equal(encode(mug, "", true), "");
     });
 });
