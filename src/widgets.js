@@ -415,32 +415,15 @@ var xPath = function (mug, options) {
                 widget.getDisplayName(),
                 !!widget.isDisabled(),
                 widget.getHelp()
-            ),
-            autocompleteChoices;
+            );
         control.addClass('jstree-drop');
-        if (options.autocompleteChoices) {
-            autocompleteChoices = function () {
-                return options.autocompleteChoices(mug);
-            };
-        }
         return getUIElementWithEditButton(elem, function () {
-            widget.options.displayXPathEditor({
-                leftPlaceholder: options.leftPlaceholder,
-                rightPlaceholder: options.rightPlaceholder,
-                leftAutocompleteChoices: autocompleteChoices,
-                value: super_getValue(),
+            openXPathEditor(mug, options, {
+                getValue: super_getValue,
+                setValue: super_setValue,
+                onDone: widget.handleChange,
                 xpathType: widget.definition.xpathType,
-                onLoad: function ($ui) {
-                    setWidget($ui, widget);
-                    $ui.find(".property-name").text(options.lstring || "Expression");
-                },
-                done: function (val) {
-                    if (val !== false) {
-                        super_setValue(val);
-                        widget.handleChange();
-                    }
-                },
-                mug: mug,
+                onLoadExtra: function ($ui) { setWidget($ui, widget); },
             });
             analytics.fbUsage('Logic', options.lstring);
         }, !!widget.isDisabled());
@@ -977,6 +960,54 @@ function enableAutocompleteOnInput($input, mug, options) {
     });
 }
 
+/**
+ * Open the expression-editor modal with the standard arg bundle. Shared
+ * between `widgets.xPath` and the nested `nestedXPathField` so both stay in sync
+ * on what the modal receives.
+ *
+ * @param {Mug} mug - Mug that owns the field being edited.
+ * @param {Object} options - Widget options. Must include
+ *     `displayXPathEditor` (the modal launcher). May include
+ *     `leftPlaceholder`, `rightPlaceholder`, `autocompleteChoices`, and
+ *     `lstring` (all forwarded to the modal).
+ * @param {Object} context - Per-call glue supplied by the caller:
+ *   @param {Function} context.getValue - Returns the current value to seed
+ *       the modal with.
+ *   @param {Function} context.setValue - Called with the user's committed
+ *       value when the modal is dismissed with a save.
+ *   @param {Function} context.onDone - Called after `setValue` so the
+ *       caller can react (e.g. fire a change event, re-validate).
+ *   @param {string} [context.xpathType] - Passed through to the modal to
+ *       tell it which xpath grammar to expect.
+ *   @param {Function} [context.onLoadExtra] - Optional hook invoked with
+ *       the modal's jQuery root when it loads, for caller-specific setup
+ *       (e.g. attaching the widget to the modal via `setWidget`).
+ */
+function openXPathEditor(mug, options, context) {
+    var autocompleteChoices;
+    if (options.autocompleteChoices) {
+        autocompleteChoices = function () { return options.autocompleteChoices(mug); };
+    }
+    options.displayXPathEditor({
+        leftPlaceholder: options.leftPlaceholder,
+        rightPlaceholder: options.rightPlaceholder,
+        leftAutocompleteChoices: autocompleteChoices,
+        value: context.getValue(),
+        xpathType: context.xpathType,
+        onLoad: function ($ui) {
+            if (context.onLoadExtra) { context.onLoadExtra($ui); }
+            $ui.find(".property-name").text(options.lstring || "Expression");
+        },
+        done: function (val) {
+            if (val !== false) {
+                context.setValue(val);
+                context.onDone();
+            }
+        },
+        mug: mug,
+    });
+}
+
 export default {
     base: base,
     normal: normal,
@@ -1002,6 +1033,7 @@ export default {
         addCollapseToggle: addCollapseToggle,
         encodeValueForInputElement: encodeValueForInputElement,
         decodeValueFromInputElement: decodeValueFromInputElement,
-        enableAutocompleteOnInput: enableAutocompleteOnInput
+        enableAutocompleteOnInput: enableAutocompleteOnInput,
+        openXPathEditor: openXPathEditor
     }
 };
