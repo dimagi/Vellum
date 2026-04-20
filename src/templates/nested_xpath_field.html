@@ -1,0 +1,32 @@
+<%
+  // Nested XPath field template used by repeater-card rows.
+  //
+  // Parameters:
+  //   value: Current expression string.
+  //
+  //   placeholder: Placeholder text for plain mode only.
+  //
+  //   fieldClass: Additional CSS class(es) for field identity/styling.
+  //
+  //   required: boolean
+  //
+  //   useRichText: boolean
+%>
+<div class="fd-nested-xpath-field">
+  <% if (useRichText) { %>
+    <div class="form-control fd-input jstree-drop fd-xpath-input <%- fieldClass %>"
+         contenteditable="true"
+         data-widget="xpath"
+         <% if (required) { %>data-required="true"<% } %>
+         data-initial-value="<%- value %>"></div>
+  <% } else { %>
+    <input class="form-control fd-xpath-input <%- fieldClass %>" type="text"
+           value="<%- value %>" placeholder="<%- placeholder %>"
+           data-widget="xpath"
+           <% if (required) { %>data-required="true"<% } %>/>
+  <% } %>
+  <button type="button" class="btn btn-default fd-xpath-edit"
+          title="<%-gettext("Open expression builder")%>">
+    <i class="fa fa-edit"></i>
+  </button>
+</div>

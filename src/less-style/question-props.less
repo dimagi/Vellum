@@ -138,6 +138,28 @@
                     }
                 }
             }
+
+            .fd-nested-xpath-field {
+                display: flex;
+                width: 100%;
+
+                > .form-control,
+                > .fd-xpath-input {
+                    flex: 1 1 0;
+                    min-width: 0;
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+                    border-right: 0;
+                }
+                > .btn {
+                    flex: 0 0 auto;
+                    border-top-left-radius: 0;
+                    border-bottom-left-radius: 0;
+                    padding: 0 0.75em;
+                    display: inline-flex;
+                    align-items: center;
+                }
+            }
         }
 
         .fd-question-fieldset[data-slug='advanced'] {
