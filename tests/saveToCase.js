@@ -777,4 +777,204 @@ describe("The SaveToCase module", function() {
             );
         });
     });
+
+    describe("repeater card with a blank identifier", function () {
+        // When the user clicks "Add property" in a repeater section, the
+        // widget seeds a new card whose identifier is still the empty 
+        // string — but the other fields in the card can already hold real
+        // xpath values if the user filled those in before typing in 
+        // the identifier field.
+
+        it("should walk xpaths in cards whose identifier is blank", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useUpdate = true;
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/foo", relevant: "" },
+                "": { calculate: "/data/bar", relevant: "" },
+            };
+            var visited = [];
+            mug.spec.updateProperty.mapLogicExpressions(mug, function (expr) {
+                visited.push(expr);
+                return [];
+            });
+            visited.sort();
+            assert.deepEqual(visited, ["/data/bar", "/data/foo"]);
+        });
+
+        it("should rewrite xpaths in cards whose identifier is blank", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useUpdate = true;
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/foo" },
+                "": { calculate: "/data/foo", relevant: "" },
+            };
+            mug.spec.updateProperty.updateLogicExpressions(mug, function (expr) {
+                return expr === "/data/foo" ? "/data/bar" : expr;
+            });
+            assert.equal(mug.p.updateProperty.name.calculate, "/data/bar");
+            assert.equal(mug.p.updateProperty[""].calculate, "/data/bar");
+        });
+
+        it("should omit cards whose identifier is blank from saved XML", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/name" },
+                "": { calculate: "", relevant: "" },
+            };
+            var $xml = $(call("createXML"));
+            var $updateChildren = $xml.find('update').children();
+            assert.equal($updateChildren.length, 1, "only the named card");
+            assert.equal($updateChildren.first().prop('tagName').toLowerCase(), 'name');
+        });
+
+        it("should walk identifier-blank card xpaths across create/update/index", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useCreate = true;
+            mug.p.useUpdate = true;
+            mug.p.useIndex = true;
+            mug.p.createProperty = { "": { calculate: "/data/a" } };
+            mug.p.updateProperty = { "": { calculate: "/data/b" } };
+            mug.p.indexProperty = { "": { calculate: "/data/c" } };
+
+            function collect(spec, prop) {
+                var visited = [];
+                spec[prop].mapLogicExpressions(mug, function (expr) {
+                    visited.push(expr);
+                    return [];
+                });
+                return visited;
+            }
+            assert.deepEqual(collect(mug.spec, "createProperty"), ["/data/a"]);
+            assert.deepEqual(collect(mug.spec, "updateProperty"), ["/data/b"]);
+            assert.deepEqual(collect(mug.spec, "indexProperty"), ["/data/c"]);
+        });
+    });
+
+    describe("repeater card DOM interactions", function () {
+
+        it("should render one card per updateProperty entry", function () {
+            util.loadXML(UPDATE_PROPERTY_XML);
+            util.clickQuestion("save_to_case");
+            var $cards = $(".fd-update-property.fd-repeater-card");
+            assert.equal($cards.length, 2, "two rows → two cards");
+            var names = $cards.find(".fd-update-property-name")
+                .map(function () { return $(this).val(); }).get().sort();
+            assert.deepEqual(names, ["dash-dash", "name"]);
+        });
+
+        it("should add a blank card when the Add button is clicked", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            var $list = $(".fd-update-property").filter(".fd-repeater-card");
+            assert.equal($list.length, 0, "no cards initially");
+
+            // Click the Add button inside the Update section.
+            var $updateSection = $("[name='property-updateProperty']");
+            $updateSection.find(".fd-add-property").trigger("click");
+
+            $list = $(".fd-update-property").filter(".fd-repeater-card");
+            assert.equal($list.length, 1, "Add creates one blank card");
+            assert.equal(
+                $list.find(".fd-update-property-name").val(), "",
+                "new card's name is empty"
+            );
+        });
+
+        it("should remove a card when its Remove button is clicked", function () {
+            util.loadXML(UPDATE_PROPERTY_XML);
+            var mug = util.getMug("save_to_case");
+            util.clickQuestion("save_to_case");
+            var $cards = $(".fd-update-property.fd-repeater-card");
+            assert.equal($cards.length, 2, "two cards initially");
+
+            // Remove the "name" card.
+            $cards.filter(function () {
+                return $(this).find(".fd-update-property-name").val() === "name";
+            }).find(".fd-remove-property").trigger("click");
+
+            $cards = $(".fd-update-property.fd-repeater-card");
+            assert.equal($cards.length, 1, "one card after remove");
+            assert.notProperty(mug.p.updateProperty, "name",
+                "mug.p no longer has the removed row");
+            assert.property(mug.p.updateProperty, "dash-dash",
+                "other row preserved");
+        });
+
+        it("should propagate typed values into mug.p on change", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-repeater-card").first();
+            $card.find(".fd-update-property-name").val("age").trigger("change");
+
+            assert.property(mug.p.updateProperty, "age");
+        });
+    });
+
+    describe("validationFunc empty-state and list-level checks", function () {
+
+        it("createProperty passes when empty (requiresAtLeastOne=false)", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "uuid()",
+                useCreate: true,
+                case_type: "patient",
+                caseName: "/data/name",
+            });
+            mug.p.createProperty = {};
+            assert.strictEqual(mug.spec.createProperty.validationFunc(mug), "pass");
+        });
+
+        it("updateProperty fails with emptyStateMessage when empty", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            mug.p.updateProperty = {};
+            var msg = mug.spec.updateProperty.validationFunc(mug);
+            assert.notEqual(msg, "pass");
+            assert.match(msg, /at least one property/i);
+        });
+
+        it("indexProperty fails with emptyStateMessage when empty", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useIndex: true,
+            });
+            mug.p.indexProperty = {};
+            var msg = mug.spec.indexProperty.validationFunc(mug);
+            assert.notEqual(msg, "pass");
+            assert.match(msg, /at least one index/i);
+        });
+
+        it("updateProperty passes with one entry", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/name" },
+            };
+            assert.strictEqual(mug.spec.updateProperty.validationFunc(mug), "pass");
+        });
+    });
 });

@@ -3,11 +3,7 @@ import _ from "underscore";
 import mugs from "vellum/mugs";
 import Tree from "vellum/tree";
 import util from "vellum/util";
-import atwho from "vellum/atwho";
 import widgets from "vellum/widgets";
-import widget_update_case from "vellum/templates/widget_update_case.html";
-import widget_index_case from "vellum/templates/widget_index_case.html";
-import widget_save_to_case from "vellum/templates/widget_save_to_case.html";
 import "vellum/core";
 
 
@@ -44,100 +40,132 @@ function usesCases(mug) {
 }
 
 
-var propertyWidget = function (mug, options) {
-        var widget = widgets.normal(mug, options),
-            id = options.id,
-            internal_template = options.template;
-        options.richText = false;
-
-        widget.input = $('<div class="control-row" />').attr('name', id);
-
-        widget.getControl = function () {
-            return widget.input;
-        };
-
-        widget.refreshControl = function (value) {
-            value = value ? value : widget.getValue();
-            widget.input.html(widget_save_to_case({
-                internal_template: internal_template,
-                props: value
-            }));
-            widget.input.find('input').on('change keyup', function () {
-                widget.handleChange();
-            });
-            widget.input.find('.fd-add-property').click(widget.addProperty);
-            widget.input.find('.fd-remove-property').click(widget.removeProperty);
-            widget.input.find('input').addClass('jstree-drop');
-            widget.input.find('input').each(function() {
-                atwho.autocomplete($(this), mug);
-            });
-        };
-
-        widget.setValue = function (value) {
-            value = _.isUndefined(value) ? {} : value;
-            widget.refreshControl(value);
-        };
-
-        widget.updateValue = function () {
-            var currentValues = widget.getValue();
-            if (!("" in currentValues)) {
-                widget.input.find('.btn').removeClass('hide');
-                widget.input.find('.fd-remove-property').removeClass('hide');
-            }
-            widget.save();
-        };
-
-        widget.removeProperty = function(e) {
-            $(this).parent().parent().parent().remove();
-            widget.refreshControl();
-            widget.save();
-            e.preventDefault();
-        };
-
-        widget.addProperty = function(e) {
-            widget.refreshControl();
-            e.preventDefault();
-        };
-
-        return widget;
+// Shared Calculation + Condition fields for Create and Update configs.
+var SAVE_PROPERTY_CALC_FIELD = {
+        label: gettext("Calculation"), fieldClass: "fd-update-property-source",
+        valueKey: "calculate", widget: "xpath", required: true,
     },
-    saveCasePropWidget = function (mug, options) {
-        options.template = widget_update_case;
-        var widget = propertyWidget(mug, options);
-
-        widget.getValue = function () {
-            var currentValues = {};
-            _.each(widget.input.find('.fd-update-property'), function (kvPair) {
-                var $pair = $(kvPair);
-                currentValues[$pair.find('.fd-update-property-name').val()] = {
-                    calculate: $pair.find('.fd-update-property-source').val(),
-                    relevant: $pair.find('.fd-update-property-relevant').val(),
-                };
-            });
-            return currentValues;
-        };
-
-        return widget;
-    },
-    indexCaseWidget = function (mug, options) {
-        options.template = widget_index_case;
-        var widget = propertyWidget(mug, options);
-
-        widget.getValue = function () {
-            var currentValues = {};
-            _.each(widget.input.find('.fd-index-property'), function (kvPair) {
-                var $pair = $(kvPair);
-                currentValues[$pair.find('.fd-index-property-name').val()] = {
-                    calculate: $pair.find('.fd-index-property-source').val(),
-                    case_type: $pair.find('.fd-index-property-case-type').val(),
-                    relationship: $pair.find('.fd-index-property-relationship').val(),
-                };
-            });
-            return currentValues;
-        };
-
-        return widget;
+    SAVE_PROPERTY_RELEVANT_FIELD = {
+        label: gettext("Condition"), fieldClass: "fd-update-property-relevant",
+        valueKey: "relevant", widget: "xpath",
+        placeholder: gettext("Optional — leave blank to always apply"),
     };
+
+var CREATE_CARD_CONFIG = {
+        rootClass: "fd-update-property",
+        cardHeaderText: gettext("Case property"),
+        addLabel: gettext("Add property"),
+        errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
+        requiresAtLeastOne: false,
+        emptyStateMessage: null,
+        fields: [
+            {label: gettext("Property Name"), fieldClass: "fd-update-property-name",
+             isIdentifier: true, required: true},
+            SAVE_PROPERTY_CALC_FIELD,
+            SAVE_PROPERTY_RELEVANT_FIELD,
+        ],
+    },
+    UPDATE_CARD_CONFIG = {
+        rootClass: "fd-update-property",
+        cardHeaderText: gettext("Case property"),
+        addLabel: gettext("Add property"),
+        errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
+        requiresAtLeastOne: true,
+        emptyStateMessage: gettext("Add at least one property to update, or deselect the Update action."),
+        fields: [
+            {label: gettext("Property Name"), fieldClass: "fd-update-property-name",
+             isIdentifier: true, required: true},
+            SAVE_PROPERTY_CALC_FIELD,
+            SAVE_PROPERTY_RELEVANT_FIELD,
+        ],
+    },
+    INDEX_CARD_CONFIG = {
+        rootClass: "fd-index-property",
+        cardHeaderText: gettext("Index"),
+        addLabel: gettext("Add index property"),
+        errorSummary: gettext("One or more index properties above have errors. Fix the highlighted fields."),
+        requiresAtLeastOne: true,
+        emptyStateMessage: gettext("Add at least one index, or deselect the Index action."),
+        fields: [
+            {label: gettext("Relationship Identifier"), fieldClass: "fd-index-property-name",
+             isIdentifier: true, required: true},
+            {label: gettext("Referenced Case ID"), fieldClass: "fd-index-property-source",
+             valueKey: "calculate", widget: "xpath", required: true},
+            {label: gettext("Referenced Case Type"), fieldClass: "fd-index-property-case-type",
+             valueKey: "case_type", widget: "dropdown",
+             placeholder: gettext("Select from existing case types"),
+             options: function (mug, opts) {
+                 return (opts.vellum.data.saveToCase || {}).existingCaseTypes || [];
+             }},
+            {label: gettext("Relationship"), fieldClass: "fd-index-property-relationship",
+             valueKey: "relationship", widget: "dropdown", required: true,
+             options: [
+                 {value: "child", label: gettext("child")},
+                 {value: "extension", label: gettext("extension")},
+             ]},
+        ],
+    };
+
+// Helpers for walking the nested xpath expressions stored inside a repeater-
+// card map — shape `{<rowId>: {<key>: <xpath string>, ...}, ...}` where
+// `keys` lists which per-row keys hold xpath (e.g. ['calculate', 'relevant']).
+// Used by the create/update/index spec hooks below to bridge repeater-card
+// data to logic.js's mapLogicExpressions / updateLogicExpressions.
+
+// Visit every `rowMap[rowId][key]` that holds a non-empty xpath string.
+function forEachCardXPath(rowMap, keys, visit) {
+    _.each(rowMap || {}, function (row) {
+        _.each(keys, function (key) {
+            if (row[key]) { visit(row, key); }
+        });
+    });
+}
+
+// Apply `fn` to every xpath string, collect each return value, and flatten
+// the results into one array. Used by `mapLogicExpressions` to gather
+// logic-reference messages across all card rows.
+function flatMapCardXPaths(rowMap, keys, fn) {
+    var results = [];
+    forEachCardXPath(rowMap, keys, function (row, key) {
+        results.push(fn(row[key]));
+    });
+    return _.flatten(results);
+}
+
+// Apply `fn` to every xpath string, and overwrite in place if the returned
+// value differs. Used by `updateLogicExpressions` to rewrite paths when a
+// referenced question is renamed.
+function rewriteCardXPaths(rowMap, keys, fn) {
+    forEachCardXPath(rowMap, keys, function (row, key) {
+        var next = fn(row[key]);
+        if (next !== row[key]) { row[key] = next; }
+    });
+}
+
+// Walk the nested card data and detect required-missing or invalid-xpath
+// errors; when anything's broken, the parent widget's validationFunc
+// returns `cardConfig.errorSummary` as the widget-level message.
+function hasNestedCardError(mug, propMap, fields) {
+    var broken = false;
+    _.each(propMap || {}, function (v, name) {
+        if (broken) { return; }
+        // Skip the blank-seed entry (no data yet).
+        if (!name && _.every(_.values(v), function (val) { return !val; })) {
+            return;
+        }
+        _.each(fields, function (f) {
+            if (broken) { return; }
+            var val = f.isIdentifier ? name : (v[f.valueKey] || "");
+            if (f.required && !val) {
+                broken = true;
+            } else if (f.widget === "xpath" && val) {
+                try { mug.form.xpath.parse(val); }
+                catch (e) { broken = true; }
+            }
+        });
+    });
+    return broken;
+}
 
 var CASE_TYPE_REGEX = /^[\w-]+$/;
 
@@ -500,7 +528,14 @@ var slugToProp = {
                 lstring: gettext("Case Properties To Create"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: saveCasePropWidget,
+                widget: widgets.repeaterCard,
+                cardConfig: CREATE_CARD_CONFIG,
+                mapLogicExpressions: function (mug, fn) {
+                    return flatMapCardXPaths(mug.p.createProperty, ['calculate', 'relevant'], fn);
+                },
+                updateLogicExpressions: function (mug, fn) {
+                    rewriteCardXPaths(mug.p.createProperty, ['calculate', 'relevant'], fn);
+                },
                 validationFunc: function (mug) {
                     if (mug.p.useCreate) {
                         var props = _.without(_.keys(mug.p.createProperty), ""),
@@ -521,7 +556,9 @@ var slugToProp = {
                                 {props: invalidProps.join(", ")}
                             );
                         }
-
+                        if (hasNestedCardError(mug, mug.p.createProperty, CREATE_CARD_CONFIG.fields)) {
+                            return CREATE_CARD_CONFIG.errorSummary;
+                        }
                     }
                     return 'pass';
                 }
@@ -546,7 +583,14 @@ var slugToProp = {
                 lstring: gettext("Case Properties To Update"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: saveCasePropWidget,
+                widget: widgets.repeaterCard,
+                cardConfig: UPDATE_CARD_CONFIG,
+                mapLogicExpressions: function (mug, fn) {
+                    return flatMapCardXPaths(mug.p.updateProperty, ['calculate', 'relevant'], fn);
+                },
+                updateLogicExpressions: function (mug, fn) {
+                    rewriteCardXPaths(mug.p.updateProperty, ['calculate', 'relevant'], fn);
+                },
                 validationFunc: function (mug) {
                     if (mug.p.useUpdate) {
                         var props = _.without(_.keys(mug.p.updateProperty), ""),
@@ -560,6 +604,12 @@ var slugToProp = {
                                 {props: invalidProps.join(", ")}
                             );
                         }
+                        if (UPDATE_CARD_CONFIG.requiresAtLeastOne && _.isEmpty(mug.p.updateProperty)) {
+                            return UPDATE_CARD_CONFIG.emptyStateMessage;
+                        }
+                        if (hasNestedCardError(mug, mug.p.updateProperty, UPDATE_CARD_CONFIG.fields)) {
+                            return UPDATE_CARD_CONFIG.errorSummary;
+                        }
                     }
                     return 'pass';
                 }
@@ -572,7 +622,14 @@ var slugToProp = {
                 lstring: gettext("Index Properties"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: indexCaseWidget,
+                widget: widgets.repeaterCard,
+                cardConfig: INDEX_CARD_CONFIG,
+                mapLogicExpressions: function (mug, fn) {
+                    return flatMapCardXPaths(mug.p.indexProperty, ['calculate'], fn);
+                },
+                updateLogicExpressions: function (mug, fn) {
+                    rewriteCardXPaths(mug.p.indexProperty, ['calculate'], fn);
+                },
                 validationFunc: function (mug) {
                     if (mug.p.useIndex) {
                         var props = _.without(_.keys(mug.p.indexProperty), ""),
@@ -593,6 +650,12 @@ var slugToProp = {
                             );
                         } else if (invalidRelationships.length > 0) {
                             return gettext("Relationship must be child or extension");
+                        }
+                        if (INDEX_CARD_CONFIG.requiresAtLeastOne && _.isEmpty(mug.p.indexProperty)) {
+                            return INDEX_CARD_CONFIG.emptyStateMessage;
+                        }
+                        if (hasNestedCardError(mug, mug.p.indexProperty, INDEX_CARD_CONFIG.fields)) {
+                            return INDEX_CARD_CONFIG.errorSummary;
                         }
                     }
                     return 'pass';
