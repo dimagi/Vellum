@@ -294,6 +294,12 @@ var itextConfigurableBlock = function (mug, options) {
             $(this).before(block.getDeleteFormButton($(this).data('formtype')));
         });
 
+        // these buttons don't have a widget to check isDisabled()
+        // instead, directly check if this property should be locked
+        if (mug.form.vellum.isPropertyLocked(mug, options.path)) {
+            $blockUI.find('.btn').addClass('disabled').css('pointerEvents', 'none');
+        }
+
         return $blockUI;
     };
 

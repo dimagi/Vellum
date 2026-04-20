@@ -6,21 +6,22 @@ export function compareCaseMappings (baseline, incoming) {
     // the original with the incoming mappings to produce a diff.
     const additions = {};
     const deletions = {};
-    const updates = {};
     const allKeys = new Set([...Object.keys(baseline), ...Object.keys(incoming)]);
 
     allKeys.forEach(key => {
         if (Object.hasOwn(baseline, key) && Object.hasOwn(incoming, key)) {
+            const cache = {};
             incoming[key].forEach(item => {
-                const match = baseline[key].find(q => q.question_path === item.question_path);
-                if (!match) {
+                const num = countExactMatches(item, baseline[key], incoming[key], cache);
+                if (num === null || num > 0) {
                     push(key, item, additions);
-                } else if (!_.isEqual(match, item)) {
-                    push(key, item, updates);
+                } else if (num < 0) {
+                    push(key, item, deletions);
                 }
             });
             baseline[key].forEach(item => {
-                if (!incoming[key].find(q => q.question_path === item.question_path)) {
+                const num = countExactMatches(item, baseline[key], incoming[key], cache);
+                if (num === null || num < 0) {
                     push(key, item, deletions);
                 }
             });
@@ -42,13 +43,48 @@ export function compareCaseMappings (baseline, incoming) {
     if (Object.keys(deletions).length) {
         diff.delete = deletions;
     }
-    if (Object.keys(updates).length) {
-        diff.update = updates;
-    }
     return diff;
 }
 
 function push(key, item, mapping) {
     mapping[key] = mapping[key] || [];
     mapping[key].push(item);
+}
+
+/**
+ * Count exact matches of item in baseline and incoming
+ *
+ * Returns null if there are no other exact matches.
+ * Returns a positive number if incoming has more exact matches.
+ * Returns a negative number if baseline has more exact matches.
+ * If not null, the difference is moved toward zero and cached each
+ * time this function is called. Once cached, the cached difference
+ * (which remains zero once zero) is returned.
+ */
+function countExactMatches(item, baseline, incoming, cache) {
+    const key = Object.keys(item)
+        .sort()
+        .map(k => {
+            const v = item[k];
+            return `${k}:${typeof v}=${String(v)}`;
+        })
+        .join(' ');
+    let num = cache[key];
+    if (num === undefined) {
+        const nBaseline = baseline.filter(q => _.isEqual(q, item)).length;
+        const nIncoming = incoming.filter(q => _.isEqual(q, item)).length;
+        if (nIncoming + nBaseline === 1) {
+            cache[key] = null;
+            return null;
+        }
+        num = cache[key] = nIncoming - nBaseline;
+    } else if (num === null) {
+        return null;
+    }
+    if (num > 0) {
+        cache[key]--;
+    } else if (num < 0) {
+        cache[key]++;
+    }
+    return num;
 }
