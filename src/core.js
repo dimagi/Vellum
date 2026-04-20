@@ -957,12 +957,10 @@ var hidePageSpinner = function() {
 };
 
 fn.handleDropFinish = function(target, path, mug, event) {
-    var _this = this,
-        ops = target.closest(".xpath-expression-row").find(".op-select");
+    var ops = target.closest(".xpath-expression-row").find(".op-select");
 
     if (target) {
-        // the .change fires the validation controls
-        if (widgets.util.getWidget(target, this).options.richText && _this.data.core.form.richText) {
+        if (target.data("editorWrapper")) {
             richText.editor(target).insertExpression(path);
         } else {
             target.val(target.val() + path).change();
