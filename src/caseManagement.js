@@ -390,7 +390,9 @@ class CaseMapMaintainer {
                         // multiple questions no longer are assigned to this case property,
                         // so we can remove the conflict message
                         const mugWithConflict = this.form.getMugByPath(questions[0].question_path);
-                        mugWithConflict.dropMessage('caseProperty', CONFLICT_MSG_KEY);
+                        if (mugWithConflict) {
+                            mugWithConflict.dropMessage('caseProperty', CONFLICT_MSG_KEY);
+                        }
                     }
                 }
             }

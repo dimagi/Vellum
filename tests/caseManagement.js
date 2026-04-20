@@ -441,6 +441,19 @@ describe("The Case Management plugin", function () {
         assert.notInclude(xml, 'conflicting_delete', xml);
     });
 
+    it("should not attempt to dismiss conflicting delete on unknown question", function () {
+        util.loadXML("");
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [
+                {"question_path": "/data/unknown1"},
+                {"question_path": "/data/unknown2"},
+            ],
+        }}});
+
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.notInclude(xml, 'conflicting_delete', xml);
+    });
+
     it("should show conflicting delete message on all relevant mugs", function () {
         util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
         util.call("onFormSave", {"caseManagement": {"mappings": {
