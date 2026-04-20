@@ -139,6 +139,29 @@
                 }
             }
 
+            // Repeater card
+
+            // Flex column owns the spacing between cards (and the trailing
+            // Add button). No per-card `margin-bottom` — `gap` handles it.
+            .fd-repeater-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75em;
+
+                > .fd-add-property {
+                    align-self: flex-start;
+                }
+            }
+            .fd-repeater-card.panel {
+                margin-bottom: 0;            // gap on .fd-repeater-list owns this
+                border-color: @cc-neutral-hi;
+            }
+            .fd-repeater-card-header {
+                background: @cc-bg;
+                border-bottom-color: @cc-neutral-hi;
+                padding: 0.5em 1em;
+            }
+
             .fd-nested-xpath-field {
                 display: flex;
                 width: 100%;
@@ -158,6 +181,24 @@
                     padding: 0 0.75em;
                     display: inline-flex;
                     align-items: center;
+                }
+            }
+            .fd-repeater-card-header .fd-repeater-card-title {
+                font-weight: 600;
+                line-height: 1.5;
+            }
+            // De-noise the field labels: the card title alone carries the
+            // bold weight in the card, so individual field labels drop to
+            // medium. Overrides Bootstrap's `.control-label` default of 700.
+            .fd-repeater-card-body .control-label {
+                font-weight: 500;
+            }
+
+            .fd-repeater-card-header .fd-remove-property {
+                color: @cc-att-neg-mid;
+                &:hover, &:focus {
+                    color: @cc-att-neg-low;
+                    text-decoration: none;
                 }
             }
         }

@@ -1,0 +1,103 @@
+<%
+  // Repeater card list: one Bootstrap panel per entry in `props` (map key k ->
+  // row object v).
+  //
+  // Template parameters:
+  //   props                  — outer map (key → row object) to render.
+  //   cardConfig             — user-declared config (see below).
+  //   useRichText            — resolved by widgets.repeaterCard from
+  //                            mug.form.richText.
+  //   nested_xpath_field     — injected partial template (xpath fields).
+  //   nested_dropdown_field  — injected partial template (dropdown fields).
+  //
+  // cardConfig must include at least:
+  // - fields           — field specs for each label + control row in a card
+  // - rootClass        — extra class on each `.fd-repeater-card` (styling +
+  //                      selector: `widgets.repeaterCard` uses it in
+  //                      `getValue` / validation to find each card in the DOM)
+  // - cardHeaderText   — title shown in each card’s header (panel heading)
+  // - addLabel         — label for the bottom “add row” link
+  //
+  // Typical extras (not required by this template, but repeater UX uses them):
+  // - errorSummary, requiresAtLeastOne, emptyStateMessage, validationFunc, …
+  //
+  // Each card row is props[k] = v, e.g.
+  //   props = { age: { calculate: "30", relevant: "true()" } }
+  //   k = "age", v = { calculate: "30", relevant: "true()" }
+  //
+  // Where this field reads/writes (pick one per field; never both):
+  //   isIdentifier: true    → value is the map key k ("age" above).
+  //   valueKey: "calculate" → value is v["calculate"] ("30" above).
+  //
+  // Each entry in `cardConfig.fields` supports:
+  //   label         — rendered as the control-label.
+  //   fieldClass    — CSS class on the control. Also used by widgets.js
+  //                   (`validateField`, `getValue`) to find the field in
+  //                   the DOM, and often grep'd by identifier.
+  //   widget        — "input" (default) | "xpath" | "dropdown".
+  //   required      — adds data-required="true", enables the inline
+  //                   "Required" validator in widgets.js `validateField`.
+  //   placeholder   — plain-text + xpath modes only.
+  //   options       — dropdown mode only: array of strings, {value, label}
+  //                   objects, or a resolver `(mug, opts) => [...]`.
+  //   extraValidator — optional per-field validator, returns an error
+  //                   string or null (see `validateField`).
+  //
+  var fields = cardConfig.fields,
+      rootClass = cardConfig.rootClass,
+      cardHeaderText = cardConfig.cardHeaderText;
+%>
+<div class="fd-repeater-list">
+  <% _.each(props, function (v, k) { %>
+    <div class="panel panel-default fd-repeater-card <%- rootClass %>">
+      <div class="panel-heading clearfix fd-repeater-card-header">
+        <span class="fd-repeater-card-title"><%- cardHeaderText %></span>
+        <button type="button" class="btn btn-xs btn-link pull-right fd-remove-property"
+                title="<%- gettext("Remove") %>" aria-label="<%- gettext("Remove") %>">
+          <i class="fa fa-remove"></i>
+        </button>
+      </div>
+      <div class="panel-body form-horizontal fd-repeater-card-body">
+        <% _.each(fields, function (field) {
+          var currentValue = field.isIdentifier ? k : (v[field.valueKey] || "");
+          var widgetType = field.widget || "input";
+        %>
+          <div class="form-group">
+            <label class="control-label col-sm-3"><%- field.label %></label>
+            <div class="col-sm-9">
+              <% if (widgetType === "dropdown") { %>
+                <%= nested_dropdown_field({
+                  value: currentValue,
+                  fieldClass: field.fieldClass,
+                  required: field.required,
+                  placeholder: field.placeholder,
+                  options: field.options,
+                }) %>
+              <% } else if (widgetType === "xpath") { %>
+                <%= nested_xpath_field({
+                  value: currentValue,
+                  placeholder: field.placeholder,
+                  fieldClass: field.fieldClass,
+                  required: field.required,
+                  useRichText: useRichText,
+                }) %>
+              <% } else { %>
+                <input class="form-control <%- field.fieldClass %>" type="text"
+                       value="<%- currentValue %>"
+                       placeholder="<%- field.placeholder %>"
+                       data-widget="input"
+                       <% if (field.required) { %>data-required="true"<% } %>
+                       <% if (field.isIdentifier) { %>data-is-identifier="true"<% } %> />
+              <% } %>
+              <div class="help-block text-danger fd-field-error hide"></div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  <% }); %>
+  <a class="btn btn-default fd-add-property">
+    <i class="fa fa-plus"></i> <%- cardConfig.addLabel %>
+  </a>
+</div>
+<div class="messages" />
