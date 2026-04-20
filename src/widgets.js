@@ -446,10 +446,7 @@ var xPath = function (mug, options) {
         }, !!widget.isDisabled());
     };
 
-    atwho.autocomplete(widget.input, mug, {
-        property: options.path,
-        useRichText: mug.form.richText,
-    });
+    enableAutocompleteOnInput(widget.input, mug, options);
 
     widget.hasLogicReferences = true;
 
@@ -973,6 +970,13 @@ function decodeValueFromInputElement(mug, value, normalize) {
     }
 }
 
+function enableAutocompleteOnInput($input, mug, options) {
+    atwho.autocomplete($input, mug, {
+        property: options.path,
+        useRichText: mug.form.richText,
+    });
+}
+
 export default {
     base: base,
     normal: normal,
@@ -997,6 +1001,7 @@ export default {
         getUIElement: getUIElement,
         addCollapseToggle: addCollapseToggle,
         encodeValueForInputElement: encodeValueForInputElement,
-        decodeValueFromInputElement: decodeValueFromInputElement
+        decodeValueFromInputElement: decodeValueFromInputElement,
+        enableAutocompleteOnInput: enableAutocompleteOnInput
     }
 };
