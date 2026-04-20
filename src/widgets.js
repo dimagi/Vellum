@@ -3,11 +3,15 @@ import ui_element from "vellum/templates/ui_element.html";
 import widget_chips_template from "vellum/templates/widget_chips.html";
 import widget_control_keyvalue from "vellum/templates/widget_control_keyvalue.html";
 import widget_control_message from "vellum/templates/widget_control_message.html";
+import widget_repeater_card from "vellum/templates/widget_repeater_card.html";
+import nested_xpath_field from "vellum/templates/nested_xpath_field.html";
+import nested_dropdown_field from "vellum/templates/nested_dropdown_field.html";
 import _ from "underscore";
 import $ from "jquery";
 import atwho from "vellum/atwho";
 import util from "vellum/util";
 import richTextUtils from "vellum/richText";
+import nestedXPathField from "vellum/nestedXPathField";
 import analytics from "vellum/hqAnalytics";
 
 var base = function(mug, options) {
@@ -960,6 +964,167 @@ function enableAutocompleteOnInput($input, mug, options) {
     });
 }
 
+// -------------------------------------------------------------------------
+// Repeater card widget — a compound-list property (as opposed to a scalar
+// one). Renders a list of cards (one per record); each record has N fields
+// declared by `cardConfig.fields`. Usage in a mug spec:
+//
+//     someListProp: {
+//         lstring: gettext("Things"),
+//         widget: widgets.repeaterCard,
+//         cardConfig: {
+//             rootClass: "fd-thing",
+//             cardHeaderText: gettext("Thing"),
+//             addLabel: gettext("Add thing"),
+//             errorSummary: gettext("One or more things above have errors."),
+//             requiresAtLeastOne: false,
+//             emptyStateMessage: null,
+//             fields: [
+//                 {label: gettext("Name"), fieldClass: "fd-thing-name",
+//                  isIdentifier: true, required: true},
+//                 {label: gettext("Value"), fieldClass: "fd-thing-value",
+//                  valueKey: "value", widget: "xpath"},
+//                 ...
+//             ],
+//         },
+//         ...
+//     }
+//
+// -------------------------------------------------------------------------
+
+function readFieldValue($el) {
+    if (!$el.length) { return ""; }
+    var wrapper = $el.data("editorWrapper");
+    if (wrapper) { return wrapper.getValue(); }
+    return $el.val();
+}
+
+function emptyRepeaterItem(cardConfig) {
+    return _.reduce(cardConfig.fields, function (o, f) {
+        if (f.valueKey) { o[f.valueKey] = ""; }
+        return o;
+    }, {});
+}
+
+var repeaterCard = function (mug, options) {
+    var widget = normal(mug, options),
+        id = options.id || 'property-' + options.path,
+        cardConfig = options.cardConfig;
+    options.richText = false;
+
+    widget.input = $('<div class="control-row" />').attr('name', id);
+    widget.hasLogicReferences = true;
+
+    widget.getControl = function () {
+        return widget.input;
+    };
+
+    // Read values straight from the DOM using `cardConfig.fields` — no
+    // per-mug `getValue` override needed. Each card's key is the
+    // `isIdentifier` field's value; each card's body is
+    // {valueKey: fieldValue, ...}.
+    widget.getValue = function () {
+        var currentValues = {};
+        widget.input.find('.' + cardConfig.rootClass).each(function () {
+            var $card = $(this), key = null, entry = {};
+            _.each(cardConfig.fields, function (f) {
+                var val = readFieldValue($card.find('.' + f.fieldClass));
+                if (f.isIdentifier) { key = val; }
+                else if (f.valueKey) { entry[f.valueKey] = val; }
+            });
+            if (key !== null) { currentValues[key] = entry; }
+        });
+        return currentValues;
+    };
+
+    // Empty value → render no cards (just the Add button). Clicking Add
+    // seeds a blank `""` entry via `addProperty`; widgets requiring at
+    // least one card surface a reminder via their `validationFunc`.
+    widget.refreshControl = function (value) {
+        value = value ? value : widget.getValue();
+        renderCards(value);
+        wirePlainInputHandlers();
+        wireXPathFields();
+        widget.input.find('.fd-add-property').click(widget.addProperty);
+        widget.input.find('.fd-remove-property').click(widget.removeProperty);
+
+        function renderCards(val) {
+            var resolvedCardConfig = _.extend({}, cardConfig, {
+                fields: _.map(cardConfig.fields, function (f) {
+                    if (_.isFunction(f.options)) {
+                        return _.extend({}, f, {options: f.options(mug, options)});
+                    }
+                    return f;
+                }),
+            });
+            widget.input.html(widget_repeater_card({
+                props: val,
+                cardConfig: resolvedCardConfig,
+                useRichText: !!mug.form.richText,
+                nested_xpath_field: nested_xpath_field,
+                nested_dropdown_field: nested_dropdown_field,
+            }));
+        }
+
+        function wirePlainInputHandlers() {
+            widget.input.find('input, select').not('.fd-xpath-input')
+                .on('change keyup', function () {
+                    widget.handleChange();
+                });
+            widget.input.find('input[type="text"]').not('.fd-xpath-input')
+                .addClass('jstree-drop')
+                .each(function () { atwho.autocomplete($(this), mug); });
+        }
+
+        function wireXPathFields() {
+            widget.input.find('.fd-xpath-input').each(function () {
+                var $el = $(this),
+                    $group = $el.closest('.fd-nested-xpath-field');
+                nestedXPathField(mug, {
+                    $el: $el,
+                    $editButton: $group.find('.fd-xpath-edit'),
+                    initialValue: $el.attr('data-initial-value') || '',
+                    path: options.path,
+                    displayXPathEditor: options.displayXPathEditor,
+                }).on('change', function () {
+                    widget.handleChange();
+                });
+            });
+        }
+    };
+
+    widget.setValue = function (value) {
+        value = _.isUndefined(value) ? {} : value;
+        widget.refreshControl(value);
+    };
+
+    widget.updateValue = function () {
+        widget.save();
+    };
+
+    widget.removeProperty = function (e) {
+        e.preventDefault();
+        $(this).closest('.fd-repeater-card').remove();
+        widget.handleChange();
+    };
+
+    widget.addProperty = function (e) {
+        e.preventDefault();
+        var currentValues = widget.getValue();
+        // If there's already a blank card, focus it instead of adding another.
+        if (!("" in currentValues)) {
+            currentValues[""] = emptyRepeaterItem(cardConfig);
+            widget.refreshControl(currentValues);
+            widget.handleChange();
+        }
+        widget.input.find('.fd-repeater-card').last()
+            .find('input').first().focus();
+    };
+
+    return widget;
+};
+repeaterCard.trackLogicReferences = true;
+
 /**
  * Open the expression-editor modal with the standard arg bundle. Shared
  * between `widgets.xPath` and the nested `nestedXPathField` so both stay in sync
@@ -1021,6 +1186,7 @@ export default {
     dropdown: dropdown,
     dropdownWithInput: dropdownWithInput,
     xPath: xPath,
+    repeaterCard: repeaterCard,
     baseKeyValue: baseKeyValue,
     readOnlyControl: readOnlyControl,
     abstractMediaWidget: abstractMediaWidget,
