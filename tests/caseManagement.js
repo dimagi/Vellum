@@ -638,6 +638,29 @@ describe("The Case Management plugin", function () {
         assert.ok(msg, JSON.stringify(alerts));
     });
 
+    describe("with unknown question path", function () {
+        before(function () {
+            util.loadXML("");
+        });
+
+        const args = [
+            [{"question_path": null}],
+            [{"question_path": ""}],
+            [{"question_path": "/data/unknown"}],
+            [{"question_path": "/data/unknown"}, {"question_path": ""}],
+        ];
+        args.forEach(questions => {
+            it("should prune " + JSON.stringify(questions), function () {
+                util.call("onFormSave", {"caseManagement": {"mappings": {"name": questions}}});
+                const vellum = $("#vellum").vellum("get");
+
+                assert.deepEqual(vellum.data.caseManagement.caseMappings, {});
+                assert.deepEqual(vellum.data.caseManagement.caseMappingsByQuestion, {});
+                assert.deepEqual(vellum.data.caseManagement.baseline, {});
+            });
+        });
+    });
+
     describe("should auto-assign case name to", function () {
         let popover;
         before(() => {

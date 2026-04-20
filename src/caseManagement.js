@@ -169,12 +169,9 @@ class CaseMappingsBuilder {
         const caseMappingSection = head.find('> vellum\\:case_mappings');
         if (caseMappingSection.length > 0) {
             const mappingElements = caseMappingSection.children().toArray();
-            data.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
-            data.caseMappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            const mappings = this.buildMappingsFromXMLElements(mappingElements);
+            addCaseMappingsToPlugin(mappings, data, form);
         }
-
-        const maintainer = new CaseMapMaintainer(form, data);
-        maintainer.pruneInvalidMappings();
     }
 
     buildMappingsFromXMLElements (mappingElements) {
@@ -201,19 +198,44 @@ class CaseMappingsBuilder {
 
         return question;
     }
+}
 
-    buildQuestionMappingsFromCaseMappings(caseMappings) {
-        const mappingsByQuestion = {};
-        Object.entries(caseMappings).forEach(([caseProperty, questions]) => {
+/**
+ * Add case mappings to plugin data
+ *
+ * Mappings for unknown questions are not added to the plugin data.
+ *
+ * @param {Object} caseMappings - {"caseProperty": [{"question_path": ...}, ...], ...}
+ * @param {Object} data - plugin data to which caseMappings and
+ *                        caseMappingsByQuestion will be assigned.
+ * @param {Form} form
+ */
+function addCaseMappingsToPlugin(caseMappings, data, form) {
+    function isKnownQuestion(question) {
+        const path = question.question_path;
+        if (!path) {
+            return false;
+        } else if (!Object.hasOwn(cache, path)) {
+            cache[path] = !!form.getMugByPath(path);
+        }
+        return cache[path];
+    }
+    const cache = {};
+    const mappings = {};
+    const byQuestion = {};
+    Object.entries(caseMappings).forEach(([property, questions]) => {
+        questions = questions.filter(isKnownQuestion);
+        if (questions.length) {
+            mappings[property] = questions;
             questions.forEach(question => {
                 const path = question.question_path;
-                mappingsByQuestion[path] = mappingsByQuestion[path] || [];
-                mappingsByQuestion[path].push(caseProperty);
+                byQuestion[path] = byQuestion[path] || [];
+                byQuestion[path].push(property);
             });
-        });
-
-        return mappingsByQuestion;
-    }
+        }
+    });
+    data.caseMappings = mappings;
+    data.caseMappingsByQuestion = byQuestion;
 }
 
 class XMLCaseMappingWriter {
@@ -378,15 +400,6 @@ class CaseMapMaintainer {
     removeMappings (path) {
         this.moveMappings(path, null);
     }
-
-    pruneInvalidMappings () {
-        Object.keys(this.data.caseMappingsByQuestion).forEach(questionPath => {
-            const mug = this.form.getMugByPath(questionPath);
-            if (!mug) {
-                this.removeMappings(questionPath);
-            }
-        });
-    }
 }
 
 function initAutoAssignName(vellum) {
@@ -467,11 +480,11 @@ $.vellum.plugin('caseManagement', {}, {
     performAdditionalParsing: function (form, xml) {
         this.__callOld();
         const data = this.data.caseManagement;
-        const builder = new CaseMappingsBuilder();
         if (!data.caseMappings) {
-            data.caseMappings = JSON.parse(JSON.stringify(data.baseline));
-            data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            const mappings = JSON.parse(JSON.stringify(data.baseline));
+            addCaseMappingsToPlugin(mappings, data, form);
         } else {
+            const builder = new CaseMappingsBuilder();
             builder.updateMappingsFromXML(form, data, xml);
         }
     },
@@ -659,10 +672,9 @@ $.vellum.plugin('caseManagement', {}, {
         this.__callOld();
         const data = this.data.caseManagement;
         if (formData.caseManagement?.mappings) {
+            const form = this.data.core.form;
             const saveButton = this.data.core.saveButton;
-            const builder = new CaseMappingsBuilder();
-            data.caseMappings = formData.caseManagement.mappings;
-            data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            addCaseMappingsToPlugin(formData.caseManagement.mappings, data, form);
             this.data.core.form.walkMugs(mug => addCaseMappings(mug, data, saveButton));
             refreshCurrentMug(this);
         }
