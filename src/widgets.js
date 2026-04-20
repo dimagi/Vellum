@@ -193,18 +193,10 @@ var text = function (mug, options) {
     }
 
     widget.setValue = function (value) {
-        if (value) {
-            // <input> converts newlines to spaces; this preserves them
-            value = value.replace(/\n/g, '&#10;');
-        }
-
+        value = encodeValueForInputElement(mug, value, widget.hasLogicReferences);
         var position = util.getCaretPosition(input[0]);
         var oldvalue = input.val();
-        if (value && widget.hasLogicReferences) {
-            input.val(mug.form.normalizeXPath(value));
-        } else {
-            input.val(value);
-        }
+        input.val(value);
 
         // If this input has focus and value hasn't changed much,
         // keep the cursor in the same position
@@ -965,6 +957,17 @@ function setWidget($el, widget) {
     return $el;
 }
 
+function encodeValueForInputElement(mug, value, normalize) {
+    if (value) {
+        // <input> converts newlines to spaces; this preserves them
+        value = value.replace(/\n/g, '&#10;');
+    }
+    if (value && normalize) {
+        return mug.form.normalizeXPath(value);
+    }
+    return value;
+}
+
 export default {
     base: base,
     normal: normal,
@@ -987,6 +990,7 @@ export default {
         getMessages: getMessages,
         getUIElementWithEditButton: getUIElementWithEditButton,
         getUIElement: getUIElement,
-        addCollapseToggle: addCollapseToggle
+        addCollapseToggle: addCollapseToggle,
+        encodeValueForInputElement: encodeValueForInputElement
     }
 };
