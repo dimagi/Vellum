@@ -4,6 +4,7 @@ import mugs from "vellum/mugs";
 import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
 import nudgeName from "vellum/templates/case_management_name_nudge.html";
 import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.html";
+import tplAutoAssignedName from "vellum/templates/case_management_auto_assigned_name.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
 import { compareCaseMappings } from "vellum/caseDiff";
@@ -401,16 +402,19 @@ function initAutoAssignName(vellum) {
 }
 
 function autoAssignName(vellum) {
-    const form = vellum.data.core.form;
-    let mug = form.findFirstMatchingChild(null, () => true);
-    if (!mug || mug.p.caseProperty || mug.spec.caseProperty?.presence !== 'optional') {
-        mug = vellum.addQuestion('DataBindOnly', 'first');
-        mug.p.nodeID = form.generate_question_id('case-name');
-        mug.p.calculateAttr = 'uuid()';
-    }
-    mug.p.caseProperty = 'name';
-    vellum.data.core.saveButton.fire('change');
-    vellum.refreshCurrentMug();
+    vellum.ensureCurrentMugIsSaved(() => {
+        const form = vellum.data.core.form;
+        let mug = form.findFirstMatchingChild(null, () => true);
+        if (!mug || mug.p.caseProperty || mug.spec.caseProperty?.presence !== 'optional') {
+            mug = vellum.addQuestion('DataBindOnly', 'first');
+            mug.p.nodeID = form.generate_question_id('case-name');
+            mug.p.calculateAttr = 'uuid()';
+        }
+        mug._caseManagementAutoAssignedName = true;
+        mug.p.caseProperty = 'name';
+        vellum.data.core.saveButton.fire('change');
+        vellum.setCurrentMug(mug);
+    });
 }
 
 function refreshCurrentMug(vellum) {
@@ -532,6 +536,13 @@ $.vellum.plugin('caseManagement', {}, {
                     $nudge.fadeOut(300, function () { $(this).remove(); });
                 }
             }, null, 'teardown-mug-properties');
+        } else if (mug._caseManagementAutoAssignedName) {
+            delete mug._caseManagementAutoAssignedName;
+            const $explainer = $(tplAutoAssignedName());
+            $explainer.on('close.bs.alert', () => {
+                $explainer.fadeOut(300, function () { $(this).remove(); });
+            });
+            $sec.find('.fd-fieldset-content').prepend($explainer);
         } else if (mug.p.caseProperty !== 'name') {
             // can be removed when the learning nudge is no longer needed
             const NUDGE_KEY = 'nudge-caseManagement';
