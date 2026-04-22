@@ -54,7 +54,7 @@ $.vellum.plugin("lock", {}, {
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
-        setLockedFromParent(mug);
+        setControlOnlyChildrenLocked(mug);
     },
     setTreeActions: function (mug) {
         if (!mug.options.hasOwnProperty('_originalCanAddChoices')) {
@@ -113,7 +113,9 @@ $.vellum.plugin("lock", {}, {
                     delete _this.data.lock.locks[mug.ufid];
                 }
                 mug.p.set(attr, value);
-                mug.form.getChildren(mug).forEach(child => setLockedFromParent(child));
+                if (_.contains(["Select", "MSelect"], mug.__className)) {
+                    setControlOnlyChildrenLocked(mug);
+                }
                 _this.setTreeExtraIcons(mug);
 
                 if (!mug.form.isLoadingXForm) {
@@ -196,10 +198,12 @@ function hasUnlockedChildren(mug) {
     );
 }
 
-function setLockedFromParent(mug) {
-    if (mug.parentMug && mug.options.isControlOnly) {
-        mug.p.set('locked', mug.parentMug.p.locked);
-    }
+function setControlOnlyChildrenLocked(mug) {
+    mug.form.getChildren(mug).forEach(child => {
+        if (child.options.isControlOnly) {
+            child.p.set('locked', mug.p.locked);
+        }
+    });
 }
 
 function updateParentTreeIcons(parent) {
