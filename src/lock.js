@@ -98,7 +98,11 @@ $.vellum.plugin("lock", {}, {
             help: gettext("A locked question cannot be edited, moved, or deleted from the form."),
             helpURL: "https://www.example.com",  // placeholder for public documentation
             serialize: () => {},
-            deserialize: () => {},
+            deserialize: (data, key, mug, context) => {
+                if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_BIND_ATTR]) {
+                    delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                }
+            },
             setter: function (mug, attr, value) {
                 if (value === true) {
                     mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};

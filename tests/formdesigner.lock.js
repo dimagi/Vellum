@@ -107,6 +107,7 @@ describe("The Lock plugin", function() {
         const pasted = getMug('/data/copy-1-of-locked');
         assert(pasted, "pasted mug should exist");
         assert(!pasted.p.locked);
+        assert(!pasted.p.rawBindAttributes["vellum:lock"]);
         call('getData').core.form.removeMugsFromForm([pasted]);
     });
 
