@@ -160,7 +160,7 @@ function addMultipleAssignmentsMessageToMug(mug, url) {
 }
 
 class CaseMappingsBuilder {
-    updateMappingsFromXML (form, data, xml) {
+    getMappingsFromXML (xml) {
         if (!xml) {
             return;
         }
@@ -169,8 +169,7 @@ class CaseMappingsBuilder {
         const caseMappingSection = head.find('> vellum\\:case_mappings');
         if (caseMappingSection.length > 0) {
             const mappingElements = caseMappingSection.children().toArray();
-            const mappings = this.buildMappingsFromXMLElements(mappingElements);
-            addCaseMappingsToPlugin(mappings, data, form);
+            return this.buildMappingsFromXMLElements(mappingElements);
         }
     }
 
@@ -487,7 +486,10 @@ $.vellum.plugin('caseManagement', {}, {
             addCaseMappingsToPlugin(mappings, data, form);
         } else {
             const builder = new CaseMappingsBuilder();
-            builder.updateMappingsFromXML(form, data, xml);
+            const mappings = builder.getMappingsFromXML(xml);
+            if (mappings) {
+                addCaseMappingsToPlugin(mappings, data, form);
+            }
         }
     },
 
