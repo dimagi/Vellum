@@ -270,7 +270,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["one", "three", "two", ""]);
+        assert.deepEqual(displayedOptions, ["name", "one", "three", "two", ""]);
     });
 
     it("should display a warning when multiple questions are saving to the same case property", function () {
@@ -441,6 +441,19 @@ describe("The Case Management plugin", function () {
         assert.notInclude(xml, 'conflicting_delete', xml);
     });
 
+    it("should not attempt to dismiss conflicting delete on unknown question", function () {
+        util.loadXML("");
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [
+                {"question_path": "/data/unknown1"},
+                {"question_path": "/data/unknown2"},
+            ],
+        }}});
+
+        const xml = call("createXML", {withCaseMappings: true});
+        assert.notInclude(xml, 'conflicting_delete', xml);
+    });
+
     it("should show conflicting delete message on all relevant mugs", function () {
         util.loadXML(PROPERTY_CONFLICT_DELETED_XML);
         util.call("onFormSave", {"caseManagement": {"mappings": {
@@ -482,7 +495,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["newCaseProperty", "one", "three", "two", ""]);
+        assert.deepEqual(displayedOptions, ["name", "newCaseProperty", "one", "three", "two", ""]);
 
         // Verify that custom options will be removed when no longer in use
         util.clickQuestion(question1);
@@ -501,7 +514,7 @@ describe("The Case Management plugin", function () {
             displayedOptions.push($opt.text());
         });
 
-        assert.deepEqual(displayedOptions, ["question2", "one", "three", "two", ""]);
+        assert.deepEqual(displayedOptions, ["question2", "name", "one", "three", "two", ""]);
     });
 
     it("should remove child mappings when parent group is deleted", function () {
@@ -622,6 +635,123 @@ describe("The Case Management plugin", function () {
         const messages = casePropertySelect.find("~ .messages");
         assert.include(messages.text(), "case_id is a reserved word");
         assert.isFalse(util.isTreeNodeValid(question));
+    });
+
+    it("validation should not fail with empty form", function () {
+        util.loadXML("");
+        const alerts = call("preSaveValidation");
+        assert.equal(alerts.length, 0);
+    });
+
+    it("validation should fail when case name is not mapped", function () {
+        util.loadXML("");
+        util.addQuestion("Text", "one");
+        const alerts = call("preSaveValidation");
+        const msg = _(alerts).find(a => a.indexOf('missing a case name') >= 0);
+        assert.ok(msg, JSON.stringify(alerts));
+    });
+
+    describe("with unknown question path", function () {
+        before(function () {
+            util.loadXML("");
+        });
+
+        const args = [
+            [{"question_path": null}],
+            [{"question_path": ""}],
+            [{"question_path": "/data/unknown"}],
+            [{"question_path": "/data/unknown"}, {"question_path": ""}],
+        ];
+        args.forEach(questions => {
+            it("should prune " + JSON.stringify(questions), function () {
+                util.call("onFormSave", {"caseManagement": {"mappings": {"name": questions}}});
+                const vellum = $("#vellum").vellum("get");
+
+                assert.deepEqual(vellum.data.caseManagement.caseMappings, {});
+                assert.deepEqual(vellum.data.caseManagement.caseMappingsByQuestion, {});
+                assert.deepEqual(vellum.data.caseManagement.baseline, {});
+            });
+        });
+    });
+
+    describe("should auto-assign case name to", function () {
+        let popover;
+        before(() => {
+            popover = call("getData").core.saveButton.ui.data('bs.popover');
+            // disable popover animation for deterministic hide
+            // otherwise next test may fail if it interacts with popovers
+            popover.options.animation = false;
+        });
+        after(() => {
+            delete popover.options.animation;
+        });
+
+        it("first mug", function (done) {
+            util.loadXML("");
+            const mug = util.addQuestion("Text", "first");
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                $(".fd-auto-assign-case-name").trigger("click");
+                assert.equal(mug.p.caseProperty, 'name');
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
+
+        it("new mug when first mug has mapping", function (done) {
+            util.loadXML("");
+            const mug = util.addQuestion("Text", "test");
+            mug.p.caseProperty = 'test';
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                $(".fd-auto-assign-case-name").trigger("click");
+                const name = call("getMugByPath", "/data/case-name");
+                assert.equal(name.p.nodeID, 'case-name');
+                assert.equal(name.p.caseProperty, 'name');
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
+
+        it("new mug when first mug is a group", function (done) {
+            util.loadXML("");
+            const group = util.addQuestion("Group", "test");
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                $(".fd-auto-assign-case-name").trigger("click");
+                const name = call("getMugByPath", "/data/case-name");
+                assert.equal(name.p.nodeID, 'case-name');
+                assert.equal(name.p.caseProperty, 'name');
+                assert.equal(group.p.caseProperty, undefined);
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
+
+        it("new mug with unique node ID", function (done) {
+            util.loadXML("");
+            const mug = util.addQuestion("Text", "case-name");
+            mug.p.caseProperty = 'test';
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                $(".fd-auto-assign-case-name").trigger("click");
+                const name = mug.form.findFirstMatchingChild(null, () => true);
+                assert.notEqual(name.p.nodeID, 'case-name');
+                assert.endsWith(name.p.nodeID, 'case-name');
+                assert.equal(name.p.caseProperty, 'name');
+                assert.equal(mug.p.caseProperty, 'test');
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
     });
 
     describe("with case management disabled", function () {
