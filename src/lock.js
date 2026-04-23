@@ -113,13 +113,16 @@ $.vellum.plugin("lock", {}, {
                     delete _this.data.lock.locks[mug.ufid];
                 }
                 mug.p.set(attr, value);
+                _this.setTreeExtraIcons(mug);
+
                 if (_.contains(["Select", "MSelect"], mug.__className)) {
                     setControlOnlyChildrenLocked(mug);
                 }
-                _this.setTreeExtraIcons(mug);
 
                 if (!mug.form.isLoadingXForm) {
-                    if (_.contains(["Select", "MSelect"], mug.__className)) {
+                    if (mug.__className === "Group") {
+                        cascadeLockToChildren(mug, value);
+                    } else if (_.contains(["Select", "MSelect"], mug.__className)) {
                         _this.setTreeActions(mug);
                     }
                     if (_this.getCurrentlySelectedMug() === mug) {
@@ -202,6 +205,16 @@ function setControlOnlyChildrenLocked(mug) {
     mug.form.getChildren(mug).forEach(child => {
         if (child.options.isControlOnly) {
             child.p.set('locked', mug.p.locked);
+        }
+    });
+}
+
+function cascadeLockToChildren(mug, value) {
+    mug.form.getChildren(mug).forEach(child => {
+        if (child.p.locked !== value) {
+            child.p.locked = value;
+        } else if (child.__className === "Group") {
+            cascadeLockToChildren(child, value);
         }
     });
 }

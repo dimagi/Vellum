@@ -171,6 +171,59 @@ describe("The Lock plugin", function() {
                 '#', '#',
                 0));
         });
+
+        it("locks all children when a group is locked", function () {
+            const group = getMug('/data/group_no_lock');
+            const child = getMug('/data/group_no_lock/nested_unlocked');
+            try {
+                group.p.locked = true;
+                assert(child.p.locked, "expected child to be locked");
+            } finally {
+                group.p.locked = false;
+            }
+        });
+
+        it("unlocks all children when a group is unlocked", function () {
+            const group = getMug('/data/group_no_lock');
+            const child = getMug('/data/group_no_lock/nested_unlocked');
+            try {
+                group.p.locked = true;
+                group.p.locked = false;
+                assert(!child.p.locked, "expected child to be unlocked");
+            } finally {
+                group.p.locked = false;
+            }
+        });
+
+        it("cascades lock state through nested groups", function () {
+            const outer = getMug('/data/group_with_nested_lock');
+            const subgroup = getMug('/data/group_with_nested_lock/subgroup');
+            const deepChild = getMug('/data/group_with_nested_lock/subgroup/nested_locked');
+            try {
+                outer.p.locked = true;
+                assert(subgroup.p.locked, "expected subgroup to be locked");
+                assert(deepChild.p.locked, "expected nested child to be locked");
+                outer.p.locked = false;
+                assert(!subgroup.p.locked, "expected subgroup to be unlocked");
+                assert(!deepChild.p.locked, "expected nested child to be unlocked");
+            } finally {
+                deepChild.p.locked = true;
+            }
+        });
+
+        it("leaves a child independently toggleable after a group cascade", function () {
+            const group = getMug('/data/group_no_lock');
+            const child = getMug('/data/group_no_lock/nested_unlocked');
+            try {
+                group.p.locked = true;
+                child.p.locked = false;
+                assert(group.p.locked, "group should stay locked");
+                assert(!child.p.locked, "child should be independently unlocked");
+            } finally {
+                child.p.locked = false;
+                group.p.locked = false;
+            }
+        });
     });
 
     describe("locked select questions", function () {
