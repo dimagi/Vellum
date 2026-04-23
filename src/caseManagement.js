@@ -7,7 +7,7 @@ import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.htm
 import tplAutoAssignedName from "vellum/templates/case_management_auto_assigned_name.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
-import { compareCaseMappings } from "vellum/caseDiff";
+import { compareCaseMappings, formatCaseMappingDiff } from "vellum/caseDiff";
 
 
 function casePropertyDropdownWidget (mug, opts) {
@@ -159,46 +159,6 @@ function addMultipleAssignmentsMessageToMug(mug, url) {
     mug.addMessage('caseProperty', message);
 }
 
-class CaseMappingsBuilder {
-    getMappingsFromXML (xml) {
-        if (!xml) {
-            return;
-        }
-
-        const head = xml.find(':root > h\\:head, :root > head');
-        const caseMappingSection = head.find('> vellum\\:case_mappings');
-        if (caseMappingSection.length > 0) {
-            const mappingElements = caseMappingSection.children().toArray();
-            return this.buildMappingsFromXMLElements(mappingElements);
-        }
-    }
-
-    buildMappingsFromXMLElements (mappingElements) {
-        const mappings = {};
-        mappingElements.forEach(mappingElement => {
-            const propertyValue = mappingElement.attributes.property.value;
-            const questionsList = [];
-            const questionElements = $(mappingElement).children();
-            questionElements.each((index, questionElement) => {
-                questionsList.push(this.buildQuestionFromXMLElement(questionElement));
-            });
-            mappings[propertyValue] = questionsList;
-        });
-
-        return mappings;
-    }
-
-    buildQuestionFromXMLElement (questionElement) {
-        const question = {};
-        for (let i = 0; i < questionElement.attributes.length; i++) {
-            const item = questionElement.attributes.item(i);
-            question[item.name] = item.value;
-        }
-
-        return question;
-    }
-}
-
 /**
  * Add case mappings to plugin data
  *
@@ -235,6 +195,46 @@ function addCaseMappingsToPlugin(caseMappings, data, form) {
     });
     data.caseMappings = mappings;
     data.caseMappingsByQuestion = byQuestion;
+}
+
+class XMLCaseMappingsBuilder {
+    getMappings (xml) {
+        if (!xml) {
+            return;
+        }
+
+        const head = xml.find(':root > h\\:head, :root > head');
+        const caseMappingSection = head.find('> vellum\\:case_mappings');
+        if (caseMappingSection.length > 0) {
+            const mappingElements = caseMappingSection.children().toArray();
+            return this.buildMappingsFromXMLElements(mappingElements);
+        }
+    }
+
+    buildMappingsFromXMLElements (mappingElements) {
+        const mappings = {};
+        mappingElements.forEach(mappingElement => {
+            const propertyValue = mappingElement.attributes.property.value;
+            const questionsList = [];
+            const questionElements = $(mappingElement).children();
+            questionElements.each((index, questionElement) => {
+                questionsList.push(this.buildQuestionFromXMLElement(questionElement));
+            });
+            mappings[propertyValue] = questionsList;
+        });
+
+        return mappings;
+    }
+
+    buildQuestionFromXMLElement (questionElement) {
+        const question = {};
+        for (let i = 0; i < questionElement.attributes.length; i++) {
+            const item = questionElement.attributes.item(i);
+            question[item.name] = item.value;
+        }
+
+        return question;
+    }
 }
 
 class XMLCaseMappingWriter {
@@ -303,7 +303,8 @@ class CaseMapMaintainer {
     }
 
     replaceFormPropertyMappings (questionPath, prev, current) {
-        let questions = prev ? this.data.caseMappings[prev] || [] : [];
+        const mappings = this.data.caseMappings;
+        let questions = prev ? mappings[prev] || [] : [];
         let question = null;
 
         let prevIndex = questions.findIndex((question) => question.question_path === questionPath);
@@ -314,7 +315,7 @@ class CaseMapMaintainer {
             questions.splice(prevIndex, 1);
             if (questions.length === 0) {
                 // delete the old case property questions
-                delete this.data.caseMappings[prev];
+                delete mappings[prev];
             } else if (questions.length === 1) {
                 // this case property is now unique, so we can remove conflict warnings from the remaining mug
                 const remainingMug = this.form.getMugByPath(questions[0].question_path);
@@ -329,7 +330,7 @@ class CaseMapMaintainer {
         }
 
         if (current) {
-            this.data.caseMappings[current] = this.data.caseMappings[current] || [];
+            mappings[current] = mappings[current] || [];
             if (!question) {
                 const originals = this.data.baseline[current];
                 question = originals?.find(q => q.question_path === questionPath);
@@ -337,13 +338,13 @@ class CaseMapMaintainer {
                     question = {'question_path': questionPath};
                 }
             }
-            this.data.caseMappings[current].push(question);
+            mappings[current].push(question);
 
-            if (this.data.caseMappings[current].length >= 2) {
+            if (mappings[current].length >= 2) {
                 // this new mapping creates a conflict, so add a warning to each assigned question
                 // these warnings will cause the save button to mention validation errors,
                 // but they do not prevent saving the form
-                this.data.caseMappings[current].forEach(question => {
+                mappings[current].forEach(question => {
                     const mugWithConflict = this.form.getMugByPath(question.question_path);
                     addConflictMessageToMug(mugWithConflict, current);
                 });
@@ -485,8 +486,8 @@ $.vellum.plugin('caseManagement', {}, {
             const mappings = JSON.parse(JSON.stringify(data.baseline));
             addCaseMappingsToPlugin(mappings, data, form);
         } else {
-            const builder = new CaseMappingsBuilder();
-            const mappings = builder.getMappingsFromXML(xml);
+            const builder = new XMLCaseMappingsBuilder();
+            const mappings = builder.getMappings(xml);
             if (mappings) {
                 addCaseMappingsToPlugin(mappings, data, form);
             }
@@ -689,8 +690,9 @@ $.vellum.plugin('caseManagement', {}, {
     augmentSentData: function (sentData, saveType) {
         const result = this.__callOld();
         const data = this.data.caseManagement;
+        const is_reg = this.data.caseManagement.is_registration_form;
         const diff = compareCaseMappings(data.baseline, data.caseMappings);
-        result.mapping_diff = JSON.stringify(diff);
+        result.case_mapping_diff = JSON.stringify(formatCaseMappingDiff(diff, is_reg));
         return result;
     }
 

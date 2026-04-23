@@ -88,3 +88,63 @@ function countExactMatches(item, baseline, incoming, cache) {
     }
     return num;
 }
+
+/**
+ * Convert combined mapping diff to case_mapping_diff format accepted by HQ
+ *
+ * NOTE: the provided `diff` object may be mutated, and future mutations
+ * to it or the returned object may mutually affect each other.
+ *
+ * Combined format: all properties grouped under 'add' and 'delete' keys:
+ *   {
+ *     "add": {
+ *       "name": [{"question_path": ...}, ...]
+ *       "case-property": [{"question_path": ...}, ...]
+ *       ...
+ *     },
+ *     "delete": {
+ *       "name": [{"question_path": ...}, ...]
+ *       "case-property": [{"question_path": ...}, ...]
+ *       ...
+ *     },
+ *   }
+ *
+ * Standard HQ "case_mapping_diff" format for registration forms:
+ *   {
+ *     "open_case": {
+ *       // "name" diffs
+ *       "add": [{"question_path": ...}, ...],
+ *       "delete": [{"question_path": ...}, ...],
+ *     },
+ *     "update_case": {
+ *       "add": {
+ *         "case-property": [{"question_path": ...}, ...]
+ *         ...
+ *       },
+ *       "delete": {
+ *         "case-property": [{"question_path": ...}, ...]
+ *         ...
+ *       },
+ *     },
+ *   }
+ * 
+ * Non-registration forms do not produce an "open_case" item, and
+ * instead all diffs are included under "update_case".
+ *
+ * @param {Object} diff Diff object created by compareCaseMappings.
+ */
+export function formatCaseMappingDiff(diff, is_registration_form) {
+    const result = {"update_case": diff};
+    if (is_registration_form) {
+        result.open_case = {};
+        if (diff.add?.name) {
+            result.open_case.add = diff.add.name;
+            delete diff.add.name;
+        }
+        if (diff.delete?.name) {
+            result.open_case.delete = diff.delete.name;
+            delete diff.delete.name;
+        }
+    }
+    return result;
+}
