@@ -212,6 +212,26 @@ describe("The Lock plugin", function() {
             const lockedSelect = getMug('/data/locked_select');
             assert.isFalse(lockedSelect.options.canAddChoices);
         });
+
+        it("removes the 'Add Choice' action when locking a select", function () {
+            const lockedSelect = getMug('/data/unlocked_select');
+            try {
+                lockedSelect.p.locked = true;
+                assert.isFalse(lockedSelect.options.canAddChoices);
+            } finally {
+                lockedSelect.p.locked = false;
+            }
+        });
+
+        it("adds the 'Add Choice' action when unlocking a select", function () {
+            const lockedSelect = getMug('/data/locked_select');
+            try {
+                lockedSelect.p.locked = false;
+                assert(lockedSelect.options.canAddChoices);
+            } finally {
+                lockedSelect.p.locked = true;
+            }
+        });
     });
 
     describe("tree icons", function () {

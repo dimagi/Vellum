@@ -41,9 +41,10 @@ $.vellum.plugin("lock", {}, {
         setLockedFromParent(mug);
     },
     setTreeActions: function (mug) {
-        if (mug.p.locked) {
-            mug.options.canAddChoices = false;
+        if (!mug.options.hasOwnProperty('_originalCanAddChoices')) {
+            mug.options._originalCanAddChoices = mug.options.canAddChoices;
         }
+        mug.options.canAddChoices = mug.p.locked ? false : mug.options._originalCanAddChoices;
         this.__callOld();
     },
     setTreeExtraIcons: function (mug) {
@@ -94,6 +95,9 @@ $.vellum.plugin("lock", {}, {
                 _this.setTreeExtraIcons(mug);
 
                 if (!mug.form.isLoadingXForm) {
+                    if (_.contains(["Select", "MSelect"], mug.__className)) {
+                        _this.setTreeActions(mug);
+                    }
                     if (_this.getCurrentlySelectedMug() === mug) {
                         _this.displayMugProperties(mug);
                     }
