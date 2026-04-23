@@ -174,6 +174,39 @@ function rewriteCardXPaths(rowMap, keys, fn) {
     });
 }
 
+// Data-side mirror of widgets.js `validateField`. The widget's inline
+// validator is touched-state gated and DOM-driven, so it only catches
+// errors for cards the user has actually interacted with. `isFormValid`
+// (and any non-interactive code path that calls `mug.validate()`) sees
+// the spec's `validationFunc`, not the DOM. This helper reads mug.p
+// directly so the same per-field rules (Required, XPath syntax,
+// extraValidator) apply regardless of touched state.
+function hasRepeaterCardFieldError(mug, cardMap, cardConfig) {
+    var fields = cardConfig.fields;
+    var hasError = false;
+    _.each(cardMap || {}, function (card, cardId) {
+        if (hasError) { return; }
+        var cardIsEmpty = !cardId && _.every(card, function (v) { return !v; });
+        if (cardIsEmpty) { return; }
+        _.each(fields, function (f) {
+            if (hasError) { return; }
+            var val = f.isIdentifier ? cardId : (card[f.valueKey] || "");
+            if (f.required && !val) {
+                hasError = true;
+                return;
+            }
+            if (f.widget === "xpath" && val && val !== '-') {
+                try { mug.form.xpath.parse(val); }
+                catch (e) { hasError = true; return; }
+            }
+            if (f.extraValidator && f.extraValidator(val)) {
+                hasError = true;
+            }
+        });
+    });
+    return hasError;
+}
+
 
 var CASE_TYPE_REGEX = /^[\w-]+$/;
 
@@ -548,6 +581,12 @@ var slugToProp = {
                 updateLogicExpressions: function (mug, fn) {
                     rewriteCardXPaths(mug.p.createProperty, ['calculate', 'relevant'], fn);
                 },
+                validationFunc: function (mug) {
+                    if (hasRepeaterCardFieldError(mug, mug.p.createProperty, CREATE_CARD_CONFIG)) {
+                        return CREATE_CARD_CONFIG.errorSummary;
+                    }
+                    return 'pass';
+                },
             },
             useClose: {
                 visibility: 'hidden',
@@ -583,6 +622,9 @@ var slugToProp = {
                             _.isEmpty(mug.p.updateProperty)) {
                         return UPDATE_CARD_CONFIG.emptyStateMessage;
                     }
+                    if (hasRepeaterCardFieldError(mug, mug.p.updateProperty, UPDATE_CARD_CONFIG)) {
+                        return UPDATE_CARD_CONFIG.errorSummary;
+                    }
                     return 'pass';
                 }
             },
@@ -607,6 +649,9 @@ var slugToProp = {
                             INDEX_CARD_CONFIG.requiresAtLeastOne &&
                             _.isEmpty(mug.p.indexProperty)) {
                         return INDEX_CARD_CONFIG.emptyStateMessage;
+                    }
+                    if (hasRepeaterCardFieldError(mug, mug.p.indexProperty, INDEX_CARD_CONFIG)) {
+                        return INDEX_CARD_CONFIG.errorSummary;
                     }
                     return 'pass';
                 }

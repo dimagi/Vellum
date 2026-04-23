@@ -1039,6 +1039,34 @@ describe("The SaveToCase module", function() {
             };
             assert.strictEqual(mug.spec.updateProperty.validationFunc(mug), "pass");
         });
+
+        it("should catch per-field errors in untouched cards (isFormValid)", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useIndex: true,
+            });
+            mug.p.indexProperty = {
+                "parent": {
+                    calculate: "this is not valid xpath!!!",
+                    case_type: "type",
+                    relationship: "neither_child_nor_extension",
+                },
+            };
+            assert.notEqual(mug.spec.indexProperty.validationFunc(mug), "pass",);
+            assert.notOk(mug.form.isFormValid());
+
+            mug.p.indexProperty = {
+                "parent": {
+                    calculate: "/data/meta/caseID",
+                    case_type: "type",
+                    relationship: "child",
+                },
+            };
+            assert.strictEqual(
+                mug.spec.indexProperty.validationFunc(mug), "pass"
+            );
+        });
     });
 
     describe("attribute-path reference validation", function () {
