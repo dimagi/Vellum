@@ -1,6 +1,10 @@
 import $ from "jquery";
 import _ from "underscore";
 import mugs from "vellum/mugs";
+import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
+import nudgeName from "vellum/templates/case_management_name_nudge.html";
+import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.html";
+import tplAutoAssignedName from "vellum/templates/case_management_auto_assigned_name.html";
 import util from "vellum/util";
 import widgets from "vellum/widgets";
 import { compareCaseMappings } from "vellum/caseDiff";
@@ -156,7 +160,7 @@ function addMultipleAssignmentsMessageToMug(mug, url) {
 }
 
 class CaseMappingsBuilder {
-    updateMappingsFromXML (form, data, xml) {
+    getMappingsFromXML (xml) {
         if (!xml) {
             return;
         }
@@ -165,12 +169,8 @@ class CaseMappingsBuilder {
         const caseMappingSection = head.find('> vellum\\:case_mappings');
         if (caseMappingSection.length > 0) {
             const mappingElements = caseMappingSection.children().toArray();
-            data.caseMappings = this.buildMappingsFromXMLElements(mappingElements);
-            data.caseMappingsByQuestion = this.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            return this.buildMappingsFromXMLElements(mappingElements);
         }
-
-        const maintainer = new CaseMapMaintainer(form, data);
-        maintainer.pruneInvalidMappings();
     }
 
     buildMappingsFromXMLElements (mappingElements) {
@@ -197,19 +197,44 @@ class CaseMappingsBuilder {
 
         return question;
     }
+}
 
-    buildQuestionMappingsFromCaseMappings(caseMappings) {
-        const mappingsByQuestion = {};
-        Object.entries(caseMappings).forEach(([caseProperty, questions]) => {
+/**
+ * Add case mappings to plugin data
+ *
+ * Mappings for unknown questions are not added to the plugin data.
+ *
+ * @param {Object} caseMappings - {"caseProperty": [{"question_path": ...}, ...], ...}
+ * @param {Object} data - plugin data to which caseMappings and
+ *                        caseMappingsByQuestion will be assigned.
+ * @param {Form} form
+ */
+function addCaseMappingsToPlugin(caseMappings, data, form) {
+    function isKnownQuestion(question) {
+        const path = question.question_path;
+        if (!path) {
+            return false;
+        } else if (!Object.hasOwn(cache, path)) {
+            cache[path] = !!form.getMugByPath(path);
+        }
+        return cache[path];
+    }
+    const cache = {};
+    const mappings = {};
+    const byQuestion = {};
+    Object.entries(caseMappings).forEach(([property, questions]) => {
+        questions = questions.filter(isKnownQuestion);
+        if (questions.length) {
+            mappings[property] = questions;
             questions.forEach(question => {
                 const path = question.question_path;
-                mappingsByQuestion[path] = mappingsByQuestion[path] || [];
-                mappingsByQuestion[path].push(caseProperty);
+                byQuestion[path] = byQuestion[path] || [];
+                byQuestion[path].push(property);
             });
-        });
-
-        return mappingsByQuestion;
-    }
+        }
+    });
+    data.caseMappings = mappings;
+    data.caseMappingsByQuestion = byQuestion;
 }
 
 class XMLCaseMappingWriter {
@@ -364,7 +389,9 @@ class CaseMapMaintainer {
                         // multiple questions no longer are assigned to this case property,
                         // so we can remove the conflict message
                         const mugWithConflict = this.form.getMugByPath(questions[0].question_path);
-                        mugWithConflict.dropMessage('caseProperty', CONFLICT_MSG_KEY);
+                        if (mugWithConflict) {
+                            mugWithConflict.dropMessage('caseProperty', CONFLICT_MSG_KEY);
+                        }
                     }
                 }
             }
@@ -374,15 +401,34 @@ class CaseMapMaintainer {
     removeMappings (path) {
         this.moveMappings(path, null);
     }
+}
 
-    pruneInvalidMappings () {
-        Object.keys(this.data.caseMappingsByQuestion).forEach(questionPath => {
-            const mug = this.form.getMugByPath(questionPath);
-            if (!mug) {
-                this.removeMappings(questionPath);
-            }
+function initAutoAssignName(vellum) {
+    const saveButtonUi = vellum.data.core.saveButton.ui;
+    saveButtonUi.on('shown.bs.popover', function () {
+        const $tip = saveButtonUi.data('bs.popover').$tip;
+        $tip.off('click.autoAssignName');
+        $tip.on('click.autoAssignName', '.fd-auto-assign-case-name', function () {
+            autoAssignName(vellum);
+            saveButtonUi.popover('hide');
         });
-    }
+    });
+}
+
+function autoAssignName(vellum) {
+    vellum.ensureCurrentMugIsSaved(() => {
+        const form = vellum.data.core.form;
+        let mug = form.findFirstMatchingChild(null, () => true);
+        if (!mug || mug.p.caseProperty || mug.spec.caseProperty?.presence !== 'optional') {
+            mug = vellum.addQuestion('DataBindOnly', 'first');
+            mug.p.nodeID = form.generate_question_id('case-name');
+            mug.p.calculateAttr = 'uuid()';
+        }
+        mug._caseManagementAutoAssignedName = true;
+        mug.p.caseProperty = 'name';
+        vellum.data.core.saveButton.fire('change');
+        vellum.setCurrentMug(mug);
+    });
 }
 
 function refreshCurrentMug(vellum) {
@@ -404,6 +450,11 @@ $.vellum.plugin('caseManagement', {}, {
         data.properties = this.opts().caseManagement.properties || [];
         data.baseline = this.opts().caseManagement.mappings || {};
         data.view_form_url = this.opts().caseManagement.view_form_url;
+        data.is_registration_form = this.opts().caseManagement.is_registration_form;
+        if (data.is_registration_form && !data.properties.includes('name')) {
+            data.properties.push('name');
+        }
+        initAutoAssignName(this);
     },
 
     loadXML: function () {
@@ -430,12 +481,15 @@ $.vellum.plugin('caseManagement', {}, {
     performAdditionalParsing: function (form, xml) {
         this.__callOld();
         const data = this.data.caseManagement;
-        const builder = new CaseMappingsBuilder();
         if (!data.caseMappings) {
-            data.caseMappings = JSON.parse(JSON.stringify(data.baseline));
-            data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            const mappings = JSON.parse(JSON.stringify(data.baseline));
+            addCaseMappingsToPlugin(mappings, data, form);
         } else {
-            builder.updateMappingsFromXML(form, data, xml);
+            const builder = new CaseMappingsBuilder();
+            const mappings = builder.getMappingsFromXML(xml);
+            if (mappings) {
+                addCaseMappingsToPlugin(mappings, data, form);
+            }
         }
     },
 
@@ -486,32 +540,59 @@ $.vellum.plugin('caseManagement', {}, {
     },
 
     getSectionDisplay: function (mug, options) {
-        // can be removed when the Case Management nudge is no longer needed
         const $sec = this.__callOld();
-        const NUDGE_KEY = 'nudge-caseManagement';
-        const DISMISS_ON = 3;
-        let useCount = parseInt(localStorage.getItem(NUDGE_KEY) || '0');
-        if (options.slug === 'caseManagement' && useCount < DISMISS_ON) {
-            const $nudge = $(
-                '<div class="alert alert-info fd-nudge">' +
-                    '<button type="button" class="close" ' +
-                        'data-dismiss="alert" aria-label="' + gettext('Close') + '">&times;</button>' +
-                    '<i class="fa fa-info-circle"></i> ' +
-                    gettext('Save this question as a case property to reuse its data across your application.') +
-                '</div>'
-            );
-            $nudge.on('close.bs.alert', () => localStorage.setItem(NUDGE_KEY, String(DISMISS_ON)));
+        if (options.slug !== 'caseManagement') {
+            return $sec;
+        }
+        const data = this.data.caseManagement;
+        if (data.is_registration_form && !data.caseMappings?.name?.length) {
+            const $nudge = $(nudgeName({format: util.format}));
             $sec.find('.fd-fieldset-content').prepend($nudge);
             mug.on('property-changed', event => {
-                if (event.property === 'caseProperty' && event.val) {
-                    localStorage.setItem(NUDGE_KEY, String(++useCount));
-                    if (useCount >= DISMISS_ON) {
-                        $nudge.fadeOut(300, function () { $(this).remove(); });
-                    }
+                if (event.property === 'caseProperty' && event.val === 'name') {
+                    $nudge.fadeOut(300, function () { $(this).remove(); });
                 }
             }, null, 'teardown-mug-properties');
+        } else if (mug._caseManagementAutoAssignedName) {
+            delete mug._caseManagementAutoAssignedName;
+            const $explainer = $(tplAutoAssignedName());
+            $explainer.on('close.bs.alert', () => {
+                $explainer.fadeOut(300, function () { $(this).remove(); });
+            });
+            $sec.find('.fd-fieldset-content').prepend($explainer);
+        } else if (mug.p.caseProperty !== 'name') {
+            // can be removed when the learning nudge is no longer needed
+            const NUDGE_KEY = 'nudge-caseManagement';
+            const DISMISS_ON = 3;
+            let useCount = parseInt(localStorage.getItem(NUDGE_KEY) || '0');
+            if (useCount < DISMISS_ON) {
+                const $nudge = $(nudgeLearn());
+                $nudge.on('close.bs.alert', () => localStorage.setItem(NUDGE_KEY, String(DISMISS_ON)));
+                $sec.find('.fd-fieldset-content').prepend($nudge);
+                mug.on('property-changed', event => {
+                    if (event.property === 'caseProperty' && event.val) {
+                        localStorage.setItem(NUDGE_KEY, String(++useCount));
+                        if (useCount >= DISMISS_ON) {
+                            $nudge.fadeOut(300, function () { $(this).remove(); });
+                        }
+                    }
+                }, null, 'teardown-mug-properties');
+            }
         }
         return $sec;
+    },
+
+    preSaveValidation: function () {
+        const alerts = this.__callOld();
+        const data = this.data.caseManagement;
+        if (!data.caseMappings?.name?.length && data.is_registration_form &&
+                this.data.core.form.tree.getRootChildren().length) {
+            alerts.push(util.format(gettext(
+                'This registration form is missing a case name. ' +
+                'Assign the {name} property to a question.'
+            ), {name: '<code>name</code>'}) + tmpAutoAssign());
+        }
+        return alerts;
     },
 
     getMugSpec: function () {
@@ -595,10 +676,9 @@ $.vellum.plugin('caseManagement', {}, {
         this.__callOld();
         const data = this.data.caseManagement;
         if (formData.caseManagement?.mappings) {
+            const form = this.data.core.form;
             const saveButton = this.data.core.saveButton;
-            const builder = new CaseMappingsBuilder();
-            data.caseMappings = formData.caseManagement.mappings;
-            data.caseMappingsByQuestion = builder.buildQuestionMappingsFromCaseMappings(data.caseMappings);
+            addCaseMappingsToPlugin(formData.caseManagement.mappings, data, form);
             this.data.core.form.walkMugs(mug => addCaseMappings(mug, data, saveButton));
             refreshCurrentMug(this);
         }

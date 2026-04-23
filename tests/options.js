@@ -225,6 +225,7 @@ var OPTIONS = {
         mappings: {},
         view_form_url: 'http://view_form',
         reserved_words: ['case_id', 'case_name', 'userid'],
+        is_registration_form: true,
     },
     uploader: {
         uploadUrls: {

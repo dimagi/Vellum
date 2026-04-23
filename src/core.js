@@ -10,6 +10,7 @@ import edit_source from "vellum/templates/edit_source.html";
 import confirm_overwrite from "vellum/templates/confirm_overwrite.html";
 import control_group_stdInput from "vellum/templates/control_group_stdInput.html";
 import form_errors_template from "vellum/templates/form_errors_template.html";
+import pre_save_alerts from "vellum/templates/pre_save_alerts.html";
 import question_fieldset from "vellum/templates/question_fieldset.html";
 import question_type_changer from "vellum/templates/question_type_changer.html";
 import question_toolbar from "vellum/templates/question_toolbar.html";
@@ -122,35 +123,28 @@ fn.init = function () {
         csrftoken: _this.opts().csrftoken
     });
 
-    var validateForSave = _.debounce(function () {
-        var form = _this.data.core.form,
-            template = "<div class='alert alert-danger'>{error}<br/>{action}</div>",
-            icon = "<i class='fd-valid-alert-icon fa fa-warning'></i>",
-            action;
+    const validateForSave = _.debounce(function () {
+        const form = _this.data.core.form;
+        const template = "{error}<br/>{action}";
+        const icon = "<i class='fd-valid-alert-icon fa fa-warning'></i>";
+        const alerts = [];
         if (form.hasBrokenReferences()) {
-            action = gettext("Look for questions marked with $1 and " +
-                "check they don't reference deleted questions.");
-            return {
-                title: gettext("Errors in Form"),
-                content: util.format(template, {
-                    error: gettext("Form has reference errors."),
-                    action: action.replace('$1', icon),
-                }),
-            };
+            alerts.push(util.format(template, {
+                error: gettext("Form has reference errors."),
+                action: gettext("Look for questions marked with $1 and " +
+                    "check if they reference deleted questions.").replace('$1', icon),
+            }));
         } else if (!form.isFormValid()) {
-            action = gettext("Look for questions marked with $1 and fix the errors.");
-            // TODO make a more efficient way to check if any mug in the
-            // form is not valid and use that instead of only current mug.
-            return {
-                title: "Validation Failed",
-                content: util.format(template, {
-                    error: gettext("Form has validation errors."),
-                    action: action.replace('$1', icon),
-                }),
-            };
-        } else {
-            return {title: "", content: ""};
+            alerts.push(util.format(template, {
+                error: gettext("Form has validation errors."),
+                action: gettext("Look for questions marked with $1 and fix the errors.").replace('$1', icon),
+            }));
         }
+        alerts.push(..._this.preSaveValidation());
+        return alerts.length ? {
+            title: gettext("Validation Failed"),
+            content: pre_save_alerts({alerts}),
+        } : {title: "", content: ""};
     }, 500, true);
     _this.data.core.saveButton.ui.popover({
         title: function () {
@@ -162,12 +156,38 @@ fn.init = function () {
         html: true,
         placement: 'bottom',
         container: 'body',
-        trigger: 'hover',
+        trigger: 'manual',
         sanitize: false,
+    });
+    const saveButtonUi = _this.data.core.saveButton.ui;
+    let hideTimeout;
+    function showPopover() {
+        cancelHide();
+        saveButtonUi.popover('show');
+    }
+    function scheduleHide() {
+        cancelHide();
+        hideTimeout = setTimeout(function () {
+            saveButtonUi.popover('hide');
+            hideTimeout = null;
+        }, 500);
+    }
+    function cancelHide() {
+        clearTimeout(hideTimeout);
+    }
+    // Keep the popover open while hovering over the button or the popover itself.
+    saveButtonUi.on('mouseenter', showPopover);
+    saveButtonUi.on('mouseleave', scheduleHide);
+    saveButtonUi.on('shown.bs.popover', function () {
+        const $tip = saveButtonUi.data('bs.popover').$tip;
+        $tip.off('mouseenter.savePopover mouseleave.savePopover')
+            .on('mouseenter.savePopover', cancelHide)
+            .on('mouseleave.savePopover', scheduleHide);
     });
     // Saving, and the associated modal, can interfere with the popover,
     // so make absolutely sure that the popover is removed on save.
     _this.data.core.saveButton.ui.on('click', function() {
+        cancelHide();
         $(this).popover('hide');
     });
 
@@ -2578,6 +2598,15 @@ fn.populateControlMug = function (mug, controlElement) {
 fn.updateControlNodeAdaptorMap = function (map) {};
 
 fn.contributeToModelXML = function (xmlWriter, form) {};
+
+/**
+ * Validate on Save button hover.
+ *
+ * @returns An array of warnings.
+ */
+fn.preSaveValidation = function () {
+    return [];
+};
 
 fn.contributeToHeadXML = function (xmlWriter, form) {};
 
