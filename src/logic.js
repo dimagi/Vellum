@@ -268,6 +268,27 @@ LogicManager.prototype = {
                 isHashRef = form.hasValidHashtagPrefix(xpath),
                 knownHashtag = isHashRef && form.isValidHashtag(xpath);
 
+            // For a path that does not resolve to a mug and also does
+            // not start with a hashtag, walk up until we hit the first
+            // ancestor mug, then ask that mug's type whether the
+            // remaining suffix is a valid navigation into its generated
+            // XML subtree (`isValidSubPath`).
+            if (!refMug && !isHashtag) {
+                var ancestorPath = pathString.replace(/\/[^/]*$/, '');
+                while (ancestorPath) {
+                    var candidate = form.getMugByPath(ancestorPath);
+                    if (candidate) {
+                        var suffix = pathString.substring(ancestorPath.length);
+                        if (candidate.options.isValidSubPath &&
+                            candidate.options.isValidSubPath(suffix)) {
+                            refMug = candidate;
+                        }
+                        break;
+                    }
+                    ancestorPath = ancestorPath.replace(/\/[^/]*$/, '');
+                }
+            }
+
             // last part is hack to allow root node in data parents
             if ((!refMug && !knownHashtag) &&
                 (!mug.options.ignoreReferenceWarning || !mug.options.ignoreReferenceWarning(mug)) &&

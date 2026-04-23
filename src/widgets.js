@@ -1018,6 +1018,25 @@ function findUnknownReferences(mug, value) {
             refMug = form.getMugByPath(pathString),
             isHashRef = form.hasValidHashtagPrefix(xpath),
             knownHashtag = isHashRef && form.isValidHashtag(xpath);
+        // For a path that does not resolve to a mug and also does not
+        // start with a hashtag, walk up to the first ancestor mug, then
+        // consult its type's `isValidSubPath`. Mirrors the logic
+        // in `_addReferences`; keep in sync.
+        if (!refMug && !isHashtag) {
+            var ancestorPath = pathString.replace(/\/[^/]*$/, '');
+            while (ancestorPath) {
+                var candidate = form.getMugByPath(ancestorPath);
+                if (candidate) {
+                    var suffix = pathString.substring(ancestorPath.length);
+                    if (candidate.options.isValidSubPath &&
+                        candidate.options.isValidSubPath(candidate, suffix)) {
+                        refMug = candidate;
+                    }
+                    break;
+                }
+                ancestorPath = ancestorPath.replace(/\/[^/]*$/, '');
+            }
+        }
         if (!refMug && !knownHashtag) {
             unknowns.push(xpath);
         }

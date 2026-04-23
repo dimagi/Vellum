@@ -356,6 +356,11 @@ var slugToProp = {
             mug.p.date_modified = mug.p.date_modified || '/data/meta/timeEnd';
             mug.p.user_id = mug.p.user_id || "instance('commcaresession')/session/context/userid";
         },
+        // Whitelist of paths that the reference tracker should treat as
+        // valid navigation into this mug's generated XML subtree.
+        isValidSubPath: function (suffix) {
+            return /^\/case\/@(case_id|date_modified|user_id)$/.test(suffix);
+        },
         spec: {
             xmlnsAttr: { presence: "optional" },
             "date_modified": {
