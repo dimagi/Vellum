@@ -94,6 +94,9 @@ $.vellum.plugin("lock", {}, {
                 _this.setTreeExtraIcons(mug);
 
                 if (!mug.form.isLoadingXForm) {
+                    if (_this.getCurrentlySelectedMug() === mug) {
+                        _this.displayMugProperties(mug);
+                    }
                     if (mug.parentMug) {
                         updateParentTreeIcons(mug.parentMug);
                     }
