@@ -1,5 +1,5 @@
 import chai from "chai";
-import { compareCaseMappings } from "vellum/caseDiff";
+import { compareCaseMappings, formatCaseMappingDiff } from "vellum/caseDiff";
 
 const assert = chai.assert;
 
@@ -192,5 +192,85 @@ describe("The Case Management diff tool", function () {
         const baseline = {one: [{question_path: "/data/first", update_mode: "edit"}]};
         const incoming = {one: [{question_path: "/data/first", update_mode: "edit"}]};
         assert.deepEqual(compareCaseMappings(baseline, incoming), {});
+    });
+});
+
+describe("The Case Management diff formatter", () => {
+    it("should keep all mappings in 'update_case' for non-registration form", () => {
+        const diff = {
+            add: {name: [{question_path: "/data/one"}]},
+            delete: {name: [{question_path: "/data/two"}]},
+        };
+        assert.deepEqual(formatCaseMappingDiff(diff), {
+            "update_case": {
+                add: {name: [{question_path: "/data/one"}]},
+                delete: {name: [{question_path: "/data/two"}]},
+            },
+        });
+    });
+
+    it("should put 'name' mappings in 'open_case' for registration form", () => {
+        const diff = {
+            add: {
+                name: [{question_path: "/data/one"}],
+                age: [{question_path: "/data/two"}],
+                dob: [{question_path: "/data/three"}],
+            },
+            delete: {
+                name: [{question_path: "/data/four"}],
+                age: [{question_path: "/data/five"}],
+                dob: [{question_path: "/data/six"}],
+            },
+        };
+        assert.deepEqual(formatCaseMappingDiff(diff, true), {
+            "open_case": {
+                add: [{question_path: "/data/one"}],
+                delete: [{question_path: "/data/four"}],
+            },
+            "update_case": {
+                add: {
+                    age: [{question_path: "/data/two"}],
+                    dob: [{question_path: "/data/three"}],
+                },
+                delete: {
+                    age: [{question_path: "/data/five"}],
+                    dob: [{question_path: "/data/six"}],
+                },
+            }
+        });
+    });
+
+    it("should handle missing 'delete' for registration form", () => {
+        const diff = {
+            add: {
+                name: [{question_path: "/data/one"}],
+                age: [{question_path: "/data/two"}],
+            },
+        };
+        assert.deepEqual(formatCaseMappingDiff(diff, true), {
+            "open_case": {
+                add: [{question_path: "/data/one"}],
+            },
+            "update_case": {
+                add: {age: [{question_path: "/data/two"}]},
+            }
+        });
+    });
+
+    it("should handle missing 'add' for registration form", () => {
+        const diff = {
+            delete: {
+                name: [{question_path: "/data/three"}],
+                age: [{question_path: "/data/four"}],
+            },
+        };
+        assert.deepEqual(formatCaseMappingDiff(diff, true), {
+            "open_case": {
+                delete: [{question_path: "/data/three"}],
+            },
+            "update_case": {
+                delete: {age: [{question_path: "/data/four"}]},
+            }
+        });
     });
 });
