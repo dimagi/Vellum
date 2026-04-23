@@ -159,6 +159,44 @@ function addMultipleAssignmentsMessageToMug(mug, url) {
     mug.addMessage('caseProperty', message);
 }
 
+/**
+ * Add case mappings to plugin data
+ *
+ * Mappings for unknown questions are not added to the plugin data.
+ *
+ * @param {Object} caseMappings - {"caseProperty": [{"question_path": ...}, ...], ...}
+ * @param {Object} data - plugin data to which caseMappings and
+ *                        caseMappingsByQuestion will be assigned.
+ * @param {Form} form
+ */
+function addCaseMappingsToPlugin(caseMappings, data, form) {
+    function isKnownQuestion(question) {
+        const path = question.question_path;
+        if (!path) {
+            return false;
+        } else if (!Object.hasOwn(cache, path)) {
+            cache[path] = !!form.getMugByPath(path);
+        }
+        return cache[path];
+    }
+    const cache = {};
+    const mappings = {};
+    const byQuestion = {};
+    Object.entries(caseMappings).forEach(([property, questions]) => {
+        questions = questions.filter(isKnownQuestion);
+        if (questions.length) {
+            mappings[property] = questions;
+            questions.forEach(question => {
+                const path = question.question_path;
+                byQuestion[path] = byQuestion[path] || [];
+                byQuestion[path].push(property);
+            });
+        }
+    });
+    data.caseMappings = mappings;
+    data.caseMappingsByQuestion = byQuestion;
+}
+
 class XMLCaseMappingsBuilder {
     getMappings (xml) {
         if (!xml) {
@@ -197,44 +235,6 @@ class XMLCaseMappingsBuilder {
 
         return question;
     }
-}
-
-/**
- * Add case mappings to plugin data
- *
- * Mappings for unknown questions are not added to the plugin data.
- *
- * @param {Object} caseMappings - {"caseProperty": [{"question_path": ...}, ...], ...}
- * @param {Object} data - plugin data to which caseMappings and
- *                        caseMappingsByQuestion will be assigned.
- * @param {Form} form
- */
-function addCaseMappingsToPlugin(caseMappings, data, form) {
-    function isKnownQuestion(question) {
-        const path = question.question_path;
-        if (!path) {
-            return false;
-        } else if (!Object.hasOwn(cache, path)) {
-            cache[path] = !!form.getMugByPath(path);
-        }
-        return cache[path];
-    }
-    const cache = {};
-    const mappings = {};
-    const byQuestion = {};
-    Object.entries(caseMappings).forEach(([property, questions]) => {
-        questions = questions.filter(isKnownQuestion);
-        if (questions.length) {
-            mappings[property] = questions;
-            questions.forEach(question => {
-                const path = question.question_path;
-                byQuestion[path] = byQuestion[path] || [];
-                byQuestion[path].push(property);
-            });
-        }
-    });
-    data.caseMappings = mappings;
-    data.caseMappingsByQuestion = byQuestion;
 }
 
 class XMLCaseMappingWriter {
