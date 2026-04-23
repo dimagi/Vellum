@@ -159,8 +159,8 @@ function addMultipleAssignmentsMessageToMug(mug, url) {
     mug.addMessage('caseProperty', message);
 }
 
-class CaseMappingsBuilder {
-    getMappingsFromXML (xml) {
+class XMLCaseMappingsBuilder {
+    getMappings (xml) {
         if (!xml) {
             return;
         }
@@ -486,8 +486,8 @@ $.vellum.plugin('caseManagement', {}, {
             const mappings = JSON.parse(JSON.stringify(data.baseline));
             addCaseMappingsToPlugin(mappings, data, form);
         } else {
-            const builder = new CaseMappingsBuilder();
-            const mappings = builder.getMappingsFromXML(xml);
+            const builder = new XMLCaseMappingsBuilder();
+            const mappings = builder.getMappings(xml);
             if (mappings) {
                 addCaseMappingsToPlugin(mappings, data, form);
             }
