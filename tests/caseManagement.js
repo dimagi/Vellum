@@ -106,6 +106,18 @@ describe("The Case Management plugin", function () {
         assert.notExists(getCaseManagementSection()[0]);
     });
 
+    it("should hide the case management section for questions in repeat groups", function () {
+        util.loadXML("");
+        const repeat = util.addQuestion("Repeat", "repeat_group");
+        const group = util.addQuestion("Group", "group");
+        const text = util.addQuestion("Text", "text");
+        util.clickQuestion(text);
+
+        assert.equal(text.parentMug, group);
+        assert.equal(group.parentMug, repeat);
+        assert.notExists(getCaseManagementSection()[0]);
+    });
+
     it("should hide the case management section for question lists", function () {
         util.loadXML("");
         util.addQuestion("FieldList", "question_list");

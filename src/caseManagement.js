@@ -545,6 +545,13 @@ $.vellum.plugin('caseManagement', {}, {
         if (options.slug !== 'caseManagement') {
             return $sec;
         }
+        let parent = mug.parentMug;
+        while (parent) {
+            if (parent.__className === "Repeat") {
+                return $();  // hide section if in repeat group
+            }
+            parent = parent.parentMug;
+        }
         const data = this.data.caseManagement;
         if (data.is_registration_form && !data.caseMappings?.name?.length) {
             const $nudge = $(nudgeName({format: util.format}));
