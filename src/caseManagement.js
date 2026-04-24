@@ -458,6 +458,19 @@ $.vellum.plugin('caseManagement', {}, {
         initAutoAssignName(this);
     },
 
+    postInit: function() {
+        this.__callOld();
+        const types = this.data.core.mugTypes.normalTypes;
+        const exclude = {'Trigger': true, 'SaveToCase': true};
+        _(types).each((type, name) => {
+            if (Object.hasOwn(exclude, name) ||
+                    type.dataType === 'binary' ||  // multimedia: Audio, Image, ...
+                    type.tagName === 'group') {
+                type.spec.caseProperty = { presence: 'notallowed' };
+            }
+        });
+    },
+
     loadXML: function () {
         this.__callOld();
         const _this = this;
@@ -504,19 +517,6 @@ $.vellum.plugin('caseManagement', {}, {
             const writer = new XMLCaseMappingWriter(xmlWriter);
             writer.writeCaseMappingsElement(this.data.caseManagement);
         }
-    },
-
-    getMugTypes: function () {
-        const types = this.__callOld();
-        const excludedTypes = [
-            types.normal.Trigger,
-            types.normal.Group,
-            types.normal.Repeat,
-            types.normal.FieldList
-        ];
-        excludedTypes.forEach(excludedType => excludedType.spec.caseProperty = { presence: 'notallowed' });
-
-        return types;
     },
 
     getSections: function (mug) {

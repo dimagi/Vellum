@@ -717,21 +717,34 @@ describe("The Case Management plugin", function () {
             save.popover("show");
         });
 
-        it("new mug when first mug is a group", function (done) {
-            util.loadXML("");
-            const group = util.addQuestion("Group", "test");
-            const save = call("getData").core.saveButton.ui;
-            function test() {
-                save.off('shown.bs.popover.test');
-                $(".fd-auto-assign-case-name").trigger("click");
-                const name = call("getMugByPath", "/data/case-name");
-                assert.equal(name.p.nodeID, 'case-name');
-                assert.equal(name.p.caseProperty, 'name');
-                assert.equal(group.p.caseProperty, undefined);
-                done();
-            }
-            save.on('shown.bs.popover.test', test);
-            save.popover("show");
+        describe("new mug when first mug is a", function () {
+            ([
+                "Trigger",
+                "Group",
+                "Repeat",
+                "SaveToCase",
+                "Audio",
+                "Image",
+                "Video",
+                "Document",
+            ]).forEach(type => {
+                it(type, function (done) {
+                    util.loadXML("");
+                    const mug = util.addQuestion(type, "test");
+                    const save = call("getData").core.saveButton.ui;
+                    function test() {
+                        save.off('shown.bs.popover.test');
+                        $(".fd-auto-assign-case-name").trigger("click");
+                        const name = call("getMugByPath", "/data/case-name");
+                        assert.isUndefined(mug.p.caseProperty, type + " caseProperty should be undefined");
+                        assert.equal(name.p.nodeID, 'case-name');
+                        assert.equal(name.p.caseProperty, 'name');
+                        done();
+                    }
+                    save.on('shown.bs.popover.test', test);
+                    save.popover("show");
+                });
+            });
         });
 
         it("new mug with unique node ID", function (done) {
