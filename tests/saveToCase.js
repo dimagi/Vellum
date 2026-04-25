@@ -988,6 +988,48 @@ describe("The SaveToCase module", function() {
                 "valid name should not set .has-error"
             );
         });
+
+        it("should leave untouched siblings quiet during typing, then surface them on save-popover hover", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "uuid()",
+                useCreate: true,
+                case_type: "p",
+                caseName: "/data/name",
+                useIndex: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-indexProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-index-property.fd-repeater-card").first();
+            var key = "mug-indexProperty-error";
+            function indexErrorMessage() {
+                var found = null;
+                mug.messages.each("indexProperty", function (m) {
+                    if (m.key === key) { found = m.message; }
+                });
+                return found;
+            }
+
+            // Type only the identifier.
+            $card.find(".fd-index-property-name").val("parent").trigger("change");
+            assert.notOk(
+                $card.find(".fd-index-property-relationship").closest(".form-group")
+                    .hasClass("has-error"),
+                "untyped required field should stay quiet during typing"
+            );
+            assert.isNull(indexErrorMessage());
+
+            // Trigger the save-popover show event
+            mug.form.vellum.data.core.saveButton.ui.trigger("show.bs.popover");
+            assert.ok(
+                $card.find(".fd-index-property-relationship").closest(".form-group")
+                    .hasClass("has-error"),
+                "force-touched required field should fire inline on save-popover show"
+            );
+            assert.isNotNull(indexErrorMessage());
+        });
+
     });
 
     describe("validationFunc empty-state and list-level checks", function () {

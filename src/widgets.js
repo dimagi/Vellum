@@ -1234,12 +1234,9 @@ var repeaterCard = function (mug, options) {
         }
     };
 
-    // Hovering the top-bar Save button force-touches every field so the
-    // user sees any pending errors before they commit. Namespaced so
-    // switching mugs cleanly rebinds.
     var $saveButton = options.vellum.data.core.saveButton.ui,
         eventNamespace = '.fd-repeater-' + widget.id;
-    $saveButton.on('mouseenter' + eventNamespace, function () {
+    $saveButton.on('show.bs.popover' + eventNamespace, function () {
         widget.input.find('[data-widget]').each(function () {
             $(this).data('touched', true);
         });
