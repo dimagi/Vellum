@@ -554,8 +554,11 @@ var slugToProp = {
                     mug.form.vellum.collapseSection(slug, false);
                 },
                 onDeselect: function (slug, mug) {
-                    mug.p[slugToProp[slug]] = false;
-                    mug.form.vellum.collapseSection(slug, true);
+                    var prop = slugToProp[slug];
+                    if (mug.p[prop]) {                                                                                                                                                                                       
+                        mug.p[prop] = false;                                     
+                    }
+                    mug.form.vellum.collapseSection(slug, true);  
                 },
             },
             useCreate: {
