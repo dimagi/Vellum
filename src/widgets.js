@@ -10,7 +10,6 @@ import _ from "underscore";
 import $ from "jquery";
 import atwho from "vellum/atwho";
 import util from "vellum/util";
-import logic from "vellum/logic";
 import richTextUtils from "vellum/richText";
 import nestedXPathField from "vellum/nestedXPathField";
 import analytics from "vellum/hqAnalytics";
@@ -1000,54 +999,6 @@ function readFieldValue($el) {
     return $el.val();
 }
 
-// Inspect an xpath expression and return an "Unknown question[s]: ..."
-// string when any referenced path/hashtag doesn't resolve to a form node.
-// Mirrors the detection logic in logic.js `_addReferences` so repeater-card
-// fields can surface bad-path warnings inline instead of at the widget level.
-function findUnknownReferences(mug, value) {
-    if (!value) { return null; }
-    var form = mug.form,
-        expr = new logic.LogicExpression(value, form.xpath);
-    if (!expr.parsed) { return null; }
-    expr.analyze();
-    var unknowns = [];
-    _.each(expr.absolutePaths.concat(expr.hashtags), function (xobj) {
-        var xpath = xobj.toHashtag(),
-            isHashtag = xpath.startsWith('#'),
-            pathString = isHashtag ? xpath : xobj.pathWithoutPredicates(),
-            refMug = form.getMugByPath(pathString),
-            isHashRef = form.hasValidHashtagPrefix(xpath),
-            knownHashtag = isHashRef && form.isValidHashtag(xpath);
-        // For a path that does not resolve to a mug and also does not
-        // start with a hashtag, walk up to the first ancestor mug, then
-        // consult its type's `isValidSubPath`. Mirrors the logic
-        // in `_addReferences`; keep in sync.
-        if (!refMug && !isHashtag) {
-            var ancestorPath = pathString.replace(/\/[^/]*$/, '');
-            while (ancestorPath) {
-                var candidate = form.getMugByPath(ancestorPath);
-                if (candidate) {
-                    var suffix = pathString.substring(ancestorPath.length);
-                    if (candidate.options.isValidSubPath &&
-                        candidate.options.isValidSubPath(candidate, suffix)) {
-                        refMug = candidate;
-                    }
-                    break;
-                }
-                ancestorPath = ancestorPath.replace(/\/[^/]*$/, '');
-            }
-        }
-        if (!refMug && !knownHashtag) {
-            unknowns.push(xpath);
-        }
-    });
-    if (unknowns.length === 0) { return null; }
-    if (unknowns.length === 1) {
-        return gettext("Unknown question:") + " " + unknowns[0];
-    }
-    return gettext("Unknown questions:") + "\n- " + unknowns.join("\n- ");
-}
-
 function validateField($field, mug, cardConfig) {
     var $fieldRow = $field.closest('.form-group'),
         $err = $fieldRow.find('.fd-field-error'),
@@ -1062,7 +1013,6 @@ function validateField($field, mug, cardConfig) {
     } else if (widgetType === "xpath" && val) {
         try {
             mug.form.xpath.parse(val);
-            error = findUnknownReferences(mug, val);
         } catch (e) {
             error = gettext("Invalid XPath expression");
         }
