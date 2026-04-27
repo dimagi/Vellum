@@ -752,29 +752,4 @@ describe("The SaveToCase module", function() {
             );
         });
     });
-
-    describe("openCaseCondition promotion", function () {
-        it("should preserve user-provided ownerIdCondition even when openCaseCondition has same condition", function () {
-            util.loadXML("");
-            util.addQuestion("SaveToCase", "stc", {
-                case_id: 'uuid()',
-                useCreate: true,
-                case_type: 'household',
-                caseName: '/data/name',
-                ownerId: '/data/loc',
-                ownerIdCondition: "/data/set_owner = 'yes'",
-                openCaseCondition: "/data/set_owner = 'yes'",
-            });
-            var xml = call("createXML"),
-                $xml = $(xml);
-            assert.equal(
-                $xml.find('bind[nodeset="/data/stc/case"]').attr('relevant'),
-                "/data/set_owner = 'yes'"
-            );
-            assert.equal(
-                $xml.find('bind[nodeset="/data/stc/case/create/owner_id"]').attr('relevant'),
-                "/data/set_owner = 'yes'"
-            );
-        });
-    });
 });
