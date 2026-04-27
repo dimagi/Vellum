@@ -106,6 +106,18 @@ describe("The Case Management plugin", function () {
         assert.notExists(getCaseManagementSection()[0]);
     });
 
+    it("should hide the case management section for questions in repeat groups", function () {
+        util.loadXML("");
+        const repeat = util.addQuestion("Repeat", "repeat_group");
+        const group = util.addQuestion("Group", "group");
+        const text = util.addQuestion("Text", "text");
+        util.clickQuestion(text);
+
+        assert.equal(text.parentMug, group);
+        assert.equal(group.parentMug, repeat);
+        assert.notExists(getCaseManagementSection()[0]);
+    });
+
     it("should hide the case management section for question lists", function () {
         util.loadXML("");
         util.addQuestion("FieldList", "question_list");
@@ -717,21 +729,34 @@ describe("The Case Management plugin", function () {
             save.popover("show");
         });
 
-        it("new mug when first mug is a group", function (done) {
-            util.loadXML("");
-            const group = util.addQuestion("Group", "test");
-            const save = call("getData").core.saveButton.ui;
-            function test() {
-                save.off('shown.bs.popover.test');
-                $(".fd-auto-assign-case-name").trigger("click");
-                const name = call("getMugByPath", "/data/case-name");
-                assert.equal(name.p.nodeID, 'case-name');
-                assert.equal(name.p.caseProperty, 'name');
-                assert.equal(group.p.caseProperty, undefined);
-                done();
-            }
-            save.on('shown.bs.popover.test', test);
-            save.popover("show");
+        describe("new mug when first mug is a", function () {
+            ([
+                "Trigger",
+                "Group",
+                "Repeat",
+                "SaveToCase",
+                "Audio",
+                "Image",
+                "Video",
+                "Document",
+            ]).forEach(type => {
+                it(type, function (done) {
+                    util.loadXML("");
+                    const mug = util.addQuestion(type, "test");
+                    const save = call("getData").core.saveButton.ui;
+                    function test() {
+                        save.off('shown.bs.popover.test');
+                        $(".fd-auto-assign-case-name").trigger("click");
+                        const name = call("getMugByPath", "/data/case-name");
+                        assert.isUndefined(mug.p.caseProperty, type + " caseProperty should be undefined");
+                        assert.equal(name.p.nodeID, 'case-name');
+                        assert.equal(name.p.caseProperty, 'name');
+                        done();
+                    }
+                    save.on('shown.bs.popover.test', test);
+                    save.popover("show");
+                });
+            });
         });
 
         it("new mug with unique node ID", function (done) {

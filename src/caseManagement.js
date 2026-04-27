@@ -420,7 +420,8 @@ function autoAssignName(vellum) {
     vellum.ensureCurrentMugIsSaved(() => {
         const form = vellum.data.core.form;
         let mug = form.findFirstMatchingChild(null, () => true);
-        if (!mug || mug.p.caseProperty || mug.spec.caseProperty?.presence !== 'optional') {
+        if (!mug || mug.p.caseProperty || !mug.spec.caseProperty ||
+                mug.getPresence("caseProperty") !== 'optional') {
             mug = vellum.addQuestion('DataBindOnly', 'first');
             mug.p.nodeID = form.generate_question_id('case-name');
             mug.p.calculateAttr = 'uuid()';
@@ -456,6 +457,19 @@ $.vellum.plugin('caseManagement', {}, {
             data.properties.push('name');
         }
         initAutoAssignName(this);
+    },
+
+    postInit: function() {
+        this.__callOld();
+        const types = this.data.core.mugTypes.normalTypes;
+        const exclude = {'Trigger': true, 'SaveToCase': true};
+        _(types).each((type, name) => {
+            if (Object.hasOwn(exclude, name) ||
+                    type.dataType === 'binary' ||  // multimedia: Audio, Image, ...
+                    type.tagName === 'group') {
+                type.spec.caseProperty = { presence: 'notallowed' };
+            }
+        });
     },
 
     loadXML: function () {
@@ -506,19 +520,6 @@ $.vellum.plugin('caseManagement', {}, {
         }
     },
 
-    getMugTypes: function () {
-        const types = this.__callOld();
-        const excludedTypes = [
-            types.normal.Trigger,
-            types.normal.Group,
-            types.normal.Repeat,
-            types.normal.FieldList
-        ];
-        excludedTypes.forEach(excludedType => excludedType.spec.caseProperty = { presence: 'notallowed' });
-
-        return types;
-    },
-
     getSections: function (mug) {
         const sections = this.__callOld(mug);
         sections.splice(1, 0, {
@@ -544,6 +545,13 @@ $.vellum.plugin('caseManagement', {}, {
         const $sec = this.__callOld();
         if (options.slug !== 'caseManagement') {
             return $sec;
+        }
+        let parent = mug.parentMug;
+        while (parent) {
+            if (parent.__className === "Repeat") {
+                return $();  // hide section if in repeat group
+            }
+            parent = parent.parentMug;
         }
         const data = this.data.caseManagement;
         if (data.is_registration_form && !data.caseMappings?.name?.length) {
