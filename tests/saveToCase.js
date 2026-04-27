@@ -632,7 +632,7 @@ describe("The SaveToCase module", function() {
             assert.deepEqual(_.without(_.keys(mug.p.createProperty), ""), ["p1", "p2"]);
         });
 
-        it("should preserve user-provided ownerIdCondition even when openCaseCondition has same condition", function () {
+        it("createXML writes /case and owner_id relevants when both conditions match", function () {
             util.loadXML("");
             util.addQuestion("SaveToCase", "stc", {
                 case_id: 'uuid()',
