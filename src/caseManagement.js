@@ -1,6 +1,5 @@
 import $ from "jquery";
 import _ from "underscore";
-import mugs from "vellum/mugs";
 import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
 import nudgeName from "vellum/templates/case_management_name_nudge.html";
 import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.html";
@@ -624,8 +623,28 @@ $.vellum.plugin('caseManagement', {}, {
                     return questionMappings.length <= 1;
                 },
                 lstring: gettext('Case Property'),
-                serialize: mugs.serializeXPath,
-                deserialize: mugs.deserializeXPath,
+                serialize: (value, key, mug, data) => {
+                    const props = that.data.caseManagement
+                                      .caseMappingsByQuestion[mug.absolutePath];
+                    if (!props?.length) {
+                        return undefined;
+                    }
+                    // Return a space-delimited string of case properties.
+                    // Case properties should not contain spaces, but if they
+                    // do, spaces are converted to underscores.
+                    return props.map(prop => prop.replace(/ /g, "_")).join(" ");
+                },
+                deserialize: (data, key, mug, context) => {
+                    const props = data[key]?.split(" ").filter(v => v);
+                    if (props?.length) {
+                        mug.p.set(key, props[0]);
+                        const maintainer = new CaseMapMaintainer(mug.form, that.data.caseManagement);
+                        _.uniq(props).reverse().forEach(prop => {
+                            maintainer.updateFormMappings(mug.absolutePath, null, prop);
+                        });
+                    }
+                    return undefined;
+                },
                 setter: function (mug, attr, value) {
                     const maintainer = new CaseMapMaintainer(mug.form, that.data.caseManagement);
                     maintainer.updateFormMappings(mug.absolutePath, mug.p[attr], value);

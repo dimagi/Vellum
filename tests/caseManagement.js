@@ -5,6 +5,8 @@ import $ from "jquery";
 import _ from "underscore";
 import util from "tests/utils";
 import xmlLib from "vellum/xml";
+import copyPaste from "vellum/copy-paste";
+import { copyPasteFormat } from "tests/copy-paste";
 import BASELINE_XML from "static/caseManagement/baseline.xml";
 import BASELINE_NO_MAPPING_XML from "static/caseManagement/baseline_no_mapping_block.xml";
 import MULTIPLE_PROPERTIES_XML from "static/caseManagement/multiple_properties.xml";
@@ -193,10 +195,69 @@ describe("The Case Management plugin", function () {
         assert.isFalse(select.prop("disabled"), "question1 case property select should be enabled");
     });
 
+    it("should copy and paste case property", function () {
+        const vellum = $("#vellum").vellum("get");
+        util.loadXML("");
+        util.addQuestion("Text", "text");
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/text"}],
+        }}});
+        util.selectAll();
+        const copy = copyPaste.copy();
+
+        assert.deepEqual(copy, copyPasteFormat([
+            ["id", "type", "caseProperty"],
+            ["/text", "Text", "one"],
+        ]));
+
+        copyPaste.paste(copy);
+        const newMug = call("getMugByPath", "/data/copy-1-of-text");
+        const data = vellum.data.caseManagement;
+
+        assert.equal(newMug.p.caseProperty, "one");
+        assert.deepEqual(data.caseMappingsByQuestion[newMug.absolutePath], ["one"]);
+        assert.deepEqual(data.caseMappings.one, [
+            {question_path: "/data/text"},
+            {question_path: "/data/copy-1-of-text"},
+        ]);
+    });
+
+    it("should copy and paste multiple properties per question", function () {
+        const vellum = $("#vellum").vellum("get");
+        util.loadXML("");
+        util.addQuestion("Text", "text");
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/text"}],
+            "two": [{"question_path": "/data/text"}],
+        }}});
+        util.selectAll();
+        const copy = copyPaste.copy();
+
+        assert.deepEqual(copy, copyPasteFormat([
+            ["id", "type", "caseProperty"],
+            ["/text", "Text", "one two"],
+        ]));
+
+        copyPaste.paste(copy);
+        const newMug = call("getMugByPath", "/data/copy-1-of-text");
+        const data = vellum.data.caseManagement;
+
+        assert.equal(newMug.p.caseProperty, "one");
+        assert.deepEqual(data.caseMappingsByQuestion[newMug.absolutePath], ["one", "two"]);
+        assert.deepEqual(data.caseMappings.one, [
+            {question_path: "/data/text"},
+            {question_path: "/data/copy-1-of-text"},
+        ]);
+        assert.deepEqual(data.caseMappings.two, [
+            {question_path: "/data/text"},
+            {question_path: "/data/copy-1-of-text"},
+        ]);
+    });
+
     it("should save the case property to the XML", function () {
         util.loadXML("");
         util.addQuestion("Text", "question");
-        
+
         // set the value
         const caseManagementSection = getCaseManagementSection();
         const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
