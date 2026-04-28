@@ -1,9 +1,9 @@
 <%
-  // Repeater card list: one Bootstrap panel per entry in `props` (map key k ->
-  // row object v).
+  // Repeater card list: one Bootstrap panel per entry in `props` (map key
+  // cardIdentifier -> card object cardData).
   //
   // Template parameters:
-  //   props                  — outer map (key → row object) to render.
+  //   props                  — outer map (cardIdentifier → cardData) to render.
   //   cardConfig             — user-declared config (see below).
   //   useRichText            — resolved by widgets.repeaterCard from
   //                            mug.form.richText.
@@ -21,13 +21,13 @@
   // Typical extras (not required by this template, but repeater UX uses them):
   // - errorSummary, requiresAtLeastOne, emptyStateMessage, validationFunc, …
   //
-  // Each card row is props[k] = v, e.g.
+  // Each card props[cardIdentifier] = cardData, e.g.
   //   props = { age: { calculate: "30", relevant: "true()" } }
-  //   k = "age", v = { calculate: "30", relevant: "true()" }
+  //   cardIdentifier = "age", cardData = { calculate: "30", relevant: "true()" }
   //
   // Where this field reads/writes (pick one per field; never both):
-  //   isIdentifier: true    → value is the map key k ("age" above).
-  //   valueKey: "calculate" → value is v["calculate"] ("30" above).
+  //   isIdentifier: true    → value is the map key cardIdentifier ("age" above).
+  //   valueKey: "calculate" → value is cardData["calculate"] ("30" above).
   //
   // Each entry in `cardConfig.fields` supports:
   //   label         — rendered as the control-label.
@@ -48,7 +48,7 @@
       cardHeaderText = cardConfig.cardHeaderText;
 %>
 <div class="fd-repeater-list">
-  <% _.each(props, function (v, k) { %>
+  <% _.each(props, function (cardData, cardIdentifier) { %>
     <div class="panel panel-default fd-repeater-card <%- rootClass %>">
       <div class="panel-heading clearfix fd-repeater-card-header">
         <span class="fd-repeater-card-title"><%- cardHeaderText %></span>
@@ -59,7 +59,7 @@
       </div>
       <div class="panel-body form-horizontal fd-repeater-card-body">
         <% _.each(fields, function (field) {
-          var currentValue = field.isIdentifier ? k : (v[field.valueKey] || "");
+          var currentValue = field.isIdentifier ? cardIdentifier : (cardData[field.valueKey] || "");
           var widgetType = field.widget || "input";
         %>
           <div class="form-group">
