@@ -20,7 +20,7 @@ const assert = chai.assert,
 function beforeFn(done) {
     util.init({
         javaRosa: {langs: ['en']},
-        plugins: ['lock'],
+        plugins: ['lock', 'itemset'],
         core: {
             onReady: function () {
                 call('loadXFormOrError', TEST_XML, done);
@@ -227,64 +227,106 @@ describe("The Lock plugin", function() {
     });
 
     describe("locked select questions", function () {
-        it("propagates locked to control-only children when set", function () {
-            const mug = getMug('/data/unlocked_select');
-            const choice = getMug('/data/unlocked_select/choice1');
+        const STATIC_SELECTS = [
+            {type: "Select", lockedPath: '/data/locked_select', unlockedPath: '/data/unlocked_select'},
+            {type: "MSelect", lockedPath: '/data/locked_mselect', unlockedPath: '/data/unlocked_mselect'},
+        ];
+        const DYNAMIC_SELECTS = [
+            {
+                type: "SelectDynamic",
+                lockedPath: '/data/locked_select_dynamic',
+                unlockedPath: '/data/unlocked_select_dynamic',
+            },
+            {
+                type: "MSelectDynamic",
+                lockedPath: '/data/locked_mselect_dynamic',
+                unlockedPath: '/data/unlocked_mselect_dynamic',
+            },
+        ];
+        const ALL_SELECTS = [...STATIC_SELECTS, ...DYNAMIC_SELECTS];
 
-            mug.p.locked = true;
-            assert(choice.p.locked);
-            mug.p.locked = false;
-            assert(!choice.p.locked);
+        ALL_SELECTS.forEach(function ({type, unlockedPath}) {
+            it(`propagates locked to control-only children when ${type} is locked`, function () {
+                const mug = getMug(unlockedPath);
+                const controlOnlyChildren = mug.form.getChildren(mug)
+                    .filter(c => c.options.isControlOnly);
+                assert(controlOnlyChildren.length > 0, "expected at least one control-only child");
+                try {
+                    mug.p.locked = true;
+                    controlOnlyChildren.forEach(child =>
+                        assert(child.p.locked, `expected ${child.__className} to be locked`));
+                    mug.p.locked = false;
+                    controlOnlyChildren.forEach(child =>
+                        assert(!child.p.locked, `expected ${child.__className} to be unlocked`));
+                } finally {
+                    mug.p.locked = false;
+                }
+            });
         });
 
-        it("prevents moving choices into a locked select", function () {
-            const src = getMug('/data/unlocked_select/choice1');
-            const dst = getMug('/data/locked_select');
-            assert.isFalse(call('checkMove',
-                src.ufid, src.__className,
-                dst.ufid, dst.__className,
-                0));
+        STATIC_SELECTS.forEach(function ({type, lockedPath, unlockedPath}) {
+            it(`prevents moving choices into a locked ${type}`, function () {
+                const src = getMug(`${unlockedPath}/choice1`);
+                const dst = getMug(lockedPath);
+                assert.isFalse(call('checkMove',
+                    src.ufid, src.__className,
+                    dst.ufid, dst.__className,
+                    0));
+            });
+
+            it(`prevents pasting a choice into a locked ${type}`, function () {
+                clickQuestion(`${unlockedPath}/choice1`);
+                const serialized = copyPaste.copy();
+                clickQuestion(`${lockedPath}/choice1`);
+                const errors = copyPaste.paste(serialized);
+                assert(errors.length > 0, "expected paste errors");
+            });
+
+            it(`allows pasting a choice into an unlocked ${type}`, function () {
+                clickQuestion(`${lockedPath}/choice1`);
+                const serialized = copyPaste.copy();
+                clickQuestion(`${unlockedPath}/choice1`);
+                const errors = copyPaste.paste(serialized);
+                assert.equal(errors.length, 0, "expected no paste errors");
+            });
+
+            it(`removes the 'Add Choice' action for a locked ${type}`, function () {
+                assert.isFalse(getMug(lockedPath).options.canAddChoices);
+            });
+
+            it(`removes the 'Add Choice' action when locking a ${type}`, function () {
+                const mug = getMug(unlockedPath);
+                try {
+                    mug.p.locked = true;
+                    assert.isFalse(mug.options.canAddChoices);
+                } finally {
+                    mug.p.locked = false;
+                }
+            });
+
+            it(`adds the 'Add Choice' action when unlocking a ${type}`, function () {
+                const mug = getMug(lockedPath);
+                try {
+                    mug.p.locked = false;
+                    assert(mug.options.canAddChoices);
+                } finally {
+                    mug.p.locked = true;
+                }
+            });
         });
 
-        it("prevents pasting a choice into a locked select", function () {
-            clickQuestion('/data/unlocked_select/choice1');
-            const serialized = copyPaste.copy();
-            clickQuestion('/data/locked_select/choice1');
-            const errors = copyPaste.paste(serialized);
-            assert(errors.length > 0, "expected paste errors");
-        });
-
-        it("allows pasting a choice into an unlocked select", function () {
-            clickQuestion('/data/locked_select/choice1');
-            const serialized = copyPaste.copy();
-            clickQuestion('/data/unlocked_select/choice1');
-            const errors = copyPaste.paste(serialized);
-            assert.equal(errors.length, 0, "expected no paste errors");
-        });
-
-        it("removes the 'Add Choice' action for a locked select", function () {
-            const lockedSelect = getMug('/data/locked_select');
-            assert.isFalse(lockedSelect.options.canAddChoices);
-        });
-
-        it("removes the 'Add Choice' action when locking a select", function () {
-            const lockedSelect = getMug('/data/unlocked_select');
-            try {
-                lockedSelect.p.locked = true;
-                assert.isFalse(lockedSelect.options.canAddChoices);
-            } finally {
-                lockedSelect.p.locked = false;
-            }
-        });
-
-        it("adds the 'Add Choice' action when unlocking a select", function () {
-            const lockedSelect = getMug('/data/locked_select');
-            try {
-                lockedSelect.p.locked = false;
-                assert(lockedSelect.options.canAddChoices);
-            } finally {
-                lockedSelect.p.locked = true;
-            }
+        DYNAMIC_SELECTS.forEach(function ({type, lockedPath, unlockedPath}) {
+            it(`does not toggle canAddChoices when locking a ${type}`, function () {
+                const mug = getMug(unlockedPath);
+                const before = mug.options.canAddChoices;
+                try {
+                    mug.p.locked = true;
+                    assert.equal(mug.options.canAddChoices, before,
+                        "canAddChoices should not change for dynamic selects");
+                } finally {
+                    mug.p.locked = false;
+                }
+            });
         });
     });
 
