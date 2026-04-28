@@ -27,6 +27,14 @@
 					<locked_group_with_unlocked_children>
 						<nested_unlocked />
 					</locked_group_with_unlocked_children>
+					<locked_repeat jr:template="" />
+					<locked_repeat_with_unlocked_children jr:template="">
+						<nested_unlocked />
+					</locked_repeat_with_unlocked_children>
+					<locked_fieldlist />
+					<locked_fieldlist_with_unlocked_children>
+						<nested_unlocked />
+					</locked_fieldlist_with_unlocked_children>
 					<locked_select />
 					<unlocked_select />
 				</data>
@@ -42,6 +50,12 @@
 			<bind vellum:nodeset="#form/locked_group" nodeset="/data/locked_group" vellum:lock="all" />
 			<bind vellum:nodeset="#form/locked_group_with_unlocked_children" nodeset="/data/locked_group_with_unlocked_children" vellum:lock="all" />
 			<bind vellum:nodeset="#form/locked_group_with_unlocked_children/nested_unlocked" nodeset="/data/locked_group_with_unlocked_children/nested_unlocked" type="xsd:string" />
+			<bind vellum:nodeset="#form/locked_repeat" nodeset="/data/locked_repeat" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_repeat_with_unlocked_children" nodeset="/data/locked_repeat_with_unlocked_children" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_repeat_with_unlocked_children/nested_unlocked" nodeset="/data/locked_repeat_with_unlocked_children/nested_unlocked" type="xsd:string" />
+			<bind vellum:nodeset="#form/locked_fieldlist" nodeset="/data/locked_fieldlist" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_fieldlist_with_unlocked_children" nodeset="/data/locked_fieldlist_with_unlocked_children" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_fieldlist_with_unlocked_children/nested_unlocked" nodeset="/data/locked_fieldlist_with_unlocked_children/nested_unlocked" type="xsd:string" />
 			<bind vellum:nodeset="#form/locked_select" nodeset="/data/locked_select" vellum:lock="all" />
 			<bind vellum:nodeset="#form/unlocked_select" nodeset="/data/unlocked_select" />
 			<itext>
@@ -62,6 +76,12 @@
 						<value>nested_unlocked</value>
 					</text>
 					<text id="locked_group_with_unlocked_children/nested_unlocked-label">
+						<value>nested_unlocked</value>
+					</text>
+					<text id="locked_repeat_with_unlocked_children/nested_unlocked-label">
+						<value>nested_unlocked</value>
+					</text>
+					<text id="locked_fieldlist_with_unlocked_children/nested_unlocked-label">
 						<value>nested_unlocked</value>
 					</text>
 					<text id="locked_select-label">
@@ -106,6 +126,22 @@
 		<group vellum:ref="#form/locked_group_with_unlocked_children" ref="/data/locked_group_with_unlocked_children">
 			<input vellum:ref="#form/locked_group_with_unlocked_children/nested_unlocked" ref="/data/locked_group_with_unlocked_children/nested_unlocked">
 				<label ref="jr:itext('locked_group_with_unlocked_children/nested_unlocked-label')" />
+			</input>
+		</group>
+		<group>
+			<repeat vellum:nodeset="#form/locked_repeat" nodeset="/data/locked_repeat"></repeat>
+		</group>
+		<group>
+			<repeat vellum:nodeset="#form/locked_repeat_with_unlocked_children" nodeset="/data/locked_repeat_with_unlocked_children">
+				<input vellum:ref="#form/locked_repeat_with_unlocked_children/nested_unlocked" ref="/data/locked_repeat_with_unlocked_children/nested_unlocked">
+					<label ref="jr:itext('locked_repeat_with_unlocked_children/nested_unlocked-label')" />
+				</input>
+			</repeat>
+		</group>
+		<group vellum:ref="#form/locked_fieldlist" ref="/data/locked_fieldlist" appearance="field-list"></group>
+		<group vellum:ref="#form/locked_fieldlist_with_unlocked_children" ref="/data/locked_fieldlist_with_unlocked_children" appearance="field-list">
+			<input vellum:ref="#form/locked_fieldlist_with_unlocked_children/nested_unlocked" ref="/data/locked_fieldlist_with_unlocked_children/nested_unlocked">
+				<label ref="jr:itext('locked_fieldlist_with_unlocked_children/nested_unlocked-label')" />
 			</input>
 		</group>
 		<select1 vellum:ref="#form/locked_select" ref="/data/locked_select">

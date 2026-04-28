@@ -320,33 +320,42 @@ describe("The Lock plugin", function() {
             }
         });
 
-        it("shows a lock icon on a locked group with no unlocked children", function () {
-            const icon = getLockIcon('/data/locked_group');
-            assert(icon, "expected icon on locked group");
-            assert.include(icon, 'fa-lock');
-            assert.notInclude(icon, 'fa-unlock');
-        });
+        [
+            {type: "Group", lockedPath: '/data/locked_group',
+             withUnlockedChildrenPath: '/data/locked_group_with_unlocked_children'},
+            {type: "Repeat", lockedPath: '/data/locked_repeat',
+             withUnlockedChildrenPath: '/data/locked_repeat_with_unlocked_children'},
+            {type: "FieldList", lockedPath: '/data/locked_fieldlist',
+             withUnlockedChildrenPath: '/data/locked_fieldlist_with_unlocked_children'},
+        ].forEach(function ({type, lockedPath, withUnlockedChildrenPath}) {
+            describe(`for a locked ${type}`, function () {
+                it("shows a lock icon when there are no unlocked children", function () {
+                    const icon = getLockIcon(lockedPath);
+                    assert(icon, `expected icon on locked ${type}`);
+                    assert.include(icon, 'fa-lock');
+                    assert.notInclude(icon, 'fa-unlock');
+                });
 
-        it("updates parent group icon when child lock state changes", function () {
-            const child = getMug('/data/locked_group_with_unlocked_children/nested_unlocked');
-            try {
-                // initially has unlocked children -> fa-unlock
-                assert.include(getLockIcon('/data/locked_group_with_unlocked_children'), 'fa-unlock');
-                // lock the child -> all children locked -> fa-lock
-                child.p.locked = true;
-                const icon = getLockIcon('/data/locked_group_with_unlocked_children');
-                assert.include(icon, 'fa-lock');
-                assert.notInclude(icon, 'fa-unlock');
-            } finally {
-                child.p.locked = false;
-            }
-        });
+                it("shows an unlock icon when there are unlocked children", function () {
+                    const icon = getLockIcon(withUnlockedChildrenPath);
+                    assert(icon, `expected icon on locked ${type}`);
+                    assert.include(icon, 'fa-unlock');
+                    assert.notInclude(icon, 'fa-lock');
+                });
 
-        it("shows an unlock icon on a locked group with unlocked children", function () {
-            const icon = getLockIcon('/data/locked_group_with_unlocked_children');
-            assert(icon, "expected lock icon on locked select");
-            assert.include(icon, 'fa-unlock');
-            assert.notInclude(icon, 'fa-lock');
+                it("updates the icon when a child's lock state changes", function () {
+                    const child = getMug(`${withUnlockedChildrenPath}/nested_unlocked`);
+                    try {
+                        assert.include(getLockIcon(withUnlockedChildrenPath), 'fa-unlock');
+                        child.p.locked = true;
+                        const icon = getLockIcon(withUnlockedChildrenPath);
+                        assert.include(icon, 'fa-lock');
+                        assert.notInclude(icon, 'fa-unlock');
+                    } finally {
+                        child.p.locked = false;
+                    }
+                });
+            });
         });
     });
 

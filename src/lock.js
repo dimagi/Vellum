@@ -14,6 +14,7 @@ const LOCKED_BIND_ATTR = "vellum:lock";
 const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit";
 const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
 const SELECT_CLASSES = ["Select", "MSelect", "Choice"];
+const GROUP_CLASSES = ["Group", "Repeat", "FieldList"];
 
 $.vellum.plugin("lock", {}, {
     init: function () {
@@ -120,7 +121,7 @@ $.vellum.plugin("lock", {}, {
                 }
 
                 if (!mug.form.isLoadingXForm) {
-                    if (mug.__className === "Group") {
+                    if (_.contains(GROUP_CLASSES, mug.__className)) {
                         cascadeLockToChildren(mug, value);
                     } else if (_.contains(["Select", "MSelect"], mug.__className)) {
                         _this.setTreeActions(mug);
@@ -213,7 +214,7 @@ function cascadeLockToChildren(mug, value) {
     mug.form.getChildren(mug).forEach(child => {
         if (child.p.locked !== value) {
             child.p.locked = value;
-        } else if (child.__className === "Group") {
+        } else if (_.contains(GROUP_CLASSES, child.__className)) {
             cascadeLockToChildren(child, value);
         }
     });
@@ -221,7 +222,7 @@ function cascadeLockToChildren(mug, value) {
 
 function updateParentTreeIcons(parent) {
     while (parent) {
-        if (parent.p.locked && parent.__className === "Group") {
+        if (parent.p.locked && _.contains(GROUP_CLASSES, parent.__className)) {
             parent.form.vellum.setTreeExtraIcons(parent);
         }
         parent = parent.parentMug;
@@ -235,7 +236,7 @@ function treeLockIcon(mug) {
 
     let iconClass = "fa-lock";
     let tooltipText = gettext("Only a user with permission can edit this question.");
-    if (mug.__className === "Group") {
+    if (_.contains(GROUP_CLASSES, mug.__className)) {
         if (hasUnlockedChildren(mug)) {
             iconClass = "fa-unlock";
             tooltipText = gettext(
