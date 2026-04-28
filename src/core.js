@@ -1966,6 +1966,12 @@ fn.setTreeValidationIcon = function (mug) {
     }
 };
 
+/**
+ * Extension point for plugins to add inline icons next to mug name in the form tree.
+ * Should populate a data.extraIcons object on the mug's corresponding jstree node.
+ * 
+ * @param mug - The mug to add icons for.
+ */
 fn.setTreeExtraIcons = function (mug) {};
 
 fn._resetMessages = function (errors) {
