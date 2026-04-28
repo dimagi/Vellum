@@ -60,7 +60,7 @@ $.vellum.plugin("lock", {}, {
     handleMugParseFinish: function (mug) {
         this.__callOld();
         if (_.contains(SELECT_CLASSES, mug.__className)) {
-            setControlOnlyChildrenLocked(mug);
+            propagateLockToControlOnlyChildren(mug);
         }
     },
     setTreeActions: function (mug) {
@@ -122,21 +122,19 @@ $.vellum.plugin("lock", {}, {
                 _this.setTreeExtraIcons(mug);
 
                 if (_.contains(SELECT_CLASSES, mug.__className)) {
-                    setControlOnlyChildrenLocked(mug);
+                    propagateLockToControlOnlyChildren(mug);
                 }
 
                 if (!mug.form.isLoadingXForm) {
                     if (_.contains(GROUP_CLASSES, mug.__className)) {
-                        cascadeLockToChildren(mug, value);
+                        cascadeLockToDescendants(mug, value);
                     } else if (_.contains(STATIC_SELECT_CLASSES, mug.__className)) {
                         _this.setTreeActions(mug);
                     }
                     if (_this.getCurrentlySelectedMug() === mug) {
                         _this.displayMugProperties(mug);
                     }
-                    if (mug.parentMug) {
-                        updateParentTreeIcons(mug.parentMug);
-                    }
+                    updateAncestorTreeIcons(mug);
                 }
             },
         };
@@ -185,29 +183,29 @@ $.vellum.plugin("lock", {}, {
         return false;
     },
     isMugPathMoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked && !hasLockedChildren(mug);
+        return this.__callOld() && !mug.p.locked && !hasLockedDescendants(mug);
     },
     isMugRemoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked && !hasLockedChildren(mug);
+        return this.__callOld() && !mug.p.locked && !hasLockedDescendants(mug);
     },
     isMugTypeChangeable: function (mug) {
         return this.__callOld() && !mug.p.locked;
     },
 });
 
-function hasLockedChildren(mug) {
+function hasLockedDescendants(mug) {
     return mug.form.getChildren(mug).some(child =>
-        child.p.locked || hasLockedChildren(child)
+        child.p.locked || hasLockedDescendants(child)
     );
 }
 
-function hasUnlockedChildren(mug) {
+function hasUnlockedDescendants(mug) {
     return mug.form.getChildren(mug).some(child =>
-        !child.p.locked || hasUnlockedChildren(child)
+        !child.p.locked || hasUnlockedDescendants(child)
     );
 }
 
-function setControlOnlyChildrenLocked(mug) {
+function propagateLockToControlOnlyChildren(mug) {
     mug.form.getChildren(mug).forEach(child => {
         if (child.options.isControlOnly) {
             child.p.set('locked', mug.p.locked);
@@ -215,17 +213,18 @@ function setControlOnlyChildrenLocked(mug) {
     });
 }
 
-function cascadeLockToChildren(mug, value) {
+function cascadeLockToDescendants(mug, value) {
     mug.form.getChildren(mug).forEach(child => {
         if (child.p.locked !== value) {
             child.p.locked = value;
         } else if (_.contains(GROUP_CLASSES, child.__className)) {
-            cascadeLockToChildren(child, value);
+            cascadeLockToDescendants(child, value);
         }
     });
 }
 
-function updateParentTreeIcons(parent) {
+function updateAncestorTreeIcons(mug) {
+    let parent = mug.parentMug;
     while (parent) {
         if (parent.p.locked && _.contains(GROUP_CLASSES, parent.__className)) {
             parent.form.vellum.setTreeExtraIcons(parent);
@@ -242,7 +241,7 @@ function treeLockIcon(mug) {
     let iconClass = "fa-lock";
     let tooltipText = gettext("Only a user with permission can edit this question.");
     if (_.contains(GROUP_CLASSES, mug.__className)) {
-        if (hasUnlockedChildren(mug)) {
+        if (hasUnlockedDescendants(mug)) {
             iconClass = "fa-unlock";
             tooltipText = gettext(
                 "Only a user with permission can edit this group. " +
