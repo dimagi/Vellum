@@ -126,7 +126,7 @@ var CREATE_CARD_CONFIG = {
              valueKey: "case_type", widget: "dropdown",
              placeholder: gettext("Select from existing case types"),
              options: function (mug, opts) {
-                 return (opts.vellum.data.saveToCase || {}).existingCaseTypes || [];
+                 return opts.vellum.data.saveToCase?.existingCaseTypes || [];
              }},
             {label: gettext("Relationship"), fieldClass: "fd-index-property-relationship",
              valueKey: "relationship", widget: "dropdown", required: true,
