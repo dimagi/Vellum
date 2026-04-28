@@ -13,7 +13,11 @@ import widgets from "vellum/widgets";
 const LOCKED_BIND_ATTR = "vellum:lock";
 const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit";
 const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
-const SELECT_CLASSES = ["Select", "MSelect", "Choice"];
+
+const STATIC_SELECT_CLASSES = ["Select", "MSelect"];
+const SELECT_AND_CHOICE_CLASSES = [...STATIC_SELECT_CLASSES, "Choice"];
+const DYNAMIC_SELECT_CLASSES = ["SelectDynamic", "MSelectDynamic"];
+const SELECT_CLASSES = [...STATIC_SELECT_CLASSES, ...DYNAMIC_SELECT_CLASSES];
 const GROUP_CLASSES = ["Group", "Repeat", "FieldList"];
 
 $.vellum.plugin("lock", {}, {
@@ -55,13 +59,14 @@ $.vellum.plugin("lock", {}, {
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
-        setControlOnlyChildrenLocked(mug);
+        if (_.contains(SELECT_CLASSES, mug.__className)) {
+            setControlOnlyChildrenLocked(mug);
+        }
     },
     setTreeActions: function (mug) {
-        if (!mug.options.hasOwnProperty('_originalCanAddChoices')) {
-            mug.options._originalCanAddChoices = mug.options.canAddChoices;
+        if (_.contains(STATIC_SELECT_CLASSES, mug.__className)) {
+            mug.options.canAddChoices = !mug.p.locked;
         }
-        mug.options.canAddChoices = mug.p.locked ? false : mug.options._originalCanAddChoices;
         this.__callOld();
     },
     setTreeExtraIcons: function (mug) {
@@ -116,14 +121,14 @@ $.vellum.plugin("lock", {}, {
                 mug.p.set(attr, value);
                 _this.setTreeExtraIcons(mug);
 
-                if (_.contains(["Select", "MSelect"], mug.__className)) {
+                if (_.contains(SELECT_CLASSES, mug.__className)) {
                     setControlOnlyChildrenLocked(mug);
                 }
 
                 if (!mug.form.isLoadingXForm) {
                     if (_.contains(GROUP_CLASSES, mug.__className)) {
                         cascadeLockToChildren(mug, value);
-                    } else if (_.contains(["Select", "MSelect"], mug.__className)) {
+                    } else if (_.contains(STATIC_SELECT_CLASSES, mug.__className)) {
                         _this.setTreeActions(mug);
                     }
                     if (_this.getCurrentlySelectedMug() === mug) {
@@ -148,14 +153,14 @@ $.vellum.plugin("lock", {}, {
         if (canMove) {
             const destinationMug = form.getMugByUFID(dstId);
             if (destinationMug) {
-                return !(destinationMug.p.locked && _.contains(SELECT_CLASSES, dstType));
+                return !(destinationMug.p.locked && _.contains(SELECT_AND_CHOICE_CLASSES, dstType));
             }
             return true;
         }
         return false;
     },
     getInsertTargetAndPosition: function (refMug, qType, after) {
-        if (refMug?.p.locked && _.contains(SELECT_CLASSES, refMug.__className)) {
+        if (refMug?.p.locked && _.contains(SELECT_AND_CHOICE_CLASSES, refMug.__className)) {
             return null;
         }
         return this.__callOld();
