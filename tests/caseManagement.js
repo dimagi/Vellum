@@ -48,13 +48,6 @@ describe("The Case Management plugin", function () {
             }
         });
     });
-    beforeEach(() => {
-        const data = $("#vellum").vellum("get").data.caseManagement;
-        if (data) {
-            data.baseline = {};
-            delete data.caseMappings;
-        }
-    });
 
     it("preserves case mapping between loading and writing XML", function () {
         util.loadXML(BASELINE_XML);
@@ -722,6 +715,44 @@ describe("The Case Management plugin", function () {
         const alerts = call("preSaveValidation");
         const msg = _(alerts).find(a => a.indexOf('missing a case name') >= 0);
         assert.ok(msg, JSON.stringify(alerts));
+    });
+
+    describe("Case Property value", function () {
+        let mug;
+        before(function () {
+            util.loadXML("");
+            mug = util.addQuestion("Text", "text");
+        });
+
+        ([  // allowed case property values
+            "",
+            "a",
+            "b_",
+            "c-",
+            "d1",
+            "E1",
+        ]).forEach(value => {
+            it(`should allow ${JSON.stringify(value)}`, function () {
+                mug.p.caseProperty = value;
+
+                assert.equal(util.getMessages(mug), "");
+            });
+        });
+
+        ([  // illegal case property values
+            "_a",
+            "-b",
+            " ",
+            "@c",
+            "d$",
+            "E ",
+        ]).forEach(value => {
+            it(`should not allow ${JSON.stringify(value)}`, function () {
+                mug.p.caseProperty = value;
+
+                assert.match(util.getMessages(mug), /should start with a letter/);
+            });
+        });
     });
 
     describe("with unknown question path", function () {
