@@ -1,48 +1,4 @@
 <%
-  // Repeater card list: one Bootstrap panel per entry in `props` (map key
-  // cardIdentifier -> card object cardData).
-  //
-  // Template parameters:
-  //   props                  — outer map (cardIdentifier → cardData) to render.
-  //   cardConfig             — user-declared config (see below).
-  //   useRichText            — resolved by widgets.repeaterCard from
-  //                            mug.form.richText.
-  //   nested_xpath_field     — injected partial template (xpath fields).
-  //   nested_dropdown_field  — injected partial template (dropdown fields).
-  //
-  // cardConfig must include at least:
-  // - fields           — field specs for each label + control row in a card
-  // - rootClass        — extra class on each `.fd-repeater-card` (styling +
-  //                      selector: `widgets.repeaterCard` uses it in
-  //                      `getValue` / validation to find each card in the DOM)
-  // - cardHeaderText   — title shown in each card’s header (panel heading)
-  // - addLabel         — label for the bottom “add row” link
-  //
-  // Typical extras (not required by this template, but repeater UX uses them):
-  // - errorSummary, requiresAtLeastOne, emptyStateMessage, validationFunc, …
-  //
-  // Each card props[cardIdentifier] = cardData, e.g.
-  //   props = { age: { calculate: "30", relevant: "true()" } }
-  //   cardIdentifier = "age", cardData = { calculate: "30", relevant: "true()" }
-  //
-  // Where this field reads/writes (pick one per field; never both):
-  //   isIdentifier: true    → value is the map key cardIdentifier ("age" above).
-  //   valueKey: "calculate" → value is cardData["calculate"] ("30" above).
-  //
-  // Each entry in `cardConfig.fields` supports:
-  //   label         — rendered as the control-label.
-  //   fieldClass    — CSS class on the control. Also used by widgets.js
-  //                   (`validateField`, `getValue`) to find the field in
-  //                   the DOM, and often grep'd by identifier.
-  //   widget        — "input" (default) | "xpath" | "dropdown".
-  //   required      — adds data-required="true", enables the inline
-  //                   "Required" validator in widgets.js `validateField`.
-  //   placeholder   — plain-text + xpath modes only.
-  //   options       — dropdown mode only: array of strings, {value, label}
-  //                   objects, or a resolver `(mug, opts) => [...]`.
-  //   extraValidator — optional per-field validator, returns an error
-  //                   string or null (see `validateField`).
-  //
   var fields = cardConfig.fields,
       rootClass = cardConfig.rootClass,
       cardHeaderText = cardConfig.cardHeaderText;

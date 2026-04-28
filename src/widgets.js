@@ -967,29 +967,27 @@ function enableAutocompleteOnInput($input, mug, options) {
 // -------------------------------------------------------------------------
 // Repeater card widget — a compound-list property (as opposed to a scalar
 // one). Renders a list of cards (one per record); each record has N fields
-// declared by `cardConfig.fields`. Usage in a mug spec:
+// declared by `cardConfig.fields`.
+
+// cardConfig:
+//   - fields: array of field specs (one row per field inside each card).
+//   - rootClass: class added to each `.fd-repeater-card`.
+//   - cardHeaderText: title shown in each card header.
+//   - addLabel: label for the "add row" action.
+//   - errorSummary (optional)
+//   - requiresAtLeastOne (optional)
+//   - emptyStateMessage (optional)
 //
-//     someListProp: {
-//         lstring: gettext("Things"),
-//         widget: widgets.repeaterCard,
-//         cardConfig: {
-//             rootClass: "fd-thing",
-//             cardHeaderText: gettext("Thing"),
-//             addLabel: gettext("Add thing"),
-//             errorSummary: gettext("One or more things above have errors."),
-//             requiresAtLeastOne: false,
-//             emptyStateMessage: null,
-//             fields: [
-//                 {label: gettext("Name"), fieldClass: "fd-thing-name",
-//                  isIdentifier: true, required: true},
-//                 {label: gettext("Value"), fieldClass: "fd-thing-value",
-//                  valueKey: "value", widget: "xpath"},
-//                 ...
-//             ],
-//         },
-//         ...
-//     }
-//
+// cardConfig.fields:
+//   - label
+//   - fieldClass: control CSS class (also used by widgets.js selectors)
+//   - isIdentifier: when true, value comes from `cardIdentifier`
+//   - valueKey: when set, value comes from `cardData[valueKey]`
+//   - widget: "input" (default) | "xpath" | "dropdown"
+//   - required (optional): default to false
+//   - placeholder (optional)
+//   - options (optional): dropdown options (array or resolver)
+//   - extraValidator (optional)
 // -------------------------------------------------------------------------
 
 function readFieldValue($el) {
