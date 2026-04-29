@@ -419,8 +419,7 @@ function autoAssignName(vellum) {
     vellum.ensureCurrentMugIsSaved(() => {
         const form = vellum.data.core.form;
         let mug = form.findFirstMatchingChild(null, () => true);
-        if (!mug || mug.p.caseProperty || !mug.spec.caseProperty ||
-                mug.getPresence("caseProperty") !== 'optional') {
+        if (!canAddCaseName(mug)) {
             mug = vellum.addQuestion('DataBindOnly', 'first');
             mug.p.nodeID = form.generate_question_id('case-name');
             mug.p.calculateAttr = 'uuid()';
@@ -430,6 +429,14 @@ function autoAssignName(vellum) {
         vellum.data.core.saveButton.fire('change');
         vellum.setCurrentMug(mug);
     });
+}
+
+function canAddCaseName(mug) {
+    if (!mug) {
+        return false;
+    }
+    const canSetCaseProperty = mug.spec.caseProperty && mug.getPresence("caseProperty") === 'optional';
+    return canSetCaseProperty && !mug.p.caseProperty && !mug.form.vellum.isPropertyLocked(mug, "caseProperty");
 }
 
 function refreshCurrentMug(vellum) {
