@@ -69,8 +69,10 @@ function nestedXPathField(mug, options) {
             e.preventDefault();
             widgets.util.openXPathEditor(mug, options, {
                 getValue: super_getValue,
-                setValue: super_setValue,
-                onDone: fireChange,
+                done: function (val) {
+                    super_setValue(val);
+                    fireChange();
+                },
                 xpathType: options.xpathType,
             });
         });

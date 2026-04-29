@@ -256,8 +256,10 @@ var xPath = function (mug, options) {
         return getUIElementWithEditButton(elem, function () {
             openXPathEditor(mug, options, {
                 getValue: super_getValue,
-                setValue: super_setValue,
-                onDone: widget.handleChange,
+                done: function (val) {
+                    super_setValue(val);
+                    widget.handleChange();
+                },
                 xpathType: widget.definition.xpathType,
                 onLoadExtra: function ($ui) { setWidget($ui, widget); },
             });
@@ -756,10 +758,10 @@ function enableAutocompleteOnInput($input, mug, options) {
  * @param {Object} context - Per-call glue supplied by the caller:
  *   @param {Function} context.getValue - Returns the current value to seed
  *       the modal with.
- *   @param {Function} context.setValue - Called with the user's committed
- *       value when the modal is dismissed with a save.
- *   @param {Function} context.onDone - Called after `setValue` so the
- *       caller can react (e.g. fire a change event, re-validate).
+ *   @param {Function} context.done - Called with the user's committed value
+ *       when the modal is dismissed with a save. The caller is responsible
+ *       for both writing the value back into its field and firing any
+ *       change notification.
  *   @param {string} [context.xpathType] - Passed through to the modal to
  *       tell it which xpath grammar to expect.
  *   @param {Function} [context.onLoadExtra] - Optional hook invoked with
@@ -782,10 +784,7 @@ function openXPathEditor(mug, options, context) {
             $ui.find(".property-name").text(options.lstring || "Expression");
         },
         done: function (val) {
-            if (val !== false) {
-                context.setValue(val);
-                context.onDone();
-            }
+            if (val !== false) { context.done(val); }
         },
         mug: mug,
     });
