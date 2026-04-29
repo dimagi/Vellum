@@ -10,7 +10,7 @@ import nested_dropdown_field from "vellum/templates/nested_dropdown_field.html";
 // -------------------------------------------------------------------------
 // Repeater card widget — a compound-list property (as opposed to a scalar
 // one). Renders a list of cards (one per record); each record has N fields
-// declared by `cardConfig.fields`.
+// declared by `cardConfig.fieldSpecs`.
 
 // cardConfig:
 //   - fields: array of field specs (one row per field inside each card).
@@ -21,7 +21,7 @@ import nested_dropdown_field from "vellum/templates/nested_dropdown_field.html";
 //   - requiresAtLeastOne (optional)
 //   - emptyStateMessage (optional)
 //
-// cardConfig.fields:
+// cardConfig.fieldSpecs:
 //   - label
 //   - fieldClass: control CSS class (also used by widgets.js selectors)
 //   - isIdentifier: when true, value comes from `cardIdentifier`
@@ -60,7 +60,7 @@ function validateField($field, mug, cardConfig) {
     }
 
     if (!error && cardConfig) {
-        var fieldSpec = _.find(cardConfig.fields, function (f) {
+        var fieldSpec = _.find(cardConfig.fieldSpecs, function (f) {
             return $field.hasClass(f.fieldClass);
         });
         if (fieldSpec && fieldSpec.extraValidator) {
@@ -78,7 +78,7 @@ function validateField($field, mug, cardConfig) {
 }
 
 function emptyRepeaterItem(cardConfig) {
-    return _.reduce(cardConfig.fields, function (o, f) {
+    return _.reduce(cardConfig.fieldSpecs, function (o, f) {
         if (f.valueKey) { o[f.valueKey] = ""; }
         return o;
     }, {});
@@ -103,7 +103,7 @@ var repeaterCard = function (mug, options) {
             var $card = $(this),
                 cardIdentifier = null,
                 cardData = {};
-            _.each(cardConfig.fields, function (field) {
+            _.each(cardConfig.fieldSpecs, function (field) {
                 var fieldValue = readFieldValue($card.find('.' + field.fieldClass));
                 if (field.isIdentifier) { cardIdentifier = fieldValue; }
                 else if (field.valueKey) { cardData[field.valueKey] = fieldValue; }
@@ -141,7 +141,7 @@ var repeaterCard = function (mug, options) {
 
         function renderCards(val) {
             var resolvedCardConfig = _.extend({}, cardConfig, {
-                fields: _.map(cardConfig.fields, function (f) {
+                fieldSpecs: _.map(cardConfig.fieldSpecs, function (f) {
                     if (_.isFunction(f.options)) {
                         return _.extend({}, f, {options: f.options(mug, options)});
                     }

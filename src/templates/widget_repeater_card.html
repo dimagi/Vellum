@@ -1,5 +1,5 @@
 <%
-  var fields = cardConfig.fields,
+  var fieldSpecs = cardConfig.fieldSpecs,
       rootClass = cardConfig.rootClass,
       cardHeaderText = cardConfig.cardHeaderText;
 %>
@@ -14,7 +14,7 @@
         </button>
       </div>
       <div class="panel-body form-horizontal fd-repeater-card-body">
-        <% _.each(fields, function (field) {
+        <% _.each(fieldSpecs, function (field) {
           var currentValue = field.isIdentifier ? cardIdentifier : (cardData[field.valueKey] || "");
           var widgetType = field.widget || "input";
         %>

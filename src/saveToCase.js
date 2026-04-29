@@ -91,7 +91,7 @@ var CREATE_CARD_CONFIG = {
         errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
         requiresAtLeastOne: false,
         emptyStateMessage: null,
-        fields: [
+        fieldSpecs: [
             {
                 label: gettext("Property Name"),
                 fieldClass: "fd-update-property-name",
@@ -110,7 +110,7 @@ var CREATE_CARD_CONFIG = {
         errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
         requiresAtLeastOne: true,
         emptyStateMessage: gettext("Add at least one property to update, or deselect the Update action."),
-        fields: [
+        fieldSpecs: [
             {
                 label: gettext("Property Name"),
                 fieldClass: "fd-update-property-name",
@@ -129,7 +129,7 @@ var CREATE_CARD_CONFIG = {
         errorSummary: gettext("One or more index properties above have errors. Fix the highlighted fields."),
         requiresAtLeastOne: true,
         emptyStateMessage: gettext("Add at least one index, or deselect the Index action."),
-        fields: [
+        fieldSpecs: [
             {
                 label: gettext("Relationship Identifier"),
                 fieldClass: "fd-index-property-name",
@@ -213,13 +213,13 @@ function rewriteCardXPaths(rowMap, keys, fn) {
 // directly so the same per-field rules (Required, XPath syntax,
 // extraValidator) apply regardless of touched state.
 function hasRepeaterCardFieldError(mug, cardMap, cardConfig) {
-    var fields = cardConfig.fields;
+    var fieldSpecs = cardConfig.fieldSpecs;
     var hasError = false;
     _.each(cardMap || {}, function (card, cardId) {
         if (hasError) { return; }
         var cardIsEmpty = !cardId && _.every(card, function (v) { return !v; });
         if (cardIsEmpty) { return; }
-        _.each(fields, function (f) {
+        _.each(fieldSpecs, function (f) {
             if (hasError) { return; }
             var val = f.isIdentifier ? cardId : (card[f.valueKey] || "");
             if (f.required && !val) {
