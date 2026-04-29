@@ -17,7 +17,7 @@ var assert = chai.assert,
 
 function eq(serial, rows, message) {
     if (!_.isString(rows)) {
-        rows = tsv.tabDelimit([HEADER].concat(rows));
+        rows = copyPasteFormat(rows);
     }
     util.assertEqual(serial + "\n", rows + "\n",
                      message || "cut or copy mismatch");
@@ -25,10 +25,14 @@ function eq(serial, rows, message) {
 
 function paste(rows, errors, print) {
     if (!_.isString(rows)) {
-        rows = tsv.tabDelimit([HEADER].concat(rows));
+        rows = copyPasteFormat(rows);
     }
     if (print) { window.console.log(rows); } // debugging helper
     assert.deepEqual(mod.paste(rows), errors || []);
+}
+
+export function copyPasteFormat(rows) {
+    return tsv.tabDelimit([HEADER].concat(rows));
 }
 
 describe("The copy-paste plugin", function () {
