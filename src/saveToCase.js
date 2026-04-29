@@ -70,12 +70,17 @@ function validateRelationshipChoice(val) {
 
 // Shared Calculation + Condition fields for Create and Update configs.
 var SAVE_PROPERTY_CALC_FIELD = {
-        label: gettext("Calculation"), fieldClass: "fd-update-property-source",
-        valueKey: "calculate", widget: "xpath", required: true,
+        label: gettext("Calculation"),
+        fieldClass: "fd-update-property-source",
+        valueKey: "calculate",
+        widget: "xpath",
+        required: true,
     },
     SAVE_PROPERTY_RELEVANT_FIELD = {
-        label: gettext("Condition"), fieldClass: "fd-update-property-relevant",
-        valueKey: "relevant", widget: "xpath",
+        label: gettext("Condition"),
+        fieldClass: "fd-update-property-relevant",
+        valueKey: "relevant",
+        widget: "xpath",
         placeholder: gettext("Optional — leave blank to always apply"),
     };
 
@@ -87,9 +92,13 @@ var CREATE_CARD_CONFIG = {
         requiresAtLeastOne: false,
         emptyStateMessage: null,
         fields: [
-            {label: gettext("Property Name"), fieldClass: "fd-update-property-name",
-             isIdentifier: true, required: true,
-             extraValidator: validateCreatePropertyName},
+            {
+                label: gettext("Property Name"),
+                fieldClass: "fd-update-property-name",
+                isIdentifier: true,
+                required: true,
+                extraValidator: validateCreatePropertyName,
+            },
             SAVE_PROPERTY_CALC_FIELD,
             SAVE_PROPERTY_RELEVANT_FIELD,
         ],
@@ -102,9 +111,13 @@ var CREATE_CARD_CONFIG = {
         requiresAtLeastOne: true,
         emptyStateMessage: gettext("Add at least one property to update, or deselect the Update action."),
         fields: [
-            {label: gettext("Property Name"), fieldClass: "fd-update-property-name",
-             isIdentifier: true, required: true,
-             extraValidator: validatePropertyNameChars},
+            {
+                label: gettext("Property Name"),
+                fieldClass: "fd-update-property-name",
+                isIdentifier: true,
+                required: true,
+                extraValidator: validatePropertyNameChars,
+            },
             SAVE_PROPERTY_CALC_FIELD,
             SAVE_PROPERTY_RELEVANT_FIELD,
         ],
@@ -117,24 +130,42 @@ var CREATE_CARD_CONFIG = {
         requiresAtLeastOne: true,
         emptyStateMessage: gettext("Add at least one index, or deselect the Index action."),
         fields: [
-            {label: gettext("Relationship Identifier"), fieldClass: "fd-index-property-name",
-             isIdentifier: true, required: true,
-             extraValidator: validatePropertyNameChars},
-            {label: gettext("Referenced Case ID"), fieldClass: "fd-index-property-source",
-             valueKey: "calculate", widget: "xpath", required: true},
-            {label: gettext("Referenced Case Type"), fieldClass: "fd-index-property-case-type",
-             valueKey: "case_type", widget: "dropdown",
-             placeholder: gettext("Select from existing case types"),
-             options: function (mug, opts) {
-                 return opts.vellum.data.saveToCase?.existingCaseTypes || [];
-             }},
-            {label: gettext("Relationship"), fieldClass: "fd-index-property-relationship",
-             valueKey: "relationship", widget: "dropdown", required: true,
-             options: [
-                 {value: "child", label: gettext("child")},
-                 {value: "extension", label: gettext("extension")},
-             ],
-             extraValidator: validateRelationshipChoice},
+            {
+                label: gettext("Relationship Identifier"),
+                fieldClass: "fd-index-property-name",
+                isIdentifier: true,
+                required: true,
+                extraValidator: validatePropertyNameChars,
+            },
+            {
+                label: gettext("Referenced Case ID"),
+                fieldClass: "fd-index-property-source",
+                valueKey: "calculate",
+                widget: "xpath",
+                required: true,
+            },
+            {
+                label: gettext("Referenced Case Type"),
+                fieldClass: "fd-index-property-case-type",
+                valueKey: "case_type",
+                widget: "dropdown",
+                placeholder: gettext("Select from existing case types"),
+                options: function (mug, opts) {
+                    return opts.vellum.data.saveToCase?.existingCaseTypes || [];
+                },
+            },
+            {
+                label: gettext("Relationship"),
+                fieldClass: "fd-index-property-relationship",
+                valueKey: "relationship",
+                widget: "dropdown",
+                required: true,
+                options: [
+                    {value: "child", label: gettext("child")},
+                    {value: "extension", label: gettext("extension")},
+                ],
+                extraValidator: validateRelationshipChoice,
+            },
         ],
     };
 
