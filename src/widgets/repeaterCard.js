@@ -97,22 +97,22 @@ var repeaterCard = function (mug, options) {
         return widget.input;
     };
 
-    // Read values straight from the DOM using `cardConfig.fields` — no
-    // per-mug `getValue` override needed. Each card's key is the
-    // `isIdentifier` field's value; each card's body is
-    // {valueKey: fieldValue, ...}.
     widget.getValue = function () {
-        var currentValues = {};
+        var cardsValue = {};
         widget.input.find('.' + cardConfig.rootClass).each(function () {
-            var $card = $(this), key = null, entry = {};
-            _.each(cardConfig.fields, function (f) {
-                var val = readFieldValue($card.find('.' + f.fieldClass));
-                if (f.isIdentifier) { key = val; }
-                else if (f.valueKey) { entry[f.valueKey] = val; }
+            var $card = $(this),
+                cardIdentifier = null,
+                cardData = {};
+            _.each(cardConfig.fields, function (field) {
+                var fieldValue = readFieldValue($card.find('.' + field.fieldClass));
+                if (field.isIdentifier) { cardIdentifier = fieldValue; }
+                else if (field.valueKey) { cardData[field.valueKey] = fieldValue; }
             });
-            if (key !== null) { currentValues[key] = entry; }
+            if (cardIdentifier !== null) {
+                cardsValue[cardIdentifier] = cardData;
+            }
         });
-        return currentValues;
+        return cardsValue;
     };
 
     // Refresh inline field validation when logic.js updates references on
