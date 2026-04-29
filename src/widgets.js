@@ -13,7 +13,7 @@ import {
     getMessages,
     getUIElement,
 } from "vellum/widgets/base";
-import cardList from "vellum/widgets/repeaterCard";
+import cardList from "vellum/widgets/cardList";
 
 var text = function (mug, options) {
     var widget = normal(mug, options),

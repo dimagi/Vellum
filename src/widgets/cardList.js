@@ -3,7 +3,7 @@ import $ from "jquery";
 import atwho from "vellum/atwho";
 import nestedXPathField from "vellum/nestedXPathField";
 import {normal} from "vellum/widgets/base";
-import widget_card_list from "vellum/templates/widget_repeater_card.html";
+import widget_card_list from "vellum/templates/widget_card_list.html";
 import nested_xpath_field from "vellum/templates/nested_xpath_field.html";
 import nested_dropdown_field from "vellum/templates/nested_dropdown_field.html";
 
