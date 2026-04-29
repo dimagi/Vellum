@@ -82,7 +82,12 @@ function advancedDataSourceWidget(mug, options, labelText) {
     widget.options.richText = false;
     widget.getUIElement = function () {
         var query = getUIElementWithEditButton(
-                getUIElement(widget.input, labelText),
+                getUIElement(
+                    widget.input,
+                    labelText,
+                    !!widget.isDisabled(),
+                    widget.getHelp(),
+                ),
                 function () {
                     mug.form.vellum.displaySecondaryEditor({
                         source: local_getValue(),
@@ -98,7 +103,8 @@ function advancedDataSourceWidget(mug, options, labelText) {
                             }
                         }
                     });
-                }
+                },
+                !!widget.isDisabled(),
             );
         return $("<div></div>").append(query);
     };
