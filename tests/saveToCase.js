@@ -779,12 +779,6 @@ describe("The SaveToCase module", function() {
     });
 
     describe("card list with a blank identifier", function () {
-        // When the user clicks "Add property" in a card list section, the
-        // widget seeds a new card whose identifier is still the empty 
-        // string — but the other fields in the card can already hold real
-        // xpath values if the user filled those in before typing in 
-        // the identifier field.
-
         it("should walk xpaths in cards whose identifier is blank", function () {
             util.loadXML("");
             var mug = util.addQuestion("SaveToCase", "mug");
@@ -825,11 +819,11 @@ describe("The SaveToCase module", function() {
             });
             mug.p.updateProperty = {
                 "name": { calculate: "/data/name" },
-                "": { calculate: "", relevant: "" },
+                "": { calculate: "/data/name", relevant: "" },
             };
             var $xml = $(call("createXML"));
             var $updateChildren = $xml.find('update').children();
-            assert.equal($updateChildren.length, 1, "only the named card");
+            assert.equal($updateChildren.length, 1, "expected exactly one card after Save");
             assert.equal($updateChildren.first().prop('tagName').toLowerCase(), 'name');
         });
 
@@ -877,17 +871,17 @@ describe("The SaveToCase module", function() {
             });
             util.clickQuestion("mug");
             var $list = $(".fd-update-property").filter(".fd-card");
-            assert.equal($list.length, 0, "no cards initially");
+            assert.equal($list.length, 0, "expected no cards before Add is clicked");
 
             // Click the Add button inside the Update section.
             var $updateSection = $("[name='property-updateProperty']");
             $updateSection.find(".fd-add-property").trigger("click");
 
             $list = $(".fd-update-property").filter(".fd-card");
-            assert.equal($list.length, 1, "Add creates one blank card");
+            assert.equal($list.length, 1, "expected exactly one card after Add");
             assert.equal(
                 $list.find(".fd-update-property-name").val(), "",
-                "new card's name is empty"
+                "new card identifier field should be empty"
             );
         });
 
@@ -896,7 +890,7 @@ describe("The SaveToCase module", function() {
             var mug = util.getMug("save_to_case");
             util.clickQuestion("save_to_case");
             var $cards = $(".fd-update-property.fd-card");
-            assert.equal($cards.length, 2, "two cards initially");
+            assert.equal($cards.length, 2, "expected exactly two cards before Remove");
 
             // Remove the "name" card.
             $cards.filter(function () {
@@ -904,11 +898,11 @@ describe("The SaveToCase module", function() {
             }).find(".fd-remove-property").trigger("click");
 
             $cards = $(".fd-update-property.fd-card");
-            assert.equal($cards.length, 1, "one card after remove");
+            assert.equal($cards.length, 1, "expected exactly one card after Remove");
             assert.notProperty(mug.p.updateProperty, "name",
-                "mug.p no longer has the removed row");
+                "expected mug.p.updateProperty to no longer include the removed card");
             assert.property(mug.p.updateProperty, "dash-dash",
-                "other row preserved");
+                "expected mug.p.updateProperty to still include the other card");
         });
 
         it("should propagate typed values into mug.p on change", function () {
@@ -923,7 +917,11 @@ describe("The SaveToCase module", function() {
             var $card = $(".fd-update-property.fd-card").first();
             $card.find(".fd-update-property-name").val("age").trigger("change");
 
-            assert.property(mug.p.updateProperty, "age");
+            assert.property(
+                mug.p.updateProperty,
+                "age",
+                "expected mug.p.updateProperty to include typed value"
+            );
         });
     });
 
@@ -944,7 +942,7 @@ describe("The SaveToCase module", function() {
 
             assert.ok(
                 $nameInput.closest(".form-group").hasClass("has-error"),
-                "form-group gets .has-error for invalid chars"
+                "expected .has-error on name field for invalid property name characters"
             );
         });
 
@@ -966,7 +964,7 @@ describe("The SaveToCase module", function() {
 
             assert.ok(
                 $nameInput.closest(".form-group").hasClass("has-error"),
-                "case_type is reserved; .has-error should be set"
+                "expected .has-error on name field for reserved property name"
             );
         });
 
@@ -985,7 +983,7 @@ describe("The SaveToCase module", function() {
 
             assert.notOk(
                 $nameInput.closest(".form-group").hasClass("has-error"),
-                "valid name should not set .has-error"
+                "expected no .has-error on name field for valid property name"
             );
         });
 
@@ -1016,7 +1014,7 @@ describe("The SaveToCase module", function() {
             assert.notOk(
                 $card.find(".fd-index-property-relationship").closest(".form-group")
                     .hasClass("has-error"),
-                "untyped required field should stay quiet during typing"
+                "expected no .has-error on relationship field for untouched required field"
             );
             assert.isNull(indexErrorMessage());
 
@@ -1025,7 +1023,7 @@ describe("The SaveToCase module", function() {
             assert.ok(
                 $card.find(".fd-index-property-relationship").closest(".form-group")
                     .hasClass("has-error"),
-                "force-touched required field should fire inline on save-popover show"
+                "expected .has-error on relationship field for force-touched required field"
             );
             assert.isNotNull(indexErrorMessage());
         });
