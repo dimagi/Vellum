@@ -263,7 +263,7 @@ var repeaterCard = function (mug, options) {
         e.preventDefault();
         var currentValues = widget.getValue();
         // If there's already a blank card, focus it instead of adding another.
-        if (!("" in currentValues)) {
+        if (!Object.hasOwn(currentValues, "")) {
             currentValues[""] = emptyRepeaterItem(cardConfig);
             widget.refreshControl(currentValues);
             widget.handleChange();
