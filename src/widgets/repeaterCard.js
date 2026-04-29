@@ -60,8 +60,8 @@ function validateField($field, mug, cardConfig) {
     }
 
     if (!error && cardConfig) {
-        var fieldSpec = _.find(cardConfig.fieldSpecs, function (f) {
-            return $field.hasClass(f.fieldClass);
+        var fieldSpec = _.find(cardConfig.fieldSpecs, function (fieldSpec) {
+            return $field.hasClass(fieldSpec.fieldClass);
         });
         if (fieldSpec && fieldSpec.extraValidator) {
             error = fieldSpec.extraValidator(val);
@@ -141,11 +141,15 @@ var repeaterCard = function (mug, options) {
 
         function renderCards(val) {
             var resolvedCardConfig = _.extend({}, cardConfig, {
-                fieldSpecs: _.map(cardConfig.fieldSpecs, function (f) {
-                    if (_.isFunction(f.dropdownOptions)) {
-                        return _.extend({}, f, {dropdownOptions: f.dropdownOptions(mug, options)});
+                fieldSpecs: _.map(cardConfig.fieldSpecs, function (fieldSpec) {
+                    if (_.isFunction(fieldSpec.dropdownOptions)) {
+                        return _.extend(
+                            {},
+                            fieldSpec,
+                            {dropdownOptions: fieldSpec.dropdownOptions(mug, options)}
+                        );
                     }
-                    return f;
+                    return fieldSpec;
                 }),
             });
             widget.input.html(widget_repeater_card({
