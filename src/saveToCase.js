@@ -169,39 +169,29 @@ var CREATE_CARD_CONFIG = {
         ],
     };
 
-// Helpers for walking the nested xpath expressions stored inside a repeater-
-// card map — shape `{<rowId>: {<key>: <xpath string>, ...}, ...}` where
-// `keys` lists which per-row keys hold xpath (e.g. ['calculate', 'relevant']).
-// Used by the create/update/index spec hooks below to bridge repeater-card
-// data to logic.js's mapLogicExpressions / updateLogicExpressions.
-
-// Visit every `rowMap[rowId][key]` that holds a non-empty xpath string.
-function forEachCardXPath(rowMap, keys, visit) {
-    _.each(rowMap || {}, function (row) {
+// Visit every `cardMap[cardIdentifier][key]` that holds a non-empty xpath string.
+function forEachCardXPath(cardMap, keys, visit) {
+    _.each(cardMap || {}, function (cardData) {
         _.each(keys, function (key) {
-            if (row[key]) { visit(row, key); }
+            if (cardData[key]) { visit(cardData, key); }
         });
     });
 }
 
-// Apply `fn` to every xpath string, collect each return value, and flatten
-// the results into one array. Used by `mapLogicExpressions` to gather
-// logic-reference messages across all card rows.
-function flatMapCardXPaths(rowMap, keys, fn) {
+// Used by `mapLogicExpressions` to gather logic-reference messages across all card rows.
+function flatMapCardXPaths(cardMap, keys, fn) {
     var results = [];
-    forEachCardXPath(rowMap, keys, function (row, key) {
-        results.push(fn(row[key]));
+    forEachCardXPath(cardMap, keys, function (cardData, key) {
+        results.push(fn(cardData[key]));
     });
     return _.flatten(results);
 }
 
-// Apply `fn` to every xpath string, and overwrite in place if the returned
-// value differs. Used by `updateLogicExpressions` to rewrite paths when a
-// referenced question is renamed.
-function rewriteCardXPaths(rowMap, keys, fn) {
-    forEachCardXPath(rowMap, keys, function (row, key) {
-        var next = fn(row[key]);
-        if (next !== row[key]) { row[key] = next; }
+//Used by `updateLogicExpressions` to rewrite paths when a referenced question is renamed.
+function rewriteCardXPaths(cardMap, keys, fn) {
+    forEachCardXPath(cardMap, keys, function (cardData, key) {
+        var next = fn(cardData[key]);
+        if (next !== cardData[key]) { cardData[key] = next; }
     });
 }
 
