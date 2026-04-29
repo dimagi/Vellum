@@ -215,22 +215,22 @@ function rewriteCardXPaths(rowMap, keys, fn) {
 function hasRepeaterCardFieldError(mug, cardMap, cardConfig) {
     var fieldSpecs = cardConfig.fieldSpecs;
     var hasError = false;
-    _.each(cardMap || {}, function (card, cardId) {
+    _.each(cardMap || {}, function (cardData, cardIdentifier) {
         if (hasError) { return; }
-        var cardIsEmpty = !cardId && _.every(card, function (v) { return !v; });
+        var cardIsEmpty = !cardIdentifier && _.every(cardData, function (fieldValue) { return !fieldValue; });
         if (cardIsEmpty) { return; }
-        _.each(fieldSpecs, function (f) {
+        _.each(fieldSpecs, function (fieldSpec) {
             if (hasError) { return; }
-            var val = f.isIdentifier ? cardId : (card[f.valueKey] || "");
-            if (f.required && !val) {
+            var val = fieldSpec.isIdentifier ? cardIdentifier : (cardData[fieldSpec.valueKey] || "");
+            if (fieldSpec.required && !val) {
                 hasError = true;
                 return;
             }
-            if (f.widget === "xpath" && val && val !== '-') {
+            if (fieldSpec.widget === "xpath" && val && val !== '-') {
                 try { mug.form.xpath.parse(val); }
                 catch (e) { hasError = true; return; }
             }
-            if (f.extraValidator && f.extraValidator(val)) {
+            if (fieldSpec.extraValidator && fieldSpec.extraValidator(val)) {
                 hasError = true;
             }
         });
