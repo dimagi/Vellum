@@ -1,7 +1,7 @@
 /*
  * Nested XPath field — a lightweight cousin of `widgets.xPath` that mounts
  * onto a pre-existing DOM element (typically a contenteditable div inside a
- * repeater card).
+ * card list).
  */
 import $ from "jquery";
 import richText from "vellum/richText";
@@ -24,7 +24,7 @@ function nestedXPathField(mug, options) {
         });
         // Mirror widgets.richText: destroy the editor when the mug tears
         // down so orphaned editor instances don't accumulate across
-        // repeater-card re-renders.
+        // cardList re-renders.
         mug.on('teardown-mug-properties', editor.destroy, null, 'teardown-mug-properties');
         super_getValue = editor.getValue;
         super_setValue = editor.setValue;

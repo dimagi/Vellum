@@ -3,17 +3,17 @@
       rootClass = cardConfig.rootClass,
       cardHeaderText = cardConfig.cardHeaderText;
 %>
-<div class="fd-repeater-list">
+<div class="fd-card-list">
   <% _.each(props, function (cardData, cardIdentifier) { %>
-    <div class="panel panel-default fd-repeater-card <%- rootClass %>">
-      <div class="panel-heading clearfix fd-repeater-card-header">
-        <span class="fd-repeater-card-title"><%- cardHeaderText %></span>
+    <div class="panel panel-default fd-card <%- rootClass %>">
+      <div class="panel-heading clearfix fd-card-header">
+        <span class="fd-card-title"><%- cardHeaderText %></span>
         <button type="button" class="btn btn-xs btn-link pull-right fd-remove-property"
                 title="<%- gettext("Remove") %>" aria-label="<%- gettext("Remove") %>">
           <i class="fa fa-remove"></i>
         </button>
       </div>
-      <div class="panel-body form-horizontal fd-repeater-card-body">
+      <div class="panel-body form-horizontal fd-card-body">
         <% _.each(fieldSpecs, function (field) {
           var currentValue = field.isIdentifier ? cardIdentifier : (cardData[field.valueKey] || "");
           var widgetType = field.widget || "input";

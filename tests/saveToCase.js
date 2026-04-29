@@ -778,8 +778,8 @@ describe("The SaveToCase module", function() {
         });
     });
 
-    describe("repeater card with a blank identifier", function () {
-        // When the user clicks "Add property" in a repeater section, the
+    describe("card list with a blank identifier", function () {
+        // When the user clicks "Add property" in a card list section, the
         // widget seeds a new card whose identifier is still the empty 
         // string — but the other fields in the card can already hold real
         // xpath values if the user filled those in before typing in 
@@ -857,12 +857,12 @@ describe("The SaveToCase module", function() {
         });
     });
 
-    describe("repeater card DOM interactions", function () {
+    describe("card list DOM interactions", function () {
 
         it("should render one card per updateProperty entry", function () {
             util.loadXML(UPDATE_PROPERTY_XML);
             util.clickQuestion("save_to_case");
-            var $cards = $(".fd-update-property.fd-repeater-card");
+            var $cards = $(".fd-update-property.fd-card");
             assert.equal($cards.length, 2, "two rows → two cards");
             var names = $cards.find(".fd-update-property-name")
                 .map(function () { return $(this).val(); }).get().sort();
@@ -876,14 +876,14 @@ describe("The SaveToCase module", function() {
                 useUpdate: true,
             });
             util.clickQuestion("mug");
-            var $list = $(".fd-update-property").filter(".fd-repeater-card");
+            var $list = $(".fd-update-property").filter(".fd-card");
             assert.equal($list.length, 0, "no cards initially");
 
             // Click the Add button inside the Update section.
             var $updateSection = $("[name='property-updateProperty']");
             $updateSection.find(".fd-add-property").trigger("click");
 
-            $list = $(".fd-update-property").filter(".fd-repeater-card");
+            $list = $(".fd-update-property").filter(".fd-card");
             assert.equal($list.length, 1, "Add creates one blank card");
             assert.equal(
                 $list.find(".fd-update-property-name").val(), "",
@@ -895,7 +895,7 @@ describe("The SaveToCase module", function() {
             util.loadXML(UPDATE_PROPERTY_XML);
             var mug = util.getMug("save_to_case");
             util.clickQuestion("save_to_case");
-            var $cards = $(".fd-update-property.fd-repeater-card");
+            var $cards = $(".fd-update-property.fd-card");
             assert.equal($cards.length, 2, "two cards initially");
 
             // Remove the "name" card.
@@ -903,7 +903,7 @@ describe("The SaveToCase module", function() {
                 return $(this).find(".fd-update-property-name").val() === "name";
             }).find(".fd-remove-property").trigger("click");
 
-            $cards = $(".fd-update-property.fd-repeater-card");
+            $cards = $(".fd-update-property.fd-card");
             assert.equal($cards.length, 1, "one card after remove");
             assert.notProperty(mug.p.updateProperty, "name",
                 "mug.p no longer has the removed row");
@@ -920,7 +920,7 @@ describe("The SaveToCase module", function() {
             util.clickQuestion("mug");
             $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
 
-            var $card = $(".fd-update-property.fd-repeater-card").first();
+            var $card = $(".fd-update-property.fd-card").first();
             $card.find(".fd-update-property-name").val("age").trigger("change");
 
             assert.property(mug.p.updateProperty, "age");
@@ -938,7 +938,7 @@ describe("The SaveToCase module", function() {
             util.clickQuestion("mug");
             $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
 
-            var $card = $(".fd-update-property.fd-repeater-card").first();
+            var $card = $(".fd-update-property.fd-card").first();
             var $nameInput = $card.find(".fd-update-property-name");
             $nameInput.val("bad name!").trigger("change");
 
@@ -960,7 +960,7 @@ describe("The SaveToCase module", function() {
             $("[name='property-createProperty']").find(".fd-add-property").trigger("click");
 
             var $card = $("[name='property-createProperty']")
-                .find(".fd-update-property.fd-repeater-card").first();
+                .find(".fd-update-property.fd-card").first();
             var $nameInput = $card.find(".fd-update-property-name");
             $nameInput.val("case_type").trigger("change");
 
@@ -979,7 +979,7 @@ describe("The SaveToCase module", function() {
             util.clickQuestion("mug");
             $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
 
-            var $card = $(".fd-update-property.fd-repeater-card").first();
+            var $card = $(".fd-update-property.fd-card").first();
             var $nameInput = $card.find(".fd-update-property-name");
             $nameInput.val("valid_name-123").trigger("change");
 
@@ -1001,7 +1001,7 @@ describe("The SaveToCase module", function() {
             util.clickQuestion("mug");
             $("[name='property-indexProperty']").find(".fd-add-property").trigger("click");
 
-            var $card = $(".fd-index-property.fd-repeater-card").first();
+            var $card = $(".fd-index-property.fd-card").first();
             var key = "mug-indexProperty-error";
             function indexErrorMessage() {
                 var found = null;

@@ -13,7 +13,7 @@ import {
     getMessages,
     getUIElement,
 } from "vellum/widgets/base";
-import repeaterCard from "vellum/widgets/repeaterCard";
+import cardList from "vellum/widgets/repeaterCard";
 
 var text = function (mug, options) {
     var widget = normal(mug, options),
@@ -804,7 +804,7 @@ export default {
     dropdown: dropdown,
     dropdownWithInput: dropdownWithInput,
     xPath: xPath,
-    repeaterCard: repeaterCard,
+    cardList: cardList,
     baseKeyValue: baseKeyValue,
     readOnlyControl: readOnlyControl,
     abstractMediaWidget: abstractMediaWidget,

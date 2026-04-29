@@ -3,18 +3,19 @@ import $ from "jquery";
 import atwho from "vellum/atwho";
 import nestedXPathField from "vellum/nestedXPathField";
 import {normal} from "vellum/widgets/base";
-import widget_repeater_card from "vellum/templates/widget_repeater_card.html";
+import widget_card_list from "vellum/templates/widget_repeater_card.html";
 import nested_xpath_field from "vellum/templates/nested_xpath_field.html";
 import nested_dropdown_field from "vellum/templates/nested_dropdown_field.html";
 
 // -------------------------------------------------------------------------
-// Repeater card widget — a compound-list property (as opposed to a scalar
+// Card list widget — a compound-list property (as opposed to a scalar
 // one). Renders a list of cards (one per record); each record has N fields
-// declared by `cardConfig.fieldSpecs`.
+// declared by `cardConfig.fieldSpecs`. Distinct from the Repeat Group
+// question type, which is an unrelated concept.
 
 // cardConfig:
 //   - fields: array of field specs (one row per field inside each card).
-//   - rootClass: class added to each `.fd-repeater-card`.
+//   - rootClass: class added to each `.fd-card`.
 //   - cardHeaderText: title shown in each card header.
 //   - addLabel: label for the "add row" action.
 //   - errorSummary (optional)
@@ -77,14 +78,14 @@ function validateField($field, mug, cardConfig) {
     }
 }
 
-function emptyRepeaterItem(cardConfig) {
+function emptyCard(cardConfig) {
     return _.reduce(cardConfig.fieldSpecs, function (o, f) {
         if (f.valueKey) { o[f.valueKey] = ""; }
         return o;
     }, {});
 }
 
-var repeaterCard = function (mug, options) {
+var cardList = function (mug, options) {
     var widget = normal(mug, options),
         id = options.id || 'property-' + options.path,
         cardConfig = options.cardConfig;
@@ -119,7 +120,7 @@ var repeaterCard = function (mug, options) {
     // external events (rename, delete). Without this the widget-level
     // summary fires but the inline "Unknown question: X" text goes stale.
     mug.on("messages-changed", function () {
-        widget.input.find('.fd-repeater-card').each(function () {
+        widget.input.find('.fd-card').each(function () {
             if (widget.validateCard) { widget.validateCard($(this)); }
         });
     }, null, "teardown-mug-properties");
@@ -135,7 +136,7 @@ var repeaterCard = function (mug, options) {
         widget.input.find('.fd-add-property').click(widget.addProperty);
         widget.input.find('.fd-remove-property').click(widget.removeProperty);
         seedTouchedStateForSavedCards();
-        widget.input.find('.fd-repeater-card').each(function () {
+        widget.input.find('.fd-card').each(function () {
             widget.validateCard($(this));
         });
 
@@ -152,7 +153,7 @@ var repeaterCard = function (mug, options) {
                     return fieldSpec;
                 }),
             });
-            widget.input.html(widget_repeater_card({
+            widget.input.html(widget_card_list({
                 props: val,
                 cardConfig: resolvedCardConfig,
                 useRichText: !!mug.form.richText,
@@ -166,7 +167,7 @@ var repeaterCard = function (mug, options) {
                 .on('change keyup', function () {
                     $(this).data('touched', true);
                     widget.handleChange();
-                    widget.validateCard($(this).closest('.fd-repeater-card'));
+                    widget.validateCard($(this).closest('.fd-card'));
                 });
             widget.input.find('input[type="text"]').not('.fd-xpath-input')
                 .addClass('jstree-drop')
@@ -186,7 +187,7 @@ var repeaterCard = function (mug, options) {
                 }).on('change', function () {
                     $el.data('touched', true);
                     widget.handleChange();
-                    widget.validateCard($el.closest('.fd-repeater-card'));
+                    widget.validateCard($el.closest('.fd-card'));
                 });
             });
         }
@@ -195,7 +196,7 @@ var repeaterCard = function (mug, options) {
         // seen" — all their fields start touched so existing broken data
         // surfaces immediately.
         function seedTouchedStateForSavedCards() {
-            widget.input.find('.fd-repeater-card').each(function () {
+            widget.input.find('.fd-card').each(function () {
                 var $card = $(this),
                     $name = $card.find('[data-is-identifier="true"]').first(),
                     cardHasName = !!readFieldValue($name);
@@ -230,12 +231,12 @@ var repeaterCard = function (mug, options) {
     };
 
     var $saveButton = options.vellum.data.core.saveButton.ui,
-        eventNamespace = '.fd-repeater-' + widget.id;
+        eventNamespace = '.fd-card-list-' + widget.id;
     $saveButton.on('show.bs.popover' + eventNamespace, function () {
         widget.input.find('[data-widget]').each(function () {
             $(this).data('touched', true);
         });
-        widget.input.find('.fd-repeater-card').each(function () {
+        widget.input.find('.fd-card').each(function () {
             widget.validateCard($(this));
         });
     });
@@ -254,7 +255,7 @@ var repeaterCard = function (mug, options) {
 
     widget.removeProperty = function (e) {
         e.preventDefault();
-        $(this).closest('.fd-repeater-card').remove();
+        $(this).closest('.fd-card').remove();
         widget.handleChange();
         widget.syncMugMessages();
     };
@@ -264,16 +265,16 @@ var repeaterCard = function (mug, options) {
         var currentValues = widget.getValue();
         // If there's already a blank card, focus it instead of adding another.
         if (!Object.hasOwn(currentValues, "")) {
-            currentValues[""] = emptyRepeaterItem(cardConfig);
+            currentValues[""] = emptyCard(cardConfig);
             widget.refreshControl(currentValues);
             widget.handleChange();
         }
-        widget.input.find('.fd-repeater-card').last()
+        widget.input.find('.fd-card').last()
             .find('input').first().focus();
     };
 
     return widget;
 };
-repeaterCard.trackLogicReferences = true;
+cardList.trackLogicReferences = true;
 
-export default repeaterCard;
+export default cardList;

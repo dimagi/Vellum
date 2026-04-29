@@ -202,7 +202,7 @@ function rewriteCardXPaths(cardMap, keys, fn) {
 // the spec's `validationFunc`, not the DOM. This helper reads mug.p
 // directly so the same per-field rules (Required, XPath syntax,
 // extraValidator) apply regardless of touched state.
-function hasRepeaterCardFieldError(mug, cardMap, cardConfig) {
+function hasCardListFieldError(mug, cardMap, cardConfig) {
     var fieldSpecs = cardConfig.fieldSpecs;
     var hasError = false;
     _.each(cardMap || {}, function (cardData, cardIdentifier) {
@@ -589,7 +589,7 @@ var slugToProp = {
                 lstring: gettext("Case Properties To Create"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: widgets.repeaterCard,
+                widget: widgets.cardList,
                 cardConfig: CREATE_CARD_CONFIG,
                 mapLogicExpressions: function (mug, fn) {
                     return flatMapCardXPaths(mug.p.createProperty, ['calculate', 'relevant'], fn);
@@ -598,7 +598,7 @@ var slugToProp = {
                     rewriteCardXPaths(mug.p.createProperty, ['calculate', 'relevant'], fn);
                 },
                 validationFunc: function (mug) {
-                    if (hasRepeaterCardFieldError(mug, mug.p.createProperty, CREATE_CARD_CONFIG)) {
+                    if (hasCardListFieldError(mug, mug.p.createProperty, CREATE_CARD_CONFIG)) {
                         return CREATE_CARD_CONFIG.errorSummary;
                     }
                     return 'pass';
@@ -624,7 +624,7 @@ var slugToProp = {
                 lstring: gettext("Case Properties To Update"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: widgets.repeaterCard,
+                widget: widgets.cardList,
                 cardConfig: UPDATE_CARD_CONFIG,
                 mapLogicExpressions: function (mug, fn) {
                     return flatMapCardXPaths(mug.p.updateProperty, ['calculate', 'relevant'], fn);
@@ -638,7 +638,7 @@ var slugToProp = {
                             _.isEmpty(mug.p.updateProperty)) {
                         return UPDATE_CARD_CONFIG.emptyStateMessage;
                     }
-                    if (hasRepeaterCardFieldError(mug, mug.p.updateProperty, UPDATE_CARD_CONFIG)) {
+                    if (hasCardListFieldError(mug, mug.p.updateProperty, UPDATE_CARD_CONFIG)) {
                         return UPDATE_CARD_CONFIG.errorSummary;
                     }
                     return 'pass';
@@ -652,7 +652,7 @@ var slugToProp = {
                 lstring: gettext("Index Properties"),
                 visibility: 'visible',
                 presence: 'optional',
-                widget: widgets.repeaterCard,
+                widget: widgets.cardList,
                 cardConfig: INDEX_CARD_CONFIG,
                 mapLogicExpressions: function (mug, fn) {
                     return flatMapCardXPaths(mug.p.indexProperty, ['calculate'], fn);
@@ -666,7 +666,7 @@ var slugToProp = {
                             _.isEmpty(mug.p.indexProperty)) {
                         return INDEX_CARD_CONFIG.emptyStateMessage;
                     }
-                    if (hasRepeaterCardFieldError(mug, mug.p.indexProperty, INDEX_CARD_CONFIG)) {
+                    if (hasCardListFieldError(mug, mug.p.indexProperty, INDEX_CARD_CONFIG)) {
                         return INDEX_CARD_CONFIG.errorSummary;
                     }
                     return 'pass';
