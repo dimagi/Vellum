@@ -1048,6 +1048,10 @@ fn._createJSTree = function () {
                 var args = Array.prototype.slice.call(arguments),
                     node = this.parent.redraw_node.apply(this.inst, args);
                 obj = this.inst.get_node(obj);
+                // add any extra icons if present
+                if (node && obj.data?.extraIcons) {
+                    $(node).find('a > i').first().after(Object.values(obj.data.extraIcons));
+                }
                 // decorate node with error indicator if present
                 if (node && obj.data && obj.data.errors) {
                     $(node).find('a > i').first().after(obj.data.errors);
@@ -1549,6 +1553,7 @@ fn._populateTree = function (selectedHashtag) {
             if (!changed && mug.hasErrors()) {
                 _this.setTreeValidationIcon(mug);
             }
+            _this.setTreeExtraIcons(mug);
             _this.setTreeActions(mug);
         }
     });
@@ -1980,6 +1985,14 @@ fn.setTreeValidationIcon = function (mug) {
         this.jstree("redraw_node", node);
     }
 };
+
+/**
+ * Extension point for plugins to add inline icons next to mug name in the form tree.
+ * Should populate a data.extraIcons object on the mug's corresponding jstree node.
+ * 
+ * @param mug - The mug to add icons for.
+ */
+fn.setTreeExtraIcons = function (mug) {};
 
 fn._resetMessages = function (errors) {
     var error, messages_div = this.$f.find('.fd-messages');

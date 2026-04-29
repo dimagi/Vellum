@@ -13,9 +13,30 @@ import widgets from "vellum/widgets";
 const LOCKED_BIND_ATTR = "vellum:lock";
 const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit";
 const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
-const SELECT_CLASSES = ["Select", "MSelect", "Choice"];
+
+const STATIC_SELECT_CLASSES = ["Select", "MSelect"];
+const SELECT_AND_CHOICE_CLASSES = [...STATIC_SELECT_CLASSES, "Choice"];
+const DYNAMIC_SELECT_CLASSES = ["SelectDynamic", "MSelectDynamic"];
+const SELECT_CLASSES = [...STATIC_SELECT_CLASSES, ...DYNAMIC_SELECT_CLASSES];
+const GROUP_CLASSES = ["Group", "Repeat", "FieldList"];
 
 $.vellum.plugin("lock", {}, {
+    init: function () {
+        const data = this.data.lock;
+        data.locks = {};
+    },
+    loadXML: function () {
+        this.__callOld();
+
+        // we don't know whether there are any locks until XML is loaded
+        // tools menu items are already defined at this point, so target what we want and remove them here
+        if (_.some(this.data.lock.locks) && !this.opts().features.edit_locked_questions) {
+            const $menu = this.$f.find('.fd-tools-menu').parent();
+            $menu.find('a:contains("' + gettext("Edit Source XML") + '")').parent().remove();
+            $menu.find('a:contains("' + gettext("Edit Bulk Translations") + '")').parent().remove();
+        }
+
+    },
     parseBindElement: function (form, el, path) {
         this.__callOld();
         const locked = el.xmlAttr(LOCKED_BIND_ATTR);
@@ -38,13 +59,31 @@ $.vellum.plugin("lock", {}, {
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
-        this._setLockedFromParent(mug);
+        if (_.contains(SELECT_CLASSES, mug.__className)) {
+            propagateLockToControlOnlyChildren(mug);
+        }
     },
     setTreeActions: function (mug) {
-        if (mug.p.locked) {
-            mug.options.canAddChoices = false;
+        if (_.contains(STATIC_SELECT_CLASSES, mug.__className)) {
+            mug.options.canAddChoices = !mug.p.locked;
         }
         this.__callOld();
+    },
+    setTreeExtraIcons: function (mug) {
+        this.__callOld();
+        const node = mug.ufid && this.jstree('get_node', mug.ufid);
+        if (!node) { return; }
+
+        let icon = null;
+        if (mug.p.locked) {
+            icon = treeLockIcon(mug);
+        }
+
+        if (node.data.extraIcons?.lock !== icon) {
+            node.data.extraIcons = node.data.extraIcons || {};
+            node.data.extraIcons.lock = icon;
+            this.jstree('redraw_node', node);
+        }
     },
     getMainProperties: function () {
         const properties = this.__callOld();
@@ -65,16 +104,38 @@ $.vellum.plugin("lock", {}, {
             help: gettext("A locked question cannot be edited, moved, or deleted from the form."),
             helpURL: "https://www.example.com",  // placeholder for public documentation
             serialize: () => {},
-            deserialize: () => {},
+            deserialize: (data, key, mug, context) => {
+                if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_BIND_ATTR]) {
+                    delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                }
+            },
             setter: function (mug, attr, value) {
                 if (value === true) {
                     mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
                     mug.p.rawBindAttributes[LOCKED_BIND_ATTR] = 'all';
+                    _this.data.lock.locks[mug.ufid] = 'all';
                 } else {
                     delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                    delete _this.data.lock.locks[mug.ufid];
                 }
                 mug.p.set(attr, value);
-                mug.form.getChildren(mug).forEach(child => _this._setLockedFromParent(child));
+                _this.setTreeExtraIcons(mug);
+
+                if (_.contains(SELECT_CLASSES, mug.__className)) {
+                    propagateLockToControlOnlyChildren(mug);
+                }
+
+                if (!mug.form.isLoadingXForm) {
+                    if (_.contains(GROUP_CLASSES, mug.__className)) {
+                        cascadeLockToDescendants(mug, value);
+                    } else if (_.contains(STATIC_SELECT_CLASSES, mug.__className)) {
+                        _this.setTreeActions(mug);
+                    }
+                    if (_this.getCurrentlySelectedMug() === mug) {
+                        _this.displayMugProperties(mug);
+                    }
+                    updateAncestorTreeIcons(mug);
+                }
             },
         };
         return spec;
@@ -90,27 +151,17 @@ $.vellum.plugin("lock", {}, {
         if (canMove) {
             const destinationMug = form.getMugByUFID(dstId);
             if (destinationMug) {
-                return !(destinationMug.p.locked && _.contains(SELECT_CLASSES, dstType));
+                return !(destinationMug.p.locked && _.contains(SELECT_AND_CHOICE_CLASSES, dstType));
             }
             return true;
         }
         return false;
     },
     getInsertTargetAndPosition: function (refMug, qType, after) {
-        if (refMug?.p.locked && _.contains(SELECT_CLASSES, refMug.__className)) {
+        if (refMug?.p.locked && _.contains(SELECT_AND_CHOICE_CLASSES, refMug.__className)) {
             return null;
         }
         return this.__callOld();
-    },
-    _hasLockedChildren: function (mug) {
-        return mug.form.getChildren(mug).some(child =>
-            child.p.locked || this._hasLockedChildren(child)
-        );
-    },
-    _setLockedFromParent: function (mug) {
-        if (mug.parentMug && mug.options.isControlOnly) {
-            mug.p.set('locked', mug.parentMug.p.locked);
-        }
     },
     isPropertyLocked: function (mug, propertyPath) {
         const locked = this.__callOld();
@@ -132,12 +183,76 @@ $.vellum.plugin("lock", {}, {
         return false;
     },
     isMugPathMoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked && !this._hasLockedChildren(mug);
+        return this.__callOld() && !mug.p.locked && !hasLockedDescendants(mug);
     },
     isMugRemoveable: function (mug) {
-        return this.__callOld() && !mug.p.locked && !this._hasLockedChildren(mug);
+        return this.__callOld() && !mug.p.locked && !hasLockedDescendants(mug);
     },
     isMugTypeChangeable: function (mug) {
         return this.__callOld() && !mug.p.locked;
     },
 });
+
+function hasLockedDescendants(mug) {
+    return mug.form.getChildren(mug).some(child =>
+        child.p.locked || hasLockedDescendants(child)
+    );
+}
+
+function hasUnlockedDescendants(mug) {
+    return mug.form.getChildren(mug).some(child =>
+        !child.p.locked || hasUnlockedDescendants(child)
+    );
+}
+
+function propagateLockToControlOnlyChildren(mug) {
+    mug.form.getChildren(mug).forEach(child => {
+        if (child.options.isControlOnly) {
+            child.p.set('locked', mug.p.locked);
+        }
+    });
+}
+
+function cascadeLockToDescendants(mug, value) {
+    mug.form.getChildren(mug).forEach(child => {
+        if (child.p.locked !== value) {
+            child.p.locked = value;
+        } else if (_.contains(GROUP_CLASSES, child.__className)) {
+            cascadeLockToDescendants(child, value);
+        }
+    });
+}
+
+function updateAncestorTreeIcons(mug) {
+    let parent = mug.parentMug;
+    while (parent) {
+        if (parent.p.locked && _.contains(GROUP_CLASSES, parent.__className)) {
+            parent.form.vellum.setTreeExtraIcons(parent);
+        }
+        parent = parent.parentMug;
+    }
+}
+
+function treeLockIcon(mug) {
+    if (mug.options.isControlOnly) {
+        return;
+    }
+
+    let iconClass = "fa-lock";
+    let tooltipText = gettext("Only a user with permission can edit this question.");
+    if (_.contains(GROUP_CLASSES, mug.__className)) {
+        if (hasUnlockedDescendants(mug)) {
+            iconClass = "fa-unlock";
+            tooltipText = gettext(
+                "Only a user with permission can edit this group. " +
+                "Some questions are unlocked."
+            );
+        } else {
+            tooltipText = gettext(
+                "Only a user with permission can edit this group. " +
+                "All questions are locked."
+            );
+        }
+    }
+    return `<i class="fa ${iconClass}" title="${tooltipText}"></i>&nbsp;`;
+}

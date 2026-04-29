@@ -20,7 +20,7 @@ const assert = chai.assert,
 function beforeFn(done) {
     util.init({
         javaRosa: {langs: ['en']},
-        plugins: ['lock'],
+        plugins: ['lock', 'itemset'],
         core: {
             onReady: function () {
                 call('loadXFormOrError', TEST_XML, done);
@@ -107,6 +107,7 @@ describe("The Lock plugin", function() {
         const pasted = getMug('/data/copy-1-of-locked');
         assert(pasted, "pasted mug should exist");
         assert(!pasted.p.locked);
+        assert(!pasted.p.rawBindAttributes["vellum:lock"]);
         call('getData').core.form.removeMugsFromForm([pasted]);
     });
 
@@ -128,18 +129,6 @@ describe("The Lock plugin", function() {
         it("disallows changing ID of a group that contains a locked question", function () {
             assert(locked('/data/group_with_nested_lock', 'nodeID'));
             assert.isFalse(locked('/data/group_no_lock', 'nodeID'));
-        });
-
-        it("detects locked children recursively", function () {
-            const groupWithNestedLock = getMug('/data/group_with_nested_lock');
-            assert(call('_hasLockedChildren', groupWithNestedLock),
-                "group with deeply nested locked question should have locked children");
-            const subgroup = getMug('/data/group_with_nested_lock/subgroup');
-            assert(call('_hasLockedChildren', subgroup),
-                "subgroup directly containing locked question should have locked children");
-            const groupNoLock = getMug('/data/group_no_lock');
-            assert.isFalse(call('_hasLockedChildren', groupNoLock),
-                "group without locked children should return false");
         });
 
         it("adds a 'locked children' message to a group that contains a locked question", function () {
@@ -182,47 +171,233 @@ describe("The Lock plugin", function() {
                 '#', '#',
                 0));
         });
+
+        it("locks all children when a group is locked", function () {
+            const group = getMug('/data/group_no_lock');
+            const child = getMug('/data/group_no_lock/nested_unlocked');
+            try {
+                group.p.locked = true;
+                assert(child.p.locked, "expected child to be locked");
+            } finally {
+                group.p.locked = false;
+            }
+        });
+
+        it("unlocks all children when a group is unlocked", function () {
+            const group = getMug('/data/group_no_lock');
+            const child = getMug('/data/group_no_lock/nested_unlocked');
+            try {
+                group.p.locked = true;
+                group.p.locked = false;
+                assert(!child.p.locked, "expected child to be unlocked");
+            } finally {
+                group.p.locked = false;
+            }
+        });
+
+        it("cascades lock state through nested groups", function () {
+            const outer = getMug('/data/group_with_nested_lock');
+            const subgroup = getMug('/data/group_with_nested_lock/subgroup');
+            const deepChild = getMug('/data/group_with_nested_lock/subgroup/nested_locked');
+            try {
+                outer.p.locked = true;
+                assert(subgroup.p.locked, "expected subgroup to be locked");
+                assert(deepChild.p.locked, "expected nested child to be locked");
+                outer.p.locked = false;
+                assert(!subgroup.p.locked, "expected subgroup to be unlocked");
+                assert(!deepChild.p.locked, "expected nested child to be unlocked");
+            } finally {
+                deepChild.p.locked = true;
+            }
+        });
+
+        it("leaves a child independently toggleable after a group cascade", function () {
+            const group = getMug('/data/group_no_lock');
+            const child = getMug('/data/group_no_lock/nested_unlocked');
+            try {
+                group.p.locked = true;
+                child.p.locked = false;
+                assert(group.p.locked, "group should stay locked");
+                assert(!child.p.locked, "child should be independently unlocked");
+            } finally {
+                child.p.locked = false;
+                group.p.locked = false;
+            }
+        });
     });
 
     describe("locked select questions", function () {
-        it("propagates locked to control-only children when set", function () {
-            const mug = getMug('/data/unlocked_select');
-            const choice = getMug('/data/unlocked_select/choice1');
+        const STATIC_SELECTS = [
+            {type: "Select", lockedPath: '/data/locked_select', unlockedPath: '/data/unlocked_select'},
+            {type: "MSelect", lockedPath: '/data/locked_mselect', unlockedPath: '/data/unlocked_mselect'},
+        ];
+        const DYNAMIC_SELECTS = [
+            {
+                type: "SelectDynamic",
+                lockedPath: '/data/locked_select_dynamic',
+                unlockedPath: '/data/unlocked_select_dynamic',
+            },
+            {
+                type: "MSelectDynamic",
+                lockedPath: '/data/locked_mselect_dynamic',
+                unlockedPath: '/data/unlocked_mselect_dynamic',
+            },
+        ];
+        const ALL_SELECTS = [...STATIC_SELECTS, ...DYNAMIC_SELECTS];
 
-            mug.p.locked = true;
-            assert(choice.p.locked);
-            mug.p.locked = false;
-            assert(!choice.p.locked);
+        ALL_SELECTS.forEach(function ({type, unlockedPath}) {
+            it(`propagates locked to control-only children when ${type} is locked`, function () {
+                const mug = getMug(unlockedPath);
+                const controlOnlyChildren = mug.form.getChildren(mug)
+                    .filter(c => c.options.isControlOnly);
+                assert(controlOnlyChildren.length > 0, "expected at least one control-only child");
+                try {
+                    mug.p.locked = true;
+                    controlOnlyChildren.forEach(child =>
+                        assert(child.p.locked, `expected ${child.__className} to be locked`));
+                    mug.p.locked = false;
+                    controlOnlyChildren.forEach(child =>
+                        assert(!child.p.locked, `expected ${child.__className} to be unlocked`));
+                } finally {
+                    mug.p.locked = false;
+                }
+            });
         });
 
-        it("prevents moving choices into a locked select", function () {
-            const src = getMug('/data/unlocked_select/choice1');
-            const dst = getMug('/data/locked_select');
-            assert.isFalse(call('checkMove',
-                src.ufid, src.__className,
-                dst.ufid, dst.__className,
-                0));
+        STATIC_SELECTS.forEach(function ({type, lockedPath, unlockedPath}) {
+            it(`prevents moving choices into a locked ${type}`, function () {
+                const src = getMug(`${unlockedPath}/choice1`);
+                const dst = getMug(lockedPath);
+                assert.isFalse(call('checkMove',
+                    src.ufid, src.__className,
+                    dst.ufid, dst.__className,
+                    0));
+            });
+
+            it(`prevents pasting a choice into a locked ${type}`, function () {
+                clickQuestion(`${unlockedPath}/choice1`);
+                const serialized = copyPaste.copy();
+                clickQuestion(`${lockedPath}/choice1`);
+                const errors = copyPaste.paste(serialized);
+                assert(errors.length > 0, "expected paste errors");
+            });
+
+            it(`allows pasting a choice into an unlocked ${type}`, function () {
+                clickQuestion(`${lockedPath}/choice1`);
+                const serialized = copyPaste.copy();
+                clickQuestion(`${unlockedPath}/choice1`);
+                const errors = copyPaste.paste(serialized);
+                assert.equal(errors.length, 0, "expected no paste errors");
+            });
+
+            it(`removes the 'Add Choice' action for a locked ${type}`, function () {
+                assert.isFalse(getMug(lockedPath).options.canAddChoices);
+            });
+
+            it(`removes the 'Add Choice' action when locking a ${type}`, function () {
+                const mug = getMug(unlockedPath);
+                try {
+                    mug.p.locked = true;
+                    assert.isFalse(mug.options.canAddChoices);
+                } finally {
+                    mug.p.locked = false;
+                }
+            });
+
+            it(`adds the 'Add Choice' action when unlocking a ${type}`, function () {
+                const mug = getMug(lockedPath);
+                try {
+                    mug.p.locked = false;
+                    assert(mug.options.canAddChoices);
+                } finally {
+                    mug.p.locked = true;
+                }
+            });
         });
 
-        it("prevents pasting a choice into a locked select", function () {
-            clickQuestion('/data/unlocked_select/choice1');
-            const serialized = copyPaste.copy();
-            clickQuestion('/data/locked_select/choice1');
-            const errors = copyPaste.paste(serialized);
-            assert(errors.length > 0, "expected paste errors");
+        DYNAMIC_SELECTS.forEach(function ({type, lockedPath, unlockedPath}) {
+            it(`does not toggle canAddChoices when locking a ${type}`, function () {
+                const mug = getMug(unlockedPath);
+                const before = mug.options.canAddChoices;
+                try {
+                    mug.p.locked = true;
+                    assert.equal(mug.options.canAddChoices, before,
+                        "canAddChoices should not change for dynamic selects");
+                } finally {
+                    mug.p.locked = false;
+                }
+            });
+        });
+    });
+
+    describe("tree icons", function () {
+        function getLockIcon(path) {
+            const mug = getMug(path);
+            const node = call('jstree', 'get_node', mug.ufid);
+            return node.data.extraIcons?.lock || null;
+        }
+
+        it("shows a lock icon on a locked question", function () {
+            const icon = getLockIcon('/data/locked');
+            assert(icon, "expected lock icon on locked question");
+            assert.include(icon, 'fa-lock');
         });
 
-        it("allows pasting a choice into an unlocked select", function () {
-            clickQuestion('/data/locked_select/choice1');
-            const serialized = copyPaste.copy();
-            clickQuestion('/data/unlocked_select/choice1');
-            const errors = copyPaste.paste(serialized);
-            assert.equal(errors.length, 0, "expected no paste errors");
+        it("does not show a lock icon on an unlocked question", function () {
+            assert.isNull(getLockIcon('/data/unlocked'));
         });
 
-        it("removes the 'Add Choice' action for a locked select", function () {
-            const lockedSelect = getMug('/data/locked_select');
-            assert.isFalse(lockedSelect.options.canAddChoices);
+        it("does not show a lock icon on a locked choice", function () {
+            assert.isNull(getLockIcon('/data/locked_select/choice1'));
+        });
+
+        it("updates the lock icon when toggling locked", function () {
+            const mug = getMug('/data/unlocked');
+            try {
+                assert.isNull(getLockIcon('/data/unlocked'));
+                mug.p.locked = true;
+                assert(getLockIcon('/data/unlocked'), "expected lock icon after locking");
+            } finally {
+                mug.p.locked = false;
+            }
+        });
+
+        [
+            {type: "Group", lockedPath: '/data/locked_group',
+             withUnlockedChildrenPath: '/data/locked_group_with_unlocked_children'},
+            {type: "Repeat", lockedPath: '/data/locked_repeat',
+             withUnlockedChildrenPath: '/data/locked_repeat_with_unlocked_children'},
+            {type: "FieldList", lockedPath: '/data/locked_fieldlist',
+             withUnlockedChildrenPath: '/data/locked_fieldlist_with_unlocked_children'},
+        ].forEach(function ({type, lockedPath, withUnlockedChildrenPath}) {
+            describe(`for a locked ${type}`, function () {
+                it("shows a lock icon when there are no unlocked children", function () {
+                    const icon = getLockIcon(lockedPath);
+                    assert(icon, `expected icon on locked ${type}`);
+                    assert.include(icon, 'fa-lock');
+                    assert.notInclude(icon, 'fa-unlock');
+                });
+
+                it("shows an unlock icon when there are unlocked children", function () {
+                    const icon = getLockIcon(withUnlockedChildrenPath);
+                    assert(icon, `expected icon on locked ${type}`);
+                    assert.include(icon, 'fa-unlock');
+                    assert.notInclude(icon, 'fa-lock');
+                });
+
+                it("updates the icon when a child's lock state changes", function () {
+                    const child = getMug(`${withUnlockedChildrenPath}/nested_unlocked`);
+                    try {
+                        assert.include(getLockIcon(withUnlockedChildrenPath), 'fa-unlock');
+                        child.p.locked = true;
+                        const icon = getLockIcon(withUnlockedChildrenPath);
+                        assert.include(icon, 'fa-lock');
+                        assert.notInclude(icon, 'fa-unlock');
+                    } finally {
+                        child.p.locked = false;
+                    }
+                });
+            });
         });
     });
 
@@ -258,6 +433,14 @@ describe("The Lock plugin", function() {
                 const spec = mug.spec.locked;
                 assert(spec.enabled(mug));
             });
+
+            it("keeps Edit Source XML and Edit Bulk Translations when there are locked questions", function () {
+                const $menu = $(".fd-tools-menu").parent();
+                assert($menu.find('a:contains("Edit Source XML")').length,
+                    "Edit Source XML should be in tools menu");
+                assert($menu.find('a:contains("Edit Bulk Translations")').length,
+                    "Edit Bulk Translations should be in tools menu");
+            });
         });
 
         describe("without the feature enabled", function () {
@@ -279,6 +462,14 @@ describe("The Lock plugin", function() {
                 const mug = getMug('/data/locked');
                 const spec = mug.spec.locked;
                 assert(!spec.enabled(mug));
+            });
+
+            it("removes Edit Source XML and Edit Bulk Translations when there are locked questions", function () {
+                const $menu = $(".fd-tools-menu").parent();
+                assert.equal($menu.find('a:contains("Edit Source XML")').length, 0,
+                    "Edit Source XML should not be in tools menu");
+                assert.equal($menu.find('a:contains("Edit Bulk Translations")').length, 0,
+                    "Edit Bulk Translations should not be in tools menu");
             });
         });
     });
