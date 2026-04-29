@@ -150,7 +150,7 @@ var CREATE_CARD_CONFIG = {
                 valueKey: "case_type",
                 widget: "dropdown",
                 placeholder: gettext("Select from existing case types"),
-                options: function (mug, opts) {
+                dropdownOptions: function (mug, opts) {
                     return opts.vellum.data.saveToCase?.existingCaseTypes || [];
                 },
             },
@@ -160,7 +160,7 @@ var CREATE_CARD_CONFIG = {
                 valueKey: "relationship",
                 widget: "dropdown",
                 required: true,
-                options: [
+                dropdownOptions: [
                     {value: "child", label: gettext("child")},
                     {value: "extension", label: gettext("extension")},
                 ],

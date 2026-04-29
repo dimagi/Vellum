@@ -29,7 +29,7 @@ import nested_dropdown_field from "vellum/templates/nested_dropdown_field.html";
 //   - widget: "input" (default) | "xpath" | "dropdown"
 //   - required (optional): default to false
 //   - placeholder (optional)
-//   - options (optional): dropdown options (array or resolver)
+//   - dropdownOptions (optional): dropdown options (array or resolver)
 //   - extraValidator (optional)
 // -------------------------------------------------------------------------
 
@@ -142,8 +142,8 @@ var repeaterCard = function (mug, options) {
         function renderCards(val) {
             var resolvedCardConfig = _.extend({}, cardConfig, {
                 fieldSpecs: _.map(cardConfig.fieldSpecs, function (f) {
-                    if (_.isFunction(f.options)) {
-                        return _.extend({}, f, {options: f.options(mug, options)});
+                    if (_.isFunction(f.dropdownOptions)) {
+                        return _.extend({}, f, {dropdownOptions: f.dropdownOptions(mug, options)});
                     }
                     return f;
                 }),
