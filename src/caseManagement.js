@@ -1,6 +1,5 @@
 import $ from "jquery";
 import _ from "underscore";
-import mugs from "vellum/mugs";
 import nudgeLearn from "vellum/templates/case_management_learning_nudge.html";
 import nudgeName from "vellum/templates/case_management_name_nudge.html";
 import tmpAutoAssign from "vellum/templates/case_management_auto_assign_name.html";
@@ -420,7 +419,8 @@ function autoAssignName(vellum) {
     vellum.ensureCurrentMugIsSaved(() => {
         const form = vellum.data.core.form;
         let mug = form.findFirstMatchingChild(null, () => true);
-        if (!mug || mug.p.caseProperty || mug.spec.caseProperty?.presence !== 'optional') {
+        if (!mug || mug.p.caseProperty || !mug.spec.caseProperty ||
+                mug.getPresence("caseProperty") !== 'optional') {
             mug = vellum.addQuestion('DataBindOnly', 'first');
             mug.p.nodeID = form.generate_question_id('case-name');
             mug.p.calculateAttr = 'uuid()';
@@ -456,6 +456,19 @@ $.vellum.plugin('caseManagement', {}, {
             data.properties.push('name');
         }
         initAutoAssignName(this);
+    },
+
+    postInit: function() {
+        this.__callOld();
+        const types = this.data.core.mugTypes.normalTypes;
+        const exclude = {'Trigger': true, 'SaveToCase': true};
+        _(types).each((type, name) => {
+            if (Object.hasOwn(exclude, name) ||
+                    type.dataType === 'binary' ||  // multimedia: Audio, Image, ...
+                    type.tagName === 'group') {
+                type.spec.caseProperty = { presence: 'notallowed' };
+            }
+        });
     },
 
     loadXML: function () {
@@ -506,19 +519,6 @@ $.vellum.plugin('caseManagement', {}, {
         }
     },
 
-    getMugTypes: function () {
-        const types = this.__callOld();
-        const excludedTypes = [
-            types.normal.Trigger,
-            types.normal.Group,
-            types.normal.Repeat,
-            types.normal.FieldList
-        ];
-        excludedTypes.forEach(excludedType => excludedType.spec.caseProperty = { presence: 'notallowed' });
-
-        return types;
-    },
-
     getSections: function (mug) {
         const sections = this.__callOld(mug);
         sections.splice(1, 0, {
@@ -544,6 +544,13 @@ $.vellum.plugin('caseManagement', {}, {
         const $sec = this.__callOld();
         if (options.slug !== 'caseManagement') {
             return $sec;
+        }
+        let parent = mug.parentMug;
+        while (parent) {
+            if (parent.__className === "Repeat") {
+                return $();  // hide section if in repeat group
+            }
+            parent = parent.parentMug;
         }
         const data = this.data.caseManagement;
         if (data.is_registration_form && !data.caseMappings?.name?.length) {
@@ -616,8 +623,28 @@ $.vellum.plugin('caseManagement', {}, {
                     return questionMappings.length <= 1;
                 },
                 lstring: gettext('Case Property'),
-                serialize: mugs.serializeXPath,
-                deserialize: mugs.deserializeXPath,
+                serialize: (value, key, mug, data) => {
+                    const props = that.data.caseManagement
+                                      .caseMappingsByQuestion[mug.absolutePath];
+                    if (!props?.length) {
+                        return undefined;
+                    }
+                    // Return a space-delimited string of case properties.
+                    // Case properties should not contain spaces, but if they
+                    // do, spaces are converted to underscores.
+                    return props.map(prop => prop.replace(/ /g, "_")).join(" ");
+                },
+                deserialize: (data, key, mug, context) => {
+                    const props = data[key]?.split(" ").filter(v => v);
+                    if (props?.length) {
+                        mug.p.set(key, props[0]);
+                        const maintainer = new CaseMapMaintainer(mug.form, that.data.caseManagement);
+                        _.uniq(props).reverse().forEach(prop => {
+                            maintainer.updateFormMappings(mug.absolutePath, null, prop);
+                        });
+                    }
+                    return undefined;
+                },
                 setter: function (mug, attr, value) {
                     const maintainer = new CaseMapMaintainer(mug.form, that.data.caseManagement);
                     maintainer.updateFormMappings(mug.absolutePath, mug.p[attr], value);
@@ -631,6 +658,12 @@ $.vellum.plugin('caseManagement', {}, {
                             gettext("**{word}** is a reserved word"),
                             {word: currentValue}
                         )};
+                    }
+                    if (currentValue && !/^[a-z][\w-]*$/i.test(currentValue)) {
+                        return gettext(
+                            "Case Property should start with a letter and " +
+                            "only contain letters, numbers, '-', and '_'"
+                        );
                     }
                     return 'pass';
                 },

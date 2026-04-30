@@ -5,6 +5,8 @@ import $ from "jquery";
 import _ from "underscore";
 import util from "tests/utils";
 import xmlLib from "vellum/xml";
+import copyPaste from "vellum/copy-paste";
+import { copyPasteFormat } from "tests/copy-paste";
 import BASELINE_XML from "static/caseManagement/baseline.xml";
 import BASELINE_NO_MAPPING_XML from "static/caseManagement/baseline_no_mapping_block.xml";
 import MULTIPLE_PROPERTIES_XML from "static/caseManagement/multiple_properties.xml";
@@ -45,13 +47,6 @@ describe("The Case Management plugin", function () {
                 }
             }
         });
-    });
-    beforeEach(() => {
-        const data = $("#vellum").vellum("get").data.caseManagement;
-        if (data) {
-            data.baseline = {};
-            delete data.caseMappings;
-        }
     });
 
     it("preserves case mapping between loading and writing XML", function () {
@@ -103,6 +98,18 @@ describe("The Case Management plugin", function () {
         util.loadXML("");
         util.addQuestion("Repeat", "repeat_group");
 
+        assert.notExists(getCaseManagementSection()[0]);
+    });
+
+    it("should hide the case management section for questions in repeat groups", function () {
+        util.loadXML("");
+        const repeat = util.addQuestion("Repeat", "repeat_group");
+        const group = util.addQuestion("Group", "group");
+        const text = util.addQuestion("Text", "text");
+        util.clickQuestion(text);
+
+        assert.equal(text.parentMug, group);
+        assert.equal(group.parentMug, repeat);
         assert.notExists(getCaseManagementSection()[0]);
     });
 
@@ -181,10 +188,69 @@ describe("The Case Management plugin", function () {
         assert.isFalse(select.prop("disabled"), "question1 case property select should be enabled");
     });
 
+    it("should copy and paste case property", function () {
+        const vellum = $("#vellum").vellum("get");
+        util.loadXML("");
+        util.addQuestion("Text", "text");
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/text"}],
+        }}});
+        util.selectAll();
+        const copy = copyPaste.copy();
+
+        assert.deepEqual(copy, copyPasteFormat([
+            ["id", "type", "caseProperty"],
+            ["/text", "Text", "one"],
+        ]));
+
+        copyPaste.paste(copy);
+        const newMug = call("getMugByPath", "/data/copy-1-of-text");
+        const data = vellum.data.caseManagement;
+
+        assert.equal(newMug.p.caseProperty, "one");
+        assert.deepEqual(data.caseMappingsByQuestion[newMug.absolutePath], ["one"]);
+        assert.deepEqual(data.caseMappings.one, [
+            {question_path: "/data/text"},
+            {question_path: "/data/copy-1-of-text"},
+        ]);
+    });
+
+    it("should copy and paste multiple properties per question", function () {
+        const vellum = $("#vellum").vellum("get");
+        util.loadXML("");
+        util.addQuestion("Text", "text");
+        util.call("onFormSave", {"caseManagement": {"mappings": {
+            "one": [{"question_path": "/data/text"}],
+            "two": [{"question_path": "/data/text"}],
+        }}});
+        util.selectAll();
+        const copy = copyPaste.copy();
+
+        assert.deepEqual(copy, copyPasteFormat([
+            ["id", "type", "caseProperty"],
+            ["/text", "Text", "one two"],
+        ]));
+
+        copyPaste.paste(copy);
+        const newMug = call("getMugByPath", "/data/copy-1-of-text");
+        const data = vellum.data.caseManagement;
+
+        assert.equal(newMug.p.caseProperty, "one");
+        assert.deepEqual(data.caseMappingsByQuestion[newMug.absolutePath], ["one", "two"]);
+        assert.deepEqual(data.caseMappings.one, [
+            {question_path: "/data/text"},
+            {question_path: "/data/copy-1-of-text"},
+        ]);
+        assert.deepEqual(data.caseMappings.two, [
+            {question_path: "/data/text"},
+            {question_path: "/data/copy-1-of-text"},
+        ]);
+    });
+
     it("should save the case property to the XML", function () {
         util.loadXML("");
         util.addQuestion("Text", "question");
-        
+
         // set the value
         const caseManagementSection = getCaseManagementSection();
         const casePropertySelect = caseManagementSection.find(CASE_PROPERTY_WIDGET_TYPE);
@@ -651,6 +717,44 @@ describe("The Case Management plugin", function () {
         assert.ok(msg, JSON.stringify(alerts));
     });
 
+    describe("Case Property value", function () {
+        let mug;
+        before(function () {
+            util.loadXML("");
+            mug = util.addQuestion("Text", "text");
+        });
+
+        ([  // allowed case property values
+            "",
+            "a",
+            "b_",
+            "c-",
+            "d1",
+            "E1",
+        ]).forEach(value => {
+            it(`should allow ${JSON.stringify(value)}`, function () {
+                mug.p.caseProperty = value;
+
+                assert.equal(util.getMessages(mug), "");
+            });
+        });
+
+        ([  // illegal case property values
+            "_a",
+            "-b",
+            " ",
+            "@c",
+            "d$",
+            "E ",
+        ]).forEach(value => {
+            it(`should not allow ${JSON.stringify(value)}`, function () {
+                mug.p.caseProperty = value;
+
+                assert.match(util.getMessages(mug), /should start with a letter/);
+            });
+        });
+    });
+
     describe("with unknown question path", function () {
         before(function () {
             util.loadXML("");
@@ -717,21 +821,34 @@ describe("The Case Management plugin", function () {
             save.popover("show");
         });
 
-        it("new mug when first mug is a group", function (done) {
-            util.loadXML("");
-            const group = util.addQuestion("Group", "test");
-            const save = call("getData").core.saveButton.ui;
-            function test() {
-                save.off('shown.bs.popover.test');
-                $(".fd-auto-assign-case-name").trigger("click");
-                const name = call("getMugByPath", "/data/case-name");
-                assert.equal(name.p.nodeID, 'case-name');
-                assert.equal(name.p.caseProperty, 'name');
-                assert.equal(group.p.caseProperty, undefined);
-                done();
-            }
-            save.on('shown.bs.popover.test', test);
-            save.popover("show");
+        describe("new mug when first mug is a", function () {
+            ([
+                "Trigger",
+                "Group",
+                "Repeat",
+                "SaveToCase",
+                "Audio",
+                "Image",
+                "Video",
+                "Document",
+            ]).forEach(type => {
+                it(type, function (done) {
+                    util.loadXML("");
+                    const mug = util.addQuestion(type, "test");
+                    const save = call("getData").core.saveButton.ui;
+                    function test() {
+                        save.off('shown.bs.popover.test');
+                        $(".fd-auto-assign-case-name").trigger("click");
+                        const name = call("getMugByPath", "/data/case-name");
+                        assert.isUndefined(mug.p.caseProperty, type + " caseProperty should be undefined");
+                        assert.equal(name.p.nodeID, 'case-name');
+                        assert.equal(name.p.caseProperty, 'name');
+                        done();
+                    }
+                    save.on('shown.bs.popover.test', test);
+                    save.popover("show");
+                });
+            });
         });
 
         it("new mug with unique node ID", function (done) {

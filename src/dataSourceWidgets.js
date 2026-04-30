@@ -190,7 +190,12 @@ function fixtureWidget(mug, options, labelText) {
     if (options.hasAdvancedEditor) {
         widget.getUIElement = function () {
             var query = widgets.util.getUIElementWithEditButton(
-                    widgets.util.getUIElement(widget.input, labelText),
+                    widgets.util.getUIElement(
+                        widget.input,
+                        labelText,
+                        !!widget.isDisabled(),
+                        widget.getHelp(),
+                    ),
                     function () {
                         mug.form.vellum.displaySecondaryEditor({
                             source: getSource(mug),
@@ -206,7 +211,8 @@ function fixtureWidget(mug, options, labelText) {
                                 }
                             }
                         });
-                    }
+                    },
+                    !!widget.isDisabled(),
                 );
             query.find(".fd-edit-button").text("...");
             return $("<div></div>").append(query);

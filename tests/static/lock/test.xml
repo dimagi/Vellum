@@ -24,10 +24,28 @@
 						<nested_unlocked />
 					</group_no_lock>
 					<locked_group />
+					<locked_group_with_unlocked_children>
+						<nested_unlocked />
+					</locked_group_with_unlocked_children>
+					<locked_repeat jr:template="" />
+					<locked_repeat_with_unlocked_children jr:template="">
+						<nested_unlocked />
+					</locked_repeat_with_unlocked_children>
+					<locked_fieldlist />
+					<locked_fieldlist_with_unlocked_children>
+						<nested_unlocked />
+					</locked_fieldlist_with_unlocked_children>
 					<locked_select />
 					<unlocked_select />
+					<locked_mselect />
+					<unlocked_mselect />
+					<locked_select_dynamic />
+					<unlocked_select_dynamic />
+					<locked_mselect_dynamic />
+					<unlocked_mselect_dynamic />
 				</data>
 			</instance>
+			<instance id="casedb" src="jr://instance/casedb" />
 			<bind vellum:nodeset="#form/locked" nodeset="/data/locked" type="xsd:string" vellum:lock="all" />
 			<bind vellum:nodeset="#form/unsupported_lock" nodeset="/data/unsupported_lock" type="xsd:string" vellum:lock="other" />
 			<bind vellum:nodeset="#form/unlocked" nodeset="/data/unlocked" type="xsd:string" />
@@ -37,8 +55,22 @@
 			<bind vellum:nodeset="#form/group_no_lock" nodeset="/data/group_no_lock" />
 			<bind vellum:nodeset="#form/group_no_lock/nested_unlocked" nodeset="/data/group_no_lock/nested_unlocked" type="xsd:string" />
 			<bind vellum:nodeset="#form/locked_group" nodeset="/data/locked_group" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_group_with_unlocked_children" nodeset="/data/locked_group_with_unlocked_children" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_group_with_unlocked_children/nested_unlocked" nodeset="/data/locked_group_with_unlocked_children/nested_unlocked" type="xsd:string" />
+			<bind vellum:nodeset="#form/locked_repeat" nodeset="/data/locked_repeat" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_repeat_with_unlocked_children" nodeset="/data/locked_repeat_with_unlocked_children" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_repeat_with_unlocked_children/nested_unlocked" nodeset="/data/locked_repeat_with_unlocked_children/nested_unlocked" type="xsd:string" />
+			<bind vellum:nodeset="#form/locked_fieldlist" nodeset="/data/locked_fieldlist" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_fieldlist_with_unlocked_children" nodeset="/data/locked_fieldlist_with_unlocked_children" vellum:lock="all" />
+			<bind vellum:nodeset="#form/locked_fieldlist_with_unlocked_children/nested_unlocked" nodeset="/data/locked_fieldlist_with_unlocked_children/nested_unlocked" type="xsd:string" />
 			<bind vellum:nodeset="#form/locked_select" nodeset="/data/locked_select" vellum:lock="all" />
 			<bind vellum:nodeset="#form/unlocked_select" nodeset="/data/unlocked_select" />
+			<bind vellum:nodeset="#form/locked_mselect" nodeset="/data/locked_mselect" vellum:lock="all" />
+			<bind vellum:nodeset="#form/unlocked_mselect" nodeset="/data/unlocked_mselect" />
+			<bind vellum:nodeset="#form/locked_select_dynamic" nodeset="/data/locked_select_dynamic" vellum:lock="all" />
+			<bind vellum:nodeset="#form/unlocked_select_dynamic" nodeset="/data/unlocked_select_dynamic" />
+			<bind vellum:nodeset="#form/locked_mselect_dynamic" nodeset="/data/locked_mselect_dynamic" vellum:lock="all" />
+			<bind vellum:nodeset="#form/unlocked_mselect_dynamic" nodeset="/data/unlocked_mselect_dynamic" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="locked-label">
@@ -56,6 +88,15 @@
 					<text id="nested_unlocked-label">
 						<value>nested_unlocked</value>
 					</text>
+					<text id="locked_group_with_unlocked_children/nested_unlocked-label">
+						<value>nested_unlocked</value>
+					</text>
+					<text id="locked_repeat_with_unlocked_children/nested_unlocked-label">
+						<value>nested_unlocked</value>
+					</text>
+					<text id="locked_fieldlist_with_unlocked_children/nested_unlocked-label">
+						<value>nested_unlocked</value>
+					</text>
 					<text id="locked_select-label">
 						<value>locked_select</value>
 					</text>
@@ -67,6 +108,30 @@
 					</text>
 					<text id="unlocked_select-choice1-label">
 						<value>choice1</value>
+					</text>
+					<text id="locked_mselect-label">
+						<value>locked_mselect</value>
+					</text>
+					<text id="locked_mselect-choice1-label">
+						<value>choice1</value>
+					</text>
+					<text id="unlocked_mselect-label">
+						<value>unlocked_mselect</value>
+					</text>
+					<text id="unlocked_mselect-choice1-label">
+						<value>choice1</value>
+					</text>
+					<text id="locked_select_dynamic-label">
+						<value>locked_select_dynamic</value>
+					</text>
+					<text id="unlocked_select_dynamic-label">
+						<value>unlocked_select_dynamic</value>
+					</text>
+					<text id="locked_mselect_dynamic-label">
+						<value>locked_mselect_dynamic</value>
+					</text>
+					<text id="unlocked_mselect_dynamic-label">
+						<value>unlocked_mselect_dynamic</value>
 					</text>
 				</translation>
 			</itext>
@@ -95,6 +160,27 @@
 			</input>
 		</group>
 		<group vellum:ref="#form/locked_group" ref="/data/locked_group"></group>
+		<group vellum:ref="#form/locked_group_with_unlocked_children" ref="/data/locked_group_with_unlocked_children">
+			<input vellum:ref="#form/locked_group_with_unlocked_children/nested_unlocked" ref="/data/locked_group_with_unlocked_children/nested_unlocked">
+				<label ref="jr:itext('locked_group_with_unlocked_children/nested_unlocked-label')" />
+			</input>
+		</group>
+		<group>
+			<repeat vellum:nodeset="#form/locked_repeat" nodeset="/data/locked_repeat"></repeat>
+		</group>
+		<group>
+			<repeat vellum:nodeset="#form/locked_repeat_with_unlocked_children" nodeset="/data/locked_repeat_with_unlocked_children">
+				<input vellum:ref="#form/locked_repeat_with_unlocked_children/nested_unlocked" ref="/data/locked_repeat_with_unlocked_children/nested_unlocked">
+					<label ref="jr:itext('locked_repeat_with_unlocked_children/nested_unlocked-label')" />
+				</input>
+			</repeat>
+		</group>
+		<group vellum:ref="#form/locked_fieldlist" ref="/data/locked_fieldlist" appearance="field-list"></group>
+		<group vellum:ref="#form/locked_fieldlist_with_unlocked_children" ref="/data/locked_fieldlist_with_unlocked_children" appearance="field-list">
+			<input vellum:ref="#form/locked_fieldlist_with_unlocked_children/nested_unlocked" ref="/data/locked_fieldlist_with_unlocked_children/nested_unlocked">
+				<label ref="jr:itext('locked_fieldlist_with_unlocked_children/nested_unlocked-label')" />
+			</input>
+		</group>
 		<select1 vellum:ref="#form/locked_select" ref="/data/locked_select">
 			<label ref="jr:itext('locked_select-label')" />
 			<item>
@@ -109,5 +195,47 @@
 				<value>choice1</value>
 			</item>
 		</select1>
+		<select vellum:ref="#form/locked_mselect" ref="/data/locked_mselect">
+			<label ref="jr:itext('locked_mselect-label')" />
+			<item>
+				<label ref="jr:itext('locked_mselect-choice1-label')" />
+				<value>choice1</value>
+			</item>
+		</select>
+		<select vellum:ref="#form/unlocked_mselect" ref="/data/unlocked_mselect">
+			<label ref="jr:itext('unlocked_mselect-label')" />
+			<item>
+				<label ref="jr:itext('unlocked_mselect-choice1-label')" />
+				<value>choice1</value>
+			</item>
+		</select>
+		<select1 vellum:ref="#form/locked_select_dynamic" ref="/data/locked_select_dynamic">
+			<label ref="jr:itext('locked_select_dynamic-label')" />
+			<itemset nodeset="instance('casedb')/casedb/case[@case_type='mother']">
+				<label ref="case_name" />
+				<value ref="@case_id" />
+			</itemset>
+		</select1>
+		<select1 vellum:ref="#form/unlocked_select_dynamic" ref="/data/unlocked_select_dynamic">
+			<label ref="jr:itext('unlocked_select_dynamic-label')" />
+			<itemset nodeset="instance('casedb')/casedb/case[@case_type='mother']">
+				<label ref="case_name" />
+				<value ref="@case_id" />
+			</itemset>
+		</select1>
+		<select vellum:ref="#form/locked_mselect_dynamic" ref="/data/locked_mselect_dynamic">
+			<label ref="jr:itext('locked_mselect_dynamic-label')" />
+			<itemset nodeset="instance('casedb')/casedb/case[@case_type='mother']">
+				<label ref="case_name" />
+				<value ref="@case_id" />
+			</itemset>
+		</select>
+		<select vellum:ref="#form/unlocked_mselect_dynamic" ref="/data/unlocked_mselect_dynamic">
+			<label ref="jr:itext('unlocked_mselect_dynamic-label')" />
+			<itemset nodeset="instance('casedb')/casedb/case[@case_type='mother']">
+				<label ref="case_name" />
+				<value ref="@case_id" />
+			</itemset>
+		</select>
 	</h:body>
 </h:html>
