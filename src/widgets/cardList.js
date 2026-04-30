@@ -116,15 +116,6 @@ var cardList = function (mug, options) {
         return cardsValue;
     };
 
-    // Refresh inline field validation when logic.js updates references on
-    // external events (rename, delete). Without this the widget-level
-    // summary fires but the inline "Unknown question: X" text goes stale.
-    mug.on("messages-changed", function () {
-        widget.input.find('.fd-card').each(function () {
-            if (widget.validateCard) { widget.validateCard($(this)); }
-        });
-    }, null, "teardown-mug-properties");
-
     widget.refreshControl = function (value) {
         value = value ? value : widget.getValue();
         renderCards(value);
