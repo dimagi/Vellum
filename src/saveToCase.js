@@ -39,13 +39,11 @@ function usesCases(mug) {
         indexesCase(mug);
 }
 
-
-// Inline per-field validators. Each returns an error string to show under
-// the field, or null when the value passes. `validateField` in widgets.js
-// picks them up via the field config's `extraValidator` key.
 function validatePropertyNameChars(val) {
-    if (val && !/^[a-z0-9_-]+$/i.test(val)) {
-        return gettext("Use only letters, numbers, '-' and '_'");
+    if (val && !/^[a-z][\w-]*$/i.test(val)) {
+        return gettext(
+            "Property name should start with a letter and only contain letters, numbers, '-' and '_'"
+        );
     }
     return null;
 }
