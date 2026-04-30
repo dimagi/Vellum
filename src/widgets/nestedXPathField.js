@@ -36,9 +36,6 @@ function nestedXPathField(mug, options) {
             $el[0].dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
         };
     } else {
-        // Normalization (newline encoding + normalizeXPath/normalizeHashtag)
-        // is shared with `widgets.text`; see widgets.util.encodeValueForInputElement
-        // and decodeValueFromInputElement.
         super_getValue = function () {
             return widgets.util.decodeValueFromInputElement(mug, $el.val(), true);
         };

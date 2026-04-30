@@ -167,7 +167,6 @@ var CREATE_CARD_CONFIG = {
         ],
     };
 
-// Visit every `cardMap[cardIdentifier][key]` that holds a non-empty xpath string.
 function forEachCardXPath(cardMap, keys, visit) {
     _.each(cardMap || {}, function (cardData) {
         _.each(keys, function (key) {
@@ -193,13 +192,6 @@ function rewriteCardXPaths(cardMap, keys, fn) {
     });
 }
 
-// Data-side mirror of widgets.js `validateField`. The widget's inline
-// validator is touched-state gated and DOM-driven, so it only catches
-// errors for cards the user has actually interacted with. `isFormValid`
-// (and any non-interactive code path that calls `mug.validate()`) sees
-// the spec's `validationFunc`, not the DOM. This helper reads mug.p
-// directly so the same per-field rules (Required, XPath syntax,
-// extraValidator) apply regardless of touched state.
 function hasCardListFieldError(mug, cardMap, cardConfig) {
     var fieldSpecs = cardConfig.fieldSpecs;
     return _.some(cardMap || {}, function (cardData, cardIdentifier) {

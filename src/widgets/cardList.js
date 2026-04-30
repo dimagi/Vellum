@@ -125,9 +125,6 @@ var cardList = function (mug, options) {
         });
     }, null, "teardown-mug-properties");
 
-    // Empty value → render no cards (just the Add button). Clicking Add
-    // seeds a blank `""` entry via `addProperty`; widgets requiring at
-    // least one card surface a reminder via their `validationFunc`.
     widget.refreshControl = function (value) {
         value = value ? value : widget.getValue();
         renderCards(value);
@@ -192,9 +189,6 @@ var cardList = function (mug, options) {
             });
         }
 
-        // Cards loaded from saved data (key != "") are treated as "already
-        // seen" — all their fields start touched so existing broken data
-        // surfaces immediately.
         function seedTouchedStateForSavedCards() {
             widget.input.find('.fd-card').each(function () {
                 var $card = $(this),

@@ -286,11 +286,6 @@ describe("The rich text widget", function () {
 });
 
 describe("widgets.util xpath encode/decode helpers", function () {
-    // Shared helpers used by widgets.text and nestedXPathField to move
-    // xpath strings in/out of a plain <input>. Encode preserves newlines
-    // (which <input> would otherwise collapse to spaces) and optionally
-    // normalizes hashtag → raw xpath. Decode is the reverse.
-
     var mug, encode, decode;
     before(function (done) {
         util.init({
