@@ -202,28 +202,20 @@ function rewriteCardXPaths(cardMap, keys, fn) {
 // extraValidator) apply regardless of touched state.
 function hasCardListFieldError(mug, cardMap, cardConfig) {
     var fieldSpecs = cardConfig.fieldSpecs;
-    var hasError = false;
-    _.each(cardMap || {}, function (cardData, cardIdentifier) {
-        if (hasError) { return; }
+    return _.some(cardMap || {}, function (cardData, cardIdentifier) {
         var cardIsEmpty = !cardIdentifier && _.every(cardData, (fieldValue) => !fieldValue);
-        if (cardIsEmpty) { return; }
-        _.each(fieldSpecs, function (fieldSpec) {
-            if (hasError) { return; }
+        if (cardIsEmpty) { return false; }
+        return _.some(fieldSpecs, function (fieldSpec) {
             var val = fieldSpec.isIdentifier ? cardIdentifier : (cardData[fieldSpec.valueKey] || "");
-            if (fieldSpec.required && !val) {
-                hasError = true;
-                return;
-            }
+            if (fieldSpec.required && !val) { return true; }
             if (fieldSpec.widget === "xpath" && val && val !== '-') {
                 try { mug.form.xpath.parse(val); }
-                catch (e) { hasError = true; return; }
+                catch (e) { return true; }
             }
-            if (fieldSpec.extraValidator && fieldSpec.extraValidator(val)) {
-                hasError = true;
-            }
+            if (fieldSpec.extraValidator && fieldSpec.extraValidator(val)) { return true; }
+            return false;
         });
     });
-    return hasError;
 }
 
 
