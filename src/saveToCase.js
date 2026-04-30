@@ -573,6 +573,7 @@ var slugToProp = {
                 presence: 'optional',
                 widget: widgets.cardList,
                 cardConfig: CREATE_CARD_CONFIG,
+                suppressUnknownReferenceWarning: true,
                 mapLogicExpressions: function (mug, fn) {
                     return flatMapCardXPaths(mug.p.createProperty, ['calculate', 'relevant'], fn);
                 },
@@ -608,6 +609,7 @@ var slugToProp = {
                 presence: 'optional',
                 widget: widgets.cardList,
                 cardConfig: UPDATE_CARD_CONFIG,
+                suppressUnknownReferenceWarning: true,
                 mapLogicExpressions: function (mug, fn) {
                     return flatMapCardXPaths(mug.p.updateProperty, ['calculate', 'relevant'], fn);
                 },
@@ -636,6 +638,7 @@ var slugToProp = {
                 presence: 'optional',
                 widget: widgets.cardList,
                 cardConfig: INDEX_CARD_CONFIG,
+                suppressUnknownReferenceWarning: true,
                 mapLogicExpressions: function (mug, fn) {
                     return flatMapCardXPaths(mug.p.indexProperty, ['calculate'], fn);
                 },

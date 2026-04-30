@@ -304,6 +304,9 @@ LogicManager.prototype = {
         _.each(expr.hashtags, function (hashtag) {
             form.referenceHashtag(hashtag.toHashtag(), mug, property);
         });
+        if (spec && spec.suppressUnknownReferenceWarning) {
+            unknowns = [];
+        }
         if (unknowns.length > 0) {
             if (!this.errors[mug.ufid]) {
                 this.errors[mug.ufid] = {};
