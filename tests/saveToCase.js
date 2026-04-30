@@ -925,7 +925,80 @@ describe("The SaveToCase module", function() {
         });
     });
 
-    describe("inline validators (extraValidator)", function () {
+    describe("inline validators", function () {
+        // Suite defaults to rich_text (tests/options.js); nested card XPath uses
+        // richText.editor — cardList listens on native `input` (see editor.on).
+        function commitNestedXPathExpression($field, text) {
+            $field.data("editorWrapper").setValue(text);
+            $field[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        }
+
+        it("should flag empty required field as Required after touched", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $name = $card.find(".fd-update-property-name");
+            assert.notOk(
+                $name.closest(".form-group").hasClass("has-error"),
+                "empty required field should not show .has-error if untouched"
+            );
+
+            $name.trigger("change");
+            assert.ok(
+                $name.closest(".form-group").hasClass("has-error"),
+                "empty required field should show .has-error once touched"
+            );
+            assert.match(
+                $name.closest(".form-group").find(".fd-field-error").text(),
+                /Required/i
+            );
+        });
+
+        it("should flag invalid XPath syntax", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $calculate = $card.find(".fd-update-property-calculate");
+            commitNestedXPathExpression($calculate, "this is not valid xpath!!!");
+            assert.ok(
+                $calculate.closest(".form-group").hasClass("has-error"),
+                "invalid xpath syntax should produce .has-error"
+            );
+            assert.match(
+                $calculate.closest(".form-group").find(".fd-field-error").text(),
+                /Invalid XPath/i
+            );
+        });
+
+        it("should surface inline error on saved bad data on first render", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+                updateProperty: {
+                    "name": { calculate: "" },
+                },
+            });
+            util.clickQuestion("mug");
+            var $card = $(".fd-update-property.fd-card").first();
+            var $calculate = $card.find(".fd-update-property-calculate");
+            assert.ok(
+                $calculate.closest(".form-group").hasClass("has-error"),
+                "saved card should show .has-error on first render"
+            );
+        });
 
         it("should flag invalid property-name chars in Update", function () {
             util.loadXML("");
@@ -1028,6 +1101,61 @@ describe("The SaveToCase module", function() {
             assert.isNotNull(indexErrorMessage());
         });
 
+    });
+
+    describe("inline validation propogation to mug.messages", function () {
+
+        function updateErrorMessage(mug) {
+            var key = "mug-updateProperty-error";
+            var found = null;
+            mug.messages.each("updateProperty", function (m) {
+                if (m.key === key) { found = m.message; }
+            });
+            return found;
+        }
+
+        it("should populate mug.messages when an inline error is set", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $name = $card.find(".fd-update-property-name");
+            assert.notOk($name.closest(".form-group").hasClass("has-error"), "name field should not have inline .has-error initially");
+            assert.isNull(updateErrorMessage(mug), "There should be no mug.messageserror initially");
+
+
+            $name.val("invalid name!").trigger("change");
+            var msg = updateErrorMessage(mug);
+            assert.ok($name.closest(".form-group").hasClass("has-error"), "Invalid name should trigger inline error");
+            assert.isNotNull(msg, "Inline error should be populate mug.messages");
+            assert.match(msg, /have errors/i);
+        });
+
+        it("should drop mug.messages entry when the inline error is fixed", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $name = $card.find(".fd-update-property-name");
+
+            $name.val("invalid name!").trigger("change");
+            assert.ok($name.closest(".form-group").hasClass("has-error"), "Invalid name should trigger inline error");
+            assert.isNotNull(updateErrorMessage(mug), "Inline error should be populate mug.messages");
+
+            $name.val("valid_name").trigger("change");
+            assert.notOk($name.closest(".form-group").hasClass("has-error"), "Valid name should clear inline error");
+            assert.isNull(updateErrorMessage(mug), "Clear inline error should also clear error from mug.messages");
+        });
     });
 
     describe("validationFunc empty-state and list-level checks", function () {
