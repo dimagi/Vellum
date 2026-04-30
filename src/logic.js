@@ -5,6 +5,18 @@ import util from "vellum/util";
 var EXTERNAL_REF = "#",
     INVALID_XPATH = "#invalid/xpath ";
 
+function getLogicExpressionHandler(mug, propertyName, handlerName) {
+    var property = mug.p[propertyName];
+    if (property && _.isFunction(property[handlerName])) {
+        return property[handlerName].bind(property);
+    }
+    var spec = mug.spec && mug.spec[propertyName];
+    if (spec && _.isFunction(spec[handlerName])) {
+        return function (fn) { return spec[handlerName](mug, fn); };
+    }
+    return null;
+}
+
 function LogicExpression (exprText, xpathParser) {
     this._text = exprText || "";
     this._xpathParser = xpathParser;
@@ -292,6 +304,9 @@ LogicManager.prototype = {
         _.each(expr.hashtags, function (hashtag) {
             form.referenceHashtag(hashtag.toHashtag(), mug, property);
         });
+        if (spec && spec.suppressUnknownReferenceWarning) {
+            unknowns = [];
+        }
         if (unknowns.length > 0) {
             if (!this.errors[mug.ufid]) {
                 this.errors[mug.ufid] = {};
@@ -319,8 +334,9 @@ LogicManager.prototype = {
         var _this = this,
             returned = {};
         this.clearReferences(mug, property);
-        if (!value && mug.p[property] && _.isFunction(mug.p[property].mapLogicExpressions)) {
-            return mug.p[property].mapLogicExpressions(function (expr) {
+        var mapFn = getLogicExpressionHandler(mug, property, 'mapLogicExpressions');
+        if (!value && mapFn) {
+            return mapFn(function (expr) {
                 var messages = _this._addReferences(mug, property, expr);
                 return _.filter(messages, function (msg) {
                     if (!returned.hasOwnProperty(msg.key)) {
@@ -399,8 +415,9 @@ LogicManager.prototype = {
             }
             seen[pkey] = null;
             var value = mug.p[property];
-            if (value && _.isFunction(value.updateLogicExpressions)) {
-                value.updateLogicExpressions(updateExpression, mug);
+            var updateFn = getLogicExpressionHandler(mug, property, 'updateLogicExpressions');
+            if (updateFn) {
+                updateFn(updateExpression, mug);
             } else {
                 var result = updateExpression(value);
                 if (value !== result) {

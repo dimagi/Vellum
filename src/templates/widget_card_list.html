@@ -1,0 +1,59 @@
+<%
+  var fieldSpecs = cardConfig.fieldSpecs,
+      rootClass = cardConfig.rootClass,
+      cardHeaderText = cardConfig.cardHeaderText;
+%>
+<div class="fd-card-list">
+  <% _.each(props, function (cardData, cardIdentifier) { %>
+    <div class="panel panel-default fd-card <%- rootClass %>">
+      <div class="panel-heading clearfix fd-card-header">
+        <span class="fd-card-title"><%- cardHeaderText %></span>
+        <button type="button" class="btn btn-xs btn-link pull-right fd-remove-property"
+                title="<%- gettext("Remove") %>" aria-label="<%- gettext("Remove") %>">
+          <i class="fa fa-remove"></i>
+        </button>
+      </div>
+      <div class="panel-body form-horizontal fd-card-body">
+        <% _.each(fieldSpecs, function (field) {
+          var currentValue = field.isIdentifier ? cardIdentifier : (cardData[field.valueKey] || "");
+          var widgetType = field.widget || "input";
+        %>
+          <div class="form-group">
+            <label class="control-label col-sm-3"><%- field.label %></label>
+            <div class="col-sm-9">
+              <% if (widgetType === "dropdown") { %>
+                <%= nested_dropdown_field({
+                  value: currentValue,
+                  fieldClass: field.fieldClass,
+                  required: field.required,
+                  placeholder: field.placeholder,
+                  options: field.dropdownOptions,
+                }) %>
+              <% } else if (widgetType === "xpath") { %>
+                <%= nested_xpath_field({
+                  value: currentValue,
+                  placeholder: field.placeholder,
+                  fieldClass: field.fieldClass,
+                  required: field.required,
+                  useRichText: useRichText,
+                }) %>
+              <% } else { %>
+                <input class="form-control <%- field.fieldClass %>" type="text"
+                       value="<%- currentValue %>"
+                       placeholder="<%- field.placeholder %>"
+                       data-widget="input"
+                       <% if (field.required) { %>data-required="true"<% } %>
+                       <% if (field.isIdentifier) { %>data-is-identifier="true"<% } %> />
+              <% } %>
+              <div class="help-block text-danger fd-field-error hide"></div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  <% }); %>
+  <a class="btn btn-default fd-add-property">
+    <i class="fa fa-plus"></i> <%- cardConfig.addLabel %>
+  </a>
+</div>
+<div class="messages" />

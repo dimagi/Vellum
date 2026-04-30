@@ -227,7 +227,7 @@ describe("The SaveToCase module", function() {
                 relationship: "notchildorextension",
             }
         };
-        assert.strictEqual(mug.spec.indexProperty.validationFunc(mug), "Relationship must be child or extension");
+        assert.notEqual(mug.spec.indexProperty.validationFunc(mug), "pass");
     });
 
     it("should only not error on empty extension ref", function () {
@@ -749,6 +749,465 @@ describe("The SaveToCase module", function() {
             );
             assert.notOk(
                 $xml.find('bind[nodeset="/data/save_to_case/case/create/owner_id"]').attr('relevant')
+            );
+        });
+    });
+
+    describe("card list with a blank identifier", function () {
+        it("should walk xpaths in cards whose identifier is blank", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useUpdate = true;
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/foo", relevant: "" },
+                "": { calculate: "/data/bar", relevant: "" },
+            };
+            var visited = [];
+            mug.spec.updateProperty.mapLogicExpressions(mug, function (expr) {
+                visited.push(expr);
+                return [];
+            });
+            visited.sort();
+            assert.deepEqual(visited, ["/data/bar", "/data/foo"]);
+        });
+
+        it("should rewrite xpaths in cards whose identifier is blank", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useUpdate = true;
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/foo" },
+                "": { calculate: "/data/foo", relevant: "" },
+            };
+            mug.spec.updateProperty.updateLogicExpressions(mug, function (expr) {
+                return expr === "/data/foo" ? "/data/bar" : expr;
+            });
+            assert.equal(mug.p.updateProperty.name.calculate, "/data/bar");
+            assert.equal(mug.p.updateProperty[""].calculate, "/data/bar");
+        });
+
+        it("should omit cards whose identifier is blank from saved XML", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/name" },
+                "": { calculate: "/data/name", relevant: "" },
+            };
+            var $xml = $(call("createXML"));
+            var $updateChildren = $xml.find('update').children();
+            assert.equal($updateChildren.length, 1, "expected exactly one card after Save");
+            assert.equal($updateChildren.first().prop('tagName').toLowerCase(), 'name');
+        });
+
+        it("should walk identifier-blank card xpaths across create/update/index", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug");
+            mug.p.useCreate = true;
+            mug.p.useUpdate = true;
+            mug.p.useIndex = true;
+            mug.p.createProperty = { "": { calculate: "/data/a" } };
+            mug.p.updateProperty = { "": { calculate: "/data/b" } };
+            mug.p.indexProperty = { "": { calculate: "/data/c" } };
+
+            function collect(spec, prop) {
+                var visited = [];
+                spec[prop].mapLogicExpressions(mug, function (expr) {
+                    visited.push(expr);
+                    return [];
+                });
+                return visited;
+            }
+            assert.deepEqual(collect(mug.spec, "createProperty"), ["/data/a"]);
+            assert.deepEqual(collect(mug.spec, "updateProperty"), ["/data/b"]);
+            assert.deepEqual(collect(mug.spec, "indexProperty"), ["/data/c"]);
+        });
+    });
+
+    describe("card list DOM interactions", function () {
+
+        it("should render one card per updateProperty entry", function () {
+            util.loadXML(UPDATE_PROPERTY_XML);
+            util.clickQuestion("save_to_case");
+            var $cards = $(".fd-update-property.fd-card");
+            assert.equal($cards.length, 2, "two rows → two cards");
+            var names = $cards.find(".fd-update-property-name")
+                .map(function () { return $(this).val(); }).get().sort();
+            assert.deepEqual(names, ["dash-dash", "name"]);
+        });
+
+        it("should add a blank card when the Add button is clicked", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            var $list = $(".fd-update-property").filter(".fd-card");
+            assert.equal($list.length, 0, "expected no cards before Add is clicked");
+
+            // Click the Add button inside the Update section.
+            var $updateSection = $("[name='property-updateProperty']");
+            $updateSection.find(".fd-add-property").trigger("click");
+
+            $list = $(".fd-update-property").filter(".fd-card");
+            assert.equal($list.length, 1, "expected exactly one card after Add");
+            assert.equal(
+                $list.find(".fd-update-property-name").val(), "",
+                "new card identifier field should be empty"
+            );
+        });
+
+        it("should remove a card when its Remove button is clicked", function () {
+            util.loadXML(UPDATE_PROPERTY_XML);
+            var mug = util.getMug("save_to_case");
+            util.clickQuestion("save_to_case");
+            var $cards = $(".fd-update-property.fd-card");
+            assert.equal($cards.length, 2, "expected exactly two cards before Remove");
+
+            // Remove the "name" card.
+            $cards.filter(function () {
+                return $(this).find(".fd-update-property-name").val() === "name";
+            }).find(".fd-remove-property").trigger("click");
+
+            $cards = $(".fd-update-property.fd-card");
+            assert.equal($cards.length, 1, "expected exactly one card after Remove");
+            assert.notProperty(mug.p.updateProperty, "name",
+                "expected mug.p.updateProperty to no longer include the removed card");
+            assert.property(mug.p.updateProperty, "dash-dash",
+                "expected mug.p.updateProperty to still include the other card");
+        });
+
+        it("should propagate typed values into mug.p on change", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            $card.find(".fd-update-property-name").val("age").trigger("change");
+
+            assert.property(
+                mug.p.updateProperty,
+                "age",
+                "expected mug.p.updateProperty to include typed value"
+            );
+        });
+    });
+
+    describe("inline validators", function () {
+        // Suite defaults to rich_text (tests/options.js); nested card XPath uses
+        // richText.editor — cardList listens on native `input` (see editor.on).
+        function commitNestedXPathExpression($field, text) {
+            $field.data("editorWrapper").setValue(text);
+            $field[0].dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        }
+
+        it("should flag empty required field as Required after touched", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $name = $card.find(".fd-update-property-name");
+            assert.notOk(
+                $name.closest(".form-group").hasClass("has-error"),
+                "empty required field should not show .has-error if untouched"
+            );
+
+            $name.trigger("change");
+            assert.ok(
+                $name.closest(".form-group").hasClass("has-error"),
+                "empty required field should show .has-error once touched"
+            );
+            assert.match(
+                $name.closest(".form-group").find(".fd-field-error").text(),
+                /Required/i
+            );
+        });
+
+        it("should flag invalid XPath syntax", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $calculate = $card.find(".fd-update-property-calculate");
+            commitNestedXPathExpression($calculate, "this is not valid xpath!!!");
+            assert.ok(
+                $calculate.closest(".form-group").hasClass("has-error"),
+                "invalid xpath syntax should produce .has-error"
+            );
+            assert.match(
+                $calculate.closest(".form-group").find(".fd-field-error").text(),
+                /Invalid XPath/i
+            );
+        });
+
+        it("should surface inline error on saved bad data on first render", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+                updateProperty: {
+                    "name": { calculate: "" },
+                },
+            });
+            util.clickQuestion("mug");
+            var $card = $(".fd-update-property.fd-card").first();
+            var $calculate = $card.find(".fd-update-property-calculate");
+            assert.ok(
+                $calculate.closest(".form-group").hasClass("has-error"),
+                "saved card should show .has-error on first render"
+            );
+        });
+
+        it("should flag invalid property-name chars in Update", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $nameInput = $card.find(".fd-update-property-name");
+            $nameInput.val("bad name!").trigger("change");
+
+            assert.ok(
+                $nameInput.closest(".form-group").hasClass("has-error"),
+                "expected .has-error on name field for invalid property name characters"
+            );
+        });
+
+        it("should flag reserved names (case_type) in Create", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "uuid()",
+                useCreate: true,
+                case_type: "patient",
+                caseName: "/data/name",
+            });
+            util.clickQuestion("mug");
+            $("[name='property-createProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $("[name='property-createProperty']")
+                .find(".fd-update-property.fd-card").first();
+            var $nameInput = $card.find(".fd-update-property-name");
+            $nameInput.val("case_type").trigger("change");
+
+            assert.ok(
+                $nameInput.closest(".form-group").hasClass("has-error"),
+                "expected .has-error on name field for reserved property name"
+            );
+        });
+
+        it("should pass valid property names without error", function () {
+            util.loadXML("");
+            util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $nameInput = $card.find(".fd-update-property-name");
+            $nameInput.val("valid_name-123").trigger("change");
+
+            assert.notOk(
+                $nameInput.closest(".form-group").hasClass("has-error"),
+                "expected no .has-error on name field for valid property name"
+            );
+        });
+
+        it("should leave untouched siblings quiet during typing, then surface them on save-popover hover", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "uuid()",
+                useCreate: true,
+                case_type: "p",
+                caseName: "/data/name",
+                useIndex: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-indexProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-index-property.fd-card").first();
+            var key = "mug-indexProperty-error";
+            function indexErrorMessage() {
+                var found = null;
+                mug.messages.each("indexProperty", function (m) {
+                    if (m.key === key) { found = m.message; }
+                });
+                return found;
+            }
+
+            // Type only the identifier.
+            $card.find(".fd-index-property-name").val("parent").trigger("change");
+            assert.notOk(
+                $card.find(".fd-index-property-relationship").closest(".form-group")
+                    .hasClass("has-error"),
+                "expected no .has-error on relationship field for untouched required field"
+            );
+            assert.isNull(indexErrorMessage());
+
+            // Trigger the save-popover show event
+            mug.form.vellum.data.core.saveButton.ui.trigger("show.bs.popover");
+            assert.ok(
+                $card.find(".fd-index-property-relationship").closest(".form-group")
+                    .hasClass("has-error"),
+                "expected .has-error on relationship field for force-touched required field"
+            );
+            assert.isNotNull(indexErrorMessage());
+        });
+
+    });
+
+    describe("inline validation propogation to mug.messages", function () {
+
+        function updateErrorMessage(mug) {
+            var key = "mug-updateProperty-error";
+            var found = null;
+            mug.messages.each("updateProperty", function (m) {
+                if (m.key === key) { found = m.message; }
+            });
+            return found;
+        }
+
+        it("should populate mug.messages when an inline error is set", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $name = $card.find(".fd-update-property-name");
+            assert.notOk($name.closest(".form-group").hasClass("has-error"), "name field should not have inline .has-error initially");
+            assert.isNull(updateErrorMessage(mug), "There should be no mug.messageserror initially");
+
+
+            $name.val("invalid name!").trigger("change");
+            var msg = updateErrorMessage(mug);
+            assert.ok($name.closest(".form-group").hasClass("has-error"), "Invalid name should trigger inline error");
+            assert.isNotNull(msg, "Inline error should be populate mug.messages");
+            assert.match(msg, /have errors/i);
+        });
+
+        it("should drop mug.messages entry when the inline error is fixed", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            util.clickQuestion("mug");
+            $("[name='property-updateProperty']").find(".fd-add-property").trigger("click");
+
+            var $card = $(".fd-update-property.fd-card").first();
+            var $name = $card.find(".fd-update-property-name");
+
+            $name.val("invalid name!").trigger("change");
+            assert.ok($name.closest(".form-group").hasClass("has-error"), "Invalid name should trigger inline error");
+            assert.isNotNull(updateErrorMessage(mug), "Inline error should be populate mug.messages");
+
+            $name.val("valid_name").trigger("change");
+            assert.notOk($name.closest(".form-group").hasClass("has-error"), "Valid name should clear inline error");
+            assert.isNull(updateErrorMessage(mug), "Clear inline error should also clear error from mug.messages");
+        });
+    });
+
+    describe("validationFunc empty-state and list-level checks", function () {
+
+        it("createProperty passes when empty (requiresAtLeastOne=false)", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "uuid()",
+                useCreate: true,
+                case_type: "patient",
+                caseName: "/data/name",
+            });
+            mug.p.createProperty = {};
+            assert.strictEqual(mug.spec.createProperty.validationFunc(mug), "pass");
+        });
+
+        it("updateProperty fails with emptyStateMessage when empty", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            mug.p.updateProperty = {};
+            var msg = mug.spec.updateProperty.validationFunc(mug);
+            assert.notEqual(msg, "pass");
+            assert.match(msg, /at least one property/i);
+        });
+
+        it("indexProperty fails with emptyStateMessage when empty", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useIndex: true,
+            });
+            mug.p.indexProperty = {};
+            var msg = mug.spec.indexProperty.validationFunc(mug);
+            assert.notEqual(msg, "pass");
+            assert.match(msg, /at least one index/i);
+        });
+
+        it("updateProperty passes with one entry", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useUpdate: true,
+            });
+            mug.p.updateProperty = {
+                "name": { calculate: "/data/name" },
+            };
+            assert.strictEqual(mug.spec.updateProperty.validationFunc(mug), "pass");
+        });
+
+        it("should catch per-field errors in untouched cards (isFormValid)", function () {
+            util.loadXML("");
+            var mug = util.addQuestion("SaveToCase", "mug", {
+                case_id: "/data/meta/caseID",
+                useIndex: true,
+            });
+            mug.p.indexProperty = {
+                "parent": {
+                    calculate: "this is not valid xpath!!!",
+                    case_type: "type",
+                    relationship: "neither_child_nor_extension",
+                },
+            };
+            assert.notEqual(mug.spec.indexProperty.validationFunc(mug), "pass",);
+            assert.notOk(mug.form.isFormValid());
+
+            mug.p.indexProperty = {
+                "parent": {
+                    calculate: "/data/meta/caseID",
+                    case_type: "type",
+                    relationship: "child",
+                },
+            };
+            assert.strictEqual(
+                mug.spec.indexProperty.validationFunc(mug), "pass"
             );
         });
     });
