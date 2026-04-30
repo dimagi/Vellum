@@ -69,7 +69,7 @@ function validateRelationshipChoice(val) {
 // Shared Calculation + Condition fields for Create and Update configs.
 var SAVE_PROPERTY_CALC_FIELD = {
         label: gettext("Calculation"),
-        fieldClass: "fd-update-property-source",
+        fieldClass: "fd-update-property-calculate",
         valueKey: "calculate",
         widget: "xpath",
         required: true,
@@ -137,7 +137,7 @@ var CREATE_CARD_CONFIG = {
             },
             {
                 label: gettext("Referenced Case ID"),
-                fieldClass: "fd-index-property-source",
+                fieldClass: "fd-index-property-calculate",
                 valueKey: "calculate",
                 widget: "xpath",
                 required: true,
