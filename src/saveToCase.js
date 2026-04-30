@@ -205,7 +205,7 @@ function hasCardListFieldError(mug, cardMap, cardConfig) {
     var hasError = false;
     _.each(cardMap || {}, function (cardData, cardIdentifier) {
         if (hasError) { return; }
-        var cardIsEmpty = !cardIdentifier && _.every(cardData, function (fieldValue) { return !fieldValue; });
+        var cardIsEmpty = !cardIdentifier && _.every(cardData, (fieldValue) => !fieldValue);
         if (cardIsEmpty) { return; }
         _.each(fieldSpecs, function (fieldSpec) {
             if (hasError) { return; }
