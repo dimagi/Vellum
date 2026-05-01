@@ -122,28 +122,28 @@ var CREATE_CARD_CONFIG = {
     },
     INDEX_CARD_CONFIG = {
         rootClass: "fd-index-property",
-        cardHeaderText: gettext("Index"),
-        addLabel: gettext("Add index property"),
-        errorSummary: gettext("One or more index properties above have errors. Fix the highlighted fields."),
+        cardHeaderText: gettext("Relationship"),
+        addLabel: gettext("Add relationship"),
+        errorSummary: gettext("One or more relationships above have errors. Fix the highlighted fields."),
         requiresAtLeastOne: true,
-        emptyStateMessage: gettext("Add at least one index, or deselect the Index action."),
+        emptyStateMessage: gettext("Add at least one relationship, or deselect the Link / Unlink action."),
         fieldSpecs: [
             {
-                label: gettext("Relationship Identifier"),
+                label: gettext("Relationship Name"),
                 fieldClass: "fd-index-property-name",
                 isIdentifier: true,
                 required: true,
                 extraValidator: validatePropertyNameChars,
             },
             {
-                label: gettext("Referenced Case ID"),
+                label: gettext("Parent / Host Case ID"),
                 fieldClass: "fd-index-property-calculate",
                 valueKey: "calculate",
                 widget: "xpath",
                 required: true,
             },
             {
-                label: gettext("Referenced Case Type"),
+                label: gettext("Parent / Host Case Type"),
                 fieldClass: "fd-index-property-case-type",
                 valueKey: "case_type",
                 widget: "dropdown",
@@ -153,7 +153,7 @@ var CREATE_CARD_CONFIG = {
                 },
             },
             {
-                label: gettext("Relationship"),
+                label: gettext("Relationship Type"),
                 fieldClass: "fd-index-property-relationship",
                 valueKey: "relationship",
                 widget: "dropdown",
@@ -551,7 +551,7 @@ var slugToProp = {
                       label: gettext("Close"),
                       help: gettext("Closes the case so it no longer appears in active case lists.")},
                     { slug: "index",
-                      label: gettext("Index"),
+                      label: gettext("Link / Unlink"),
                       help: gettext("Link / unlink this case to another case.")},
                 ],
                 exclusive: ["create", "update"],
@@ -958,7 +958,7 @@ var slugToProp = {
             },
             {
                 slug: "index",
-                displayName: gettext("Index"),
+                displayName: gettext("Link / Unlink"),
                 properties: [
                     "indexProperty",
                 ],
