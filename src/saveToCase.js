@@ -86,7 +86,7 @@ var CREATE_CARD_CONFIG = {
         rootClass: "fd-update-property",
         cardHeaderText: gettext("Case property"),
         addLabel: gettext("Add property"),
-        errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
+        errorSummary: gettext("One or more properties in Create Section have errors. Fix the highlighted fields."),
         requiresAtLeastOne: false,
         emptyStateMessage: null,
         fieldSpecs: [
@@ -105,7 +105,7 @@ var CREATE_CARD_CONFIG = {
         rootClass: "fd-update-property",
         cardHeaderText: gettext("Case property"),
         addLabel: gettext("Add property"),
-        errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
+        errorSummary: gettext("One or more properties in Update Section have errors. Fix the highlighted fields."),
         requiresAtLeastOne: true,
         emptyStateMessage: gettext("Add at least one property to update, or deselect the Update action."),
         fieldSpecs: [
@@ -124,7 +124,7 @@ var CREATE_CARD_CONFIG = {
         rootClass: "fd-index-property",
         cardHeaderText: gettext("Relationship"),
         addLabel: gettext("Add relationship"),
-        errorSummary: gettext("One or more relationships above have errors. Fix the highlighted fields."),
+        errorSummary: gettext("One or more relationships in Link / Unlink Section have errors. Fix the highlighted fields."),
         requiresAtLeastOne: true,
         emptyStateMessage: gettext("Add at least one relationship, or deselect the Link / Unlink action."),
         fieldSpecs: [
