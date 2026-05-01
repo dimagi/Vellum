@@ -136,6 +136,18 @@ var CREATE_CARD_CONFIG = {
                 extraValidator: validatePropertyNameChars,
             },
             {
+                label: gettext("Relationship Type"),
+                fieldClass: "fd-index-property-relationship",
+                valueKey: "relationship",
+                widget: "dropdown",
+                required: true,
+                dropdownOptions: [
+                    {value: "child", label: gettext("child")},
+                    {value: "extension", label: gettext("extension")},
+                ],
+                extraValidator: validateRelationshipChoice,
+            },
+            {
                 label: gettext("Parent / Host Case ID"),
                 fieldClass: "fd-index-property-calculate",
                 valueKey: "calculate",
@@ -151,18 +163,6 @@ var CREATE_CARD_CONFIG = {
                 dropdownOptions: function (mug, opts) {
                     return opts.vellum.data.saveToCase?.existingCaseTypes || [];
                 },
-            },
-            {
-                label: gettext("Relationship Type"),
-                fieldClass: "fd-index-property-relationship",
-                valueKey: "relationship",
-                widget: "dropdown",
-                required: true,
-                dropdownOptions: [
-                    {value: "child", label: gettext("child")},
-                    {value: "extension", label: gettext("extension")},
-                ],
-                extraValidator: validateRelationshipChoice,
             },
         ],
     };
@@ -642,7 +642,7 @@ var slugToProp = {
                 presence: 'optional',
             },
             indexProperty: {
-                lstring: gettext("Index Properties"),
+                lstring: gettext("Relationships"),
                 visibility: 'visible',
                 presence: 'optional',
                 widget: widgets.cardList,
