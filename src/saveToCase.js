@@ -19,19 +19,19 @@ function validateXPath(mug, value) {
 }
 
 function createsCase(mug) {
-    return !!(mug && mug.p.useCreate);
+    return !!mug?.p.useCreate;
 }
 
 function closesCase(mug) {
-    return !!(mug && mug.p.useClose);
+    return !!mug?.p.useClose;
 }
 
 function updatesCase(mug) {
-    return !!(mug && mug.p.useUpdate);
+    return !!mug?.p.useUpdate;
 }
 
 function indexesCase(mug) {
-    return !!(mug && mug.p.useIndex);
+    return !!mug?.p.useIndex;
 }
 
 function usesCases(mug) {
