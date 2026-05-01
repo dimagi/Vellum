@@ -28,6 +28,23 @@
             margin-top: 10px;
             white-space: pre-line;
         }
+
+        .fd-question-help-link {
+            margin-left: 1em;
+            color: @cc-brand-mid;
+            font-size: 13px;
+            text-decoration: none;
+
+            &:hover, &:focus {
+                color: darken(@cc-brand-mid, 10%);
+                text-decoration: underline;
+            }
+
+            i {
+                font-size: 11px;
+                margin-left: 0.5em;
+            }
+        }
     }
 
     // Main content (scrolling area, accordion of Basic, Logic, etc.)
