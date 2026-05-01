@@ -1,6 +1,6 @@
-<div class="fd-question-toolbar-container clearfix">
-    <% if (isCopyable) { %><div class="btn-toolbar pull-left"></div><% } %>
-    <div class="btn-toolbar pull-right">
+<div class="fd-question-toolbar-container">
+    <% if (isCopyable) { %><div class="btn-toolbar fd-toolbar-start"></div><% } %>
+    <div class="btn-toolbar fd-toolbar-end">
         <% if (isDeleteable) { %>
             <button type="button" class="btn btn-danger fd-button-remove"  tabindex="-1">
                 <i class="fa-regular fa-trash-can"></i> <%-gettext("Delete")%>
