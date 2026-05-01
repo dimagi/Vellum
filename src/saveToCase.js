@@ -558,7 +558,7 @@ var slugToProp = {
                     if (mug.p[prop]) {                                                                                                                                                                                       
                         mug.p[prop] = false;                                     
                     }
-                    mug.form.vellum.collapseSection(slug, true);  
+                    mug.form.vellum.collapseSection(slug, true);
                 },
             },
             useCreate: {
