@@ -2117,7 +2117,7 @@ fn.getMugToolbar = function (mug, multiselect) {
         _this.refreshCurrentMug();
     });
     if (!multiselect) {
-        $baseToolbar.find('.btn-toolbar.pull-left')
+        $baseToolbar.find('.fd-toolbar-start')
             .prepend(this.getQuestionTypeChanger(mug));
         if (mug.p.comment) {
             $baseToolbar.find('.fd-question-comment').show();

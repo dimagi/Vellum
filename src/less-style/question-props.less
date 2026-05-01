@@ -10,6 +10,20 @@
         border-bottom: 1px solid @navbarBackground;
         padding: @contentPaddingVellum;
 
+        .fd-question-toolbar-container {
+            display: flex;
+            align-items: center;
+
+            .btn-toolbar {
+                display: flex;
+                align-items: center;
+
+                &.fd-toolbar-end {
+                    margin-left: auto;
+                }
+            }
+        }
+
         .fd-question-comment {
             margin-top: 10px;
             white-space: pre-line;
