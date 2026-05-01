@@ -94,22 +94,8 @@ describe("The SaveToCase module", function() {
 
     it("should only allow custom case types for create actions", function () {
         util.loadXML("");
-        util.addQuestion("SaveToCase", "stc_update", {
-            case_id: 'a-real-exisitng-case-id',
-            case_type: 'household',
-            useUpdate: true,
-            updateProperty: {
-                'name': { 'calculate': '/data/name' },
-            }
-        });
-        util.addQuestion("SaveToCase", "stc_create", {
-            case_id: 'uuid()',
-            case_type: 'household',
-            useCreate: true,
-            createProperty: {
-                'case_name': { 'calculate': '/data/name' },
-            }
-        });
+        util.addQuestion("SaveToCase", "stc_update", {useUpdate: true});
+        util.addQuestion("SaveToCase", "stc_create", {useCreate: true});
 
         util.clickQuestion("stc_update");
         assert.strictEqual($("[name=property-case_type]").data('select2').options.options.tags, false);
