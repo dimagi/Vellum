@@ -409,6 +409,7 @@ var chips = function (mug, options) {
                     });
             return { slug: def.slug,
                      label: def.label,
+                     icon: def.icon,
                      help: def.help,
                      active: isActive,
                      disabled: isDisabled };

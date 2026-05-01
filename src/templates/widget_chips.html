@@ -9,7 +9,7 @@
             title="<%- chip.help %>"
             <% } %>
             type="button">
-        <%= chip.label %>
+        <% if (chip.icon) { %><i class="<%= chip.icon %>"></i> <% } %><%= chip.label %>
     </button>
     <% }); %>
 </div>
