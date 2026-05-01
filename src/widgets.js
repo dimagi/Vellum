@@ -407,15 +407,26 @@ var chips = function (mug, options) {
                     exclusiveChips.some(function (s) {
                         return s !== def.slug && getState(s, mug);
                     });
-            return { slug: def.slug, label: def.label,
-                     active: isActive, disabled: isDisabled };
+            return { slug: def.slug,
+                     label: def.label,
+                     help: def.help,
+                     active: isActive,
+                     disabled: isDisabled };
         });
         var $rendered = $(widget_chips_template({ chips: data }));
+
+        //initialize tooltips
+        $rendered.tooltip({
+            selector: '.fd-chip',
+            trigger: 'hover focus',
+            delay: { show: 200, hide: 0 },
+        });
 
         $rendered.find('.fd-chip').on('click', function (e) {
             e.preventDefault();
             var $btn = $(this),
                 slug = $btn.data('slug');
+            $btn.tooltip('hide');
             if ($btn.hasClass('disabled')) return;
 
             var isActive = $btn.hasClass('btn-primary');
