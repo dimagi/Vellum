@@ -19,19 +19,19 @@ function validateXPath(mug, value) {
 }
 
 function createsCase(mug) {
-    return mug ? mug.p.useCreate : false;
+    return !!mug?.p.useCreate;
 }
 
 function closesCase(mug) {
-    return mug ? mug.p.useClose : false;
+    return !!mug?.p.useClose;
 }
 
 function updatesCase(mug) {
-    return mug ? mug.p.useUpdate : false;
+    return !!mug?.p.useUpdate;
 }
 
 function indexesCase(mug) {
-    return mug ? mug.p.useIndex : false;
+    return !!mug?.p.useIndex;
 }
 
 function usesCases(mug) {
@@ -555,7 +555,10 @@ var slugToProp = {
                     mug.form.vellum.collapseSection(slug, false);
                 },
                 onDeselect: function (slug, mug) {
-                    mug.p[slugToProp[slug]] = false;
+                    var prop = slugToProp[slug];
+                    if (mug.p[prop]) {                                                                                                                                                                                       
+                        mug.p[prop] = false;                                     
+                    }
                     mug.form.vellum.collapseSection(slug, true);
                 },
             },
@@ -563,8 +566,9 @@ var slugToProp = {
                 visibility: 'hidden',
                 presence: 'optional',
                 validationFunc: function (mug) {
-                    // case_id validation depends on useCreate
-                    mug.validate('case_id');
+                    if (mug.p.case_id) {
+                        mug.validate('case_id');
+                    }
                     return 'pass';
                 },
             },
