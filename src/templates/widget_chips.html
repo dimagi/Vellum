@@ -2,8 +2,14 @@
     <% _.each(chips, function(chip) { %>
     <button class="btn fd-chip btn-<%= chip.active ? 'primary' : 'default' %><%= chip.disabled ? ' disabled' : '' %>"
             data-slug="<%= chip.slug %>"
+            <% if (chip.help) { %>
+            data-toggle="tooltip"
+            data-placement="top"
+            data-container="body"
+            title="<%- chip.help %>"
+            <% } %>
             type="button">
-        <%= chip.label %>
+        <% if (chip.icon) { %><i class="<%= chip.icon %>"></i> <% } %><%= chip.label %>
     </button>
     <% }); %>
 </div>

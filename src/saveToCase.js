@@ -86,7 +86,7 @@ var CREATE_CARD_CONFIG = {
         rootClass: "fd-update-property",
         cardHeaderText: gettext("Case property"),
         addLabel: gettext("Add property"),
-        errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
+        errorSummary: gettext("One or more properties in Create Section have errors. Fix the highlighted fields."),
         requiresAtLeastOne: false,
         emptyStateMessage: null,
         fieldSpecs: [
@@ -105,7 +105,7 @@ var CREATE_CARD_CONFIG = {
         rootClass: "fd-update-property",
         cardHeaderText: gettext("Case property"),
         addLabel: gettext("Add property"),
-        errorSummary: gettext("One or more properties above have errors. Fix the highlighted fields."),
+        errorSummary: gettext("One or more properties in Update Section have errors. Fix the highlighted fields."),
         requiresAtLeastOne: true,
         emptyStateMessage: gettext("Add at least one property to update, or deselect the Update action."),
         fieldSpecs: [
@@ -122,38 +122,21 @@ var CREATE_CARD_CONFIG = {
     },
     INDEX_CARD_CONFIG = {
         rootClass: "fd-index-property",
-        cardHeaderText: gettext("Index"),
-        addLabel: gettext("Add index property"),
-        errorSummary: gettext("One or more index properties above have errors. Fix the highlighted fields."),
+        cardHeaderText: gettext("Relationship"),
+        addLabel: gettext("Add relationship"),
+        errorSummary: gettext("One or more relationships in Link / Unlink Section have errors. Fix the highlighted fields."),
         requiresAtLeastOne: true,
-        emptyStateMessage: gettext("Add at least one index, or deselect the Index action."),
+        emptyStateMessage: gettext("Add at least one relationship, or deselect the Link / Unlink action."),
         fieldSpecs: [
             {
-                label: gettext("Relationship Identifier"),
+                label: gettext("Relationship Name"),
                 fieldClass: "fd-index-property-name",
                 isIdentifier: true,
                 required: true,
                 extraValidator: validatePropertyNameChars,
             },
             {
-                label: gettext("Referenced Case ID"),
-                fieldClass: "fd-index-property-calculate",
-                valueKey: "calculate",
-                widget: "xpath",
-                required: true,
-            },
-            {
-                label: gettext("Referenced Case Type"),
-                fieldClass: "fd-index-property-case-type",
-                valueKey: "case_type",
-                widget: "dropdown",
-                placeholder: gettext("Select from existing case types"),
-                dropdownOptions: function (mug, opts) {
-                    return opts.vellum.data.saveToCase?.existingCaseTypes || [];
-                },
-            },
-            {
-                label: gettext("Relationship"),
+                label: gettext("Relationship Type"),
                 fieldClass: "fd-index-property-relationship",
                 valueKey: "relationship",
                 widget: "dropdown",
@@ -163,6 +146,22 @@ var CREATE_CARD_CONFIG = {
                     {value: "extension", label: gettext("extension")},
                 ],
                 extraValidator: validateRelationshipChoice,
+            },
+            {
+                label: gettext("Parent / Host Case ID"),
+                fieldClass: "fd-index-property-calculate",
+                valueKey: "calculate",
+                widget: "xpath",
+            },
+            {
+                label: gettext("Parent / Host Case Type"),
+                fieldClass: "fd-index-property-case-type",
+                valueKey: "case_type",
+                widget: "dropdown",
+                placeholder: gettext("Select from existing case types"),
+                dropdownOptions: function (mug, opts) {
+                    return opts.vellum.data.saveToCase?.existingCaseTypes || [];
+                },
             },
         ],
     };
@@ -200,7 +199,7 @@ function hasCardListFieldError(mug, cardMap, cardConfig) {
         return _.some(fieldSpecs, function (fieldSpec) {
             var val = fieldSpec.isIdentifier ? cardIdentifier : (cardData[fieldSpec.valueKey] || "");
             if (fieldSpec.required && !val) { return true; }
-            if (fieldSpec.widget === "xpath" && val && val !== '-') {
+            if (fieldSpec.widget === "xpath" && val) {
                 try { mug.form.xpath.parse(val); }
                 catch (e) { return true; }
             }
@@ -541,10 +540,22 @@ var slugToProp = {
                 },
                 widget: widgets.chips,
                 chips: [
-                    { slug: "create", label: gettext("Create") },
-                    { slug: "update", label: gettext("Update") },
-                    { slug: "close",  label: gettext("Close") },
-                    { slug: "index",  label: gettext("Index") },
+                    { slug: "create",
+                      label: gettext("Create"),
+                      icon: "fa-solid fa-file-circle-plus",
+                      help: gettext("Create a new case when the form is submitted.")},
+                    { slug: "update",
+                      label: gettext("Update"),
+                      icon: "fa-solid fa-file-pen",
+                      help: gettext("Save values to one or more properties on the case.")},
+                    { slug: "close",
+                      label: gettext("Close"),
+                      icon: "fa-solid fa-circle-xmark",
+                      help: gettext("Close the case so it no longer appears in active case lists.")},
+                    { slug: "index",
+                      label: gettext("Link / Unlink"),
+                      icon: "fa-solid fa-link",
+                      help: gettext("Link / unlink this case to another case.")},
                 ],
                 exclusive: ["create", "update"],
                 getState: function (slug, mug) {
@@ -638,7 +649,7 @@ var slugToProp = {
                 presence: 'optional',
             },
             indexProperty: {
-                lstring: gettext("Index Properties"),
+                lstring: gettext("Relationships"),
                 visibility: 'visible',
                 presence: 'optional',
                 widget: widgets.cardList,
@@ -954,7 +965,7 @@ var slugToProp = {
             },
             {
                 slug: "index",
-                displayName: gettext("Index"),
+                displayName: gettext("Link / Unlink"),
                 properties: [
                     "indexProperty",
                 ],

@@ -1154,7 +1154,7 @@ describe("The SaveToCase module", function() {
             mug.p.indexProperty = {};
             var msg = mug.spec.indexProperty.validationFunc(mug);
             assert.notEqual(msg, "pass");
-            assert.match(msg, /at least one index/i);
+            assert.match(msg, /at least one relationship/i);
         });
 
         it("updateProperty passes with one entry", function () {
