@@ -152,7 +152,6 @@ var CREATE_CARD_CONFIG = {
                 fieldClass: "fd-index-property-calculate",
                 valueKey: "calculate",
                 widget: "xpath",
-                required: true,
             },
             {
                 label: gettext("Parent / Host Case Type"),
@@ -200,7 +199,7 @@ function hasCardListFieldError(mug, cardMap, cardConfig) {
         return _.some(fieldSpecs, function (fieldSpec) {
             var val = fieldSpec.isIdentifier ? cardIdentifier : (cardData[fieldSpec.valueKey] || "");
             if (fieldSpec.required && !val) { return true; }
-            if (fieldSpec.widget === "xpath" && val && val !== '-') {
+            if (fieldSpec.widget === "xpath" && val) {
                 try { mug.form.xpath.parse(val); }
                 catch (e) { return true; }
             }
