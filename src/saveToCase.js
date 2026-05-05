@@ -48,10 +48,6 @@ function validatePropertyNameChars(val) {
     return null;
 }
 
-function validateCreatePropertyName(val) {
-    return validatePropertyNameChars(val);
-}
-
 function validateRelationshipChoice(val) {
     if (val && val !== "child" && val !== "extension") {
         return gettext("Relationship must be child or extension.");
@@ -89,7 +85,7 @@ var CREATE_CARD_CONFIG = {
                 fieldClass: "fd-update-property-name",
                 isIdentifier: true,
                 required: true,
-                extraValidator: validateCreatePropertyName,
+                extraValidator: validatePropertyNameChars,
             },
             SAVE_PROPERTY_CALC_FIELD,
             SAVE_PROPERTY_RELEVANT_FIELD,
