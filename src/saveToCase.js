@@ -991,14 +991,7 @@ function promoteStashedCreateBindRelevants(mug) {
     }
 
     if (ownerIdRelevant) {
-        var redundantWithCaseTypeOrName = _.contains(
-            caseTypeAndNameRelevants,
-            ownerIdRelevant
-        );
-        var redundantWithOpenCase = ownerIdRelevant === mug.p.openCaseCondition;
-        if (!redundantWithCaseTypeOrName && !redundantWithOpenCase) {
-            mug.p.ownerIdCondition = ownerIdRelevant;
-        }
+        mug.p.ownerIdCondition = ownerIdRelevant;
     }
 }
 
