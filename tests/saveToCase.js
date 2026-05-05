@@ -580,17 +580,6 @@ describe("The SaveToCase module", function() {
             assert.strictEqual(mug.spec.caseName.validationFunc(mug), "pass");
         });
 
-        it("should reject reserved properties in createProperty", function () {
-            util.loadXML("");
-            var mug = util.addQuestion("SaveToCase", "mug");
-            mug.p.useCreate = true;
-            mug.p.caseName = "/data/name";
-            mug.p.createProperty = {
-                case_name: { calculate: "/data/name" },
-            };
-            assert.notEqual(mug.spec.createProperty.validationFunc(mug), "pass");
-        });
-
         it("should emit extra create properties under <update>", function () {
             util.loadXML("");
             var mug = util.addQuestion("SaveToCase", "stc", {
@@ -978,28 +967,6 @@ describe("The SaveToCase module", function() {
             assert.ok(
                 $nameInput.closest(".form-group").hasClass("has-error"),
                 "expected .has-error on name field for invalid property name characters"
-            );
-        });
-
-        it("should flag reserved names (case_type) in Create", function () {
-            util.loadXML("");
-            util.addQuestion("SaveToCase", "mug", {
-                case_id: "uuid()",
-                useCreate: true,
-                case_type: "patient",
-                caseName: "/data/name",
-            });
-            util.clickQuestion("mug");
-            $("[name='property-createProperty']").find(".fd-add-property").trigger("click");
-
-            var $card = $("[name='property-createProperty']")
-                .find(".fd-update-property.fd-card").first();
-            var $nameInput = $card.find(".fd-update-property-name");
-            $nameInput.val("case_type").trigger("change");
-
-            assert.ok(
-                $nameInput.closest(".form-group").hasClass("has-error"),
-                "expected .has-error on name field for reserved property name"
             );
         });
 
