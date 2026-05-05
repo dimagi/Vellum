@@ -673,12 +673,12 @@ describe("The SaveToCase module", function() {
             assert.notOk(mug.p.ownerIdCondition);
         });
 
-        it("should promote all-same relevant to openCaseCondition and absorb owner_id", function () {
+        it("should promote all-same relevant to openCaseCondition and ownerIdCondition", function () {
             var cond = "/data/name != ''";
             util.loadXML(withRelevants(cond, cond, cond));
             var mug = util.getMug("save_to_case");
             assert.equal(mug.p.openCaseCondition, cond);
-            assert.notOk(mug.p.ownerIdCondition);
+            assert.equal(mug.p.ownerIdCondition, cond);
         });
 
         it("should keep owner_id-only relevant as ownerIdCondition", function () {
@@ -710,12 +710,12 @@ describe("The SaveToCase module", function() {
             assert.equal(mug.p.ownerIdCondition, "/data/name != ''");
         });
 
-        it("should promote shared case_name+owner_id relevant and absorb owner_id", function () {
+        it("should promote shared case_name+owner_id relevant to both conditions", function () {
             var cond = "/data/name != ''";
             util.loadXML(withRelevants(null, cond, cond));
             var mug = util.getMug("save_to_case");
             assert.equal(mug.p.openCaseCondition, cond);
-            assert.notOk(mug.p.ownerIdCondition);
+            assert.equal(mug.p.ownerIdCondition, cond);
         });
 
         it("should output case-level relevant instead of per-property relevant after loading legacy form", function () {
@@ -733,8 +733,9 @@ describe("The SaveToCase module", function() {
             assert.notOk(
                 $xml.find('bind[nodeset="/data/save_to_case/case/create/case_name"]').attr('relevant')
             );
-            assert.notOk(
-                $xml.find('bind[nodeset="/data/save_to_case/case/create/owner_id"]').attr('relevant')
+            assert.equal(
+                $xml.find('bind[nodeset="/data/save_to_case/case/create/owner_id"]').attr('relevant'),
+                cond
             );
         });
     });
