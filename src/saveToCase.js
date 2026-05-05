@@ -979,8 +979,7 @@ var slugToProp = {
 function promoteStashedCreateBindRelevants(mug) {
     var stashed = mug._stashedCreateBindRelevants || {},
         caseTypeRelevant = stashed.case_type,
-        caseNameRelevant = stashed.case_name,
-        ownerIdRelevant = stashed.owner_id;
+        caseNameRelevant = stashed.case_name;
     delete mug._stashedCreateBindRelevants;
 
     var caseTypeAndNameRelevants = _.compact(
@@ -988,10 +987,6 @@ function promoteStashedCreateBindRelevants(mug) {
     );
     if (caseTypeAndNameRelevants.length && !mug.p.openCaseCondition) {
         mug.p.openCaseCondition = caseTypeAndNameRelevants.join(" and ");
-    }
-
-    if (ownerIdRelevant) {
-        mug.p.ownerIdCondition = ownerIdRelevant;
     }
 }
 
@@ -1130,7 +1125,10 @@ $.vellum.plugin("saveToCase", {}, {
 
                         if (action === "create" && prop === "owner_id") {
                             mug.p.ownerId = el.xmlAttr("calculate");
-                            stashRelevant('owner_id');
+                            var ownerIdRelevant = el.xmlAttr('relevant');
+                            if (ownerIdRelevant) {
+                                mug.p.ownerIdCondition = ownerIdRelevant;
+                            }
                             return;
                         }
 
