@@ -383,7 +383,7 @@ var slugToProp = {
     CASE_XMLNS = "http://commcarehq.org/case/transaction/v2",
     saveToCaseMugOptions = {
         typeName: 'Advanced Case Actions',
-        helpURL: 'https://dimagi.atlassian.net/wiki/spaces/cc/pages/2146608216/CommCare+Supported+Feature+Save+to+Case+Feature+Flag',
+        helpURL: 'https://dimagi.atlassian.net/wiki/spaces/commcarepublic/pages/3942252546/Enabling+and+Using+Advanced+Case+Actions',
         isTypeChangeable: false,
         isDataOnly: true,
         supportsDataNodeRole: true,
