@@ -49,12 +49,6 @@ function validatePropertyNameChars(val) {
 }
 
 function validateCreatePropertyName(val) {
-    if (val && _.contains(["case_type", "case_name", "owner_id"], val)) {
-        return gettext("Use the dedicated field above instead.");
-    }
-    if (val && val === "name") {
-        return gettext("Use the case_name field above instead.");
-    }
     return validatePropertyNameChars(val);
 }
 
