@@ -1,181 +1,19 @@
-import ui_element from "vellum/templates/ui_element.html";
+import collapse_toggle from "vellum/templates/collapse_toggle.html";
+import widget_chips_template from "vellum/templates/widget_chips.html";
 import widget_control_keyvalue from "vellum/templates/widget_control_keyvalue.html";
-import widget_control_message from "vellum/templates/widget_control_message.html";
 import _ from "underscore";
 import $ from "jquery";
 import atwho from "vellum/atwho";
 import util from "vellum/util";
 import richTextUtils from "vellum/richText";
 import analytics from "vellum/hqAnalytics";
-
-var base = function(mug, options) {
-    // set properties shared by all widgets
-    var widget = {};
-    options.richText = true;
-    widget.options = options;
-    widget.mug = mug;
-    widget.id = options.id;
-    util.eventuality(widget);
-
-    widget.isDisabled = function () {
-        // requires widget.path to be set.  This only happens in
-        // normal.  Need to change widgets that inherit directly from
-        // base to use the path/property system.
-        if (!widget.path) {
-            return false;
-        }
-
-        if (_.isFunction(mug.spec[widget.path].enabled)) {
-            return !mug.spec[widget.path].enabled(mug);
-        }
-
-        return mug.form.vellum.isPropertyLocked(mug, widget.path);
-    };
-
-    widget.getDisplayName = function () {
-        // use the display text, or the property name if none found
-        return this.definition.lstring ? this.definition.lstring : this.path;
-    };
-
-    widget.getControl = function () {
-        throw ("must be overridden");
-    };
-
-    widget.setValue = function (val) {
-        // noop
-    };
-
-    widget.getValue = function () {
-        // noop
-    };
-
-    widget.getHelp = function () {
-        if (this.definition && this.definition.help) {
-            return {
-                text: this.definition.help,
-                url: this.definition.helpURL
-            };
-        }
-        return null;
-    };
-
-    widget.refreshMessages = function () {
-        // placeholder to be overridden by widgets that inherit from base
-    };
-
-    widget.postRender = function () {
-        // placeholder to be overriden by widgets that inherit from base
-        // intended to allow post render configuration, such as
-        // enabling select2 functionality
-    };
-
-    widget.handleChange = function () {
-        widget.updateValue();
-        mug.showChangedMsg = true;
-        // TODO make all widgets that inherit from base set path
-        if (widget.path) {
-            // Widget change events, in addition to mug property
-            // setters, trigger mug validation because some mug
-            // property values have sub-properties that do not
-            // trigger mug property change events when they are
-            // changed.
-            mug.validate(widget.path);
-        }
-        widget.fire("change");
-    };
-
-    widget.updateValue = function () {
-        // When a widget's value changes, do whatever work you need to in
-        // the model/UI to make sure we are in a consistent state.
-        widget.save();
-    };
-
-    widget.save = function () {
-        throw 'Not Implemented';
-    };
-
-    widget.getUIElement = function () {
-        return getUIElement(widget.getControl(), widget.getDisplayName(),
-                            !!widget.isDisabled(), widget.getHelp());
-    };
-
-    widget.addInstanceRef = function (attrs, property) {
-        if (!property) {
-            property = widget.path;
-            if (!property) {
-                throw new Error("widget has no path: " + widget);
-            }
-        }
-        return mug.form.addInstanceIfNotExists(attrs, mug, property);
-    };
-
-    return widget;
-};
-
-var normal = function(mug, options) {
-    var path = options.widgetValuePath || options.path,
-        inputID = options.id || 'property-' + path,
-        disabled = options.disabled || false,
-        widget = base(mug, options);
-
-    widget.mugValue = options.mugValue || function (mug, value) {
-        if (arguments.length === 1) {
-            return mug.p[path];
-        }
-        mug.p[path] = value;
-    };
-
-    widget.path = path;
-    widget.definition = mug.p.getDefinition(options.path);
-    widget.currentValue = widget.mugValue(mug);
-    widget.id = inputID;
-    widget.saving = false;
-
-    widget.input = $("<input />")
-        .attr("name", inputID)
-        .attr("id", inputID)
-        .prop('disabled', disabled);
-
-    widget.getControl = function () {
-        return widget.input;
-    };
-
-    widget.getMessagesContainer = function () {
-        return widget.getControl()
-                .closest(".widget")
-                .find(".messages:last");
-    };
-
-    widget.getMessages = function (mug, path) {
-        return getMessages(mug, path);
-    };
-
-    widget.refreshMessages = function () {
-        var messages = widget.getMessages(mug, path);
-        var $container = widget.getMessagesContainer();
-        $container.empty();
-        if (messages.length) {
-            $container.append(messages);
-            $container.removeClass("hide");
-        } else {
-            $container.addClass("hide");
-        }
-    };
-
-    mug.on("messages-changed",
-           function () { widget.refreshMessages(); }, null, "teardown-mug-properties");
-
-    widget.save = function () {
-        widget.saving = true;
-        try {
-            widget.mugValue(mug, widget.getValue());
-        } finally {
-            widget.saving = false;
-        }
-    };
-
-    return widget;
-};
+import {
+    base,
+    normal,
+    getMessages,
+    getUIElement,
+} from "vellum/widgets/base";
+import cardList from "vellum/widgets/cardList";
 
 var text = function (mug, options) {
     var widget = normal(mug, options),
@@ -191,18 +29,10 @@ var text = function (mug, options) {
     }
 
     widget.setValue = function (value) {
-        if (value) {
-            // <input> converts newlines to spaces; this preserves them
-            value = value.replace(/\n/g, '&#10;');
-        }
-
+        value = encodeValueForInputElement(mug, value, widget.hasLogicReferences);
         var position = util.getCaretPosition(input[0]);
         var oldvalue = input.val();
-        if (value && widget.hasLogicReferences) {
-            input.val(mug.form.normalizeXPath(value));
-        } else {
-            input.val(value);
-        }
+        input.val(value);
 
         // If this input has focus and value hasn't changed much,
         // keep the cursor in the same position
@@ -212,14 +42,7 @@ var text = function (mug, options) {
     };
 
     widget.getValue = function() {
-        var ret = input.val().replace(/&#10;/g, '\n');
-
-        if (ret && widget.hasLogicReferences) {
-            // TODO should not be using hashtags when rich text is off
-            return mug.form.normalizeHashtag(ret);
-        } else {
-            return ret;
-        }
+        return decodeValueFromInputElement(mug, input.val(), !!widget.hasLogicReferences);
     };
 
     input.on("change input", function () {
@@ -428,41 +251,23 @@ var xPath = function (mug, options) {
                 widget.getDisplayName(),
                 !!widget.isDisabled(),
                 widget.getHelp()
-            ),
-            autocompleteChoices;
+            );
         control.addClass('jstree-drop');
-        if (options.autocompleteChoices) {
-            autocompleteChoices = function () {
-                return options.autocompleteChoices(mug);
-            };
-        }
         return getUIElementWithEditButton(elem, function () {
-            widget.options.displayXPathEditor({
-                leftPlaceholder: options.leftPlaceholder,
-                rightPlaceholder: options.rightPlaceholder,
-                leftAutocompleteChoices: autocompleteChoices,
-                value: super_getValue(),
-                xpathType: widget.definition.xpathType,
-                onLoad: function ($ui) {
-                    setWidget($ui, widget);
-                    $ui.find(".property-name").text(options.lstring || "Expression");
-                },
+            openXPathEditor(mug, options, {
+                getValue: super_getValue,
                 done: function (val) {
-                    if (val !== false) {
-                        super_setValue(val);
-                        widget.handleChange();
-                    }
+                    super_setValue(val);
+                    widget.handleChange();
                 },
-                mug: mug,
+                xpathType: widget.definition.xpathType,
+                onLoadExtra: function ($ui) { setWidget($ui, widget); },
             });
             analytics.fbUsage('Logic', options.lstring);
         }, !!widget.isDisabled());
     };
 
-    atwho.autocomplete(widget.input, mug, {
-        property: options.path,
-        useRichText: mug.form.richText,
-    });
+    enableAutocompleteOnInput(widget.input, mug, options);
 
     widget.hasLogicReferences = true;
 
@@ -558,6 +363,113 @@ var baseKeyValue = function (mug, options) {
         } finally {
             widget.saving = false;
         }
+    };
+
+    return widget;
+};
+
+var chips = function (mug, options) {
+    var widget = base(mug, options);
+    widget.definition = mug.p.getDefinition(options.path);
+    widget.path = options.path;
+
+    widget.getMessagesContainer = function () {
+        return widget.getControl().closest(".widget").find(".messages:last");
+    };
+
+    widget.refreshMessages = function () {
+        var messages = getMessages(mug, widget.path);
+        var $container = widget.getMessagesContainer();
+        $container.empty();
+        if (messages.length) {
+            $container.append(messages);
+            $container.removeClass("hide");
+        } else {
+            $container.addClass("hide");
+        }
+    };
+
+    mug.on("messages-changed", widget.refreshMessages, null, "teardown-mug-properties");
+    var chipDefs = options.chips || [],
+        exclusiveChips = options.exclusive || [],
+        onSelect = options.onSelect || function () {},
+        onDeselect = options.onDeselect || function () {},
+        getState = options.getState || function () { return false; };
+
+    var $el;
+
+    var exclusiveSet = new Set(exclusiveChips);
+
+    function render() {
+        var data = _.map(chipDefs, function (def) {
+            var isActive = getState(def.slug, mug),
+                isDisabled = !isActive && exclusiveSet.has(def.slug) &&
+                    exclusiveChips.some(function (s) {
+                        return s !== def.slug && getState(s, mug);
+                    });
+            return { slug: def.slug,
+                     label: def.label,
+                     icon: def.icon,
+                     help: def.help,
+                     active: isActive,
+                     disabled: isDisabled };
+        });
+        var $rendered = $(widget_chips_template({ chips: data }));
+
+        //initialize tooltips
+        $rendered.tooltip({
+            selector: '.fd-chip',
+            trigger: 'hover focus',
+            delay: { show: 200, hide: 0 },
+        });
+
+        $rendered.find('.fd-chip').on('click', function (e) {
+            e.preventDefault();
+            var $btn = $(this),
+                slug = $btn.data('slug');
+            $btn.tooltip('hide');
+            if ($btn.hasClass('disabled')) return;
+
+            var isActive = $btn.hasClass('btn-primary');
+            if (isActive) {
+                onDeselect(slug, mug);
+            } else {
+                if (exclusiveSet.has(slug)) {
+                    exclusiveChips.forEach(function (s) {
+                        if (s !== slug && getState(s, mug)) {
+                            onDeselect(s, mug);
+                        }
+                    });
+                }
+                onSelect(slug, mug);
+            }
+            render();
+            widget.handleChange();
+        });
+
+        if ($el) {
+            $el.replaceWith($rendered);
+        }
+        $el = $rendered;
+    }
+
+    render();
+
+    widget.getControl = function () { return $el; };
+    widget.setValue = function () { render(); };
+    widget.getValue = function () { return null; };
+    widget.save = function () { /* noop - callbacks handle state */ };
+
+    // Sync external state (e.g. section collapse) with chip state on init,
+    // since external state may be stale (e.g. from localStorage).
+    widget.postRender = function () {
+        _.each(chipDefs, function (def) {
+            if (getState(def.slug, mug)) {
+                onSelect(def.slug, mug);
+            } else {
+                onDeselect(def.slug, mug);
+            }
+        });
     };
 
     return widget;
@@ -777,59 +689,6 @@ var getUIElementWithEditButton = function($uiElem, editFn, isDisabled) {
     return $uiElem;
 };
 
-var getUIElement = function($input, labelText, isDisabled, help) {
-    var $uiElem = $(ui_element({
-        labelText: labelText,
-        help: help,
-    }));
-
-    if (isDisabled) {
-        // Disable anything that can be disabled
-        $input.find("*").addBack().prop('disabled', true);
-        $input.filter('[contenteditable]').attr({
-            'contenteditable': false,
-            'disabled': true,
-        });
-    }
-
-    $uiElem.find(".controls").prepend($input);
-
-    if (help && !help.url) {
-        $uiElem.find(".fd-help a").click(function (e) { e.preventDefault(); });
-    }
-
-    return $uiElem;
-};
-
-function getMessages(mug, path) {
-    var $messages = $(),
-        seen = {};
-    mug.messages.each(path, function (msg) {
-        const messageKey = mug.messages.getMessageText(msg.message);
-        if (seen.hasOwnProperty(messageKey)) { return; }
-        seen[messageKey] = true;
-        let htmlMessage = "";
-        if (msg.message.hasOwnProperty("markdown")) {
-            htmlMessage = util.markdown(msg.message.markdown);
-        } else if (/n/.test(msg.message)) {
-            // html swallows newlines by default, so treat these messages as HTML to embed newline objects
-            htmlMessage = util.markdown(msg.message);
-        }
-
-        const context = {msg: msg, html: htmlMessage};
-        const html = $(widget_control_message(context));
-
-        html.find("button.close").click(function () {
-            mug.dropMessage(path, msg.key);
-            if (msg.key === "mug-nodeID-changed-warning") {
-                mug.showChangedMsg = false;
-            }
-        });
-        $messages = $messages.add(html);
-    });
-    return $messages;
-}
-
 function getWidget(input, vellum) {
     var obj = input,
         widget;
@@ -843,9 +702,104 @@ function getWidget(input, vellum) {
     return null;
 }
 
+function addCollapseToggle(slug, options) {
+    var $section = $(".fd-question-fieldset[data-slug='" + slug + "']"),
+        collapseId = 'fd-collapse-' + slug,
+        $content = $section.find('.fd-fieldset-content');
+    $section.find('legend').hide();
+    $section.removeClass('hide');
+    $content.attr('id', collapseId).addClass('collapse');
+    $section.before(collapse_toggle($.extend({collapseId: collapseId}, options)));
+
+    if (options.mug) {
+        var expandIfMessages = function () {
+            if ($content.find('.messages').children().length) {
+                $content.collapse('show');
+            }
+        };
+        options.mug.on("messages-changed", expandIfMessages, null, "teardown-mug-properties");
+        expandIfMessages();
+    }
+}
+
 function setWidget($el, widget) {
     $el.data("vellum_widget", widget);
     return $el;
+}
+
+function encodeValueForInputElement(mug, value, normalize) {
+    if (value) {
+        // <input> converts newlines to spaces; this preserves them
+        value = value.replace(/\n/g, '&#10;');
+    }
+    if (value && normalize) {
+        return mug.form.normalizeXPath(value);
+    }
+    return value;
+}
+
+// Reverse of encodeValueForInputElement
+function decodeValueFromInputElement(mug, value, normalize) {
+    var ret = value.replace(/&#10;/g, '\n');
+
+    if (ret && normalize) {
+        // TODO should not be using hashtags when rich text is off
+        return mug.form.normalizeHashtag(ret);
+    } else {
+        return ret;
+    }
+}
+
+function enableAutocompleteOnInput($input, mug, options) {
+    atwho.autocomplete($input, mug, {
+        property: options.path,
+        useRichText: mug.form.richText,
+    });
+}
+
+/**
+ * Open the expression-editor modal with the standard arg bundle. Shared
+ * between `widgets.xPath` and the nested `nestedXPathField` so both stay in sync
+ * on what the modal receives.
+ *
+ * @param {Mug} mug - Mug that owns the field being edited.
+ * @param {Object} options - Widget options. Must include
+ *     `displayXPathEditor` (the modal launcher). May include
+ *     `leftPlaceholder`, `rightPlaceholder`, `autocompleteChoices`, and
+ *     `lstring` (all forwarded to the modal).
+ * @param {Object} context - Per-call glue supplied by the caller:
+ *   @param {Function} context.getValue - Returns the current value to seed
+ *       the modal with.
+ *   @param {Function} context.done - Called with the user's committed value
+ *       when the modal is dismissed with a save. The caller is responsible
+ *       for both writing the value back into its field and firing any
+ *       change notification.
+ *   @param {string} [context.xpathType] - Passed through to the modal to
+ *       tell it which xpath grammar to expect.
+ *   @param {Function} [context.onLoadExtra] - Optional hook invoked with
+ *       the modal's jQuery root when it loads, for caller-specific setup
+ *       (e.g. attaching the widget to the modal via `setWidget`).
+ */
+function openXPathEditor(mug, options, context) {
+    var autocompleteChoices;
+    if (options.autocompleteChoices) {
+        autocompleteChoices = function () { return options.autocompleteChoices(mug); };
+    }
+    options.displayXPathEditor({
+        leftPlaceholder: options.leftPlaceholder,
+        rightPlaceholder: options.rightPlaceholder,
+        leftAutocompleteChoices: autocompleteChoices,
+        value: context.getValue(),
+        xpathType: context.xpathType,
+        onLoad: function ($ui) {
+            if (context.onLoadExtra) { context.onLoadExtra($ui); }
+            $ui.find(".property-name").text(options.lstring || "Expression");
+        },
+        done: function (val) {
+            if (val !== false) { context.done(val); }
+        },
+        mug: mug,
+    });
 }
 
 export default {
@@ -857,9 +811,11 @@ export default {
     identifier: identifier,
     droppableText: droppableText,
     checkbox: checkbox,
+    chips: chips,
     dropdown: dropdown,
     dropdownWithInput: dropdownWithInput,
     xPath: xPath,
+    cardList: cardList,
     baseKeyValue: baseKeyValue,
     readOnlyControl: readOnlyControl,
     abstractMediaWidget: abstractMediaWidget,
@@ -868,6 +824,11 @@ export default {
         setWidget: setWidget,
         getMessages: getMessages,
         getUIElementWithEditButton: getUIElementWithEditButton,
-        getUIElement: getUIElement
+        getUIElement: getUIElement,
+        addCollapseToggle: addCollapseToggle,
+        encodeValueForInputElement: encodeValueForInputElement,
+        decodeValueFromInputElement: decodeValueFromInputElement,
+        enableAutocompleteOnInput: enableAutocompleteOnInput,
+        openXPathEditor: openXPathEditor
     }
 };

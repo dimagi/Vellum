@@ -13,6 +13,7 @@ import form_errors_template from "vellum/templates/form_errors_template.html";
 import pre_save_alerts from "vellum/templates/pre_save_alerts.html";
 import question_fieldset from "vellum/templates/question_fieldset.html";
 import question_type_changer from "vellum/templates/question_type_changer.html";
+import question_help_link from "vellum/templates/question_help_link.html";
 import question_toolbar from "vellum/templates/question_toolbar.html";
 import alert_global from "vellum/templates/alert_global.html";
 import modal_content from "vellum/templates/modal_content.html";
@@ -957,12 +958,10 @@ var hidePageSpinner = function() {
 };
 
 fn.handleDropFinish = function(target, path, mug, event) {
-    var _this = this,
-        ops = target.closest(".xpath-expression-row").find(".op-select");
+    var ops = target.closest(".xpath-expression-row").find(".op-select");
 
     if (target) {
-        // the .change fires the validation controls
-        if (widgets.util.getWidget(target, this).options.richText && _this.data.core.form.richText) {
+        if (target.data("editorWrapper")) {
             richText.editor(target).insertExpression(path);
         } else {
             target.val(target.val() + path).change();
@@ -2119,8 +2118,11 @@ fn.getMugToolbar = function (mug, multiselect) {
         _this.refreshCurrentMug();
     });
     if (!multiselect) {
-        $baseToolbar.find('.btn-toolbar.pull-left')
-            .prepend(this.getQuestionTypeChanger(mug));
+        var $leftToolbar = $baseToolbar.find('.fd-toolbar-start');
+        $leftToolbar.prepend(this.getQuestionTypeChanger(mug));
+        if (mug.options.helpURL) {
+            $leftToolbar.append(question_help_link({helpURL: mug.options.helpURL}));
+        }
         if (mug.p.comment) {
             $baseToolbar.find('.fd-question-comment').show();
         }

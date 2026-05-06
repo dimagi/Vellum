@@ -10,9 +10,40 @@
         border-bottom: 1px solid @navbarBackground;
         padding: @contentPaddingVellum;
 
+        .fd-question-toolbar-container {
+            display: flex;
+            align-items: center;
+
+            .btn-toolbar {
+                display: flex;
+                align-items: center;
+
+                &.fd-toolbar-end {
+                    margin-left: auto;
+                }
+            }
+        }
+
         .fd-question-comment {
             margin-top: 10px;
             white-space: pre-line;
+        }
+
+        .fd-question-help-link {
+            margin-left: 1em;
+            color: @cc-brand-mid;
+            font-size: 13px;
+            text-decoration: none;
+
+            &:hover, &:focus {
+                color: darken(@cc-brand-mid, 10%);
+                text-decoration: underline;
+            }
+
+            i {
+                font-size: 11px;
+                margin-left: 0.5em;
+            }
         }
     }
 
@@ -105,6 +136,12 @@
                     margin: 10px 0 0 0;
                 }
 
+                .fd-mode-toggle-link {
+                    display: inline-block;
+                    margin-top: 4px;
+                    font-size: @fontSizeSmall;
+                }
+
                 // Blocks of itext, like when adding multimedia or advanced > other content
                 .itext-block-container {
                     .btn-danger {
@@ -132,6 +169,109 @@
                     }
                 }
             }
+
+            // Card list
+
+            // Flex column owns the spacing between cards (and the trailing
+            // Add button). No per-card `margin-bottom` — `gap` handles it.
+            .fd-card-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75em;
+
+                > .fd-add-property {
+                    align-self: flex-start;
+                }
+            }
+            .fd-card.panel {
+                margin-bottom: 0;            // gap on .fd-card-list owns this
+                border-color: @cc-neutral-hi;
+            }
+            .fd-card-header {
+                background: @cc-bg;
+                border-bottom-color: @cc-neutral-hi;
+                padding: 0.5em 1em;
+            }
+
+            .fd-nested-xpath-field {
+                display: flex;
+                width: 100%;
+
+                > .form-control,
+                > .fd-xpath-input {
+                    flex: 1 1 0;
+                    min-width: 0;
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
+                    border-right: 0;
+                }
+                > .btn {
+                    flex: 0 0 auto;
+                    border-top-left-radius: 0;
+                    border-bottom-left-radius: 0;
+                    padding: 0 0.75em;
+                    display: inline-flex;
+                    align-items: center;
+                }
+            }
+            .fd-card-header .fd-card-title {
+                font-weight: 600;
+                line-height: 1.5;
+            }
+            // De-noise the field labels: the card title alone carries the
+            // bold weight in the card, so individual field labels drop to
+            // medium. Overrides Bootstrap's `.control-label` default of 700.
+            .fd-card-body .control-label {
+                font-weight: 500;
+            }
+
+            .fd-card-header .fd-remove-property {
+                color: @cc-att-neg-mid;
+                &:hover, &:focus {
+                    color: @cc-att-neg-low;
+                    text-decoration: none;
+                }
+            }
+        }
+
+        .fd-collapse-toggle {
+            padding: 10px 0;
+            &:has(button.collapsed) {
+                margin-bottom: 20px;
+            }
+            button {
+                background: none;
+                border: none;
+                padding: 0;
+                color: @cc-brand-mid;
+                &:hover {
+                    color: darken(@cc-brand-mid, 10%);
+                }
+                &.collapsed .fd-collapse-hide {
+                    display: none;
+                }
+                &:not(.collapsed) .fd-collapse-show {
+                    display: none;
+                }
+            }
         }
     }
-} 
+
+    .fd-chips {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+
+        .fd-chip {
+            border-radius: 20px;
+            padding: 3px 13px;
+            font-weight: normal;
+            text-shadow: none;
+
+            i {
+                margin-right: 6px;
+            }
+        }
+    }
+}

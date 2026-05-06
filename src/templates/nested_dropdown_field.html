@@ -1,0 +1,28 @@
+<%
+  // Nested dropdown field template used by cardList widgets,
+  // with fallthrough rendering for a current value that isn't in the list,
+  // we still want to display it rather than silently discarding it.
+
+  var normalizedOptions = _.map(options || [], function (opt) {
+    return _.isObject(opt)
+      ? { value: opt.value, label: opt.label }
+      : { value: opt, label: opt };
+  });
+
+  var valueMatchesKnownOption = _.some(normalizedOptions, function (o) {
+    return o.value === value;
+  });
+
+  var showOrphanCurrentValue = !!(value && !valueMatchesKnownOption);
+%>
+<select class="form-control <%- fieldClass %>"
+        data-widget="dropdown"
+        <% if (required) { %>data-required="true"<% } %>>
+  <option value=""><%- placeholder || "" %></option>
+  <% _.each(normalizedOptions, function (o) { %>
+    <option value="<%- o.value %>"<% if (o.value === value) { %> selected<% } %>><%- o.label %></option>
+  <% }); %>
+  <% if (showOrphanCurrentValue) { %>
+    <option value="<%- value %>" selected><%- value %></option>
+  <% } %>
+</select>
