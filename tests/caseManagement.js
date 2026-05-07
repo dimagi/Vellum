@@ -755,7 +755,7 @@ describe("The Case Management plugin", function () {
         });
     });
 
-    describe("with parent path", function () {
+    describe("with parent/host path", function () {
         let mug;
         before(function () {
             util.loadXML(BASELINE_XML);
@@ -766,6 +766,11 @@ describe("The Case Management plugin", function () {
             ["parent/property"],
             ["parent/parent/property"],
             ["parent/parent/parent/property"],
+            ["host/property"],
+            ["host/host/property"],
+            ["parent/host/property"],
+            ["parent/host/parent/property"],
+            ["host/parent/host/property"],
         ];
         args.forEach(prop => {
             it(`should allow ${prop} to be referenced without error`, function () {
