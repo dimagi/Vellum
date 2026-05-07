@@ -659,7 +659,7 @@ $.vellum.plugin('caseManagement', {}, {
                             {word: currentValue}
                         )};
                     }
-                    if (currentValue && !/^[a-z][\w-]*$/i.test(currentValue)) {
+                    if (currentValue && !/^(?:parent\/)*[a-z][\w-]*$/i.test(currentValue)) {
                         return gettext(
                             "Case Property should start with a letter and " +
                             "only contain letters, numbers, '-', and '_'"

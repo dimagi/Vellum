@@ -755,6 +755,28 @@ describe("The Case Management plugin", function () {
         });
     });
 
+    describe("with parent path", function () {
+        let mug;
+        before(function () {
+            util.loadXML(BASELINE_XML);
+            mug = call("getMugByPath", "/data/question1");
+        });
+
+        const args = [
+            ["parent/property"],
+            ["parent/parent/property"],
+            ["parent/parent/parent/property"],
+        ];
+        args.forEach(prop => {
+            it(`should allow ${prop} to be referenced without error`, function () {
+                mug.p.caseProperty = prop;
+                util.clickQuestion(mug);
+
+                assert.isTrue(util.isTreeNodeValid(mug), "Unexpected error: " + util.getMessages(mug));
+            });
+        });
+    });
+
     describe("with unknown question path", function () {
         before(function () {
             util.loadXML("");
