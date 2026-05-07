@@ -165,8 +165,13 @@ $.vellum.plugin("lock", {}, {
     },
     isPropertyLocked: function (mug, propertyPath) {
         const locked = this.__callOld();
-        if (locked || mug.p.locked) {
+        if (locked) {
             return true;
+        }
+
+        if (mug.p.locked) {
+            // never lock the "Locked" checkbox based on itself
+            return propertyPath !== "locked";
         }
 
         if (propertyPath === 'nodeID' && !this.isMugPathMoveable(mug)) {
