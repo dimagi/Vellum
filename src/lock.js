@@ -110,6 +110,10 @@ $.vellum.plugin("lock", {}, {
                 }
             },
             setter: function (mug, attr, value) {
+                if (!isEditable && !mug.form.isLoadingXForm) {
+                    return;
+                }
+
                 if (value === true) {
                     mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
                     mug.p.rawBindAttributes[LOCKED_BIND_ATTR] = 'all';
