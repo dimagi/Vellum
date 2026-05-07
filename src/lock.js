@@ -178,16 +178,20 @@ $.vellum.plugin("lock", {}, {
             return propertyPath !== "locked";
         }
 
-        if (propertyPath === 'nodeID' && !this.isMugPathMoveable(mug)) {
-            const message = {
-                key: LOCKED_CHILDREN_MSG_KEY,
-                message: gettext(
-                        "This group contains locked questions and cannot be moved or deleted from the form."
-                    ),
-                level: mug.INFO,
-            };
-            mug.addMessage('nodeID', message);
-            return true;
+        if (propertyPath === 'nodeID') {
+            if (!this.isMugPathMoveable(mug)) {
+                const message = {
+                    key: LOCKED_CHILDREN_MSG_KEY,
+                    message: gettext(
+                            "This group contains locked questions and cannot be moved or deleted from the form."
+                        ),
+                    level: mug.INFO,
+                };
+                mug.addMessage('nodeID', message);
+                return true;
+            } else {
+                mug.dropMessage('nodeID', LOCKED_CHILDREN_MSG_KEY);
+            }
         }
         return false;
     },
