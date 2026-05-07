@@ -731,6 +731,8 @@ describe("The Case Management plugin", function () {
             "c-",
             "d1",
             "E1",
+            "parent/f",
+            "host/G",
         ]).forEach(value => {
             it(`should allow ${JSON.stringify(value)}`, function () {
                 mug.p.caseProperty = value;
@@ -746,11 +748,41 @@ describe("The Case Management plugin", function () {
             "@c",
             "d$",
             "E ",
+            "parent/f$",
+            "host/ G",
+            "1/h",
         ]).forEach(value => {
             it(`should not allow ${JSON.stringify(value)}`, function () {
                 mug.p.caseProperty = value;
 
                 assert.match(util.getMessages(mug), /should start with a letter/);
+            });
+        });
+    });
+
+    describe("with parent/host path", function () {
+        let mug;
+        before(function () {
+            util.loadXML(BASELINE_XML);
+            mug = call("getMugByPath", "/data/question1");
+        });
+
+        const args = [
+            ["parent/property"],
+            ["parent/parent/property"],
+            ["parent/parent/parent/property"],
+            ["host/property"],
+            ["host/host/property"],
+            ["parent/host/property"],
+            ["parent/host/parent/property"],
+            ["host/parent/host/property"],
+        ];
+        args.forEach(prop => {
+            it(`should allow ${prop} to be referenced without error`, function () {
+                mug.p.caseProperty = prop;
+                util.clickQuestion(mug);
+
+                assert.isTrue(util.isTreeNodeValid(mug), "Unexpected error: " + util.getMessages(mug));
             });
         });
     });
