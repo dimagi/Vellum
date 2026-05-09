@@ -1,10 +1,12 @@
 /**
  * CommCare Connect plugin for Vellum
  *
- * This plugin adds two new mug types:
+ * This plugin add new mug types:
  * - Learn Module
  * - Assessment Score
  * - Delivery Unit
+ * - Task
+ * - Work Area Update
  */
 import $ from "jquery";
 import _ from "underscore";
