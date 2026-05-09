@@ -351,6 +351,83 @@ let mugConfigs = {
             }),
             _.clone(logicSection),
         ],
+    },
+    ConnectWorkAreaUpdate: {
+        rootName: "work_area_update",
+        childNodes: [
+            {id: "work_area_id"},
+            {id: "status"},
+            {id: "reason"},
+            {id: "additional_details"},
+            {id: "photo_evidence"}
+        ],
+        mugOptions: util.extend(baseMugOptions, {
+            typeName: 'Work Area Update',
+            icon: 'fa fa-wrench',
+            init: mug => {
+                mug.p.work_area_id = "";
+                mug.p.status = "";
+                mug.p.reason = "";
+                mug.p.additional_details = "";
+                mug.p.photo_evidence = "";
+            },
+            spec: util.extend(baseSpec, {
+                work_area_id: {
+                    lstring: gettext("Work Area ID"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: gettext('XPath expression for the work area ID associated with this update.'),
+                },
+                status: {
+                    lstring: gettext("Status"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                },
+                reason: {
+                    lstring: gettext("Reason"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                },
+                additional_details: {
+                    lstring: gettext("Additional Details"),
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                },
+                photo_evidence: {
+                    lstring: gettext("Photo Evidence"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: gettext('Reference to the image uploaded for photo evidence'),
+                }
+            })
+        }),
+        sections: [
+            _.extend({}, baseSection, {
+                properties: [
+                    "work_area_id",
+                    "status",
+                    "reason",
+                    "additional_details",
+                    "photo_evidence",
+                ],
+            }),
+            _.clone(logicSection),
+        ],
     }
 };
 
