@@ -5,6 +5,7 @@ import ASSESSMENT_XML from "static/commcareConnect/assessment.xml";
 import TASK_XML from "static/commcareConnect/task_module.xml";
 import DELIVER_XML from "static/commcareConnect/deliver.xml";
 import DELIVER_WORK_AREA_XML from "static/commcareConnect/deliver_with_work_area.xml";
+import WORK_AREA_UPDATE_XML from "static/commcareConnect/work_area_update.xml";
 
 var assert = chai.assert,
     call = util.call;
@@ -83,6 +84,27 @@ describe("The CommCareConnect", function() {
             assert.equal(task.p.description, "Task 1 is fun\nLearning is still fun");
             assert.equal(task.p.relevantAttr, "x = 3");
             util.assertXmlEqual(call("createXML"), TASK_XML);
+        });
+    });
+
+    describe("work area update", function () {
+        it("should load and save", function () {
+            util.loadXML(WORK_AREA_UPDATE_XML);
+            var update = util.getMug("update_1");
+            assert.equal(update.__className, "ConnectWorkAreaUpdate");
+            assert.equal(update.p.work_area_id, "instance('commcaresession')/session/data/work_area_id");
+            assert.equal(update.p.status, "/data/status_choice");
+            assert.equal(update.p.reason, "/data/reason_text");
+            assert.equal(update.p.additional_details, "/data/details");
+            assert.equal(update.p.photo_evidence, "/data/photo");
+            assert.equal(update.p.relevantAttr, "x = 4");
+            util.assertXmlEqual(call("createXML"), WORK_AREA_UPDATE_XML);
+        });
+
+        it("should make additional_details optional", function () {
+            var mug = util.addQuestion("ConnectWorkAreaUpdate", "update");
+            assert.equal(mug.spec.additional_details.presence, "optional");
+            assert.equal(mug.p.additional_details, "");
         });
     });
 });
