@@ -85,6 +85,7 @@ var assert = chai.assert,
             },
         }],
     }];
+const ZWSP = "\u200B";
 
 function icon(iconClass) {
     if (iconClass.startsWith("fa-")) {
@@ -120,7 +121,7 @@ function outputValueTemplateFn(path) {
 
 function wrapWithDiv(el) { return $('<div>').append(el); }
 function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
-function wrapWithDivPZwsp(el) { return wrapWithDiv($('<p>').text('\u200b').append(el).append('\u200b')); }
+function wrapWithDivPZwsp(el) { return wrapWithDiv($('<p>').text(ZWSP).append(el).append(ZWSP)); }
 function html(value) { return wrapWithDiv(value).html(); }
 
 function setupGlobalForm(done) {
@@ -708,7 +709,7 @@ describe("The rich text editor", function () {
                 assert.exists(range);
                 assert.isTrue(range.collapsed);
                 assert.strictEqual(range.startContainer, range.startContainer.parentNode.lastChild);
-                assert.strictEqual(range.startContainer.textContent, "\u200B");
+                assert.strictEqual(range.startContainer.textContent, ZWSP);
             });
 
 
