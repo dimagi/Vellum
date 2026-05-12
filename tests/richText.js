@@ -681,6 +681,21 @@ describe("The rich text editor", function () {
                     done();
                 });
             });
+
+            it("should mark a bubble as selected while the selection covers it", function (done) {
+                exprEditor.setValue("#form/text", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    document.dispatchEvent(new Event('selectionchange'));
+                    assert.isTrue(bubble.classList.contains('selected'), "marked on click");
+
+                    const tail = exprInput[0].lastChild;
+                    window.getSelection().setBaseAndExtent(tail, 0, tail, 0);
+                    document.dispatchEvent(new Event('selectionchange'));
+                    assert.isFalse(bubble.classList.contains('selected'), "unmarked when selection moves away");
+                    done();
+                });
+            });
         });
     });
 

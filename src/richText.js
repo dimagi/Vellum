@@ -372,6 +372,23 @@ var editor = function(input, form, options) {
         );
     }
 
+    function updateBubbleSelectedState() {
+        const selection = window.getSelection();
+        const editorRanges = [];
+        for (let index = 0; index < selection.rangeCount; index++) {
+            const range = selection.getRangeAt(index);
+            if (inputElement.contains(range.commonAncestorContainer)) {
+                editorRanges.push(range);
+            }
+        }
+        if (!editorRanges.length) { return; }
+        inputElement.querySelectorAll('.label-datanode').forEach(bubble => {
+            const isSelected = editorRanges.some(range => range.intersectsNode(bubble));
+            bubble.classList.toggle('selected', isSelected);
+        });
+    }
+    document.addEventListener('selectionchange', updateBubbleSelectedState);
+
     if (arguments.length === 1) {
         throw new Error("editor not initialized: " +
                         $("<div>").append(input).html());
@@ -475,6 +492,7 @@ var editor = function(input, form, options) {
         },
         destroy: function () {
             if (input !== null) {
+                document.removeEventListener('selectionchange', updateBubbleSelectedState);
                 input.removeData("editorWrapper");
                 input = null;
             }

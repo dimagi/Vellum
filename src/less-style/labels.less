@@ -11,9 +11,15 @@
     vertical-align: middle;
     font-weight: 400;
 
-    &:hover {
+    &:hover, &.selected {
         cursor: pointer;
         color: #ffffff;
+    }
+    // Suppress the OS selection highlight on bubble contents so it doesn't
+    // overlay the `.selected` darken below.
+    &::selection, *::selection {
+        background-color: transparent;
+        color: inherit;
     }
     .close {
         color: @cc-light-cool-accent-low;
@@ -41,7 +47,7 @@
     .close {
         color: @cc-light-cool-accent-low;
     }
-    &:hover {
+    &:hover, &.selected {
         background-color: desaturate(@cc-light-cool-accent-mid, 30%);
         border-color: darken(desaturate(@cc-light-cool-accent-mid, 30%), 5%);
         .close {
@@ -57,7 +63,7 @@
     .close {
         color: @cc-neutral-low;
     }
-    &:hover {
+    &:hover, &.selected {
         background-color: @cc-neutral-mid;
         .close {
             color: @cc-neutral-hi;
@@ -72,7 +78,7 @@
     .close {
         color: @cc-light-warm-accent-low;
     }
-    &:hover {
+    &:hover, &.selected {
         background-color: @cc-light-warm-accent-mid;
         .close {
             color: @cc-light-warm-accent-hi;
@@ -87,7 +93,7 @@
     .close {
         color: @cc-att-neg-low;
     }
-    &:hover {
+    &:hover, &.selected {
         background-color: @cc-att-neg-mid;
         .close {
             color: @cc-att-neg-hi;
