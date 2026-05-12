@@ -1362,7 +1362,7 @@ fn.loadXFormOrError = function (formString, done, updateSaveButton) {
             if (_this.opts().core.formIconClass) {
                 _this.$f.find('.fd-form-icon').addClass(_this.opts().core.formIconClass);
             } else {
-                _this.$f.find('.fd-form-icon').addClass('fa fa-edit');
+                _this.$f.find('.fd-form-icon').addClass('fa fa-regular fa-file');
             }
             if (_this.opts().core.defaultHelpTextTemplateId) {
                 _this.$f.find('.fd-default-helptext')
