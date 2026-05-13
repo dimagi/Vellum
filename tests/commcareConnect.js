@@ -106,5 +106,10 @@ describe("The CommCareConnect", function() {
             assert.equal(mug.spec.additional_details.presence, "optional");
             assert.equal(mug.p.additional_details, "");
         });
+
+        it("should label nodeID as 'Work Area Update ID'", function () {
+            var mug = util.addQuestion("ConnectWorkAreaUpdate", "update");
+            assert.equal(mug.spec.nodeID.lstring, "Work Area Update ID");
+        });
     });
 });

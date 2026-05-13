@@ -374,6 +374,9 @@ let mugConfigs = {
                 mug.p.photo_evidence = "";
             },
             spec: util.extend(baseSpec, {
+                nodeID: {
+                    lstring: gettext('Work Area Update ID'),
+                },
                 work_area_id: {
                     lstring: gettext("Work Area ID"),
                     visibility: 'visible',
@@ -421,6 +424,7 @@ let mugConfigs = {
         sections: [
             _.extend({}, baseSection, {
                 properties: [
+                    "nodeID",
                     "work_area_id",
                     "status",
                     "reason",
