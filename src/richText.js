@@ -101,7 +101,7 @@ var editor = function(input, form, options) {
     });
     observer.observe(inputElement, { childList: true, subtree: true });
 
-    function insertHtmlWithSpace(content, insertSpaces = false) {
+    function insertHtmlWithSuffix(content, suffix=' ') {
         const hasFocus = document.activeElement === inputElement;
         let range;
         if (!hasFocus && x && y) {
@@ -153,9 +153,8 @@ var editor = function(input, form, options) {
             range.insertNode(fragment);
             range.collapse();
 
-            if (insertSpaces) {
-                const trailingSpace = document.createTextNode(" ");
-                range.insertNode(trailingSpace);
+            if (suffix) {
+                range.insertNode(document.createTextNode(suffix));
                 range.collapse();
             }
 
@@ -421,9 +420,9 @@ var editor = function(input, form, options) {
         },
         insertExpression: function (xpath) {
             if (options.isExpression) {
-                insertHtmlWithSpace(bubbleExpression(xpath, form), true);
+                insertHtmlWithSuffix(bubbleExpression(xpath, form));
             } else {
-                insertHtmlWithSpace(makeBubble(form, xpath), true);
+                insertHtmlWithSuffix(makeBubble(form, xpath));
             }
             return wrapper;
         },
@@ -431,7 +430,7 @@ var editor = function(input, form, options) {
             if (options.isExpression) {
                 throw new Error("cannot insert output into expression editor");
             }
-            insertHtmlWithSpace(bubbleOutputs(xpath, form));
+            insertHtmlWithSuffix(bubbleOutputs(xpath, form), '');
             return wrapper;
         },
         change: function () {
