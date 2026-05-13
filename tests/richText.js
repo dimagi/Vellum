@@ -90,14 +90,18 @@ const ZWSP = "\u200B";
 /**
  * Escape zero-width spaces and normalize non-breaking spaces in string
  *
+ * If the passed value is a DOM node, it is converted to text.
  * Convert non-breaking space (\u00A0) to normal space to resolve
  * selection.toString() difference between Chrome and Firefox.
  *
- * @param {String} str - String to be escaped.
+ * @param {String or Node} val - String or DOM node to be escaped.
  * @returns String with visible {ZWSP} and NBSP normalized to space
  */
-function escape(str) {
-    return str.replace(/\u200B/g, '{ZWSP}').replace(/\u00A0/g, ' ');
+function escape(val) {
+    if (val?.nodeType) {
+        val = val.textContent;
+    }
+    return val.replace(/\u200B/g, '{ZWSP}').replace(/\u00A0/g, ' ');
 }
 
 function icon(iconClass) {
@@ -754,6 +758,46 @@ describe("The rich text editor", function () {
                         assert.equal(exprInput[0].querySelectorAll('.label-datanode').length, 1);
                         done();
                     });
+                });
+            });
+
+            it("should extend selection past bubble on shift+click", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const firstText = exprInput[0].querySelector('p').firstChild;
+                    window.getSelection().setBaseAndExtent(firstText, 0, firstText, 0);
+
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {
+                        bubbles: true,
+                        shiftKey: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "1 + {ZWSP} text{ZWSP}", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "{ZWSP} + 2", "unexpected focus");
+                    done();
+                });
+            });
+
+            it("should extend selection backward past bubble on shift+click", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const trailingText = paragraph.childNodes[2];
+                    // Anchor just past the bubble's trailing ZWSP, selection extends to end.
+                    window.getSelection().setBaseAndExtent(
+                        trailingText, 3, trailingText, trailingText.nodeValue.length
+                    );
+
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {
+                        bubbles: true,
+                        shiftKey: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "{ZWSP} text{ZWSP} +", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "1 + {ZWSP}", "unexpected focus");
+                    done();
                 });
             });
         });

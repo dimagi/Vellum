@@ -330,12 +330,36 @@ var editor = function(input, form, options) {
             event.preventDefault();
             bubbleClickInProgress = true;
             inputElement.focus();
-            selectBubbleAtom(bubble);
+            if (event.shiftKey) {
+                extendSelectionPastBubble(bubble);
+            } else {
+                selectBubbleAtom(bubble);
+            }
             setTimeout(() => { bubbleClickInProgress = false; }, 0);
         }
     });
 
+    function extendSelectionPastBubble(bubble) {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) {
+            selectBubbleAtom(bubble);
+            return;
+        }
+        const {anchorNode, anchorOffset} = selection;
+        const [startNode, startOffset, endNode, endOffset] = getBubbleAtomBoundaries(bubble);
+        const bubbleRange = document.createRange();
+        bubbleRange.selectNode(bubble);
+        const anchorIsBeforeBubble = bubbleRange.comparePoint(anchorNode, anchorOffset) < 0;
+        const focusNode = anchorIsBeforeBubble ? endNode : startNode;
+        const focusOffset = anchorIsBeforeBubble ? endOffset : startOffset;
+        selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
+    }
+
     function selectBubbleAtom(bubble) {
+        window.getSelection().setBaseAndExtent(...getBubbleAtomBoundaries(bubble));
+    }
+
+    function getBubbleAtomBoundaries(bubble) {
         const prev = bubble.previousSibling;
         const next = bubble.nextSibling;
         const parent = bubble.parentNode;
@@ -344,13 +368,12 @@ var editor = function(input, form, options) {
                 prev.nodeValue.endsWith(ZERO_WIDTH_SPACE);
         const hasTrailingZwsp = next && next.nodeType === Node.TEXT_NODE &&
                 next.nodeValue.startsWith(ZERO_WIDTH_SPACE);
-        const startNode = hasLeadingZwsp ? prev : parent;
-        const startOffset = hasLeadingZwsp ? prev.nodeValue.length - 1 : bubbleIndex;
-        const endNode = hasTrailingZwsp ? next : parent;
-        const endOffset = hasTrailingZwsp ? 1 : bubbleIndex + 1;
-        window.getSelection().setBaseAndExtent(
-            startNode, startOffset, endNode, endOffset
-        );
+        return [
+            /* startNode   */ hasLeadingZwsp ? prev : parent,
+            /* startOffset */ hasLeadingZwsp ? prev.nodeValue.length - 1 : bubbleIndex,
+            /*   endNode   */ hasTrailingZwsp ? next : parent,
+            /*   endOffset */ hasTrailingZwsp ? 1 : bubbleIndex + 1,
+        ];
     }
 
     function updateBubbleSelectedState() {
