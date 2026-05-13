@@ -142,11 +142,6 @@ var editor = function(input, form, options) {
             selection.removeAllRanges();
             selection.addRange(range);
             range.deleteContents();
-            if (insertSpaces) {
-                const leadingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE);
-                range.insertNode(leadingSpaceNode);
-                range.setStartAfter(leadingSpaceNode);
-            }
 
             const fragment = htmlToFragment(content);
             const nodesNeedingPopovers = [];
@@ -159,8 +154,8 @@ var editor = function(input, form, options) {
             range.collapse();
 
             if (insertSpaces) {
-                const trailingSpaceNode = document.createTextNode(ZERO_WIDTH_SPACE + " ");
-                range.insertNode(trailingSpaceNode);
+                const trailingSpace = document.createTextNode(" ");
+                range.insertNode(trailingSpace);
                 range.collapse();
             }
 
@@ -421,17 +416,6 @@ var editor = function(input, form, options) {
             var richTextValue = toRichText(value, form, options);
             inputElement.innerHTML = richTextValue;
 
-            const nonEditableSpans = inputElement.querySelectorAll('span[contenteditable="false"]');
-            nonEditableSpans.forEach(span => {
-                const prevNode = span.previousSibling,
-                      nextNode = span.nextSibling;
-                if (!prevNode || prevNode.nodeType !== Node.TEXT_NODE || !prevNode.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
-                    span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span);
-                }
-                if (!nextNode || nextNode.nodeType !== Node.TEXT_NODE || !nextNode.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
-                    span.parentNode.insertBefore(document.createTextNode(ZERO_WIDTH_SPACE), span.nextSibling);
-                }
-            });
             // Add ZWSP at the end to prevent browsers from replacing tailing spaces
             // with other characters changing the overall behavior
             inputElement.innerHTML += ZERO_WIDTH_SPACE;
@@ -452,10 +436,7 @@ var editor = function(input, form, options) {
             if (options.isExpression) {
                 insertHtmlWithSpace(bubbleExpression(xpath, form), true);
             } else {
-                var output = makeBubble(form, xpath);
-                insertHtmlWithSpace($('<p>')
-                    .append(output)
-                    .html(), true);
+                insertHtmlWithSpace(makeBubble(form, xpath), true);
             }
             return wrapper;
         },
@@ -779,12 +760,17 @@ function getBubbleDisplayValue(path, xpathParser) {
 }
 
 /**
- * Make a xpath bubble
+ * Make a xpath bubble wrapped in zero-width-spaces (ZWSP).
+ *
+ * The leading/trailing ZWSPs are part of the bubble's "atomic" boundary;
+ * they give the cursor a real text position next to a contenteditable="false"
+ * span and act as a delete sentinel that the input handler watches.
  *
  * @param xpath - xpath expression to set as the bubble value.
- * @returns jquery object of the bubble
+ * @param attrs - optional extra attributes to set on the bubble span.
+ * @returns HTML string: `ZWSP<span ...>...</span>ZWSP`
  */
-function makeBubble(form, xpath) {
+function makeBubble(form, xpath, attrs) {
     function _parseXPath(xpath, form) {
         if (!FORM_REF_REGEX.test(xpath)) {
             if (form.isValidHashtag(xpath)) {
@@ -819,13 +805,16 @@ function makeBubble(form, xpath) {
             .attr('id', uniqueId)
             .append(icon)
             .append(dispValue);
-
-    return $bubble;
+    if (attrs) {
+        $bubble.attr(attrs);
+    }
+    return ZERO_WIDTH_SPACE + $bubble.prop('outerHTML') + ZERO_WIDTH_SPACE;
 }
 
 /**
  * @param output - <output ...> DOM element
- * @returns - jquery object of xpath bubble or string
+ * @returns - HTML string for the xpath bubble (with surrounding ZWSPs) or
+ *            plain-text fallback when the value isn't a recognized reference.
  */
 function outputToBubble(form, output) {
     var info = extractXPathInfo($(output)),
@@ -838,13 +827,7 @@ function outputToBubble(form, output) {
     if (!startsWithRef || (startsWithRef && containsWhitespace)) {
         return $('<span>').text(xml.normalize(output)).html();
     }
-    // return $('<div>').append(makeBubble(form, xpath).attr(attrs)).html();
-    const m = $('<div>')
-        .append(document.createTextNode(ZERO_WIDTH_SPACE))
-        .append(makeBubble(form, xpath).attr(attrs))
-        .append(document.createTextNode(ZERO_WIDTH_SPACE))
-        .html();
-    return m;
+    return makeBubble(form, xpath, attrs);
 }
 
 /**
@@ -923,10 +906,9 @@ function bubbleExpression(text, form) {
         transform = form.transformHashtags;
     }
     function bubble(hashtag) {
-        return makeBubble(form, hashtag).prop('outerHTML');
+        return makeBubble(form, hashtag);
     }
-    const transformed = transform(text, bubble, true);
-    return transformed;
+    return transform(text, bubble, true);
 }
 
 function unwrapBubbles(text, form, isExpression) {

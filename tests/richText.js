@@ -133,7 +133,6 @@ function outputValueTemplateFn(path) {
 }
 
 function wrapWithDiv(el) { return $('<div>').append(el); }
-function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
 function wrapWithDivPZwsp(el) { return wrapWithDiv($('<p>').text(ZWSP).append(el).append(ZWSP)); }
 function html(value) { return wrapWithDiv(value).html(); }
 
@@ -185,7 +184,7 @@ describe("Rich text utilities", function() {
         _.each(simpleConversions, function(val) {
             it("from text to html: " + val[0], function() {
                 const richTextText = richText.toRichText(val[0], form, opts);
-                const expectedHtml = wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                const expectedHtml = wrapWithDivPZwsp(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
                 assert.strictEqual(richTextText, expectedHtml);
             });
 
@@ -239,21 +238,22 @@ describe("Rich text utilities", function() {
         var f_1065 = "#case/f_1065",
             ico = icon('fcc-fd-text'),
             opts = {isExpression: true},
+            wrap = function (bubble) { return ZWSP + html(bubble) + ZWSP; },
             equations = [
                 [
                     "#form/text = #form/othertext",
-                    html(makeBubble('#form/text', 'text', ico, true)) + " = " +
-                    html(makeBubble('#form/othertext', 'othertext', ico, true))
+                    wrap(makeBubble('#form/text', 'text', ico, true)) + " = " +
+                    wrap(makeBubble('#form/othertext', 'othertext', ico, true))
                 ],
                 [
                     "#form/text <= #form/othertext",
-                    html(makeBubble('#form/text', 'text', ico, true)) + " <= " +
-                    html(makeBubble('#form/othertext', 'othertext', ico, true))
+                    wrap(makeBubble('#form/text', 'text', ico, true)) + " <= " +
+                    wrap(makeBubble('#form/othertext', 'othertext', ico, true))
                 ],
                 [
                     f_1065 + " = " + f_1065,
-                    html(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")) + " = " +
-                    html(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case"))
+                    wrap(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")) + " = " +
+                    wrap(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case"))
                 ],
             ];
 
@@ -598,9 +598,9 @@ describe("The rich text editor", function () {
                     input_[0].dispatchEvent(clipboardEvent);
 
                     const text = removeZWSP(removeSpanId(input_[0].innerHTML));
-                    const expText = removeSpanId(richText
+                    const expText = removeZWSP(removeSpanId(richText
                         .toRichText(initialExpr, form, opts)
-                        .replace(find, escapeHTML(pasteText)));
+                        .replace(find, escapeHTML(pasteText))));
                     assert.equal(text, expText);
                     assert.equal(editor.getValue(),
                         initialExpr.substring(0, selStart) + pasteText +
@@ -654,7 +654,7 @@ describe("The rich text editor", function () {
             it("should make bubbles on converting to rich text: " + repr, function () {
                 var text = richText.toRichText(result, form, {isExpression: true}),
                     bubble = makeBubble('#form/text', 'text', icon('fcc-fd-text'), true),
-                    expected = (expr.slice(0, i) + html(bubble) + " " + expr.slice(i)),
+                    expected = (expr.slice(0, i) + ZWSP + html(bubble) + ZWSP + " " + expr.slice(i)),
                     expected2 = expected
                         .replace(/  $/, "")  // HACK for "one =  "
                         .replace(/  /g, " &nbsp;")
@@ -693,6 +693,20 @@ describe("The rich text editor", function () {
                     window.getSelection().setBaseAndExtent(tail, 0, tail, 0);
                     document.dispatchEvent(new Event('selectionchange'));
                     assert.isFalse(bubble.classList.contains('selected'), "unmarked when selection moves away");
+                    done();
+                });
+            });
+
+            it("should not orphan a neighbor bubble when an adjacent bubble is deleted", function (done) {
+                exprEditor.setValue("#invalid/xpath `#form/text``#form/othertext`", function () {
+                    const before = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(before.length, 2, "precondition: two bubbles");
+                    const [first] = before;
+                    first.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    window.getSelection().getRangeAt(0).deleteContents();
+                    exprInput[0].dispatchEvent(new Event('input', {bubbles: true}));
+                    const after = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(after.length, 1, "only the clicked bubble is removed");
                     done();
                 });
             });
