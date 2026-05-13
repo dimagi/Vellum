@@ -707,6 +707,55 @@ describe("The rich text editor", function () {
                     done();
                 });
             });
+
+            it("should copy a selected bubble as its hashtag", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    assertCopy(exprInput, "#form/text");
+                    done();
+                });
+            });
+
+            it("should cut a selected bubble leaving no orphan ZWSP", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+
+                    const dataTransfer = new DataTransfer();
+                    exprInput[0].dispatchEvent(new ClipboardEvent('cut', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+
+                    assert.equal(dataTransfer.getData('text/plain'), "#form/text");
+                    assert.equal(exprEditor.getValue(), "1 +  + 2");
+                    done();
+                });
+            });
+
+            it("should paste a copied bubble", function (done) {
+                exprEditor.setValue("1 + #form/old + 2", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.setData('text/plain', '#form/new');
+                    exprInput[0].dispatchEvent(new ClipboardEvent('paste', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+                    assert.equal(exprEditor.getValue(), '1 + #form/new + 2');
+
+                    // get -> set (reload) to convert hashtag to bubble
+                    exprEditor.setValue(exprEditor.getValue(), function () {
+                        assert.equal(exprInput[0].querySelectorAll('.label-datanode').length, 1);
+                        done();
+                    });
+                });
+            });
         });
     });
 
