@@ -362,18 +362,7 @@ var editor = function(input, form, options) {
     function getBubbleAtomBoundaries(bubble) {
         const prev = bubble.previousSibling;
         const next = bubble.nextSibling;
-        const parent = bubble.parentNode;
-        const bubbleIndex = Array.prototype.indexOf.call(parent.childNodes, bubble);
-        const hasLeadingZwsp = prev && prev.nodeType === Node.TEXT_NODE &&
-                prev.nodeValue.endsWith(ZERO_WIDTH_SPACE);
-        const hasTrailingZwsp = next && next.nodeType === Node.TEXT_NODE &&
-                next.nodeValue.startsWith(ZERO_WIDTH_SPACE);
-        return [
-            /* startNode   */ hasLeadingZwsp ? prev : parent,
-            /* startOffset */ hasLeadingZwsp ? prev.nodeValue.length - 1 : bubbleIndex,
-            /*   endNode   */ hasTrailingZwsp ? next : parent,
-            /*   endOffset */ hasTrailingZwsp ? 1 : bubbleIndex + 1,
-        ];
+        return [prev, prev.nodeValue.length - 1, next, 1];
     }
 
     function updateBubbleSelectedState() {
@@ -496,11 +485,17 @@ var editor = function(input, form, options) {
         if (selection.rangeCount > 0) {
             const range = selection.getRangeAt(0),
                   container = document.createElement('div');
+            if (e.type === 'cut') {
+                expandRangeOverClippedBubbleAtoms(range);
+            }
             container.appendChild(range.cloneContents());
             selectedText = fromRichText(container.innerHTML, form, options.isExpression);
 
             if (e.type === 'cut') {
                 range.deleteContents();
+                // Run the input handler to clean up any bubble whose ZWSP boundary
+                // the cut clipped, and to push the post-cut state onto the undo stack.
+                inputElement.dispatchEvent(new Event('input', {bubbles: true}));
             }
             if (isInvalid(selectedText)) {
                 selectedText = escapedHashtags.transform(
@@ -512,6 +507,28 @@ var editor = function(input, form, options) {
         if (e.clipboardData) {
             e.clipboardData.setData('text/plain', selectedText);
         }
+    }
+
+    function expandRangeOverClippedBubbleAtoms(range) {
+        // If the selection slices through a bubble's ZWSP boundary without
+        // including the bubble itself, the post-cut input handler will remove
+        // the partially selected bubble, so it must also land on the clipboard.
+        inputElement.querySelectorAll('.label-datanode').forEach(bubble => {
+            if (range.intersectsNode(bubble)) return;
+            const prev = bubble.previousSibling;
+            const next = bubble.nextSibling;
+            const leadingZwspInRange =
+                range.comparePoint(prev, prev.nodeValue.length - 1) === 0 &&
+                range.comparePoint(prev, prev.nodeValue.length) === 0;
+            const trailingZwspInRange =
+                range.comparePoint(next, 0) === 0 &&
+                range.comparePoint(next, 1) === 0;
+            if (leadingZwspInRange) {
+                range.setEnd(next, 1);
+            } else if (trailingZwspInRange) {
+                range.setStart(prev, prev.nodeValue.length - 1);
+            }
+        });
     }
 
     inputElement.addEventListener('copy', handleCopyOrCut);
@@ -595,6 +612,9 @@ var editor = function(input, form, options) {
                 if (!inputElement.innerHTML.endsWith(ZERO_WIDTH_SPACE)) {
                     inputElement.innerHTML += ZERO_WIDTH_SPACE;
                 }
+                // Run the input handler to clean up any bubble whose ZWSP boundary
+                // the inserted content clipped, and to push the new state onto the undo stack.
+                inputElement.dispatchEvent(new Event('input', {bubbles: true}));
             }
         }
     }

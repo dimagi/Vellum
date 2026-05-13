@@ -800,6 +800,56 @@ describe("The rich text editor", function () {
                     done();
                 });
             });
+
+            it("should clean up neighbor bubble whose ZWSP boundary was clipped by cut", function (done) {
+                exprEditor.setValue("#invalid/xpath `#form/text``#form/othertext`", function () {
+                    const bubbles = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(bubbles.length, 2, "precondition: two bubbles");
+                    const [first] = bubbles;
+                    first.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    // Extend the selection to consume both ZWSPs between the bubbles,
+                    // clipping the second bubble's leading ZWSP.
+                    window.getSelection().getRangeAt(0).setEnd(first.nextSibling, 2);
+
+                    const dataTransfer = new DataTransfer();
+                    exprInput[0].dispatchEvent(new ClipboardEvent('cut', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+                    assert.equal(dataTransfer.getData('text/plain'), "#form/text#form/othertext");
+
+                    assert.equal(
+                        exprInput[0].querySelectorAll('.label-datanode').length, 0,
+                        "the neighbor with broken ZWSP boundary is also removed"
+                    );
+                    done();
+                });
+            });
+
+            it("should clean up neighbor bubble whose ZWSP boundary was clipped by paste", function (done) {
+                exprEditor.setValue("#invalid/xpath `#form/text``#form/othertext`", function () {
+                    const bubbles = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(bubbles.length, 2, "precondition: two bubbles");
+                    const [first] = bubbles;
+                    first.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    window.getSelection().getRangeAt(0).setEnd(first.nextSibling, 2);
+
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.setData('text/plain', 'X');
+                    exprInput[0].dispatchEvent(new ClipboardEvent('paste', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+
+                    assert.equal(
+                        exprInput[0].querySelectorAll('.label-datanode').length, 0,
+                        "the neighbor with broken ZWSP boundary is also removed"
+                    );
+                    done();
+                });
+            });
         });
     });
 
