@@ -340,6 +340,38 @@ var editor = function(input, form, options) {
         y = e.clientY;
     });
 
+    let bubbleClickInProgress = false;
+    inputElement.addEventListener('mousedown', function (event) {
+        // Select bubble on click. Use mousedown because it fires before
+        // the browser positions the caret.
+        const bubble = event.target?.closest?.('.label-datanode');
+        if (bubble && inputElement.contains(bubble)) {
+            event.preventDefault();
+            bubbleClickInProgress = true;
+            inputElement.focus();
+            selectBubbleAtom(bubble);
+            setTimeout(() => { bubbleClickInProgress = false; }, 0);
+        }
+    });
+
+    function selectBubbleAtom(bubble) {
+        const prev = bubble.previousSibling;
+        const next = bubble.nextSibling;
+        const parent = bubble.parentNode;
+        const bubbleIndex = Array.prototype.indexOf.call(parent.childNodes, bubble);
+        const hasLeadingZwsp = prev && prev.nodeType === Node.TEXT_NODE &&
+                prev.nodeValue.endsWith(ZERO_WIDTH_SPACE);
+        const hasTrailingZwsp = next && next.nodeType === Node.TEXT_NODE &&
+                next.nodeValue.startsWith(ZERO_WIDTH_SPACE);
+        const startNode = hasLeadingZwsp ? prev : parent;
+        const startOffset = hasLeadingZwsp ? prev.nodeValue.length - 1 : bubbleIndex;
+        const endNode = hasTrailingZwsp ? next : parent;
+        const endOffset = hasTrailingZwsp ? 1 : bubbleIndex + 1;
+        window.getSelection().setBaseAndExtent(
+            startNode, startOffset, endNode, endOffset
+        );
+    }
+
     if (arguments.length === 1) {
         throw new Error("editor not initialized: " +
                         $("<div>").append(input).html());
@@ -515,6 +547,7 @@ var editor = function(input, form, options) {
     });
 
     inputElement.addEventListener('focus', function () {
+        if (bubbleClickInProgress) { return; }
         const lastChild = inputElement.lastChild;
         if (lastChild && lastChild.length > 0) { // should always be true because of the tailing ZWSP
             const selection = window.getSelection();

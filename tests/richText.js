@@ -87,6 +87,19 @@ var assert = chai.assert,
     }];
 const ZWSP = "\u200B";
 
+/**
+ * Escape zero-width spaces and normalize non-breaking spaces in string
+ *
+ * Convert non-breaking space (\u00A0) to normal space to resolve
+ * selection.toString() difference between Chrome and Firefox.
+ *
+ * @param {String} str - String to be escaped.
+ * @returns String with visible {ZWSP} and NBSP normalized to space
+ */
+function escape(str) {
+    return str.replace(/\u200B/g, '{ZWSP}').replace(/\u00A0/g, ' ');
+}
+
 function icon(iconClass) {
     if (iconClass.startsWith("fa-")) {
         return $('<i>').addClass(iconClass).html('&nbsp;');
@@ -649,6 +662,26 @@ describe("The rich text editor", function () {
                 assert.equal(removeSpanId(text), "<p>" + expected2 + "</p>");
             });
         }));
+
+        describe("bubble selection", function () {
+
+            it("should select bubble atom on mousedown", function (done) {
+                exprEditor.setValue("#form/text", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+
+                    const selection = window.getSelection();
+                    assert.equal(selection.rangeCount, 1, "selection range count");
+                    const range = selection.getRangeAt(0);
+                    assert.equal(
+                        escape(range.toString()),
+                        escape(`${ZWSP} text${ZWSP}`),
+                        "selection covers leading ZWSP, bubble text, trailing ZWSP"
+                    );
+                    done();
+                });
+            });
+        });
     });
 
     describe("in vellum", function() {
