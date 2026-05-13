@@ -7,6 +7,7 @@ import CodeMirror from "codemirror";
 import main_template from "vellum/templates/main.html";
 import add_question from "vellum/templates/add_question.html";
 import edit_source from "vellum/templates/edit_source.html";
+import edit_form_details_modal from "vellum/templates/edit_form_details_modal.html";
 import confirm_overwrite from "vellum/templates/confirm_overwrite.html";
 import control_group_stdInput from "vellum/templates/control_group_stdInput.html";
 import form_errors_template from "vellum/templates/form_errors_template.html";
@@ -549,6 +550,10 @@ fn._init_extra_tools = function () {
         });
     });
 
+    this.$f.find('.fd-edit-form-details-button').click(function () {
+        _this.showEditFormDetailsModal();
+    });
+
     // Section toggling menu
     this.$f.find(".fd-content-right").on('click', '.fd-section-changer .dropdown-menu a', function(e) {
         var $link = $(e.target);
@@ -788,6 +793,33 @@ fn.showOverwriteWarning = function(send, formText, serverForm) {
 
     $('#form-differences').hide();
     $modal.modal('show');
+};
+
+fn.showEditFormDetailsModal = function () {
+    var _this = this,
+        form = this.data.core.form,
+        $modal = this.generateNewModal(gettext("Edit Form Details"), [
+            {
+                title: gettext("Update"),
+                cssClasses: "btn-primary",
+                action: function () {
+                    form.setAttr('formName', $nameInput.val());
+                    form.setAttr('formComment', $commentInput.val());
+                    _this.$f.find('.fd-tree .fd-head-text').text(form.formName);
+                    _this.closeModal();
+                }
+            }
+        ], gettext("Cancel")),
+        $body = $(edit_form_details_modal()),
+        $nameInput = $body.find('.fd-form-name').val(form.formName),
+        $commentInput = $body.find('.fd-form-comment').val(form.formComment);
+
+    $modal.find('.modal-body').html($body);
+
+    $modal.modal('show');
+    $modal.one('shown.bs.modal', function () {
+        $nameInput.focus();
+    });
 };
 
 fn.showFormPropertiesModal = function () {
