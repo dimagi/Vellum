@@ -517,7 +517,7 @@ describe("The rich text editor", function () {
             assert.equal(editor.getValue(), 'A');
         });
 
-        function assertCopy($editor, value, callback) {
+        function assertCopy($editor, value) {
             const dataTransfer = new DataTransfer();
             const clipboardEvent = new ClipboardEvent('copy', {
                 clipboardData: dataTransfer,
@@ -528,7 +528,6 @@ describe("The rich text editor", function () {
 
             assert.equal(dataTransfer.getData('text/plain'), value);
             assert.strictEqual(dataTransfer.getData("text/html"), '');
-            callback();
         }
 
         var TEST_LABEL = 'Weight: <output value="#form/text" /> grams',
@@ -537,18 +536,16 @@ describe("The rich text editor", function () {
         it("should copy output tag from rich text editor", function (done) {
             editor.setValue(TEST_LABEL, function () {
                 editor.select(6, 4);
-                assertCopy(input, ': <output value="#form/text" />', function () {
-                    done();
-                });
+                assertCopy(input, ': <output value="#form/text" />');
+                done();
             });
         });
 
         it("should copy expression with hashtags from expression editor", function (done) {
             exprEditor.setValue(TEST_XPATH, function () {
                 exprEditor.select(11, 5);
-                assertCopy(exprInput, "+ (#case/dob", function () {
-                    done();
-                });
+                assertCopy(exprInput, "+ (#case/dob");
+                done();
             });
         });
 
