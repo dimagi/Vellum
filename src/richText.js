@@ -422,7 +422,7 @@ var editor = function(input, form, options) {
             if (options.isExpression) {
                 insertHtmlWithSuffix(bubbleExpression(xpath, form));
             } else {
-                insertHtmlWithSuffix(makeBubble(form, xpath));
+                insertHtmlWithSuffix(makeBubble(xpath, form));
             }
             return wrapper;
         },
@@ -756,7 +756,7 @@ function getBubbleDisplayValue(path, xpathParser) {
  * @param attrs - optional extra attributes to set on the bubble span.
  * @returns HTML string: `ZWSP<span ...>...</span>ZWSP`
  */
-function makeBubble(form, xpath, attrs) {
+function makeBubble(xpath, form, attrs) {
     function _parseXPath(xpath, form) {
         if (!FORM_REF_REGEX.test(xpath)) {
             if (form.isValidHashtag(xpath)) {
@@ -802,7 +802,7 @@ function makeBubble(form, xpath, attrs) {
  * @returns - HTML string for the xpath bubble (with surrounding ZWSPs) or
  *            plain-text fallback when the value isn't a recognized reference.
  */
-function outputToBubble(form, output) {
+function outputToBubble(output, form) {
     var info = extractXPathInfo($(output)),
         xpath = form.normalizeHashtag(info.value, true),
         attrs = _.omit(info, 'value'),
@@ -813,7 +813,7 @@ function outputToBubble(form, output) {
     if (!startsWithRef || (startsWithRef && containsWhitespace)) {
         return $('<span>').text(xml.normalize(output)).html();
     }
-    return makeBubble(form, xpath, attrs);
+    return makeBubble(xpath, form, attrs);
 }
 
 /**
@@ -829,12 +829,12 @@ function bubbleOutputs(text, form, escape) {
     if (escape) {
         replacer = function () {
             var id = util.get_guid();
-            places[id] = outputToBubble(form, this);
+            places[id] = outputToBubble(this, form);
             return "{" + id + "}";
         };
     } else {
         replacer = function () {
-            return outputToBubble(form, this);
+            return outputToBubble(this, form);
         };
     }
     el.find('output').replaceWith(replacer);
@@ -892,7 +892,7 @@ function bubbleExpression(text, form) {
         transform = form.transformHashtags;
     }
     function bubble(hashtag) {
-        return makeBubble(form, hashtag);
+        return makeBubble(hashtag, form);
     }
     return transform(text, bubble, true);
 }
