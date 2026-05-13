@@ -89,6 +89,19 @@
                 line-height: @height;
                 font-size: @baseFontSize * 0.9;
                 min-width: @menuContainerWidth;
+                display: flex;
+
+                .fd-edit-form-details-button {
+                    padding: 0 @contentPaddingVellum;
+                    color: @white;
+                    background: @cc-brand-low;
+                    border: 0;
+                    cursor: pointer;
+              
+                    &:hover {
+                        background: @cc-brand-mid;
+                    }
+                }
 
                 // Icon link to open dropdown
                 .dropdown {
