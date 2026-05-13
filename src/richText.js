@@ -225,57 +225,80 @@ var editor = function(input, form, options) {
         }
     });
 
-    inputElement.addEventListener('mouseup', checkCursorPosition);
-    inputElement.addEventListener('keyup', checkCursorPosition);
+    inputElement.addEventListener('mouseup', snapSelectionAtBubbleBoundary);
+    inputElement.addEventListener('keyup', snapSelectionAtBubbleBoundary);
 
-    function checkCursorPosition(event) {
+    function snapSelectionAtBubbleBoundary(event) {
+        // The selection's focus end should not fall between a bubble and one of
+        // its surrounding ZWSPs. For a collapsed cursor, follow the arrow-key
+        // direction; otherwise bump outside. For an extended (shift+key)
+        // selection, jump the focus past the entire bubble atom.
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
-
         const range = selection.getRangeAt(0);
-        if (!range.collapsed) return; // Only check when cursor is a point, not a selection
+        const focusNode = selection.focusNode;
+        const focusOffset = selection.focusOffset;
+        if (!focusNode || focusNode.nodeType !== Node.TEXT_NODE) return;
+        const value = focusNode.nodeValue;
 
-        const node = range.startContainer,
-              offset = range.startOffset;
-
-        // The cursor should not be between the bubble span and the ZWSP that surround it.
-        // If it got moved there using arrow keys follow the direction and place it on the
-        // other side of the span. If not, move the cursor to the outside.
-        if (node.nodeType === Node.TEXT_NODE) {
-            // Check if cursor is at the end of a text node that ends with ZWSP
-            if (offset === node.length && node.nodeValue.endsWith(ZERO_WIDTH_SPACE)) {
-                const nextNode = node.nextSibling;
-                if (nextNode && nextNode.nodeName.toLowerCase() === 'span' &&
-                    nextNode.contentEditable === 'false') {
-                    if (event.keyCode === 39) { //right arrow
-                       const nodeAfterSpan = nextNode.nextSibling;
-                       if (nodeAfterSpan && nodeAfterSpan.nodeType === Node.TEXT_NODE) {
-                           range.setStart(nodeAfterSpan, 1);
-                           range.collapse(true);
-                       }
-                    } else {
-                        range.setStart(node, offset - 1);
-                        range.collapse(true);
+        // Right-side boundary: focus at end of text ending with ZWSP.
+        if (focusOffset === value.length && value.endsWith(ZERO_WIDTH_SPACE)) {
+            const bubble = focusNode.nextSibling;
+            const isBubble = bubble?.classList?.contains('label-datanode');
+            if (range.collapsed) {
+                if (isBubble) {
+                    if (event.keyCode === 39) { // right arrow: past atom
+                        range.setStart(bubble.nextSibling, 1);
+                    } else { // bump back outside the leading ZWSP
+                        range.setStart(focusNode, focusOffset - 1);
                     }
-                } else if (!nextNode && node.parentNode.getAttribute('contenteditable') === 'true') { // behind the last ZWSP at the end
-                    range.setStart(node, offset - 1);
+                    range.collapse(true);
+                } else if (!bubble && focusNode.parentNode.getAttribute('contenteditable') === 'true') {
+                    // Behind the editor's trailing sentinel ZWSP.
+                    range.setStart(focusNode, focusOffset - 1);
                     range.collapse(true);
                 }
+            } else if (isBubble) {
+                selection.extend(bubble.nextSibling, 1);
             }
+            return;
+        }
 
-            if (offset === 0 && node.nodeValue.startsWith(ZERO_WIDTH_SPACE)) {
-                const prevNode = node.previousSibling;
-                if (prevNode && prevNode.nodeName.toLowerCase() === 'span' &&
-                    prevNode.contentEditable === 'false') {
-                    if (event.keyCode === 37) { //left arrow
-                        const nodeLeftOfSpan = prevNode.previousSibling;
-                        range.setStart(nodeLeftOfSpan, nodeLeftOfSpan.nodeValue.length - 1); // jumping over span and ZWSP
-                        range.collapse(true);
-                    } else {
-                        range.setStart(node, 1);
-                        range.collapse(true);
+        // Left-side boundary: focus at start of text starting with ZWSP.
+        if (focusOffset === 0 && value.startsWith(ZERO_WIDTH_SPACE)) {
+            const bubble = focusNode.previousSibling;
+            const isBubble = bubble?.classList?.contains('label-datanode');
+            if (range.collapsed) {
+                if (isBubble) {
+                    if (event.keyCode === 37) { // left arrow: past atom
+                        const prev = bubble.previousSibling;
+                        range.setStart(prev, prev.nodeValue.length - 1);
+                    } else { // bump forward outside the trailing ZWSP
+                        range.setStart(focusNode, 1);
                     }
+                    range.collapse(true);
                 }
+            } else if (isBubble) {
+                const prev = bubble.previousSibling;
+                selection.extend(prev, prev.nodeValue.length - 1);
+            }
+            return;
+        }
+
+        // Focus has landed inside a bubble's content (e.g., word-jump or
+        // drag-select crossed into a bubble). Snap it out to the boundary
+        // on the side that extends the selection further.
+        const bubble = focusNode.parentElement?.closest('.label-datanode');
+        if (bubble && !range.collapsed) {
+            const bubbleRange = document.createRange();
+            bubbleRange.selectNode(bubble);
+            const anchorBefore = bubbleRange.comparePoint(
+                selection.anchorNode, selection.anchorOffset) < 0;
+            if (anchorBefore) {
+                selection.extend(bubble.nextSibling, 1);
+            } else {
+                const prev = bubble.previousSibling;
+                selection.extend(prev, prev.nodeValue.length - 1);
             }
         }
     }

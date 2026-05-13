@@ -850,6 +850,109 @@ describe("The rich text editor", function () {
                     done();
                 });
             });
+
+            it("should extend selection past whole bubble on shift+ArrowRight", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const firstText = paragraph.firstChild;
+                    // Select two chars before the bubble's leading ZWSP.
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(firstText, 2, firstText, 4);
+                    assert.equal(escape(sel.toString()), "+ ", "precondition failed");
+                    // Simulate the browser's default one-char extension into the boundary.
+                    sel.extend(firstText, firstText.nodeValue.length);
+                    assert.equal(escape(sel.toString()), "+ {ZWSP}", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowRight',
+                        shiftKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "+ {ZWSP} text{ZWSP}", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "{ZWSP} + 2", "unexpected focus");
+                    done();
+                });
+            });
+
+            it("should extend selection past whole bubble on shift+ArrowLeft", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const trailingText = paragraph.childNodes[2];
+                    // Select two chars after the bubble's trailing ZWSP, focus on the left.
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(trailingText, 3, trailingText, 1);
+                    assert.equal(escape(sel.toString()), " +", "precondition failed");
+                    // Simulate the browser's default one-char extension into the boundary.
+                    sel.extend(trailingText, 0);
+                    assert.equal(escape(sel.toString()), "{ZWSP} +", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowLeft',
+                        shiftKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "{ZWSP} text{ZWSP} +", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "1 + {ZWSP}", "unexpected focus node");
+                    done();
+                });
+            });
+
+            it("should snap to atomic boundary when selection ends in bubble node", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const firstText = paragraph.firstChild;
+                    // bubbleText is 'text' node in <span><i>&nbsp;</i>text</span>
+                    const bubbleText = paragraph.childNodes[1].childNodes[1];
+                    // Simulate post-extension state: focus lies between leading ZWSP and bubble
+                    // (e.g., after a Ctrl+Shift+ArrowRight word jump).
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(firstText, 0, bubbleText, 0);
+                    assert.equal(escape(sel.toString()), "1 + {ZWSP}", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowRight',
+                        shiftKey: true,
+                        ctrlKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "1 + {ZWSP} text{ZWSP}", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "{ZWSP} + 2", "unexpected focus");
+                    done();
+                });
+            });
+
+            it("should snap to atomic boundary when (reverse) selection ends in bubble node", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const trailingText = paragraph.childNodes[2];
+                    // Simulate post-extension state: focus lies between bubble and trailing ZWSP.
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(trailingText, trailingText.nodeValue.length, trailingText, 0);
+                    assert.equal(escape(sel.toString()), "{ZWSP} + 2", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowLeft',
+                        shiftKey: true,
+                        ctrlKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "{ZWSP} text{ZWSP} + 2", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "1 + {ZWSP}", "unexpected focus");
+                    done();
+                });
+            });
         });
     });
 
