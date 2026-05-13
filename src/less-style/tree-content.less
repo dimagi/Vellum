@@ -81,8 +81,41 @@
                 font-size: 14px;
             }
 
+            // Question tree menu (language switcher, copy, paste, etc.)
             .fd-head-menu-container {
+                position: absolute;
+                right: 0px;
+                top: 0px;
                 line-height: @height;
+                font-size: @baseFontSize * 0.9;
+                min-width: @menuContainerWidth;
+
+                // Icon link to open dropdown
+                .dropdown {
+                    .dropdown-toggle {
+                        color: @white;
+                        cursor: pointer;
+                        display: block;
+                        padding: 0 @contentPaddingVellum;
+                        text-decoration: none;
+                        background-color: @cc-brand-low;
+
+                        &:hover {
+                            text-decoration: none;
+                            background-color: @cc-brand-mid;
+                        }
+                    }
+
+                    // Menu options
+                    .dropdown-menu {
+                        a {
+                            min-width: 170px;
+                            > .hotkey {
+                                float: right;
+                            }
+                        }
+                    }
+                }
             }
         }
 
