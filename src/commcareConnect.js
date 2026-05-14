@@ -1,10 +1,12 @@
 /**
  * CommCare Connect plugin for Vellum
  *
- * This plugin adds two new mug types:
+ * This plugin adds new mug types:
  * - Learn Module
  * - Assessment Score
  * - Delivery Unit
+ * - Task
+ * - Work Area Update
  */
 import $ from "jquery";
 import _ from "underscore";
@@ -154,15 +156,6 @@ let mugConfigs = {
                         return val && val.match(/^\d+$/) ? "pass" : gettext("Must be an integer");
                     },
                     help: gettext('Estimated time to complete the module in hours.'),
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition'),
                 }
             })
         }),
@@ -201,15 +194,6 @@ let mugConfigs = {
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
                     help: gettext('XPath expression for the users assessment score.'),
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition')
                 }
             })
         }),
@@ -276,15 +260,6 @@ let mugConfigs = {
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
                     help: gettext('XPath expression for the work area ID associated with this Delivery Unit.'),
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition')
                 }
             })
         }),
@@ -329,15 +304,6 @@ let mugConfigs = {
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.richTextarea,
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition'),
                 }
             })
         }),
@@ -347,6 +313,88 @@ let mugConfigs = {
                     "nodeID",
                     "name",
                     "description",
+                ],
+            }),
+            _.clone(logicSection),
+        ],
+    },
+    ConnectWorkAreaUpdate: {
+        rootName: "work_area_update",
+        childNodes: [
+            {id: "work_area_id"},
+            {id: "status"},
+            {id: "reason"},
+            {id: "additional_details"},
+            {id: "photo_evidence"}
+        ],
+        mugOptions: util.extend(baseMugOptions, {
+            typeName: 'Work Area Update',
+            icon: 'fa fa-wrench',
+            init: mug => {
+                mug.p.work_area_id = "";
+                mug.p.status = "";
+                mug.p.reason = "";
+                mug.p.additional_details = "";
+                mug.p.photo_evidence = "";
+            },
+            spec: util.extend(baseSpec, {
+                nodeID: {
+                    lstring: gettext('Work Area Update ID'),
+                },
+                work_area_id: {
+                    lstring: gettext("Work Area ID"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: gettext('XPath expression for the work area ID associated with this update.'),
+                },
+                status: {
+                    lstring: gettext("Status"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: gettext('One of the valid values accepted by CommCare Connect like REQUEST_FOR_INACCESSIBLE')
+                },
+                reason: {
+                    lstring: gettext("Reason"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                },
+                additional_details: {
+                    lstring: gettext("Additional Details"),
+                    visibility: 'visible',
+                    presence: 'optional',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                },
+                photo_evidence: {
+                    lstring: gettext("Photo Evidence"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: gettext('Reference to the image uploaded for photo evidence'),
+                }
+            })
+        }),
+        sections: [
+            _.extend({}, baseSection, {
+                properties: [
+                    "nodeID",
+                    "work_area_id",
+                    "status",
+                    "reason",
+                    "additional_details",
+                    "photo_evidence",
                 ],
             }),
             _.clone(logicSection),

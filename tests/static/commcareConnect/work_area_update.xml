@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa" xmlns:vellum="http://commcarehq.org/xforms/vellum">
+	<h:head>
+		<h:title>Untitled Form</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E1B03643-109D-4DC6-9737-815E4401DE79" uiVersion="1" version="1" name="Untitled Form">
+					<status_choice />
+					<reason_text />
+					<details />
+					<photo />
+					<update_1 vellum:role="ConnectWorkAreaUpdate">
+						<work_area_update xmlns="http://commcareconnect.com/data/v1/learn" id="update_1">
+							<work_area_id/>
+							<status/>
+							<reason/>
+							<additional_details/>
+							<photo_evidence/>
+						</work_area_update>
+					</update_1>
+				</data>
+			</instance>
+			<instance src="jr://instance/session" id="commcaresession" />
+			<bind vellum:nodeset="#form/status_choice" nodeset="/data/status_choice" type="xsd:string" />
+			<bind vellum:nodeset="#form/reason_text" nodeset="/data/reason_text" type="xsd:string" />
+			<bind vellum:nodeset="#form/details" nodeset="/data/details" type="xsd:string" />
+			<bind vellum:nodeset="#form/photo" nodeset="/data/photo" type="binary" />
+			<bind vellum:nodeset="#form/update_1" nodeset="/data/update_1" relevant="x = 4" />
+			<bind nodeset="/data/update_1/work_area_update/work_area_id" calculate="instance('commcaresession')/session/data/work_area_id" />
+			<bind nodeset="/data/update_1/work_area_update/status" vellum:calculate="#form/status_choice" calculate="/data/status_choice" />
+			<bind nodeset="/data/update_1/work_area_update/reason" vellum:calculate="#form/reason_text" calculate="/data/reason_text" />
+			<bind nodeset="/data/update_1/work_area_update/additional_details" vellum:calculate="#form/details" calculate="/data/details" />
+			<bind nodeset="/data/update_1/work_area_update/photo_evidence" vellum:calculate="#form/photo" calculate="/data/photo" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="status_choice-label">
+						<value>status_choice</value>
+					</text>
+					<text id="reason_text-label">
+						<value>reason_text</value>
+					</text>
+					<text id="details-label">
+						<value>details</value>
+					</text>
+					<text id="photo-label">
+						<value>photo</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input vellum:ref="#form/status_choice" ref="/data/status_choice">
+			<label ref="jr:itext('status_choice-label')" />
+		</input>
+		<input vellum:ref="#form/reason_text" ref="/data/reason_text">
+			<label ref="jr:itext('reason_text-label')" />
+		</input>
+		<input vellum:ref="#form/details" ref="/data/details">
+			<label ref="jr:itext('details-label')" />
+		</input>
+		<upload mediatype="image/*" vellum:ref="#form/photo" ref="/data/photo">
+			<label ref="jr:itext('photo-label')" />
+		</upload>
+	</h:body>
+</h:html>
