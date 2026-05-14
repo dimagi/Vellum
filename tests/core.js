@@ -673,6 +673,62 @@ describe("Vellum core", function () {
         });
     });
 
+    describe("save POST carries name and comment", function () {
+        var SRV_FORM = new Array(20).join(" line one\n line two\n line three\n line four\n line five\n"),
+            vellum, patchData, fullData;
+        before(function (done) {
+            util.init({
+                core: {
+                    onReady: function () {
+                        vellum = this;
+                        done();
+                    },
+                    patchUrl: function (data) {
+                        patchData = data;
+                        return {status: "ok", sha1: "abc"};
+                    },
+                    saveUrl: function (data) {
+                        fullData = data;
+                        return {xform: data.xform};
+                    },
+                },
+            });
+        });
+        beforeEach(function () {
+            patchData = fullData = null;
+            vellum.data.core.saveButton.fire("change");
+            vellum.data.core.lastSavedXForm = SRV_FORM;
+            vellum.data.core.form.setAttr('formName', 'Survey');
+            vellum.data.core.form.setAttr('formComment', 'For Q2 rollout');
+        });
+
+        it("should include name and comment in a patch save", function () {
+            vellum.send(SRV_FORM + " edit", "patch");
+            assert(patchData, "patchUrl was not called");
+            assert(patchData.patch, "patch payload missing");
+            assert.equal(patchData.name, 'Survey');
+            assert.equal(patchData.comment, 'For Q2 rollout');
+        });
+
+        it("should include name and comment in a full save", function () {
+            vellum.send(SRV_FORM + " edit", "full");
+            assert(fullData, "saveUrl was not called");
+            assert(fullData.xform, "xform payload missing");
+            assert.equal(fullData.name, 'Survey');
+            assert.equal(fullData.comment, 'For Q2 rollout');
+        });
+
+        it("should include name and comment when patch is too long and falls back to full", function () {
+            // Tiny new form vs. long SRV_FORM means the patch text is longer
+            // than the new form text, triggering the auto-promote fallback
+            // inside fn.send.
+            vellum.send("abc", "patch");
+            assert(fullData, "saveUrl was not called (fallback didn't fire)");
+            assert.equal(fullData.name, 'Survey');
+            assert.equal(fullData.comment, 'For Q2 rollout');
+        });
+    });
+
     describe("with duplicate ID should", function () {
         var form, dup;
         before(function () {
