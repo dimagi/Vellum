@@ -1,7 +1,7 @@
 /**
  * CommCare Connect plugin for Vellum
  *
- * This plugin add new mug types:
+ * This plugin adds new mug types:
  * - Learn Module
  * - Assessment Score
  * - Delivery Unit
@@ -393,6 +393,7 @@ let mugConfigs = {
                     widget: widgets.xPath,
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
+                    help: gettext('One of the valid values accepted by CommCare Connect like REQUEST_FOR_INACCESSIBLE')
                 },
                 reason: {
                     lstring: gettext("Reason"),
