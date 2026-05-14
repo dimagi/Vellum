@@ -125,9 +125,11 @@ import('jquery.vellum').then(() => Promise.all([
         }, 500);
     }
 
-    $('#load-saved').click(function () {
+    function loadFromSession() {
         load(session.getItem("vellum.tests.main.lastSavedForm") || "");
-    });
+    }
+
+    $('#load-saved').click(loadFromSession);
 
     if (navigator.userAgent.indexOf('HeadlessChrome') >= 0) {
         load("", function () { mocha.run(); });
@@ -136,7 +138,7 @@ import('jquery.vellum').then(() => Promise.all([
         // (Application > Storage > Session Storage > http://localhost...
         //  > vellum.tests.main.lastSavedForm value)
         // and then add ?load=saved to query string and reload.
-        load(session.getItem("vellum.tests.main.lastSavedForm") || "");
+        loadFromSession();
     } else {
         load(""); // load empty form on initial page load
     }
