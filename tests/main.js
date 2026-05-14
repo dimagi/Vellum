@@ -81,7 +81,10 @@ import('jquery.vellum').then(() => Promise.all([
 ])).then(function() {
     // All tests are now loaded and registered with mocha
 
-    var session = window.sessionStorage;
+    var session = window.sessionStorage,
+        LAST_SAVED_FORM_KEY = "vellum.tests.main.lastSavedForm",
+        LAST_SAVED_FORM_NAME_KEY = "vellum.tests.main.lastSavedFormName",
+        LAST_SAVED_FORM_COMMENT_KEY = "vellum.tests.main.lastSavedFormComment";
 
     function runTests() {
         function showTestResults() {
@@ -104,18 +107,22 @@ import('jquery.vellum').then(() => Promise.all([
     }
     $('#run-tests').click(runTests);
 
-    function load(form, ready) {
+    function load(form, ready, formName, formComment) {
         $('#vellum').empty().vellum($.extend(true, {}, options.options, {
             core: {
                 onReady: ready,
                 saveUrl: function (data) {
-                    session.setItem("vellum.tests.main.lastSavedForm", data.xform);
+                    session.setItem(LAST_SAVED_FORM_KEY, data.xform);
+                    session.setItem(LAST_SAVED_FORM_NAME_KEY, data.name || "");
+                    session.setItem(LAST_SAVED_FORM_COMMENT_KEY, data.comment || "");
                 },
                 patchUrl: function (data) {
                     // fake conflict to retry with saveUrl
                     return {status: 'conflict'};
                 },
-                form: form
+                form: form,
+                formName: formName,
+                formComment: formComment,
             }
         }));
 
@@ -125,18 +132,26 @@ import('jquery.vellum').then(() => Promise.all([
         }, 500);
     }
 
-    $('#load-saved').click(function () {
-        load(session.getItem("vellum.tests.main.lastSavedForm") || "");
-    });
+    function loadFromSession() {
+        load(
+            session.getItem(LAST_SAVED_FORM_KEY) || "",
+            undefined,
+            session.getItem(LAST_SAVED_FORM_NAME_KEY) || undefined,
+            session.getItem(LAST_SAVED_FORM_COMMENT_KEY) || undefined
+        );
+    }
+
+    $('#load-saved').click(loadFromSession);
 
     if (navigator.userAgent.indexOf('HeadlessChrome') >= 0) {
         load("", function () { mocha.run(); });
     } else if (/[?&]load=saved(&|#|$)/.test(window.location.href)) {
         // Use Chrome dev tools to preset form XML
         // (Application > Storage > Session Storage > http://localhost...
-        //  > vellum.tests.main.lastSavedForm value)
+        //  > vellum.tests.main.lastSavedForm value, plus optionally
+        //  lastSavedFormName / lastSavedFormComment)
         // and then add ?load=saved to query string and reload.
-        load(session.getItem("vellum.tests.main.lastSavedForm") || "");
+        loadFromSession();
     } else {
         load(""); // load empty form on initial page load
     }

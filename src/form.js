@@ -117,6 +117,7 @@ function Form (opts, vellum, mugTypes) {
     this.mugTypes = mugTypes;
 
     this.formName = vellum.opts().core.formName || gettext("New Form");
+    this.formComment = vellum.opts().core.formComment || "";
     this.noMarkdown = false;
     this.mugMap = {};
     this.instanceMetadata = [InstanceMetadata({})];
