@@ -156,15 +156,6 @@ let mugConfigs = {
                         return val && val.match(/^\d+$/) ? "pass" : gettext("Must be an integer");
                     },
                     help: gettext('Estimated time to complete the module in hours.'),
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition'),
                 }
             })
         }),
@@ -203,15 +194,6 @@ let mugConfigs = {
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
                     help: gettext('XPath expression for the users assessment score.'),
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition')
                 }
             })
         }),
@@ -278,15 +260,6 @@ let mugConfigs = {
                     serialize: mugs.serializeXPath,
                     deserialize: mugs.deserializeXPath,
                     help: gettext('XPath expression for the work area ID associated with this Delivery Unit.'),
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition')
                 }
             })
         }),
@@ -331,15 +304,6 @@ let mugConfigs = {
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.richTextarea,
-                },
-                relevantAttr: {
-                    visibility: 'visible',
-                    presence: 'optional',
-                    widget: widgets.xPath,
-                    xpathType: "bool",
-                    serialize: mugs.serializeXPath,
-                    deserialize: mugs.deserializeXPath,
-                    lstring: gettext('Display Condition'),
                 }
             })
         }),
