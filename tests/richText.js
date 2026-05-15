@@ -171,10 +171,6 @@ function removeSpanId(htmlString) {
     return htmlString.replace(/<span([^>]*)\s+id="[^"]*"([^>]*)>/g, '<span$1$2>');
 }
 
-function removeZWSP(htmlString) {
-    return htmlString.replace(/\u200B/g, '');
-}
-
 describe("Rich text utilities", function() {
     before(setupGlobalForm);
 
@@ -600,11 +596,11 @@ describe("The rich text editor", function () {
                     });
                     input_[0].dispatchEvent(clipboardEvent);
 
-                    const text = removeZWSP(removeSpanId(input_[0].innerHTML));
-                    const expText = removeZWSP(removeSpanId(richText
+                    const text = removeSpanId(input_[0].innerHTML);
+                    const expText = removeSpanId(richText
                         .toRichText(initialExpr, form, opts)
-                        .replace(find, escapeHTML(pasteText))));
-                    assert.equal(text, expText);
+                        .replace(find, escapeHTML(pasteText)) + ZWSP);
+                    assert.equal(escape(text), escape(expText));
                     assert.equal(editor.getValue(),
                         initialExpr.substring(0, selStart) + pasteText +
                         initialExpr.substring(selStart + selLength));
