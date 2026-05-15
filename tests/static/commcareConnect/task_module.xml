@@ -8,8 +8,6 @@
 					<name />
 					<task_1 vellum:role="ConnectTask">
 						<task xmlns="http://commcareconnect.com/data/v1/learn" id="task_1">
-							<name>task 1</name>
-							<description>Task 1 is fun&#10;Learning is still fun</description>
 							<task_slug/>
 						</task>
 					</task_1>

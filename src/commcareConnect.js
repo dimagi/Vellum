@@ -279,33 +279,17 @@ let mugConfigs = {
     ConnectTask: {
         rootName: "task",
         childNodes: [
-            {id: "name", writeToData: true},
-            {id: "description", writeToData: true},
             {id: "task_slug"},
         ],
         mugOptions: util.extend(baseMugOptions, {
             typeName: 'Task',
             icon: 'fa fa-tasks',
             init: mug => {
-                mug.p.name = "";
-                mug.p.description = "";
                 mug.p.task_slug = "";
             },
             spec: util.extend(baseSpec, {
                 nodeID: {
                     lstring: gettext('Task ID'),
-                },
-                name: {
-                    lstring: gettext("Name"),
-                    visibility: 'visible',
-                    presence: 'required',
-                    widget: widgets.text,
-                },
-                description: {
-                    lstring: gettext("Description"),
-                    visibility: 'visible',
-                    presence: 'required',
-                    widget: widgets.richTextarea,
                 },
                 task_slug: {
                     lstring: gettext("Task Slug"),
@@ -322,8 +306,6 @@ let mugConfigs = {
             _.extend({}, baseSection, {
                 properties: [
                     "nodeID",
-                    "name",
-                    "description",
                     "task_slug",
                 ],
             }),
