@@ -232,7 +232,7 @@ var editor = function(input, form, options) {
         // The selection's focus end should not fall between a bubble and one of
         // its surrounding ZWSPs. For a collapsed cursor, follow the arrow-key
         // direction; otherwise bump outside. For an extended (shift+key)
-        // selection, jump the focus past the entire bubble atom.
+        // selection, jump the focus past the entire bubble.
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
         const range = selection.getRangeAt(0);
@@ -247,7 +247,7 @@ var editor = function(input, form, options) {
             const isBubble = bubble?.classList?.contains('label-datanode');
             if (range.collapsed) {
                 if (isBubble) {
-                    if (event.keyCode === 39) { // right arrow: past atom
+                    if (event.keyCode === 39) { // right arrow: past bubble
                         range.setStart(bubble.nextSibling, 1);
                     } else { // bump back outside the leading ZWSP
                         range.setStart(focusNode, focusOffset - 1);
@@ -270,7 +270,7 @@ var editor = function(input, form, options) {
             const isBubble = bubble?.classList?.contains('label-datanode');
             if (range.collapsed) {
                 if (isBubble) {
-                    if (event.keyCode === 37) { // left arrow: past atom
+                    if (event.keyCode === 37) { // left arrow: past bubble
                         const prev = bubble.previousSibling;
                         range.setStart(prev, prev.nodeValue.length - 1);
                     } else { // bump forward outside the trailing ZWSP
@@ -356,7 +356,7 @@ var editor = function(input, form, options) {
             if (event.shiftKey) {
                 extendSelectionPastBubble(bubble);
             } else {
-                selectBubbleAtom(bubble);
+                selectBubble(bubble);
             }
             setTimeout(() => { bubbleClickInProgress = false; }, 0);
         }
@@ -365,11 +365,11 @@ var editor = function(input, form, options) {
     function extendSelectionPastBubble(bubble) {
         const selection = window.getSelection();
         if (selection.rangeCount === 0) {
-            selectBubbleAtom(bubble);
+            selectBubble(bubble);
             return;
         }
         const {anchorNode, anchorOffset} = selection;
-        const [startNode, startOffset, endNode, endOffset] = getBubbleAtomBoundaries(bubble);
+        const [startNode, startOffset, endNode, endOffset] = getBubbleBoundaries(bubble);
         const bubbleRange = document.createRange();
         bubbleRange.selectNode(bubble);
         const anchorIsBeforeBubble = bubbleRange.comparePoint(anchorNode, anchorOffset) < 0;
@@ -378,11 +378,11 @@ var editor = function(input, form, options) {
         selection.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
     }
 
-    function selectBubbleAtom(bubble) {
-        window.getSelection().setBaseAndExtent(...getBubbleAtomBoundaries(bubble));
+    function selectBubble(bubble) {
+        window.getSelection().setBaseAndExtent(...getBubbleBoundaries(bubble));
     }
 
-    function getBubbleAtomBoundaries(bubble) {
+    function getBubbleBoundaries(bubble) {
         const prev = bubble.previousSibling;
         const next = bubble.nextSibling;
         return [prev, prev.nodeValue.length - 1, next, 1];
@@ -509,7 +509,7 @@ var editor = function(input, form, options) {
             const range = selection.getRangeAt(0),
                   container = document.createElement('div');
             if (e.type === 'cut') {
-                expandRangeOverClippedBubbleAtoms(range);
+                expandRangeOverClippedBubble(range);
             }
             container.appendChild(range.cloneContents());
             selectedText = fromRichText(container.innerHTML, form, options.isExpression);
@@ -532,7 +532,7 @@ var editor = function(input, form, options) {
         }
     }
 
-    function expandRangeOverClippedBubbleAtoms(range) {
+    function expandRangeOverClippedBubble(range) {
         // If the selection includes a bubble's ZWSP boundary but not the bubble
         // itself (unexpected), the post-cut input handler will remove the
         // partially selected bubble, so it must also land on the clipboard.
