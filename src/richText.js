@@ -533,22 +533,19 @@ var editor = function(input, form, options) {
     }
 
     function expandRangeOverClippedBubbleAtoms(range) {
-        // If the selection slices through a bubble's ZWSP boundary without
-        // including the bubble itself, the post-cut input handler will remove
-        // the partially selected bubble, so it must also land on the clipboard.
+        // If the selection includes a bubble's ZWSP boundary but not the bubble
+        // itself (unexpected), the post-cut input handler will remove the
+        // partially selected bubble, so it must also land on the clipboard.
+        if (range.collapsed) return;
         inputElement.querySelectorAll('.label-datanode').forEach(bubble => {
             if (range.intersectsNode(bubble)) return;
             const prev = bubble.previousSibling;
             const next = bubble.nextSibling;
-            const leadingZwspInRange =
-                range.comparePoint(prev, prev.nodeValue.length - 1) === 0 &&
-                range.comparePoint(prev, prev.nodeValue.length) === 0;
-            const trailingZwspInRange =
-                range.comparePoint(next, 0) === 0 &&
-                range.comparePoint(next, 1) === 0;
-            if (leadingZwspInRange) {
+            const isLeadingZwspSelected = range.comparePoint(prev, prev.nodeValue.length) === 0;
+            const isTrailingZwspSelected = range.comparePoint(next, 0) === 0;
+            if (isLeadingZwspSelected) {
                 range.setEnd(next, 1);
-            } else if (trailingZwspInRange) {
+            } else if (isTrailingZwspSelected) {
                 range.setStart(prev, prev.nodeValue.length - 1);
             }
         });
