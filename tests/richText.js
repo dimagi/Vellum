@@ -114,7 +114,7 @@ function icon(iconClass) {
 function externalIcon () { return icon('fcc-fd-case-property'); }
 function externalUnknownIcon () { return icon('fa-solid fa-triangle-exclamation'); }
 
-function makeBubble(xpath, dispValue, icon, internal, id) {
+function makeBubble(xpath, dispValue, icon, internal, id, attrs) {
     var span = $('<span>').addClass('label label-datanode').attr({
         'data-value': xpath,
         'contenteditable': false,
@@ -130,14 +130,17 @@ function makeBubble(xpath, dispValue, icon, internal, id) {
     } else {
         span.addClass('label-datanode-unknown');
     }
-    return span.append(icon).append(dispValue);
+    if (attrs) {
+        span.attr(attrs);
+    }
+    return ZWSP + html(span.append(icon).append(dispValue)) + ZWSP;
 }
 function outputValueTemplateFn(path) {
     return '<output value="' + path + '"></output>';
 }
 
 function wrapWithDiv(el) { return $('<div>').append(el); }
-function wrapWithDivPZwsp(el) { return wrapWithDiv($('<p>').text(ZWSP).append(el).append(ZWSP)); }
+function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
 function html(value) { return wrapWithDiv(value).html(); }
 
 function setupGlobalForm(done) {
@@ -188,13 +191,13 @@ describe("Rich text utilities", function() {
         _.each(simpleConversions, function(val) {
             it("from text to html: " + val[0], function() {
                 const richTextText = richText.toRichText(val[0], form, opts);
-                const expectedHtml = wrapWithDivPZwsp(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                const expectedHtml = wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
                 assert.strictEqual(richTextText, expectedHtml);
             });
 
             it("from text to html with output value: " + val[0], function() {
                 const richTextText = richText.toRichText(outputValueTemplateFn(val[0]), form);
-                const expectedHtml = wrapWithDivPZwsp(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                const expectedHtml = wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
                 assert.strictEqual(richTextText, expectedHtml);
             });
         });
@@ -219,13 +222,14 @@ describe("Rich text utilities", function() {
                 const richTextText = richText.toRichText(outputValueTemplateFn(val.xmlValue), form);
                 assert.equal(
                     richTextText,
-                    wrapWithDivPZwsp(makeBubble(
+                    wrapWithDivP(makeBubble(
                         val.valueInBubble,
                         val.bubbleDispValue,
                         val.icon,
                         val.internalRef,
-                        getSpanId(richTextText)
-                    ).attr(val.extraAttrs)).html()
+                        getSpanId(richTextText),
+                        val.extraAttrs,
+                    )).html()
                 );
             });
         });
@@ -242,22 +246,21 @@ describe("Rich text utilities", function() {
         var f_1065 = "#case/f_1065",
             ico = icon('fcc-fd-text'),
             opts = {isExpression: true},
-            wrap = function (bubble) { return ZWSP + html(bubble) + ZWSP; },
             equations = [
                 [
                     "#form/text = #form/othertext",
-                    wrap(makeBubble('#form/text', 'text', ico, true)) + " = " +
-                    wrap(makeBubble('#form/othertext', 'othertext', ico, true))
+                    makeBubble('#form/text', 'text', ico, true) + " = " +
+                    makeBubble('#form/othertext', 'othertext', ico, true)
                 ],
                 [
                     "#form/text <= #form/othertext",
-                    wrap(makeBubble('#form/text', 'text', ico, true)) + " <= " +
-                    wrap(makeBubble('#form/othertext', 'othertext', ico, true))
+                    makeBubble('#form/text', 'text', ico, true) + " <= " +
+                    makeBubble('#form/othertext', 'othertext', ico, true)
                 ],
                 [
                     f_1065 + " = " + f_1065,
-                    wrap(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")) + " = " +
-                    wrap(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case"))
+                    makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case") + " = " +
+                    makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")
                 ],
             ];
 
@@ -356,9 +359,9 @@ describe("Rich text utilities", function() {
     describe("convert value with output and escaped HTML", function () {
         var items = [
                 ['<h1><output value="#form/text" /></h1>',
-                 '&lt;h1&gt;​{text}​&lt;/h1&gt;'], // string contains zero width spaces
+                 '&lt;h1&gt;{text}&lt;/h1&gt;'],
                 ['<output value="#form/text" /> <tag /> <output value="#form/othertext" />',
-                 '​{text}​ &lt;tag /&gt; ​{othertext}​'], // string contains zero width spaces
+                 '{text} &lt;tag /&gt; {othertext}'],
                 ["{blah}", "{blah}"],
                 ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                 ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
@@ -374,12 +377,11 @@ describe("Rich text utilities", function() {
                 var result = removeSpanId(richText.bubbleOutputs(item[0], form, true)),
                     expect = item[1].replace(/{(.*?)}/g, function (m, name) {
                         if (form.getIconByPath("#form/" + name)) {
-                            var output = makeBubble("#form/" + name, name, ico, true);
-                            return output[0].outerHTML;
+                            return makeBubble("#form/" + name, name, ico, true);
                         }
                         return m;
                     });
-                assert.equal(result, expect);
+                assert.equal(escape(result), escape(expect));
             });
         });
     });
@@ -655,7 +657,7 @@ describe("The rich text editor", function () {
             it("should make bubbles on converting to rich text: " + repr, function () {
                 var text = richText.toRichText(result, form, {isExpression: true}),
                     bubble = makeBubble('#form/text', 'text', icon('fcc-fd-text'), true),
-                    expected = (expr.slice(0, i) + ZWSP + html(bubble) + ZWSP + " " + expr.slice(i)),
+                    expected = (expr.slice(0, i) + bubble + " " + expr.slice(i)),
                     expected2 = expected
                         .replace(/  $/, "")  // HACK for "one =  "
                         .replace(/  /g, " &nbsp;")
