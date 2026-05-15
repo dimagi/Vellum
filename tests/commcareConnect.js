@@ -82,6 +82,7 @@ describe("The CommCareConnect", function() {
             assert.equal(task.__className, "ConnectTask");
             assert.equal(task.p.name, "task 1");
             assert.equal(task.p.description, "Task 1 is fun\nLearning is still fun");
+            assert.equal(task.p.task_slug, "instance('commcaresession')/session/data/task_slug");
             assert.equal(task.p.relevantAttr, "x = 3");
             util.assertXmlEqual(call("createXML"), TASK_XML);
         });

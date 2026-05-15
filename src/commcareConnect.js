@@ -281,6 +281,7 @@ let mugConfigs = {
         childNodes: [
             {id: "name", writeToData: true},
             {id: "description", writeToData: true},
+            {id: "task_slug"},
         ],
         mugOptions: util.extend(baseMugOptions, {
             typeName: 'Task',
@@ -288,6 +289,7 @@ let mugConfigs = {
             init: mug => {
                 mug.p.name = "";
                 mug.p.description = "";
+                mug.p.task_slug = "";
             },
             spec: util.extend(baseSpec, {
                 nodeID: {
@@ -304,6 +306,15 @@ let mugConfigs = {
                     visibility: 'visible',
                     presence: 'required',
                     widget: widgets.richTextarea,
+                },
+                task_slug: {
+                    lstring: gettext("Task Slug"),
+                    visibility: 'visible',
+                    presence: 'required',
+                    widget: widgets.xPath,
+                    serialize: mugs.serializeXPath,
+                    deserialize: mugs.deserializeXPath,
+                    help: gettext('XPath expression for the task slug identifier.'),
                 }
             })
         }),
@@ -313,6 +324,7 @@ let mugConfigs = {
                     "nodeID",
                     "name",
                     "description",
+                    "task_slug",
                 ],
             }),
             _.clone(logicSection),

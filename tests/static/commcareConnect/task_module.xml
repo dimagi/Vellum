@@ -10,12 +10,15 @@
 						<task xmlns="http://commcareconnect.com/data/v1/learn" id="task_1">
 							<name>task 1</name>
 							<description>Task 1 is fun&#10;Learning is still fun</description>
+							<task_slug/>
 						</task>
 					</task_1>
 				</data>
 			</instance>
+			<instance src="jr://instance/session" id="commcaresession" />
 			<bind vellum:nodeset="#form/name" nodeset="/data/name" type="xsd:string" />
 			<bind vellum:nodeset="#form/task_1" nodeset="/data/task_1" relevant="x = 3" />
+			<bind nodeset="/data/task_1/task/task_slug" calculate="instance('commcaresession')/session/data/task_slug" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="name-label">
