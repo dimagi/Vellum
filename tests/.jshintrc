@@ -35,6 +35,7 @@
         "afterEach": false,
         /* BROWSER APIS */
         "DataTransfer": false,
-        "ClipboardEvent": false
+        "ClipboardEvent": false,
+        "KeyboardEvent": false
     }
 }

@@ -85,6 +85,24 @@ var assert = chai.assert,
             },
         }],
     }];
+const ZWSP = "\u200B";
+
+/**
+ * Escape zero-width spaces and normalize non-breaking spaces in string
+ *
+ * If the passed value is a DOM node, it is converted to text.
+ * Convert non-breaking space (\u00A0) to normal space to resolve
+ * selection.toString() difference between Chrome and Firefox.
+ *
+ * @param {String or Node} val - String or DOM node to be escaped.
+ * @returns String with visible {ZWSP} and NBSP normalized to space
+ */
+function escape(val) {
+    if (val?.nodeType) {
+        val = val.textContent;
+    }
+    return val.replace(/\u200B/g, '{ZWSP}').replace(/\u00A0/g, ' ');
+}
 
 function icon(iconClass) {
     if (iconClass.startsWith("fa-")) {
@@ -96,7 +114,7 @@ function icon(iconClass) {
 function externalIcon () { return icon('fcc-fd-case-property'); }
 function externalUnknownIcon () { return icon('fa-solid fa-triangle-exclamation'); }
 
-function makeBubble(xpath, dispValue, icon, internal, id) {
+function makeBubble(xpath, dispValue, icon, internal, id, attrs) {
     var span = $('<span>').addClass('label label-datanode').attr({
         'data-value': xpath,
         'contenteditable': false,
@@ -112,7 +130,10 @@ function makeBubble(xpath, dispValue, icon, internal, id) {
     } else {
         span.addClass('label-datanode-unknown');
     }
-    return span.append(icon).append(dispValue);
+    if (attrs) {
+        span.attr(attrs);
+    }
+    return ZWSP + html(span.append(icon).append(dispValue)) + ZWSP;
 }
 function outputValueTemplateFn(path) {
     return '<output value="' + path + '"></output>';
@@ -120,7 +141,6 @@ function outputValueTemplateFn(path) {
 
 function wrapWithDiv(el) { return $('<div>').append(el); }
 function wrapWithDivP(el) { return wrapWithDiv($('<p>').append(el)); }
-function wrapWithDivPZwsp(el) { return wrapWithDiv($('<p>').text('\u200b').append(el).append('\u200b')); }
 function html(value) { return wrapWithDiv(value).html(); }
 
 function setupGlobalForm(done) {
@@ -151,10 +171,6 @@ function removeSpanId(htmlString) {
     return htmlString.replace(/<span([^>]*)\s+id="[^"]*"([^>]*)>/g, '<span$1$2>');
 }
 
-function removeZWSP(htmlString) {
-    return htmlString.replace(/\u200B/g, '');
-}
-
 describe("Rich text utilities", function() {
     before(setupGlobalForm);
 
@@ -177,7 +193,7 @@ describe("Rich text utilities", function() {
 
             it("from text to html with output value: " + val[0], function() {
                 const richTextText = richText.toRichText(outputValueTemplateFn(val[0]), form);
-                const expectedHtml = wrapWithDivPZwsp(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
+                const expectedHtml = wrapWithDivP(makeBubble(val[0], val[1], val[2], val[3], getSpanId(richTextText))).html();
                 assert.strictEqual(richTextText, expectedHtml);
             });
         });
@@ -202,13 +218,14 @@ describe("Rich text utilities", function() {
                 const richTextText = richText.toRichText(outputValueTemplateFn(val.xmlValue), form);
                 assert.equal(
                     richTextText,
-                    wrapWithDivPZwsp(makeBubble(
+                    wrapWithDivP(makeBubble(
                         val.valueInBubble,
                         val.bubbleDispValue,
                         val.icon,
                         val.internalRef,
-                        getSpanId(richTextText)
-                    ).attr(val.extraAttrs)).html()
+                        getSpanId(richTextText),
+                        val.extraAttrs,
+                    )).html()
                 );
             });
         });
@@ -228,18 +245,18 @@ describe("Rich text utilities", function() {
             equations = [
                 [
                     "#form/text = #form/othertext",
-                    html(makeBubble('#form/text', 'text', ico, true)) + " = " +
-                    html(makeBubble('#form/othertext', 'othertext', ico, true))
+                    makeBubble('#form/text', 'text', ico, true) + " = " +
+                    makeBubble('#form/othertext', 'othertext', ico, true)
                 ],
                 [
                     "#form/text <= #form/othertext",
-                    html(makeBubble('#form/text', 'text', ico, true)) + " <= " +
-                    html(makeBubble('#form/othertext', 'othertext', ico, true))
+                    makeBubble('#form/text', 'text', ico, true) + " <= " +
+                    makeBubble('#form/othertext', 'othertext', ico, true)
                 ],
                 [
                     f_1065 + " = " + f_1065,
-                    html(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")) + " = " +
-                    html(makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case"))
+                    makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case") + " = " +
+                    makeBubble(f_1065, 'f_1065', icon('fcc-fd-case-property'), "case")
                 ],
             ];
 
@@ -338,9 +355,9 @@ describe("Rich text utilities", function() {
     describe("convert value with output and escaped HTML", function () {
         var items = [
                 ['<h1><output value="#form/text" /></h1>',
-                 '&lt;h1&gt;​{text}​&lt;/h1&gt;'], // string contains zero width spaces
+                 '&lt;h1&gt;{text}&lt;/h1&gt;'],
                 ['<output value="#form/text" /> <tag /> <output value="#form/othertext" />',
-                 '​{text}​ &lt;tag /&gt; ​{othertext}​'], // string contains zero width spaces
+                 '{text} &lt;tag /&gt; {othertext}'],
                 ["{blah}", "{blah}"],
                 ['<output value="unknown(#form/text)" />', '&lt;output value="unknown(#form/text)" /&gt;'],
                 ['<output value="#form/text + now()" />', '&lt;output value="#form/text + now()" /&gt;'],
@@ -356,12 +373,11 @@ describe("Rich text utilities", function() {
                 var result = removeSpanId(richText.bubbleOutputs(item[0], form, true)),
                     expect = item[1].replace(/{(.*?)}/g, function (m, name) {
                         if (form.getIconByPath("#form/" + name)) {
-                            var output = makeBubble("#form/" + name, name, ico, true);
-                            return output[0].outerHTML;
+                            return makeBubble("#form/" + name, name, ico, true);
                         }
                         return m;
                     });
-                assert.equal(result, expect);
+                assert.equal(escape(result), escape(expect));
             });
         });
     });
@@ -503,7 +519,7 @@ describe("The rich text editor", function () {
             assert.equal(editor.getValue(), 'A');
         });
 
-        function assertCopy($editor, value, callback) {
+        function assertCopy($editor, value) {
             const dataTransfer = new DataTransfer();
             const clipboardEvent = new ClipboardEvent('copy', {
                 clipboardData: dataTransfer,
@@ -514,7 +530,6 @@ describe("The rich text editor", function () {
 
             assert.equal(dataTransfer.getData('text/plain'), value);
             assert.strictEqual(dataTransfer.getData("text/html"), '');
-            callback();
         }
 
         var TEST_LABEL = 'Weight: <output value="#form/text" /> grams',
@@ -523,18 +538,16 @@ describe("The rich text editor", function () {
         it("should copy output tag from rich text editor", function (done) {
             editor.setValue(TEST_LABEL, function () {
                 editor.select(6, 4);
-                assertCopy(input, ': <output value="#form/text" />', function () {
-                    done();
-                });
+                assertCopy(input, ': <output value="#form/text" />');
+                done();
             });
         });
 
         it("should copy expression with hashtags from expression editor", function (done) {
             exprEditor.setValue(TEST_XPATH, function () {
                 exprEditor.select(11, 5);
-                assertCopy(exprInput, "+ (#case/dob", function () {
-                    done();
-                });
+                assertCopy(exprInput, "+ (#case/dob");
+                done();
             });
         });
 
@@ -583,11 +596,11 @@ describe("The rich text editor", function () {
                     });
                     input_[0].dispatchEvent(clipboardEvent);
 
-                    const text = removeZWSP(removeSpanId(input_[0].innerHTML));
+                    const text = removeSpanId(input_[0].innerHTML);
                     const expText = removeSpanId(richText
                         .toRichText(initialExpr, form, opts)
-                        .replace(find, escapeHTML(pasteText)));
-                    assert.equal(text, expText);
+                        .replace(find, escapeHTML(pasteText)) + ZWSP);
+                    assert.equal(escape(text), escape(expText));
                     assert.equal(editor.getValue(),
                         initialExpr.substring(0, selStart) + pasteText +
                         initialExpr.substring(selStart + selLength));
@@ -640,7 +653,7 @@ describe("The rich text editor", function () {
             it("should make bubbles on converting to rich text: " + repr, function () {
                 var text = richText.toRichText(result, form, {isExpression: true}),
                     bubble = makeBubble('#form/text', 'text', icon('fcc-fd-text'), true),
-                    expected = (expr.slice(0, i) + html(bubble) + " " + expr.slice(i)),
+                    expected = (expr.slice(0, i) + bubble + " " + expr.slice(i)),
                     expected2 = expected
                         .replace(/  $/, "")  // HACK for "one =  "
                         .replace(/  /g, " &nbsp;")
@@ -648,6 +661,297 @@ describe("The rich text editor", function () {
                 assert.equal(removeSpanId(text), "<p>" + expected2 + "</p>");
             });
         }));
+
+        describe("bubble selection", function () {
+
+            it("should select bubble atom on mousedown", function (done) {
+                exprEditor.setValue("#form/text", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+
+                    const selection = window.getSelection();
+                    assert.equal(selection.rangeCount, 1, "selection range count");
+                    const range = selection.getRangeAt(0);
+                    assert.equal(
+                        escape(range.toString()),
+                        escape(`${ZWSP} text${ZWSP}`),
+                        "selection covers leading ZWSP, bubble text, trailing ZWSP"
+                    );
+                    done();
+                });
+            });
+
+            it("should mark a bubble as selected while the selection covers it", function (done) {
+                exprEditor.setValue("#form/text", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    document.dispatchEvent(new Event('selectionchange'));
+                    assert.isTrue(bubble.classList.contains('selected'), "marked on click");
+
+                    const tail = exprInput[0].lastChild;
+                    window.getSelection().setBaseAndExtent(tail, 0, tail, 0);
+                    document.dispatchEvent(new Event('selectionchange'));
+                    assert.isFalse(bubble.classList.contains('selected'), "unmarked when selection moves away");
+                    done();
+                });
+            });
+
+            it("should not orphan a neighbor bubble when an adjacent bubble is deleted", function (done) {
+                exprEditor.setValue("#invalid/xpath `#form/text``#form/othertext`", function () {
+                    const before = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(before.length, 2, "precondition: two bubbles");
+                    const [first] = before;
+                    first.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    window.getSelection().getRangeAt(0).deleteContents();
+                    exprInput[0].dispatchEvent(new Event('input', {bubbles: true}));
+                    const after = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(after.length, 1, "only the clicked bubble is removed");
+                    done();
+                });
+            });
+
+            it("should copy a selected bubble as its hashtag", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    assertCopy(exprInput, "#form/text");
+                    done();
+                });
+            });
+
+            it("should cut a selected bubble leaving no orphan ZWSP", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+
+                    const dataTransfer = new DataTransfer();
+                    exprInput[0].dispatchEvent(new ClipboardEvent('cut', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+
+                    assert.equal(dataTransfer.getData('text/plain'), "#form/text");
+                    assert.equal(exprEditor.getValue(), "1 +  + 2");
+                    done();
+                });
+            });
+
+            it("should paste a copied bubble", function (done) {
+                exprEditor.setValue("1 + #form/old + 2", function () {
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.setData('text/plain', '#form/new');
+                    exprInput[0].dispatchEvent(new ClipboardEvent('paste', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+                    assert.equal(exprEditor.getValue(), '1 + #form/new + 2');
+
+                    // get -> set (reload) to convert hashtag to bubble
+                    exprEditor.setValue(exprEditor.getValue(), function () {
+                        assert.equal(exprInput[0].querySelectorAll('.label-datanode').length, 1);
+                        done();
+                    });
+                });
+            });
+
+            it("should extend selection past bubble on shift+click", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const firstText = exprInput[0].querySelector('p').firstChild;
+                    window.getSelection().setBaseAndExtent(firstText, 0, firstText, 0);
+
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {
+                        bubbles: true,
+                        shiftKey: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "1 + {ZWSP} text{ZWSP}", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "{ZWSP} + 2", "unexpected focus");
+                    done();
+                });
+            });
+
+            it("should extend selection backward past bubble on shift+click", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const trailingText = paragraph.childNodes[2];
+                    // Anchor just past the bubble's trailing ZWSP, selection extends to end.
+                    window.getSelection().setBaseAndExtent(
+                        trailingText, 3, trailingText, trailingText.nodeValue.length
+                    );
+
+                    const bubble = exprInput[0].querySelector('.label-datanode');
+                    bubble.dispatchEvent(new MouseEvent('mousedown', {
+                        bubbles: true,
+                        shiftKey: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "{ZWSP} text{ZWSP} +", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "1 + {ZWSP}", "unexpected focus");
+                    done();
+                });
+            });
+
+            it("should clean up neighbor bubble whose ZWSP boundary was clipped by cut", function (done) {
+                exprEditor.setValue("#invalid/xpath `#form/text``#form/othertext`", function () {
+                    const bubbles = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(bubbles.length, 2, "precondition: two bubbles");
+                    const [first] = bubbles;
+                    first.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    // Extend the selection to consume both ZWSPs between the bubbles,
+                    // clipping the second bubble's leading ZWSP.
+                    window.getSelection().getRangeAt(0).setEnd(first.nextSibling, 2);
+
+                    const dataTransfer = new DataTransfer();
+                    exprInput[0].dispatchEvent(new ClipboardEvent('cut', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+                    assert.equal(dataTransfer.getData('text/plain'), "#form/text#form/othertext");
+
+                    assert.equal(
+                        exprInput[0].querySelectorAll('.label-datanode').length, 0,
+                        "the neighbor with broken ZWSP boundary is also removed"
+                    );
+                    done();
+                });
+            });
+
+            it("should clean up neighbor bubble whose ZWSP boundary was clipped by paste", function (done) {
+                exprEditor.setValue("#invalid/xpath `#form/text``#form/othertext`", function () {
+                    const bubbles = exprInput[0].querySelectorAll('.label-datanode');
+                    assert.equal(bubbles.length, 2, "precondition: two bubbles");
+                    const [first] = bubbles;
+                    first.dispatchEvent(new MouseEvent('mousedown', {bubbles: true}));
+                    window.getSelection().getRangeAt(0).setEnd(first.nextSibling, 2);
+
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.setData('text/plain', 'X');
+                    exprInput[0].dispatchEvent(new ClipboardEvent('paste', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+
+                    assert.equal(
+                        exprInput[0].querySelectorAll('.label-datanode').length, 0,
+                        "the neighbor with broken ZWSP boundary is also removed"
+                    );
+                    done();
+                });
+            });
+
+            it("should extend selection past whole bubble on shift+ArrowRight", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const firstText = paragraph.firstChild;
+                    // Select two chars before the bubble's leading ZWSP.
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(firstText, 2, firstText, 4);
+                    assert.equal(escape(sel.toString()), "+ ", "precondition failed");
+                    // Simulate the browser's default one-char extension into the boundary.
+                    sel.extend(firstText, firstText.nodeValue.length);
+                    assert.equal(escape(sel.toString()), "+ {ZWSP}", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowRight',
+                        shiftKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "+ {ZWSP} text{ZWSP}", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "{ZWSP} + 2", "unexpected focus");
+                    done();
+                });
+            });
+
+            it("should extend selection past whole bubble on shift+ArrowLeft", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const trailingText = paragraph.childNodes[2];
+                    // Select two chars after the bubble's trailing ZWSP, focus on the left.
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(trailingText, 3, trailingText, 1);
+                    assert.equal(escape(sel.toString()), " +", "precondition failed");
+                    // Simulate the browser's default one-char extension into the boundary.
+                    sel.extend(trailingText, 0);
+                    assert.equal(escape(sel.toString()), "{ZWSP} +", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowLeft',
+                        shiftKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "{ZWSP} text{ZWSP} +", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "1 + {ZWSP}", "unexpected focus node");
+                    done();
+                });
+            });
+
+            it("should snap to atomic boundary when selection ends in bubble node", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const firstText = paragraph.firstChild;
+                    // bubbleText is 'text' node in <span><i>&nbsp;</i>text</span>
+                    const bubbleText = paragraph.childNodes[1].childNodes[1];
+                    // Simulate post-extension state: focus lies between leading ZWSP and bubble
+                    // (e.g., after a Ctrl+Shift+ArrowRight word jump).
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(firstText, 0, bubbleText, 0);
+                    assert.equal(escape(sel.toString()), "1 + {ZWSP}", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowRight',
+                        shiftKey: true,
+                        ctrlKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "1 + {ZWSP} text{ZWSP}", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "{ZWSP} + 2", "unexpected focus");
+                    done();
+                });
+            });
+
+            it("should snap to atomic boundary when (reverse) selection ends in bubble node", function (done) {
+                exprEditor.setValue("1 + #form/text + 2", function () {
+                    const paragraph = exprInput[0].querySelector('p');
+                    const trailingText = paragraph.childNodes[2];
+                    // Simulate post-extension state: focus lies between bubble and trailing ZWSP.
+                    exprInput[0].focus();
+                    const sel = window.getSelection();
+                    sel.setBaseAndExtent(trailingText, trailingText.nodeValue.length, trailingText, 0);
+                    assert.equal(escape(sel.toString()), "{ZWSP} + 2", "precondition failed");
+
+                    exprInput[0].dispatchEvent(new KeyboardEvent('keyup', {
+                        key: 'ArrowLeft',
+                        shiftKey: true,
+                        ctrlKey: true,
+                        bubbles: true,
+                    }));
+
+                    const selection = window.getSelection();
+                    assert.equal(escape(selection.toString()), "{ZWSP} text{ZWSP} + 2", "unexpected selection");
+                    assert.equal(escape(selection.focusNode), "1 + {ZWSP}", "unexpected focus");
+                    done();
+                });
+            });
+        });
     });
 
     describe("in vellum", function() {
@@ -708,7 +1012,7 @@ describe("The rich text editor", function () {
                 assert.exists(range);
                 assert.isTrue(range.collapsed);
                 assert.strictEqual(range.startContainer, range.startContainer.parentNode.lastChild);
-                assert.strictEqual(range.startContainer.textContent, "\u200B");
+                assert.strictEqual(range.startContainer.textContent, ZWSP);
             });
 
 
