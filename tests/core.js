@@ -1019,9 +1019,9 @@ describe("Vellum core", function () {
             dropHandler.restore();
         });
 
-        function makeTargetEl(attrs) {
+        function makeTargetEl(attrs, tag = "input") {
             // addClass after attr so .test-drop-target survives any class set via attrs.
-            return $("<input />").attr(attrs || {})
+            return $(`<${tag} />`).attr(attrs || {})
                 .addClass("test-drop-target")
                 .appendTo("#vellum");
         }
@@ -1080,6 +1080,34 @@ describe("Vellum core", function () {
             fireDnd("dnd_stop", $a[0]);
             assert.isFalse($a.hasClass('jstree-drop-active'), "first should be cleared");
             assert.isFalse($b.hasClass('jstree-drop-active'), "second should be cleared");
+        });
+
+        it("rejects a drop on a disabled .jstree-drop target", function () {
+            const $el = makeTargetEl({class: "jstree-drop", disabled: "disabled"});
+            fireDnd("dnd_stop", $el[0]);
+            assert.isFalse(dropHandler.called, "handleDrop should not be called");
+        });
+
+        it("rejects a drop on a contenteditable='false' .jstree-drop target", function () {
+            const $el = makeTargetEl({class: "jstree-drop", contenteditable: "false"}, "div");
+            fireDnd("dnd_stop", $el[0]);
+            assert.isFalse(dropHandler.called, "handleDrop should not be called");
+        });
+
+        it("sets the 'er' icon class on dnd_move over a disabled .jstree-drop target", function () {
+            const $el = makeTargetEl({class: "jstree-drop", disabled: "disabled"});
+            const $icon = fireDnd("dnd_move", $el[0]).helper.find('.jstree-icon');
+            assert($icon.hasClass('jstree-er'), "icon should be jstree-er");
+            assert.isFalse($icon.hasClass('jstree-ok'), "icon should not be jstree-ok");
+        });
+
+        it("does not add jstree-drop-active to a disabled .jstree-drop element", function () {
+            const $enabled = makeTargetEl({class: "jstree-drop"});
+            const $disabled = makeTargetEl({class: "jstree-drop", disabled: "disabled"});
+            fireDnd("dnd_move", $enabled[0]);
+            assert($enabled.hasClass('jstree-drop-active'), "enabled target should be active");
+            assert.isFalse($disabled.hasClass('jstree-drop-active'),
+                "disabled target should not be active");
         });
     });
 });
