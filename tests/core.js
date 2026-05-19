@@ -982,4 +982,104 @@ describe("Vellum core", function () {
             });
         });
     });
+
+    describe("drag and drop outside form tree", function () {
+        let dragSource;
+        
+        const dropHandler = {
+            called: false,
+            init() {
+                this._original = dragSource.node.data.handleDrop;
+                dragSource.node.data.handleDrop = () => { this.called = true; };
+            },
+            reset() { this.called = false; },
+            restore() { dragSource.node.data.handleDrop = this._original; },
+        };
+
+        before(function () {
+            util.loadXML("");
+            util.addQuestion("Text", "dragSource");
+            const tree = $(".fd-question-tree").jstree(true);
+            dragSource = {tree: tree, node: util.findNode(tree, "dragSource")};
+            // Bootstrap the persistent dnd_move/dnd_stop listeners. core.js
+            // registers them lazily via .one("dnd_move.vakata.jstree").
+            fireDnd("dnd_move", makeTargetEl({class: "jstree-drop"})[0]);
+            dropHandler.init();
+        });
+
+        beforeEach(function () {
+            dropHandler.reset();
+        });
+
+        afterEach(function () {
+            $(".test-drop-target").remove();
+        });
+
+        after(function () {
+            dropHandler.restore();
+        });
+
+        function makeTargetEl(attrs) {
+            // addClass after attr so .test-drop-target survives any class set via attrs.
+            return $("<input />").attr(attrs || {})
+                .addClass("test-drop-target")
+                .appendTo("#vellum");
+        }
+
+        function fireDnd(eventName, targetEl) {
+            const data = {
+                data: {
+                    obj: $("#vellum")[0],
+                    origin: dragSource.tree,
+                    nodes: [dragSource.node.id],
+                },
+                event: {target: targetEl, type: "mouseup"},
+                helper: $("<div><i class='jstree-icon'/></div>"),
+            };
+            $(document).trigger(eventName + ".vakata.jstree", [data]);
+            return data;
+        }
+
+        it("accepts a drop on a .jstree-drop target outside the tree", function () {
+            const $el = makeTargetEl({class: "jstree-drop"});
+            fireDnd("dnd_stop", $el[0]);
+            assert(dropHandler.called, "handleDrop should be called");
+        });
+
+        it("rejects a drop on a target outside any .jstree-drop", function () {
+            const $el = makeTargetEl();
+            fireDnd("dnd_stop", $el[0]);
+            assert.isFalse(dropHandler.called, "handleDrop should not be called");
+        });
+
+        it("sets the 'ok' icon class on dnd_move over a .jstree-drop target", function () {
+            const $el = makeTargetEl({class: "jstree-drop"});
+            const $icon = fireDnd("dnd_move", $el[0]).helper.find('.jstree-icon');
+            assert($icon.hasClass('jstree-ok'), "icon should be jstree-ok");
+            assert.isFalse($icon.hasClass('jstree-er'), "icon should not be jstree-er");
+        });
+
+        it("sets the 'er' icon class on dnd_move over a non-.jstree-drop target", function () {
+            const $el = makeTargetEl();
+            const $icon = fireDnd("dnd_move", $el[0]).helper.find('.jstree-icon');
+            assert($icon.hasClass('jstree-er'), "icon should be jstree-er");
+            assert.isFalse($icon.hasClass('jstree-ok'), "icon should not be jstree-ok");
+        });
+
+        it("adds jstree-drop-active to all .jstree-drop elements on dnd_move", function () {
+            const $a = makeTargetEl({class: "jstree-drop"});
+            const $b = makeTargetEl({class: "jstree-drop"});
+            fireDnd("dnd_move", $a[0]);
+            assert($a.hasClass('jstree-drop-active'), "first target should be active");
+            assert($b.hasClass('jstree-drop-active'), "second target should be active");
+        });
+
+        it("removes jstree-drop-active from all .jstree-drop elements on dnd_stop", function () {
+            const $a = makeTargetEl({class: "jstree-drop jstree-drop-active"});
+            const $b = makeTargetEl({class: "jstree-drop jstree-drop-active"});
+            fireDnd("dnd_stop", $a[0]);
+            assert.isFalse($a.hasClass('jstree-drop-active'), "first should be cleared");
+            assert.isFalse($b.hasClass('jstree-drop-active'), "second should be cleared");
+        });
+    });
 });
