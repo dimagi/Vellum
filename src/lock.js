@@ -102,7 +102,7 @@ $.vellum.plugin("lock", {}, {
             widget: widgets.checkbox,
             enabled: () => isEditable,
             help: gettext("A locked question cannot be edited, moved, or deleted from the form."),
-            helpURL: "https://www.example.com",  // placeholder for public documentation
+            helpURL: "https://dimagi.atlassian.net/wiki/spaces/commcarepublic/pages/3946381318/Locked+Admin+Questions",
             serialize: () => {},
             deserialize: (data, key, mug, context) => {
                 if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_BIND_ATTR]) {
