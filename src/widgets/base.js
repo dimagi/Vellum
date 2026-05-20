@@ -21,8 +21,8 @@ export var base = function(mug, options) {
             return false;
         }
 
-        if (_.isFunction(mug.spec[widget.path].enabled)) {
-            return !mug.spec[widget.path].enabled(mug);
+        if (_.isFunction(mug.spec[widget.path].enabled) && !mug.spec[widget.path].enabled(mug)) {
+            return true;
         }
 
         return mug.form.vellum.isPropertyLocked(mug, widget.path);

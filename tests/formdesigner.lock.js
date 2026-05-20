@@ -21,6 +21,7 @@ function beforeFn(done) {
     util.init({
         javaRosa: {langs: ['en']},
         plugins: ['lock', 'itemset'],
+        features: {edit_locked_questions: true},
         core: {
             onReady: function () {
                 call('loadXFormOrError', TEST_XML, done);
@@ -403,18 +404,7 @@ describe("The Lock plugin", function() {
 
     describe("edit_locked_questions feature", function () {
         describe("with the feature enabled", function () {
-            before(function (done) {
-                util.init({
-                    javaRosa: {langs: ['en']},
-                    plugins: ['lock'],
-                    features: {edit_locked_questions: true},
-                    core: {
-                        onReady: function () {
-                            call('loadXFormOrError', TEST_XML, done);
-                        }
-                    }
-                });
-            });
+            before(beforeFn);
 
             it("does not add the 'cannot edit' message to locked questions", function () {
                 const mug = getMug('/data/locked');
@@ -444,7 +434,18 @@ describe("The Lock plugin", function() {
         });
 
         describe("without the feature enabled", function () {
-            before(beforeFn);
+            before(function (done) {
+                util.init({
+                    javaRosa: {langs: ['en']},
+                    plugins: ['lock'],
+                    features: {edit_locked_questions: false},
+                    core: {
+                        onReady: function () {
+                            call('loadXFormOrError', TEST_XML, done);
+                        }
+                    }
+                });
+            });
 
             it("adds the 'cannot edit' message to locked questions", function () {
                 const mug = getMug('/data/locked');

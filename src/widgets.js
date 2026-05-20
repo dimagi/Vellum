@@ -280,6 +280,7 @@ var baseKeyValue = function (mug, options) {
     var widget = base(mug, options),
         path = options.widgetValuePath || options.path,
         id = options.id || 'property-' + path;
+    widget.path = path;
     widget.definition = mug.p.getDefinition(options.path);
     options.richText = false;
 
@@ -296,9 +297,6 @@ var baseKeyValue = function (mug, options) {
     widget.kvInput = $('<div class="control-row" />').attr('name', id);
 
     widget.getControl = function () {
-        if (widget.isDisabled()) {
-            // todo
-        }
         return widget.kvInput;
     };
 
@@ -306,6 +304,11 @@ var baseKeyValue = function (mug, options) {
         widget.kvInput.html(widget_control_keyvalue({
             pairs: _.clone(value)
         }));
+        if (widget.isDisabled()) {
+            widget.kvInput.find('input').prop('disabled', true);
+            widget.kvInput.find('.btn').addClass('hide');
+            return;
+        }
         widget.kvInput.find('input').on('change keyup', function () {
             widget.handleChange();
         });

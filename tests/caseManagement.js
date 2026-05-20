@@ -883,6 +883,30 @@ describe("The Case Management plugin", function () {
             });
         });
 
+        it("new mug when first mug's Case Property is locked", function (done) {
+            util.loadXML("");
+            const mug = util.addQuestion("Text", "first");
+            const vellum = mug.form.vellum;
+            const originalIsPropertyLocked = vellum.isPropertyLocked;
+            vellum.isPropertyLocked = () => true;
+            const save = call("getData").core.saveButton.ui;
+            function test() {
+                save.off('shown.bs.popover.test');
+                try {
+                    $(".fd-auto-assign-case-name").trigger("click");
+                    assert.isUndefined(mug.p.caseProperty, "locked mug should not receive case name");
+                    const name = call("getMugByPath", "/data/case-name");
+                    assert.equal(name.p.nodeID, 'case-name');
+                    assert.equal(name.p.caseProperty, 'name');
+                } finally {
+                    vellum.isPropertyLocked = originalIsPropertyLocked;
+                }
+                done();
+            }
+            save.on('shown.bs.popover.test', test);
+            save.popover("show");
+        });
+
         it("new mug with unique node ID", function (done) {
             util.loadXML("");
             const mug = util.addQuestion("Text", "case-name");

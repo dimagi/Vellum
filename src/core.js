@@ -1151,14 +1151,21 @@ fn._createJSTree = function () {
  * drag begins.
  */
 $(document).one("dnd_move.vakata.jstree", function (e, data) {
+    const disableDropForEl = function (el) {
+        return el.getAttribute('disabled') !== null || el.getAttribute('contenteditable') === 'false';
+    };
+
     $(document).on("dnd_move.vakata.jstree", function (e, data) {
-        $('.jstree-drop').addClass('jstree-drop-active');
+        $('.jstree-drop')
+            .not((_, el) => disableDropForEl(el))
+            .addClass('jstree-drop-active');
         var source = $(data.data.obj),
             target = $(data.event.target),
             inst = $.jstree.reference(target);
         if (!inst && target.vellum("get") === source.vellum("get")) {
             // only when not dragging inside the tree
-            if (target.closest('.jstree-drop').length) {
+            const $closest = target.closest('.jstree-drop');
+            if ($closest.length && !disableDropForEl($closest[0])) {
                 data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
             } else {
                 data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
@@ -1170,7 +1177,12 @@ $(document).one("dnd_move.vakata.jstree", function (e, data) {
             target = $(data.event.target),
             inst = $.jstree.reference(target);
 
-        if (!inst && (target.closest('.jstree-drop').length) && vellum === target.vellum("get")) {
+        const $closest = target.closest('.jstree-drop');
+        if (!inst &&
+            $closest.length &&
+            !disableDropForEl($closest[0]) &&
+            vellum === target.vellum("get")
+        ) {
             if (data.data.origin) {
                 var node = data.data.origin.get_node(data.data.nodes[0]);
                 if (node.data && node.data.handleDrop) {

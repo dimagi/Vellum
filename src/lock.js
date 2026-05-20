@@ -102,7 +102,7 @@ $.vellum.plugin("lock", {}, {
             widget: widgets.checkbox,
             enabled: () => isEditable,
             help: gettext("A locked question cannot be edited, moved, or deleted from the form."),
-            helpURL: "https://www.example.com",  // placeholder for public documentation
+            helpURL: "https://dimagi.atlassian.net/wiki/spaces/commcarepublic/pages/3946381318/Locked+Admin+Questions",
             serialize: () => {},
             deserialize: (data, key, mug, context) => {
                 if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_BIND_ATTR]) {
@@ -110,6 +110,10 @@ $.vellum.plugin("lock", {}, {
                 }
             },
             setter: function (mug, attr, value) {
+                if (!isEditable && !mug.form.isLoadingXForm) {
+                    return;
+                }
+
                 if (value === true) {
                     mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
                     mug.p.rawBindAttributes[LOCKED_BIND_ATTR] = 'all';
@@ -165,20 +169,29 @@ $.vellum.plugin("lock", {}, {
     },
     isPropertyLocked: function (mug, propertyPath) {
         const locked = this.__callOld();
-        if (locked || mug.p.locked) {
+        if (locked) {
             return true;
         }
 
-        if (propertyPath === 'nodeID' && !this.isMugPathMoveable(mug)) {
-            const message = {
-                key: LOCKED_CHILDREN_MSG_KEY,
-                message: gettext(
-                        "This group contains locked questions and cannot be moved or deleted from the form."
-                    ),
-                level: mug.INFO,
-            };
-            mug.addMessage('nodeID', message);
-            return true;
+        if (mug.p.locked) {
+            // never lock the "Locked" checkbox based on itself
+            return propertyPath !== "locked";
+        }
+
+        if (propertyPath === 'nodeID') {
+            if (!this.isMugPathMoveable(mug)) {
+                const message = {
+                    key: LOCKED_CHILDREN_MSG_KEY,
+                    message: gettext(
+                            "This group contains locked questions and cannot be moved or deleted from the form."
+                        ),
+                    level: mug.INFO,
+                };
+                mug.addMessage('nodeID', message);
+                return true;
+            } else {
+                mug.dropMessage('nodeID', LOCKED_CHILDREN_MSG_KEY);
+            }
         }
         return false;
     },
