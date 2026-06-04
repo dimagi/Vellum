@@ -20,7 +20,7 @@ const assert = chai.assert,
 function beforeFn(done) {
     util.init({
         javaRosa: {langs: ['en']},
-        plugins: ['lock', 'itemset'],
+        plugins: ['lock', 'itemset', 'saveToCase'],
         features: {edit_locked_questions: true},
         core: {
             onReady: function () {
@@ -225,6 +225,22 @@ describe("The Lock plugin", function() {
                 group.p.locked = false;
             }
         });
+
+        it("does not lock an Advanced Case Action when its parent group is locked", function () {
+            const group = getMug('/data/group_no_lock');
+            const normal = getMug('/data/group_no_lock/nested_unlocked');
+            clickQuestion("group_no_lock");
+            const stc = util.addQuestion("SaveToCase", "g_case", {useCreate: true});
+            try {
+                group.p.locked = true;
+                assert(normal.p.locked, "normal child should lock");
+                assert(!stc.p.locked, "SaveToCase should be skipped");
+            } finally {
+                group.p.locked = false;
+                call('getData').core.form.removeMugsFromForm([stc]);
+            }
+        });
+
     });
 
     describe("locked select questions", function () {
@@ -399,6 +415,21 @@ describe("The Lock plugin", function() {
                     }
                 });
             });
+        });
+
+        it("shows a full lock icon on a locked group whose only unlocked descendant is an Advanced Case Action", function () {
+            const group = getMug('/data/group_no_lock');
+            clickQuestion("group_no_lock");
+            const stc = util.addQuestion("SaveToCase", "icon_case", { useCreate: true });
+            try {
+                group.p.locked = true;
+                const icon = getLockIcon('/data/group_no_lock');
+                assert.include(icon, 'fa-lock');
+                assert.notInclude(icon, 'fa-unlock');
+            } finally {
+                group.p.locked = false;
+                call('getData').core.form.removeMugsFromForm([stc]);
+            }
         });
     });
 
