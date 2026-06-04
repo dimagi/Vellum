@@ -36,6 +36,7 @@
         /* BROWSER APIS */
         "DataTransfer": false,
         "ClipboardEvent": false,
-        "KeyboardEvent": false
+        "KeyboardEvent": false,
+        "FocusEvent": false
     }
 }

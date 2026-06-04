@@ -457,6 +457,22 @@ function markdownVisible() {
         .is(':visible');
 }
 
+// Focus an input and ensure its "focus" event handlers run.
+//
+// Headless chrome does not dispatch focus events for a programmatic .focus()
+// when the document lacks system focus. Behavior that is lazily bound to
+// "focus" therefore never triggers. Fire the event explicitly so those
+// handlers run. Covers both native addEventListener and jQuery bindings.
+function focus($input) {
+    const $el = $input && $input.jquery ? $input : $($input);
+    const el = $el[0];
+    if (!el) { return $el; }
+    el.focus();
+    el.dispatchEvent(new FocusEvent('focus'));
+    $el.triggerHandler('focus');
+    return $el;
+}
+
 export default {
     options: options,
     asyncatch: asyncatch,
@@ -534,5 +550,6 @@ export default {
         return $node.children(".fd-valid-alert-icon").length === 0;
     },
     markdownVisible: markdownVisible,
+    focus: focus,
     parseXML: xml.parseXML,
 };

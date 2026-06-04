@@ -999,13 +999,11 @@ describe("The rich text editor", function () {
             });
 
             it("cursor should be at end of input on focus", function () {
-                var editor = richText.editor(widget.input),
-                    value = 'testing cursor';
+                var value = 'testing cursor';
                 widget.setValue(value);
                 // Make sure focus is elsewhere, then focus on the rich text input
-                // editor.on('instanceReady', function() {
-                $('[name=property-nodeID]').focus();
-                editor.focus();
+                util.focus($('[name=property-nodeID]'));
+                util.focus(widget.input);
                 var selection = window.getSelection();
                 assert.exists(selection);
                 var range = selection.getRangeAt(0);
