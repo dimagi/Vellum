@@ -25,7 +25,16 @@ jobs:
         mv package.json.save package.json
         yarn install
     - name: Install Chrome for Puppeteer
-      run: node_modules/.bin/puppeteer browsers install chrome
+      run: |
+        echo "HOME=$HOME  PUPPETEER_CACHE_DIR=${PUPPETEER_CACHE_DIR:-<unset>}"
+        echo "--- launch will look here: ---"
+        node -e "console.log(require('puppeteer').executablePath())"
+        echo "--- cache contents BEFORE install: ---"
+        ls -laR ~/.cache/puppeteer 2>&1 || echo "(no cache dir)"
+        echo "--- install (forced path output): ---"
+        node_modules/.bin/puppeteer browsers install chrome --format '{{path}}'
+        echo "--- cache contents AFTER install: ---"
+        ls -laR ~/.cache/puppeteer 2>&1 || echo "(no cache dir)"
     - name: Build webpack
       run: |
         rm -rf _build
