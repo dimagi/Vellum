@@ -14,12 +14,18 @@ jobs:
       with:
         node-version: 24
     - name: Install dependencies
+      env:
+        # puppeteer doesn't set up chrome correctly when installed as a
+        # transitive dependency, so skip it here and explicitly install below
+        PUPPETEER_SKIP_DOWNLOAD: "true"
       run: |
         mv package.json package.json.save
         npm install "yarn@^1"
         rm package-lock.json
         mv package.json.save package.json
         yarn install
+    - name: Install Chrome for Puppeteer
+      run: node_modules/.bin/puppeteer browsers install chrome
     - name: Build webpack
       run: |
         rm -rf _build
