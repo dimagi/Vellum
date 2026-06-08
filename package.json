@@ -41,7 +41,7 @@
         "http-server": "^14.1.0",
         "jsdiff": "components/jsdiff#master",
         "jshint": "^2.13.6",
-        "less": "3.10.3",
+        "less": "4.6.3",
         "less-loader": "12.2.0",
         "minimist": "^1.2.8",
         "mocha": "10.2.0",
