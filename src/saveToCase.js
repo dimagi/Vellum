@@ -253,9 +253,14 @@ function caseTypeDropdownWidget(mug, opts) {
     widget.postRender = function () {
         initSelect2();
         var $dropdownRow = widget.input.closest('.widget'),
-            $toggleLink = addModeToggle($dropdownRow, gettext('Select case type with XPath'), function () {
-                switchToXpathMode(mug, widget, $dropdownRow);
-            });
+            $toggleLink = addModeToggle(
+                $dropdownRow,
+                gettext('Select case type with XPath'),
+                widget.isDisabled(),
+                function () {
+                    switchToXpathMode(mug, widget, $dropdownRow);
+                }
+            );
         if (!createsCase(mug)) {
             $toggleLink.hide();
         }
@@ -295,9 +300,14 @@ function caseTypeXpathWidget(mug, opts) {
 
     widget.postRender = function () {
         var $xpathRow = widget.input.closest('.widget');
-        addModeToggle($xpathRow, gettext('Select case type from a list'), function () {
-            switchToDropdownMode(mug, widget, $xpathRow);
-        });
+        addModeToggle(
+            $xpathRow,
+            gettext('Select case type from a list'),
+            widget.isDisabled(),
+            function () {
+                switchToDropdownMode(mug, widget, $xpathRow);
+            }
+        );
         if (!createsCase(mug) || !mug.p.caseTypeXPath || mug.p.case_type) {
             $xpathRow.hide();
         }
@@ -305,9 +315,10 @@ function caseTypeXpathWidget(mug, opts) {
     return widget;
 }
 
-function addModeToggle($row, text, onClick) {
-    var $link = $('<a href="#" class="fd-mode-toggle-link" />')
+function addModeToggle($row, text, disabled, onClick) {
+    var $link = $('<button type="button" class="btn-link fd-mode-toggle-link p-0" />')
         .text(text)
+        .prop('disabled', disabled)
         .on('click', function (e) {
             e.preventDefault();
             onClick();
