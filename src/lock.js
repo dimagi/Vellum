@@ -19,7 +19,6 @@ const SELECT_AND_CHOICE_CLASSES = [...STATIC_SELECT_CLASSES, "Choice"];
 const DYNAMIC_SELECT_CLASSES = ["SelectDynamic", "MSelectDynamic"];
 const SELECT_CLASSES = [...STATIC_SELECT_CLASSES, ...DYNAMIC_SELECT_CLASSES];
 const GROUP_CLASSES = ["Group", "Repeat", "FieldList"];
-const NON_LOCKABLE_CLASSES = ["SaveToCase"];  // TODO: allow Advanced Case Actions to be locked
 
 $.vellum.plugin("lock", {}, {
     init: function () {
@@ -236,8 +235,7 @@ function hasLockedDescendants(mug) {
 
 function hasUnlockedDescendants(mug) {
     return mug.form.getChildren(mug).some(child =>
-        !_.contains(NON_LOCKABLE_CLASSES, child.__className) &&
-        (!child.p.locked || hasUnlockedDescendants(child))
+        !child.p.locked || hasUnlockedDescendants(child)
     );
 }
 
@@ -251,9 +249,6 @@ function propagateLockToControlOnlyChildren(mug) {
 
 function cascadeLockToDescendants(mug, value) {
     mug.form.getChildren(mug).forEach(child => {
-        if (_.contains(NON_LOCKABLE_CLASSES, child.__className)) {
-            return;
-        }
         if (child.p.locked !== value) {
             child.p.locked = value;
         } else if (_.contains(GROUP_CLASSES, child.__className)) {

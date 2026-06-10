@@ -226,21 +226,6 @@ describe("The Lock plugin", function() {
             }
         });
 
-        it("does not lock an Advanced Case Action when its parent group is locked", function () {
-            const group = getMug('/data/group_no_lock');
-            const normal = getMug('/data/group_no_lock/nested_unlocked');
-            clickQuestion("group_no_lock");
-            const stc = util.addQuestion("SaveToCase", "g_case", {useCreate: true});
-            try {
-                group.p.locked = true;
-                assert(normal.p.locked, "normal child should lock");
-                assert(!stc.p.locked, "SaveToCase should be skipped");
-            } finally {
-                group.p.locked = false;
-                call('getData').core.form.removeMugsFromForm([stc]);
-            }
-        });
-
     });
 
     describe("locked select questions", function () {
