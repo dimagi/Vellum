@@ -32,6 +32,7 @@
 							<question28 />
 							<question29 />
 							<question33 />
+							<question34 />
 							<question7 />
 						</question23>
 					</question22>
@@ -66,6 +67,7 @@
 			<bind nodeset="/data/question22/question23/question28" type="xsd:string" />
 			<bind nodeset="/data/question22/question23/question29" type="binary" />
 			<bind nodeset="/data/question22/question23/question33" type="binary" />
+			<bind nodeset="/data/question22/question23/question34" type="binary" />
 			<bind nodeset="/data/question22/question23/question7" type="intent" />
 			<bind nodeset="/data/question20" />
 			<bind nodeset="/data/question32" calculate="1 + 2" />
@@ -225,6 +227,7 @@
 					<secret ref="/data/question22/question23/question28" />
 					<upload ref="/data/question22/question23/question29" mediatype="image/*" appearance="signature" />
 					<upload ref="/data/question22/question23/question33" mediatype="application/*,text/*" />
+					<upload ref="/data/question22/question23/question34" mediatype="image/*" jr:imageDimensionScaledMax="250px" appearance="face" />
 					<input ref="/data/question22/question23/question7" appearance="intent:question7" />
 				</group>
 			</repeat>

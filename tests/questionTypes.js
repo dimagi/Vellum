@@ -150,6 +150,10 @@ var call = util.call,
             path: 'question22/question23/',
             nodeId: 'question33'
         }, {
+            type: 'FaceCapture',
+            path: 'question22/question23/',
+            nodeId: 'question34'
+        }, {
             type: 'AndroidIntent',
             path: 'question22/question23/',
             nodeId: 'question7'
@@ -402,16 +406,19 @@ describe("Vellum", function () {
                 Trigger: "minimal",
                 PhoneNumber: "numeric",
                 Signature: "signature",
+                FaceCapture: "face",
             },
             remove_appearance = [
                 ["Trigger", questionWithoutDefaultAppearance],
                 ["PhoneNumber", questionWithoutDefaultAppearance],
                 ["Signature", questionWithoutDefaultAppearance],
+                ["FaceCapture", questionWithoutDefaultAppearance],
             ],
             change_appearance = [
                 ["Trigger", _.omit(questionWithDefaultAppearance, "Trigger")],
                 ["PhoneNumber", _.omit(questionWithDefaultAppearance, "PhoneNumber")],
                 ["Signature", _.omit(questionWithDefaultAppearance, "Signature")],
+                ["FaceCapture", _.omit(questionWithDefaultAppearance, "FaceCapture")],
             ];
 
         before(function (done) {
@@ -705,6 +712,67 @@ describe("Image Questions", function() {
         util.loadXML(IMAGE_CAPTURE_XML);
         var image = call("getMugByPath", "/data/image");
         assert.strictEqual(image.p.imageSize, '');
+    });
+});
+
+describe("Face Capture Questions", function() {
+    before(function (done) {
+        util.init({
+            core: {
+                onReady: function () { done(); }
+            }
+        });
+    });
+
+    it("should set appearance to 'face' on init", function() {
+        util.loadXML("");
+        var mug = util.addQuestion("FaceCapture", 'face1');
+        assert.strictEqual(mug.p.appearance, "face");
+    });
+
+    it("should default to small image size (inherits ImageField init)", function() {
+        util.loadXML("");
+        var mug = util.addQuestion("FaceCapture", 'face2');
+        assert.strictEqual(mug.p.imageSize, 250);
+    });
+
+    it("should serialize to upload with mediatype image/* and appearance face", function() {
+        util.loadXML("");
+        util.addQuestion("FaceCapture", 'face3');
+        var xml = util.call("createXML");
+        assert.include(xml, 'mediatype="image/*"');
+        assert.include(xml, 'appearance="face"');
+    });
+
+    it("should parse back to FaceCapture mug from XML with appearance='face'", function() {
+        util.loadXML("");
+        util.addQuestion("FaceCapture", 'face4');
+        var xml = util.call("createXML");
+        util.loadXML(xml);
+        var mug = util.getMug('face4');
+        assert.equal(mug.__className, "FaceCapture");
+    });
+
+    it("should serialize and parse imageSize for FaceCapture", function() {
+        util.loadXML("");
+        var mug = util.addQuestion("FaceCapture", 'face_size');
+        mug.p.imageSize = 500;
+        var xml = util.call("createXML");
+        assert.include(xml, 'jr:imageDimensionScaledMax="500px"');
+        util.loadXML(xml);
+        mug = util.getMug('face_size');
+        assert.equal(mug.p.imageSize, 500);
+    });
+
+    it("should clear appearance on changeType to Image", function() {
+        util.loadXML("");
+        var mug = util.addQuestion("FaceCapture", 'face5');
+        assert.strictEqual(mug.p.appearance, "face");
+        var nodeID = mug.p.nodeID;
+        util.call("changeMugType", mug, "Image");
+        mug = util.getMug(nodeID);
+        assert.equal(mug.__className, "Image");
+        assert.equal(mug.p.appearance, undefined);
     });
 });
 

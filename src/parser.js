@@ -338,7 +338,7 @@ function populateControlMug(mug, $cEl) {
     if (hintEl.length && mug.getPresence("hintLabel") !== 'notallowed') {
         mug.p.hintLabel = xml.humanize(hintEl);
     }
-    if (mug.__className === "Image") {
+    if (mug.__className === "Image" || mug.__className === "FaceCapture") {
         mug.p.imageSize = imageSize ? parseInt(imageSize) : "";
     }
 }
@@ -499,6 +499,8 @@ function buildControlNodeAdaptorMap() {
             } else if (mediaType === 'image/*') { /* fix eclipse syntax highlighter */
                 if (appearance === 'signature') {
                     type = 'Signature';
+                } else if (appearance === 'face') {
+                    type = 'FaceCapture';
                 } else {
                     type = 'Image';
                 }
