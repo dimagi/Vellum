@@ -46,17 +46,21 @@ $.vellum.plugin("lock", {}, {
             mug.p.set('locked', true);
 
             if (!this.opts().features.edit_locked_questions) {
-                const message = {
-                    key: LOCKED_UNEDITABLE_MSG_KEY,
-                    message: gettext(
-                            "This question is locked and can only be edited by a user with the locked " +
-                            "questions permission."
-                        ),
-                    level: mug.INFO,
-                };
-                mug.addMessage('locked', message);
+                addLockedUneditableMessage(mug);
             }
         }
+    },
+    parseDataElement: function (form, el, parentMug, role) {
+        const mug = this.__callOld();
+        // Data-only mugs have no bind, so their lock lives on the <data> node.
+        if (mug.options.isDataOnly && $(el).xmlAttr(LOCKED_XML_ATTR) === 'all') {
+            mug.p.set('locked', true);
+
+            if (!this.opts().features.edit_locked_questions) {
+                addLockedUneditableMessage(mug);
+            }
+        }
+        return mug;
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
@@ -106,8 +110,9 @@ $.vellum.plugin("lock", {}, {
             helpURL: "https://dimagi.atlassian.net/wiki/spaces/commcarepublic/pages/3946381318/Locked+Admin+Questions",
             serialize: () => {},
             deserialize: (data, key, mug, context) => {
-                if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_XML_ATTR]) {
-                    delete mug.p.rawBindAttributes[LOCKED_XML_ATTR];
+                const rawAttrsProp = lockedAttrsProp(mug);
+                if (mug.p[rawAttrsProp] && mug.p[rawAttrsProp][LOCKED_XML_ATTR]) {
+                    delete mug.p[rawAttrsProp][LOCKED_XML_ATTR];
                 }
             },
             setter: function (mug, attr, value) {
@@ -115,12 +120,13 @@ $.vellum.plugin("lock", {}, {
                     return;
                 }
 
+                const rawAttrsProp = lockedAttrsProp(mug);
                 if (value === true) {
-                    mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
-                    mug.p.rawBindAttributes[LOCKED_XML_ATTR] = 'all';
+                    mug.p[rawAttrsProp] = mug.p[rawAttrsProp] || {};
+                    mug.p[rawAttrsProp][LOCKED_XML_ATTR] = 'all';
                     _this.data.lock.locks[mug.ufid] = 'all';
                 } else {
-                    delete mug.p.rawBindAttributes[LOCKED_XML_ATTR];
+                    delete mug.p[rawAttrsProp][LOCKED_XML_ATTR];
                     delete _this.data.lock.locks[mug.ufid];
                 }
                 mug.p.set(attr, value);
@@ -206,6 +212,21 @@ $.vellum.plugin("lock", {}, {
         return this.__callOld() && !mug.p.locked;
     },
 });
+
+function lockedAttrsProp(mug) {
+    return mug.options.isDataOnly ? 'rawDataAttributes' : 'rawBindAttributes';
+}
+
+function addLockedUneditableMessage(mug) {
+    mug.addMessage('locked', {
+        key: LOCKED_UNEDITABLE_MSG_KEY,
+        message: gettext(
+                "This question is locked and can only be edited by a user with the locked " +
+                "questions permission."
+            ),
+        level: mug.INFO,
+    });
+}
 
 function hasLockedDescendants(mug) {
     return mug.form.getChildren(mug).some(child =>
