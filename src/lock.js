@@ -1,10 +1,3 @@
-/*
- * Locked Questions plugin.
- *
- * Lets you lock questions by setting vellum:lock on their bind.
- *
- *    'all': Nothing about this question can be changed.
- */
 import $ from "jquery";
 import "vellum/core";
 import _ from "underscore";
