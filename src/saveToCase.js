@@ -908,6 +908,7 @@ var slugToProp = {
                     "case_type",
                     "caseTypeXPath",
                     "case_id",
+                    "locked",
                 ],
             },
             {
