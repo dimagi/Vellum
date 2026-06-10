@@ -10,7 +10,7 @@ import "vellum/core";
 import _ from "underscore";
 import widgets from "vellum/widgets";
 
-const LOCKED_BIND_ATTR = "vellum:lock";
+const LOCKED_XML_ATTR = "vellum:lock";
 const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit";
 const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
 
@@ -40,7 +40,7 @@ $.vellum.plugin("lock", {}, {
     },
     parseBindElement: function (form, el, path) {
         this.__callOld();
-        const locked = el.xmlAttr(LOCKED_BIND_ATTR);
+        const locked = el.xmlAttr(LOCKED_XML_ATTR);
         if (locked && locked === 'all') {
             const mug = form.getMugByPath(path);
             mug.p.set('locked', true);
@@ -106,8 +106,8 @@ $.vellum.plugin("lock", {}, {
             helpURL: "https://dimagi.atlassian.net/wiki/spaces/commcarepublic/pages/3946381318/Locked+Admin+Questions",
             serialize: () => {},
             deserialize: (data, key, mug, context) => {
-                if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_BIND_ATTR]) {
-                    delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_XML_ATTR]) {
+                    delete mug.p.rawBindAttributes[LOCKED_XML_ATTR];
                 }
             },
             setter: function (mug, attr, value) {
@@ -117,10 +117,10 @@ $.vellum.plugin("lock", {}, {
 
                 if (value === true) {
                     mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
-                    mug.p.rawBindAttributes[LOCKED_BIND_ATTR] = 'all';
+                    mug.p.rawBindAttributes[LOCKED_XML_ATTR] = 'all';
                     _this.data.lock.locks[mug.ufid] = 'all';
                 } else {
-                    delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                    delete mug.p.rawBindAttributes[LOCKED_XML_ATTR];
                     delete _this.data.lock.locks[mug.ufid];
                 }
                 mug.p.set(attr, value);
