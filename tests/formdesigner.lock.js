@@ -505,6 +505,42 @@ describe("The Lock plugin", function() {
             });
         });
     });
+
+    describe("compatibility with Advanced Case Actions", function () {
+        before(beforeFn);
+
+        function makeLockedSaveToCase() {
+            util.loadXML("");
+            const mug = util.addQuestion("SaveToCase", "save_to_case", {
+                useClose: true,
+                closeCondition: "1=1",
+            });
+            mug.p.locked = true;
+            return mug;
+        }
+
+        it("sets vellum:lock='all' on rawDataAttributes when locked", function () {
+            const mug = makeLockedSaveToCase();
+            assert.equal(mug.p.rawDataAttributes['vellum:lock'], 'all');
+            assert.notProperty(mug.p.rawBindAttributes || {}, 'vellum:lock');
+        });
+
+        it("removes vellum:lock from rawDataAttributes when unlocked", function () {
+            const mug = makeLockedSaveToCase();
+            mug.p.locked = false;
+            assert.notProperty(mug.p.rawDataAttributes, 'vellum:lock');
+        });
+
+        it("round-trips a locked Advanced Case Action through XML", function () {
+            makeLockedSaveToCase();
+            const xml = call('createXML');
+            assert.include(xml, 'vellum:lock="all"',
+                "expected vellum:lock on the serialized data node");
+            util.loadXML(xml);
+            assert(getMug('/data/save_to_case').p.locked,
+                "expected locked to be set after reloading");
+        });
+    });
 });
 
 
