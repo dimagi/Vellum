@@ -226,21 +226,6 @@ describe("The Lock plugin", function() {
             }
         });
 
-        it("does not lock an Advanced Case Action when its parent group is locked", function () {
-            const group = getMug('/data/group_no_lock');
-            const normal = getMug('/data/group_no_lock/nested_unlocked');
-            clickQuestion("group_no_lock");
-            const stc = util.addQuestion("SaveToCase", "g_case", {useCreate: true});
-            try {
-                group.p.locked = true;
-                assert(normal.p.locked, "normal child should lock");
-                assert(!stc.p.locked, "SaveToCase should be skipped");
-            } finally {
-                group.p.locked = false;
-                call('getData').core.form.removeMugsFromForm([stc]);
-            }
-        });
-
     });
 
     describe("locked select questions", function () {
@@ -503,6 +488,42 @@ describe("The Lock plugin", function() {
                 assert.equal($menu.find('a:contains("Edit Bulk Translations")').length, 0,
                     "Edit Bulk Translations should not be in tools menu");
             });
+        });
+    });
+
+    describe("compatibility with Advanced Case Actions", function () {
+        before(beforeFn);
+
+        function makeLockedSaveToCase() {
+            util.loadXML("");
+            const mug = util.addQuestion("SaveToCase", "save_to_case", {
+                useClose: true,
+                closeCondition: "1=1",
+            });
+            mug.p.locked = true;
+            return mug;
+        }
+
+        it("sets vellum:lock='all' on rawDataAttributes when locked", function () {
+            const mug = makeLockedSaveToCase();
+            assert.equal(mug.p.rawDataAttributes['vellum:lock'], 'all');
+            assert.notProperty(mug.p.rawBindAttributes || {}, 'vellum:lock');
+        });
+
+        it("removes vellum:lock from rawDataAttributes when unlocked", function () {
+            const mug = makeLockedSaveToCase();
+            mug.p.locked = false;
+            assert.notProperty(mug.p.rawDataAttributes, 'vellum:lock');
+        });
+
+        it("round-trips a locked Advanced Case Action through XML", function () {
+            makeLockedSaveToCase();
+            const xml = call('createXML');
+            assert.include(xml, 'vellum:lock="all"',
+                "expected vellum:lock on the serialized data node");
+            util.loadXML(xml);
+            assert(getMug('/data/save_to_case').p.locked,
+                "expected locked to be set after reloading");
         });
     });
 });

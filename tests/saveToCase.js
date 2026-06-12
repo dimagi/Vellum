@@ -376,7 +376,7 @@ describe("The SaveToCase module", function() {
             assert.notOk($xpathRow.is(":visible"), "xpath hidden");
 
             // Click "Use an xpath expression" to switch to xpath mode
-            $dropdownRow.find('.controls > a').trigger('click');
+            $dropdownRow.find('.controls > button').trigger('click');
             assert.notOk(mug.p.case_type, "case_type cleared");
             assert.notOk($dropdownRow.is(":visible"), "dropdown hidden");
             assert.ok($xpathRow.is(":visible"), "xpath visible");
@@ -388,14 +388,14 @@ describe("The SaveToCase module", function() {
             assert.equal(mug.p.caseTypeXPath, '/data/dynamic_type');
 
             // Click "Select case type from a list" to switch back to dropdown and verify dropdown is restored
-            $xpathRow.find('.controls > a').trigger('click');
+            $xpathRow.find('.controls > button').trigger('click');
             assert.equal(mug.p.case_type, 'household', "dropdown value restored");
             assert.notOk(mug.p.caseTypeXPath, "xpath cleared");
             assert.ok($dropdownRow.is(":visible"), "dropdown visible again");
             assert.notOk($xpathRow.is(":visible"), "xpath hidden again");
 
             // Click "Use an xpath expression" again to verify xpath is restored
-            $dropdownRow.find('.controls > a').trigger('click');
+            $dropdownRow.find('.controls > button').trigger('click');
             assert.equal(mug.p.caseTypeXPath, '/data/dynamic_type', "xpath value restored");
             assert.notOk(mug.p.case_type, "case_type cleared again");
         });

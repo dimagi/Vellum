@@ -180,8 +180,10 @@ export var getUIElement = function($input, labelText, isDisabled, help) {
     }));
 
     if (isDisabled) {
-        // Disable anything that can be disabled
-        $input.find("*").addBack().prop('disabled', true);
+        // Disable anything that can be disabled. Exclude <option>/<optgroup>:
+        // a disabled option cannot be selected, which breaks select2's display
+        // of the current value (it falls back to the placeholder).
+        $input.find("*").addBack().not("option, optgroup").prop('disabled', true);
         $input.filter('[contenteditable]').attr({
             'contenteditable': false,
             'disabled': true,

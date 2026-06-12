@@ -1,16 +1,9 @@
-/*
- * Locked Questions plugin.
- *
- * Lets you lock questions by setting vellum:lock on their bind.
- *
- *    'all': Nothing about this question can be changed.
- */
 import $ from "jquery";
 import "vellum/core";
 import _ from "underscore";
 import widgets from "vellum/widgets";
 
-const LOCKED_BIND_ATTR = "vellum:lock";
+const LOCKED_XML_ATTR = "vellum:lock";
 const LOCKED_UNEDITABLE_MSG_KEY = "mug-locked-cannot-edit";
 const LOCKED_CHILDREN_MSG_KEY = "mug-has-locked-children";
 
@@ -19,7 +12,6 @@ const SELECT_AND_CHOICE_CLASSES = [...STATIC_SELECT_CLASSES, "Choice"];
 const DYNAMIC_SELECT_CLASSES = ["SelectDynamic", "MSelectDynamic"];
 const SELECT_CLASSES = [...STATIC_SELECT_CLASSES, ...DYNAMIC_SELECT_CLASSES];
 const GROUP_CLASSES = ["Group", "Repeat", "FieldList"];
-const NON_LOCKABLE_CLASSES = ["SaveToCase"];  // TODO: allow Advanced Case Actions to be locked
 
 $.vellum.plugin("lock", {}, {
     init: function () {
@@ -40,23 +32,27 @@ $.vellum.plugin("lock", {}, {
     },
     parseBindElement: function (form, el, path) {
         this.__callOld();
-        const locked = el.xmlAttr(LOCKED_BIND_ATTR);
+        const locked = el.xmlAttr(LOCKED_XML_ATTR);
         if (locked && locked === 'all') {
             const mug = form.getMugByPath(path);
             mug.p.set('locked', true);
 
             if (!this.opts().features.edit_locked_questions) {
-                const message = {
-                    key: LOCKED_UNEDITABLE_MSG_KEY,
-                    message: gettext(
-                            "This question is locked and can only be edited by a user with the locked " +
-                            "questions permission."
-                        ),
-                    level: mug.INFO,
-                };
-                mug.addMessage('locked', message);
+                addLockedUneditableMessage(mug);
             }
         }
+    },
+    parseDataElement: function (form, el, parentMug, role) {
+        const mug = this.__callOld();
+        // Data-only mugs have no bind, so their lock lives on the <data> node.
+        if (mug.options.isDataOnly && $(el).xmlAttr(LOCKED_XML_ATTR) === 'all') {
+            mug.p.set('locked', true);
+
+            if (!this.opts().features.edit_locked_questions) {
+                addLockedUneditableMessage(mug);
+            }
+        }
+        return mug;
     },
     handleMugParseFinish: function (mug) {
         this.__callOld();
@@ -106,8 +102,9 @@ $.vellum.plugin("lock", {}, {
             helpURL: "https://dimagi.atlassian.net/wiki/spaces/commcarepublic/pages/3946381318/Locked+Admin+Questions",
             serialize: () => {},
             deserialize: (data, key, mug, context) => {
-                if (mug.p.rawBindAttributes && mug.p.rawBindAttributes[LOCKED_BIND_ATTR]) {
-                    delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                const rawAttrsProp = lockedAttrsProp(mug);
+                if (mug.p[rawAttrsProp] && mug.p[rawAttrsProp][LOCKED_XML_ATTR]) {
+                    delete mug.p[rawAttrsProp][LOCKED_XML_ATTR];
                 }
             },
             setter: function (mug, attr, value) {
@@ -115,12 +112,13 @@ $.vellum.plugin("lock", {}, {
                     return;
                 }
 
+                const rawAttrsProp = lockedAttrsProp(mug);
                 if (value === true) {
-                    mug.p.rawBindAttributes = mug.p.rawBindAttributes || {};
-                    mug.p.rawBindAttributes[LOCKED_BIND_ATTR] = 'all';
+                    mug.p[rawAttrsProp] = mug.p[rawAttrsProp] || {};
+                    mug.p[rawAttrsProp][LOCKED_XML_ATTR] = 'all';
                     _this.data.lock.locks[mug.ufid] = 'all';
                 } else {
-                    delete mug.p.rawBindAttributes[LOCKED_BIND_ATTR];
+                    delete mug.p[rawAttrsProp][LOCKED_XML_ATTR];
                     delete _this.data.lock.locks[mug.ufid];
                 }
                 mug.p.set(attr, value);
@@ -207,6 +205,21 @@ $.vellum.plugin("lock", {}, {
     },
 });
 
+function lockedAttrsProp(mug) {
+    return mug.options.isDataOnly ? 'rawDataAttributes' : 'rawBindAttributes';
+}
+
+function addLockedUneditableMessage(mug) {
+    mug.addMessage('locked', {
+        key: LOCKED_UNEDITABLE_MSG_KEY,
+        message: gettext(
+                "This question is locked and can only be edited by a user with the locked " +
+                "questions permission."
+            ),
+        level: mug.INFO,
+    });
+}
+
 function hasLockedDescendants(mug) {
     return mug.form.getChildren(mug).some(child =>
         child.p.locked || hasLockedDescendants(child)
@@ -215,8 +228,7 @@ function hasLockedDescendants(mug) {
 
 function hasUnlockedDescendants(mug) {
     return mug.form.getChildren(mug).some(child =>
-        !_.contains(NON_LOCKABLE_CLASSES, child.__className) &&
-        (!child.p.locked || hasUnlockedDescendants(child))
+        !child.p.locked || hasUnlockedDescendants(child)
     );
 }
 
@@ -230,9 +242,6 @@ function propagateLockToControlOnlyChildren(mug) {
 
 function cascadeLockToDescendants(mug, value) {
     mug.form.getChildren(mug).forEach(child => {
-        if (_.contains(NON_LOCKABLE_CLASSES, child.__className)) {
-            return;
-        }
         if (child.p.locked !== value) {
             child.p.locked = value;
         } else if (_.contains(GROUP_CLASSES, child.__className)) {
