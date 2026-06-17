@@ -40,7 +40,7 @@ var ImageField = util.extend(AudioField, {
     },
     writeCustomXML: function (xmlWriter, mug) {
         AudioField.writeCustomXML(xmlWriter, mug);
-        if (mug.__className === "Image" && mug.p.imageSize) {
+        if ((mug.__className === "Image" || mug.__className === "FaceCapture") && mug.p.imageSize) {
             xmlWriter.writeAttributeString("jr:imageDimensionScaledMax", mug.p.imageSize + "px");
         }
     },
@@ -75,10 +75,22 @@ var Signature = util.extend(ImageField, {
     },
 });
 
+var FaceCapture = util.extend(ImageField, {
+    typeName: gettext('Face Capture'),
+    icon: 'fa fa-user',
+    init: function (mug, form) {
+        ImageField.init(mug, form);
+        mug.p.appearance = "face";
+    },
+    changeTypeTransform: function (mug) {
+        mug.p.appearance = undefined;
+    },
+});
+
 var DocumentField = util.extend(AudioField, {
     typeName: gettext('Document Upload'),
     icon: 'fa fa-file',
     mediaType: "application/*,text/*",
 });
 
-export {AudioField, ImageField, Video, Signature, DocumentField};
+export {AudioField, ImageField, Video, Signature, FaceCapture, DocumentField};

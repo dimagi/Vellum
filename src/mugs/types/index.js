@@ -1,6 +1,6 @@
 import {TextField, PhoneNumber, Secret} from "./text";
 import {Int, Long, Double} from "./numeric";
-import {AudioField, ImageField, Video, Signature, DocumentField} from "./media";
+import {AudioField, ImageField, Video, Signature, FaceCapture, DocumentField} from "./media";
 import {DateField, DateTime, Time} from "./date";
 import {Choice, MSelect, Select} from "./select";
 import {Group, FieldList, Repeat} from "./group";
@@ -15,6 +15,7 @@ var baseMugTypes = {
         "DateTime": DateTime,
         "Document": DocumentField,
         "Double": Double,
+        "FaceCapture": FaceCapture,
         "FieldList": FieldList,
         "Geopoint": Geopoint,
         "Group": Group,
