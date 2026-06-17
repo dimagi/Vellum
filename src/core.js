@@ -336,7 +336,7 @@ fn.getQuestionGroups = function () {
     };
 
     if (this.opts().features.face_capture) {
-        mediaGroup.questions.splice(1, 0, "FaceCapture");
+        mediaGroup.questions.splice(3, 0, "FaceCapture");
     }
     if (this.opts().features.support_document_upload) {
         mediaGroup.questions.push("Document");
