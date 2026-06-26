@@ -14,7 +14,7 @@ name: Claude Dependabot PR Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened]
   workflow_dispatch:
     inputs:
       pr_number:
