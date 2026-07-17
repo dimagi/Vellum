@@ -15,9 +15,9 @@
         "url": "https://github.com/dimagi/Vellum.git"
     },
     "dependencies": {
-        "at.js": "1.5.4",
         "Caret.js": "INTELOGIE/Caret.js#0.3.1",
         "XMLWriter": "dimagi/XMLWriter#master",
+        "at.js": "1.5.4",
         "bootstrap": "3.4.1",
         "codemirror": "5.61.1",
         "crypto-js": "4.2.0",
@@ -26,7 +26,7 @@
         "jstree": "3.3.11",
         "jstree-actions": "0.2.1",
         "langcodes": "dimagi/langcodes#master",
-        "markdown-it": "12.3.2",
+        "markdown-it": "^14.2.0",
         "select2": "4.1.0-rc.0",
         "underscore": "1.13.1",
         "xpath": "dimagi/js-xpath#v0.0.10"
