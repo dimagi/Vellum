@@ -47,7 +47,7 @@
         "mocha": "10.2.0",
         "mocha-headless-chrome": "4.0.0",
         "style-loader": "4.0.0",
-        "webpack": "5.94.0",
+        "webpack": "5.104.1",
         "webpack-cli": "5.1.4",
         "webpack-merge": "6.0.1"
     },
