@@ -1537,9 +1537,13 @@ fn.loadXML = function (formXML, options) {
     }).on('mug-property-change', function (e) {
         _this.refreshMugName(e.mug);
         _this.toggleConstraintItext(e.mug);
-        if (e.property === 'comment' && e.val) {
-            _this.$f.find('.fd-question-comment').show();
-            _this.$f.find('.fd-question-comment').text(e.val);
+        if (e.property === 'comment') {
+            if (e.val) {
+                _this.$f.find('.fd-question-comment').show();
+                _this.$f.find('.fd-question-comment').text(e.val);
+            } else {
+                _this.$f.find('.fd-question-comment').hide();
+            }
         }
     });
 };

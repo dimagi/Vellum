@@ -51,6 +51,15 @@ describe("Question Comments", function() {
         mug.p.comment = 'this is a comment';
         assert($('.fd-props-toolbar > .alert-info').is(':visible'));
     });
+
+    it("should not display a comment after it is deleted", function() {
+        util.loadXML("");
+        var mug = util.addQuestion("Text", "mug");
+        mug.p.comment = 'this is a comment';
+        mug.p.comment = '';
+        assert(!$('.fd-props-toolbar > .alert-info').is(':visible'),
+                $('.fd-props-toolbar > .alert-info').text());
+    });
 });
 
 describe("Section Toggler", function() {
