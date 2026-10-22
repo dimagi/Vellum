@@ -71,7 +71,7 @@ describe("atwho", function() {
             var mug = util.clickQuestion('one')[0];
             // TODO: This shouldn't rely on relevantAttr
             var input = $('[name=property-relevantAttr]');
-            input.focus();
+            util.focus(input);
             input.val('/data/').keyup();
             assert.strictEqual(getDisplayedAtwhoViews().length, 1);
             try {
@@ -162,7 +162,7 @@ describe("atwho", function() {
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
-            widget.input.focus();
+            util.focus(widget.input);
             $element.trigger('keyup');
 
             assert.strictEqual(getDisplayedAtwhoViews().length, 1);

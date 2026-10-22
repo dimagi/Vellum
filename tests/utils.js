@@ -457,6 +457,23 @@ function markdownVisible() {
         .is(':visible');
 }
 
+// Focus an element and make sure its "focus" event handlers run.
+//
+// Headless Chrome does not dispatch focus events for a programmatic .focus()
+// when the page lacks system focus, so behavior bound to "focus" (atwho
+// initialization, rich text caret placement) never runs.
+function focus(element) {
+    var el = $(element)[0],
+        fired = false;
+    function onFocus() { fired = true; }
+    el.addEventListener('focus', onFocus);
+    el.focus();
+    el.removeEventListener('focus', onFocus);
+    if (!fired) {
+        el.dispatchEvent(new FocusEvent('focus'));
+    }
+}
+
 export default {
     options: options,
     asyncatch: asyncatch,
@@ -534,5 +551,6 @@ export default {
         return $node.children(".fd-valid-alert-icon").length === 0;
     },
     markdownVisible: markdownVisible,
+    focus: focus,
     parseXML: xml.parseXML,
 };
