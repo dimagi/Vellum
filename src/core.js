@@ -41,7 +41,7 @@ import "jstree";
 import "jstree-actions";
 import "jstree-styles";
 import "bootstrap";
-import "Caret.js";
+import "jquery.caret";
 import "at.js";
 import "at.js/dist/css/jquery.atwho.min.css";
 import "codemirror/lib/codemirror.css";
