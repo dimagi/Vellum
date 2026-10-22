@@ -64,17 +64,13 @@
     "resolutions": {
         "ansi-regex": "^4.1.1",
         "async": "^3.2.2",
-        "form-data": "^2.5.4",
         "js-yaml": "^3.14.2",
-        "json-schema": "^0.4.0",
         "lodash": "^4.17.19",
         "mime": "^1.4.1",
         "minimatch": "^3.0.2",
         "puppeteer": "^25.15.0",
         "qs": "^6.0.4",
-        "request": "^2.88.2",
         "serialize-javascript": "^6.0.2",
-        "set-value": "^4.0.1",
         "ws": "^5.2.3"
     }
 }
