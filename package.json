@@ -65,7 +65,7 @@
         "ansi-regex": "^4.1.1",
         "async": "^3.2.2",
         "js-yaml": "^4.3.2",
-        "lodash": "^4.17.19",
+        "lodash": "^4.18.1",
         "mime": "^1.4.1",
         "minimatch": "^3.0.2",
         "puppeteer": "^25.15.0",
